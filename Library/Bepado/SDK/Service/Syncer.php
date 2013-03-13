@@ -1,0 +1,125 @@
+<?php
+/**
+ * This file is part of the Bepado SDK Component.
+ *
+ * @version 1.0.0snapshot201303061109
+ */
+
+namespace Bepado\SDK\Service;
+
+use Bepado\SDK\Gateway;
+use Bepado\SDK\ProductFromShop;
+use Bepado\SDK\RevisionProvider;
+use Bepado\SDK\ProductHasher;
+use Bepado\SDK\Gateway\ChangeGateway;
+use Bepado\SDK\Gateway\ProductGateway;
+
+/**
+ * Service to sync product database with changes feed
+ *
+ * @version 1.0.0snapshot201303061109
+ */
+class Syncer
+{
+    /**
+     * Gateway to products
+     *
+     * @var \Bepado\SDK\Gateway\ProductGateway
+     */
+    protected $products;
+
+    /**
+     * Gateway to changes feed
+     *
+     * @var \Bepado\SDK\Gateway\ChangeGateway
+     */
+    protected $changes;
+
+    /**
+     * Product from shop
+     *
+     * @var \Bepado\SDK\ProductFromShop
+     */
+    protected $fromShop;
+
+    /**
+     * Revision provider
+     *
+     * @var \Bepado\SDK\RevisionProvider
+     */
+    protected $revisions;
+
+    /**
+     * Product hasher
+     *
+     * @var \Bepado\SDK\ProductHasher
+     */
+    protected $hasher;
+
+    /**
+     * Construct from gateway
+     *
+     * @param \Bepado\SDK\Gateway\ProductGateway $products
+     * @param \Bepado\SDK\Gateway\ChangeGateway $changes
+     * @param \Bepado\SDK\ProductFromShop $fromShop
+     * @param \Bepado\SDK\RevisionProvider $revisions
+     * @param \Bepado\SDK\ProductHasher $hasher
+     */
+    public function __construct(
+        ProductGateway $products,
+        ChangeGateway $changes,
+        ProductFromShop $fromShop,
+        RevisionProvider $revisions,
+        ProductHasher $hasher
+    ) {
+        $this->products = $products;
+        $this->changes = $changes;
+        $this->fromShop = $fromShop;
+        $this->revisions = $revisions;
+        $this->hasher = $hasher;
+    }
+
+    /**
+     * Sync changes feed with internal database
+     *
+     * @return void
+     */
+    public function recreateChangesFeed()
+    {
+        $shopProducts = $this->fromShop->getExportedProductIDs();
+        $knownProducts = $this->products->getAllProductIDs();
+
+        if ($deletes = array_diff($knownProducts, $shopProducts)) {
+            foreach ($deletes as $productId) {
+                $this->changes->recordDelete($productId, $this->revisions->next());
+            }
+        }
+
+        if ($inserts = array_diff($shopProducts, $knownProducts)) {
+            foreach ($this->fromShop->getProducts($inserts) as $product) {
+                $this->changes->recordInsert(
+                    $product->sourceId,
+                    $this->hasher->hash($product),
+                    $this->revisions->next(),
+                    $product
+                );
+            }
+        }
+
+        if ($toCheck = array_intersect($shopProducts, $knownProducts)) {
+            foreach ($this->fromShop->getProducts($toCheck) as $product) {
+                if ($this->products->hasChanged(
+                    $product->sourceId,
+                    $this->hasher->hash($product)
+                )) {
+                    $this->changes->recordUpdate(
+                        $product->sourceId,
+                        $this->hasher->hash($product),
+                        $this->revisions->next(),
+                        $product
+                    );
+                }
+            }
+        }
+    }
+}

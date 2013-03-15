@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Struct;
@@ -15,7 +15,7 @@ use Bepado\SDK\Struct;
  * All properties in this class are internal to the SDK. Users should not care.
  * Properties will be overwritten by the SDK anyways.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 abstract class ShopItem extends Struct
 {

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\ShopGateway;
@@ -14,7 +14,7 @@ use Bepado\SDK\ShopGateway;
  *
  * Gateway to interact with other shops
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 class Http extends ShopGateway
 {

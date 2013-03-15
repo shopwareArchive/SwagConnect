@@ -2,18 +2,18 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Service;
 
-use Bepado\SDK\HttpClient;
 use Bepado\SDK\Gateway;
+use Bepado\SDK\HttpClient;
 
 /**
  * Verification service
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 class Verification
 {
@@ -76,7 +76,7 @@ class Verification
 
         if ($response->status >= 400) {
             $message = null;
-            if ($error = json_decode($response->body) &&
+            if (($error = json_decode($response->body)) &&
                 isset($error->message)) {
                 $message = $error->message;
             }

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Gateway;
@@ -18,7 +18,7 @@ use Bepado\SDK\Struct\Product;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  * @api
  */
 class InMemory extends Gateway

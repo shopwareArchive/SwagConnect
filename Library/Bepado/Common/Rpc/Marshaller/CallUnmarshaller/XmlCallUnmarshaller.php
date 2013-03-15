@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\Common\Rpc\Marshaller\CallUnmarshaller;
@@ -84,6 +84,9 @@ class XmlCallUnmarshaller extends CallUnmarshaller
         $oldErrorState = libxml_use_internal_errors(true);
         libxml_clear_errors();
 
+        // Ensure that we have UTF-8 encoded data
+        $data = mb_convert_encoding($data, 'UTF-8');
+
         $document = new \DOMDocument();
         $document->preserveWhiteSpace = false;
         $document->loadXML($data);
@@ -94,7 +97,7 @@ class XmlCallUnmarshaller extends CallUnmarshaller
 
         if (count($errors) > 0) {
             throw new \UnexpectedValueException(
-                "The provided RPC XML is invalid: {$errors[0]->message}.'{$data}'" 
+                "The provided RPC XML is invalid: {$errors[0]->message}.'{$data}'"
             );
         }
 

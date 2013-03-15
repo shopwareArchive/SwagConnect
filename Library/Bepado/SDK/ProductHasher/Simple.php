@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\ProductHasher;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Base class for product hasher implementations
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 class Simple extends ProductHasher
 {

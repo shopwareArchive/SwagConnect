@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 class Product extends Verificator
 {
@@ -41,9 +41,10 @@ class Product extends Verificator
      *
      * Throws a RuntimeException if the struct does not verify.
      *
-     * @param VerificatorDispatcher $dispatcher
-     * @param Struct $struct
+     * @param \Bepado\SDK\Struct\VerificatorDispatcher $dispatcher
+     * @param \Bepado\SDK\Struct $struct
      * @return void
+     * @throws \RuntimeException
      */
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
@@ -57,6 +58,10 @@ class Product extends Verificator
             if ($struct->$property === null) {
                 throw new \RuntimeException("Property $property MUST be set in product.");
             }
+        }
+
+        if (!in_array($struct->vat, array(0.0, 0.07, 0.19))) {
+            throw new \RuntimeException("Only 0.00, 0.07 and 0.19 are allowed as value added tax.");
         }
 
         if (!count($struct->categories)) {

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Gateway;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Gateaway interface to maintain shop configurations
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  * @api
  */
 interface ShopConfiguration

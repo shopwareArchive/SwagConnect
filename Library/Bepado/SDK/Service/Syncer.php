@@ -2,22 +2,22 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 
 namespace Bepado\SDK\Service;
 
 use Bepado\SDK\Gateway;
-use Bepado\SDK\ProductFromShop;
-use Bepado\SDK\RevisionProvider;
-use Bepado\SDK\ProductHasher;
 use Bepado\SDK\Gateway\ChangeGateway;
 use Bepado\SDK\Gateway\ProductGateway;
+use Bepado\SDK\ProductFromShop;
+use Bepado\SDK\ProductHasher;
+use Bepado\SDK\RevisionProvider;
 
 /**
  * Service to sync product database with changes feed
  *
- * @version 1.0.0snapshot201303061109
+ * @version 1.0.0snapshot201303151129
  */
 class Syncer
 {

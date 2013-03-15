@@ -126,17 +126,17 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://socialnetwork.bepado.server1219-han.de-nserver.de';
+    protected $socialNetworkHost = 'http://Bepado:Shopware@socialnetwork.bepado.server1219-han.de-nserver.de';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://transaction.bepado.server1219-han.de-nserver.de';
+    protected $transactionHost = 'http://Bepado:Shopware@transaction.bepado.server1219-han.de-nserver.de';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://search.bepado.server1219-han.de-nserver.de';
+    protected $searchHost = 'http://Bepado:Shopware@search.bepado.server1219-han.de-nserver.de';
 
     /**
      * @param \Bepado\SDK\Gateway $gateway

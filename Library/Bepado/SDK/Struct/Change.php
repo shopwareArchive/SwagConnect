@@ -15,7 +15,7 @@ use Bepado\SDK\Struct;
  * @version 1.0.0snapshot201303061109
  * @api
  */
-abstract class Change extends Struct
+class Change extends Struct
 {
     /**
      * Product ID in source shop

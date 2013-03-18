@@ -82,15 +82,22 @@ final class Shopware_Plugins_Frontend_SwagBepado_Bootstrap extends Shopware_Comp
     private function createMyAttributes()
     {
         $this->Application()->Models()->addAttribute(
-            's_order_details_attributes',
-            'swag',
+            's_articles_attributes',
             'bepado',
+            'shopId',
+            'text'
+        );
+
+        $this->Application()->Models()->addAttribute(
+            's_order_details_attributes',
+            'bepado',
+            'reservation_id',
             'text'
         );
         $this->Application()->Models()->addAttribute(
             's_order_basket_attributes',
-            'swag',
             'bepado',
+            'reservation_id',
             'text'
         );
         $this->Application()->Models()->generateAttributeModels(array(

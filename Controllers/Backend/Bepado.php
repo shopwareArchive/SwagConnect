@@ -57,6 +57,57 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    public function addAllProductsAction()
+    {
+        $sdk = $this->getSDK();
+        $manager = Shopware()->Models();
+        $repository = $manager->getRepository(
+            'Shopware\Models\Article\Article'
+        );
+
+        $builder = $repository->createQueryBuilder('a');
+        $builder->join('a.mainDetail', 'd');
+        $builder->join('a.supplier', 's');
+        $builder->join('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->join('a.tax', 't');
+        $builder->select(array(
+            'a.id as sourceId',
+            'd.ean',
+            'a.name as title',
+            'a.description as shortDescription',
+            'a.descriptionLong as longDescription',
+            's.name as vendor',
+            't.tax / 100 as vat',
+            'p.basePrice as price',
+            'p.price * (100 + t.tax) / 100 as purchasePrice',
+            //'"EUR" as currency',
+            'd.shippingFree as freeDelivery',
+            'd.releaseDate as deliveryDate',
+            'd.inStock as availability',
+            //'images = array()',
+            //'categories = array()',
+            //'attributes = array()'
+        ));
+        $builder->where('d.inStock > 0');
+        $query = $builder->getQuery();
+        $result = $query->getArrayResult();
+        foreach($result as $productData) {
+            if(isset($productData['releaseDate'])) {
+                $productData['releaseDate'] = $productData['releaseDate']->getTimestamp();
+            }
+            if(empty($productData['price'])) {
+                $productData['price'] = $productData['purchasePrice'];
+            }
+            $productData['categories'] = array(
+                '/auto_motorrad'
+            );
+            $product = new \Bepado\SDK\Struct\Product(
+                $productData
+            );
+            $sdk->recordInsert($product);
+        }
+    }
+
     public function searchProductAction()
     {
         $sdk = $this->getSDK();
@@ -86,5 +137,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $sdk = $this->getSDK();
         $id = $this->Request()->getParam('id');
         $sdk->recordDelete($id);
+    }
+
+    public function recreateChangesFeedAction()
+    {
+        $sdk = $this->getSDK();
+        $sdk->recreateChangesFeed();
     }
 }

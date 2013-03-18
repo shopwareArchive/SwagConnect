@@ -49,9 +49,8 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
     public function indexAction()
     {
-        if(!$this->Request()->isPost()) {
+        Shopware()->Log()->err('BepadoGateway:' . file_get_contents('php://input'));
 
-        }
         $sdk = $this->getSDK();
         echo $sdk->handle(
             file_get_contents('php://input')

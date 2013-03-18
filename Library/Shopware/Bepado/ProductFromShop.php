@@ -62,26 +62,27 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $ids)
     {
+        Shopware()->Log()->err('getProducts:' . print_r($ids, true));
         $repository = Shopware()->Models()->getRepository(
             'Shopware\Models\Article\Article'
         );
         $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'm');
+        $builder->join('a.mainDetail', 'd');
         $builder->join('a.supplier', 's');
         $builder->select(array(
             'a.id as sourceId',
             'a.name as title',
-            'a.description as longDescription',
-            'a.shortDescription as shortDescription',
+            'a.descriptionLong as longDescription',
+            'a.description as shortDescription',
             's.name as vendor',
             'd.inStock as availability'
         ));
-        $builder->where('a.id = ?');
+        $builder->where('a.id = :id');
         $query = $builder->getQuery();
         $products = array();
         foreach($ids as $id) {
-            $product = $query->execute(array($id));
-            $products[] = new Product($product);
+            $product = $query->execute(array('id' => $id));
+            $products[] = new Product($product[0]);
         }
         return $products;
     }
@@ -93,7 +94,19 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getExportedProductIDs()
     {
-
+        $repository = Shopware()->Models()->getRepository(
+            'Shopware\Models\Article\Article'
+        );
+        $builder = $repository->createQueryBuilder('a');
+        $builder->select(array(
+            'a.id as sourceId'
+        ));
+        $query = $builder->getQuery();
+        $ids = $query->getArrayResult();
+        $ids = array_map(function($id) {
+            return $id['sourceId'];
+        }, $ids);
+        return $ids;
     }
 
     /**
@@ -136,7 +149,12 @@ class ProductFromShop implements ProductFromShopBase
             $item->fromArray(array(
                 'articleId' => $product->product->sourceId,
                 'quantity' => $product->count,
-                'orderId' => $model->getId()
+                'orderId' => $model->getId(),
+                'number' => $model->getNumber(),
+                'articleNumber' => '',
+                'articleName' => $product->product->title,
+                'price' => $product->product->purchasePrice,
+                'taxRate' => '',
             ));
             $items[] = $item;
         }

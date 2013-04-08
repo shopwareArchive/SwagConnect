@@ -45,7 +45,7 @@ class ProductToShop implements ProductToShopBase
     /**
      * @param ModelManager $manager
      */
-    public function __constructor(ModelManager $manager)
+    public function __construct(ModelManager $manager)
     {
         $this->manager = $manager;
     }
@@ -62,12 +62,9 @@ class ProductToShop implements ProductToShopBase
             'Shopware\Models\Article\Article'
         );
         $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->where('d.number = ?');
-        $builder->setParameters(array(
-            $number
-        ));
+        $builder->join('a.mainDetail', 'd', 'with', 'd.number = :number');
         $query = $builder->getQuery();
+        $query->setParameter('number', $number);
         $model = $query->getOneOrNullResult(
             $mode
         );
@@ -93,6 +90,9 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        if(empty($product->number) || empty($product->title) || empty($product->vendor)) {
+            return;
+        }
         $model = $this->getModelByProduct($product);
         if($model === null) {
             $model = new ProductModel();
@@ -101,7 +101,20 @@ class ProductToShop implements ProductToShopBase
             ));
             $this->manager->persist($model);
         }
-        //$model->setTax();
+        if($product->vat !== null) {
+            $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+            $tax = $repo->findOneBy(array('tax' => $product->vat));
+            $model->setTax($tax);
+        }
+        if($product->vendor !== null) {
+            $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
+            $supplier = $repo->findOneBy(array('name' => $product->vendor));
+            if($supplier === null) {
+                $supplier = new \Shopware\Models\Article\Supplier();
+                $supplier->setName($product->vendor);
+            }
+            $model->setSupplier($supplier);
+        }
         $model->setName($product->title);
         $model->setDescription($product->shortDescription);
         $model->setDescriptionLong($product->longDescription);
@@ -110,7 +123,7 @@ class ProductToShop implements ProductToShopBase
         $detail->setInStock($product->availability);
         //$model->setImages(array(
         //));
-        $this->manager->flush($model);
+        $this->manager->flush();
     }
 
     /**
@@ -136,6 +149,6 @@ class ProductToShop implements ProductToShopBase
             return;
         }
         $this->manager->remove($model);
-        $this->manager->flush($model);
+        $this->manager->flush();
     }
 }

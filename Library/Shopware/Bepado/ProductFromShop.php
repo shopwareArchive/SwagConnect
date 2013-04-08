@@ -46,9 +46,18 @@ class ProductFromShop implements ProductFromShopBase
     /**
      * @param ModelManager $manager
      */
-    public function __constructor(ModelManager $manager)
+    public function __construct(ModelManager $manager)
     {
         $this->manager = $manager;
+    }
+
+    /**
+     * @param Product $product
+     * @return string
+     */
+    private function getNumberByProduct(Product $product)
+    {
+        return 'BP-' . $product->shopId . '-' . $product->sourceId;
     }
 
     /**
@@ -69,20 +78,49 @@ class ProductFromShop implements ProductFromShopBase
         $builder = $repository->createQueryBuilder('a');
         $builder->join('a.mainDetail', 'd');
         $builder->join('a.supplier', 's');
+        $builder->join('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->join('a.tax', 't');
         $builder->select(array(
             'a.id as sourceId',
+            'd.ean',
             'a.name as title',
-            'a.descriptionLong as longDescription',
             'a.description as shortDescription',
+            'a.descriptionLong as longDescription',
             's.name as vendor',
-            'd.inStock as availability'
+            't.tax / 100 as vat',
+            'p.basePrice as price',
+            'p.price * (100 + t.tax) / 100 as purchasePrice',
+            //'"EUR" as currency',
+            'd.shippingFree as freeDelivery',
+            'd.releaseDate as deliveryDate',
+            'd.inStock as availability',
+            //'images = array()',
         ));
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
         $products = array();
         foreach($ids as $id) {
             $product = $query->execute(array('id' => $id));
-            $products[] = new Product($product[0]);
+            $productData = $product[0];
+            $productData['price'] = round($productData['price'], 2);
+            $productData['vat'] = round($productData['vat'], 2);
+            if(isset($productData['deliveryDate'])) {
+                $productData['deliveryDate'] = $productData['deliveryDate']->getTimestamp();
+            }
+            if(empty($productData['price'])) {
+                $productData['price'] = $productData['purchasePrice'];
+            }
+            $productData['categories'] = array(
+                '/auto_motorrad'
+            );
+            $productData['attributes'] = array(
+                //Product::ATTRIBUTE_WEIGHT => '',
+                //Product::ATTRIBUTE_BASE_VOLUME => '',
+                //Product::ATTRIBUTE_BASE_WEIGHT => '',
+                //Product::ATTRIBUTE_DIMENSION => '',
+                //Product::ATTRIBUTE_VOLUME => '',
+            );
+            $products[] = new Product($productData);
         }
         return $products;
     }
@@ -151,10 +189,10 @@ class ProductFromShop implements ProductFromShopBase
                 'quantity' => $product->count,
                 'orderId' => $model->getId(),
                 'number' => $model->getNumber(),
-                'articleNumber' => '',
+                'articleNumber' => $this->getNumberByProduct($product->product),
                 'articleName' => $product->product->title,
                 'price' => $product->product->purchasePrice,
-                'taxRate' => '',
+                'taxRate' => $product->product->vat * 100
             ));
             $items[] = $item;
         }

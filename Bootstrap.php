@@ -28,7 +28,7 @@
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
-final class Shopware_Plugins_Frontend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
+final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
     /**
      * Returns the current version of the plugin.
@@ -165,7 +165,8 @@ final class Shopware_Plugins_Frontend_SwagBepado_Bootstrap extends Shopware_Comp
 	 */
 	public function uninstall()
 	{
-        return parent::uninstall();
+
+        return true;
 	}
 
     private function removeMyAttributes()

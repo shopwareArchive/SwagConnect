@@ -204,14 +204,12 @@ class PDO extends Gateway
             serialize($product)
         ));
 
-        $query = $this->connection->query(
-            'UPDATE
-                bepado_product
-            SET
-                p_hash = ?
-            WHERE
-                p_source_id = ?
-            ;'
+        $query = $this->connection->prepare(
+            '
+            UPDATE bepado_product
+            SET p_hash = ?
+            WHERE p_source_id = ?
+            '
         );
         $query->execute(array(
             $hash,

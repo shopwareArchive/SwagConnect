@@ -53,6 +53,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
         $sdk = $this->getSDK();
         echo $sdk->handle(
+            //file_get_contents(dirname(__FILE__) . '/test.xml')
             file_get_contents('php://input')
         );
     }

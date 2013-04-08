@@ -22,6 +22,8 @@
  * our trademarks remain entirely with us.
  */
 
+use \Bepado\SDK\Struct\Product;
+
 /**
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
@@ -85,15 +87,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
             //'images = array()',
-            //'categories = array()',
-            //'attributes = array()'
         ));
         $builder->where('d.inStock > 0');
         $query = $builder->getQuery();
-        $result = $query->getArrayResult();
+        $result = $query->iterate(array(), Doctrine\ORM\Query::HYDRATE_ARRAY);
         foreach($result as $productData) {
-            if(isset($productData['releaseDate'])) {
-                $productData['releaseDate'] = $productData['releaseDate']->getTimestamp();
+            if(isset($productData['deliveryDate'])) {
+                $productData['deliveryDate'] = $productData['deliveryDate']->getTimestamp();
             }
             if(empty($productData['price'])) {
                 $productData['price'] = $productData['purchasePrice'];
@@ -101,10 +101,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $productData['categories'] = array(
                 '/auto_motorrad'
             );
-            $product = new \Bepado\SDK\Struct\Product(
+            $productData['attributes'] = array(
+                Product::ATTRIBUTE_WEIGHT => '',
+                Product::ATTRIBUTE_BASE_VOLUME => '',
+                Product::ATTRIBUTE_BASE_WEIGHT => '',
+                Product::ATTRIBUTE_DIMENSION => '',
+                Product::ATTRIBUTE_VOLUME => '',
+            );
+            $product = new Product(
                 $productData
             );
-            $sdk->recordInsert($product);
+            $sdk->recordUpdate($product);
         }
     }
 
@@ -121,14 +128,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function createProductAction()
     {
         $sdk = $this->getSDK();
-        $product =  new \Bepado\SDK\Struct\Product();
+        $product =  new Product();
         $sdk->recordInsert($product);
     }
 
     public function updateProductAction()
     {
         $sdk = $this->getSDK();
-        $product =  new \Bepado\SDK\Struct\Product();
+        $product =  new Product();
         $sdk->recordUpdate($product);
     }
 

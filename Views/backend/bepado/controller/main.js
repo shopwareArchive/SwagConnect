@@ -9,16 +9,15 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     extend: 'Enlight.app.Controller',
 
     views: [
-        'main.Window', 'main.Navigation', 'main.Panel'
+        'main.Window', 'main.Navigation', 'main.Panel', 'main.Config'
     ],
     stores: [ 'main.Navigation' ],
     models: [ ],
 
     refs: [
         { ref: 'window', selector: 'bepado-window' },
-        { ref: 'list', selector: 'bepado-list' },
-        { ref: 'panel', selector: 'bepado-panel' },
-        { ref: 'form', selector: 'bepado-form' }
+        { ref: 'navi', selector: 'bepado-navigation' },
+        { ref: 'form', selector: 'bepado-config' }
     ],
 
     messages: {
@@ -60,8 +59,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-list button[action=addOption]': {
                 click: me.onAddListEntry
             },
-            'bepado-form button[action=save]': {
-                click: me.onSaveEntry
+            'bepado-config button[action=save]': {
+                click: me.onSaveConfig
             },
             'bepado-value button[action=add]': {
                 click: me.onAddValueEntry
@@ -148,44 +147,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
-    onSaveEntry: function(button) {
+    onSaveConfig: function(button) {
         var me = this,
-            form = button.up('form'),
-            basicForm = form.getForm(),
-            record = form.getRecord(),
-            store = form.store;
-
-        if(!basicForm.isValid()) {
-            return;
-        }
-        if(!record) {
-            return;
-        }
-        basicForm.updateRecord();
-        if(!record.store) {
-            store.add(record);
-        }
-
+            form = me.getForm();
         form.setLoading();
-        //form.loadRecord();
-
-        var message,
-            title = me.messages.saveEntryTitle;
-
-        store.sync({
-            success :function (records, operation) {
-                message = me.messages.saveEntrySuccess;
-                me.createGrowlMessage(record, title, message);
-                me.onAfterSaveForm();
-            },
-            failure:function (operation) {
-                message = me.messages.saveEntryError;
-                if(operation.proxy.reader.rawData.message) {
-                    message += '<br />' + operation.proxy.reader.rawData.message;
-                }
-                me.createGrowlMessage(record, title, message);
-                me.onAfterSaveForm();
-            }
+        form.onSaveForm(form, false, function() {
+            form.setLoading(false);
         });
     },
 

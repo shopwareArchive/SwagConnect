@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.0.0';
+        return '1.0.1';
     }
 
     /**
@@ -71,7 +71,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	public function install()
 	{	
         $this->createMyMenu();
-        //$this->createMyForm();
+        $this->createMyForm();
         $this->createMyEvents();
         //$this->createMyTables();
         //$this->createMyAttributes();
@@ -123,10 +123,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $form = $this->Form();
 
-        $form->setElement('text', 'imageSelectThumbnailSize', array(
-            'label' => 'Bildauswahl > Thumbnail-Größe',
-            'description' => 'Achtung: Die Thumbnail-Größe muss dafür im entsprechenden Album eingetragen sein.',
-            'value' => '130x130',
+        $form->setElement('text', 'apiKey', array(
+            'label' => 'API Key',
+            'description' => '',
             'required' => true
         ));
     }
@@ -216,9 +215,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $connection = $this->Application()->Db()->getConnection();
         $manager = $this->Application()->Models();
         $front = $this->Application()->Front();
+        $apiKey = $this->Config()->get('apiKey', '84c8f397-082f-48b7-b8de-b310dec89347');
 
         return new Bepado\SDK\SDK(
-            '84c8f397-082f-48b7-b8de-b310dec89347',
+            $apiKey,
             $front->Router()->assemble(array(
                 'module' => 'backend',
                 'controller' => 'bepado_gateway',
@@ -234,12 +234,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
-    /**
-     * @param   Enlight_Event_EventArgs $args
-     * @return  string
-     */
-    public function onGetControllerPathBackend(Enlight_Event_EventArgs $args)
-    {
+/**
+ * @param   Enlight_Event_EventArgs $args
+ * @return  string
+ * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado
+ */
+public function onGetControllerPathBackend(Enlight_Event_EventArgs $args)
+{
         $this->registerMyTemplateDir();
         $this->Application()->Snippets()->addConfigDir(
             $this->Path() . 'Snippets/'

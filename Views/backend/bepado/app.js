@@ -19,4 +19,3 @@ Ext.define('Shopware.apps.Bepado', {
     }
 });
 //{/block}
-

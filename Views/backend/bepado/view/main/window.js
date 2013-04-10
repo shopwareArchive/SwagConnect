@@ -63,7 +63,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
             xtype: 'bepado-navigation',
             region: 'west'
         }, {
-            xtype: 'bepado-panel',
+            xtype: 'bepado-config',
             region: 'center'
         }]
     }

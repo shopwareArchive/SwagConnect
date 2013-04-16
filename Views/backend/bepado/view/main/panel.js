@@ -6,13 +6,27 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
     alias: 'widget.bepado-panel',
 
     border: false,
-    layout: 'fit',
+    layout: 'card',
 
     initComponent: function() {
         var me = this;
 
         Ext.applyIf(me, {
-
+            items: [{
+                html: '<h1>Hello World</h1>'
+            }, {
+                xtype: 'bepado-config',
+                itemId: 'config'
+            }, {
+                xtype: 'bepado-mapping',
+                itemId: 'mapping'
+            }, {
+                xtype: 'bepado-export',
+                itemId: 'export'
+            }, {
+                xtype: 'bepado-import',
+                itemId: 'import'
+            }]
         });
 
         me.callParent(arguments);

@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.0.1';
+        return '1.0.8';
     }
 
     /**
@@ -74,7 +74,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyForm();
         $this->createMyEvents();
         //$this->createMyTables();
-        //$this->createMyAttributes();
+        $this->createMyAttributes();
 
 	 	return true;
 	}
@@ -83,24 +83,38 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->Application()->Models()->addAttribute(
             's_articles_attributes',
-            'bepado',
-            'shopId',
+            'bepado', 'shop_id',
+            'text'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'source_id',
+            'text'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'export',
+            'text'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'categories',
             'text'
         );
 
         $this->Application()->Models()->addAttribute(
             's_order_details_attributes',
-            'bepado',
-            'reservation_id',
+            'bepado', 'reservation_id',
             'text'
         );
         $this->Application()->Models()->addAttribute(
             's_order_basket_attributes',
-            'bepado',
-            'reservation_id',
+            'bepado', 'reservation_id',
             'text'
         );
+
         $this->Application()->Models()->generateAttributeModels(array(
+            's_articles_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
         ));
@@ -126,7 +140,39 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('text', 'apiKey', array(
             'label' => 'API Key',
             'description' => '',
-            'required' => true
+            'required' => true,
+            'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+            'uniqueId' => 'apiKey'
+        ));
+        $form->setElement('button', 'verifyApiKey', array(
+            'label' => '<strong>API Key testen</strong>',
+            'handler' => "function(btn) {
+                var apiField = btn.up('form').down('textfield[uniqueId=apiKey]'),
+                    apiKey = apiField.getValue(),
+                    title = btn.up('window').title;
+                Ext.Ajax.request({
+                    scope: this,
+                    url: window.location.pathname + 'bepado/verifyApiKey',
+                    success: function(result, request) {
+                        var response = Ext.JSON.decode(result.responseText);
+                        apiField.setFieldStyle('background-color', response.success ? 'green' : 'red');
+                        if(response.message) {
+                            Shopware.Notification.createGrowlMessage(
+                                btn.title,
+                                response.message,
+                                title
+                            );
+                        }
+                    },
+                    failure: function() { },
+                    params: { apiKey: apiKey }
+                });
+            }"
+        ));
+        $form->setElement('select', 'exportPriceGroup', array(
+            'label' => 'Export-Preisgruppe',
+            'description' => '',
+            'store' => 'base.CustomerGroup'
         ));
     }
 
@@ -234,13 +280,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
-/**
- * @param   Enlight_Event_EventArgs $args
- * @return  string
- * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado
- */
-public function onGetControllerPathBackend(Enlight_Event_EventArgs $args)
-{
+    /**
+     * @param   Enlight_Event_EventArgs $args
+     * @return  string
+     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado
+     */
+    public function onGetControllerPathBackend(Enlight_Event_EventArgs $args)
+    {
         $this->registerMyTemplateDir();
         $this->Application()->Snippets()->addConfigDir(
             $this->Path() . 'Snippets/'

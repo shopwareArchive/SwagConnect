@@ -9,15 +9,20 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     extend: 'Enlight.app.Controller',
 
     views: [
-        'main.Window', 'main.Navigation', 'main.Panel', 'main.Config'
+        'main.Window', 'main.Navigation',
+        'main.Panel', 'main.Config', 'main.Mapping',
+        'export.Panel', 'import.Panel',
+        'export.List', 'export.Filter'
     ],
-    stores: [ 'main.Navigation' ],
-    models: [ ],
+    stores: [ 'main.Navigation', 'export.List', 'main.Mapping', 'main.Category' ],
+    models: [ 'export.List', 'main.Mapping' ],
 
     refs: [
         { ref: 'window', selector: 'bepado-window' },
-        { ref: 'navi', selector: 'bepado-navigation' },
-        { ref: 'form', selector: 'bepado-config' }
+        { ref: 'navigation', selector: 'bepado-navigation' },
+        { ref: 'panel', selector: 'bepado-panel' },
+        { ref: 'configForm', selector: 'bepado-config' },
+        { ref: 'exportList', selector: 'bepado-export-list' }
     ],
 
     messages: {
@@ -43,139 +48,87 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         }).show();
 
         me.control({
-            'bepado-list': {
-                select: me.onSelectListEntry,
-                selectionchange: me.onChangeListEntry
-            },
-            'bepado-list button[action=removeGroup]': {
-                click: me.onRemoveListEntry
-            },
-            'bepado-list button[action=removeOption]': {
-                click: me.onRemoveListEntry
-            },
-            'bepado-list button[action=addGroup]': {
-                click: me.onAddListEntry
-            },
-            'bepado-list button[action=addOption]': {
-                click: me.onAddListEntry
+            'bepado-navigation': {
+                select: me.onSelectNavigationEntry
             },
             'bepado-config button[action=save]': {
-                click: me.onSaveConfig
+                click: me.onSaveConfigForm
             },
-            'bepado-value button[action=add]': {
-                click: me.onAddValueEntry
+            'bepado-export-list button[action=save]': {
+               click: function() {
+                   var records = me.selModel.getSelection(), ids = [];
+
+                   records.each(function(record) {
+                       ids.push(record.get('id'));
+                   });
+
+                   Ext.Ajax.request({
+                       url: '{url action=selectProducts}',
+                       method: 'POST',
+                       params: {
+                           ids: ids
+                       },
+                       success: function(response, opts) {
+                           var operation = Ext.decode(response.responseText);
+                           if (operation.success == true) {
+
+                           }
+                       }
+                   });
+
+               }
             },
-            'bepado-value': {
-                delete: me.onDeleteValue
+            'bepado-export-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                    if (value.length === 0 ) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'search',
+                            '%' + value + '%'
+                        );
+                    }
+                }
+            },
+            'bepado-export-filter base-element-select[name=supplier]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                    if (!value) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'supplierId',
+                            value
+                        );
+                    }
+                }
+            },
+            'bepado-export-filter treepanel': {
+                select: function(tree, node) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                    if (!node) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'categoryId',
+                            node.get('id')
+                        );
+                    }
+                }
             }
         });
 
         me.callParent(arguments);
-    },
-
-    onDeleteValue: function(panel, record) {
-        var me = this,
-            store = panel.getStore();
-        store.remove(record);
-    },
-
-    onAddValueEntry: function(button) {
-        var me = this,
-            table = button.up('grid'),
-            fields = table.query('[isFormField]'),
-            store = table.getStore(),
-            data = { }, fieldData;
-        if(!table) {
-            return;
-        }
-        Ext.each(fields, function(field) {
-            fieldData = field.getModelData();
-            data = Ext.apply(data, fieldData);
-        });
-        var record = store.add(data)[0],
-            plugin = table.getPlugin('cellediting');
-        //plugin.startEdit(record, table.columns[0]);
-    },
-
-    onAddListEntry: function(button) {
-        var me = this, record,
-            list = me.getList(),
-            selection = list.getSelectionModel().getLastSelected();
-
-        record = me.getModel(button.model).create();
-        if(selection && button.model == 'main.Option') {
-            record.set('groupId', selection.get('groupId'));
-            if(selection.get('position')) {
-                record.set('position', selection.get('position') + 1);
-            }
-        }
-        me.loadPanel(button.model, record);
-    },
-
-    onRemoveListEntry: function(button) {
-        var me = this,
-            list = me.getList(),
-            selection = list.getSelectionModel().getLastSelected(),
-            title = new Ext.Template(me.messages.deleteEntryTitle),
-            message = new Ext.Template(me.messages.deleteEntryMessage),
-            data = Ext.clone(selection.data),
-            panel = me.getPanel();
-
-        title = title.applyTemplate(data);
-        message = message.applyTemplate(data);
-
-        Ext.MessageBox.confirm(title, message, function (response) {
-            if (response !== 'yes') {
-                return;
-            }
-
-            panel.removeAll(true);
-            selection.destroy({
-                callback: function (self, operation) {
-                    if (operation.success) {
-                        message = me.messages.deleteEntrySuccess;
-                    } else {
-                        message = me.messages.deleteEntryError;
-                        var rawData = operation.records[0].proxy.reader.rawData;
-                        if (rawData.message) {
-                            message += '<br />' + rawData.message;
-                        }
-                    }
-                    me.createGrowlMessage(selection, title, message);
-                }
-            });
-        });
-    },
-
-    onSaveConfig: function(button) {
-        var me = this,
-            form = me.getForm();
-        form.setLoading();
-        form.onSaveForm(form, false, function() {
-            form.setLoading(false);
-        });
-    },
-
-    onAfterSaveForm: function() {
-        var me = this,
-            form = me.getForm(),
-            list = me.getList(),
-            sm = list.getSelectionModel(),
-            selection = sm.getLastSelected(),
-            root = list.getRootNode(),
-            node = selection || root;
-        node = node.isLeaf() ? node.parentNode : node;
-
-        list.getStore().load({
-            node: root,
-            callback: function(records, operation) {
-                node.expand();
-                sm.select(node);
-            }
-        });
-
-        form.setLoading(false);
-        form.destroy();
     },
 
     createGrowlMessage: function(record, title, message) {
@@ -188,78 +141,24 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         Shopware.Notification.createGrowlMessage(title, message, win.title);
     },
 
-    onSelectListEntry: function(tree, node) {
+    onSelectNavigationEntry: function(tree, node) {
         var me = this,
             panel = me.getPanel(),
-            model = node.isLeaf() ? 'main.Option' : 'main.Group',
-            value = node.get(node.isLeaf() ? 'optionId' : 'groupId');
+            win = me.getWindow(),
+            item = node.get('id'),
+            layout = panel.getLayout();
 
-        panel.setLoading(true);
-
-        me.getStore(model).load({
-            filters : [{
-                property: 'id',
-                value: value
-            }],
-            callback: function(records, operation, success) {
-                var record = records[0];
-                if(record) {
-                    me.loadPanel(model, record);
-                }
-            }
-        });
+        layout.setActiveItem(item);
+        win.loadTitle(node);
     },
 
-    onChangeListEntry: function(table, records) {
+    onSaveConfigForm: function(button) {
         var me = this,
-            record = records.length ? records[0] : null,
-            list = me.getList(),
-            buttons = list.query('button');
-        Ext.each(buttons, function(button) {
-            button.hide().enable();
+            form = me.getConfigForm();
+        form.setLoading();
+        form.onSaveForm(form, false, function() {
+            form.setLoading(false);
         });
-        if(!record || !record.isLeaf()) {
-            list.down('button[action=removeGroup]').show();
-        } else {
-            list.down('button[action=addOption]').show();
-            list.down('button[action=removeOption]').show();
-        }
-        list.down('button[action=addGroup]').show();
-        if(!record) {
-            list.down('button[action=removeGroup]').disable();
-        } else {
-            list.down('button[action=addOption]').show();
-        }
-    },
-
-    loadPanel: function(model, record) {
-        var me = this,
-            form, win = me.getWindow(),
-            store = me.getStore(model),
-            panel = me.getPanel();
-
-        form = me.getView(model).create({
-            store: store,
-            record: record
-        });
-
-        panel.removeAll(true);
-        panel.add(form);
-
-        win.loadTitle(model, record);
-
-        form.loadRecord(record);
-        record.setDirty();
-        record.associations.each(function(association) {
-            var store = record[association.name](),
-                associationKey = association.associationKey,
-                grid = form.down('grid[name=' + associationKey + ']');
-            if(grid && store) {
-                grid.reconfigure(store);
-            }
-        });
-
-        panel.setLoading(false);
     }
 });
 //{/block}

@@ -320,4 +320,15 @@ final class SDK
         $this->verifySdk();
         return $this->dependencies->getGateway()->getCategories();
     }
+
+    /**
+     * @param $key
+     */
+    public function verifyKey($key)
+    {
+        $this->dependencies->getVerificationService()->verify(
+            $key,
+            $this->apiEndpointUrl
+        );
+    }
 }

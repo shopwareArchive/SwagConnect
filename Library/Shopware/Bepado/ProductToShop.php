@@ -26,6 +26,7 @@ namespace Shopware\Bepado;
 use Bepado\SDK\ProductToShop as ProductToShopBase,
     Bepado\SDK\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
+    Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 
@@ -57,27 +58,23 @@ class ProductToShop implements ProductToShopBase
      */
     private function getModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
-        $number = $this->getNumberByProduct($product);
         $repository = Shopware()->Models()->getRepository(
             'Shopware\Models\Article\Article'
         );
         $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd', 'with', 'd.number = :number');
+        $builder->join(
+            'a.attribute', 'at',
+            'with',
+            'at.bepadoShopId = :shopId AND at.bepadoSourceId = :sourceId'
+        );
+        $builder->join('a.mainDetail', 'd');
         $query = $builder->getQuery();
-        $query->setParameter('number', $number);
+        $query->setParameter('shopId', $product->shopId);
+        $query->setParameter('sourceId', $product->sourceId);
         $model = $query->getOneOrNullResult(
             $mode
         );
         return $model;
-    }
-
-    /**
-     * @param Product $product
-     * @return string
-     */
-    private function getNumberByProduct(Product $product)
-    {
-        return 'BP-' . $product->shopId . '-' . $product->sourceId;
     }
 
     /**
@@ -97,8 +94,9 @@ class ProductToShop implements ProductToShopBase
         if($model === null) {
             $model = new ProductModel();
             $model->setMainDetail(array(
-                'number' => $this->getNumberByProduct($product)
+                'number' => 'BP-' . $product->shopId . '-' . $product->sourceId
             ));
+            $model->setAttribute(new AttributeModel());
             $this->manager->persist($model);
         }
         if($product->vat !== null) {
@@ -118,9 +116,14 @@ class ProductToShop implements ProductToShopBase
         $model->setName($product->title);
         $model->setDescription($product->shortDescription);
         $model->setDescriptionLong($product->longDescription);
+        /** @var $attribute AttributeModel */
+        $attribute = $model->getAttribute();
+        $attribute->setBepadoShopId($product->shopId);
+        $attribute->setBepadoSourceId($product->sourceId);
         /** @var $detail \Shopware\Models\Article\Detail */
         $detail = $model->getMainDetail();
         $detail->setInStock($product->availability);
+
         //$model->setImages(array(
         //));
         $this->manager->flush();

@@ -6,9 +6,9 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
         expanded: true,
         children: [
             { id: 'config', text: "Konfiguration", leaf: true },
+            { id: 'mapping', text: "Mapping", leaf: true },
             { id: 'export', text: "Produkt-Export", leaf: true },
-            { id: 'import', text: "Produkt-Import", leaf: true },
-            { id: 'cloud', text: "Cloud-Search", leaf: true }
+            { id: 'import', text: "Produkt-Import", leaf: true }
         ]
     }
 });

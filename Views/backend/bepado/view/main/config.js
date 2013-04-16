@@ -20,7 +20,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Config', {
 
         me.formStore.on('load', me.onLoadForm, me, { single: true });
         me.formStore.load({
-            filters : [{
+            filters: [{
                 property: 'name',
                 value: 'SwagBepado'
             }]

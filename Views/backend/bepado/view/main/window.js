@@ -15,12 +15,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
 
     title: '{s name=window/title}Bepado{/s}',
 
-    titleOption: '{s name=window/title_option}Bepado - Option: [name]{/s}',
-    titleGroup: '{s name=window/title_group}Bepado - Group: [name]{/s}',
-    titleNewOption: '{s name=window/title_new_option}Bepado - New option{/s}',
-    titleNewGroup: '{s name=window/title_new_group}Bepado - New group{/s}',
-    titleCharge: '{s name=window/title_charge}Bepado - Charge: [name]{/s}',
-    titleNewCharge: '{s name=window/title_new_charge}Bepado - New charge{/s}',
+    titleTemplate: '{s name=window/title_template}Bepado - [text]{/s}',
 
     /**
      *
@@ -35,21 +30,15 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
         me.callParent(arguments);
     },
 
-    loadTitle: function(model, record) {
-        var me = this, title, data ;
+    loadTitle: function(record) {
+        var me = this, title, data = {};
         if(!record) {
             title = '{s name=window/title}Bepado{/s}';
-        } else if(model == 'charge.Item') {
-            title = record.get('id') ? me.titleCharge : me.titleNewCharge;
-            data = record.data;
-        } else if(record.get('id')) {
-            title = model == 'main.Group' ? me.titleGroup : me.titleOption;
-            data = record.data;
         } else {
-            title = model == 'main.Group' ? me.titleNewGroup : me.titleNewOption;
-            data = {};
+            title = me.titleTemplate;
+            data = record.data;
+            title = new Ext.Template(title).applyTemplate(data);
         }
-        title = new Ext.Template(title).applyTemplate(data);
         me.setTitle(title);
     },
 
@@ -63,9 +52,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
             xtype: 'bepado-navigation',
             region: 'west'
         }, {
-            xtype: 'bepado-config',
+            xtype: 'bepado-panel',
             region: 'center'
-        }]
+        }];
     }
 });
 //{/block}

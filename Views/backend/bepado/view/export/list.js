@@ -70,8 +70,12 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
             flex: 1
         }, {
             header: 'status',
-            dataIndex: 'status',
-            flex: 2
+            dataIndex: 'exportStatus',
+            flex: 2,
+            renderer: function(value, metaData, record) {
+                metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                return value;
+            }
         }];
     },
 
@@ -109,7 +113,7 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
             iconCls:'sprite-minus-circle-frame',
             text:'Aus dem Export löschen',
             //tooltip:'{s name=list/delete_tooltip}Delete (ALT + DELETE){/s}',
-            action:'remove'
+            action:'delete'
         });
         //items.push('->', {
         //    xtype:'textfield',

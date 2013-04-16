@@ -40,11 +40,26 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                         allowBlank: true,
                         store: 'main.Category'
                     }
-                }]
+                }],
+                dockedItems: [ me.getButtons() ]
             }]
         });
 
         me.callParent(arguments);
+    },
+
+    getButtons: function() {
+        var me = this;
+
+        return {
+            dock: 'bottom',
+            xtype: 'toolbar',
+            items: ['->', {
+                text: '{s name=form/save_text}Save{/s}',
+                cls: 'primary',
+                action: 'save'
+            }]
+        };
     }
 });
 //{/block}

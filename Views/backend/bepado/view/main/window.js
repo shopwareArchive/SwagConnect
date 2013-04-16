@@ -30,6 +30,10 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
         me.callParent(arguments);
     },
 
+    /**
+     *
+     * @param record
+     */
     loadTitle: function(record) {
         var me = this, title, data = {};
         if(!record) {

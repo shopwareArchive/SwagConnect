@@ -22,7 +22,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'navigation', selector: 'bepado-navigation' },
         { ref: 'panel', selector: 'bepado-panel' },
         { ref: 'configForm', selector: 'bepado-config' },
-        { ref: 'exportList', selector: 'bepado-export-list' }
+        { ref: 'exportList', selector: 'bepado-export-list' },
+        { ref: 'mapping', selector: 'bepado-mapping treepanel' }
     ],
 
     messages: {
@@ -54,29 +55,31 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-config button[action=save]': {
                 click: me.onSaveConfigForm
             },
-            'bepado-export-list button[action=save]': {
-               click: function() {
-                   var records = me.selModel.getSelection(), ids = [];
-
-                   records.each(function(record) {
-                       ids.push(record.get('id'));
-                   });
-
-                   Ext.Ajax.request({
-                       url: '{url action=selectProducts}',
-                       method: 'POST',
-                       params: {
-                           ids: ids
-                       },
-                       success: function(response, opts) {
-                           var operation = Ext.decode(response.responseText);
-                           if (operation.success == true) {
-
-                           }
-                       }
-                   });
-
-               }
+            'bepado-mapping button[action=save]': {
+                click: function(button) {
+                    var me = this,
+                        panel = me.getMapping();
+                    panel.setLoading();
+                    panel.store.sync({
+                        success :function (records, operation) {
+                            panel.setLoading(false);
+                            //me.createGrowlMessage(title, message, win.title);
+                        },
+                        failure:function (batch) {
+                            panel.setLoading(false);
+                            //if(batch.proxy.reader.rawData.message) {
+                            //    message += '<br />' + batch.proxy.reader.rawData.message;
+                            //}
+                            //me.createGrowlMessage(title, message);
+                        }
+                    });
+                }
+            },
+            'bepado-export-list button[action=add]': {
+               click: me.onExportFilterAction
+            },
+            'bepado-export-list button[action=delete]': {
+                click: me.onExportFilterAction
             },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
@@ -94,7 +97,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     }
                 }
             },
-            'bepado-export-filter base-element-select[name=supplier]': {
+            'bepado-export-filter base-element-select': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -104,7 +107,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     } else {
                         store.filters.clear();
                         store.filter(
-                            'supplierId',
+                            field.name,
                             value
                         );
                     }
@@ -131,13 +134,45 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         me.callParent(arguments);
     },
 
-    createGrowlMessage: function(record, title, message) {
+    onExportFilterAction: function(btn) {
         var me = this,
-            win = me.getWindow(),
-            data = Ext.clone(record.data);
+            list = me.getExportList(),
+            records = list.selModel.getSelection(),
+            ids = [], url;
 
-        title = new Ext.Template(title).applyTemplate(data);
-        message = new Ext.Template(message).applyTemplate(data);
+        if(btn.action == 'add') {
+            url = '{url action=insertOrUpdateProduct}';
+        } else if(btn.action == 'delete') {
+            url = '{url action=deleteProduct}';
+        } else {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
+        list.setLoading();
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            params: {
+                'ids[]': ids
+            },
+            success: function(response, opts) {
+                var operation = Ext.decode(response.responseText);
+                if (operation.success == true) {
+
+                }
+                list.setLoading(false);
+                list.store.load();
+            }
+        });
+    },
+
+    createGrowlMessage: function(title, message) {
+        var me = this,
+            win = me.getWindow();
         Shopware.Notification.createGrowlMessage(title, message, win.title);
     },
 

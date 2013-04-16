@@ -62,7 +62,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 anchor: '100%',
                 allowBlank: true,
                 store: [
-                    ['finish', 'Exported'],
+                    ['online', 'Online'],
                     ['error', 'Error'],
                     ['insert', 'Inserting'],
                     ['update', 'Updating']
@@ -79,7 +79,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
             bodyPadding: 5,
             items: [{
                 xtype: 'base-element-select',
-                name: 'supplier',
+                name: 'supplierId',
                 anchor: '100%',
                 allowBlank: true,
                 store: 'base.Supplier'

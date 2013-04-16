@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.0.8';
+        return '1.1.1';
     }
 
     /**
@@ -81,40 +81,52 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     private function createMyAttributes()
     {
-        $this->Application()->Models()->addAttribute(
-            's_articles_attributes',
-            'bepado', 'shop_id',
-            'text'
-        );
-        $this->Application()->Models()->addAttribute(
-            's_articles_attributes',
-            'bepado', 'source_id',
-            'text'
-        );
-        $this->Application()->Models()->addAttribute(
-            's_articles_attributes',
-            'bepado', 'export',
-            'text'
-        );
+        //$this->Application()->Models()->addAttribute(
+        //    's_articles_attributes',
+        //    'bepado', 'shop_id',
+        //    'varchar(255)'
+        //);
+        //$this->Application()->Models()->addAttribute(
+        //    's_articles_attributes',
+        //    'bepado', 'source_id',
+        //    'varchar(255)'
+        //);
+        //$this->Application()->Models()->addAttribute(
+        //    's_articles_attributes',
+        //    'bepado', 'export_status',
+        //    'text'
+        //);
+        //$this->Application()->Models()->addAttribute(
+        //    's_articles_attributes',
+        //    'bepado', 'export_message',
+        //    'text'
+        //);
+//
+        //$this->Application()->Models()->addAttribute(
+        //    's_order_details_attributes',
+        //    'bepado', 'reservation_id',
+        //    'text'
+        //);
+        //$this->Application()->Models()->addAttribute(
+        //    's_order_basket_attributes',
+        //    'bepado', 'reservation_id',
+        //    'text'
+        //);
+
         $this->Application()->Models()->addAttribute(
             's_articles_attributes',
             'bepado', 'categories',
             'text'
         );
-
-        $this->Application()->Models()->addAttribute(
-            's_order_details_attributes',
-            'bepado', 'reservation_id',
-            'text'
-        );
-        $this->Application()->Models()->addAttribute(
-            's_order_basket_attributes',
-            'bepado', 'reservation_id',
-            'text'
-        );
+        //$this->Application()->Models()->addAttribute(
+        //   's_categories_attributes',
+        //   'bepado', 'mapping',
+        //   'text'
+        //);
 
         $this->Application()->Models()->generateAttributeModels(array(
             's_articles_attributes',
+            's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
         ));

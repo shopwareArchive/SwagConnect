@@ -12,7 +12,8 @@ Ext.define('Shopware.apps.Bepado.model.export.List', {
         { name: 'active', type: 'boolean' },
         { name: 'price', type: 'float', useNull: true },
         { name: 'tax', type: 'float', useNull: true },
-        { name: 'status', type: 'string' }
+        { name: 'exportStatus', type: 'string', useNull: true },
+        { name: 'exportMessage', type: 'string', useNull: true }
     ]
 });
 //{/block}

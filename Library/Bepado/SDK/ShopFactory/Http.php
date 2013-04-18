@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\ShopFactory;
@@ -10,16 +10,22 @@ namespace Bepado\SDK\ShopFactory;
 use Bepado\SDK\ShopFactory;
 use Bepado\SDK\ShopGateway;
 use Bepado\SDK\Gateway;
+use Bepado\SDK\DependencyResolver;
 
 /**
  * Shop factory
  *
  * Constructs gateways to interact with other shops
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Http extends ShopFactory
 {
+    /**
+     * @var Bepado\SDK\DependencyResolver
+     */
+    protected $dependencyResolver;
+
     /**
      * Gateway to shop configuration
      *
@@ -34,8 +40,10 @@ class Http extends ShopFactory
      * @return void
      */
     public function __construct(
+        DependencyResolver $dependencyResolver,
         Gateway\ShopConfiguration $configuration
     ) {
+        $this->dependencyResolver = $dependencyResolver;
         $this->configuration = $configuration;
     }
 
@@ -48,6 +56,10 @@ class Http extends ShopFactory
     public function getShopGateway($shopId)
     {
         $configuration = $this->configuration->getShopConfiguration($shopId);
-        return new ShopGateway\Http($configuration->serviceEndpoint);
+        return new ShopGateway\Http(
+            $this->dependencyResolver->getHttpClient($configuration->serviceEndpoint),
+            $this->dependencyResolver->getMarshaller(),
+            $this->dependencyResolver->getUnmarshaller()
+        );
     }
 }

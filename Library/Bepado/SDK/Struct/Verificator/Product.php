@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Product extends Verificator
 {
@@ -54,14 +54,30 @@ class Product extends Verificator
                 'price',
                 'currency',
                 'availability',
+                'vat',
             ) as $property) {
             if ($struct->$property === null) {
                 throw new \RuntimeException("Property $property MUST be set in product.");
             }
         }
 
+        foreach (array(
+            'title',
+            'shortDescription',
+            'longDescription',
+            'vendor',
+            ) as $property) {
+            if (@iconv('UTF-8', 'UTF-8', $struct->$property) != $struct->$property) {
+                throw new \RuntimeException("Property $property MUST be UTF-8 encoded.");
+            }
+        }
+
         if (!in_array($struct->vat, array(0.0, 0.07, 0.19))) {
             throw new \RuntimeException("Only 0.00, 0.07 and 0.19 are allowed as value added tax.");
+        }
+
+        if (!is_array($struct->categories)) {
+            throw new \RuntimeException("Invalid Datatype, Product#categories has to be an array.");
         }
 
         if (!count($struct->categories)) {

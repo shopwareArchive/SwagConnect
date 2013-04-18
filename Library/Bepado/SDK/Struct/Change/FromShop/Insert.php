@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Struct\Change\FromShop;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct\Product;
 /**
  * Insert change struct
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 class Insert extends Change

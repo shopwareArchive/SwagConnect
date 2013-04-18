@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Gateway;
@@ -18,7 +18,7 @@ use Bepado\SDK\Struct\Product;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 class InMemory extends Gateway
@@ -264,10 +264,18 @@ class InMemory extends Gateway
      * Get configuration for the given shop
      *
      * @param string $shopId
+     * @throws \RuntimeException If shop does not exist in configuration.
      * @return \Bepado\SDK\Struct\ShopConfiguration
      */
     public function getShopConfiguration($shopId)
     {
+        if (!isset($this->shopConfiguration[$shopId])) {
+            throw new \RuntimeException(sprintf(
+                'You are not connected to shop %s. Known shops are: %s.',
+                $shopId,
+                implode(", ", array_keys($this->shopConfiguration))));
+        }
+
         return $this->shopConfiguration[$shopId];
     }
 
@@ -399,9 +407,14 @@ class InMemory extends Gateway
     public static function __set_state(array $state)
     {
         $gateway = new InMemory();
-        foreach ($state as $name => $value) {
-            $gateway->$name = $value;
-        }
+        $gateway->setInternalState($state);
         return $gateway;
+    }
+
+    protected function setInternalState(array $state)
+    {
+        foreach ($state as $name => $value) {
+            $this->$name = $value;
+        }
     }
 }

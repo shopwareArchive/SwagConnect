@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK;
@@ -13,7 +13,7 @@ namespace Bepado\SDK;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 abstract class Gateway implements

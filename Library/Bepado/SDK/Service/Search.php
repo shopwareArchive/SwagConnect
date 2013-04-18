@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Service;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Search service
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Search
 {
@@ -25,9 +25,11 @@ class Search
     protected $httpClient;
 
     public function __construct(
-        HttpClient $httpClient
+        HttpClient $httpClient,
+        $apiKey
     ) {
         $this->httpClient = $httpClient;
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -39,6 +41,8 @@ class Search
      */
     public function search(Struct\Search $search)
     {
+        $search->apiKey = $this->apiKey;
+
         $response = $this->httpClient->request(
             'GET',
             '/search?' . http_build_query((array) $search)

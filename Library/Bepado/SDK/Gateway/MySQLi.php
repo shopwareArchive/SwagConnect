@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Gateway;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Default MySQLi implementation of the storage gateway
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class MySQLi extends Gateway
 {
@@ -92,7 +92,7 @@ class MySQLi extends Gateway
             );
 
             if ($row['c_product']) {
-                $change->product = unserialize($row['c_product']);
+                $change->product = $this->ensureUtf8(unserialize($row['c_product']));
             }
         }
 
@@ -104,6 +104,20 @@ class MySQLi extends Gateway
         );
 
         return $changes;
+    }
+
+    private function ensureUtf8($product)
+    {
+        foreach (get_object_vars($product) as $name => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            if (@iconv('UTF-8', 'UTF-8', $value)) {
+                continue;
+            }
+            $product->$name = @iconv("UTF-8", "UTF-8//TRANSLIT", $value);
+        }
+        return $product;
     }
 
     /**
@@ -363,6 +377,7 @@ class MySQLi extends Gateway
      * Get configuration for the given shop
      *
      * @param string $shopId
+     * @throws \RuntimeException If shop does not exist in configuration.
      * @return Struct\ShopConfiguration
      */
     public function getShopConfiguration($shopId)
@@ -377,8 +392,11 @@ class MySQLi extends Gateway
         );
 
         $rows = $result->fetch_all(\MYSQLI_ASSOC);
+
         if (!count($rows)) {
-            return null;
+            throw new \RuntimeException(sprintf(
+                'You are not connected to shop %s.',
+                $shopId));
         }
 
         return unserialize($rows[0]['s_config']);

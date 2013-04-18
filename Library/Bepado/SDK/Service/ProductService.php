@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Service;
@@ -10,13 +10,15 @@ namespace Bepado\SDK\Service;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\ProductToShop;
 use Bepado\SDK\Struct\Change;
+use Bepado\SDK\Struct;
 use Bepado\SDK\Gateway\ChangeGateway;
 use Bepado\SDK\Gateway\RevisionGateway;
+use Bepado\SDK\Gateway\ShopConfiguration;
 
 /**
  * Product service
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class ProductService
 {
@@ -35,6 +37,13 @@ class ProductService
     protected $revision;
 
     /**
+     * Gateway for shop configurations
+     *
+     * @var \Bepado\SDK\Gateway\ShopConfiguration
+     */
+    protected $configurationGateway;
+
+    /**
      * Product importer
      *
      * @var \Bepado\SDK\ProductToShop
@@ -48,10 +57,11 @@ class ProductService
      * @param \Bepado\SDK\Gateway\RevisionGateway $revision
      * @param \Bepado\SDK\ProductToShop $toShop
      */
-    public function __construct(ChangeGateway $changes, RevisionGateway $revision, ProductToShop $toShop)
+    public function __construct(ChangeGateway $changes, RevisionGateway $revision, ShopConfiguration $configurationGateway, ProductToShop $toShop)
     {
         $this->changes = $changes;
         $this->revision = $revision;
+        $this->configurationGateway = $configurationGateway;
         $this->toShop = $toShop;
     }
 
@@ -79,12 +89,24 @@ class ProductService
             switch (true) {
                 case $change instanceof Change\ToShop\InsertOrUpdate:
                     $this->toShop->insertOrUpdate($change->product);
-                    continue 2;
+                    break;
                 case $change instanceof Change\ToShop\Delete:
                     $this->toShop->delete($change->shopId, $change->sourceId);
-                    continue 2;
+                    break;
                 default:
                     throw new \RuntimeException("Invalid change operation: $change");
+            }
+
+            if ($change->shopEndpoint !== null) {
+                $this->configurationGateway->setShopConfiguration(
+                    $change->shopId,
+                    new Struct\ShopConfiguration(
+                        array(
+                            'name' => $change->shopId,
+                            'serviceEndpoint' => $change->shopEndpoint,
+                        )
+                    )
+                );
             }
         }
 

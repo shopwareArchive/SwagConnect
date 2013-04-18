@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Struct;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Struct class for shop configurations
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 class ShopConfiguration extends Struct

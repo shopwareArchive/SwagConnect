@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK;
@@ -10,7 +10,7 @@ namespace Bepado\SDK;
 /**
  * HTTP client implementation
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 abstract class HttpClient
 {

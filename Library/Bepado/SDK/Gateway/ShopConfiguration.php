@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Gateway;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Gateaway interface to maintain shop configurations
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 interface ShopConfiguration
@@ -30,6 +30,7 @@ interface ShopConfiguration
      * Get configuration for the given shop
      *
      * @param string $shopId
+     * @throws \RuntimeException If shop does not exist in configuration.
      * @return Struct\ShopConfiguration
      */
     public function getShopConfiguration($shopId);

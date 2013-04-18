@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK;
@@ -16,7 +16,7 @@ use Bepado\Common\Struct\RpcCall;
  * dispatched to this class. It constructs the required helper classes as
  * required.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  * @api
  */
 final class SDK
@@ -75,7 +75,7 @@ final class SDK
         // entirely pre-configured object, except for the properties available
         // through constructor injection. Dependency Injection is only used
         // internally in the SDK.
-        $this->dependencies = new DependencyResolver($gateway, $toShop, $fromShop);
+        $this->dependencies = new DependencyResolver($gateway, $toShop, $fromShop, $apiKey);
     }
 
     /**

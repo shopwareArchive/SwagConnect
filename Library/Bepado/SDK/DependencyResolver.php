@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK;
@@ -17,6 +17,10 @@ use Bepado\Common\Struct\RpcCall;
  */
 class DependencyResolver
 {
+    /**
+     * @var string
+     */
+    protected $apiKey;
 
     /**
      * Gateway to custom storage
@@ -139,18 +143,26 @@ class DependencyResolver
     protected $searchHost = 'http://Bepado:Shopware@search.bepado.server1219-han.de-nserver.de';
 
     /**
+     * @var ChangeVisitor\Message
+     */
+    protected $changeVisitor;
+
+    /**
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
+     * @param string $apiKey
      */
     public function __construct(
         Gateway $gateway,
         ProductToShop $toShop,
-        ProductFromShop $fromShop
+        ProductFromShop $fromShop,
+        $apiKey
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
         $this->fromShop = $fromShop;
+        $this->apiKey = $apiKey;
 
         if ($host = getenv('_SOCIALNETWORK_HOST')) {
             $this->socialNetworkHost = "http://{$host}";
@@ -161,6 +173,8 @@ class DependencyResolver
         if ($host = getenv('_SEARCH_HOST')) {
             $this->searchHost = "http://{$host}";
         }
+
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -201,6 +215,7 @@ class DependencyResolver
                 'products',
                 array('fromShop', 'toShop', 'getLastRevision'),
                 new Service\ProductService(
+                    $this->gateway,
                     $this->gateway,
                     $this->gateway,
                     $this->toShop
@@ -317,7 +332,10 @@ class DependencyResolver
     {
         if ($this->shoppingService === null) {
             $this->shoppingService = new Service\Shopping(
-                new ShopFactory\Http($this->gateway),
+                new ShopFactory\Http(
+                    $this,
+                    $this->gateway
+                ),
                 $this->getChangeVisitor(),
                 $this->getLogger()
             );
@@ -348,7 +366,8 @@ class DependencyResolver
     {
         if ($this->searchService === null) {
             $this->searchService = new Service\Search(
-                $this->getHttpClient($this->searchHost)
+                $this->getHttpClient($this->searchHost),
+                $this->apiKey
             );
         }
 
@@ -432,7 +451,8 @@ class DependencyResolver
     {
         if ($this->logger === null) {
             $this->logger = new Logger\Http(
-                $this->getHttpClient($this->transactionHost)
+                $this->getHttpClient($this->transactionHost),
+                $this->apiKey
             );
         }
 

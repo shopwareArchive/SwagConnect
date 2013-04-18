@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Logger;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Base class for logger implementations
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Http extends Logger
 {
@@ -25,10 +25,19 @@ class Http extends Logger
      */
     protected $httpClient;
 
+    /**
+     * API Key
+     *
+     * @var string
+     */
+    protected $apiKey;
+
     public function __construct(
-        HttpClient $httpClient
+        HttpClient $httpClient,
+        $apiKey
     ) {
         $this->httpClient = $httpClient;
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -39,12 +48,15 @@ class Http extends Logger
      */
     protected function doLog(Struct\Order $order)
     {
+        $hash = hash_hmac("sha256", $order->localOrderId . $order->orderShop . $order->providerShop, $this->apiKey);
+
         $response = $this->httpClient->request(
             'POST',
             '/transaction',
             json_encode($order),
             array(
                 'Content-Type: application/json',
+                'X-Bepado-Order-Hash: ' . $hash
             )
         );
 

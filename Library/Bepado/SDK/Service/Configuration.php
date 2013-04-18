@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Service;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Service to store configuration updates
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Configuration
 {
@@ -51,6 +51,9 @@ class Configuration
      *
      * @param Struct\ShopConfiguration $shopConfigurations
      * @return void
+     *
+     * @todo This method does not seem to be used. The class can therefore be
+     *       deprecated.
      */
     public function update(array $shopConfigurations)
     {

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Service;
@@ -16,7 +16,7 @@ use Bepado\SDK\Logger;
 /**
  * Shopping service
  *
- * @version 1.0.0snapshot201303151129
+ * @version $Revision$
  */
 class Shopping
 {
@@ -28,7 +28,7 @@ class Shopping
     protected $shopFactory;
 
     /**
-     * CHange visitor
+     * Change visitor
      *
      * Visits arrays of changes into corresponding messages
      *
@@ -122,10 +122,16 @@ class Shopping
         $reservation = new Struct\Reservation();
         $reservation->orders = $orders;
         foreach ($responses as $shopId => $response) {
-            if (!is_string($response)) {
+            if (is_string($response)) {
+                $reservation->orders[$shopId]->reservationId = $response;
+            } elseif (is_array($response)) {
                 $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
             } else {
-                $reservation->orders[$shopId]->reservationId = $response;
+                // TODO: How to react on false value returned?
+                // This might occur if a reservation is canceled by the provider shop
+                // see Service\Transaction::reserveProducts().
+                // SDK::reserveProducts() needs an according update, too.
+                return false;
             }
         }
 

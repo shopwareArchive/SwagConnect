@@ -33,43 +33,43 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
     getColumns: function() {
         var me = this;
         return [{
-            header: 'number',
+            header: 'Number',
             dataIndex: 'number',
             flex: 2
         }, {
-            header: 'name',
+            header: 'Name',
             dataIndex: 'name',
             flex: 4
         }, {
-            header: 'supplier',
+            header: 'Supplier',
             dataIndex: 'supplier',
             flex: 3
         }, {
-            header: 'active',
+            header: 'Active',
             xtype: 'booleancolumn',
             dataIndex: 'active',
             width: 50
         }, {
-            header: 'price',
+            header: 'Price',
             xtype: 'numbercolumn',
             dataIndex: 'price',
             align: 'right',
             width: 55
         }, {
-            header: 'tax',
+            header: 'Tax',
             xtype: 'numbercolumn',
             dataIndex: 'tax',
             align: 'right',
             flex: 1
         }, {
-            header: 'inStock',
+            header: 'Stock',
             xtype: 'numbercolumn',
             dataIndex: 'inStock',
             format: '0,000',
             align: 'right',
             flex: 1
         }, {
-            header: 'status',
+            header: 'Status',
             dataIndex: 'exportStatus',
             flex: 2,
             renderer: function(value, metaData, record) {

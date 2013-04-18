@@ -40,12 +40,31 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                         allowBlank: true,
                         store: 'main.Category'
                     }
-                }],
+                }, me.getActionColumn()],
                 dockedItems: [ me.getButtons() ]
             }]
         });
 
         me.callParent(arguments);
+    },
+
+    getActionColumn: function() {
+        var me = this;
+        return {
+            xtype: 'actioncolumn',
+            width: 30,
+            items: [{
+                iconCls: 'sprite-minus-circle-frame',
+                action: 'clear',
+                tooltip: 'Clear mapping',
+                handler: function (view, rowIndex, colIndex, item, opts, record) {
+                    me.fireEvent('clear', view, record, rowIndex);
+                },
+                getClass: function(value, meta, record) {
+                    return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
+                }
+            }]
+        };
     },
 
     getButtons: function() {

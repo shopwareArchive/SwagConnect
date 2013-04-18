@@ -334,6 +334,36 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return $product;
     }
 
+    private function getSubProductCategoriesQuery()
+    {
+        $repository = $this->getCategoryRepository();
+        $builder = $repository->createQueryBuilder('s');
+        $builder->join('s.attribute', 'st');
+        $builder->select('MAX(st.bepadoMapping) as subMapping');
+        $builder->andWhere('c.left > s.left')
+                ->andWhere('c.right < s.right');
+        $builder->orderBy('s.right', 'DESC');
+        $query = $builder->getQuery();
+        $query->setHydrationMode($query::HYDRATE_SCALAR);
+        return $query;
+    }
+
+    private function getProductCategoriesQuery()
+    {
+        $repository = $this->getArticleRepository();
+        $builder = $repository->createQueryBuilder('a');
+        $builder->join('a.categories', 'c');
+        $builder->join('c.attribute', 'ct');
+
+        $subQuery = $this->getSubProductCategoriesQuery()->getDQL();
+
+        $builder->select('IFNULL(ct.bepadoMapping, (' . $subQuery . ')) as mapping')
+                ->where('a.id = :id');
+        $builder->groupBy('mapping');
+
+        return $builder->getQuery();
+    }
+
     public function searchProductAction()
     {
         $sdk = $this->getSDK();
@@ -354,12 +384,26 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $query = $builder->getQuery();
 
         $articleQuery = $this->getArticleModelByIdQuery();
+        $categoryQuery = $this->getProductCategoriesQuery();
 
         foreach($ids as $id) {
             $result = $query->execute(array('id' => $id));
-            $status = $result[0]['status']; $message = null;
-            unset($result[0]['status']);
-            $product = $this->getProductByRowData($result[0]);
+            if(!isset($result[0])) {
+                continue;
+            }
+            $data = $result[0];
+
+            $result = $categoryQuery->execute(array('id' => $id));
+            $data['categories'] = array();
+            foreach($result as $row) {
+                if($row['mapping'] !== null) {
+                    $data['categories'][] = $row['mapping'];
+                }
+            }
+
+            $status = $data['status']; $message = null;
+            unset($data['status']);
+            $product = $this->getProductByRowData($data);
             try {
                 if(empty($status) || $status == 'delete') {
                     $sdk->recordInsert($product);
@@ -382,6 +426,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 );
                 $attribute->setBepadoExportMessage(
                     $message
+                );
+                $attribute->setBepadoCategories(
+                    serialize($data['categories'])
                 );
             }
         }

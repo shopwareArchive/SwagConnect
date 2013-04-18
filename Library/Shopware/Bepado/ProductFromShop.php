@@ -71,58 +71,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $ids)
     {
-        Shopware()->Log()->err('getProducts:' . print_r($ids, true));
-        $repository = Shopware()->Models()->getRepository(
-            'Shopware\Models\Article\Article'
-        );
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->join('a.supplier', 's');
-        $builder->join('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->join('a.tax', 't');
-        $builder->select(array(
-            'a.id as sourceId',
-            'd.ean',
-            'a.name as title',
-            'a.description as shortDescription',
-            'a.descriptionLong as longDescription',
-            's.name as vendor',
-            't.tax / 100 as vat',
-            'p.basePrice as price',
-            'p.price * (100 + t.tax) / 100 as purchasePrice',
-            //'"EUR" as currency',
-            'd.shippingFree as freeDelivery',
-            'd.releaseDate as deliveryDate',
-            'd.inStock as availability',
-            //'images = array()',
-        ));
-        $builder->where('a.id = :id');
-        $query = $builder->getQuery();
-        $products = array();
-        foreach($ids as $id) {
-            $product = $query->execute(array('id' => $id));
-            $productData = $product[0];
-            $productData['price'] = round($productData['price'], 2);
-            $productData['vat'] = round($productData['vat'], 2);
-            if(isset($productData['deliveryDate'])) {
-                $productData['deliveryDate'] = $productData['deliveryDate']->getTimestamp();
-            }
-            if(empty($productData['price'])) {
-                $productData['price'] = $productData['purchasePrice'];
-            }
-            $productData['categories'] = array(
-                '/auto_motorrad'
-            );
-            $productData['attributes'] = array(
-                //Product::ATTRIBUTE_WEIGHT => '',
-                //Product::ATTRIBUTE_BASE_VOLUME => '',
-                //Product::ATTRIBUTE_BASE_WEIGHT => '',
-                //Product::ATTRIBUTE_DIMENSION => '',
-                //Product::ATTRIBUTE_VOLUME => '',
-            );
-            $products[] = new Product($productData);
-        }
-        return $products;
+        return array();
     }
 
     /**
@@ -136,6 +85,9 @@ class ProductFromShop implements ProductFromShopBase
             'Shopware\Models\Article\Article'
         );
         $builder = $repository->createQueryBuilder('a');
+        $builder->join('a.mainDetail', 'd');
+        $builder->join('d.attribute', 'at');
+        $builder->where('at.bepadoExportStatus IS NOT NULL');
         $builder->select(array(
             'a.id as sourceId'
         ));
@@ -180,7 +132,7 @@ class ProductFromShop implements ProductFromShopBase
             'invoiceShippingNet' => $order->shippingCosts
         ));
         $this->manager->persist($model);
-        $this->manager->flush($model);
+        //$this->manager->flush($model);
         $items = array();
         foreach($order->products as $product) {
             $item = new OrderModel\Detail();

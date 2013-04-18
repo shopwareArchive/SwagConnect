@@ -12,10 +12,17 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'main.Window', 'main.Navigation',
         'main.Panel', 'main.Config', 'main.Mapping',
         'export.Panel', 'import.Panel',
-        'export.List', 'export.Filter'
+        'export.List', 'export.Filter',
+        'import.List', 'import.Filter'
     ],
-    stores: [ 'main.Navigation', 'export.List', 'main.Mapping', 'main.Category' ],
-    models: [ 'export.List', 'main.Mapping' ],
+    stores: [
+        'main.Navigation', 'main.Mapping', 'main.Category',
+        'export.List', 'import.List'
+    ],
+    models: [
+        'main.Mapping', 'main.Product',
+        'export.List', 'import.List'
+    ],
 
     refs: [
         { ref: 'window', selector: 'bepado-window' },

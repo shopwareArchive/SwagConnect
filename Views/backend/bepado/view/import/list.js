@@ -1,13 +1,13 @@
 //{namespace name=backend/bepado/view/main}
 
-//{block name="backend/bepado/view/export/list"}
-Ext.define('Shopware.apps.Bepado.view.export.List', {
+//{block name="backend/bepado/view/import/list"}
+Ext.define('Shopware.apps.Bepado.view.import.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.bepado-export-list',
+    alias: 'widget.bepado-import-list',
 
     border: false,
 
-    store: 'export.List',
+    store: 'import.List',
 
     selModel: {
         selType: 'checkboxmodel',
@@ -68,14 +68,6 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
             format: '0,000',
             align: 'right',
             flex: 1
-        }, {
-            header: 'Status',
-            dataIndex: 'exportStatus',
-            flex: 2,
-            renderer: function(value, metaData, record) {
-                metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
-                return value;
-            }
         }];
     },
 
@@ -105,27 +97,16 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
         var items = [];
         items.push({
             iconCls:'sprite-plus-circle-frame',
-            text:'Produkt(e) exportieren / aktualisieren',
+            text:'Produkt(e) aktivieren',
             //tooltip:'{s name=list/add_tooltip}Add (ALT + INSERT){/s}',
-            action:'add'
+            action:'activate'
         });
         items.push({
             iconCls:'sprite-minus-circle-frame',
-            text:'Aus dem Export löschen',
+            text:'Produkt(e) deaktivieren',
             //tooltip:'{s name=list/delete_tooltip}Delete (ALT + DELETE){/s}',
-            action:'delete'
+            action:'deactivate'
         });
-        //items.push('->', {
-        //    xtype:'textfield',
-        //    name:'searchfield',
-        //    cls:'searchfield',
-        //    width:100,
-        //    emptyText:'{s name=search/empty_text}Search...{/s}',
-        //    enableKeyEvents:true,
-        //    checkChangeBuffer:500
-        //}, {
-        //    xtype:'tbspacer', width:6
-        //});
         return items;
     }
 });

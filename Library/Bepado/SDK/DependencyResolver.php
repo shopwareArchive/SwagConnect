@@ -130,17 +130,17 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://Bepado:Shopware@socialnetwork.bepado.server1219-han.de-nserver.de';
+    protected $socialNetworkHost = 'http://Bepado:Shopware@socialnetwork.bepado.h2155039.stratoserver.net';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://Bepado:Shopware@transaction.bepado.server1219-han.de-nserver.de';
+    protected $transactionHost = 'http://Bepado:Shopware@transaction.bepado.h2155039.stratoserver.net';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://Bepado:Shopware@search.bepado.server1219-han.de-nserver.de';
+    protected $searchHost = 'http://Bepado:Shopware@search.bepado.h2155039.stratoserver.net';
 
     /**
      * @var ChangeVisitor\Message

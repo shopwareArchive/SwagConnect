@@ -1,29 +1,17 @@
-//{block name="backend/bepado/model/main/list"}
-Ext.define('Shopware.apps.Bepado.model.main.List', {
+//{block name="backend/bepado/model/main/product"}
+Ext.define('Shopware.apps.Bepado.model.main.Product', {
     extend: 'Ext.data.Model',
 
-    proxy: {
-        type: 'ajax',
-        api: {
-            read : '{url action=getList}',
-            destroy: '{url action=deleteListItem}'
-        },
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    },
-
     fields: [
-        //{block name="backend/bepado/model/main/list/fields"}{/block}
-        { name: 'id', type: 'int', useNull: true },
-        { name: 'groupId', type: 'int', defaultValue: null, useNull: true },
-        { name: 'optionId', type: 'int', defaultValue: null, useNull: true },
-        { name: 'name' },
-        { name: 'position', type: 'int' },
+        //{block name="backend/bepado/model/main/product/fields"}{/block}
+        { name: 'id', type: 'int' },
+        { name: 'name',  type: 'string' },
+        { name: 'number',  type: 'string' },
+        { name: 'supplier',  type: 'string' },
+        { name: 'inStock',  type: 'int' },
         { name: 'active', type: 'boolean' },
-        { name: 'assignment', type: 'int', defaultValue: null, useNull: true },
-        { name: 'leaf', convert: function(v, record) { return !!record.data.optionId; } }
+        { name: 'price', type: 'float', useNull: true },
+        { name: 'tax', type: 'float', useNull: true }
     ]
 });
 //{/block}

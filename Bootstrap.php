@@ -81,27 +81,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     private function createMyAttributes()
     {
-        //$this->Application()->Models()->addAttribute(
-        //    's_articles_attributes',
-        //    'bepado', 'shop_id',
-        //    'varchar(255)'
-        //);
-        //$this->Application()->Models()->addAttribute(
-        //    's_articles_attributes',
-        //    'bepado', 'source_id',
-        //    'varchar(255)'
-        //);
-        //$this->Application()->Models()->addAttribute(
-        //    's_articles_attributes',
-        //    'bepado', 'export_status',
-        //    'text'
-        //);
-        //$this->Application()->Models()->addAttribute(
-        //    's_articles_attributes',
-        //    'bepado', 'export_message',
-        //    'text'
-        //);
-//
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'shop_id',
+            'varchar(255)'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'source_id',
+            'varchar(255)'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'export_status',
+            'text'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_articles_attributes',
+            'bepado', 'export_message',
+            'text'
+        );
+
         //$this->Application()->Models()->addAttribute(
         //    's_order_details_attributes',
         //    'bepado', 'reservation_id',
@@ -118,11 +118,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'bepado', 'categories',
             'text'
         );
-        //$this->Application()->Models()->addAttribute(
-        //   's_categories_attributes',
-        //   'bepado', 'mapping',
-        //   'text'
-        //);
+        $this->Application()->Models()->addAttribute(
+           's_categories_attributes',
+           'bepado', 'mapping',
+           'text'
+        );
 
         $this->Application()->Models()->generateAttributeModels(array(
             's_articles_attributes',

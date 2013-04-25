@@ -396,16 +396,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return $builder->getQuery();
     }
 
-    public function searchProductAction()
-    {
-        $sdk = $this->getSDK();
-        $search = new Bepado\SDK\Struct\Search(array(
-            'query' => $this->Request()->getParam('query')
-        ));
-        $result = $sdk->search($search);
-        $this->View()->assign((array)$result);
-    }
-
     public function insertOrUpdateProductAction()
     {
         $sdk = $this->getSDK();

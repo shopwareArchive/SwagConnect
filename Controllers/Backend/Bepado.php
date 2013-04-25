@@ -97,7 +97,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'p.price * (100 + t.tax) / 100 as price',
         ));
 
-        foreach($filter as $rule) {
+        foreach($filter as $key => $rule) {
             switch($rule['property']) {
                 case 'search':
                     $builder->where('d.number LIKE :search')
@@ -114,11 +114,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                         ->setParameter('status', $rule['value']);
                     break;
                 default:
-                    $builder->addFilter(array($rule));
-                    break;
+                    continue;
             }
+            unset($filter[$key]);
         }
-
+        $builder->addFilter($filter);
         $builder->addOrderBy($order);
         return $builder;
     }
@@ -134,7 +134,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'at.bepadoExportMessage as exportMessage',
             'at.bepadoCategories'
         ));
-        $builder->where('at.bepadoShopId IS NULL');
+        $builder->andWhere('at.bepadoShopId IS NULL');
 
         $query = $builder->getQuery();
 
@@ -161,7 +161,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'at.bepadoShopId',
             'at.bepadoSourceId'
         ));
-        $builder->where('at.bepadoShopId IS NOT NULL');
+        $builder->andWhere('at.bepadoShopId IS NOT NULL');
 
         $query = $builder->getQuery();
 

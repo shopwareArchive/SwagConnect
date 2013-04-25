@@ -58,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                 action: 'clear',
                 tooltip: 'Clear mapping',
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
-                    me.fireEvent('clear', view, record, rowIndex);
+                    record.set('mapping', null);
                 },
                 getClass: function(value, meta, record) {
                     return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';

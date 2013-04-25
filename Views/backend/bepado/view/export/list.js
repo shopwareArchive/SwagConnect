@@ -111,7 +111,7 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
         });
         items.push({
             iconCls:'sprite-minus-circle-frame',
-            text:'Aus dem Export löschen',
+            text:'Produkt(e) aus dem Export löschen',
             //tooltip:'{s name=list/delete_tooltip}Delete (ALT + DELETE){/s}',
             action:'delete'
         });

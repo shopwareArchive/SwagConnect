@@ -48,6 +48,45 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
 
+    private $helper;
+
+    /**
+     * @return \Shopware\Bepado\Helper
+     */
+    public function getHelper()
+    {
+        if($this->helper === null) {
+            $this->helper = new \Shopware\Bepado\Helper(
+                $this->getModelManager()
+            );
+        }
+        return $this->helper;
+    }
+
+    /**
+     * @return \Shopware\Models\Article\Repository
+     */
+    private function getArticleRepository()
+    {
+        $manager = Shopware()->Models();
+        $repository = $manager->getRepository(
+            'Shopware\Models\Article\Article'
+        );
+        return $repository;
+    }
+
+    /**
+     * @return \Shopware\Models\Category\Repository
+     */
+    private function getCategoryRepository()
+    {
+        $manager = Shopware()->Models();
+        $repository = $manager->getRepository(
+            'Shopware\Models\Category\Category'
+        );
+        return $repository;
+    }
+
     public function getCategoryListAction()
     {
         $sdk = $this->getSDK();
@@ -81,7 +120,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $builder = $repository->createQueryBuilder('a');
         $builder->join('a.mainDetail', 'd');
-        $builder->join('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
         $builder->join('d.attribute', 'at');
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
@@ -215,217 +254,31 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $rows = $this->Request()->getPost('rows');
         $rows = !isset($rows[0]) ? array($rows) : $rows;
-        $query = $this->getCategoryModelByIdQuery();
+        $helper = $this->getHelper();
         foreach($rows as $row) {
-            /** @var $result \Shopware\Models\Category\Category[] */
-            $result = $query->execute(array('id' => $row['id']));
-            if(isset($result[0])) {
-                $result[0]->getAttribute()->setBepadoMapping($row['mapping']);
+            $result = $helper->getCategoryModelById($row['id']);
+            if($result !== null) {
+                $result->getAttribute()->setBepadoMapping($row['mapping']);
             }
         }
         Shopware()->Models()->flush();
-    }
-
-    /**
-     * @return \Shopware\Models\Article\Repository
-     */
-    private function getArticleRepository()
-    {
-        $manager = Shopware()->Models();
-        $repository = $manager->getRepository(
-            'Shopware\Models\Article\Article'
-        );
-        return $repository;
-    }
-
-    /**
-     * @return \Shopware\Models\Category\Repository
-     */
-    private function getCategoryRepository()
-    {
-        $manager = Shopware()->Models();
-        $repository = $manager->getRepository(
-            'Shopware\Models\Category\Category'
-        );
-        return $repository;
-    }
-
-    /**
-     * @return \Doctrine\ORM\QueryBuilder
-     */
-    private function getProductQueryBuilder()
-    {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->join('d.attribute', 'at');
-        $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->join('a.tax', 't');
-        $builder->leftJoin('d.unit', 'u');
-        $builder->select(array(
-            'a.id as sourceId',
-            'd.ean',
-            'a.name as title',
-            'a.description as shortDescription',
-            'a.descriptionLong as longDescription',
-            's.name as vendor',
-            't.tax / 100 as vat',
-            'p.basePrice as price',
-            'p.price * (100 + t.tax) / 100 as purchasePrice',
-            //'"EUR" as currency',
-            'd.shippingFree as freeDelivery',
-            'd.releaseDate as deliveryDate',
-            'd.inStock as availability',
-
-            'd.width',
-            'd.height',
-            'd.len as length',
-
-            'd.weight',
-            'u.unit',
-            'd.purchaseUnit as volume',
-            'd.referenceUnit as base',
-            'at.bepadoExportStatus as status'
-            //'images = array()',
-        ));
-        return $builder;
-    }
-
-    /**
-     * @return \Doctrine\ORM\Query
-     */
-    private function getArticleModelByIdQuery()
-    {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.attribute', 'at');
-        $builder->addSelect('at');
-        $builder->where('a.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @return \Doctrine\ORM\Query
-     */
-    private function getCategoryModelByIdQuery()
-    {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
-        $builder->join('c.attribute', 'ct');
-        $builder->addSelect('ct');
-        $builder->where('c.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @param array $row
-     * @return Product
-     */
-    private function getProductByRowData($row)
-    {
-        if(isset($row['deliveryDate'])) {
-            $row['deliveryDate'] = $row['deliveryDate']->getTimestamp();
-        }
-        if(empty($row['price'])) {
-            $row['price'] = $row['purchasePrice'];
-        }
-
-        // Fix prices
-        foreach(array('price', 'purchasePrice', 'vat') as $name) {
-            $row[$name] = round($row[$name], 2);
-        }
-
-        // Fix attributes
-        foreach(array('weight', 'unit', 'base', 'volume') as $name) {
-            if(isset($row[$name])) {
-                $row['attributes'][$name] = $row[$name];
-            }
-            unset($row[$name]);
-        }
-
-        // Fix dimensions
-        if(!empty($row['width']) && !empty($row['height'])) {
-            $dimension = array(
-                $row['width'], $row['height']
-            );
-            if(!empty($row['length'])) {
-                $dimension[] = $row['length'];
-            }
-            $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
-        }
-        unset($row['width'], $row['height'], $row['length']);
-
-        $product = new Product(
-            $row
-        );
-        return $product;
-    }
-
-    private function getSubProductCategoriesQuery()
-    {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('s');
-        $builder->join('s.attribute', 'st');
-        $builder->select('MAX(st.bepadoMapping) as subMapping');
-        $builder->andWhere('c.left > s.left')
-                ->andWhere('c.right < s.right');
-        $builder->orderBy('s.right', 'DESC');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_SCALAR);
-        return $query;
-    }
-
-    private function getProductCategoriesQuery()
-    {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.categories', 'c');
-        $builder->join('c.attribute', 'ct');
-
-        $subQuery = $this->getSubProductCategoriesQuery()->getDQL();
-
-        $builder->select('IFNULL(ct.bepadoMapping, (' . $subQuery . ')) as mapping')
-                ->where('a.id = :id');
-        $builder->groupBy('mapping');
-
-        return $builder->getQuery();
     }
 
     public function insertOrUpdateProductAction()
     {
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
-
-        $builder = $this->getProductQueryBuilder();
-        $builder->where('a.id = :id');
-        $query = $builder->getQuery();
-
-        $articleQuery = $this->getArticleModelByIdQuery();
-        $categoryQuery = $this->getProductCategoriesQuery();
+        $helper = $this->getHelper();
 
         foreach($ids as $id) {
-            $result = $query->execute(array('id' => $id));
-            if(!isset($result[0])) {
+            $data = $helper->getRowProductDataById($id);
+            if($data === null) {
                 continue;
             }
-            $data = $result[0];
-
-            $result = $categoryQuery->execute(array('id' => $id));
-            $data['categories'] = array();
-            foreach($result as $row) {
-                if($row['mapping'] !== null) {
-                    $data['categories'][] = $row['mapping'];
-                }
-            }
-
+            $data['categories'] = $helper->getRowProductCategoriesById($id);
             $status = $data['status']; $message = null;
-            unset($data['status']);
-            $product = $this->getProductByRowData($data);
+            $product = $helper->getProductByRowData($data);
+
             try {
                 if(empty($status) || $status == 'delete') {
                     $sdk->recordInsert($product);
@@ -439,10 +292,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $message = $e->getMessage();
             }
 
-            /** @var $model Shopware\Models\Article\Article[] */
-            $model = $articleQuery->execute(array('id' => $id));
-            if(isset($model[0])) {
-                $attribute = $model[0]->getAttribute();
+            $model = $helper->getArticleModelById($id);
+            if(isset($model)) {
+                $attribute = $model->getAttribute();
                 $attribute->setBepadoExportStatus(
                     $status
                 );
@@ -461,13 +313,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
-        $query = $this->getArticleModelByIdQuery();
         foreach($ids as $id) {
             $sdk->recordDelete($id);
-            /** @var $model Shopware\Models\Article\Article[] */
-            $model = $query->execute(array('id' => $id));
-            if(isset($model[0])) {
-                $attribute = $model[0]->getAttribute();
+            $model = $this->getHelper()->getArticleModelById($id);
+            if($model !== null) {
+                $attribute = $model->getAttribute();
                 $attribute->setBepadoExportStatus(
                     'delete'
                 );

@@ -331,4 +331,14 @@ final class SDK
             $this->apiEndpointUrl
         );
     }
+
+    /**
+     * @param $shopId
+     * @return Struct\ShopConfiguration
+     */
+    public function getShopConfigurationById($shopId)
+    {
+        $this->verifySdk();
+        return $this->dependencies->getGateway()->getShopConfiguration($shopId);
+    }
 }

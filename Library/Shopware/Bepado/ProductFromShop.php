@@ -39,15 +39,22 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
 class ProductFromShop implements ProductFromShopBase
 {
     /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
      * @var ModelManager
      */
     private $manager;
 
     /**
+     * @param Helper $helper
      * @param ModelManager $manager
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(Helper $helper, ModelManager $manager)
     {
+        $this->helper = $helper;
         $this->manager = $manager;
     }
 
@@ -71,7 +78,11 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $ids)
     {
-        return array();
+        $products = array();
+        foreach($ids as $id) {
+            $products[] = $this->helper->geProductById($id);
+        }
+        return $products;
     }
 
     /**
@@ -87,7 +98,7 @@ class ProductFromShop implements ProductFromShopBase
         $builder = $repository->createQueryBuilder('a');
         $builder->join('a.mainDetail', 'd');
         $builder->join('d.attribute', 'at');
-        $builder->where('at.bepadoExportStatus IS NOT NULL');
+        $builder->where("at.bepadoExportStatus IN ('online', 'update', 'insert')");
         $builder->select(array(
             'a.id as sourceId'
         ));
@@ -135,21 +146,25 @@ class ProductFromShop implements ProductFromShopBase
         //$this->manager->flush($model);
         $items = array();
         foreach($order->products as $product) {
+            $productModel = $this->helper->getArticleModelByProduct($product->product);
+            /** @var $productDetail \Shopware\Models\Article\Detail */
+            $productDetail = $productModel->getDetails()->first();
             $item = new OrderModel\Detail();
             $item->fromArray(array(
                 'articleId' => $product->product->sourceId,
                 'quantity' => $product->count,
                 'orderId' => $model->getId(),
                 'number' => $model->getNumber(),
-                'articleNumber' => $this->getNumberByProduct($product->product),
+                'articleNumber' => $productDetail->getNumber(),
                 'articleName' => $product->product->title,
                 'price' => $product->product->purchasePrice,
                 'taxRate' => $product->product->vat * 100
             ));
             $items[] = $item;
+            $productDetail->setInStock($productDetail->getInStock() - $product->count);
         }
         $model->setDetails($items);
-        $this->manager->flush($model);
+        $this->manager->flush();
         return $model->getId();
     }
 }

@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.1';
+        return '1.1.3';
     }
 
     /**
@@ -73,7 +73,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyMenu();
         $this->createMyForm();
         $this->createMyEvents();
-        //$this->createMyTables();
+        $this->createMyTables();
         $this->createMyAttributes();
 
 	 	return true;
@@ -102,14 +102,19 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'text'
         );
 
-        //$this->Application()->Models()->addAttribute(
-        //    's_order_details_attributes',
-        //    'bepado', 'reservation_id',
-        //    'text'
-        //);
+        $this->Application()->Models()->addAttribute(
+            's_order_details_attributes',
+            'bepado', 'reservation_id',
+            'text'
+        );
+        $this->Application()->Models()->addAttribute(
+            's_order_basket_attributes',
+            'bepado', 'reservation_id',
+            'text'
+        );
         //$this->Application()->Models()->addAttribute(
         //    's_order_basket_attributes',
-        //    'bepado', 'reservation_id',
+        //    'bepado', 'order_item',
         //    'text'
         //);
 
@@ -204,11 +209,61 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoGateway',
             'onGetControllerPathGateway'
         );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout',
+            'onPostDispatchFrontendCheckout'
+        );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Detail',
+            'onPostDispatchFrontendDetail'
+        );
+
+        //$this->subscribeEvent(
+        //    'sBasket::sAddArticle::after',
+        //    'onAfterAddArticle'
+        //);
     }
 
     private function createMyTables()
     {
-        $queries = array("");
+        $queries = array("
+            CREATE TABLE IF NOT EXISTS `bepado_change` (
+              `c_source_id` varchar(64) NOT NULL,
+              `c_operation` char(8) NOT NULL,
+              `c_revision` decimal(20,10) NOT NULL,
+              `c_product` longblob,
+              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              UNIQUE KEY `c_revision` (`c_revision`),
+              KEY `c_source_id` (`c_source_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+           CREATE TABLE IF NOT EXISTS `bepado_data` (
+              `d_key` varchar(32) NOT NULL,
+              `d_value` varchar(256) NOT NULL,
+              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`d_key`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            CREATE TABLE IF NOT EXISTS `bepado_product` (
+              `p_source_id` varchar(64) NOT NULL,
+              `p_hash` varchar(64) NOT NULL,
+              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`p_source_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            CREATE TABLE IF NOT EXISTS `bepado_reservations` (
+              `r_id` varchar(32) NOT NULL,
+              `r_state` varchar(12) NOT NULL,
+              `r_order` longblob NOT NULL,
+              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`r_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            CREATE TABLE IF NOT EXISTS `bepado_shop_config` (
+              `s_shop` varchar(32) NOT NULL,
+              `s_config` mediumblob NOT NULL,
+              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`s_shop`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
 
         foreach ($queries as $query) {
             Shopware()->Db()->exec($query);
@@ -222,24 +277,60 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	 */
 	public function uninstall()
 	{
-
         return true;
 	}
+
+    /**
+     * @return bool
+     */
+    public function update()
+    {
+        $this->createMyEvents();
+        $this->createMyTables();
+        return true;
+    }
 
     private function removeMyAttributes()
     {
         try {
             $this->Application()->Models()->removeAttribute(
+                's_articles_attributes',
+                'bepado', 'shop_id'
+            );
+            $this->Application()->Models()->removeAttribute(
+                's_articles_attributes',
+                'bepado', 'source_id'
+            );
+            $this->Application()->Models()->removeAttribute(
+                's_articles_attributes',
+                'bepado', 'export_status'
+            );
+            $this->Application()->Models()->removeAttribute(
+                's_articles_attributes',
+                'bepado', 'export_message'
+            );
+
+            $this->Application()->Models()->removeAttribute(
                 's_order_details_attributes',
-                'swag',
-                'customizing'
+                'bepado', 'reservation_id'
             );
             $this->Application()->Models()->removeAttribute(
                 's_order_basket_attributes',
-                'swag',
-                'customizing'
+                'bepado', 'reservation_id'
             );
+
+            $this->Application()->Models()->removeAttribute(
+                's_articles_attributes',
+                'bepado', 'categories'
+            );
+            $this->Application()->Models()->removeAttribute(
+                's_categories_attributes',
+                'bepado', 'mapping'
+            );
+
             $this->Application()->Models()->generateAttributeModels(array(
+                's_articles_attributes',
+                's_categories_attributes',
                 's_order_details_attributes',
                 's_order_basket_attributes',
             ));
@@ -255,10 +346,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * @param   Enlight_Event_EventArgs $args
-     * @return  Bepado\SDK\SDK
+     *
      */
-    public function onInitResourceSDK(Enlight_Event_EventArgs $args)
+    private function registerMyLibrary()
     {
         $this->Application()->Loader()->registerNamespace(
             'Bepado',
@@ -268,11 +358,20 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'Shopware\\Bepado',
             $this->Path() . 'Library/Shopware/Bepado/'
         );
+    }
 
+    /**
+     * @param   Enlight_Event_EventArgs $args
+     * @return  Bepado\SDK\SDK
+     */
+    public function onInitResourceSDK(Enlight_Event_EventArgs $args)
+    {
+        $this->registerMyLibrary();
         /** @var $connection PDO */
         $connection = $this->Application()->Db()->getConnection();
         $manager = $this->Application()->Models();
         $front = $this->Application()->Front();
+        $helper = new \Shopware\Bepado\Helper($manager);
         $apiKey = $this->Config()->get('apiKey');
 
         return new Bepado\SDK\SDK(
@@ -284,12 +383,40 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             )),
             new \Bepado\SDK\Gateway\PDO($connection),
             new \Shopware\Bepado\ProductToShop(
+                $helper,
                 $manager
             ),
             new \Shopware\Bepado\ProductFromShop(
+                $helper,
                 $manager
             )
         );
+    }
+
+    private $helper, $sdk;
+
+    /**
+     * @return Bepado\SDK\SDK
+     */
+    private function getSDK()
+    {
+        if($this->sdk === null) {
+            $this->sdk = $this->Application()->Bootstrap()->getResource('BepadoSDK');
+        }
+        return $this->sdk;
+    }
+
+    /**
+     * @return \Shopware\Bepado\Helper
+     */
+    public function getHelper()
+    {
+        if($this->helper === null) {
+            $this->helper = new \Shopware\Bepado\Helper(
+                $this->Application()->Models()
+            );
+        }
+        return $this->helper;
     }
 
     /**
@@ -313,5 +440,104 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function onGetControllerPathGateway(Enlight_Event_EventArgs $args)
     {
         return $this->Path() . 'Controllers/Backend/BepadoGateway.php';
+    }
+
+    /**
+     * @param Enlight_Hook_HookArgs $args
+     */
+    public function onAfterAddArticle(Enlight_Hook_HookArgs $args)
+    {
+        $id = $args->getId();
+    }
+
+    /**
+     * Event listener method
+     *
+     * @param Enlight_Event_EventArgs $args
+     * @return void
+     */
+    public function onPostDispatchFrontendCheckout(Enlight_Event_EventArgs $args)
+    {
+        /** @var $action Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $view = $action->View();
+
+        //$this->registerCustomizing();
+        //$view->extendsTemplate('frontend/plugins/swag_customizing/checkout.tpl');
+        //$view->assign('customizingThumbnailSize', $this->Config()->get('imageSelectThumbnailSize'));
+
+        if(empty($view->sBasket)) {
+            return;
+        }
+
+        $sdk = $this->getSDK();
+        $helper = $this->getHelper();
+
+        $bepadoContent = array();
+        $bepadoProducts = array();
+        $bepadoShops = array();
+        $bepadoCheckResults = array();
+
+        $basket = $view->sBasket;
+        foreach ($basket['content'] as $key => $row) {
+            if(!empty($row['mode'])) {
+                continue;
+            }
+            $product = $helper->geProductById($row['articleID']);
+            if($product === null || $product->shopId === null) {
+                continue;
+            }
+            $bepadoProducts[$product->shopId][$product->sourceId] = $product;
+            $bepadoContent[$product->shopId][$product->sourceId] = $row;
+            unset($basket['content'][$key]);
+        }
+        $view->sBasket = $basket;
+
+        foreach($bepadoContent as $shopId => $items) {
+            $order = new Bepado\SDK\Struct\Order();
+            $order->products = array();
+
+            foreach($items as $sourceId => $item) {
+                $product = $bepadoProducts[$shopId][$sourceId];
+
+                $orderItem = new Bepado\SDK\Struct\OrderItem();
+                $orderItem->product = $product;
+                $orderItem->count = (int)$item['quantity'];
+
+                $order->products[] = $orderItem;
+            }
+            $bepadoCheckResults[$shopId] = $sdk->checkProducts($order);
+            $bepadoShops[$shopId] = $sdk->getShopConfigurationById($shopId);
+        }
+
+        $view->assign(array(
+            'bepadoContent' => $bepadoContent,
+            'bepadoShops' => $bepadoShops,
+            'bepadoCheckResults' => $bepadoCheckResults
+        ));
+    }
+
+    /**
+     * Event listener method
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchFrontendDetail(Enlight_Event_EventArgs $args)
+    {
+        /** @var $action Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $view = $action->View();
+        $helper = $this->getHelper();
+        $sdk = $this->getSDK();
+
+        $this->registerMyTemplateDir();
+        //$view->extendsTemplate('frontend/plugins/swag_customizing/index.tpl');
+
+        $articleData = $view->getAssign('sArticle');
+        if(empty($articleData['articleID'])) {
+            return;
+        }
+
+        //var_dump($articleData); die();
     }
 }

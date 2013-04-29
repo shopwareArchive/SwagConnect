@@ -40,43 +40,23 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
 class ProductToShop implements ProductToShopBase
 {
     /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
      * @var ModelManager
      */
     private $manager;
 
     /**
+     * @param Helper $helper
      * @param ModelManager $manager
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(Helper $helper, ModelManager $manager)
     {
+        $this->helper = $helper;
         $this->manager = $manager;
-    }
-
-    /**
-     * @param Product $product
-     * @param int $mode
-     * @return null|ProductModel
-     */
-    private function getModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
-    {
-        $repository = Shopware()->Models()->getRepository(
-            'Shopware\Models\Article\Article'
-        );
-        $builder = $repository->createQueryBuilder('a');
-        $builder->select(array('a', 'd', 'at'));
-        $builder->join('a.details', 'd');
-        $builder->leftJoin('d.attribute', 'at');
-        $builder->where('at.bepadoShopId = :shopId AND at.bepadoSourceId = :sourceId');
-        $builder->orWhere('d.number = :number');
-        $query = $builder->getQuery();
-        $query->setParameter('shopId', $product->shopId);
-        $query->setParameter('sourceId', $product->sourceId);
-        $query->setParameter('number', 'BP-' . $product->shopId . '-' . $product->sourceId);
-        $result = $query->getResult(
-            $query::HYDRATE_OBJECT,
-            $mode
-        );
-        return isset($result[0]) ? $result[0] : null;
     }
 
     /**
@@ -92,7 +72,7 @@ class ProductToShop implements ProductToShopBase
         if(empty($product->title) || empty($product->vendor)) {
             return;
         }
-        $model = $this->getModelByProduct($product);
+        $model = $this->helper->getArticleModelByProduct($product);
         if($model === null) {
             $model = new ProductModel();
             $detail = new DetailModel();
@@ -119,6 +99,19 @@ class ProductToShop implements ProductToShopBase
             }
             $model->setSupplier($supplier);
         }
+
+        $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+        $customerGroup = $repo->findOneBy(array('key' => 'EK'));
+
+        $detail->getPrices()->clear();
+        $detail->setPrices(array(
+            array(
+                'from' => 1,
+                'price' => $product->price / (100 + 100 * $product->vat) * 100,
+                'customerGroup' => $customerGroup
+            )
+        ));
+
         $model->setName($product->title);
         $model->setDescription($product->shortDescription);
         $model->setDescriptionLong($product->longDescription);
@@ -158,15 +151,16 @@ class ProductToShop implements ProductToShopBase
      */
     public function delete($shopId, $sourceId)
     {
-        $model = $this->getModelByProduct(new Product(array(
+        $model =  $this->helper->getArticleModelByProduct(new Product(array(
             'shopId' => $shopId,
             'sourceId' => $sourceId,
-        )), Query::HYDRATE_SIMPLEOBJECT);
+        )));
         if($model === null) {
             return;
         }
-        $model->getDetails()->clear();
-        $this->manager->remove($model);
+        //$model->getDetails()->clear();
+        //$this->manager->remove($model);
+        $model->setActive(false);
         $this->manager->flush();
     }
 }

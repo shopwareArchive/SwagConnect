@@ -77,10 +77,10 @@ class ProductToShop implements ProductToShopBase
             $model = new ProductModel();
             $detail = new DetailModel();
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
-            $model->setDetails(array($detail));
             $this->manager->persist($model);
+            $detail->setArticle($model);
         } else {
-            $detail = $model->getDetails()->first();
+            $detail = $model->getMainDetail();
         }
         $attribute = $detail->getAttribute() ?: new AttributeModel();
 
@@ -100,18 +100,6 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
-        $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
-        $customerGroup = $repo->findOneBy(array('key' => 'EK'));
-
-        $detail->getPrices()->clear();
-        $detail->setPrices(array(
-            array(
-                'from' => 1,
-                'price' => $product->price / (100 + 100 * $product->vat) * 100,
-                'customerGroup' => $customerGroup
-            )
-        ));
-
         $model->setName($product->title);
         $model->setDescription($product->shortDescription);
         $model->setDescriptionLong($product->longDescription);
@@ -122,6 +110,18 @@ class ProductToShop implements ProductToShopBase
 
         //$model->setImages(array(
         //));
+
+        $repo = $this->manager->getRepository('Shopware\Models\Customer\Group');
+        $customerGroup = $repo->findOneBy(array('key' => 'EK'));
+        $detail->getPrices()->clear();
+        $price = new \Shopware\Models\Article\Price();
+        $price->fromArray(array(
+            'from' => 1,
+            'price' => $product->price / (100 + 100 * $product->vat) * 100,
+            'customerGroup' => $customerGroup,
+            'article' => $model
+        ));
+        $detail->setPrices(array($price));
 
         $this->manager->flush($model);
 
@@ -161,6 +161,6 @@ class ProductToShop implements ProductToShopBase
         //$model->getDetails()->clear();
         //$this->manager->remove($model);
         $model->setActive(false);
-        $this->manager->flush();
+        $this->manager->flush($model);
     }
 }

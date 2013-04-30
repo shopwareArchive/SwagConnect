@@ -131,7 +131,7 @@ class Helper
         $repository = $this->getArticleRepository();
         $builder = $repository->createQueryBuilder('a');
         $builder->select(array('a', 'd', 'at'));
-        $builder->join('a.details', 'd');
+        $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
         return $builder;
     }
@@ -317,7 +317,7 @@ class Helper
      * @param $id
      * @return \Bepado\SDK\Struct\Product
      */
-    public function geProductById($id)
+    public function getProductById($id)
     {
         $data = $this->getRowProductDataById($id);
         return $this->getProductByRowData($data);

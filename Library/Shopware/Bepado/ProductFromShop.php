@@ -59,15 +59,6 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
-     * @param Product $product
-     * @return string
-     */
-    private function getNumberByProduct(Product $product)
-    {
-        return 'BP-' . $product->shopId . '-' . $product->sourceId;
-    }
-
-    /**
      * Get product data
      *
      * Get product data for all the product IDs specified in the given string
@@ -80,7 +71,7 @@ class ProductFromShop implements ProductFromShopBase
     {
         $products = array();
         foreach($ids as $id) {
-            $products[] = $this->helper->geProductById($id);
+            $products[] = $this->helper->getProductById($id);
         }
         return $products;
     }

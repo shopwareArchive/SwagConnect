@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.3';
+        return '1.1.4';
     }
 
     /**
@@ -211,6 +211,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $this->subscribeEvent(
+            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Bepado',
+            'onGetControllerPathFrontend'
+        );
+
+        $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout',
             'onPostDispatchFrontendCheckout'
         );
@@ -345,9 +350,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
-    /**
-     *
-     */
     private function registerMyLibrary()
     {
         $this->Application()->Loader()->registerNamespace(
@@ -443,6 +445,16 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * @param   Enlight_Event_EventArgs $args
+     * @return  string
+     */
+    public function onGetControllerPathFrontend(Enlight_Event_EventArgs $args)
+    {
+        $this->registerMyTemplateDir();
+        return $this->Path() . 'Controllers/Frontend/Bepado.php';
+    }
+
+    /**
      * @param Enlight_Hook_HookArgs $args
      */
     public function onAfterAddArticle(Enlight_Hook_HookArgs $args)
@@ -478,12 +490,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $bepadoShops = array();
         $bepadoCheckResults = array();
 
+        $userData = $view->sUserData;
+        $shippingData = $userData['shippingaddress'];
+        $address = new Bepado\SDK\Struct\Address();
+        $address->zip = $shippingData['zipcode'];
+        $address->city = $shippingData['city'];
+        $address->country = $userData['additional']['countryShipping']['iso3'];
+        if(!empty($userData['additional']['stateShipping']['shortcode'])) {
+            $address->state = $userData['additional']['stateShipping']['shortcode'];
+        }
+        $address->name = $shippingData['firstname'] . ' ' . $shippingData['lastname'];
+        if(!empty($shippingData['company'])) {
+            $address->name = $shippingData['company'] . ' - ' . $address->name;
+        }
+        $address->line1 = $shippingData['street'] . ' ' . $shippingData['streetnumber'];
+
         $basket = $view->sBasket;
         foreach ($basket['content'] as $key => $row) {
             if(!empty($row['mode'])) {
                 continue;
             }
-            $product = $helper->geProductById($row['articleID']);
+            $product = $helper->getProductById($row['articleID']);
             if($product === null || $product->shopId === null) {
                 continue;
             }
@@ -496,6 +523,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         foreach($bepadoContent as $shopId => $items) {
             $order = new Bepado\SDK\Struct\Order();
             $order->products = array();
+            $order->deliveryAddress = $address;
 
             foreach($items as $sourceId => $item) {
                 $product = $bepadoProducts[$shopId][$sourceId];
@@ -506,7 +534,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
                 $order->products[] = $orderItem;
             }
-            $bepadoCheckResults[$shopId] = $sdk->checkProducts($order);
+            try {
+                $message = $sdk->reserveProducts($order);
+            } catch(Exception $e) {
+                $message = new Bepado\SDK\Struct\Message();
+                $message->message = $e->getMessage();
+            }
+            $bepadoCheckResults[$shopId] = $message;
             $bepadoShops[$shopId] = $sdk->getShopConfigurationById($shopId);
         }
 

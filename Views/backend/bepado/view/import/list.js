@@ -68,6 +68,23 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             format: '0,000',
             align: 'right',
             flex: 1
+        }, {
+            xtype: 'actioncolumn',
+            width: 26,
+            items: [{
+                action: 'edit',
+                cls: 'editBtn',
+                iconCls: 'sprite-pencil',
+                handler: function(view, rowIndex, colIndex, item, opts, record) {
+                    Shopware.app.Application.addSubApplication({
+                        name: 'Shopware.apps.Article',
+                        action: 'detail',
+                        params: {
+                            articleId: record.get('id')
+                        }
+                    });
+                }
+            }]
         }];
     },
 

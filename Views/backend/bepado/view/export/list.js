@@ -76,6 +76,23 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
                 metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
                 return value;
             }
+        }, {
+            xtype: 'actioncolumn',
+            width: 26,
+            items: [{
+                action: 'edit',
+                cls: 'editBtn',
+                iconCls: 'sprite-pencil',
+                handler: function(view, rowIndex, colIndex, item, opts, record) {
+                    Shopware.app.Application.addSubApplication({
+                        name: 'Shopware.apps.Article',
+                        action: 'detail',
+                        params: {
+                            articleId: record.get('id')
+                        }
+                    });
+                }
+            }]
         }];
     },
 

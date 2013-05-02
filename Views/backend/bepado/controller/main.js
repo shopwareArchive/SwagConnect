@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'panel', selector: 'bepado-panel' },
         { ref: 'configForm', selector: 'bepado-config' },
         { ref: 'exportList', selector: 'bepado-export-list' },
+        { ref: 'importList', selector: 'bepado-import-list' },
         { ref: 'mapping', selector: 'bepado-mapping treepanel' }
     ],
 
@@ -135,6 +136,79 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                         );
                     }
                 }
+            },
+            'bepado-import-list button[action=activate]': {
+                click: me.onImportFilterAction
+            },
+            'bepado-import-list button[action=deactivate]': {
+                click: me.onImportFilterAction
+            },
+            'bepado-import-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+
+                    if (value.length === 0 ) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'search',
+                            '%' + value + '%'
+                        );
+                    }
+                }
+            },
+            'bepado-import-filter base-element-select': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+
+                    if (!value) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            field.name,
+                            value
+                        );
+                    }
+                }
+            },
+            'bepado-import-filter [name=active]': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+                    if(!value) {
+                        return;
+                    }
+
+                    if(field.inputValue == '') {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            field.name,
+                            field.inputValue
+                        );
+                    }
+                }
+            },
+            'bepado-import-filter treepanel': {
+                select: function(tree, node) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+
+                    if (!node) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'categoryId',
+                            node.get('id')
+                        );
+                    }
+                }
             }
         });
 
@@ -151,6 +225,42 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             url = '{url action=insertOrUpdateProduct}';
         } else if(btn.action == 'delete') {
             url = '{url action=deleteProduct}';
+        } else {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
+        list.setLoading();
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            params: {
+                'ids[]': ids
+            },
+            success: function(response, opts) {
+                var operation = Ext.decode(response.responseText);
+                if (operation.success == true) {
+
+                }
+                list.setLoading(false);
+                list.store.load();
+            }
+        });
+    },
+
+    onImportFilterAction: function(btn) {
+        var me = this,
+            list = me.getImportList(),
+            records = list.selModel.getSelection(),
+            ids = [], url;
+
+        if(btn.action == 'activate') {
+            url = '{url action=updateProduct}?active=1';
+        } else if(btn.action == 'deactivate') {
+            url = '{url action=updateProduct}?active=0';
         } else {
             return;
         }

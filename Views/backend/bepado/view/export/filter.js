@@ -58,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
             bodyPadding: 5,
             items: [{
                 xtype: 'base-element-select',
-                name: 'status',
+                name: 'exportStatus',
                 anchor: '100%',
                 allowBlank: true,
                 store: [

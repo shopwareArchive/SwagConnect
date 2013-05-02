@@ -135,7 +135,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             't.tax as tax',
             'p.price * (100 + t.tax) / 100 as price',
         ));
-
         foreach($filter as $key => $rule) {
             switch($rule['property']) {
                 case 'search':
@@ -148,16 +147,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                     $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId')
                         ->setParameter('categoryId', $rule['value']);
                     break;
-                case 'status':
+                case 'exportStatus':
                     $builder->where('at.bepadoExportStatus LIKE :status')
                         ->setParameter('status', $rule['value']);
+                    break;
+                case 'active':
+                    $builder->where('a.active LIKE :active')
+                        ->setParameter('active', $rule['value']);
                     break;
                 default:
                     continue;
             }
-            unset($filter[$key]);
         }
-        $builder->addFilter($filter);
         $builder->addOrderBy($order);
         return $builder;
     }
@@ -321,6 +322,19 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $attribute->setBepadoExportStatus(
                     'delete'
                 );
+            }
+        }
+        Shopware()->Models()->flush();
+    }
+
+    public function updateProductAction()
+    {
+        $ids = $this->Request()->getPost('ids');
+        $active = (bool)$this->Request()->get('active');
+        foreach($ids as $id) {
+            $model = $this->getHelper()->getArticleModelById($id);
+            if($model !== null) {
+                $model->setActive($active);
             }
         }
         Shopware()->Models()->flush();

@@ -482,6 +482,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             return;
         }
 
+        $this->registerMyTemplateDir();
+        $view->extendsTemplate('frontend/bepado/checkout.tpl');
+
         $sdk = $this->getSDK();
         $helper = $this->getHelper();
 
@@ -489,6 +492,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $bepadoProducts = array();
         $bepadoShops = array();
         $bepadoCheckResults = array();
+        $bepadoOrders = array();
 
         $userData = $view->sUserData;
         $shippingData = $userData['shippingaddress'];
@@ -516,7 +520,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             }
             $bepadoProducts[$product->shopId][$product->sourceId] = $product;
             $bepadoContent[$product->shopId][$product->sourceId] = $row;
-            unset($basket['content'][$key]);
+            //unset($basket['content'][$key]);
         }
         $view->sBasket = $basket;
 
@@ -547,6 +551,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $view->assign(array(
             'bepadoContent' => $bepadoContent,
             'bepadoShops' => $bepadoShops,
+            'bepadoOrders' => $bepadoOrders,
             'bepadoCheckResults' => $bepadoCheckResults
         ));
     }
@@ -565,13 +570,22 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $sdk = $this->getSDK();
 
         $this->registerMyTemplateDir();
-        //$view->extendsTemplate('frontend/plugins/swag_customizing/index.tpl');
+        $view->extendsTemplate('frontend/bepado/detail.tpl');
 
         $articleData = $view->getAssign('sArticle');
         if(empty($articleData['articleID'])) {
             return;
         }
 
-        //var_dump($articleData); die();
+        $product = $helper->getProductById($articleData['articleID']);
+        if(empty($product->shopId)) {
+            return;
+        }
+        $shop = $sdk->getShopConfigurationById($product->shopId);
+
+        $view->assign(array(
+            'bepadoProduct' => $product,
+            'bepadoShop' => $shop
+        ));
     }
 }

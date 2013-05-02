@@ -1,0 +1,20 @@
+.table .table_row .checkout_item_bepado {
+    float: left;
+    width: 18px;
+    border-right: 1px dashed #DFDFDF;
+    display: block;
+    margin: -36px 0 0 -10px;
+    padding-bottom: 9999em;
+    margin-bottom: -9999em;
+}
+.table .table_row .checkout_item_bepado span {
+    background:  url('../images/bp_marktplatz.png') center center no-repeat;
+    width: 20px;
+    height: 75px;
+    position: absolute;
+    top: 50%;
+    margin-top: -36px
+}
+#content #confirm .table .table_row .checkout_item_bepado { height: 158px }
+#content #confirm .table .table_row { overflow: hidden }
+#content #confirm .table .table_row .main-article-features { padding-left: 15px }

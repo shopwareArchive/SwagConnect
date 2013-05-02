@@ -3,24 +3,15 @@
 {/block}
 
 {block name='frontend_checkout_cart_cart_head' prepend}
-    <div class="table_row" style="border: none; min-height:20px">
-        <div class="grid_9 box">
-            <h3 style="font-weight: bold; margin-left: 12px; display: inline-block;">Artikel von {$sShopname}</h3>
-            <hr class="clear">
-        </div>
-    </div>
+{if $bepadoContent || $shopId}
+    {include file='frontend/bepado/shop_header.tpl'}
+{/if}
 {/block}
 
 {block name='frontend_checkout_cart_premiums' prepend}
     {foreach name=basket from=$bepadoContent item=bepadoItems key=shopId}
 
-        <div class="table_row" style="border: none; min-height:20px">
-            <div class="grid_9 box">
-                <span style="margin-left: 12px; background-color: #DD4800; color: #FFF; font-size: 10px; font-weight: bold; padding: 3px; text-transform: uppercase;">Seperater Versand</span>
-                <h3 style="font-weight: bold; margin-left: 12px; display: inline-block;">Artikel von {$bepadoShops[$shopId]->name}</h3>
-                <hr class="clear">
-            </div>
-        </div>
+        {include file='frontend/bepado/shop_header.tpl'}
 
         {include file="frontend/checkout/cart_header.tpl"}
 

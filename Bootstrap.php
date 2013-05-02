@@ -520,9 +520,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             }
             $bepadoProducts[$product->shopId][$product->sourceId] = $product;
             $bepadoContent[$product->shopId][$product->sourceId] = $row;
-            //unset($basket['content'][$key]);
+            unset($basket['content'][$key]);
         }
-        $view->sBasket = $basket;
 
         foreach($bepadoContent as $shopId => $items) {
             $order = new Bepado\SDK\Struct\Order();
@@ -548,12 +547,24 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $bepadoShops[$shopId] = $sdk->getShopConfigurationById($shopId);
         }
 
+
+        if(empty($basket['content'])) {
+            reset($bepadoContent);
+            $shopId = current(array_keys($bepadoContent));
+            $basket['content'] = $bepadoContent[$shopId];
+            $view->shopId = $shopId;
+            unset($bepadoContent[$shopId]);
+        }
+
         $view->assign(array(
             'bepadoContent' => $bepadoContent,
             'bepadoShops' => $bepadoShops,
             'bepadoOrders' => $bepadoOrders,
             'bepadoCheckResults' => $bepadoCheckResults
         ));
+
+
+        $view->sBasket = $basket;
     }
 
     /**

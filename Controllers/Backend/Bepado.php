@@ -243,7 +243,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $data[$key]['text'] = $category['name'];
             $data[$key]['cls'] = 'folder';
             $data[$key]['childrenCount'] = (int)$category['childrenCount'];
-            $data[$key]['leaf'] = empty($data[$key]['childrenCount']);
+            $data[$key]['leaf'] = empty($category['childrenCount']);
         }
 
         $this->View()->assign(array(

@@ -550,7 +550,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 $message->message = $e->getMessage();
             }
             $bepadoCheckResults[$shopId] = $message;
-            $bepadoShops[$shopId] = $sdk->getShopConfigurationById($shopId);
+            $bepadoShops[$shopId] = $sdk->getShop($shopId);
         }
 
         if(empty($basket['content'])) {
@@ -596,7 +596,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         if(empty($product->shopId)) {
             return;
         }
-        $shop = $sdk->getShopConfigurationById($product->shopId);
+        $shop = $sdk->getShop($product->shopId);
 
         $view->assign(array(
             'bepadoProduct' => $product,

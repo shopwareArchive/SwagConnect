@@ -110,8 +110,9 @@ class Stream extends HttpClient
         );
 
         if ($httpFilePointer === false) {
+            $lastError = error_get_last();
             throw new \RuntimeException(
-                "Could not connect to server {$this->server}: " . error_get_last()['message']
+                "Could not connect to server {$this->server}: {$lastError['message']}"
             );
         }
 

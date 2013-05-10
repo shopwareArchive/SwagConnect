@@ -8,6 +8,7 @@
 namespace Bepado\SDK;
 
 use Bepado\Common\Struct\RpcCall;
+use Bepado\SDK\Struct\Shop;
 
 /**
  * Central SDK class, which serves as an etnry point and service fromShop.
@@ -232,12 +233,15 @@ final class SDK
      * @param Struct\Order $order
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(array $products)
     {
         $this->verifySdk();
-        $this->dependencies->getVerificator()->verify($order);
-        $order->orderShop = $this->dependencies->getGateway()->getShopId();
-        return $this->dependencies->getShoppingService()->checkProducts($order);
+
+        $productList = new Struct\ProductList(array('products' => $products));
+
+        $this->dependencies->getVerificator()->verify($productList);
+
+        return $this->dependencies->getShoppingService()->checkProducts($productList);
     }
 
     /**
@@ -322,6 +326,8 @@ final class SDK
     }
 
     /**
+     * Verify a given API key is valid.
+     *
      * @param $key
      */
     public function verifyKey($key)
@@ -333,12 +339,18 @@ final class SDK
     }
 
     /**
-     * @param $shopId
-     * @return Struct\ShopConfiguration
+     * Get information about a shop given its remote shop-id.
+     *
+     * This method allows access to the shop name - which can be
+     * used for UI purposes.
+     *
+     * @param string $shopId
+     * @return \Bepado\SDK\Struct\Shop
      */
-    public function getShopConfigurationById($shopId)
+    public function getShop($shopId)
     {
-        $this->verifySdk();
-        return $this->dependencies->getGateway()->getShopConfiguration($shopId);
+        $shopConfiguration = $this->dependencies->getGateway()->getShopConfiguration($shopId);
+
+        return new Shop(array('id' => $shopId, 'name' => $shopConfiguration->name));
     }
 }

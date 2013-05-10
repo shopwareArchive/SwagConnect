@@ -24,6 +24,7 @@ abstract class Verificator
      * @param VerificatorDispatcher $dispatcher
      * @param Struct $struct
      * @return void
+     * @throws RuntimeException if the struct is not valid
      */
     abstract public function verify(VerificatorDispatcher $dispatcher, Struct $struct);
 }

@@ -46,6 +46,13 @@ class Product extends Struct
     public $categories;
 
     /**
+     * List of product image URLs
+     *
+     * @var string[]
+     */
+    public $images = array();
+
+    /**
      * Lowest product price
      *
      * @var float

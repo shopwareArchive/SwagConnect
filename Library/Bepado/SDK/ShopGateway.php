@@ -19,16 +19,16 @@ abstract class ShopGateway
     /**
      * Check order in shop
      *
-     * Verifies, if all products in the given order still have the same price
-     * and availability.
+     * Verifies, if all products in the given list still have the same price
+     * and availability as in the remote shop..
      *
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested products.
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $productList
      * @return mixed
      */
-    abstract public function checkProducts(Struct\Order $order);
+    abstract public function checkProducts(Struct\ProductList $productList);
 
     /**
      * Reserve order in shop

@@ -59,31 +59,34 @@ class Transaction
     }
 
     /**
-     * Check order in shop
+     * Check products that will be part of an order in shop
      *
-     * Verifies, if all orders in the given order still have the same price
-     * and availability.
+     * Verifies, if all products in the list still have the same price
+     * and availability as on the remote shop.
      *
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested orders.
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $products
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $products)
     {
+        if (count($products->products) === 0) {
+            throw new \InvalidArgumentException("ProductList is not allowed to be empty in remote Transaction#checkProducts()");
+        }
+
         $currentProducts = $this->fromShop->getProducts(
             array_map(
-                function ($orderItem) {
-                    return $orderItem->product->sourceId;
+                function ($product) {
+                    return $product->sourceId;
                 },
-                $order->products
+                $products->products
             )
         );
 
         $changes = array();
-        foreach ($order->products as $orderItem) {
-            $product = $orderItem->product;
+        foreach ($products->products as $product) {
             foreach ($currentProducts as $current) {
                 if ($current->sourceId === $product->sourceId) {
                     if (($current->price !== $product->price) ||
@@ -128,7 +131,14 @@ class Transaction
      */
     public function reserveProducts(Struct\Order $order)
     {
-        $verify = $this->checkProducts($order);
+        $verify = $this->checkProducts(new Struct\ProductList(array(
+            'products' => array_map(function ($orderItem) {
+                    return $orderItem->product;
+                },
+                $order->products
+            )
+        )));
+
         if ($verify !== true) {
             return $verify;
         }

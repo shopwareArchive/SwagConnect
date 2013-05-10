@@ -289,6 +289,8 @@ class DependencyResolver
                         new Struct\Verificator\Message(),
                     'Bepado\\SDK\\Struct\\Address' =>
                         new Struct\Verificator\Address(),
+                    'Bepado\\SDK\\Struct\\ProductList' =>
+                        new Struct\Verificator\ProductList()
                 )
             );
         }

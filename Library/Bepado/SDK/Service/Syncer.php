@@ -97,6 +97,9 @@ class Syncer
 
         if ($inserts = array_diff($shopProducts, $knownProducts)) {
             foreach ($this->fromShop->getProducts($inserts) as $product) {
+                // @TODO: Ensure correct shopId is set on product? Otherwise it
+                // depends on the ProductFromShop gateway implementation. Also
+                // check Product for validity? Go through SDK class?
                 $this->changes->recordInsert(
                     $product->sourceId,
                     $this->hasher->hash($product),
@@ -108,6 +111,9 @@ class Syncer
 
         if ($toCheck = array_intersect($shopProducts, $knownProducts)) {
             foreach ($this->fromShop->getProducts($toCheck) as $product) {
+                // @TODO: Ensure correct shopId is set on product? Otherwise it
+                // depends on the ProductFromShop gateway implementation. Also
+                // check Product for validity? Go through SDK class?
                 if ($this->products->hasChanged(
                     $product->sourceId,
                     $this->hasher->hash($product)

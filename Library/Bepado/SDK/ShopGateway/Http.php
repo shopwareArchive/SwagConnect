@@ -60,23 +60,23 @@ class Http extends ShopGateway
     /**
      * Check order in shop
      *
-     * Verifies, if all products in the given order still have the same price
-     * and availability.
+     * Verifies, if all products in the given list still have the same price
+     * and availability as in the remote shop..
      *
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested products.
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $productList
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $productList)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'checkProducts',
-                    'arguments' => array($order),
+                    'arguments' => array($productList),
                 )
             )
         );

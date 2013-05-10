@@ -61,16 +61,17 @@ class Shopping
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $productList
      * @return void
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $productList)
     {
         $responses = array();
-        $orders = $this->splitShopOrders($order);
-        foreach ($orders as $shopId => $order) {
+        $productLists = $this->zipProductListByShopId($productList);
+
+        foreach ($productLists as $shopId => $products) {
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
-            $responses[$shopId] = $shopGateway->checkProducts($order);
+            $responses[$shopId] = $shopGateway->checkProducts($products);
         }
 
         $result = array();
@@ -84,6 +85,19 @@ class Shopping
         }
 
         return $result ?: true;
+    }
+
+    private function zipProductListByShopId(Struct\ProductList $productList)
+    {
+        $productLists = array();
+
+        foreach ($productList->products as $product) {
+            $productLists[$product->shopId][] = $product;
+        }
+
+        return array_map(function ($productsArray) {
+            return new Struct\ProductList(array('products' => $productsArray));
+        }, $productLists);
     }
 
     /**

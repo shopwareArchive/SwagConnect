@@ -67,14 +67,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 click: function(button) {
                     var me = this,
                         panel = me.getMapping();
-                    panel.setLoading();
+                    //panel.setLoading();
                     panel.store.sync({
                         success :function (records, operation) {
-                            panel.setLoading(false);
+                            //panel.setLoading(false);
                             //me.createGrowlMessage(title, message, win.title);
                         },
                         failure:function (batch) {
-                            panel.setLoading(false);
+                            //panel.setLoading(false);
                             //if(batch.proxy.reader.rawData.message) {
                             //    message += '<br />' + batch.proxy.reader.rawData.message;
                             //}

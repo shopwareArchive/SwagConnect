@@ -254,6 +254,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function setMappingListAction()
     {
         $rows = $this->Request()->getPost('rows');
+        if($rows === null) {
+            $rows = json_decode($this->Request()->getRawBody(), true);
+        }
         $rows = !isset($rows[0]) ? array($rows) : $rows;
         $helper = $this->getHelper();
         foreach($rows as $row) {

@@ -112,11 +112,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'bepado', 'reservation_id',
             'text'
         );
-        //$this->Application()->Models()->addAttribute(
-        //    's_order_basket_attributes',
-        //    'bepado', 'order_item',
-        //    'text'
-        //);
 
         $this->Application()->Models()->addAttribute(
             's_articles_attributes',

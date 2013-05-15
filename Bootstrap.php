@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.4';
+        return '1.1.6';
     }
 
     /**
@@ -218,6 +218,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail',
             'onPostDispatchFrontendDetail'
+        );
+
+        $this->subscribeEvent(
+            'sOrder::sSaveOrder::after',
+            'onSaveOrder'
         );
 
         //$this->subscribeEvent(
@@ -487,6 +492,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         /** @var $action Enlight_Controller_Action */
         $action = $args->getSubject();
         $view = $action->View();
+        $actionName = $action->Request()->getActionName();
 
         //$this->registerCustomizing();
         //$view->extendsTemplate('frontend/plugins/swag_customizing/checkout.tpl');
@@ -519,7 +525,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             }
             $bepadoProducts[$product->shopId][$product->sourceId] = $product;
             $bepadoContent[$product->shopId][$product->sourceId] = $row;
-            unset($basket['content'][$key]);
+
+            if($actionName == 'cart') {
+                unset($basket['content'][$key]);
+            }
         }
 
         foreach($bepadoContent as $shopId => $items) {
@@ -597,5 +606,45 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'bepadoProduct' => $product,
             'bepadoShop' => $shop
         ));
+    }
+
+    /**
+     * @param Enlight_Hook_HookArgs $args
+     */
+    public function onSaveOrder(Enlight_Hook_HookArgs $args)
+    {
+        /** @var $subject sOrder */
+        $subject = $args->getSubject();
+        $orderNumber = $args->getReturn();
+        $helper = $this->getHelper();
+        $sdk = $this->getSDK();
+
+        if (empty($orderNumber)) {
+            return;
+        }
+
+        $order = new Bepado\SDK\Struct\Order();
+        $order->products = array();
+        $order->deliveryAddress = $this->getDeliveryAddress($subject->sUserData);
+        $order->localOrderId = $orderNumber;
+
+        $basket = $subject->sBasketData;
+        foreach ($basket['content'] as $row) {
+            if(!empty($row['mode'])) {
+                continue;
+            }
+            $product = $helper->getProductById($row['articleID']);
+            if($product === null || $product->shopId === null) {
+                continue;
+            }
+            $orderItem = new Bepado\SDK\Struct\OrderItem();
+            $orderItem->product = $product;
+            $orderItem->count = (int)$row['quantity'];
+
+            $order->products[] = $orderItem;
+        }
+
+        $reservation = $sdk->reserveProducts($order);
+        $sdk->checkout($reservation);
     }
 }

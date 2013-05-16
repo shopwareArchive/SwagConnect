@@ -98,8 +98,8 @@ class Helper
             'a.descriptionLong as longDescription',
             's.name as vendor',
             't.tax / 100 as vat',
-            'p.basePrice as price',
-            'p.price * (100 + t.tax) / 100 as purchasePrice',
+            'p.price * (100 + t.tax) / 100 as price',
+            //'p.price * (100 + t.tax) / 100 as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
             'd.releaseDate as deliveryDate',
@@ -234,9 +234,9 @@ class Helper
         if(isset($row['deliveryDate'])) {
             $row['deliveryDate'] = $row['deliveryDate']->getTimestamp();
         }
-        if(empty($row['purchasePrice'])) {
-            $row['purchasePrice'] = $row['price'];
-        }
+        //if(empty($row['purchasePrice'])) {
+        //    $row['purchasePrice'] = $row['price'];
+        //}
         // Fix categories
         if(is_string($row['categories'])) {
             $row['categories'] = unserialize($row['categories']);

@@ -41,6 +41,13 @@ class Transaction
     protected $logger;
 
     /**
+     * ShopConfiguration
+     *
+     * @var ShopConfiguration
+     */
+    protected $shopConfiguration;
+
+    /**
      * COnstruct from gateway
      *
      * @param ProductFromShop $fromShop
@@ -51,11 +58,13 @@ class Transaction
     public function __construct(
         ProductFromShop $fromShop,
         Gateway\ReservationGateway $reservations,
-        Logger $logger
+        Logger $logger,
+        Gateway\ShopConfiguration $shopConfiguration
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
         $this->logger = $logger;
+        $this->shopConfiguration = $shopConfiguration;
     }
 
     /**
@@ -85,9 +94,13 @@ class Transaction
             )
         );
 
+        $myShopId = $this->shopConfiguration->getShopId();
+
         $changes = array();
         foreach ($products->products as $product) {
             foreach ($currentProducts as $current) {
+                $current->shopId = $myShopId;
+
                 if ($current->sourceId === $product->sourceId) {
                     if (($current->price !== $product->price) ||
                         ($current->availability < $product->availability)) {

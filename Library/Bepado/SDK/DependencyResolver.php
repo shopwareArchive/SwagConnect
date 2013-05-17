@@ -237,7 +237,8 @@ class DependencyResolver
                 new Service\Transaction(
                     $this->fromShop,
                     $this->gateway,
-                    $this->getLogger()
+                    $this->getLogger(),
+                    $this->gateway
                 )
             );
         }

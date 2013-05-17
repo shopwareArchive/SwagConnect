@@ -117,7 +117,10 @@ class Product extends ShopItem
     /**
      * Current price of the product.
      *
-     * Provided as a float.
+     * Provided as a float. This is the selling price of the product
+     * that end customers will pay. The price is checked again
+     * during transactions and is required to be the same in both
+     * shops during a transaction.
      *
      * @var float
      */
@@ -125,6 +128,14 @@ class Product extends ShopItem
 
     /**
      * The purchase price of this product.
+     *
+     * This is the price the seller (from-shop) of a product offers
+     * a reseller (to-shop) for transactions in Bepado.
+     * The price - purchasePrice gap is the profit of the reseller.
+     *
+     * Defining this price is optional and the regular Bepado price groups
+     * will take effect if its not given. If this price is given however
+     * price groups will NOT be considered to calculate the profit margin.
      *
      * @var float
      */

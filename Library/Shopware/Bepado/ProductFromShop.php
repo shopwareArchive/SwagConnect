@@ -83,7 +83,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getExportedProductIDs()
     {
-        $repository = Shopware()->Models()->getRepository(
+        $repository = $this->manager->getRepository(
             'Shopware\Models\Article\Article'
         );
         $builder = $repository->createQueryBuilder('a');
@@ -129,17 +129,18 @@ class ProductFromShop implements ProductFromShopBase
     {
         $model = new OrderModel\Order();
         $model->fromArray(array(
-            'number' => 'BP-' . $order->reservationId,
+            'number' => 'BP-' . $order->orderShop . '-' . $order->localOrderId,
             'invoiceShipping' => $order->shippingCosts,
             'invoiceShippingNet' => $order->shippingCosts
         ));
-        $this->manager->persist($model);
-        //$this->manager->flush($model);
         $items = array();
         foreach($order->products as $product) {
-            $productModel = $this->helper->getArticleModelByProduct($product->product);
-            /** @var $productDetail \Shopware\Models\Article\Detail */
-            $productDetail = $productModel->getDetails()->first();
+            /** @var $productModel \Shopware\Models\Article\Article */
+            $productModel = $this->manager->find(
+                '\Shopware\Models\Article\Article',
+                $product->product->sourceId
+            );
+            $productDetail = $productModel->getMainDetail();
             $item = new OrderModel\Detail();
             $item->fromArray(array(
                 'articleId' => $product->product->sourceId,
@@ -155,7 +156,26 @@ class ProductFromShop implements ProductFromShopBase
             $productDetail->setInStock($productDetail->getInStock() - $product->count);
         }
         $model->setDetails($items);
+
+        $customer = new \Shopware\Models\Customer\Customer();
+        $customer->fromArray(array(
+            'active' => true,
+            'accountMode' => 1
+        ));
+        $model->setCustomer($customer);
+
+        $shipping = new OrderModel\Shipping();
+        $shipping->fromArray(array(
+            'lastName' => $order->deliveryAddress->name,
+            'city' => $order->deliveryAddress->city,
+            'zip' => $order->deliveryAddress->zip,
+            'street' => $order->deliveryAddress->line1
+        ));
+        $model->setShipping($shipping);
+
+        $this->manager->persist($model);
         $this->manager->flush();
+
         return $model->getId();
     }
 }

@@ -182,7 +182,7 @@ class Transaction
             $order->reservationId = $reservationId;
             $this->reservations->setBought($reservationId, $order);
         } catch (\Exception $e) {
-            return false;
+            return new \Bepado\SDK\Struct\Message(array('message' => $e->getMessage()));
         }
         return true;
     }
@@ -203,7 +203,7 @@ class Transaction
             $this->reservations->setConfirmed($reservationId);
             $this->logger->log($order);
         } catch (\Exception $e) {
-            return false;
+            return new \Bepado\SDK\Struct\Message(array('message' => $e->getMessage()));
         }
         return true;
     }

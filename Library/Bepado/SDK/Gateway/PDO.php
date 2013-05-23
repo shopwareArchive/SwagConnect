@@ -472,6 +472,7 @@ class PDO extends Gateway
     public function createReservation(Struct\Order $order)
     {
         $reservationId = md5(microtime());
+        $order->reservationId = $reservationId;
         $query = $this->connection->prepare(
             'INSERT INTO
                 `bepado_reservations` (
@@ -511,7 +512,7 @@ class PDO extends Gateway
         $query->execute(array($reservationId));
 
         $result = $query->fetchColumn();
-        if ($result !== false) {
+        if ($result === false) {
             throw new \OutOfBoundsException("Reservation $reservationId not found.");
         }
 

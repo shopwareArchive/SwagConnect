@@ -127,11 +127,24 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function buy(Order $order)
     {
-        $model = new OrderModel\Order();
+        $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
+        $status = $this->manager->find('Shopware\Models\Order\Status', 0);
+        $number = 'BP-' . $order->orderShop . '-' . $order->localOrderId;
+
+        //$model = new OrderModel\Order();
+        $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 12);';
+        Shopware()->Db()->query($sql, array($number));
+        $modelId = Shopware()->Db()->lastInsertId();
+        $model = $this->manager->find('Shopware\Models\Order\Order', $modelId);
+
         $model->fromArray(array(
-            'number' => 'BP-' . $order->orderShop . '-' . $order->localOrderId,
+            'number' => $number,
             'invoiceShipping' => $order->shippingCosts,
-            'invoiceShippingNet' => $order->shippingCosts
+            'invoiceShippingNet' => $order->shippingCosts,
+            'currencyFactor' => 1,
+            'orderStatus' => $status,
+            'currency' => 'EUR',
+            'orderTime' => 'now'
         ));
         $items = array();
         foreach($order->products as $product) {
@@ -149,31 +162,59 @@ class ProductFromShop implements ProductFromShopBase
                 'number' => $model->getNumber(),
                 'articleNumber' => $productDetail->getNumber(),
                 'articleName' => $product->product->title,
-                'price' => $product->product->purchasePrice,
-                'taxRate' => $product->product->vat * 100
+                'price' => $product->product->price,
+                'taxRate' => $product->product->vat * 100,
+                'status' => $detailStatus
             ));
             $items[] = $item;
             $productDetail->setInStock($productDetail->getInStock() - $product->count);
         }
         $model->setDetails($items);
 
-        $customer = new \Shopware\Models\Customer\Customer();
-        $customer->fromArray(array(
-            'active' => true,
-            'accountMode' => 1
+        $hash = md5(serialize($order->deliveryAddress));
+        $email = substr($hash, 0, 8) . '@bepado.de';
+
+        $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
+        $customer = $repository->findOneBy(array(
+            'email' => $email,
+            'hashPassword' => $hash
         ));
+        if($customer === null) {
+            $customer = new \Shopware\Models\Customer\Customer();
+            $customer->fromArray(array(
+                'active' => true,
+                'email' => $email,
+                'hashPassword' => $hash,
+                'accountMode' => 1
+            ));
+            $this->manager->persist($customer);
+        }
+
         $model->setCustomer($customer);
+
+        $billing = new OrderModel\Billing();
+        $billing->fromArray(array(
+            'salutation' => 'mr',
+            'lastName' => $order->deliveryAddress->name,
+            'city' => $order->deliveryAddress->city,
+            'zipCode' => $order->deliveryAddress->zip,
+            'street' => $order->deliveryAddress->line1
+        ));
+        $model->setBilling($billing);
 
         $shipping = new OrderModel\Shipping();
         $shipping->fromArray(array(
+            'salutation' => 'mr',
             'lastName' => $order->deliveryAddress->name,
             'city' => $order->deliveryAddress->city,
-            'zip' => $order->deliveryAddress->zip,
+            'zipCode' => $order->deliveryAddress->zip,
             'street' => $order->deliveryAddress->line1
         ));
         $model->setShipping($shipping);
 
-        $this->manager->persist($model);
+        $model->calculateInvoiceAmount();
+
+        //$this->manager->persist($model);
         $this->manager->flush();
 
         return $model->getId();

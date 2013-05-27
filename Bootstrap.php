@@ -186,6 +186,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'description' => '',
             'store' => 'base.CustomerGroup'
         ));
+        $form->setElement('boolean', 'importCreateCategories', array(
+            'label' => 'Kategorien beim Import automatisch erzeugen',
+            'description' => ''
+        ));
     }
 
     private function createMyEvents()
@@ -224,11 +228,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'sOrder::sSaveOrder::after',
             'onSaveOrder'
         );
-
-        //$this->subscribeEvent(
-        //    'sBasket::sAddArticle::after',
-        //    'onAfterAddArticle'
-        //);
     }
 
     private function createMyTables()
@@ -452,14 +451,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyTemplateDir();
         return $this->Path() . 'Controllers/Frontend/Bepado.php';
-    }
-
-    /**
-     * @param Enlight_Hook_HookArgs $args
-     */
-    public function onAfterAddArticle(Enlight_Hook_HookArgs $args)
-    {
-        $id = $args->getId();
     }
 
     private function getDeliveryAddress($userData)

@@ -25,6 +25,7 @@
 namespace Shopware\Bepado;
 use Bepado\SDK\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
+    Shopware\Models\Category\Category as CategoryModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 
@@ -340,5 +341,30 @@ class Helper
             }
         }
         return $data;
+    }
+
+    /**
+     * @param Product $product
+     * @return \Shopware\Models\Category\Category[]
+     */
+    public function getCategoriesByProduct(Product $product)
+    {
+        $repository = $this->getCategoryRepository();
+        $builder = $repository->createQueryBuilder('c');
+        $builder->join('c.attribute', 'ca');
+        $builder->select('c');
+        $builder->andWhere('ca.bepadoMapping = :mapping');
+        $builder->andWhere('c.right-c.left = 1');
+        $query = $builder->getQuery();
+        $query->setHydrationMode($query::HYDRATE_OBJECT);
+
+        /** @var $categories CategoryModel[] */
+        $categories = array();
+        foreach($product->categories as $category) {
+            $categories = array_merge(
+                $query->execute(array('mapping' => $category))
+            );
+        }
+        return $categories;
     }
 }

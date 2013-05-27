@@ -9,6 +9,7 @@
 	{block name='frontend_search_index_result'}
 		<div class="listing" id="listing">
 			{foreach from=$searchResult->results item=result key=key name=list}
+                <img src="{$result->images[0]}" width="100" height="100">
                 <a href="{$result->url}" title="{$result->title|escape}">
                     {$result->title|escape}
                 </a><br>

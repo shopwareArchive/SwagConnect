@@ -79,6 +79,9 @@ class ProductToShop implements ProductToShopBase
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
             $this->manager->persist($model);
             $detail->setArticle($model);
+            $model->setCategories(
+                $this->helper->getCategoriesByProduct($product)
+            );
         } else {
             $detail = $model->getMainDetail();
         }

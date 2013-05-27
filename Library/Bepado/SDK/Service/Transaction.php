@@ -82,7 +82,9 @@ class Transaction
     public function checkProducts(Struct\ProductList $products)
     {
         if (count($products->products) === 0) {
-            throw new \InvalidArgumentException("ProductList is not allowed to be empty in remote Transaction#checkProducts()");
+            throw new \InvalidArgumentException(
+                "ProductList is not allowed to be empty in remote Transaction#checkProducts()"
+            );
         }
 
         $currentProducts = $this->fromShop->getProducts(
@@ -144,13 +146,18 @@ class Transaction
      */
     public function reserveProducts(Struct\Order $order)
     {
-        $verify = $this->checkProducts(new Struct\ProductList(array(
-            'products' => array_map(function ($orderItem) {
-                    return $orderItem->product;
-                },
-                $order->products
+        $products = array();
+        foreach ($order->products as $orderItem) {
+            $products[] = $orderItem->product;
+        }
+
+        $verify = $this->checkProducts(
+            new Struct\ProductList(
+                array(
+                    'products' => $products
+                )
             )
-        )));
+        );
 
         if ($verify !== true) {
             return $verify;
@@ -182,7 +189,7 @@ class Transaction
             $order->reservationId = $reservationId;
             $this->reservations->setBought($reservationId, $order);
         } catch (\Exception $e) {
-            return new \Bepado\SDK\Struct\Message(array('message' => $e->getMessage()));
+            return false;
         }
         return true;
     }
@@ -203,7 +210,7 @@ class Transaction
             $this->reservations->setConfirmed($reservationId);
             $this->logger->log($order);
         } catch (\Exception $e) {
-            return new \Bepado\SDK\Struct\Message(array('message' => $e->getMessage()));
+            return false;
         }
         return true;
     }

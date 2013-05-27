@@ -212,22 +212,25 @@ class DependencyResolver
             );
 
             $this->registry->registerService(
+                'configuration',
+                array('update'),
+                $configurationService = new Service\Configuration(
+                    $this->gateway,
+                    $this->getHttpClient($this->socialNetworkHost),
+                    $this->apiKey,
+                    $this->getVerificator()
+                )
+            );
+
+            $this->registry->registerService(
                 'products',
                 array('fromShop', 'toShop', 'getLastRevision'),
                 new Service\ProductService(
                     $this->gateway,
                     $this->gateway,
                     $this->gateway,
-                    $this->toShop
-                )
-            );
-
-            $this->registry->registerService(
-                'configuration',
-                array('update'),
-                new Service\Configuration(
-                    $this->gateway,
-                    $this->getVerificator()
+                    $this->toShop,
+                    $configurationService
                 )
             );
 
@@ -340,7 +343,8 @@ class DependencyResolver
                     $this->gateway
                 ),
                 $this->getChangeVisitor(),
-                $this->getLogger()
+                $this->getLogger(),
+                new ShippingCostCalculator($this->gateway)
             );
         }
 

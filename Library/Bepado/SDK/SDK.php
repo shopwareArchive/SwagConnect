@@ -216,6 +216,25 @@ final class SDK
     }
 
     /**
+     * Calculate shipping costs
+     *
+     * Calculate shipping costs for the given set of products.
+     *
+     * @param Struct\Product[] $products
+     * @return float
+     */
+    public function calculateShippingCosts(array $products)
+    {
+        $this->verifySdk();
+
+        $productList = new Struct\ProductList(array('products' => $products));
+
+        $this->dependencies->getVerificator()->verify($productList);
+
+        return $this->dependencies->getShoppingService()->calculateShippingCosts($productList);
+    }
+
+    /**
      * Check products still are in the state they are stored locally
      *
      * This method will verify with the remote shops that products are still in
@@ -230,7 +249,7 @@ final class SDK
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\Order $order
+     * @param Struct\Product[] $products
      * @return mixed
      */
     public function checkProducts(array $products)

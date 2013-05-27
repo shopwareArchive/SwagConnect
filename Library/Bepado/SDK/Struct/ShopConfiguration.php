@@ -28,6 +28,11 @@ class ShopConfiguration extends Struct
     public $serviceEndpoint;
 
     /**
+     * @var float
+     */
+    public $shippingCost;
+
+    /**
      * Restores a shop configuration from a previously stored state array.
      *
      * @param array $state

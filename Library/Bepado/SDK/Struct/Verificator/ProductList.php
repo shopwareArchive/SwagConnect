@@ -16,8 +16,10 @@ class ProductList extends Verificator
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         foreach ($struct->products as $product) {
-            if ( ! ($product instanceof Struct\Product)) {
-                throw new \RuntimeException("Elements passed to a product list must be instanceof Bepado\SDK\Struct\Product");
+            if (!($product instanceof Struct\Product)) {
+                throw new \RuntimeException(
+                    "Elements passed to a product list must be instanceof Bepado\SDK\Struct\Product"
+                );
             }
 
             $dispatcher->verify($product);

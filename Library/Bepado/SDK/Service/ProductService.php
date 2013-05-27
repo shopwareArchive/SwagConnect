@@ -53,16 +53,25 @@ class ProductService
     /**
      * Construct from gateway
      *
-     * @param \Bepado\SDK\Gateway\ChangeGateway $changes
-     * @param \Bepado\SDK\Gateway\RevisionGateway $revision
-     * @param \Bepado\SDK\ProductToShop $toShop
+     * @param ChangeGateway $changes
+     * @param RevisionGateway $revision
+     * @param ShopConfiguration $configurationGateway
+     * @param ProductToShop $toShop
+     * @param Configuration $configurationService
+     * @return void
      */
-    public function __construct(ChangeGateway $changes, RevisionGateway $revision, ShopConfiguration $configurationGateway, ProductToShop $toShop)
-    {
+    public function __construct(
+        ChangeGateway $changes,
+        RevisionGateway $revision,
+        ShopConfiguration $configurationGateway,
+        ProductToShop $toShop,
+        Configuration $configurationService
+    ) {
         $this->changes = $changes;
         $this->revision = $revision;
         $this->configurationGateway = $configurationGateway;
         $this->toShop = $toShop;
+        $this->configurationService = $configurationService;
     }
 
     /**
@@ -96,19 +105,12 @@ class ProductService
                 default:
                     throw new \RuntimeException("Invalid change operation: $change");
             }
-
-            if ($change->shopEndpoint !== null) {
-                $this->configurationGateway->setShopConfiguration(
-                    $change->shopId,
-                    new Struct\ShopConfiguration(
-                        array(
-                            'name' => $change->shopId,
-                            'serviceEndpoint' => $change->shopEndpoint,
-                        )
-                    )
-                );
-            }
         }
+
+        // @REFACTOR: This is a boundary violation, but currently we just want
+        // to trigger the configuration update on every product update, we
+        // receive.
+        $this->configurationService->update();
 
         $this->revision->storeLastRevision($change->revision);
         return $change->revision;

@@ -8,6 +8,7 @@
 namespace Bepado\SDK\Service;
 
 use Bepado\SDK\Gateway;
+use Bepado\SDK\HttpClient;
 use Bepado\SDK\Struct;
 
 /**
@@ -25,11 +26,25 @@ class Configuration
     protected $configuration;
 
     /**
+     * HTTP Client
+     *
+     * @var HttpClient
+     */
+    protected $httpClient;
+
+    /**
      * Struct verificator
      *
      * @var Struct\VerificatorDispatcher
      */
     protected $verificator;
+
+    /**
+     * API Key
+     *
+     * @var string
+     */
+    protected $apiKey;
 
     /**
      * Construct from gateway
@@ -40,26 +55,56 @@ class Configuration
      */
     public function __construct(
         Gateway\ShopConfiguration $configuration,
+        HttpClient $httpClient,
+        $apiKey,
         Struct\VerificatorDispatcher $verificator
     ) {
         $this->configuration = $configuration;
+        $this->httpClient = $httpClient;
+        $this->apiKey = $apiKey;
         $this->verificator = $verificator;
     }
 
     /**
      * Store shop configuration updates
      *
-     * @param Struct\ShopConfiguration $shopConfigurations
      * @return void
-     *
-     * @todo This method does not seem to be used. The class can therefore be
-     *       deprecated.
      */
-    public function update(array $shopConfigurations)
+    public function update()
     {
-        foreach ($shopConfigurations as $shopId => $shopConfiguration) {
-            $this->verificator->verify($shopConfiguration);
-            $this->configuration->setShopConfiguration($shopId, $shopConfiguration);
+        $response = $this->httpClient->request(
+            'POST',
+            '/sdk/configuration',
+            json_encode(
+                array(
+                    'apiKey' => $this->apiKey
+                )
+            ),
+            array(
+                'Content-Type: application/json',
+            )
+        );
+
+        if ($response->status >= 400) {
+            $message = null;
+            if (($error = json_decode($response->body)) &&
+                isset($error->message)) {
+                $message = $error->message;
+            }
+            throw new \RuntimeException("Loading configuration failed: " . $message);
+        }
+
+        $configurations = json_decode($response->body, true);
+        foreach ($configurations as $configuration) {
+            $this->configuration->setShopConfiguration(
+                $configuration['shopId'],
+                new Struct\ShopConfiguration(
+                    array(
+                        'serviceEndpoint' => $configuration['serviceEndpoint'],
+                        'shippingCost' => $configuration['shippingCost'],
+                    )
+                )
+            );
         }
     }
 }

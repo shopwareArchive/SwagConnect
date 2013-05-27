@@ -394,9 +394,9 @@ class MySQLi extends Gateway
         $rows = $result->fetch_all(\MYSQLI_ASSOC);
 
         if (!count($rows)) {
-            throw new \RuntimeException(sprintf(
-                'You are not connected to shop %s.',
-                $shopId));
+            throw new \RuntimeException(
+                'You are not connected to shop ' . $shopId . '.'
+            );
         }
 
         return unserialize($rows[0]['s_config']);
@@ -472,6 +472,21 @@ class MySQLi extends Gateway
                 `s_config` = "' . $this->connection->real_escape_string($shopId) . '"
             ;'
         );
+
+        $this->connection->query(
+            'INSERT INTO
+                bepado_shop_config (
+                    `s_shop`,
+                    `s_config`
+                )
+            VALUES (
+                "_last_update_",
+                ' . $this->connection->real_escape_string(time()) . '
+            )
+            ON DUPLICATE KEY UPDATE
+                `s_config` = "' . $this->connection->real_escape_string(time()) . '"
+            ;'
+        );
     }
 
     /**
@@ -507,11 +522,11 @@ class MySQLi extends Gateway
     {
         $result = $this->connection->query(
             'SELECT
-                UNIX_TIMESTAMP(`changed`) as changed
+                `s_config`
             FROM
                 `bepado_shop_config`
             WHERE
-                `s_shop` = "_self_"'
+                `s_shop` = "_last_update_"'
         );
 
         $rows = $result->fetch_all(\MYSQLI_ASSOC);
@@ -519,7 +534,7 @@ class MySQLi extends Gateway
             return false;
         }
 
-        return $rows[0]['changed'];
+        return $rows[0]['s_config'];
     }
 
     /**

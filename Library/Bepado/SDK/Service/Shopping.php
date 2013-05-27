@@ -12,6 +12,7 @@ use Bepado\SDK\Struct;
 use Bepado\SDK\ShopFactory;
 use Bepado\SDK\ChangeVisitor;
 use Bepado\SDK\Logger;
+use Bepado\SDK\ShippingCostCalculator;
 
 /**
  * Shopping service
@@ -36,14 +37,48 @@ class Shopping
      */
     protected $changeVisitor;
 
+    /**
+     * Logger
+     *
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
+     * Shipping cost calculator
+     *
+     * @var ShippingCostCalculator
+     */
+    protected $calculator;
+
     public function __construct(
         ShopFactory $shopFactory,
         ChangeVisitor $changeVisitor,
-        Logger $logger
+        Logger $logger,
+        ShippingCostCalculator $calculator
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
         $this->logger = $logger;
+        $this->calculator = $calculator;
+    }
+
+    /**
+     * Calculate shipping costs
+     *
+     * Calculate shipping costs for the given set of products.
+     *
+     * @param Struct\ProductList $productList
+     * @return float
+     */
+    public function calculateShippingCosts(Struct\ProductList $productList)
+    {
+        return array_sum(
+            array_map(
+                array($this->calculator, 'calculateProductListShippingCosts'),
+                $this->zipProductListByShopId($productList)
+            )
+        );
     }
 
     /**
@@ -92,12 +127,14 @@ class Shopping
         $productLists = array();
 
         foreach ($productList->products as $product) {
-            $productLists[$product->shopId][] = $product;
+            if (!isset($productLists[$product->shopId])) {
+                $productLists[$product->shopId] = new Struct\ProductList();
+            }
+
+            $productLists[$product->shopId]->products[] = $product;
         }
 
-        return array_map(function ($productsArray) {
-            return new Struct\ProductList(array('products' => $productsArray));
-        }, $productLists);
+        return $productLists;
     }
 
     /**
@@ -198,6 +235,7 @@ class Shopping
             $shopOrder = clone $order;
             $shopOrder->providerShop = $shopId;
             $shopOrder->products = $this->getShopProducts($order, $shopId);
+            $shopOrder->shippingCosts = $this->calculator->calculateOrderShippingCosts($shopOrder);
             $orders[$shopId] = $shopOrder;
         }
 

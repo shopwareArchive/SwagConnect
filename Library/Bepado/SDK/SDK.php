@@ -102,6 +102,25 @@ final class SDK
     }
 
     /**
+     * Verify that the client invoking the SDK is allowed to do so.
+     *
+     * @param string $client
+     * @param string $bepadoToken
+     *
+     * @throws RuntimeException
+     */
+    private function verifyClient($client, $bepadoToken)
+    {
+        if (hash_hmac('sha256', $client, $this->apiKey) !== $bepadoToken) {
+            // TODO: Return forbidden correctly
+            throw new \RuntimeException(
+
+                sprintf("Invalid Bepado Token given. Client '%s' cannot be verified and request is aborted.", $client)
+            );
+        }
+    }
+
+    /**
      * Handle request XML
      *
      * handle the XML encoding the web service request. Returns XML building
@@ -370,6 +389,10 @@ final class SDK
     {
         $shopConfiguration = $this->dependencies->getGateway()->getShopConfiguration($shopId);
 
-        return new Shop(array('id' => $shopId, 'name' => $shopConfiguration->name));
+        return new Shop(array(
+            'id' => $shopId,
+            'name' => $shopConfiguration->displayName,
+            'url' => $shopConfiguration->url,
+        ));
     }
 }

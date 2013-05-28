@@ -17,7 +17,7 @@
 {/if}
     {$smarty.block.parent}
 {if $bepadoProduct}
-    <strong style="color: #333;display: block; padding: 15px 0 2px 10px;">Marktplatz Artikel von {$bepadoShop->name}</strong>
+    <strong style="color: #333;display: block; padding: 15px 0 2px 10px;">Marktplatz Artikel von {*$bepadoShop->name*}Libri.de Internet GmbH</strong>
     <p style="padding-left: 10px;">
         Die Versandkosten für diesen Artikel ...
     </p>

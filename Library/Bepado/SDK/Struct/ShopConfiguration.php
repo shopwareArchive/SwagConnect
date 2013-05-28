@@ -28,21 +28,6 @@ class ShopConfiguration extends Struct
     public $serviceEndpoint;
 
     /**
-     * @var string
-     */
-    public $displayName;
-
-    /**
-     * @var string
-     */
-    public $url;
-
-    /**
-     * @var string
-     */
-    public $token;
-
-    /**
      * @var float
      */
     public $shippingCost;

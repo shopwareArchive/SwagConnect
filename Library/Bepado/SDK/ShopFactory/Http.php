@@ -56,13 +56,8 @@ class Http extends ShopFactory
     public function getShopGateway($shopId)
     {
         $configuration = $this->configuration->getShopConfiguration($shopId);
-
         return new ShopGateway\Http(
-            $this->dependencyResolver->getHttpClient(
-                $configuration->serviceEndpoint,
-                $configuration->name,
-                $configuration->token
-            ),
+            $this->dependencyResolver->getHttpClient($configuration->serviceEndpoint),
             $this->dependencyResolver->getMarshaller(),
             $this->dependencyResolver->getUnmarshaller()
         );

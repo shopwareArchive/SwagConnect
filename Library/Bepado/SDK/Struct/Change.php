@@ -44,28 +44,4 @@ abstract class Change extends Struct
      * @var string
      */
     public $shopEndpoint;
-
-    /**
-     * From-Shop Display Name
-     *
-     * @var string
-     */
-    public $shopDisplayName;
-
-    /**
-     * From-Shop Url
-     *
-     * @var string
-     */
-    public $shopUrl;
-
-    /**
-     * Communication Token that From-Shop can reproduce.
-     *
-     * Token is used for order communication between the two shops to verify
-     * that their communication is valid.
-     *
-     * @var string
-     */
-    public $shopToken;
 }

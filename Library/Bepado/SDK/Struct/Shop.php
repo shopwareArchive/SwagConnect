@@ -26,9 +26,4 @@ class Shop extends Struct
      * @var string
      */
     public $name;
-
-    /**
-     * @var string
-     */
-    public $url;
 }

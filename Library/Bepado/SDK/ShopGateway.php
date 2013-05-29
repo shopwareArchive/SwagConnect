@@ -62,7 +62,8 @@ abstract class ShopGateway
      * fail.
      *
      * @param string $reservationId
+     * @param string $remoteLogTransactionId
      * @return mixed
      */
-    abstract public function confirm($reservationId);
+    abstract public function confirm($reservationId, $remoteLogTransactionId);
 }

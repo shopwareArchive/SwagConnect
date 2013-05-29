@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version 1.0.0snapshot201305291116
  */
 
 namespace Bepado\Common\Rpc\Marshaller\ValueMarshaller;
@@ -135,8 +135,11 @@ class XmlValueMarshaller implements ValueMarshaller
     {
         $node = $this->document->createElement("array:array");
 
-        foreach ($data as $value) {
-            $node->appendChild($this->marshalValue($value));
+        foreach ($data as $key => $value) {
+            $item = $this->marshalValue($value);
+            $item->setAttribute('key', $key);
+
+            $node->appendChild($item);
         }
 
         return $node;

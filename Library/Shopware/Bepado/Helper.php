@@ -43,16 +43,23 @@ class Helper
     private $manager;
 
     /**
+     * @var string
+     */
+    private $imagePath;
+
+    /**
      * @var Query
      */
     private $modelQuery, $productQuery, $categoryQuery, $productCategoryQuery;
 
     /**
      * @param ModelManager $manager
+     * @param $imagePath
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(ModelManager $manager, $imagePath = null)
     {
         $this->manager = $manager;
+        $this->imagePath = $imagePath;
     }
 
     /**
@@ -322,6 +329,34 @@ class Helper
     {
         $data = $this->getRowProductDataById($id);
         return $this->getProductByRowData($data);
+    }
+
+    /**
+     * @param $id
+     * @return string[]
+     */
+    public function getImagesById($id)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('i.path', 'i.extension'))
+            ->from('Shopware\Models\Article\Image', 'i')
+            ->where('i.articleId = :articleId')
+            ->andWhere('i.parentId IS NULL')
+            ->setParameter('articleId', $id)
+            ->orderBy('i.main', 'DESC')
+            ->addOrderBy('i.position', 'ASC');
+
+        $query = $builder->getQuery();
+        $query->setHydrationMode($query::HYDRATE_OBJECT);
+
+        $images = $query->getArrayResult();
+
+        $imagePath = $this->imagePath;
+        $images = array_map(function($image) use ($imagePath) {
+            return "{$imagePath}{$image['path']}.{$image['extension']}";
+        }, $images);
+
+        return $images;
     }
 
     /**

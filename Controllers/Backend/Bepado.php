@@ -56,8 +56,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getHelper()
     {
         if($this->helper === null) {
+            $request = $this->Request();
+            $imagePath = $request->getScheme() . '://' . $request->getHttpHost() . $request->getBasePath();
+            $imagePath .= '/media/image/';
             $this->helper = new \Shopware\Bepado\Helper(
-                $this->getModelManager()
+                $this->getModelManager(), $imagePath
             );
         }
         return $this->helper;
@@ -280,11 +283,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 continue;
             }
             $data['categories'] = $helper->getRowProductCategoriesById($id);
+            $data['images'] = $helper->getImagesById($id);
             $status = $data['status']; $message = null;
             $product = $helper->getProductByRowData($data);
 
             try {
-                if(empty($status) || $status == 'delete') {
+                if(empty($status) || $status == 'delete' || $status == 'error') {
                     $sdk->recordInsert($product);
                     $status = 'insert';
                 } else {

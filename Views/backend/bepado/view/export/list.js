@@ -73,7 +73,9 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
             dataIndex: 'exportStatus',
             flex: 2,
             renderer: function(value, metaData, record) {
-                metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                if(record.get('exportMessage')) {
+                    metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                }
                 return value;
             }
         }, {

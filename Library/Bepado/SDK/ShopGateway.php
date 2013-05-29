@@ -51,9 +51,10 @@ abstract class ShopGateway
      * fail.
      *
      * @param string $reservationId
+     * @param string $orderId
      * @return mixed
      */
-    abstract public function buy($reservationId);
+    abstract public function buy($reservationId, $orderId);
 
     /**
      * Confirm a reservation in the remote shop.

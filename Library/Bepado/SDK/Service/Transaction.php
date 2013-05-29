@@ -179,13 +179,15 @@ class Transaction
      * fail.
      *
      * @param string $reservationId
+     * @param string $orderId
      * @return mixed
      */
-    public function buy($reservationId)
+    public function buy($reservationId, $orderId)
     {
         try {
             $order = $this->reservations->getOrder($reservationId);
-            $order->localOrderId = $this->fromShop->buy($order);
+            $order->localOrderId = $orderId;
+            $order->providerOrderId = $this->fromShop->buy($order);
             $order->reservationId = $reservationId;
             $this->reservations->setBought($reservationId, $order);
             return $this->logger->log($order);

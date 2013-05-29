@@ -178,7 +178,7 @@ class Product extends ShopItem
     /**
      * List of product image URLs
      *
-     * @var string[][]
+     * @var string[]
      */
     public $images = array();
 

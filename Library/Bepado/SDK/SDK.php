@@ -302,12 +302,13 @@ final class SDK
      * Struct\Message will be returned.
      *
      * @param Struct\Reservation $reservation
+     * @param string $orderId
      * @return mixed
      */
-    public function checkout(Struct\Reservation $reservation)
+    public function checkout(Struct\Reservation $reservation, $orderId)
     {
         $this->verifySdk();
-        return $this->dependencies->getShoppingService()->checkout($reservation);
+        return $this->dependencies->getShoppingService()->checkout($reservation, $orderId);
     }
 
     /**

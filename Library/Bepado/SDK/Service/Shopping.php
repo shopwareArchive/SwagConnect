@@ -199,16 +199,18 @@ class Shopping
      * expected. If it failed, or partially failed, a corresponding
      * Struct\Message will be returned.
      *
-     * @param string[] $products
+     * @param Struct\Reservation $reservation
+     * @param string $orderId
      * @return mixed
      */
-    public function checkout(Struct\Reservation $reservation)
+    public function checkout(Struct\Reservation $reservation, $orderId)
     {
         $results = array();
         foreach ($reservation->orders as $shopId => $order) {
+            $order->localOrderId = $orderId;
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
 
-            if ($remoteLogTransactionId = $shopGateway->buy($order->reservationId)) {
+            if ($remoteLogTransactionId = $shopGateway->buy($order->reservationId, $orderId)) {
                 try {
                     $localLogTransactionId = $this->logger->log($order);
                 } catch (\Exception $e) {

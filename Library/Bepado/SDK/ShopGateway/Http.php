@@ -114,16 +114,17 @@ class Http extends ShopGateway
      * fail.
      *
      * @param string $reservationId
+     * @param string $orderId
      * @return mixed
      */
-    public function buy($reservationId)
+    public function buy($reservationId, $orderId)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'buy',
-                    'arguments' => array($reservationId),
+                    'arguments' => array($reservationId, $orderId),
                 )
             )
         );

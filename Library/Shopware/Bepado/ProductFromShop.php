@@ -129,6 +129,7 @@ class ProductFromShop implements ProductFromShopBase
     {
         $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $status = $this->manager->find('Shopware\Models\Order\Status', 0);
+        $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);
         $number = 'BP-' . $order->orderShop . '-' . $order->localOrderId;
 
         //$model = new OrderModel\Order();
@@ -143,6 +144,7 @@ class ProductFromShop implements ProductFromShopBase
             'invoiceShippingNet' => $order->shippingCosts,
             'currencyFactor' => 1,
             'orderStatus' => $status,
+            'shop' => $shop,
             'currency' => 'EUR',
             'orderTime' => 'now'
         ));
@@ -193,22 +195,14 @@ class ProductFromShop implements ProductFromShopBase
         $model->setCustomer($customer);
 
         $billing = new OrderModel\Billing();
-        $billing->fromArray(array(
-            'salutation' => 'mr',
-            'lastName' => $order->deliveryAddress->name,
-            'city' => $order->deliveryAddress->city,
-            'zipCode' => $order->deliveryAddress->zip,
-            'street' => $order->deliveryAddress->line1
+        $billing->fromArray($this->getAddressData(
+            $order->deliveryAddress
         ));
         $model->setBilling($billing);
 
         $shipping = new OrderModel\Shipping();
-        $shipping->fromArray(array(
-            'salutation' => 'mr',
-            'lastName' => $order->deliveryAddress->name,
-            'city' => $order->deliveryAddress->city,
-            'zipCode' => $order->deliveryAddress->zip,
-            'street' => $order->deliveryAddress->line1
+        $shipping->fromArray($this->getAddressData(
+            $order->deliveryAddress
         ));
         $model->setShipping($shipping);
 
@@ -217,6 +211,28 @@ class ProductFromShop implements ProductFromShopBase
         //$this->manager->persist($model);
         $this->manager->flush();
 
-        return $model->getId();
+        return $model->getNumber();
+    }
+
+    /**
+     * @param $address
+     * @return array
+     */
+    private function getAddressData($address)
+    {
+        $repository = 'Shopware\Models\Country\Country';
+        $repository = $this->manager->getRepository($repository);
+        /** @var $country \Shopware\Models\Country\Country */
+        $country = $repository->findOneBy(array(
+            'iso3' => $address->country
+        ));
+        return array(
+            'salutation' => 'mr',
+            'lastName' => $address->name,
+            'city' => $address->city,
+            'zipCode' => $address->zip,
+            'street' => $address->line1,
+            'country' => $country
+        );
     }
 }

@@ -2,12 +2,6 @@
     <link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
 {/block}
 
-{block name='frontend_checkout_cart_cart_head' prepend}
-{if $bepadoContent || $shopId}
-    {include file='frontend/bepado/shop_header.tpl'}
-{/if}
-{/block}
-
 {block name='frontend_checkout_cart_premiums' prepend}
     {include file='frontend/bepado/checkout_cart.tpl'}
 {/block}

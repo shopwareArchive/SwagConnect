@@ -111,11 +111,7 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoCategories(serialize($product->categories));
         $detail->setInStock($product->availability);
 
-        //$model->setImages(array(
-        //));
-
-        $repo = $this->manager->getRepository('Shopware\Models\Customer\Group');
-        $customerGroup = $repo->findOneBy(array('key' => 'EK'));
+        $customerGroup = $this->helper->getDefaultCustomerGroup();
         $detail->getPrices()->clear();
         $price = new \Shopware\Models\Article\Price();
         $price->fromArray(array(
@@ -136,6 +132,37 @@ class ProductToShop implements ProductToShopBase
             $detail->setAttribute($attribute);
             $attribute->setArticle($model);
             $this->manager->flush();
+        }
+
+        if($model->getImages()->count() == 0)  {
+            $album = $this->manager->find('Shopware\Models\Media\Album', -1);
+            foreach ($product->images as $key => $imageUrl) {
+                $image = new \Shopware\Models\Article\Image();
+
+                $name = pathinfo($imageUrl, PATHINFO_FILENAME);
+                $file = new \Symfony\Component\HttpFoundation\File\File($imageUrl);
+
+                $media = new \Shopware\Models\Media\Media();
+                $media->setAlbum($album);
+
+                $media->setFile($file);
+                $media->setName($name);
+                $media->setDescription('');
+                $media->setCreated(new \DateTime());
+                $media->setUserId(0);
+
+                $this->manager->persist($media);
+                $this->manager->flush($media);
+
+                $image->setMain($key == 0 ? 1 : 2);
+                $image->setMedia($media);
+                $image->setPosition($key + 1);
+                $image->setArticle($model);
+                $image->setPath($media->getName());
+                $image->setExtension($media->getExtension());
+
+                $model->getImages()->add($image);
+            }
         }
     }
 

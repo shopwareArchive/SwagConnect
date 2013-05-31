@@ -85,6 +85,16 @@ class Helper
     }
 
     /**
+     * @return \Shopware\Models\Customer\Group
+     */
+    public function getDefaultCustomerGroup()
+    {
+        $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
+        $customerGroup = $repository->findOneBy(array('key' => 'EK'));
+        return $customerGroup;
+    }
+
+    /**
      * @return \Doctrine\ORM\Query
      */
     private function getProductQuery()

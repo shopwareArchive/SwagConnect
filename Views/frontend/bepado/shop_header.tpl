@@ -6,7 +6,7 @@
         </span>
         {/if}
         <h3 style="font-weight: bold; margin-left: 12px; display: inline-block;">
-            Artikel von {if $shopId}{$bepadoShops[$shopId]->name}{else}{$sShopname}{/if}
+            Artikel von {if $shopId}{*$bepadoShops[$shopId]->name*}Libri.de Internet GmbH{else}{$sShopname}{/if}
         </h3>
         <hr class="clear">
     </div>

@@ -39,8 +39,9 @@
     margin: 0 4px 0 0;
 }
 .display-shop-name {
-    font-weight: bold;
     display: inline-block;
+    font-size: 11px;
+    color: #888;
 }
 
 /** Detail section */

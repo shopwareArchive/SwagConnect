@@ -1,5 +1,5 @@
 {* Include the stylesheet if we're dealing with an bepado product *}
-{block name="frontend_index_header_css_screen"}
+{block name="frontend_index_header_css_screen" append}
 	{if $bepadoProduct}
 		<link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
 	{/if}

@@ -66,3 +66,64 @@
     color: #888;
     text-shadow: 0 1px 0 #fff;
 }
+
+
+/*
+ * Bepado Search
+ * last edit: 2013/06/03
+ * by PSC
+ */
+.bepado-article {
+    padding:15px;
+    margin:0px 20px 10px 0px;
+    border:1px solid #DFDFDF;
+}
+.bepado-article .bepado-img {
+    width:100px;
+    height:100px;
+    margin:0px 20px 0px 0px;
+    text-align:center;
+    float:left;
+}
+.bepado-article h4 {
+    padding:10px 0px 20px 0px;
+}
+.bepado-article p {
+    margin:0px 0px 10px 0px;
+    color:#777777;
+    font-size:12px;
+}
+.bepado-article a.bepado-title {
+    font-size:14px;
+    font-weight:bold;
+}
+.bepado-article .bepado-info {
+    width:450px;
+    float:left;
+}
+.bepado-article .bepado-meta {
+    width:150px;
+    padding:50px 10px 0px 0px;
+    float:right;
+}
+.bepado-article .bepado-meta .bepado-price {
+    margin:0px 0px 20px 0px;
+    font-size:16px;
+    color:#333333;
+}
+.bepado-article .bepado-meta a.more {
+    display:block;
+    width:148px;
+    height:17px;
+    padding:3px 5px 0px 5px;
+    position:relative;
+    border:0px none;
+    background:url("../images/button_right-small.png") repeat-x scroll right top transparent;
+    text-decoration:none;
+    text-shadow:0 1px 1px #C30000;
+    color:#ffffff;
+}
+.bepado-article .bepado-meta a.more:hover {
+    background-position:0px -20px;
+}
+.bepado-clear {clear:both;}

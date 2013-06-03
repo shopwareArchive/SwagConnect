@@ -43,10 +43,17 @@ class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
         $sdk = $this->getSDK();
         $request = $this->Request();
 
+        $page = $request->get('page', 1);
+        $page = max($page, 1);
+        $perPage = $request->get('limit');
+        $perPage = empty($perPage) ? 12 : (int)$perPage;
+        $perPage = min($perPage, 64);
+        $offset = $page > 1 ? ($page - 1) * $perPage : 0;
+
         $search = new \Bepado\SDK\Struct\Search(array(
             'query' => $request->get('query'),
-            'offset' => $request->get('offset', 0),
-            'limit' => min($request->get('limit', 12), 64),
+            'offset' => $offset,
+            'limit' => $perPage,
             'vendor' => $request->get('vendor'),
             'priceFrom' => (float)$request->get('priceFrom'),
             'priceTo' => (float)$request->get('priceTo'),
@@ -54,5 +61,36 @@ class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
         $searchResult = $sdk->search($search);
         $this->View()->assign('searchQuery', $request->get('query'));
         $this->View()->assign('searchResult', $searchResult);
+
+        $perPages = explode('|', Shopware()->Config()->get('fuzzySearchSelectPerPage'));
+        $this->View()->assign('perPages', $perPages);
+
+        $numberPages = ceil($searchResult->resultCount / $perPage);
+        $pages = array();
+        if ($numberPages > 1) {
+            $start = max(1, $page - 3);
+            $end = min($numberPages, $page + 2);
+            for ($i = $start; $i <= $end; $i++) {
+                $pages['numbers'][$i] = $i;
+            }
+            // Previous page
+            if ($page != 1) {
+                $pages['previous'] = $page - 1;
+            } else {
+                $pages['previous'] = null;
+            }
+            // Next page
+            if ($page != $numberPages) {
+                $pages['next'] = $page + 1;
+            } else {
+                $pages['next'] = null;
+            }
+        }
+        $this->View()->assign(array(
+           'pages' => $pages,
+           'numberPages' => $numberPages,
+           'page' => $page,
+           'perPage' => $perPage
+        ));
     }
 }

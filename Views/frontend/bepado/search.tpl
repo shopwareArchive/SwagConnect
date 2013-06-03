@@ -1,80 +1,102 @@
 {extends file='frontend/index/index.tpl'}
 
+{* Include the stylesheet if we're dealing with an bepado product *}
+{block name="frontend_index_header_css_screen" append}
+    <link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
+{/block}
+
 {* Main content *}
 {block name='frontend_index_content'}
-	<div id="center" class="grid_13">
-	{block name='frontend_search_index_headline'}
-		<h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden {$searchResult->resultCount} Artikel gefunden{/s}</h2>
-	{/block}
-	{block name='frontend_search_index_result'}
-		<div class="listing" id="listing">
-			{foreach from=$searchResult->results item=result key=key name=list}
-                <img src="{$result->images[0]}" width="100" height="100">
-                <a href="{$result->url}" title="{$result->title|escape}">
-                    {$result->title|escape}
-                </a><br>
-                <strong>Preis ab: </strong>{$result->priceFrom|currency}
-                <strong>Hersteller: </strong>{$result->vendor|escape}
-                <strong>Anz. Anbieter: </strong>{$result->shopCount}<br><br>
-			{/foreach}
-		</div>
-		{if $searchResult->resultCount}
-			<div class="clear">&nbsp;</div>
-			{include file='frontend/listing/listing_actions.tpl'}
-		{/if}
-	{/block}
-	</div>
+    <div id="center" class="grid_13">
+        {block name='frontend_search_index_headline'}
+            <h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden {$searchResult->resultCount} Artikel gefunden{/s}</h2>
+        {/block}
+        {block name='frontend_search_index_result'}
+            <div class="bepado-search">
+                <div class="listing" id="listing">
+                    {foreach from=$searchResult->results item=result key=key name=list}
+                        <div class="bepado-article">
+                            <div class="bepado-img">
+                                {if $result->images[0]}
+                                    <img src="{$result->images[0]}" width="100" height="100">
+                                {else}
+                                    <img src="{link file='frontend/_resources/images/no_picture.jpg'}" width="100" height="100">
+                                {/if}
+                            </div>
+                            <div class="bepado-info">
+                                <h4>
+                                    <a class="bepado-title" href="{$result->url}" title="{$result->title|escape}">{$result->title|escape}</a>
+                                </h4>
+                                <p><strong>Hersteller:</strong> {$result->vendor|escape}</p>
+                                <p>Bei insgesamt <strong>{$result->shopCount}</strong> Anbietern gefunden.</p>
+                            </div>
+                            <div class="bepado-meta">
+                                <p class="bepado-price">ab: <strong>{$result->priceFrom|currency}</strong></p>
+                                <a href="{$result->url}" title="{$result->title|escape}" class="more">Zum Produkt</a>
+                            </div>
+                            <div class="bepado-clear"></div>
+                        </div>
+                    {/foreach}
+                </div>
+            </div>
+            {if $searchResult->resultCount}
+                <div class="clear">&nbsp;</div>
+                {include file='frontend/listing/listing_actions.tpl'}
+            {/if}
+        {/block}
+    </div>
 {/block}
 
 {block name='frontend_listing_actions_top'}
-<div class="top">
-	<div class="sort-filter">&nbsp;</div>
-	<form method="post" action="{$sPages.first}">
-	<div class="articleperpage rightalign">
-		<label>{s name='ListingLabelItemsPerPage'}Artikel pro Seite:{/s}</label>
-		<select name="sPerPage" class="auto_submit">
-		{foreach from=$sPerPage item=perPage}
-	        <option value="{$perPage.value}" {if $perPage.markup}selected="selected"{/if}>{$perPage.value}</option>
-		{/foreach}
-		</select>
-	</div>
-	</form>
-</div>
+    <div class="top">
+        <div class="sort-filter">&nbsp;</div>
+        <form method="post" action="{url query=$searchQuery}">
+            <div class="articleperpage rightalign">
+                <label>{s name='ListingLabelItemsPerPage'}Artikel pro Seite:{/s}</label>
+                <select name="limit" class="auto_submit">
+                    {foreach from=$perPages item=value}
+                        <option value="{$value}" {if $value == $perPage}selected="selected"{/if}>{$value}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </form>
+    </div>
 {/block}
 
 {block name='frontend_listing_actions_paging'}
-{if $sPages.numbers|@count > 1}
-<div class="bottom">
-	<div class="paging">
-		<label>{se name='ListingPaging'}Blättern:{/se}</label>
-		
-		{if $sPages.previous}
-			<a href="{$sPages.previous}" class="navi prev">
-				{s name="ListingTextPrevious"}&lt;{/s}
-			</a>
-		{/if}
-		
-		{foreach from=$sPages.numbers item=page}
-			{if $page.markup}
-				<a title="" class="navi on">{$page.value}</a>
-			{else}
-				<a href="{$page.link}" title="" class="navi">
-					{$page.value}
-				</a>
-			{/if}
-		{/foreach}
-		
-		{if $sPages.next}
-			<a href="{$sPages.next}" class="navi more">{s name="ListingTextNext"}&gt;{/s}</a>
-		{/if}
-	</div>
-	<div class="display_sites">
-		{se name="ListingTextSite"}Seite{/se} <strong>{if $sPage}{$sPage}{else}1{/if}</strong> {se name="ListingTextFrom"}von{/se} <strong>{$sNumberPages}</strong>
-	</div>
-</div>
-{/if}
+
+    {if $pages.numbers|@count > 1}
+        <div class="bottom">
+            <div class="paging">
+                <label>{se name='ListingPaging'}Blättern:{/se}</label>
+
+                {if $pages.previous}
+                    <a href="{url query=$searchQuery page=$pages.previous}" class="navi prev">
+                        {s name="ListingTextPrevious"}&lt;{/s}
+                    </a>
+                {/if}
+
+                {foreach from=$pages.numbers item=number}
+                    {if $page == $number}
+                        <a title="" class="navi on">{$page}</a>
+                    {else}
+                        <a href="{url query=$searchQuery page=$number}" title="" class="navi">
+                            {$number}
+                        </a>
+                    {/if}
+                {/foreach}
+
+                {if $pages.next}
+                    <a href="{url query=$searchQuery page=$pages.next}" class="navi more">{s name="ListingTextNext"}&gt;{/s}</a>
+                {/if}
+            </div>
+            <div class="display_sites">
+                {se name="ListingTextSite"}Seite{/se} <strong>{if $page}{$page}{else}1{/if}</strong> {se name="ListingTextFrom"}von{/se} <strong>{$numberPages}</strong>
+            </div>
+        </div>
+    {/if}
 {/block}
 
 {block name="frontend_listing_actions_class"}
 <div class="listing_actions{if !$sPages || $sPages.numbers|@count < 2} normal{/if}">
-{/block}
+    {/block}

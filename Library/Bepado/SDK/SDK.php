@@ -48,7 +48,7 @@ final class SDK
      *
      * @var DependencyResolver
      */
-    private $dependencies;
+    public $dependencies;
 
     /**
      * Version constant

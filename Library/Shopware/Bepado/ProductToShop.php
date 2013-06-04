@@ -135,34 +135,39 @@ class ProductToShop implements ProductToShopBase
         }
 
         if($model->getImages()->count() == 0)  {
-            $album = $this->manager->find('Shopware\Models\Media\Album', -1);
-            foreach ($product->images as $key => $imageUrl) {
-                $image = new \Shopware\Models\Article\Image();
+            try {
+                $album = $this->manager->find('Shopware\Models\Media\Album', -1);
+                $tempDir = Shopware()->DocPath('media_temp');
+                foreach ($product->images as $key => $imageUrl) {
+                    $image = new \Shopware\Models\Article\Image();
 
-                $name = pathinfo($imageUrl, PATHINFO_FILENAME);
-                $file = new \Symfony\Component\HttpFoundation\File\File($imageUrl);
+                    $name = pathinfo($imageUrl, PATHINFO_FILENAME);
+                    $tempFile = tempnam($tempDir, 'image');
+                    $path = copy($imageUrl, $tempFile);
+                    $file = new \Symfony\Component\HttpFoundation\File\File($path);
 
-                $media = new \Shopware\Models\Media\Media();
-                $media->setAlbum($album);
+                    $media = new \Shopware\Models\Media\Media();
+                    $media->setAlbum($album);
 
-                $media->setFile($file);
-                $media->setName($name);
-                $media->setDescription('');
-                $media->setCreated(new \DateTime());
-                $media->setUserId(0);
+                    $media->setFile($file);
+                    $media->setName($name);
+                    $media->setDescription('');
+                    $media->setCreated(new \DateTime());
+                    $media->setUserId(0);
 
-                $this->manager->persist($media);
-                $this->manager->flush($media);
+                    $this->manager->persist($media);
+                    $this->manager->flush($media);
 
-                $image->setMain($key == 0 ? 1 : 2);
-                $image->setMedia($media);
-                $image->setPosition($key + 1);
-                $image->setArticle($model);
-                $image->setPath($media->getName());
-                $image->setExtension($media->getExtension());
+                    $image->setMain($key == 0 ? 1 : 2);
+                    $image->setMedia($media);
+                    $image->setPosition($key + 1);
+                    $image->setArticle($model);
+                    $image->setPath($media->getName());
+                    $image->setExtension($media->getExtension());
 
-                $model->getImages()->add($image);
-            }
+                    $model->getImages()->add($image);
+                }
+            } catch(\Exception $e) { }
         }
     }
 

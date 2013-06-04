@@ -5,11 +5,20 @@
     <link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
 {/block}
 
+{* Sidebar left *}
+{block name='frontend_index_content_left'}
+    {if $searchResult->resultCount > 0}
+        {include file='frontend/bepado/search_left.tpl'}
+    {else}
+        {$smarty.block.parent}
+    {/if}
+{/block}
+
 {* Main content *}
 {block name='frontend_index_content'}
     <div id="center" class="grid_13">
         {block name='frontend_search_index_headline'}
-            <h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden {$searchResult->resultCount} Artikel gefunden{/s}</h2>
+            <h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}</h2>
         {/block}
         {block name='frontend_search_index_result'}
             <div class="bepado-search">
@@ -64,7 +73,6 @@
 {/block}
 
 {block name='frontend_listing_actions_paging'}
-
     {if $pages.numbers|@count > 1}
         <div class="bottom">
             <div class="paging">
@@ -80,7 +88,7 @@
                     {if $page == $number}
                         <a title="" class="navi on">{$page}</a>
                     {else}
-                        <a href="{url query=$searchQuery page=$number}" title="" class="navi">
+                        <a href="{url query=$searchQuery perPage=$perPage page=$number}" title="" class="navi">
                             {$number}
                         </a>
                     {/if}
@@ -98,5 +106,5 @@
 {/block}
 
 {block name="frontend_listing_actions_class"}
-<div class="listing_actions{if !$sPages || $sPages.numbers|@count < 2} normal{/if}">
-    {/block}
+    <div class="listing_actions{if !$pages || $pages.numbers|@count < 2} normal{/if}">
+{/block}

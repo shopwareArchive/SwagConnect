@@ -49,17 +49,19 @@ class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
         $perPage = empty($perPage) ? 12 : (int)$perPage;
         $perPage = min($perPage, 64);
         $offset = $page > 1 ? ($page - 1) * $perPage : 0;
+        $vendor = $request->get('vendor');
+        $query = $request->get('query');
 
         $search = new \Bepado\SDK\Struct\Search(array(
-            'query' => $request->get('query'),
+            'query' => $query,
             'offset' => $offset,
             'limit' => $perPage,
-            'vendor' => $request->get('vendor'),
+            'vendor' => $vendor,
             'priceFrom' => (float)$request->get('priceFrom'),
             'priceTo' => (float)$request->get('priceTo'),
         ));
         $searchResult = $sdk->search($search);
-        $this->View()->assign('searchQuery', $request->get('query'));
+        $this->View()->assign('searchQuery', $query);
         $this->View()->assign('searchResult', $searchResult);
 
         $perPages = explode('|', Shopware()->Config()->get('fuzzySearchSelectPerPage'));
@@ -90,7 +92,8 @@ class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
            'pages' => $pages,
            'numberPages' => $numberPages,
            'page' => $page,
-           'perPage' => $perPage
+           'perPage' => $perPage,
+           'filterVendor' => $vendor
         ));
     }
 }

@@ -143,8 +143,8 @@ class ProductToShop implements ProductToShopBase
 
                     $name = pathinfo($imageUrl, PATHINFO_FILENAME);
                     $tempFile = tempnam($tempDir, 'image');
-                    $path = copy($imageUrl, $tempFile);
-                    $file = new \Symfony\Component\HttpFoundation\File\File($path);
+                    copy($imageUrl, $tempFile);
+                    $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
 
                     $media = new \Shopware\Models\Media\Media();
                     $media->setAlbum($album);

@@ -167,6 +167,7 @@ class ProductToShop implements ProductToShopBase
 
                     $model->getImages()->add($image);
                 }
+                $this->manager->flush($model);
             } catch(\Exception $e) { }
         }
     }

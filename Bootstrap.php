@@ -572,7 +572,33 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'bepadoShippingCosts' => $bepadoShippingCosts
         ));
 
-        $view->sBasket = $basket;
+        $shippingCosts = array_sum($bepadoShippingCosts);
+        $basket['sShippingcosts'] += $shippingCosts;
+        $basket['AmountNumeric'] += $shippingCosts;
+        $basket['AmountNetNumeric'] += $shippingCosts;
+        $basket['sAmount'] += $shippingCosts;
+        if(!empty($basket['sAmountWithTax'])) {
+            $basket['sAmountWithTax'] += $shippingCosts;
+        }
+
+        $newVariables = array(
+            'sBasket' => $basket,
+            'sShippingcosts' => $basket['sShippingcosts'],
+            'sAmount' => $basket['sAmount'],
+            'sAmountWithTax' => $basket['sAmountWithTax'],
+            'sAmountNet' => $basket['AmountNetNumeric']
+        );
+        $view->assign($newVariables);
+
+        if($actionName == 'confirm') {
+            $session = Shopware()->Session();
+            /** @var $variables ArrayObject */
+            $variables = $session->offsetGet('sOrderVariables');
+            $variables->exchangeArray(array_merge(
+                $variables->getArrayCopy(), $newVariables
+            ));
+            $session->offsetSet('sOrderVariables', $variables);
+        }
     }
 
     /**

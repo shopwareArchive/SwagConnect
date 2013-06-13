@@ -194,7 +194,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('boolean', 'detailShopInfo', array(
             'label' => 'Auf der Detailseite auf Marktplatz-Artikel hinweisen',
         ));
-        $form->setElement('boolean', 'cartShopInfo', array(
+        $form->setElement('boolean', 'checkoutShopInfo', array(
             'label' => 'Im Warenkorb auf Marktplatz-Artikel hinweisen',
         ));
     }
@@ -608,7 +608,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 'bepadoContent' => $bepadoContent,
                 'bepadoShops' => $bepadoShops,
                 'bepadoMessages' => $bepadoMessages,
-                'bepadoShippingCosts' => $bepadoShippingCosts
+                'bepadoShippingCosts' => $bepadoShippingCosts,
+                'bepadoShopInfo' => $this->Config()->get('checkoutShopInfo'),
             ));
         }
     }

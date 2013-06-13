@@ -7,7 +7,7 @@
 {/block}
 
 {block name='frontend_checkout_cart_item_image' prepend}
-    {if $shopId}
+    {if $shopId && $bepadoShopInfo}
         <span class="checkout_item_bepado"><span>&nbsp;</span></span>
     {/if}
 {/block}
@@ -16,7 +16,9 @@
     {if $shopId}
         <div class="bepado-additional-info-checkout">
             <span class="bepado-label label-separate-dispatch">{s name="frontend_checkout_cart_bepado_dispatch"}Separater Versand{/s}</span>
-            <span class="bepado-display display-shop-name">Artikel von {$bepadoShops[$shopId]->name}</span>
+            {if $bepadoShopInfo}
+                <span class="bepado-display display-shop-name">Artikel von {$bepadoShops[$shopId]->name}</span>
+            {/if}
         </div>
     {/if}
 {/block}

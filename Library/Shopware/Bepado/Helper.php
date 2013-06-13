@@ -137,7 +137,7 @@ class Helper
         ));
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
+        $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
     }
 

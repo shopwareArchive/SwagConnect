@@ -11,7 +11,7 @@
 		<div class="bepado-detail-product">
 			{$smarty.block.parent}
 
-			<strong class="bepado-detail-product-headline">Marktplatz Artikel von {*$bepadoShop->name*}Libri.de Internet GmbH</strong>
+			<strong class="bepado-detail-product-headline">Marktplatz Artikel von {$bepadoShop->name}</strong>
 			<p class="bepado-detail-product-desc">
 				Die Versandkosten für diesen Artikel ...
 			</p>

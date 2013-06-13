@@ -6,7 +6,7 @@
 {/block}
 
 {block name='frontend_detail_buy_button'}
-	{if $bepadoProduct}
+	{if $bepadoShopInfo && $bepadoProduct}
 		{* Include the basket button *}
 		<div class="bepado-detail-product">
 			{$smarty.block.parent}
@@ -20,3 +20,5 @@
 		{$smarty.block.parent}
 	{/if}
 {/block}
+
+{block name='frontend_index_header_meta_robots'}{if $bepadoNoIndex}noindex,follow{else}{$smarty.block.parent}{/if}{/block}

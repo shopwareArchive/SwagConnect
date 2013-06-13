@@ -183,12 +183,19 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
         $form->setElement('select', 'exportPriceGroup', array(
             'label' => 'Export-Preisgruppe',
-            'description' => '',
             'store' => 'base.CustomerGroup'
         ));
         $form->setElement('boolean', 'importCreateCategories', array(
-            'label' => 'Kategorien beim Import automatisch erzeugen',
-            'description' => ''
+            'label' => 'Kategorien beim Import automatisch erzeugen'
+        ));
+        $form->setElement('boolean', 'detailProductNoIndex', array(
+            'label' => 'Ein "noindex"-Meta-Tag bei Bepado-Produkten setzten',
+        ));
+        $form->setElement('boolean', 'detailShopInfo', array(
+            'label' => 'Auf der Detailseite auf Marktplatz-Artikel hinweisen',
+        ));
+        $form->setElement('boolean', 'cartShopInfo', array(
+            'label' => 'Im Warenkorb auf Marktplatz-Artikel hinweisen',
         ));
     }
 
@@ -635,7 +642,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         $view->assign(array(
             'bepadoProduct' => $product,
-            'bepadoShop' => $shop
+            'bepadoShop' => $shop,
+            'bepadoShopInfo' => $this->Config()->get('detailShopInfo'),
+            'bepadoNoIndex' => $this->Config()->get('detailProductNoIndex')
         ));
     }
 

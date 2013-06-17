@@ -278,43 +278,44 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $helper = $this->getHelper();
 
         foreach($ids as $id) {
-            $data = $helper->getRowProductDataById($id);
-            if($data === null) {
+            $model = $helper->getArticleModelById($id);
+            if($model === null) {
                 continue;
             }
-            $data['categories'] = $helper->getRowProductCategoriesById($id);
-            $data['images'] = $helper->getImagesById($id);
-            $status = $data['status']; $message = null;
-            $product = $helper->getProductByRowData($data);
+            $attribute = $model->getAttribute();
 
+            $status = $attribute->getBepadoExportStatus();
+            if(empty($status) || $status == 'delete' || $status == 'error') {
+                $status = 'insert';
+            } else {
+                $status = 'update';
+            }
+            $attribute->setBepadoExportStatus(
+                $status
+            );
+
+            $categories = $helper->getRowProductCategoriesById($id);
+            $attribute->setBepadoCategories(
+                serialize($categories)
+            );
+
+            Shopware()->Models()->flush($model);
             try {
-                if(empty($status) || $status == 'delete' || $status == 'error') {
-                    $sdk->recordInsert($product);
-                    $status = 'insert';
+                if($status == 'insert') {
+                    $sdk->recordInsert($id);
                 } else {
-                    $sdk->recordUpdate($product);
-                    $status = 'update';
+                    $sdk->recordUpdate($id);
                 }
             } catch(Exception $e) {
-                $status = 'error';
-                $message = $e->getMessage();
-            }
-
-            $model = $helper->getArticleModelById($id);
-            if(isset($model)) {
-                $attribute = $model->getAttribute();
                 $attribute->setBepadoExportStatus(
-                    $status
+                    'error'
                 );
                 $attribute->setBepadoExportMessage(
-                    $message
+                    $e->getMessage()
                 );
-                $attribute->setBepadoCategories(
-                    serialize($data['categories'])
-                );
+                Shopware()->Models()->flush($model);
             }
         }
-        Shopware()->Models()->flush();
     }
 
     public function deleteProductAction()

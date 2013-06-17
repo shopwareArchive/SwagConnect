@@ -131,8 +131,7 @@ class Helper
             'u.unit',
             'd.purchaseUnit as volume',
             'd.referenceUnit as base',
-            'at.bepadoCategories as categories',
-            'at.bepadoExportStatus as status'
+            'at.bepadoCategories as categories'
             //'images = array()',
         ));
         $builder->where('a.id = :id');
@@ -285,8 +284,6 @@ class Helper
         }
         unset($row['width'], $row['height'], $row['length']);
 
-        unset($row['status']);
-
         $product = new Product(
             $row
         );
@@ -338,6 +335,7 @@ class Helper
     public function getProductById($id)
     {
         $data = $this->getRowProductDataById($id);
+        $data['images'] = $this->getImagesById($id);
         return $this->getProductByRowData($data);
     }
 
@@ -347,6 +345,10 @@ class Helper
      */
     public function getImagesById($id)
     {
+        if($this->imagePath === null) {
+            return array();
+        }
+
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('i.path', 'i.extension'))
             ->from('Shopware\Models\Article\Image', 'i')

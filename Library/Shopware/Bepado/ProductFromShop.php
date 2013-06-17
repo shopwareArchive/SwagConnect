@@ -26,6 +26,7 @@ namespace Shopware\Bepado;
 use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Order,
     Bepado\SDK\Struct\Product,
+    Bepado\SDK\Struct\Address,
     Shopware\Models\Order as OrderModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
@@ -215,10 +216,10 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
-     * @param $address
+     * @param Address $address
      * @return array
      */
-    private function getAddressData($address)
+    private function getAddressData(Address $address)
     {
         $repository = 'Shopware\Models\Country\Country';
         $repository = $this->manager->getRepository($repository);
@@ -227,6 +228,7 @@ class ProductFromShop implements ProductFromShopBase
             'iso3' => $address->country
         ));
         return array(
+            'company' => $address->company,
             'salutation' => 'mr',
             'lastName' => $address->name,
             'city' => $address->city,

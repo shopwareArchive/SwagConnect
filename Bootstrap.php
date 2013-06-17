@@ -484,7 +484,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
         $address->name = $shippingData['firstname'] . ' ' . $shippingData['lastname'];
         if(!empty($shippingData['company'])) {
-            $address->name = $shippingData['company'] . ' - ' . $address->name;
+            $address->company = $shippingData['company'];
         }
         $address->line1 = $shippingData['street'] . ' ' . $shippingData['streetnumber'];
         return $address;

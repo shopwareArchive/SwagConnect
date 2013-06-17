@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.6';
+        return '1.1.8';
     }
 
     /**
@@ -186,16 +186,23 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'store' => 'base.CustomerGroup'
         ));
         $form->setElement('boolean', 'importCreateCategories', array(
-            'label' => 'Kategorien beim Import automatisch erzeugen'
+            'label' => 'Kategorien beim Import automatisch erzeugen',
+            'value' => true
         ));
         $form->setElement('boolean', 'detailProductNoIndex', array(
             'label' => 'Ein "noindex"-Meta-Tag bei Bepado-Produkten setzten',
+            'value' => true
         ));
         $form->setElement('boolean', 'detailShopInfo', array(
             'label' => 'Auf der Detailseite auf Marktplatz-Artikel hinweisen',
+            'value' => true
         ));
         $form->setElement('boolean', 'checkoutShopInfo', array(
             'label' => 'Im Warenkorb auf Marktplatz-Artikel hinweisen',
+            'value' => true
+        ));
+        $form->setElement('boolean', 'cloudSearch', array(
+            'label' => 'Cloud-Search aktivieren'
         ));
     }
 
@@ -234,6 +241,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->subscribeEvent(
             'sOrder::sSaveOrder::after',
             'onSaveOrder'
+        );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Search',
+            'onPostDispatchFrontendSearch'
         );
     }
 
@@ -297,7 +309,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function update()
     {
         $this->createMyEvents();
-        $this->createMyTables();
+        $this->createMyForm();
         return true;
     }
 
@@ -665,5 +677,37 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         if($reservation !== null) {
             $sdk->checkout($reservation, $orderNumber);
         }
+    }
+
+    /**
+     * Event listener method
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchFrontendSearch(Enlight_Event_EventArgs $args)
+    {
+        /** @var $action Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $request = $action->Request();
+        $view = $action->View();
+
+        if(!$request->isDispatched() || $request->getActionName() != 'defaultSearch') {
+            return;
+        }
+        if(!$this->Config()->get('cloudSearch')) {
+            return;
+        }
+        if(!empty($view->sSearchResults['sArticlesCount'])) {
+            return;
+        }
+        if(empty($view->sRequests['sSearch'])) {
+            return;
+        }
+
+        $action->redirect(array(
+            'controller' => 'bepado',
+            'action' => 'search',
+            'query' => $view->sRequests['sSearch']
+        ));
     }
 }

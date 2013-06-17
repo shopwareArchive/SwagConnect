@@ -20,7 +20,12 @@ interface ReservationGateway
     /**
      * Create and store reservation
      *
-     * Returns the reservation Id
+     * Returns the reservation Id. You may want to store the reservation ID in
+     * the order before storing the order. You can also just return the primary
+     * ID of your reservation table or something alike.
+     *
+     * You should be able to fetch the order back later by the reservation ID.
+     * It is just meant for you to be able to identify and retrieve an order.
      *
      * @param Struct\Order $order
      * @return string

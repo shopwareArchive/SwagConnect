@@ -33,6 +33,16 @@ class ShopConfiguration extends Struct
     public $shippingCost;
 
     /**
+     * @var string
+     */
+    public $displayName;
+
+    /**
+     * @var string
+     */
+    public $url;
+
+    /**
      * Restores a shop configuration from a previously stored state array.
      *
      * @param array $state

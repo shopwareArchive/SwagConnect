@@ -10,8 +10,10 @@ namespace Bepado\SDK\Service;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
 use Bepado\SDK\ShopFactory;
+use Bepado\SDK\ShopGateway;
 use Bepado\SDK\ChangeVisitor;
 use Bepado\SDK\Logger;
+use Bepado\SDK\ErrorHandler;
 use Bepado\SDK\ShippingCostCalculator;
 
 /**
@@ -45,6 +47,13 @@ class Shopping
     protected $logger;
 
     /**
+     * Error Handler
+     *
+     * @var ErrorHandler
+     */
+    protected $errorHandler;
+
+    /**
      * Shipping cost calculator
      *
      * @var ShippingCostCalculator
@@ -55,11 +64,13 @@ class Shopping
         ShopFactory $shopFactory,
         ChangeVisitor $changeVisitor,
         Logger $logger,
+        ErrorHandler $errorHandler,
         ShippingCostCalculator $calculator
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
         $this->logger = $logger;
+        $this->errorHandler = $errorHandler;
         $this->calculator = $calculator;
     }
 
@@ -210,26 +221,12 @@ class Shopping
             $order->localOrderId = $orderId;
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
 
-            if ($remoteLogTransactionId = $shopGateway->buy($order->reservationId, $orderId)) {
-                try {
-                    $localLogTransactionId = $this->logger->log($order);
-                } catch (\Exception $e) {
-                    $results[$shopId] = false;
-                    continue;
-                }
-            } else {
+            if (($transactionIds = $this->tryBuy($shopGateway, $order, $orderId)) === false) {
                 $results[$shopId] = false;
                 continue;
             }
 
-            if ($shopGateway->confirm($order->reservationId, $remoteLogTransactionId)) {
-                try {
-                    $this->logger->confirm($localLogTransactionId);
-                } catch (\Exception $e) {
-                    $results[$shopId] = false;
-                    continue;
-                }
-            } else {
+            if ($this->tryConfirm($shopGateway, $order, $transactionIds) === false) {
                 $results[$shopId] = false;
                 continue;
             }
@@ -238,6 +235,75 @@ class Shopping
         }
 
         return $results;
+    }
+
+    /**
+     * Try to issue a buy in the remote shop
+     *
+     * Returns false if an error occured. Returns the remote log transaction ID
+     * otherwise.
+     *
+     * @param ShopGateway $shopGateway
+     * @param Struct\Order $order
+     * @param string $orderId
+     * @return mixed
+     */
+    protected function tryBuy(ShopGateway $shopGateway, Struct\Order $order, $orderId)
+    {
+        $response = $shopGateway->buy($order->reservationId, $orderId);
+        if ($response instanceof Struct\Error) {
+            $this->errorHandler->handleError($response);
+            return false;
+        }
+
+        if (!$response) {
+            throw new \RuntimeException("Unexpected response: " . var_export($response, true));
+        }
+
+        try {
+            $transactionId = $this->logger->log($order);
+        } catch (\Exception $e) {
+            $this->errorHandler->handleException($e);
+            return false;
+        }
+
+        return array(
+            'local' => $transactionId,
+            'remote' => $response,
+        );
+    }
+
+    /**
+     * Try to issue a confirm in the remote shop
+     *
+     * Returns false if an error occured. Returns true, if the checkout
+     * succeeeded.
+     *
+     * @param ShopGateway $shopGateway
+     * @param Struct\Order $order
+     * @param array $transactionIds
+     * @return bool
+     */
+    protected function tryConfirm(ShopGateway $shopGateway, Struct\Order $order, array $transactionIds)
+    {
+        $response = $shopGateway->confirm($order->reservationId, $transactionIds['remote']);
+        if ($response instanceof Struct\Error) {
+            $this->errorHandler->handleError($response);
+            return false;
+        }
+
+        if (!$response) {
+            throw new \RuntimeException("Unexpected response: " . var_export($response, true));
+        }
+
+        try {
+            $this->logger->confirm($transactionIds['local']);
+        } catch (\Exception $e) {
+            $this->errorHandler->handleException($e);
+            return false;
+        }
+
+        return true;
     }
 
     /**

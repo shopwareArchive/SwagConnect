@@ -44,6 +44,13 @@ class DependencyResolver
     protected $fromShop;
 
     /**
+     * Error handler
+     *
+     * @var ErrorHandler
+     */
+    protected $errorHandler;
+
+    /**
      * Service registry
      *
      * @var Rpc\ServiceRegistry
@@ -157,11 +164,13 @@ class DependencyResolver
         Gateway $gateway,
         ProductToShop $toShop,
         ProductFromShop $fromShop,
+        ErrorHandler $errorHandler,
         $apiKey
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
         $this->fromShop = $fromShop;
+        $this->errorHandler = $errorHandler;
         $this->apiKey = $apiKey;
 
         if ($host = getenv('_SOCIALNETWORK_HOST')) {
@@ -175,6 +184,26 @@ class DependencyResolver
         }
 
         $this->apiKey = $apiKey;
+    }
+
+    /**
+     * Get from shop gateway
+     *
+     * @return ProductFromShop
+     */
+    public function getFromShop()
+    {
+        return $this->fromShop;
+    }
+
+    /**
+     * Get to shop gateway
+     *
+     * @return ProductToShop
+     */
+    public function getToShop()
+    {
+        return $this->toShop;
     }
 
     /**
@@ -344,6 +373,7 @@ class DependencyResolver
                 ),
                 $this->getChangeVisitor(),
                 $this->getLogger(),
+                $this->errorHandler,
                 new ShippingCostCalculator($this->gateway)
             );
         }
@@ -468,17 +498,18 @@ class DependencyResolver
 
     /**
      * @param string $server
+     *
      * @return \Bepado\SDK\HttpClient
      */
     public function getHttpClient($server)
     {
-        $client = new HttpClient\Stream($server);
-        $client->addDefaultHeaders(
-            array(
-                'X-Bepado-SDK-Version: ' . SDK::VERSION,
-                'Accept: applications/x-bepado-json-' . SDK::VERSION,
-            )
+        $headers = array(
+            'X-Bepado-SDK-Version: ' . SDK::VERSION,
+            'Accept: applications/x-bepado-json-' . SDK::VERSION,
         );
+
+        $client = new HttpClient\Stream($server);
+        $client->addDefaultHeaders($headers);
 
         return $client;
     }

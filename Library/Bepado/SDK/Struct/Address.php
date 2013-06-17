@@ -20,6 +20,11 @@ class Address extends Struct
     /**
      * @var string
      */
+    public $company;
+
+    /**
+     * @var string
+     */
     public $name;
 
     /**

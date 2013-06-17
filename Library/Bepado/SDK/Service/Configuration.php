@@ -102,6 +102,8 @@ class Configuration
                     array(
                         'serviceEndpoint' => $configuration['serviceEndpoint'],
                         'shippingCost' => $configuration['shippingCost'],
+                        'displayName' => $configuration['shopDisplayName'],
+                        'url' => $configuration['shopUrl'],
                     )
                 )
             );

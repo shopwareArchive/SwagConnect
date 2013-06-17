@@ -169,7 +169,10 @@ class Product extends ShopItem
      * Availability of the product
      *
      * Provide an integer with the amount of products currently in stock and
-     * ready for delivery.
+     * ready for delivery. When comparing availability during a transaction
+     * Bepado SDK will group the availability into empty, low, medium and high
+     * groups based on the interval 0 < 1-10 (low) < 11-100 (medium) < 101 to
+     * infinity (high).
      *
      * @var integer
      */

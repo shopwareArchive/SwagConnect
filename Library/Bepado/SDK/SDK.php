@@ -48,7 +48,7 @@ final class SDK
      *
      * @var DependencyResolver
      */
-    public $dependencies;
+    private $dependencies;
 
     /**
      * Version constant
@@ -67,7 +67,8 @@ final class SDK
         $apiEndpointUrl,
         Gateway $gateway,
         ProductToShop $toShop,
-        ProductFromShop $fromShop
+        ProductFromShop $fromShop,
+        ErrorHandler $errorHandler = null
     ) {
         $this->apiKey = $apiKey;
         $this->apiEndpointUrl = $apiEndpointUrl;
@@ -76,7 +77,13 @@ final class SDK
         // entirely pre-configured object, except for the properties available
         // through constructor injection. Dependency Injection is only used
         // internally in the SDK.
-        $this->dependencies = new DependencyResolver($gateway, $toShop, $fromShop, $apiKey);
+        $this->dependencies = new DependencyResolver(
+            $gateway,
+            $toShop,
+            $fromShop,
+            $errorHandler ? $errorHandler : new ErrorHandler\Exception(),
+            $apiKey
+        );
     }
 
     /**
@@ -108,6 +115,7 @@ final class SDK
      * the response.
      *
      * @param string $xml
+     *
      * @return string
      */
     public function handle($xml)
@@ -156,16 +164,16 @@ final class SDK
      * Establish a hook in your shop and call this method for every new
      * product, which should be exported to Bepado.
      *
-     * @param string $id
-     * @param string $hash
-     * @param string $revision
-     * @param Struct\Product $product
+     * @param string $productId
      * @return void
      */
-    public function recordInsert(Struct\Product $product)
+    public function recordInsert($productId)
     {
         $this->verifySdk();
+
+        $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
+
         $this->dependencies->getVerificator()->verify($product);
         $this->dependencies->getGateway()->recordInsert(
             $product->sourceId,
@@ -181,16 +189,16 @@ final class SDK
      * Establish a hook in your shop and call this method for every update of a
      * product, which is exported to Bepado.
      *
-     * @param string $id
-     * @param string $hash
-     * @param string $revision
-     * @param Struct\Product $product
+     * @param string $productId
      * @return void
      */
-    public function recordUpdate(Struct\Product $product)
+    public function recordUpdate($productId)
     {
         $this->verifySdk();
+
+        $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
+
         $this->dependencies->getVerificator()->verify($product);
         $this->dependencies->getGateway()->recordUpdate(
             $product->sourceId,
@@ -201,18 +209,30 @@ final class SDK
     }
 
     /**
+     * Get single product from gateway
+     *
+     * @param mixed $productId
+     * @return Struct\Product
+     */
+    protected function getProduct($productId)
+    {
+        $products = $this->dependencies->getFromShop()->getProducts(array($productId));
+        return reset($products);
+    }
+
+    /**
      * Record product delete
      *
      * Establish a hook in your shop and call this method for every delete of a
      * product, which is exported to Bepado.
      *
-     * @param string $id
+     * @param string $productId
      * @return void
      */
-    public function recordDelete($id)
+    public function recordDelete($productId)
     {
         $this->verifySdk();
-        $this->dependencies->getGateway()->recordDelete($id, $this->dependencies->getRevisionProvider()->next());
+        $this->dependencies->getGateway()->recordDelete($productId, $this->dependencies->getRevisionProvider()->next());
     }
 
     /**
@@ -266,7 +286,9 @@ final class SDK
     /**
      * Reserve products
      *
-     * This method will reserve the given products in the remote shops.
+     * This method will reserve the given products in the remote shops. It
+     * should be called at the beginning of the checkout process. It is the
+     * last chance to verify that everything is OK with the order.
      *
      * If the product data change in a relevant way, this method will not
      * reserve the products, but instead return a Struct\Message, which should
@@ -294,16 +316,18 @@ final class SDK
     /**
      * Checkout product sets related to the given reservation IDs
      *
-     * This process is the final "buy" transaction. It should be part of the
-     * checkout process and be handled synchronously.
+     * This process is the final "buy" transaction. It should be the last step
+     * of the checkout process and be handled synchronously. Is supposed to
+     * "always" succeed, since the reservation beforhand should already ensure
+     * everything is fine.
      *
      * This method will just return true, if the transaction worked as
-     * expected. If it failed, or partially failed, a corresponding
-     * Struct\Message will be returned.
+     * expected. If it failed, or partially failed, an error will be logged
+     * with the ErrorHandler and the method will return false.
      *
      * @param Struct\Reservation $reservation
      * @param string $orderId
-     * @return mixed
+     * @return bool[]
      */
     public function checkout(Struct\Reservation $reservation, $orderId)
     {
@@ -371,6 +395,10 @@ final class SDK
     {
         $shopConfiguration = $this->dependencies->getGateway()->getShopConfiguration($shopId);
 
-        return new Shop(array('id' => $shopId, 'name' => $shopConfiguration->name));
+        return new Shop(array(
+            'id' => $shopId,
+            'name' => $shopConfiguration->displayName,
+            'url' => $shopConfiguration->url,
+        ));
     }
 }

@@ -35,7 +35,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     ],
 
     messages: {
-
+        saveMappingTitle: '{s name=form/message/save_mapping_title}Save category mapping{/s}',
+        saveMappingSuccess: '{s name=form/message/save_mapping_success}Category mapping has been saved.{/s}',
+        saveMappingError: '{s name=form/message/save_mapping_error}Category mapping could not be saved.{/s}'
     },
 
     /**
@@ -66,19 +68,25 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-mapping button[action=save]': {
                 click: function(button) {
                     var me = this,
-                        panel = me.getMapping();
-                    //panel.setLoading();
+                        panel = me.getMapping(),
+                        title = me.messages.saveMappingTitle, message;
+                    if(panel.store.getUpdatedRecords().length < 1) {
+                        return;
+                    }
+                    panel.setLoading();
                     panel.store.sync({
                         success :function (records, operation) {
-                            //panel.setLoading(false);
-                            //me.createGrowlMessage(title, message, win.title);
+                            panel.setLoading(false);
+                            message = me.messages.saveMappingSuccess;
+                            me.createGrowlMessage(title, message);
                         },
                         failure:function (batch) {
-                            //panel.setLoading(false);
-                            //if(batch.proxy.reader.rawData.message) {
-                            //    message += '<br />' + batch.proxy.reader.rawData.message;
-                            //}
-                            //me.createGrowlMessage(title, message);
+                            panel.setLoading(false);
+                            message = me.messages.saveMappingError;
+                            if(batch.proxy.reader.rawData.message) {
+                                message += '<br />' + batch.proxy.reader.rawData.message;
+                            }
+                            me.createGrowlMessage(title, message);
                         }
                     });
                 }

@@ -13,8 +13,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
 
         Ext.applyIf(me, {
             items: [{
-                html: '<h1>Hello World</h1>'
-            }, {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {

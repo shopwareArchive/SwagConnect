@@ -110,6 +110,7 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoSourceId($product->sourceId);
         $attribute->setBepadoCategories(serialize($product->categories));
         $detail->setInStock($product->availability);
+        $model->setLastStock(true);
 
         $customerGroup = $this->helper->getDefaultCustomerGroup();
         $detail->getPrices()->clear();

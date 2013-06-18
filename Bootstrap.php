@@ -47,7 +47,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getLabel()
     {
-        return 'Bepado';
+        return 'bepado';
     }
 
     /**
@@ -203,6 +203,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
         $form->setElement('boolean', 'cloudSearch', array(
             'label' => 'Cloud-Search aktivieren'
+        ));
+        $form->setElement('text', 'productDescription', array(
+            'label' => 'Feld für Produktbeschreibungen'
         ));
     }
 
@@ -429,14 +432,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * @return \Shopware\Bepado\Helper
      */
-    public function getHelper()
+    protected function getHelper()
     {
         if($this->helper === null) {
             $this->helper = new \Shopware\Bepado\Helper(
-                $this->Application()->Models()
+                $this->Application()->Models(),
+                $this->getImagePath()
             );
         }
         return $this->helper;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getImagePath()
+    {
+        $request = $this->Application()->Front()->Request();
+        $imagePath = $request->getScheme() . '://'
+                   . $request->getHttpHost() . $request->getBasePath();
+        $imagePath .= '/media/image/';
+        return $imagePath;
     }
 
     /**

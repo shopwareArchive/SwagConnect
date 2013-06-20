@@ -237,6 +237,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $this->subscribeEvent(
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout',
+            'onPreDispatchFrontendCheckout'
+        );
+
+        $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail',
             'onPostDispatchFrontendDetail'
         );
@@ -303,6 +308,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	 */
 	public function uninstall()
 	{
+        $this->removeMyAttributes();
         return true;
 	}
 
@@ -520,7 +526,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $request = $action->Request();
         $actionName = $request->getActionName();
 
-        if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
+        if(!in_array($actionName, array('confirm', 'cart'))) {
             return;
         }
         if(empty($view->sBasket) || !$request->isDispatched()) {
@@ -555,95 +561,123 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 unset($basket['content'][$key]);
             }
         }
+        $bepadoShops = array();
+        foreach($bepadoContent as $shopId => $items) {
+            $bepadoShops[$shopId] = $sdk->getShop($shopId);
+        }
 
-        if($actionName == 'finish') {
-            $order = new Bepado\SDK\Struct\Order();
-            $order->products = array();
-            $order->deliveryAddress = $this->getDeliveryAddress($view->sUserData);
-            foreach($bepadoContent as $shopId => $items) {
-                foreach($items as $sourceId => $item) {
-                    $product = $bepadoProducts[$shopId][$sourceId];
-                    $orderItem = new Bepado\SDK\Struct\OrderItem();
-                    $orderItem->product = $product;
-                    $orderItem->count = (int)$item['quantity'];
-                    $order->products[] = $orderItem;
-                }
-            }
-            /** @var $reservation Bepado\SDK\Struct\Reservation */
-            $reservation = $sdk->reserveProducts($order);
-            if(!empty($reservation->messages)) {
-                $view->assign('bepadoMessages', $reservation->messages);
-                $action->forward('confirm');
-            } else {
-                Shopware()->Session()->BepadoReservation = $reservation;
-            }
-        } else {
-            $bepadoShops = array();
-            foreach($bepadoContent as $shopId => $items) {
-                $bepadoShops[$shopId] = $sdk->getShop($shopId);
-            }
+        $bepadoShippingCosts = array();
+        foreach($bepadoProducts as $shopId => $products) {
+            $bepadoShippingCosts[$shopId] = $sdk->calculateShippingCosts($products);
+        }
 
-            $bepadoShippingCosts = array();
+        if(($bepadoMessages = $view->getAssign('bepadoMessages')) === null) {
+            $bepadoMessages = array();
             foreach($bepadoProducts as $shopId => $products) {
-                $bepadoShippingCosts[$shopId] = $sdk->calculateShippingCosts($products);
-            }
-
-            if(($bepadoMessages = $view->getAssign('bepadoMessages')) === null) {
-                $bepadoMessages = array();
-                foreach($bepadoProducts as $shopId => $products) {
-                    /** @var $response Bepado\SDK\Struct\Message */
-                    $response = $sdk->checkProducts($products);
-                    if($response !== true) {
-                        $bepadoMessages[$shopId] = $response;
-                    }
+                /** @var $response Bepado\SDK\Struct\Message */
+                $response = $sdk->checkProducts($products);
+                if($response !== true) {
+                    $bepadoMessages[$shopId] = $response;
                 }
             }
+        }
 
-            if(empty($basket['content'])) {
-                reset($bepadoContent);
-                $shopId = current(array_keys($bepadoContent));
-                $basket['content'] = $bepadoContent[$shopId];
-                $view->shopId = $shopId;
-                unset($bepadoContent[$shopId]);
-            }
+        if(empty($basket['content'])) {
+            reset($bepadoContent);
+            $shopId = current(array_keys($bepadoContent));
+            $basket['content'] = $bepadoContent[$shopId];
+            $view->shopId = $shopId;
+            unset($bepadoContent[$shopId]);
+        }
 
-            $shippingCosts = array_sum($bepadoShippingCosts);
-            $shippingCostsOrg = $basket['sShippingcosts'];
-            $basket['sShippingcosts'] += $shippingCosts;
-            $basket['AmountNumeric'] += $shippingCosts;
-            $basket['AmountNetNumeric'] += $shippingCosts;
-            $basket['sAmount'] += $shippingCosts;
-            if(!empty($basket['sAmountWithTax'])) {
-                $basket['sAmountWithTax'] += $shippingCosts;
-            }
-            $newVariables = array(
-                'sBasket' => $basket,
-                'sShippingcosts' => $basket['sShippingcosts'],
-                'sAmount' => $basket['sAmount'],
-                'sAmountWithTax' => $basket['sAmountWithTax'],
-                'sAmountNet' => $basket['AmountNetNumeric']
-            );
-            $view->assign($newVariables);
+        $shippingCosts = array_sum($bepadoShippingCosts);
+        $shippingCostsOrg = $basket['sShippingcosts'];
+        $basket['sShippingcosts'] += $shippingCosts;
+        $basket['AmountNumeric'] += $shippingCosts;
+        $basket['AmountNetNumeric'] += $shippingCosts;
+        $basket['sAmount'] += $shippingCosts;
+        if(!empty($basket['sAmountWithTax'])) {
+            $basket['sAmountWithTax'] += $shippingCosts;
+        }
+        $newVariables = array(
+            'sBasket' => $basket,
+            'sShippingcosts' => $basket['sShippingcosts'],
+            'sAmount' => $basket['sAmount'],
+            'sAmountWithTax' => $basket['sAmountWithTax'],
+            'sAmountNet' => $basket['AmountNetNumeric']
+        );
+        $view->assign($newVariables);
 
-            if($actionName == 'confirm') {
-                $session = Shopware()->Session();
-                /** @var $variables ArrayObject */
-                $variables = $session->offsetGet('sOrderVariables');
-                $variables->exchangeArray(array_merge(
-                    $variables->getArrayCopy(), $newVariables
-                ));
-                $session->offsetSet('sOrderVariables', $variables);
-            }
-
-
-            $view->assign(array(
-                'bepadoContent' => $bepadoContent,
-                'bepadoShops' => $bepadoShops,
-                'bepadoMessages' => $bepadoMessages,
-                'bepadoShippingCosts' => $bepadoShippingCosts,
-                'bepadoShippingCostsOrg' => $shippingCostsOrg,
-                'bepadoShopInfo' => $this->Config()->get('checkoutShopInfo'),
+        if($actionName == 'confirm') {
+            $session = Shopware()->Session();
+            /** @var $variables ArrayObject */
+            $variables = $session->offsetGet('sOrderVariables');
+            $variables->exchangeArray(array_merge(
+                $variables->getArrayCopy(), $newVariables
             ));
+            $session->offsetSet('sOrderVariables', $variables);
+        }
+
+        $view->assign(array(
+            'bepadoContent' => $bepadoContent,
+            'bepadoShops' => $bepadoShops,
+            'bepadoMessages' => $bepadoMessages,
+            'bepadoShippingCosts' => $bepadoShippingCosts,
+            'bepadoShippingCostsOrg' => $shippingCostsOrg,
+            'bepadoShopInfo' => $this->Config()->get('checkoutShopInfo'),
+        ));
+    }
+
+    /**
+     * Event listener method
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPreDispatchFrontendCheckout(Enlight_Event_EventArgs $args)
+    {
+        /** @var $action Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $request = $action->Request();
+        $view = $action->View();
+        $session = Shopware()->Session();
+        $sdk = $this->getSDK();
+        $helper = $this->getHelper();
+
+        if($request->getActionName() != 'finish') {
+            return;
+        }
+        if(empty($session['sOrderVariables'])) {
+			return;
+		}
+
+        $order = new Bepado\SDK\Struct\Order();
+        $order->products = array();
+        $userData = $session['sOrderVariables']['sUserData'];
+        $order->deliveryAddress = $this->getDeliveryAddress($userData);
+
+        $basket = $session['sOrderVariables']['sBasket'];
+        foreach ($basket['content'] as $row) {
+            if(!empty($row['mode'])) {
+                continue;
+            }
+            $product = $helper->getProductById($row['articleID']);
+            if($product === null || $product->shopId === null) {
+                continue;
+            }
+
+            $orderItem = new Bepado\SDK\Struct\OrderItem();
+            $orderItem->product = $product;
+            $orderItem->count = (int)$row['quantity'];
+            $order->products[] = $orderItem;
+        }
+
+        /** @var $reservation Bepado\SDK\Struct\Reservation */
+        $reservation = $sdk->reserveProducts($order);
+        if(!empty($reservation->messages)) {
+            $view->assign('bepadoMessages', $reservation->messages);
+            $action->forward('confirm');
+        } else {
+            Shopware()->Session()->BepadoReservation = $reservation;
         }
     }
 

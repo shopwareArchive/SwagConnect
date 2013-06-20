@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.8';
+        return '1.1.9';
     }
 
     /**
@@ -204,7 +204,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('boolean', 'cloudSearch', array(
             'label' => 'Cloud-Search aktivieren'
         ));
-        $form->setElement('text', 'productDescription', array(
+        $form->setElement('text', 'productDescriptionField', array(
             'label' => 'Feld für Produktbeschreibungen'
         ));
     }
@@ -526,6 +526,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         if(empty($view->sBasket) || !$request->isDispatched()) {
             return;
         }
+        if(!empty($view->sOrderNumber)) {
+            return;
+        }
 
         $this->registerMyTemplateDir();
         $view->extendsTemplate('frontend/bepado/checkout.tpl');
@@ -605,6 +608,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             }
 
             $shippingCosts = array_sum($bepadoShippingCosts);
+            $shippingCostsOrg = $basket['sShippingcosts'];
             $basket['sShippingcosts'] += $shippingCosts;
             $basket['AmountNumeric'] += $shippingCosts;
             $basket['AmountNetNumeric'] += $shippingCosts;
@@ -637,6 +641,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 'bepadoShops' => $bepadoShops,
                 'bepadoMessages' => $bepadoMessages,
                 'bepadoShippingCosts' => $bepadoShippingCosts,
+                'bepadoShippingCostsOrg' => $shippingCostsOrg,
                 'bepadoShopInfo' => $this->Config()->get('checkoutShopInfo'),
             ));
         }

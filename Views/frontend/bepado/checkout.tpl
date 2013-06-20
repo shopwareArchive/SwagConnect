@@ -24,6 +24,12 @@
 {/block}
 
 {block name='frontend_checkout_cart_cart_head' append}
+    {if $bepadoContent}
+        {include file='frontend/bepado/shop_header.tpl'}
+    {/if}
+
+    {$smarty.block.parent}
+
     {if $bepadoMessages[$shopId]}
         <div class="error" style="margin:0">
             {foreach from=$bepadoMessages[$shopId] item=bepadomessage}

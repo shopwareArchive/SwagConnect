@@ -108,6 +108,7 @@ class ProductToShop implements ProductToShopBase
         $model->setDescriptionLong($product->longDescription);
         $attribute->setBepadoShopId($product->shopId);
         $attribute->setBepadoSourceId($product->sourceId);
+        $attribute->setBepadoExportStatus(null);
         $attribute->setBepadoCategories(serialize($product->categories));
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
@@ -198,6 +199,7 @@ class ProductToShop implements ProductToShopBase
         //$model->getDetails()->clear();
         //$this->manager->remove($model);
         $model->setActive(false);
+        $model->getAttribute()->setBepadoExportStatus('delete');
         $this->manager->flush($model);
     }
 }

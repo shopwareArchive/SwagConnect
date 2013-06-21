@@ -45,9 +45,15 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             dataIndex: 'supplier',
             flex: 3
         }, {
-            header: 'Active',
+            header: 'Status',
             xtype: 'booleancolumn',
             dataIndex: 'active',
+            renderer: function(value, metaData, record) {
+                if(record.get('bepadoStatus')) {
+                    return record.get('bepadoStatus');
+                }
+                return value ? 'Aktiv' : 'Inaktiv';
+            },
             width: 50
         }, {
             header: 'Price',

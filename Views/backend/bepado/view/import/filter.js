@@ -22,14 +22,15 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
         var me = this;
 
         me.statusFilter = me.getStatusFilter();
-        me.categoryFilter = me.getCategoryFilter();
+        //me.categoryFilter = me.getCategoryFilter();
         me.supplierFilter = me.getSupplierFilter();
         me.searchFilter = me.getSearchFilter();
 
         Ext.applyIf(me, {
             items: [
                 me.statusFilter, me.searchFilter,
-                me.supplierFilter, me.categoryFilter
+                me.supplierFilter
+                //me.categoryFilter
             ]
         });
 

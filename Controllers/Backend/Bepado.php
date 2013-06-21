@@ -202,7 +202,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
         $builder->addSelect(array(
             'at.bepadoShopId',
-            'at.bepadoSourceId'
+            'at.bepadoSourceId',
+            'at.bepadoExportStatus as bepadoStatus',
         ));
         $builder->andWhere('at.bepadoShopId IS NOT NULL');
 
@@ -323,14 +324,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
-            $sdk->recordDelete($id);
             $model = $this->getHelper()->getArticleModelById($id);
-            if($model !== null) {
-                $attribute = $model->getAttribute();
-                $attribute->setBepadoExportStatus(
-                    'delete'
-                );
+            if($model === null) {
+                continue;
             }
+            $attribute = $model->getAttribute();
+            $sdk->recordDelete($id);
+            $attribute->setBepadoExportStatus(
+                'delete'
+            );
         }
         Shopware()->Models()->flush();
     }
@@ -341,9 +343,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $active = (bool)$this->Request()->get('active');
         foreach($ids as $id) {
             $model = $this->getHelper()->getArticleModelById($id);
-            if($model !== null) {
-                $model->setActive($active);
+            if($model === null) {
+                continue;
             }
+            $attribute = $model->getAttribute();
+            if($attribute->getBepadoExportStatus() !== null) {
+                continue;
+            }
+            $model->setActive($active);
         }
         Shopware()->Models()->flush();
     }

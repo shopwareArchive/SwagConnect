@@ -137,7 +137,13 @@ class ProductFromShop implements ProductFromShopBase
         $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 12);';
         Shopware()->Db()->query($sql, array($number));
         $modelId = Shopware()->Db()->lastInsertId();
+        /** @var $model \Shopware\Models\Order\Order */
         $model = $this->manager->find('Shopware\Models\Order\Order', $modelId);
+
+        $attribute = new \Shopware\Models\Attribute\Order;
+        $attribute->setBepadoOrderId($order->localOrderId);
+        $attribute->setBepadoShopId($order->orderShop);
+        $model->setAttribute($attribute);
 
         $model->fromArray(array(
             'number' => $number,

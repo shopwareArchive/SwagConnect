@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.1.9';
+        return '1.2.1';
     }
 
     /**
@@ -103,14 +103,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $this->Application()->Models()->addAttribute(
-            's_order_details_attributes',
-            'bepado', 'reservation_id',
-            'text'
+            's_order_attributes',
+            'bepado', 'shop_id',
+            'int(11)'
         );
         $this->Application()->Models()->addAttribute(
-            's_order_basket_attributes',
-            'bepado', 'reservation_id',
-            'text'
+            's_order_attributes',
+            'bepado', 'order_id',
+            'int(11)'
         );
 
         $this->Application()->Models()->addAttribute(
@@ -255,6 +255,16 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'Enlight_Controller_Action_PostDispatch_Frontend_Search',
             'onPostDispatchFrontendSearch'
         );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_ArticleList',
+            'onPostDispatchBackendArticleList'
+        );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_Order',
+            'onPostDispatchBackendOrder'
+        );
     }
 
     private function createMyTables()
@@ -386,6 +396,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->Application()->Loader()->registerNamespace(
             'Shopware\\Bepado',
             $this->Path() . 'Library/Shopware/Bepado/'
+        );
+    }
+
+    private function registerMySnippets()
+    {
+        $this->Application()->Snippets()->addConfigDir(
+            $this->Path() . 'Snippets/'
         );
     }
 
@@ -764,5 +781,71 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'action' => 'search',
             'query' => $view->sRequests['sSearch']
         ));
+    }
+
+    /**
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchBackendArticleList(Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/article_list/bepado.js'
+                );
+                break;
+            case 'list':
+                $data = $subject->View()->data;
+                foreach($data as &$row) {
+                    $sql = 'SELECT 1 FROM s_articles_attributes WHERE articleID = ? AND bepado_source_id IS NOT NULL';
+                    $row['bepado'] = (bool)Shopware()->Db()->fetchOne($sql, array($row['articleId']));
+                }
+                $subject->View()->data = $data;
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchBackendOrder(Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/order/bepado.js'
+                );
+                break;
+            case 'getList':
+                $data = $subject->View()->data;
+                $sdk = $this->getSDK();
+                foreach($data as &$row) {
+                    $sql = 'SELECT bepado_shop_id, bepado_order_id FROM s_order_attributes WHERE orderID = ?';
+                    $result = Shopware()->Db()->fetchRow($sql, array($row['id']));
+                    if(!empty($result)) {
+                        $row['bepadoShopId'] = $result['bepado_shop_id'];
+                        $row['bepadoShop'] = $sdk->getShop($result['bepado_shop_id'])->name;
+                        $row['bepadoOrderId'] = $result['bepado_order_id'];
+                    }
+                }
+                $subject->View()->data = $data;
+                break;
+            default:
+                break;
+        }
     }
 }

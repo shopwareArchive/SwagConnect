@@ -45,7 +45,7 @@ class Helper
     /**
      * @var string
      */
-    private $imagePath;
+    private $imagePath, $productDescriptionField;
 
     /**
      * @var Query
@@ -54,12 +54,14 @@ class Helper
 
     /**
      * @param ModelManager $manager
-     * @param $imagePath
+     * @param string $imagePath
+     * @param string $productDescriptionField
      */
-    public function __construct(ModelManager $manager, $imagePath = null)
+    public function __construct(ModelManager $manager, $imagePath = null, $productDescriptionField = null)
     {
         $this->manager = $manager;
         $this->imagePath = $imagePath;
+        $this->productDescriptionField = $productDescriptionField;
     }
 
     /**
@@ -92,6 +94,14 @@ class Helper
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
         $customerGroup = $repository->findOneBy(array('key' => 'EK'));
         return $customerGroup;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getProductDescriptionField()
+    {
+        return $this->productDescriptionField;
     }
 
     /**
@@ -134,6 +144,9 @@ class Helper
             'at.bepadoCategories as categories'
             //'images = array()',
         ));
+        if($this->productDescriptionField !== null) {
+            $builder->addSelect('at.' . $this->productDescriptionField . ' as altDescription');
+        }
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
         $query->setHydrationMode($query::HYDRATE_ARRAY);
@@ -251,9 +264,12 @@ class Helper
         if(isset($row['deliveryDate'])) {
             $row['deliveryDate'] = $row['deliveryDate']->getTimestamp();
         }
-        //if(empty($row['purchasePrice'])) {
-        //    $row['purchasePrice'] = $row['price'];
-        //}
+
+        if(!empty($row['altDescription'])) {
+            $row['longDescription'] = $row['altDescription'];
+        }
+        unset($row['altDescription']);
+
         // Fix categories
         if(is_string($row['categories'])) {
             $row['categories'] = unserialize($row['categories']);

@@ -82,6 +82,9 @@ class ProductToShop implements ProductToShopBase
             $model->setCategories(
                 $this->helper->getCategoriesByProduct($product)
             );
+            $model->setName($product->title);
+            $model->setDescription($product->shortDescription);
+            $model->setDescriptionLong($product->longDescription);
         } else {
             $detail = $model->getMainDetail();
         }
@@ -103,9 +106,12 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
-        $model->setName($product->title);
-        $model->setDescription($product->shortDescription);
-        $model->setDescriptionLong($product->longDescription);
+        if(($descField = $this->helper->getProductDescriptionField()) !== null) {
+            $attribute->fromArray(array(
+                $descField => $product->longDescription
+            ));
+        }
+
         $attribute->setBepadoShopId($product->shopId);
         $attribute->setBepadoSourceId($product->sourceId);
         $attribute->setBepadoExportStatus(null);

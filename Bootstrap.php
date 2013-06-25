@@ -460,7 +460,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         if($this->helper === null) {
             $this->helper = new \Shopware\Bepado\Helper(
                 $this->Application()->Models(),
-                $this->getImagePath()
+                $this->getImagePath(),
+                $this->Config()->get('productDescriptionField')
             );
         }
         return $this->helper;

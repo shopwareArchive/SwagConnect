@@ -25,8 +25,6 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
             result = result + '<div  title="' + title + '" class="sprite-share" ' + style + '>&nbsp;</div>';
         }
 
-        console.log(result);
-
         return result;
     }
 });

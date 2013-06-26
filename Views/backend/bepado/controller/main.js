@@ -35,9 +35,19 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     ],
 
     messages: {
-        saveMappingTitle: '{s name=form/message/save_mapping_title}Save category mapping{/s}',
-        saveMappingSuccess: '{s name=form/message/save_mapping_success}Category mapping has been saved.{/s}',
-        saveMappingError: '{s name=form/message/save_mapping_error}Category mapping could not be saved.{/s}'
+        saveMappingTitle: '{s name=mapping/message/title}Save category mapping{/s}',
+        saveMappingSuccess: '{s name=mapping/message/success}Category mapping has been saved.{/s}',
+        saveMappingError: '{s name=mapping/message/error}Category mapping could not be saved.{/s}',
+
+        insertOrUpdateProductTitle: '{s name=export/message/import_product_title}Products export{/s}',
+        insertOrUpdateProductMessage: '{s name=export/message/import_product_messag}Products were marked for inserting / updating.{/s}',
+        deleteProductTitle: '{s name=export/message/delete_title}Products export{/s}',
+        deleteProductMessage: '{s name=export/message/delete_message}Products were marked for deleting.{/s}',
+
+        activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
+        activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
+        disableProductTitle: '{s name=import/message/disable_title}Products import{/s}',
+        disableProductMessage: '{s name=import/message/disable_message}Products have been disabled.{/s}'
     },
 
     /**
@@ -66,30 +76,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 click: me.onSaveConfigForm
             },
             'bepado-mapping button[action=save]': {
-                click: function(button) {
-                    var me = this,
-                        panel = me.getMapping(),
-                        title = me.messages.saveMappingTitle, message;
-                    if(panel.store.getUpdatedRecords().length < 1) {
-                        return;
-                    }
-                    panel.setLoading();
-                    panel.store.sync({
-                        success :function (records, operation) {
-                            panel.setLoading(false);
-                            message = me.messages.saveMappingSuccess;
-                            me.createGrowlMessage(title, message);
-                        },
-                        failure:function (batch) {
-                            panel.setLoading(false);
-                            message = me.messages.saveMappingError;
-                            if(batch.proxy.reader.rawData.message) {
-                                message += '<br />' + batch.proxy.reader.rawData.message;
-                            }
-                            me.createGrowlMessage(title, message);
-                        }
-                    });
-                }
+                click: me.onSaveMapping
             },
             'bepado-export-list button[action=add]': {
                click: me.onExportFilterAction
@@ -223,16 +210,45 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         me.callParent(arguments);
     },
 
+    onSaveMapping: function(button) {
+        var me = this,
+            panel = me.getMapping(),
+            title = me.messages.saveMappingTitle, message;
+        if(panel.store.getUpdatedRecords().length < 1) {
+            return;
+        }
+        panel.setLoading();
+        panel.store.sync({
+            success :function (records, operation) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingSuccess;
+                me.createGrowlMessage(title, message);
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingError;
+                if(batch.proxy.reader.rawData.message) {
+                    message += '<br />' + batch.proxy.reader.rawData.message;
+                }
+                me.createGrowlMessage(title, message);
+            }
+        });
+    },
+
     onExportFilterAction: function(btn) {
         var me = this,
             list = me.getExportList(),
             records = list.selModel.getSelection(),
-            ids = [], url;
+            ids = [], url, message, title;
 
         if(btn.action == 'add') {
             url = '{url action=insertOrUpdateProduct}';
+            title = me.messages.insertOrUpdateProductTitle;
+            message = me.messages.insertOrUpdateProductMessage;
         } else if(btn.action == 'delete') {
             url = '{url action=deleteProduct}';
+            title = me.messages.deleteProductTitle;
+            message = me.messages.deleteProductMessage;
         } else {
             return;
         }
@@ -249,10 +265,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 'ids[]': ids
             },
             success: function(response, opts) {
-                var operation = Ext.decode(response.responseText);
-                if (operation.success == true) {
-
-                }
+                //var operation = Ext.decode(response.responseText);
+                //if (operation.success == true) {
+                //}
+                me.createGrowlMessage(title, message);
                 list.setLoading(false);
                 list.store.load();
             }
@@ -263,12 +279,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         var me = this,
             list = me.getImportList(),
             records = list.selModel.getSelection(),
-            ids = [], url;
+            ids = [], url, message, title;
 
         if(btn.action == 'activate') {
             url = '{url action=updateProduct}?active=1';
+            title = me.messages.activateProductTitle;
+            message = me.messages.activateProductMessage;
         } else if(btn.action == 'deactivate') {
             url = '{url action=updateProduct}?active=0';
+            title = me.messages.disableProductTitle;
+            message = me.messages.disableProductMessage;
         } else {
             return;
         }
@@ -285,10 +305,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 'ids[]': ids
             },
             success: function(response, opts) {
-                var operation = Ext.decode(response.responseText);
-                if (operation.success == true) {
-
-                }
+                //var operation = Ext.decode(response.responseText);
+                //if (operation.success == true) {
+                //}
+                me.createGrowlMessage(title, message);
                 list.setLoading(false);
                 list.store.load();
             }

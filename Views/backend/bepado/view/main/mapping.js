@@ -14,7 +14,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         Ext.applyIf(me, {
             items: [{
                 xtype: 'treepanel',
-                //title: 'Category filter',
                 rootVisible: false,
                 root: {
                     id: 1,
@@ -30,9 +29,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                     xtype: 'treecolumn',
                     flex: 1,
                     dataIndex: 'text',
-                    text: 'Category'
+                    text: '{s name=mapping/columns/category}Category{/s}'
                 },{
-                    text: 'Mapping',
+                    text: '{s name=mapping/columns/mapping}Mapping{/s}',
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
@@ -56,7 +55,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
             items: [{
                 iconCls: 'sprite-minus-circle-frame',
                 action: 'clear',
-                tooltip: 'Clear mapping',
+                tooltip: '{s name=mapping/options/clear}Clear mapping{/s}',
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
                     record.set('mapping', null);
                 },
@@ -74,7 +73,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
             dock: 'bottom',
             xtype: 'toolbar',
             items: ['->', {
-                text: '{s name=form/save_text}Save{/s}',
+                text: '{s name=mapping/options/save}Save{/s}',
                 cls: 'primary',
                 action: 'save'
             }]

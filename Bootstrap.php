@@ -134,12 +134,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     private function createMyMenu()
     {
-        $parent = $this->Menu()->findOneBy(array('label' => 'Einstellungen'));
+        $parent = $this->Menu()->findOneBy(array('label' => 'Marketing'));
         $this->createMenuItem(array(
             'label' => $this->getLabel(),
             'controller' => 'Bepado',
             'action' => 'Index',
-            'class' => 'sprite-ui-combo-box-edit',
+            'class' => 'bepado-icon',
             'active' => 1,
             'parent' => $parent
         ));
@@ -265,6 +265,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'Enlight_Controller_Action_PostDispatch_Backend_Order',
             'onPostDispatchBackendOrder'
         );
+
+	    $this->subscribeEvent(
+		    'Enlight_Controller_Action_PostDispatch_Backend_Index',
+		    'onPostDispatch'
+	    );
     }
 
     private function createMyTables()
@@ -847,6 +852,41 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 break;
             default:
                 break;
+        }
+    }
+
+	/**
+	 * Event listener method which will be triggered when the backend will be rendered.
+	 *
+	 * The method provides the menu entry item.
+	 *
+	 * @param Enlight_Event_EventArgs $args
+	 * @returns boolean|void
+	 */
+	public function onPostDispatch(Enlight_Event_EventArgs $args)
+    {
+        $action = $args->getSubject();
+        $request = $action->Request();
+        $response = $action->Response();
+        $view = $action->View();
+
+        if (!$request->isDispatched()
+            || $response->isException()
+            || $request->getModuleName() != 'backend'
+        ) {
+            return;
+        }
+
+        if ($view->hasTemplate() )
+        {
+            $response = $args->getSubject()->Response();
+            $view = $args->getSubject()->View();
+            if($response->isException()) {
+                return;
+            }
+
+            $view->addTemplateDir($this->Path() . 'Views/');
+            $view->extendsTemplate('backend/bepado/menu_entry.tpl');
         }
     }
 }

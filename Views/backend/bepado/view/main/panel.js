@@ -13,6 +13,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
 
         Ext.applyIf(me, {
             items: [{
+                xtype: 'bepado-home-page',
+                itemId: 'home'
+            }, {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {

@@ -8,13 +8,6 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     extend: 'Enlight.app.Controller',
 
-    views: [
-        'main.Window', 'main.Navigation',
-        'main.Panel', 'main.Config', 'main.Mapping',
-        'export.Panel', 'import.Panel',
-        'export.List', 'export.Filter',
-        'import.List', 'import.Filter'
-    ],
     stores: [
         'main.Navigation', 'main.Mapping', 'main.Category',
         'export.List', 'import.List'

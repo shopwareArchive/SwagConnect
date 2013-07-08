@@ -37,7 +37,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.1';
+        return '1.2.2';
     }
 
     /**
@@ -202,7 +202,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'value' => true
         ));
         $form->setElement('boolean', 'cloudSearch', array(
-            'label' => 'Cloud-Search aktivieren'
+            'label' => 'Cloud-Search aktivieren',
+            'value' => false
         ));
         $form->setElement('text', 'productDescriptionField', array(
             'label' => 'Feld für Produktbeschreibungen'
@@ -492,9 +493,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function onGetControllerPathBackend(Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
-        $this->Application()->Snippets()->addConfigDir(
-            $this->Path() . 'Snippets/'
-        );
+        $this->registerMySnippets();
         return $this->Path() . 'Controllers/Backend/Bepado.php';
     }
 
@@ -856,15 +855,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
 	/**
-	 * Event listener method which will be triggered when the backend will be rendered.
-	 *
-	 * The method provides the menu entry item.
-	 *
 	 * @param Enlight_Event_EventArgs $args
 	 * @returns boolean|void
 	 */
 	public function onPostDispatch(Enlight_Event_EventArgs $args)
     {
+        /** @var $action Enlight_Controller_Action */
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
@@ -872,21 +868,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         if (!$request->isDispatched()
             || $response->isException()
-            || $request->getModuleName() != 'backend'
+            || !$view->hasTemplate()
         ) {
             return;
         }
 
-        if ($view->hasTemplate() )
-        {
-            $response = $args->getSubject()->Response();
-            $view = $args->getSubject()->View();
-            if($response->isException()) {
-                return;
-            }
-
-            $view->addTemplateDir($this->Path() . 'Views/');
-            $view->extendsTemplate('backend/bepado/menu_entry.tpl');
-        }
+        $view->addTemplateDir($this->Path() . 'Views/');
+        $view->extendsTemplate('backend/bepado/menu_entry.tpl');
     }
 }

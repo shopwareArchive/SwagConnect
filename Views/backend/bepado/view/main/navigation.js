@@ -7,8 +7,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Navigation', {
 
     rootVisible: false,
 
-    //title: '{s name=list/title}Groups{/s}',
-
     width: 200,
     layout: 'fit',
     //autoScroll: true,

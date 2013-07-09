@@ -128,11 +128,15 @@
 }
 .bepado-clear {clear:both;}
 .bepado-dispatch-row {
-    background: url("../images/ico-basket_voucher.png") no-repeat 20px 20px;
+    padding: 10px 0 !important;
+    background: #fff url("../images/ico-basket_voucher.png") no-repeat 20px 20px !important;
     min-height: 45px !important;
 }
 .bepado-dispatch-row .title {
     position: absolute;
     top: 14px;
     left: 95px;
+}
+#confirm .bepado-dispatch-row .title {
+    top: 0;
 }

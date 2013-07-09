@@ -25,20 +25,34 @@
 
 {block name='frontend_checkout_cart_cart_head' append}
 
-    {$smarty.block.parent}
-	{if $bepadoContent}
-    	{include file='frontend/bepado/shop_header.tpl'}
+	{if $bepadoMessages[$shopId]}
+		<div class="error" style="margin:0">
+			{foreach from=$bepadoMessages[$shopId] item=bepadomessage}
+				{$message = $bepadomessage->message}
+				{foreach from=$bepadomessage->values key=key item=value}
+					{$message = "%{$key}"|str_replace:$value:$message}
+				{/foreach}
+				{$message}<br>
+			{/foreach}
+		</div>
 	{/if}
 
-    {if $bepadoMessages[$shopId]}
-        <div class="error" style="margin:0">
-            {foreach from=$bepadoMessages[$shopId] item=bepadomessage}
-                {$message = $bepadomessage->message}
-                {foreach from=$bepadomessage->values key=key item=value}
-                    {$message = "%{$key}"|str_replace:$value:$message}
-                {/foreach}
-                {$message}<br>
-            {/foreach}
-        </div>
-    {/if}
+    {$smarty.block.parent}
+	{if $bepadoContent}
+    	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=false}
+	{/if}
+{/block}
+
+{block name='frontend_checkout_confirm_item'}
+	{if $key eq 0 && $bepadoContent}
+    	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=true}
+	{/if}
+
+	{if !$sBasketItem.bepadoShopId || !$bepadoContent}
+		{$smarty.block.parent}
+	{/if}
+
+	{if $sBasket.content|count -1 eq $key}
+		{include file='frontend/bepado/checkout_cart.tpl'}
+	{/if}
 {/block}

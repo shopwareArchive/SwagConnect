@@ -15,10 +15,12 @@
 	</div>
 
 	<div class="grid_2 textright">
-		{if $bepadoShippingCosts[$shopId]}
-			{$bepadoShippingCostsOrg|currency}
-		{elseif $bepadoShippingCostsOrg}
-			{$bepadoShippingCostsOrg|currency}
+		{if !$hideSinglePrice}
+			{if $bepadoShippingCosts[$shopId]}
+				{$bepadoShippingCostsOrg|currency}
+			{elseif $bepadoShippingCostsOrg}
+				{$bepadoShippingCostsOrg|currency}
+			{/if}
 		{/if}
 	</div>
 

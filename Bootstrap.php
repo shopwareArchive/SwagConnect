@@ -568,7 +568,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $bepadoProducts = array();
 
         $basket = $view->sBasket;
-        foreach ($basket['content'] as $key => $row) {
+        foreach ($basket['content'] as $key => &$row) {
             if(!empty($row['mode'])) {
                 continue;
             }
@@ -576,6 +576,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             if($product === null || $product->shopId === null) {
                 continue;
             }
+	        $row['bepadoShopId'] = $product->shopId;
             $bepadoProducts[$product->shopId][$product->sourceId] = $product;
             $bepadoContent[$product->shopId][$product->sourceId] = $row;
 

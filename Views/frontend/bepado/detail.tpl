@@ -11,9 +11,9 @@
 		<div class="bepado-detail-product">
 			{$smarty.block.parent}
 
-			<strong class="bepado-detail-product-headline">Marktplatz Artikel von {$bepadoShop->name}</strong>
+			<strong class="bepado-detail-product-headline">{s name=bepado/detail/marketplace_article}Marktplatz Artikel von {$bepadoShop->name}{/s}</strong>
 			<p class="bepado-detail-product-desc">
-				Die Versandkosten für diesen Artikel ...
+				{s name=bepado/detail/dispatch_info}Die Versandkosten für diesen Artikel werden separat berechnet.{/s}
 			</p>
 		</div>
 	{else}

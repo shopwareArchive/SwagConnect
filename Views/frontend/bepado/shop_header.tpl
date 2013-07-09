@@ -1,19 +1,33 @@
-<div class="table_row" style="border: none; min-height:20px;padding-bottom: 0;">
-    <div class="grid_9 box">
-        {*if $shopId}
-        <span style="margin-left: 12px; background-color: #DD4800; color: #FFF; font-size: 10px; font-weight: bold; padding: 3px; text-transform: uppercase;">
-            Separater Versand
-        </span>
-        {/if*}
-        <h3 style="font-weight: bold; margin-left: 12px; display: inline-block;">
-            {*Artikel von {if $shopId}{$bepadoShops[$shopId]->name}{else}{$sShopname}{/if}*}
-            Lieferung {counter name=bepadoIndex} von {$bepadoShops|count + 1}
-            {if $bepadoShippingCosts[$shopId]}
-            - zzgl. {$bepadoShippingCosts[$shopId]|currency} Versandkosten
-            {elseif $bepadoShippingCostsOrg}
-            - zzgl. {$bepadoShippingCostsOrg|currency} Versandkosten
-            {/if}
-        </h3>
-        <hr class="clear">
-    </div>
+<div class="table_row bepado-dispatch-row">
+	<div class="grid_6">
+		<span class="title">
+			{s name=bepado/checkout/dispatch_title}Versandkosten für die Lieferung {counter name=bepadoIndex} von {$bepadoShops|count + 1}{/s}
+		</span>
+		&nbsp;
+	</div>
+
+	<div class="grid_3">
+		&nbsp;
+	</div>
+
+	<div class="grid_1">
+		<select><option value="1">1</option></select>
+	</div>
+
+	<div class="grid_2 textright">
+		{if $bepadoShippingCosts[$shopId]}
+			{$bepadoShippingCostsOrg|currency}
+		{elseif $bepadoShippingCostsOrg}
+			{$bepadoShippingCostsOrg|currency}
+		{/if}
+	</div>
+
+	<div class="grid_2 textright">
+		<strong>{if $bepadoShippingCosts[$shopId]}
+			{$bepadoShippingCostsOrg|currency}
+		{elseif $bepadoShippingCostsOrg}
+			{$bepadoShippingCostsOrg|currency}
+		{/if}</strong>
+	</div>
+	<div class="clear"></div>
 </div>

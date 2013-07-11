@@ -18,6 +18,10 @@ Ext.define('Shopware.apps.Bepado.store.main.Mapping', {
             type : 'json',
             root: 'data'
         }
+    },
+    constructor: function(config) {
+        config.root = Ext.clone(this.root);
+        this.callParent([config]);
     }
 });
 //{/block}

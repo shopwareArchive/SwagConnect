@@ -300,7 +300,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 serialize($categories)
             );
 
-            Shopware()->Models()->flush($model);
+            Shopware()->Models()->flush($attribute);
             try {
                 if($status == 'insert') {
                     $sdk->recordInsert($id);
@@ -314,7 +314,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $attribute->setBepadoExportMessage(
                     $e->getMessage()
                 );
-                Shopware()->Models()->flush($model);
+                Shopware()->Models()->flush($attribute);
             }
         }
     }

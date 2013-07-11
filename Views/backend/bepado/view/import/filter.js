@@ -84,7 +84,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
     getSupplierFilter: function() {
         return {
             xtype: 'form',
-            title: '{s name=import/filter/category_title}Supplier filter{/s}',
+            title: '{s name=import/filter/supplier_title}Supplier filter{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{

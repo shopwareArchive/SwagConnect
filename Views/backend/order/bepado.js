@@ -31,7 +31,7 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
                 var style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
                 if (value) {
-                    result = '<div  title="" class="sprite-share" ' + style + '>&nbsp;</div>';
+                    result = '<div  title="" class="bepado-icon" ' + style + '>&nbsp;</div>';
                     metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('bepadoShop') + '"';
                 }
 

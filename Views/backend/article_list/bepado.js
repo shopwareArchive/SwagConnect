@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
         if (record.get('bepado')) {
             title = 'bepado';
-            result = result + '<div  title="' + title + '" class="sprite-share" ' + style + '>&nbsp;</div>';
+            result = result + '<div  title="' + title + '" class="bepado-icon" ' + style + '>&nbsp;</div>';
         }
 
         return result;

@@ -234,7 +234,7 @@ class ProductFromShop implements ProductFromShopBase
             'iso3' => $address->country
         ));
         return array(
-            'company' => $address->company,
+            'company' => $address->company ?: '',
             'salutation' => 'mr',
             'lastName' => $address->name,
             'city' => $address->city,

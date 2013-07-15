@@ -56,11 +56,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getHelper()
     {
         if($this->helper === null) {
-            $request = $this->Request();
-            $imagePath = $request->getScheme() . '://' . $request->getHttpHost() . $request->getBasePath();
-            $imagePath .= '/media/image/';
             $this->helper = new \Shopware\Bepado\Helper(
-                $this->getModelManager(), $imagePath
+                $this->getModelManager()
             );
         }
         return $this->helper;

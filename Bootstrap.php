@@ -425,7 +425,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $connection = $this->Application()->Db()->getConnection();
         $manager = $this->Application()->Models();
         $front = $this->Application()->Front();
-        $helper = new \Shopware\Bepado\Helper($manager);
+        $helper = $this->getHelper();
         $apiKey = $this->Config()->get('apiKey');
 
         return new Bepado\SDK\SDK(

@@ -183,7 +183,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
         $form->setElement('select', 'exportPriceGroup', array(
             'label' => 'Export-Preisgruppe',
-            'store' => 'base.CustomerGroup'
+            'store' => 'base.CustomerGroup',
+            'value' => 1
         ));
         $form->setElement('boolean', 'importCreateCategories', array(
             'label' => 'Kategorien beim Import automatisch erzeugen',
@@ -335,6 +336,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->createMyEvents();
         $this->createMyForm();
+        $this->createMyMenu();
         return true;
     }
 

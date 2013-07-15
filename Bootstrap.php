@@ -167,7 +167,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                     url: window.location.pathname + 'bepado/verifyApiKey',
                     success: function(result, request) {
                         var response = Ext.JSON.decode(result.responseText);
-                        apiField.setFieldStyle('background-color', response.success ? 'green' : 'red');
+                        Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
                         if(response.message) {
                             Shopware.Notification.createGrowlMessage(
                                 btn.title,

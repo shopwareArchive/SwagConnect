@@ -570,6 +570,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $bepadoProducts = array();
 
         $basket = $view->sBasket;
+        $basket['contentOrg'] = $basket['content'];
         foreach ($basket['content'] as $key => &$row) {
             if(!empty($row['mode'])) {
                 continue;
@@ -582,9 +583,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $bepadoProducts[$product->shopId][$product->sourceId] = $product;
             $bepadoContent[$product->shopId][$product->sourceId] = $row;
 
-            if($actionName == 'cart') {
+            //if($actionName == 'cart') {
                 unset($basket['content'][$key]);
-            }
+            //}
         }
         $bepadoShops = array();
         foreach($bepadoContent as $shopId => $items) {
@@ -651,8 +652,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $session = Shopware()->Session();
             /** @var $variables ArrayObject */
             $variables = $session->offsetGet('sOrderVariables');
+            $basket['content'] = $basket['contentOrg']; unset($basket['contentOrg']);
             $variables->exchangeArray(array_merge(
-                $variables->getArrayCopy(), $newVariables
+                $variables->getArrayCopy(), $newVariables, array('sBasket' => $basket)
             ));
             $session->offsetSet('sOrderVariables', $variables);
         }

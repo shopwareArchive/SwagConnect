@@ -48,6 +48,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             header: '{s name=export/columns/status}Status{/s}',
             xtype: 'booleancolumn',
             dataIndex: 'active',
+            sortable: false,
             renderer: function(value, metaData, record) {
                 if(record.get('bepadoStatus')) {
                     return record.get('bepadoStatus');

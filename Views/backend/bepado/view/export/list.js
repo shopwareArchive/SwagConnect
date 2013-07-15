@@ -48,7 +48,8 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
             header: '{s name=export/columns/active}Active{/s}',
             xtype: 'booleancolumn',
             dataIndex: 'active',
-            width: 50
+            width: 50,
+            sortable: false
         }, {
             header: '{s name=export/columns/price}Price{/s}',
             xtype: 'numbercolumn',

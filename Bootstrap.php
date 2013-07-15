@@ -613,6 +613,20 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $basket['content'] = $bepadoContent[$shopId];
             $view->shopId = $shopId;
             unset($bepadoContent[$shopId]);
+
+            //Remove original shipping costs
+            $shippingCostsOrg = $basket['sShippingcosts'];
+            $shippingCostsOrgNet = $basket['sShippingcostsNet'];
+            $basket['sShippingcosts'] = 0;
+            $basket['sShippingcostsNet'] = 0;
+            $basket['AmountNumeric'] -= $shippingCostsOrg;
+            $basket['AmountNetNumeric'] -= $shippingCostsOrgNet;
+            $basket['sAmount'] -= $shippingCostsOrg;
+            $rate = number_format($basket['sShippingcostsTax'], 2, '.', '');
+            $basket['sTaxRates'][$rate] -= $shippingCostsOrg - $shippingCostsOrgNet;
+            if(!empty($basket['sAmountWithTax'])) {
+                $basket['sAmountWithTax'] -= $shippingCostsOrg;
+            }
         }
 
         $shippingCosts = array_sum($bepadoShippingCosts);

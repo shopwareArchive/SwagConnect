@@ -17,7 +17,7 @@
 	<div class="grid_2 textright">
 		{if !$hideSinglePrice}
 			{if $bepadoShippingCosts[$shopId]}
-				{$bepadoShippingCostsOrg|currency}
+				{$bepadoShippingCosts[$shopId]|currency}
 			{elseif $bepadoShippingCostsOrg}
 				{$bepadoShippingCostsOrg|currency}
 			{/if}
@@ -26,7 +26,7 @@
 
 	<div class="grid_2 textright">
 		<strong>{if $bepadoShippingCosts[$shopId]}
-			{$bepadoShippingCostsOrg|currency}
+			{$bepadoShippingCosts[$shopId]|currency}
 		{elseif $bepadoShippingCostsOrg}
 			{$bepadoShippingCostsOrg|currency}
 		{/if}</strong>

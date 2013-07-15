@@ -240,11 +240,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $data = $query->getArrayResult();
 
-        foreach ($data as $key => $category) {
-            $data[$key]['text'] = $category['name'];
-            $data[$key]['cls'] = 'folder';
-            $data[$key]['childrenCount'] = (int)$category['childrenCount'];
-            $data[$key]['leaf'] = empty($category['childrenCount']);
+        foreach ($data as &$category) {
+            $category['text'] = $category['name'];
+            $category['cls'] = 'folder';
+            $category['childrenCount'] = (int)$category['childrenCount'];
+            $category['leaf'] = empty($category['childrenCount']);
         }
 
         $this->View()->assign(array(

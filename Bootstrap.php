@@ -587,6 +587,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 unset($basket['content'][$key]);
             //}
         }
+        $basket['content'] = array_values($basket['content']);
         $bepadoShops = array();
         foreach($bepadoContent as $shopId => $items) {
             $bepadoShops[$shopId] = $sdk->getShop($shopId);

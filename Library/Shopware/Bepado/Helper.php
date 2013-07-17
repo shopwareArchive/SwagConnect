@@ -366,12 +366,12 @@ class Helper
         }
 
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('i.path', 'i.extension'))
+        $builder->select(array('i.path', 'i.extension', 'i.main', 'i.position'))
             ->from('Shopware\Models\Article\Image', 'i')
             ->where('i.articleId = :articleId')
             ->andWhere('i.parentId IS NULL')
             ->setParameter('articleId', $id)
-            ->orderBy('i.main', 'DESC')
+            ->orderBy('i.main', 'ASC')
             ->addOrderBy('i.position', 'ASC');
 
         $query = $builder->getQuery();

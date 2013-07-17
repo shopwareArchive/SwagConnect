@@ -147,16 +147,14 @@ class ProductToShop implements ProductToShopBase
                 $album = $this->manager->find('Shopware\Models\Media\Album', -1);
                 $tempDir = Shopware()->DocPath('media_temp');
                 foreach ($product->images as $key => $imageUrl) {
-                    $image = new \Shopware\Models\Article\Image();
-
-                    $name = pathinfo($imageUrl, PATHINFO_FILENAME);
+                    //$name = pathinfo($imageUrl, PATHINFO_FILENAME);
+                    $name = md5(uniqid('', true));
                     $tempFile = tempnam($tempDir, 'image');
                     copy($imageUrl, $tempFile);
                     $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
 
                     $media = new \Shopware\Models\Media\Media();
                     $media->setAlbum($album);
-
                     $media->setFile($file);
                     $media->setName($name);
                     $media->setDescription('');
@@ -166,6 +164,7 @@ class ProductToShop implements ProductToShopBase
                     $this->manager->persist($media);
                     $this->manager->flush($media);
 
+                    $image = new \Shopware\Models\Article\Image();
                     $image->setMain($key == 0 ? 1 : 2);
                     $image->setMedia($media);
                     $image->setPosition($key + 1);

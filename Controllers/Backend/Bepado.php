@@ -56,6 +56,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getHelper()
     {
         if($this->helper === null) {
+            $this->getSDK();
             $this->helper = new \Shopware\Bepado\Helper(
                 $this->getModelManager()
             );

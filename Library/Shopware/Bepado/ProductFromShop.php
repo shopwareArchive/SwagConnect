@@ -158,6 +158,7 @@ class ProductFromShop implements ProductFromShopBase
             'currencyFactor' => 1,
             'orderStatus' => $status,
             'shop' => $shop,
+            'languageSubShop' => $shop,
             'payment' => $payment,
             'currency' => 'EUR',
             'orderTime' => 'now'
@@ -203,7 +204,6 @@ class ProductFromShop implements ProductFromShopBase
                 'rawPassword' => $hash,
                 'accountMode' => 1,
                 'shop' => $shop,
-                'languageSubShop' => $shop,
                 'paymentId' => $payment->getId(),
             ));
         }

@@ -259,6 +259,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $rows = json_decode($this->Request()->getRawBody(), true);
         }
         $rows = !isset($rows[0]) ? array($rows) : $rows;
+        $sdk = $this->getSDK();
         $helper = $this->getHelper();
         foreach($rows as $row) {
             $result = $helper->getCategoryModelById($row['id']);

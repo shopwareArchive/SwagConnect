@@ -361,12 +361,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             );
 
             $this->Application()->Models()->removeAttribute(
-                's_order_details_attributes',
-                'bepado', 'reservation_id'
+                's_order_attributes',
+                'bepado', 'shop_id'
             );
             $this->Application()->Models()->removeAttribute(
-                's_order_basket_attributes',
-                'bepado', 'reservation_id'
+                's_order_attributes',
+                'bepado', 'order_id'
             );
 
             $this->Application()->Models()->removeAttribute(
@@ -463,7 +463,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * @return \Shopware\Bepado\Helper
      */
-    protected function getHelper()
+    public function getHelper()
     {
         if($this->helper === null) {
             $this->helper = new \Shopware\Bepado\Helper(

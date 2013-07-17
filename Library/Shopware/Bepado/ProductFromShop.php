@@ -28,6 +28,7 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Product,
     Bepado\SDK\Struct\Address,
     Shopware\Models\Order as OrderModel,
+    Shopware\Models\Customer as CustomerModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 
@@ -133,6 +134,11 @@ class ProductFromShop implements ProductFromShopBase
         $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);
         $number = 'BP-' . $order->orderShop . '-' . $order->localOrderId;
 
+        $repository = $this->manager->getRepository('Shopware\Models\Payment\Payment');
+        $payment = $repository->findOneBy(array(
+            'name' => 'invoice',
+        ));
+
         //$model = new OrderModel\Order();
         $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 12);';
         Shopware()->Db()->query($sql, array($number));
@@ -152,6 +158,7 @@ class ProductFromShop implements ProductFromShopBase
             'currencyFactor' => 1,
             'orderStatus' => $status,
             'shop' => $shop,
+            'payment' => $payment,
             'currency' => 'EUR',
             'orderTime' => 'now'
         ));
@@ -189,25 +196,39 @@ class ProductFromShop implements ProductFromShopBase
             'hashPassword' => $hash
         ));
         if($customer === null) {
-            $customer = new \Shopware\Models\Customer\Customer();
+            $customer = new CustomerModel\Customer();
             $customer->fromArray(array(
                 'active' => true,
                 'email' => $email,
-                'hashPassword' => $hash,
-                'accountMode' => 1
+                'rawPassword' => $hash,
+                'accountMode' => 1,
+                'shop' => $shop,
+                'languageSubShop' => $shop,
+                'paymentId' => $payment->getId(),
             ));
-            $this->manager->persist($customer);
         }
+        if($customer->getBilling() === null) {
+            $billing = new CustomerModel\Billing();
+            $customer->setBilling($billing);
+        } else {
+            $billing = $customer->getBilling();
+        }
+        $billing->fromArray($this->getAddressData(
+            $order->deliveryAddress
+        ));
+        $this->manager->persist($customer);
 
         $model->setCustomer($customer);
 
         $billing = new OrderModel\Billing();
+        $billing->setCustomer($customer);
         $billing->fromArray($this->getAddressData(
             $order->deliveryAddress
         ));
         $model->setBilling($billing);
 
         $shipping = new OrderModel\Shipping();
+        $shipping->setCustomer($customer);
         $shipping->fromArray($this->getAddressData(
             $order->deliveryAddress
         ));

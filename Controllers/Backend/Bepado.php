@@ -148,6 +148,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                     $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId')
                         ->setParameter('categoryId', $rule['value']);
                     break;
+                case 'supplierId':
+                    $builder->where('a.supplierId = :supplierId')
+                        ->setParameter('supplierId', $rule['value']);
+                    break;
                 case 'exportStatus':
                     $builder->where('at.bepadoExportStatus LIKE :status')
                         ->setParameter('status', $rule['value']);

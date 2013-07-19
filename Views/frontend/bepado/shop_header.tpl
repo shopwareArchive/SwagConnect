@@ -11,7 +11,7 @@
 	</div>
 
 	<div class="grid_1">
-		<select><option value="1">1</option></select>
+		&nbsp;
 	</div>
 
 	<div class="grid_2 textright">

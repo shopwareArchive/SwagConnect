@@ -142,41 +142,44 @@ class ProductToShop implements ProductToShopBase
             $this->manager->flush();
         }
 
-        if($model->getImages()->count() == 0)  {
-            try {
-                $album = $this->manager->find('Shopware\Models\Media\Album', -1);
-                $tempDir = Shopware()->DocPath('media_temp');
-                foreach ($product->images as $key => $imageUrl) {
-                    //$name = pathinfo($imageUrl, PATHINFO_FILENAME);
-                    $name = md5(uniqid('', true));
-                    $tempFile = tempnam($tempDir, 'image');
-                    copy($imageUrl, $tempFile);
-                    $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
-
-                    $media = new \Shopware\Models\Media\Media();
-                    $media->setAlbum($album);
-                    $media->setFile($file);
-                    $media->setName($name);
-                    $media->setDescription('');
-                    $media->setCreated(new \DateTime());
-                    $media->setUserId(0);
-
-                    $this->manager->persist($media);
-                    $this->manager->flush($media);
-
-                    $image = new \Shopware\Models\Article\Image();
-                    $image->setMain($key == 0 ? 1 : 2);
-                    $image->setMedia($media);
-                    $image->setPosition($key + 1);
-                    $image->setArticle($model);
-                    $image->setPath($media->getName());
-                    $image->setExtension($media->getExtension());
-
-                    $model->getImages()->add($image);
-                }
-                $this->manager->flush($model);
-            } catch(\Exception $e) { }
+        if($model->getImages()->count() != 0)  {
+            return;
         }
+
+        try {
+            $album = $this->manager->find('Shopware\Models\Media\Album', -1);
+            $tempDir = Shopware()->DocPath('media_temp');
+            foreach ($product->images as $key => $imageUrl) {
+                //$name = pathinfo($imageUrl, PATHINFO_FILENAME);
+                //$name = md5(uniqid('', true));
+                $tempFile = tempnam($tempDir, 'image');
+                copy($imageUrl, $tempFile);
+                $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
+
+                $media = new \Shopware\Models\Media\Media();
+                $media->setAlbum($album);
+                //$media->setName($name);
+                $media->setDescription('');
+                $media->setCreated(new \DateTime());
+                $media->setUserId(0);
+                $media->setFile($file);
+
+                $this->manager->persist($media);
+                $this->manager->flush();
+
+                $image = new \Shopware\Models\Article\Image();
+                $image->setMain($key == 0 ? 1 : 2);
+                $image->setMedia($media);
+                $image->setPosition($key + 1);
+                $image->setArticle($model);
+                $image->setPath($media->getName());
+                $image->setExtension($media->getExtension());
+
+                $this->manager->persist($image);
+                $this->manager->flush();
+
+            }
+        } catch(\Exception $e) { }
     }
 
     /**

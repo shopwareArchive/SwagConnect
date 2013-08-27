@@ -142,6 +142,25 @@ class Product extends ShopItem
     public $purchasePrice;
 
     /**
+     * Do national laws require the price to be fixed at the suppliers level?
+     *
+     * This flag covers laws such as "Buchpreisbindung" in Germany.
+     * SDK implementors have to force the selling price to customers to
+     * be the same as given by the suplier.
+     *
+     * If this flag is not set, then selling shops are free to change
+     * the price in their shops to their wishes and SDK implementors
+     * **HAVE** to grant Shop users this possibility.
+     *
+     * This flag is **ONLY** for national price laws, not to prevent your
+     * partners to change the price. Using this flag for preventing partners
+     * to change the price is not allowed.
+     *
+     * @var boolean
+     */
+    public $fixedPrice = false;
+
+    /**
      * Currency of the price
      *
      * Currently only the default "EUR" is supported.
@@ -194,6 +213,24 @@ class Product extends ShopItem
      * @var string[]
      */
     public $categories = array();
+
+    /**
+     * Product Tags
+     *
+     * A list of tags that can help other shops find your product.
+     * Is limited to 10 tags maximum per product.
+     *
+     * @var array
+     */
+    public $tags = array();
+
+    /**
+     * Factor that affects the boost of products in search results.
+     * Valid values are -1, 0, 1.
+     *
+     * @var int
+     */
+    public $relevance = 0;
 
     /**
      * Contains additional attributes for this product. Use one of the constants

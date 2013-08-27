@@ -62,7 +62,8 @@ class Http extends ShopFactory
                 $configuration->serviceEndpoint
             ),
             $this->dependencyResolver->getMarshaller(),
-            $this->dependencyResolver->getUnmarshaller()
+            $this->dependencyResolver->getUnmarshaller(),
+            new ShopRequestSigner($this->dependencyResolver->getRequestSigner(), $shopId)
         );
     }
 }

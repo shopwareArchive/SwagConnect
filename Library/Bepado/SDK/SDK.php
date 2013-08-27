@@ -68,7 +68,8 @@ final class SDK
         Gateway $gateway,
         ProductToShop $toShop,
         ProductFromShop $fromShop,
-        ErrorHandler $errorHandler = null
+        ErrorHandler $errorHandler = null,
+        HttpClient\RequestSigner $requestSigner = null
     ) {
         $this->apiKey = $apiKey;
         $this->apiEndpointUrl = $apiEndpointUrl;
@@ -82,7 +83,8 @@ final class SDK
             $toShop,
             $fromShop,
             $errorHandler ? $errorHandler : new ErrorHandler\Exception(),
-            $apiKey
+            $apiKey,
+            $requestSigner
         );
     }
 
@@ -115,12 +117,20 @@ final class SDK
      * the response.
      *
      * @param string $xml
+     * @param array $headers
      *
      * @return string
      */
-    public function handle($xml)
+    public function handle($xml, array $headers = null)
     {
         $this->verifySdk();
+        $token = $this->verifyRequest($xml, $headers);
+
+        $serviceRegistry = $this->dependencies->getServiceRegistry();
+
+        if ($token->userIdentifier) {
+            $serviceRegistry = new ServiceRegistry\Authorization($serviceRegistry, $token);
+        }
 
         return $this->dependencies->getMarshaller()->marshal(
             new RpcCall(
@@ -128,13 +138,40 @@ final class SDK
                     'service' => 'null',
                     'command' => 'return',
                     'arguments' => array(
-                        $this->dependencies->getServiceRegistry()->dispatch(
+                        $serviceRegistry->dispatch(
                             $this->dependencies->getUnmarshaller()->unmarshal($xml)
                         ),
                     )
                 )
             )
         );
+    }
+
+    /**
+     * Check Authentication of the Request
+     *
+     * @return AuthenticationToken
+     */
+    private function verifyRequest($body, array $headers = null)
+    {
+        if ($headers === null) {
+            $headers = array();
+
+            foreach ($_SERVER as $name => $value) {
+                if (strpos($name, "HTTP_") === 0) {
+                    $headers[$name] = $value;
+                }
+            }
+        }
+
+        $requestSigner = $this->dependencies->getRequestSigner();
+        $token = $requestSigner->verifyRequest($body, $headers);
+
+        if (false === $token->authenticated) {
+            throw new SecurityException("Authorization of RPC request failed.");
+        }
+
+        return $token;
     }
 
     /**
@@ -395,10 +432,28 @@ final class SDK
     {
         $shopConfiguration = $this->dependencies->getGateway()->getShopConfiguration($shopId);
 
-        return new Shop(array(
-            'id' => $shopId,
-            'name' => $shopConfiguration->displayName,
-            'url' => $shopConfiguration->url,
-        ));
+        return new Shop(
+            array(
+                'id' => $shopId,
+                'name' => $shopConfiguration->displayName,
+                'url' => $shopConfiguration->url,
+            )
+        );
+    }
+
+    /**
+     * Update the status of a bepado order.
+     *
+     * @param int $orderId
+     * @param string $status
+     *
+     * @return void
+     */
+    public function updateOrderStatus($orderId, $status)
+    {
+        $this->dependencies->getOrderStatusService()->update(
+            $orderId,
+            $status
+        );
     }
 }

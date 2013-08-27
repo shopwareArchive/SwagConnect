@@ -36,6 +36,9 @@ interface ChangeGateway
      *
      * The offset specified the revision to start from
      *
+     * Important: This value may be an estimation only as its only used for
+     * Metrics calculation.  Don't rely on this value to be correct.
+     *
      * @param string $offset
      * @param int $limit
      * @return int

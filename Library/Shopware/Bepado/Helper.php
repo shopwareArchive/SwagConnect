@@ -127,7 +127,7 @@ class Helper
             's.name as vendor',
             't.tax / 100 as vat',
             'p.price * (100 + t.tax) / 100 as price',
-            //'p.price * (100 + t.tax) / 100 as purchasePrice',
+            'p.basePrice * (100 + t.tax) / 100 as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
             'd.releaseDate as deliveryDate',

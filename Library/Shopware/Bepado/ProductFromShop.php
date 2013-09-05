@@ -112,7 +112,6 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function reserve(Order $order)
     {
-
     }
 
     /**
@@ -179,7 +178,7 @@ class ProductFromShop implements ProductFromShopBase
                 'number' => $model->getNumber(),
                 'articleNumber' => $productDetail->getNumber(),
                 'articleName' => $product->product->title,
-                'price' => $product->product->price,
+                'price' => $this->calculatePrice($product->product),
                 'taxRate' => $product->product->vat * 100,
                 'status' => $detailStatus
             ));
@@ -240,6 +239,25 @@ class ProductFromShop implements ProductFromShopBase
         $this->manager->flush();
 
         return $model->getNumber();
+    }
+
+    /**
+     * Calculate the price (including VAT) that the from shop needs to pay.
+     *
+     * This is most likely NOT the price the customer itself has to pay.
+     *
+     * @return float
+     */
+    private function calculatePrice($product)
+    {
+        // TODO: Remove before Closed Beta
+        // Check is here for legacy reasons, we only enforce purchase prices
+        // for every product since September13
+        if ($product->purchasePrice > 0) {
+            return $product->purchasePrice;
+        }
+
+        return $product->price;
     }
 
     /**

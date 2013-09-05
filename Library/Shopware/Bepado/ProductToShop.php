@@ -73,10 +73,13 @@ class ProductToShop implements ProductToShopBase
             return;
         }
         $model = $this->helper->getArticleModelByProduct($product);
+
         if($model === null) {
             $model = new ProductModel();
+            $model->setActive(false);
             $detail = new DetailModel();
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
+            $detail->setActive(false);
             $this->manager->persist($model);
             $detail->setArticle($model);
             $model->setCategories(
@@ -88,6 +91,7 @@ class ProductToShop implements ProductToShopBase
         } else {
             $detail = $model->getMainDetail();
         }
+
         $attribute = $detail->getAttribute() ?: new AttributeModel();
 
         if($product->vat !== null) {
@@ -119,12 +123,16 @@ class ProductToShop implements ProductToShopBase
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
+        // TODO: Remove before ClosedBeta when purchasePrice is required
+        $purchasePrice = $product->purchasePrice ?: $product->price;
+
         $customerGroup = $this->helper->getDefaultCustomerGroup();
         $detail->getPrices()->clear();
         $price = new \Shopware\Models\Article\Price();
         $price->fromArray(array(
             'from' => 1,
             'price' => $product->price / (100 + 100 * $product->vat) * 100,
+            'basePrice' => $purchasePrice * 100 / (100 + 100 * $product->vat),
             'customerGroup' => $customerGroup,
             'article' => $model
         ));

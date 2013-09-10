@@ -128,6 +128,13 @@ class DependencyResolver
     protected $revisionFromShop;
 
     /**
+     * OrderStatusUpdate service
+     *
+     * @var Service\OrderStatusUpdate
+     */
+    protected $orderStatusUpdate;
+
+    /**
      * Logger
      *
      * @var Logger
@@ -137,22 +144,27 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://Bepado:Shopware@socialnetwork.bepado.h2155039.stratoserver.net';
+    protected $socialNetworkHost = 'http://socialnetwork.bepado.local';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://Bepado:Shopware@transaction.bepado.h2155039.stratoserver.net';
+    protected $transactionHost = 'http://transaction.bepado.local';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://Bepado:Shopware@search.bepado.h2155039.stratoserver.net';
+    protected $searchHost = 'http://search.bepado.local';
 
     /**
      * @var ChangeVisitor\Message
      */
     protected $changeVisitor;
+
+    /**
+     * @var HttpClient\RequestSigner
+     */
+    protected $requestSigner;
 
     /**
      * @param \Bepado\SDK\Gateway $gateway
@@ -165,13 +177,15 @@ class DependencyResolver
         ProductToShop $toShop,
         ProductFromShop $fromShop,
         ErrorHandler $errorHandler,
-        $apiKey
+        $apiKey,
+        HttpClient\RequestSigner $requestSigner = null
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
         $this->fromShop = $fromShop;
         $this->errorHandler = $errorHandler;
         $this->apiKey = $apiKey;
+        $this->requestSigner = $requestSigner;
 
         if ($host = getenv('_SOCIALNETWORK_HOST')) {
             $this->socialNetworkHost = "http://{$host}";
@@ -243,7 +257,7 @@ class DependencyResolver
             $this->registry->registerService(
                 'configuration',
                 array('update'),
-                $configurationService = new Service\Configuration(
+                new Service\Configuration(
                     $this->gateway,
                     $this->getHttpClient($this->socialNetworkHost),
                     $this->apiKey,
@@ -258,8 +272,7 @@ class DependencyResolver
                     $this->gateway,
                     $this->gateway,
                     $this->gateway,
-                    $this->toShop,
-                    $configurationService
+                    $this->toShop
                 )
             );
 
@@ -372,6 +385,7 @@ class DependencyResolver
                     $this->gateway
                 ),
                 $this->getChangeVisitor(),
+                $this->toShop,
                 $this->getLogger(),
                 $this->errorHandler,
                 new ShippingCostCalculator($this->gateway)
@@ -512,5 +526,36 @@ class DependencyResolver
         $client->addDefaultHeaders($headers);
 
         return $client;
+    }
+
+    /**
+     * @return HttpClient\RequestSigner
+     */
+    public function getRequestSigner()
+    {
+        if ($this->requestSigner === null) {
+            $this->requestSigner = new HttpClient\SharedKeyRequestSigner(
+                $this->getGateway(),
+                new Service\Clock(),
+                $this->apiKey
+            );
+        }
+
+        return $this->requestSigner;
+    }
+
+    /**
+     * @return Service\OrderStatusUpdate
+     */
+    public function getOrderStatusService()
+    {
+        if ($this->orderStatusUpdate === null) {
+            $this->orderStatusUpdate = new Service\OrderStatusUpdate(
+                $this->getHttpClient($this->socialNetworkHost),
+                $this->apiKey
+            );
+        }
+
+        return $this->orderStatusUpdate;
     }
 }

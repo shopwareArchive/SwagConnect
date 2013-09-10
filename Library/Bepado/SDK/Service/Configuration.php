@@ -26,43 +26,13 @@ class Configuration
     protected $configuration;
 
     /**
-     * HTTP Client
-     *
-     * @var HttpClient
-     */
-    protected $httpClient;
-
-    /**
-     * Struct verificator
-     *
-     * @var Struct\VerificatorDispatcher
-     */
-    protected $verificator;
-
-    /**
-     * API Key
-     *
-     * @var string
-     */
-    protected $apiKey;
-
-    /**
      * Construct from gateway
      *
      * @param Gateway\ShopConfiguration $gateway
-     * @param Struct\VerificatorDispatcher $verificator
-     * @return void
      */
-    public function __construct(
-        Gateway\ShopConfiguration $configuration,
-        HttpClient $httpClient,
-        $apiKey,
-        Struct\VerificatorDispatcher $verificator
-    ) {
+    public function __construct(Gateway\ShopConfiguration $configuration)
+    {
         $this->configuration = $configuration;
-        $this->httpClient = $httpClient;
-        $this->apiKey = $apiKey;
-        $this->verificator = $verificator;
     }
 
     /**
@@ -70,31 +40,8 @@ class Configuration
      *
      * @return void
      */
-    public function update()
+    public function update(array $configurations)
     {
-        $response = $this->httpClient->request(
-            'POST',
-            '/sdk/configuration',
-            json_encode(
-                array(
-                    'apiKey' => $this->apiKey
-                )
-            ),
-            array(
-                'Content-Type: application/json',
-            )
-        );
-
-        if ($response->status >= 400) {
-            $message = null;
-            if (($error = json_decode($response->body)) &&
-                isset($error->message)) {
-                $message = $error->message;
-            }
-            throw new \RuntimeException("Loading configuration failed: " . $message);
-        }
-
-        $configurations = json_decode($response->body, true);
         foreach ($configurations as $configuration) {
             $this->configuration->setShopConfiguration(
                 $configuration['shopId'],
@@ -104,6 +51,7 @@ class Configuration
                         'shippingCost' => $configuration['shippingCost'],
                         'displayName' => $configuration['shopDisplayName'],
                         'url' => $configuration['shopUrl'],
+                        'key' => $configuration['key'],
                     )
                 )
             );

@@ -25,17 +25,32 @@ class Address extends Struct
     /**
      * @var string
      */
-    public $name;
+    public $firstName;
 
     /**
      * @var string
      */
-    public $line1;
+    public $middleName;
 
     /**
      * @var string
      */
-    public $line2;
+    public $surName;
+
+    /**
+     * @var string
+     */
+    public $street;
+
+    /**
+     * @var string
+     */
+    public $streetNumber;
+
+    /**
+     * @var string
+     */
+    public $additionalAddressLine;
 
     /**
      * @var string
@@ -66,5 +81,69 @@ class Address extends Struct
     public static function __set_state(array $state)
     {
         return new Address($state);
+    }
+
+    /**
+     * Backwards compability wrapper for read access on some properties
+     *
+     * @deprecated
+     * @param string $property
+     * @return mixed
+     */
+    public function __get($property)
+    {
+        switch ($property)
+        {
+            case 'name':
+                return $this->firstName . ' ' .
+                    ($this->middleName ? $this->middleName . ' ' : '' ) .
+                    $this->surName;
+            case 'line1':
+                return $this->street . ' ' . $this->streetNumber;
+            case 'line2':
+                return $this->additionalAddressLine;
+            default:
+                return parent::__get($property);
+        }
+    }
+
+    /**
+     * Backwards compability wrapper for read access on some properties
+     *
+     * @deprecated
+     * @param string $property
+     * @return mixed
+     */
+    public function __set($property, $value)
+    {
+        switch ($property)
+        {
+            case 'name':
+                if (!preg_match(
+                    '(^(?P<firstName>\\S+)\\s+(?:(?P<middleName>.*)\\s+)?(?P<surName>\\S+)$)',
+                    $value,
+                    $matches
+                )) {
+                    throw new \DomainException("Invalid name provided");
+                }
+
+                $this->firstName = $matches['firstName'];
+                $this->middleName = isset($matches['middleName']) ? $matches['middleName'] : '';
+                $this->surName = $matches['surName'];
+                break;
+            case 'line1':
+                if (!preg_match('(^(?P<street>.+)\\s+(?P<number>\\d+\\S*)$)', $value, $matches)) {
+                    throw new \DomainException("Invalid street provided");
+                }
+
+                $this->street = $matches['street'];
+                $this->streetNumber = $matches['number'];
+                break;
+            case 'line2':
+                $this->additionalAddressLine = $value;
+                break;
+            default:
+                return parent::__get($property);
+        }
     }
 }

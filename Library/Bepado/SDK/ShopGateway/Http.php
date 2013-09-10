@@ -45,16 +45,27 @@ class Http extends ShopGateway
     protected $unmarshaller;
 
     /**
+     * @var ShopRequestSigner
+     */
+    protected $shopRequestSigner;
+
+    /**
      * @param Bepado\SDK\HttpClient $httpClient
      * @param Bepado\Common\Rpc\Marshaller\CallMarshaller $marshaller
      * @param Bepado\Common\Rpc\Marshaller\CallUnmarshaller $unmarshaller
      * @param Bepado\SDK\Gateway\ShopConfiguration $providerShopConfig
+     * @param Bepado\SDK\ShopGateway\ShopRequestSigner $shopRequestSigner
      */
-    public function __construct(HttpClient $httpClient, CallMarshaller $marshaller, CallUnmarshaller $unmarshaller)
-    {
+    public function __construct(
+        HttpClient $httpClient,
+        CallMarshaller $marshaller,
+        CallUnmarshaller $unmarshaller,
+        ShopRequestSigner $shopRequestSigner
+    ) {
         $this->httpClient = $httpClient;
         $this->marshaller = $marshaller;
         $this->unmarshaller = $unmarshaller;
+        $this->shopRequestSigner = $shopRequestSigner;
     }
 
     /**
@@ -162,11 +173,13 @@ class Http extends ShopGateway
     protected function makeRpcCall(RpcCall $call)
     {
         $marshalledCall = $this->marshaller->marshal($call);
+        $signHeaders = $this->shopRequestSigner->signRequest($marshalledCall);
 
         $httpResponse = $this->httpClient->request(
             'POST',
             '',
-            $marshalledCall
+            $marshalledCall,
+            $signHeaders
         );
 
         // TODO: Check status

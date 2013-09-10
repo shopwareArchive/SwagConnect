@@ -117,16 +117,17 @@ class PDO extends Gateway
     {
         $offset = $offset ?: 0;
         $result = $this->connection->prepare(
-            'SELECT
-                COUNT(*) `changes`
+            'EXPLAIN SELECT
+                *
             FROM
                 `bepado_change`
             WHERE
                 `c_revision` > ?'
         );
         $result->execute(array($offset));
-        $changes = $result->fetchColumn();
-        return max(0, $changes - $limit);
+        $changes = $result->fetch(\PDO::FETCH_ASSOC);
+
+        return max(0, $changes['rows'] - $limit);
     }
 
     /**

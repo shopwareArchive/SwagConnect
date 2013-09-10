@@ -133,8 +133,8 @@ class MySQLi extends Gateway
     {
         $offset = $offset ?: 0;
         $result = $this->connection->query(
-            'SELECT
-                COUNT(*) `changes`
+            'EXPLAIN SELECT
+                *
             FROM
                 `bepado_change`
             WHERE
@@ -142,7 +142,7 @@ class MySQLi extends Gateway
         );
 
         $row = $result->fetch_assoc();
-        return max(0, $row['changes'] - $limit);
+        return max(0, $row['rows'] - $limit);
     }
 
     /**

@@ -215,7 +215,11 @@ class ProductToShop implements ProductToShopBase
         //$model->getDetails()->clear();
         //$this->manager->remove($model);
         $model->setActive(false);
-        $model->getAttribute()->setBepadoExportStatus('delete');
+
+        // Not sure why, but the Attribute can be NULL
+        if ($model->getAttribute()) {
+            $model->getAttribute()->setBepadoExportStatus('delete');
+        }
         $this->manager->flush($model);
     }
 }

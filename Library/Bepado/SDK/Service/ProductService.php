@@ -57,21 +57,18 @@ class ProductService
      * @param RevisionGateway $revision
      * @param ShopConfiguration $configurationGateway
      * @param ProductToShop $toShop
-     * @param Configuration $configurationService
      * @return void
      */
     public function __construct(
         ChangeGateway $changes,
         RevisionGateway $revision,
         ShopConfiguration $configurationGateway,
-        ProductToShop $toShop,
-        Configuration $configurationService
+        ProductToShop $toShop
     ) {
         $this->changes = $changes;
         $this->revision = $revision;
         $this->configurationGateway = $configurationGateway;
         $this->toShop = $toShop;
-        $this->configurationService = $configurationService;
     }
 
     /**
@@ -106,11 +103,6 @@ class ProductService
                     throw new \RuntimeException("Invalid change operation: $change");
             }
         }
-
-        // @REFACTOR: This is a boundary violation, but currently we just want
-        // to trigger the configuration update on every product update, we
-        // receive.
-        $this->configurationService->update();
 
         $this->revision->storeLastRevision($change->revision);
         return $change->revision;

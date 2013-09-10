@@ -12,6 +12,7 @@ use Bepado\SDK\Struct;
 use Bepado\SDK\ShopFactory;
 use Bepado\SDK\ShopGateway;
 use Bepado\SDK\ChangeVisitor;
+use Bepado\SDK\ProductToShop;
 use Bepado\SDK\Logger;
 use Bepado\SDK\ErrorHandler;
 use Bepado\SDK\ShippingCostCalculator;
@@ -40,6 +41,15 @@ class Shopping
     protected $changeVisitor;
 
     /**
+     * Product to shop gateway
+     *
+     * Stores changes to products reported by the remote shop
+     *
+     * @var ProductToShop
+     */
+    protected $productToShop;
+
+    /**
      * Logger
      *
      * @var Logger
@@ -63,12 +73,14 @@ class Shopping
     public function __construct(
         ShopFactory $shopFactory,
         ChangeVisitor $changeVisitor,
+        ProductToShop $productToShop,
         Logger $logger,
         ErrorHandler $errorHandler,
         ShippingCostCalculator $calculator
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
+        $this->productToShop = $productToShop;
         $this->logger = $logger;
         $this->errorHandler = $errorHandler;
         $this->calculator = $calculator;
@@ -123,6 +135,7 @@ class Shopping
         $result = array();
         foreach ($responses as $shopId => $changes) {
             if ($changes !== true) {
+                $this->applyRemoteShopChanges($changes);
                 $result = array_merge(
                     $result,
                     $this->changeVisitor->visit($changes)
@@ -133,6 +146,12 @@ class Shopping
         return $result ?: true;
     }
 
+    /**
+     * Zip product list by shop Id
+     *
+     * @param Struct\ProductList $productList
+     * @return Struct\ProductList[]
+     */
     private function zipProductListByShopId(Struct\ProductList $productList)
     {
         $productLists = array();
@@ -187,6 +206,7 @@ class Shopping
             if (is_string($response)) {
                 $reservation->orders[$shopId]->reservationId = $response;
             } elseif (is_array($response)) {
+                $this->applyRemoteShopChanges($response);
                 $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
             } else {
                 // TODO: How to react on false value returned?
@@ -198,6 +218,30 @@ class Shopping
         }
 
         return $reservation;
+    }
+
+    /**
+     * Apply changes reported by a remote shop
+     *
+     * @param Struct\Change[] $changes
+     * @return void
+     */
+    protected function applyRemoteShopChanges(array $changes)
+    {
+        foreach ($changes as $change) {
+            switch (true) {
+                case $change instanceof Struct\Change\InterShop\Update:
+                    $this->productToShop->insertOrUpdate($change->product);
+                    break;
+                case $change instanceof Struct\Change\InterShop\Delete:
+                    $this->productToShop->delete($change->shopId, $change->sourceId);
+                    break;
+                default:
+                    throw new \RuntimeException(
+                        'Invalid change calss provided: ' . get_class($change)
+                    );
+            }
+        }
     }
 
     /**
@@ -328,6 +372,12 @@ class Shopping
         return $orders;
     }
 
+    /**
+     * Get Shop IDs
+     *
+     * @param Struct\Order $order
+     * @return string[]
+     */
     protected function getShopIds(Struct\Order $order)
     {
         return array_unique(
@@ -340,6 +390,13 @@ class Shopping
         );
     }
 
+    /**
+     * Get order items of a single shop
+     *
+     * @param Struct\Order $order
+     * @param string $shopId
+     * @return Struct\OrderItem[]
+     */
     protected function getShopProducts(Struct\Order $order, $shopId)
     {
         return array_filter(

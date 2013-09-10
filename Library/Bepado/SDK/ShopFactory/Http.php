@@ -11,6 +11,7 @@ use Bepado\SDK\ShopFactory;
 use Bepado\SDK\ShopGateway;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\DependencyResolver;
+use Bepado\SDK\ShopGateway\ShopRequestSigner;
 
 /**
  * Shop factory

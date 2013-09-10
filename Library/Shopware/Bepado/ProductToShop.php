@@ -150,9 +150,18 @@ class ProductToShop implements ProductToShopBase
             $this->manager->flush();
         }
 
-        if($model->getImages()->count() != 0)  {
-            return;
+        // @fixme WORKAROUND: there can always be an image update
+        foreach ($model->getImages() as $image) {
+            if (file_exists($image->getPath())) {
+                unlink($image->getPath());
+            }
+
+            $this->manager->remove($image);
+            $this->manager->flush();
         }
+        //if($model->getImages()->count() != 0)  {
+        //    return;
+        //}
 
         try {
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);

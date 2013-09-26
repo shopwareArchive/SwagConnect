@@ -846,7 +846,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $sql = 'SELECT articleID FROM s_articles_attributes WHERE articleID IN (' . implode(', ', $articleIds) . ') AND bepado_source_id IS NOT NULL';
         $bepadoArticleIds = array_map(function ($row) {
             return $row['articleID'];
-        }, Shopware()->Db()->fetchAll($sql, array($row['articleId'])));
+        }, Shopware()->Db()->fetchAll($sql));
 
         foreach($data as $idx => $row) {
             $data[$idx]['bepado'] = in_array($row['articleId'], $bepadoArticleIds);
@@ -871,24 +871,71 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 $subject->View()->extendsTemplate(
                     'backend/order/bepado.js'
                 );
+
                 break;
+
             case 'getList':
-                $data = $subject->View()->data;
-                $sdk = $this->getSDK();
-                foreach($data as &$row) {
-                    $sql = 'SELECT bepado_shop_id, bepado_order_id FROM s_order_attributes WHERE orderID = ?';
-                    $result = Shopware()->Db()->fetchRow($sql, array($row['id']));
-                    if(!empty($result)) {
-                        $row['bepadoShopId'] = $result['bepado_shop_id'];
-                        $row['bepadoShop'] = $sdk->getShop($result['bepado_shop_id'])->name;
-                        $row['bepadoOrderId'] = $result['bepado_order_id'];
-                    }
-                }
-                $subject->View()->data = $data;
+                $subject->View()->data = $this->markBepadoOrders(
+                    $subject->View()->data
+                );
+
                 break;
+
             default:
                 break;
         }
+    }
+
+    /**
+     * Mark Orders as Bepado Orders for view purposes.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function markBepadoOrders($data)
+    {
+        $sdk = $this->getSDK();
+
+        $orderIds = array_map(function ($orderView) {
+            return (int)$orderView['id'];
+        }, $data);
+
+        if (!$orderIds) {
+            return $data;
+        }
+
+        $bepadoOrderData = array();
+
+        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id FROM s_order_attributes WHERE orderID IN (' . implode(', ', $orderIds) . ')';
+
+        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+            $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
+        }
+
+        if (!$bepadoOrderData) {
+            return $data;
+        }
+
+        $shopNames = array();
+
+        foreach($data as $idx => $order) {
+            if ( ! isset($bepadoOrderData[$order['id']])) {
+                continue;
+            }
+
+            $result = $bepadoOrderData[$order['id']];
+
+            $data[$idx]['bepadoShopId'] = $result['bepado_shop_id'];
+            $data[$idx]['bepadoOrderId'] = $result['bepado_order_id'];
+
+            if (!isset($shopNames[$result['bepado_shop_id']])) {
+                $shopNames[$result['bepado_shop_id']] = $sdk->getShop($result['bepado_shop_id'])->name;
+            }
+
+            $data[$idx]['bepadoShop'] = $shopNames[$result['bepado_shop_id']];
+        }
+
+        return $data;
     }
 
 	/**

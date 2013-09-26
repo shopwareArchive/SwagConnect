@@ -828,16 +828,31 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 );
                 break;
             case 'list':
-                $data = $subject->View()->data;
-                foreach($data as &$row) {
-                    $sql = 'SELECT 1 FROM s_articles_attributes WHERE articleID = ? AND bepado_source_id IS NOT NULL';
-                    $row['bepado'] = (bool)Shopware()->Db()->fetchOne($sql, array($row['articleId']));
-                }
-                $subject->View()->data = $data;
+                $subject->View()->data = $this->markBepadoProducts(
+                    $subject->View()->data
+                );
                 break;
             default:
                 break;
         }
+    }
+
+    private function markBepadoProducts($data)
+    {
+        $articleIds = array_map(function ($row) {
+            return (int)$row['articleId'];
+        }, $data);
+
+        $sql = 'SELECT articleID FROM s_articles_attributes WHERE articleID IN (' . implode(', ', $articleIds) . ') AND bepado_source_id IS NOT NULL';
+        $bepadoArticleIds = array_map(function ($row) {
+            return $row['articleID'];
+        }, Shopware()->Db()->fetchAll($sql, array($row['articleId'])));
+
+        foreach($data as $idx => $row) {
+            $data[$idx]['bepado'] = in_array($row['articleId'], $bepadoArticleIds);
+        }
+
+        return $data;
     }
 
     /**

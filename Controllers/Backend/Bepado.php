@@ -228,16 +228,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $node = (int)$this->Request()->getParam('node', 1);
         $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
+
+        $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
-        $builder->select(array(
-            'c.id as id',
-            'c.name as name',
-            'c.position as position',
-            'c.parentId as parentId',
-            '(c.right - c.left - 1) / 2 as childrenCount',
-            'ct.bepadoMapping as mapping',
-        ));
+        $builder->add('select', 'ct.bepadoMapping as mapping', true);
+
         $builder->where('c.parentId = :parentId');
         $query = $builder->getQuery();
         $query->setParameter('parentId', $node);

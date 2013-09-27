@@ -30,6 +30,8 @@
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+    private $bepadoFactory;
+
     /**
      * Returns the current version of the plugin.
      *
@@ -421,52 +423,18 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function onInitResourceSDK(Enlight_Event_EventArgs $args)
     {
         $this->registerMyLibrary();
-        /** @var $connection PDO */
-        $connection = $this->Application()->Db()->getConnection();
-        $manager = $this->Application()->Models();
-        $front = $this->Application()->Front();
-        $helper = $this->getHelper();
-        $apiKey = $this->Config()->get('apiKey');
 
-        return new Bepado\SDK\SDK(
-            $apiKey,
-            $this->getSdkRoute($front),
-            new \Bepado\SDK\Gateway\PDO($connection),
-            new \Shopware\Bepado\ProductToShop(
-                $helper,
-                $manager
-            ),
-            new \Shopware\Bepado\ProductFromShop(
-                $helper,
-                $manager
-            )
-        );
+        $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory();
+
+        return $this->bepadoFactory->createSDK();
     }
-
-    private function getSdkRoute($front)
-    {
-        if ( ! $front->Router()) {
-            return '';
-        }
-
-        return $front->Router()->assemble(array(
-            'module' => 'backend',
-            'controller' => 'bepado_gateway',
-            'fullPath' => true
-        ));
-    }
-
-    private $helper, $sdk;
 
     /**
      * @return Bepado\SDK\SDK
      */
     private function getSDK()
     {
-        if($this->sdk === null) {
-            $this->sdk = $this->Application()->Bootstrap()->getResource('BepadoSDK');
-        }
-        return $this->sdk;
+        return $this->bepadoFactory->getSDK();
     }
 
     /**
@@ -474,31 +442,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getHelper()
     {
-        if($this->helper === null) {
-            $this->helper = new \Shopware\Bepado\Helper(
-                $this->Application()->Models(),
-                $this->getImagePath(),
-                $this->Config()->get('productDescriptionField')
-            );
-        }
-        return $this->helper;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getImagePath()
-    {
-        $request = $this->Application()->Front()->Request();
-
-        if (!$request) {
-            return '';
-        }
-
-        $imagePath = $request->getScheme() . '://'
-                   . $request->getHttpHost() . $request->getBasePath();
-        $imagePath .= '/media/image/';
-        return $imagePath;
+        return $this->bepadoFactory->getHelper();
     }
 
     /**

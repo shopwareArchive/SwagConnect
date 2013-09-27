@@ -48,20 +48,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
 
-    private $helper;
+    private $factory;
 
     /**
      * @return \Shopware\Bepado\Helper
      */
     public function getHelper()
     {
-        if($this->helper === null) {
-            $this->getSDK();
-            $this->helper = new \Shopware\Bepado\Helper(
-                $this->getModelManager()
-            );
+        if ($this->factory === null) {
+            $this->factory = new \Shopware\Bepado\BepadoFactory();
         }
-        return $this->helper;
+
+        return $this->factory->getHelper();
     }
 
     /**

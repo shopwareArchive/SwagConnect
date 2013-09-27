@@ -430,11 +430,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         return new Bepado\SDK\SDK(
             $apiKey,
-            $front->Router()->assemble(array(
-                'module' => 'backend',
-                'controller' => 'bepado_gateway',
-                'fullPath' => true
-            )),
+            $this->getSdkRoute($front),
             new \Bepado\SDK\Gateway\PDO($connection),
             new \Shopware\Bepado\ProductToShop(
                 $helper,
@@ -445,6 +441,19 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 $manager
             )
         );
+    }
+
+    private function getSdkRoute($front)
+    {
+        if ( ! $front->Router()) {
+            return '';
+        }
+
+        return $front->Router()->assemble(array(
+            'module' => 'backend',
+            'controller' => 'bepado_gateway',
+            'fullPath' => true
+        ));
     }
 
     private $helper, $sdk;
@@ -481,6 +490,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     protected function getImagePath()
     {
         $request = $this->Application()->Front()->Request();
+
+        if (!$request) {
+            return '';
+        }
+
         $imagePath = $request->getScheme() . '://'
                    . $request->getHttpHost() . $request->getBasePath();
         $imagePath .= '/media/image/';

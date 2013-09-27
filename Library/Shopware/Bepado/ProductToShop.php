@@ -72,6 +72,7 @@ class ProductToShop implements ProductToShopBase
         if(empty($product->title) || empty($product->vendor)) {
             return;
         }
+
         $model = $this->helper->getArticleModelByProduct($product);
 
         if($model === null) {
@@ -100,6 +101,7 @@ class ProductToShop implements ProductToShopBase
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
         }
+
         if($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
@@ -131,7 +133,7 @@ class ProductToShop implements ProductToShopBase
         $price = new \Shopware\Models\Article\Price();
         $price->fromArray(array(
             'from' => 1,
-            'price' => $product->price / (100 + 100 * $product->vat) * 100,
+            'price' => $product->price * 100 / (100 + 100 * $product->vat),
             'basePrice' => $purchasePrice * 100 / (100 + 100 * $product->vat),
             'customerGroup' => $customerGroup,
             'article' => $model

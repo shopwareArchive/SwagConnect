@@ -20,7 +20,7 @@ class BepadoFactory
     public function getSDK()
     {
         if($this->sdk === null) {
-            $this->sdk = $this->Application()->Bootstrap()->getResource('BepadoSDK');
+            $this->sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
         }
 
         return $this->sdk;

@@ -30,6 +30,7 @@
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+    /** @var \Shopware\Bepado\BepadoFactory  */
     private $bepadoFactory;
 
     /**
@@ -81,6 +82,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	 	return true;
 	}
 
+    /**
+     * Creates product, order and category attributes
+     */
     private function createMyAttributes()
     {
         $this->Application()->Models()->addAttribute(
@@ -134,6 +138,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
     }
 
+    /**
+     * Creates the plugin menu item
+     */
     private function createMyMenu()
     {
         $parent = $this->Menu()->findOneBy(array('label' => 'Marketing'));
@@ -147,6 +154,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
     }
 
+    /**
+     * Creates the plugin configuration form
+     */
     private function createMyForm()
     {
         $form = $this->Form();
@@ -213,6 +223,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
     }
 
+    /**
+     * Register the plugin events
+     */
     private function createMyEvents()
     {
         $this->subscribeEvent(
@@ -276,6 +289,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	    );
     }
 
+    /**
+     * Create necessary tables
+     */
     private function createMyTables()
     {
         $queries = array("
@@ -342,6 +358,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return true;
     }
 
+    /**
+     * Remove the attributes when uninstalling the plugin
+     */
     private function removeMyAttributes()
     {
         try {
@@ -390,6 +409,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     }
 
+    /**
+     * Register the template directory of the plugin
+     */
     private function registerMyTemplateDir()
     {
         $this->Application()->Template()->addTemplateDir(
@@ -397,6 +419,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
+    /**
+     * Register additional namespaces for the libraries
+     */
     private function registerMyLibrary()
     {
         $this->Application()->Loader()->registerNamespace(
@@ -409,11 +434,28 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
+    /**
+     * Register the snippet folder
+     */
     private function registerMySnippets()
     {
         $this->Application()->Snippets()->addConfigDir(
             $this->Path() . 'Snippets/'
         );
+    }
+
+    /**
+     * Lazy getter for the bepadoFactory
+     *
+     * @return \Shopware\Bepado\BepadoFactory
+     */
+    public function getBepadoFactory()
+    {
+        if (!$this->bepadoFactory) {
+            $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory();
+        }
+
+        return $this->bepadoFactory;
     }
 
     /**
@@ -424,9 +466,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyLibrary();
 
-        $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory();
-
-        return $this->bepadoFactory->createSDK();
+        return $this->getBepadoFactory()->createSDK();
     }
 
     /**
@@ -434,7 +474,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     private function getSDK()
     {
-        return $this->bepadoFactory->getSDK();
+
+        return $this->getBepadoFactory()->getSDK();
     }
 
     /**
@@ -442,10 +483,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getHelper()
     {
-        return $this->bepadoFactory->getHelper();
+        return $this->getBepadoFactory()->getHelper();
     }
 
     /**
+     * Register the bepado backend controller
+     *
      * @param   Enlight_Event_EventArgs $args
      * @return  string
      * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado
@@ -458,6 +501,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * Register the bepadoGateway backend controller
+     *
      * @param   Enlight_Event_EventArgs $args
      * @return  string
      */
@@ -467,6 +512,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * Register the bepado frontend controller
+     *
      * @param   Enlight_Event_EventArgs $args
      * @return  string
      */
@@ -476,6 +523,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return $this->Path() . 'Controllers/Frontend/Bepado.php';
     }
 
+    /**
+     * Helper method to create an address struct from shopware session info
+     *
+     * @param $userData
+     * @return \Bepado\SDK\Struct\Address
+     */
     private function getDeliveryAddress($userData)
     {
         $shippingData = $userData['shippingaddress'];
@@ -495,7 +548,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * Event listener method
+     * Event listener method for the checkout confirm- and cartAction.
+     *
      *
      * @param Enlight_Event_EventArgs $args
      * @return void
@@ -631,7 +685,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * Event listener method
+     * Event listener method for the checkout->finishAction. Will reserve products and redirect to
+     * the confirm page if a product cannot be reserved
      *
      * @param Enlight_Event_EventArgs $args
      */
@@ -684,7 +739,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * Event listener method
+     * Event listener method for the frontend detail page. Will add bepado template variables if the current product
+     * is a bepado product.
      *
      * @param Enlight_Event_EventArgs $args
      */
@@ -719,6 +775,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * Hooks the sSaveOrder frontend method ans reserves the bepado products
+     *
      * @param Enlight_Hook_HookArgs $args
      */
     public function onSaveOrder(Enlight_Hook_HookArgs $args)
@@ -737,7 +795,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * Event listener method
+     * Event listener method for frontend searches
      *
      * @param Enlight_Event_EventArgs $args
      */
@@ -769,6 +827,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * Extends the product list in the backend in order to have a special hint for bepado products
+     *
      * @param Enlight_Event_EventArgs $args
      */
     public function onPostDispatchBackendArticleList(Enlight_Event_EventArgs $args)
@@ -795,6 +855,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
     }
 
+    /**
+     * Helper method which adds an additional 'bepado' field to article objects in order to indicate
+     * if they are bepado articles or not
+     *
+     * @param $data
+     * @return mixed
+     */
     private function markBepadoProducts($data)
     {
         $articleIds = array_map(function ($row) {
@@ -814,6 +881,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
+     * Extends the order backend module in order to show a special hint for bepado products
+     *
      * @param Enlight_Event_EventArgs $args
      */
     public function onPostDispatchBackendOrder(Enlight_Event_EventArgs $args)
@@ -897,6 +966,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
 	/**
+     * Callback method for the Backend/Index postDispatch event.
+     * Will add the bepado sprite to the menu
+     *
 	 * @param Enlight_Event_EventArgs $args
 	 * @returns boolean|void
 	 */

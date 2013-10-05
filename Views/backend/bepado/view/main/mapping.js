@@ -44,6 +44,14 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
             }]
         });
 
+        me.addEvents(
+            /**
+             * Fired if the user clicks the "applyToChildren" action button.
+             * Will apply the current mapping to all empty child categories
+             */
+            'applyToChildren'
+        );
+
         me.callParent(arguments);
     },
 
@@ -51,7 +59,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         var me = this;
         return {
             xtype: 'actioncolumn',
-            width: 30,
+            width: 110,
             items: [{
                 iconCls: 'sprite-minus-circle-frame',
                 action: 'clear',
@@ -61,6 +69,27 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                 },
                 getClass: function(value, meta, record) {
                     return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
+                }
+            }, {
+                iconCls: 'sprite-folder-tree',
+                action: 'importCategories',
+                tooltip: '{s name=mapping/options/importCategories}Import categories from bepado{/s}',
+                handler: function (view, rowIndex, colIndex, item, opts, record) {
+                    me.fireEvent('importCategories', record);
+                },
+                getClass: function(value, meta, record) {
+                    return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
+                }
+            }, {
+                iconCls: 'sprite-arrow-skip-270',
+                action: 'assignToChildren',
+                tooltip: '{s name=mapping/options/assignToChildren}Use assignment for children, too{/s}',
+                handler: function (view, rowIndex, colIndex, item, opts, record) {
+                    me.fireEvent('applyToChildren', record);
+                },
+                getClass: function(value, meta, record) {
+                    // Hide, if category has no children
+                    return record.get('childrenCount') > 0 ? 'x-grid-center-icon': 'x-hide-display';
                 }
             }]
         };

@@ -231,6 +231,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('text', 'productDescriptionField', array(
             'label' => 'Feld für Produktbeschreibungen'
         ));
+        $form->setElement('text', 'bepadoDebugHost', array(
+                'label' => 'Alternativer bepado Host (nur für Testzwecke)',
+                'minLength' => 11
+            )
+        );
     }
 
     /**

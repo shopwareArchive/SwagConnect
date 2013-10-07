@@ -86,6 +86,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return $repository;
     }
 
+    /**
+     * Lists categories for a given bepado category tree
+     */
     public function getCategoryListAction()
     {
         $sdk = $this->getSDK();
@@ -113,6 +116,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Helper function to return a QueryBuilder for creating the listing queries for the import and export listings
+     *
+     * @param $filter
+     * @param $order
+     * @return \Doctrine\ORM\QueryBuilder
+     */
     private function getListQueryBuilder($filter, $order)
     {
         $repository = $this->getArticleRepository();
@@ -166,6 +176,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return $builder;
     }
 
+    /**
+     * Get all products exported to bepado
+     */
     public function getExportListAction()
     {
         $builder = $this->getListQueryBuilder(
@@ -194,6 +207,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Get all products imported from bepado
+     */
     public function getImportListAction()
     {
         $builder = $this->getListQueryBuilder(
@@ -222,6 +238,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Get all mappings for a given tree
+     */
     public function getMappingListAction()
     {
         $node = (int)$this->Request()->getParam('node', 1);
@@ -250,6 +269,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Save all mapped products
+     */
     public function setMappingListAction()
     {
         $rows = $this->Request()->getPost('rows');
@@ -257,7 +279,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $rows = json_decode($this->Request()->getRawBody(), true);
         }
         $rows = !isset($rows[0]) ? array($rows) : $rows;
-        $sdk = $this->getSDK();
         $helper = $this->getHelper();
         foreach($rows as $row) {
             $result = $helper->getCategoryModelById($row['id']);
@@ -266,6 +287,241 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             }
         }
         Shopware()->Models()->flush();
+    }
+
+    /**
+     * Import parts of the bepado category tree to shopware
+     */
+    public function importBepadoCategoriesAction()
+    {
+        $fromCategory = $this->Request()->getParam('fromCategory');
+        $toCategory = $this->Request()->getParam('toCategory');
+
+        $entityManager = $this->getModelManager();
+        $helper = $this->getHelper();
+
+        // Make sure that the target category exists
+        $toCategoryModel = $this->getCategoryRepository()->find($toCategory);
+        if (!$toCategoryModel) {
+            throw new \RuntimeException("Category with id  {$toCategory} not found");
+        }
+
+        // The user might have changed the mapping without saving and then hit the "importCategories"
+        // button. So we save the parent category's mapping first
+        $parentCategory = $helper->getCategoryModelById($toCategory);
+        $parentCategory->getAttribute()->setBepadoMapping($fromCategory);
+        $entityManager->flush();
+
+        try {
+            $entityManager->getConnection()->beginTransaction();
+            $this->importBepadoCategories($fromCategory, $toCategory);
+            $entityManager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $entityManager->getConnection()->rollback();
+            throw new \RuntimeException("Could not import categories", 0, $e);
+        }
+
+    }
+
+    /**
+     * Will import a bepado category tree into shopware.
+     *
+     * @param $fromCategory
+     * @param $toCategory
+     */
+    public function importBepadoCategories($fromCategory, $toCategory)
+    {
+        $categoriesToImport = $this->getFlatBepadoCategories($fromCategory);
+        $toCategoryModel = $this->getCategoryRepository()->find($toCategory);
+        $entityManager = $this->getModelManager();
+
+        /*
+         * The import string allows to identify categories, which have already been imported for
+         * this exact import. This does not prevent the user from importing the same sub-tree
+         * into multiple shopware categories. But it does prevent him from importing the same sub-tree
+         * into the same category multiple times
+         */
+        $importString = $fromCategory.'-'.$toCategory;
+
+        $currentLevel = 1;
+        $mappings = array();
+        foreach ($categoriesToImport as $id => $category) {
+            $name = $category['name'];
+            $parent = $category['parent'];
+            $level = $category['level'];
+
+            // Only flush after the level changed - this speeds up the import
+            if ($currentLevel != $level) {
+                Shopware()->Models()->flush();
+            }
+            $currentLevel = $level;
+
+            /** @var \Shopware\Models\Category\Category $parentModel */
+            if (!$parent) {
+                // Top category level - use toCategoryModel
+                $parentModel = $toCategoryModel;
+            } else {
+                // Parent was created before and is referenced in $mappings
+                $parentModel = $mappings[$parent];
+            }
+
+            // Check if there is already a category attribute for this import
+            $categoryAttributes = $entityManager->getRepository('\Shopware\Models\Attribute\Category')->findBy(
+                array('bepadoImported' => $importString, 'bepadoMapping' => $id),
+                null,
+                1
+            );
+
+            if (!empty($categoryAttributes)) {
+                /** @var \Shopware\Models\Attribute\Category $categoryAttribute */
+                $categoryAttribute = array_pop($categoryAttributes);
+                $category = $categoryAttribute->getCategory();
+            } else {
+                // Create category and attribute model
+                $category = new \Shopware\Models\Category\Category();
+                $category->setName($name);
+                $category->setParent($parentModel);
+
+                $attribute = new \Shopware\Models\Attribute\Category();
+                $attribute->setBepadoMapping($id);
+                $attribute->setBepadoImported($importString);
+                $category->setAttribute($attribute);
+
+                Shopware()->Models()->persist($category);
+                Shopware()->Models()->persist($attribute);
+            }
+
+
+            // Store the new category model in out $mappings array
+            $mappings[$id] = $category;
+        }
+
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Returns a flat array of bepado categories
+     *
+     * @param $rootCategory
+     * @return array(
+     *      string => array('id' => string, 'name' => string, 'level' => int, 'parent' => string|null)
+     * )
+     */
+    private function getFlatBepadoCategories($rootCategory)
+    {
+        $sdk = $this->getSDK();
+        $bepadoCategories = $sdk->getCategories();
+
+        $categoriesToImport = array();
+        foreach ($bepadoCategories as $id => $name) {
+            // Skip all entries which do not start with the parent or do not have it at all
+            if (strpos($id, $rootCategory) !== 0) {
+                continue;
+            }
+
+            $level = substr_count(preg_replace("#^{$rootCategory}#", '', $id), '/');
+
+            // Skip the root category
+            if ($level == 0) {
+                continue;
+            }
+
+            $categoriesToImport[$id] = array(
+                'id' => $id,
+                'name' => $name,
+                'level' => $level,
+                'parent' => $level == 1 ? null : implode('/', array_slice(explode('/', $id), 0, -1))
+            );
+        }
+
+        // Sort the categories ascending by their level, so parent categories can be imported first
+        uasort(
+            $categoriesToImport,
+            function ($a, $b) {
+                $a = $a['level'];
+                $b = $b['level'];
+                if ($a == $b) {
+                    return 0;
+                }
+                return ($a < $b) ? -1 : 1;
+            }
+        );
+        return $categoriesToImport;
+    }
+
+
+    /**
+     * Save a given mapping of a given category to all subcategories
+     */
+    public function applyMappingToChildrenAction()
+    {
+        $categoryId = $this->Request()->getParam('category');
+        $mapping = $this->Request()->getParam('mapping');
+
+        $entityManager = $this->getModelManager();
+
+        try {
+            $entityManager->getConnection()->beginTransaction();
+            $this->applyMappingToChildren($mapping, $categoryId);
+            $entityManager->getConnection()->commit();
+            $this->View()->assign(array(
+                'success' => true
+            ));
+        } catch (Exception $e) {
+            $entityManager->getConnection()->rollback();
+            $this->View()->assign(array(
+                'message' => $e->getMessage(),
+                'success' => false
+            ));
+        }
+    }
+
+    /**
+     * Helper that will assign a given mapping to all children of a given category
+     *
+     * @param $mapping string
+     * @param $categoryId int
+     */
+    private function applyMappingToChildren($mapping, $categoryId)
+    {
+        $helper = $this->getHelper();
+        $ids = $this->getChildCategoriesIds($categoryId);
+        $entityManager = $this->getModelManager();
+
+        // First of all try to save the mapping for the parent category. If that fails,
+        // it mustn't be done for the child categories
+        $parentCategory = $helper->getCategoryModelById($categoryId);
+        $parentCategory->getAttribute()->setBepadoMapping($mapping);
+        $entityManager->flush();
+
+        // Don't set the children with models in order to speed things up
+        $builder = $entityManager->createQueryBuilder();
+        $builder->update('\Shopware\Models\Attribute\Category', 'categoryAttribute')
+            ->set('categoryAttribute.bepadoMapping',  $builder->expr()->literal($mapping))
+            ->where($builder->expr()->in('categoryAttribute.categoryId', $ids));
+
+        $builder->getQuery()->execute();
+    }
+
+    /**
+     * Helper function which returns the IDs of the child categories of a given parent category
+     *
+     * @param $parentId int
+     * @return array
+     */
+    private function getChildCategoriesIds($parentId)
+    {
+        $query = $this->getModelManager()->createQuery('SELECT c.id from Shopware\Models\Category\Category c WHERE c.path LIKE ?1 ');
+        $query->setParameter(1, array("%|{$parentId}|%"));
+        $result = $query->getResult(Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
+
+        // Pop IDs from result rows
+        return array_map(
+            function ($row) {
+                return array_pop($row);
+            },
+            $result
+        );
     }
 
     public function insertOrUpdateProductAction()
@@ -315,6 +571,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
     }
 
+    /**
+     * Delete a product from bepado export
+     */
     public function deleteProductAction()
     {
         $sdk = $this->getSDK();
@@ -333,6 +592,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         Shopware()->Models()->flush();
     }
 
+    /**
+     * Updates products and flag the for bepado export.
+     */
     public function updateProductAction()
     {
         $ids = $this->Request()->getPost('ids');
@@ -351,6 +613,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         Shopware()->Models()->flush();
     }
 
+    /**
+     * Verify a given api key against the bepado server
+     */
     public function verifyApiKeyAction()
     {
         $sdk = $this->getSDK();

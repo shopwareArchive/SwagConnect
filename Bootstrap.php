@@ -83,50 +83,60 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     private function createMyAttributes()
     {
-        $this->Application()->Models()->addAttribute(
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
+        
+        $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'shop_id',
             'varchar(255)'
         );
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'source_id',
             'varchar(255)'
         );
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'export_status',
             'text'
         );
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'export_message',
             'text'
         );
 
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_order_attributes',
             'bepado', 'shop_id',
             'int(11)'
         );
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_order_attributes',
             'bepado', 'order_id',
             'int(11)'
         );
 
-        $this->Application()->Models()->addAttribute(
+        $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'categories',
             'text'
         );
-        $this->Application()->Models()->addAttribute(
+
+        $modelManager->addAttribute(
            's_categories_attributes',
            'bepado', 'mapping',
            'text'
         );
 
-        $this->Application()->Models()->generateAttributeModels(array(
+        $modelManager->addAttribute(
+           's_categories_attributes',
+           'bepado', 'imported',
+           'text'
+        );
+
+        $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_categories_attributes',
             's_order_details_attributes',
@@ -344,43 +354,53 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
     private function removeMyAttributes()
     {
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
+
+
         try {
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'shop_id'
             );
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'source_id'
             );
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'export_status'
             );
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'export_message'
             );
 
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_order_attributes',
                 'bepado', 'shop_id'
             );
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_order_attributes',
                 'bepado', 'order_id'
             );
 
-            $this->Application()->Models()->removeAttribute(
+            $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'categories'
             );
-            $this->Application()->Models()->removeAttribute(
+
+            $modelManager->removeAttribute(
                 's_categories_attributes',
                 'bepado', 'mapping'
             );
 
-            $this->Application()->Models()->generateAttributeModels(array(
+            $modelManager->removeAttribute(
+                's_categories_attributes',
+                'bepado', 'imported'
+            );
+
+            $modelManager->generateAttributeModels(array(
                 's_articles_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',

@@ -40,7 +40,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
         disableProductTitle: '{s name=import/message/disable_title}Products import{/s}',
-        disableProductMessage: '{s name=import/message/disable_message}Products have been disabled.{/s}'
+        disableProductMessage: '{s name=import/message/disable_message}Products have been disabled.{/s}',
+
+        applyMappingToChildCategoriesTitle: '{s name=mapping/applyConfirmTitle}Apply to child categories?{/s}',
+        applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
+
+        importBepadoCategoriesTitle: '{s name=mapping/importBepadoCategoriesTitle}Import categories?{/s}',
+        importBepadoCategoriesMessage: '{s name=mapping/importBepadoCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}'
     },
 
     /**
@@ -52,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     mainWindow: null,
 
     /**
-     *
+     * Init component. Basically will create the app window and register to events
      */
     init: function () {
         var me = this;
@@ -70,6 +76,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             },
             'bepado-mapping button[action=save]': {
                 click: me.onSaveMapping
+            },
+            'bepado-mapping': {
+                applyToChildren: me.onApplyMappingToChildCategories,
+                importCategories: me.onImportCategoriesFromBepado
             },
             'bepado-export-list button[action=add]': {
                click: me.onExportFilterAction
@@ -203,6 +213,100 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         me.callParent(arguments);
     },
 
+    /**
+     * Callback function that will create the bepado categories in the selected category
+     *
+     * @param record
+     */
+    onImportCategoriesFromBepado: function(record) {
+        var me = this,
+            panel = me.getMapping(),
+            store = panel.store;
+
+        Ext.MessageBox.confirm(
+            me.messages.importBepadoCategoriesTitle,
+            Ext.String.format(me.messages.importBepadoCategoriesMessage, record.get('mapping'), record.get('name')),
+            function (response) {
+                if ( response !== 'yes' ) {
+                    return;
+                }
+
+                panel.setLoading();
+                Ext.Ajax.request({
+                    url: '{url action=importBepadoCategories}',
+                    method: 'POST',
+                    params: {
+                        fromCategory: record.get('mapping'),
+                        toCategory: record.get('id')
+                    },
+                    success: function(response, opts) {
+                        me.createGrowlMessage(me.messages.saveMappingTitle, me.messages.saveMappingSuccess);
+                        panel.setLoading(false);
+                        store.load();
+                    },
+                    failure: function(response, opts) {
+                        me.createGrowlMessage(me.messages.saveMappingError, response.responseText);
+                        panel.setLoading(false);
+                    }
+
+                });
+
+            }
+        );
+    },
+
+    /**
+     * Callback function that will apply the current mapping to all child mappings
+     *
+     * @param record
+     */
+    onApplyMappingToChildCategories: function(record) {
+        var me = this,
+            panel = me.getMapping(),
+            store = panel.store;
+
+        // No message needed, if there aren't any child nodes
+        if (record.get('childrenCount') == 0) {
+            return;
+        }
+
+        Ext.MessageBox.confirm(
+            me.messages.applyMappingToChildCategoriesTitle,
+            me.messages.applyMappingToChildCategoriesMessage,
+            function (response) {
+                if ( response !== 'yes' ) {
+                    return;
+                }
+
+                panel.setLoading();
+                Ext.Ajax.request({
+                    url: '{url action=applyMappingToChildren}',
+                    method: 'POST',
+                    params: {
+                        category: record.get('id'),
+                        mapping: record.get('mapping')
+                    },
+                    success: function(response, opts) {
+                        me.createGrowlMessage(me.messages.saveMappingTitle, me.messages.saveMappingSuccess);
+                        panel.setLoading(false);
+                        store.load();
+                    },
+                    failure: function(response, opts) {
+                        me.createGrowlMessage(me.messages.saveMappingError, response.responseText);
+                        panel.setLoading(false);
+                    }
+
+                });
+
+            }
+        );
+    },
+
+    /**
+     * Callback function that will save the current mapping
+     *
+     * @param button
+     */
     onSaveMapping: function(button) {
         var me = this,
             panel = me.getMapping(),
@@ -228,6 +332,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
+    /**
+     * Callback function that will insert or delete a product from/for export
+     *
+     * @param btn
+     */
     onExportFilterAction: function(btn) {
         var me = this,
             list = me.getExportList(),
@@ -268,6 +377,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
+    /**
+     * Callback function that will activate or disable a product for import
+     *
+     * @param btn
+     */
     onImportFilterAction: function(btn) {
         var me = this,
             list = me.getImportList(),
@@ -308,12 +422,24 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
+    /**
+     * Helper to show a growl message
+     *
+     * @param title
+     * @param message
+     */
     createGrowlMessage: function(title, message) {
         var me = this,
             win = me.getWindow();
         Shopware.Notification.createGrowlMessage(title, message, win.title);
     },
 
+    /**
+     * Callback function to set the window title depending on the current navigation entry
+     *
+     * @param tree
+     * @param node
+     */
     onSelectNavigationEntry: function(tree, node) {
         var me = this,
             panel = me.getPanel(),
@@ -325,6 +451,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         win.loadTitle(node);
     },
 
+    /**
+     * Callback function to save the configuration form
+     *
+     * @param button
+     */
     onSaveConfigForm: function(button) {
         var me = this,
             form = me.getConfigForm();

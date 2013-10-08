@@ -133,7 +133,8 @@ class BepadoFactory
                 $this->getModelManager(),
                 $this->getImagePath(),
                 Shopware()->Config()->get('productDescriptionField'),
-                $this->getCategoryQuery()
+                $this->getCategoryQuery(),
+                $this->getSDK()
             );
         }
 

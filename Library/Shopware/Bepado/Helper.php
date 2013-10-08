@@ -55,17 +55,24 @@ class Helper
     private $bepadoCategoryQuery;
 
     /**
+     * @var \Bepado\SDK\SDK
+     */
+    private $sdk;
+
+    /**
      * @param ModelManager $manager
      * @param string $imagePath
      * @param string $productDescriptionField
      * @param CategoryQuery
+     * @param \Bepado\SDK\SDK $sdk
      */
-    public function __construct(ModelManager $manager, $imagePath, $productDescriptionField, $bepadoCategoryQuery)
+    public function __construct(ModelManager $manager, $imagePath, $productDescriptionField, $bepadoCategoryQuery, \Bepado\SDK\SDK $sdk)
     {
         $this->manager = $manager;
         $this->imagePath = $imagePath;
         $this->productDescriptionField = $productDescriptionField;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
+        $this->sdk = $sdk;
     }
 
     /**
@@ -98,6 +105,14 @@ class Helper
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
         $customerGroup = $repository->findOneBy(array('key' => 'EK'));
         return $customerGroup;
+    }
+
+    /**
+     * @return \Bepado\SDK\SDK
+     */
+    public function getSDK()
+    {
+        return $this->sdk;
     }
 
     /**
@@ -377,4 +392,55 @@ class Helper
     {
         return $this->bepadoCategoryQuery;
     }
+
+    /**
+     * Helper function to mark a given array of product ids for bepado update
+     *
+     * @param array $ids
+     */
+    public function insertOrUpdateProduct(array $ids)
+    {
+        $sdk = $this->getSDK();
+
+        foreach($ids as $id) {
+            $model = $this->getArticleModelById($id);
+            if($model === null) {
+                continue;
+            }
+            $attribute = $model->getAttribute();
+
+            $status = $attribute->getBepadoExportStatus();
+            if(empty($status) || $status == 'delete' || $status == 'error') {
+                $status = 'insert';
+            } else {
+                $status = 'update';
+            }
+            $attribute->setBepadoExportStatus(
+                $status
+            );
+
+            $categories = $this->getRowProductCategoriesById($id);
+            $attribute->setBepadoCategories(
+                serialize($categories)
+            );
+
+            Shopware()->Models()->flush($attribute);
+            try {
+                if($status == 'insert') {
+                    $sdk->recordInsert($id);
+                } else {
+                    $sdk->recordUpdate($id);
+                }
+            } catch(Exception $e) {
+                $attribute->setBepadoExportStatus(
+                    'error'
+                );
+                $attribute->setBepadoExportMessage(
+                    $e->getMessage()
+                );
+                Shopware()->Models()->flush($attribute);
+            }
+        }
+    }
+
 }

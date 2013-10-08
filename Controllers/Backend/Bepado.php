@@ -524,51 +524,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
     }
 
+    /**
+     * Calles when a product was marked for update in the bepado backend module
+     */
     public function insertOrUpdateProductAction()
     {
-        $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         $helper = $this->getHelper();
 
-        foreach($ids as $id) {
-            $model = $helper->getArticleModelById($id);
-            if($model === null) {
-                continue;
-            }
-            $attribute = $model->getAttribute();
-
-            $status = $attribute->getBepadoExportStatus();
-            if(empty($status) || $status == 'delete' || $status == 'error') {
-                $status = 'insert';
-            } else {
-                $status = 'update';
-            }
-            $attribute->setBepadoExportStatus(
-                $status
-            );
-
-            $categories = $helper->getRowProductCategoriesById($id);
-            $attribute->setBepadoCategories(
-                serialize($categories)
-            );
-
-            Shopware()->Models()->flush($attribute);
-            try {
-                if($status == 'insert') {
-                    $sdk->recordInsert($id);
-                } else {
-                    $sdk->recordUpdate($id);
-                }
-            } catch(Exception $e) {
-                $attribute->setBepadoExportStatus(
-                    'error'
-                );
-                $attribute->setBepadoExportMessage(
-                    $e->getMessage()
-                );
-                Shopware()->Models()->flush($attribute);
-            }
-        }
+        $helper->insertOrUpdateProduct($ids);
     }
 
     /**

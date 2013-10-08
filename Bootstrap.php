@@ -231,6 +231,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('text', 'productDescriptionField', array(
             'label' => 'Feld für Produktbeschreibungen'
         ));
+        $form->setElement('boolean', 'autoUpdateProducts', array(
+            'label' => 'Geänderte Produkte automatisch mit bepado synchronisieren',
+            'value' => true
+        ));
         $form->setElement('text', 'bepadoDebugHost', array(
                 'label' => 'Alternativer bepado Host (nur für Testzwecke)',
                 'minLength' => 11
@@ -302,6 +306,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 		    'Enlight_Controller_Action_PostDispatch_Backend_Index',
 		    'onPostDispatch'
 	    );
+
+        $this->subscribeEvent('Shopware\Models\Article\Article::postPersist', 'onUpdateArticle');
+        $this->subscribeEvent('Shopware\Models\Article\Article::postUpdate', 'onUpdateArticle');
+
+
     }
 
     /**
@@ -509,6 +518,37 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function getHelper()
     {
         return $this->getBepadoFactory()->getHelper();
+    }
+
+    /**
+     * Callback method to update changed bepado products
+     *
+     * @param Enlight_Event_EventArgs $eventArgs
+     */
+    public function onUpdateArticle(Enlight_Event_EventArgs $eventArgs)
+    {
+        if (!$this->Config()->get('autoUpdateProducts', true)) {
+            return;
+        }
+
+        $entity = $eventArgs->get('entity');
+        $id = $entity->getId();
+
+        $model = $this->getHelper()->getArticleModelById($id);
+
+        // Check if we have a valid model
+        if (!$model || !$model->getAttribute()) {
+            return;
+        }
+
+        // Check if entity is a bepado product
+        $status = $model->getAttribute()->getBepadoExportStatus();
+        if (empty($status)) {
+            return;
+        }
+
+        // Mark the product for bepado update
+        $this->getHelper()->insertOrUpdateProduct(array($id));
     }
 
     /**

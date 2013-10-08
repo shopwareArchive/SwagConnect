@@ -141,6 +141,7 @@ class ProductToShop implements ProductToShopBase
         $detail->setPrices(array($price));
 
         $this->manager->flush($model);
+        $this->manager->flush($detail);
 
         if($model->getMainDetail() === null) {
             $model->setMainDetail($detail);

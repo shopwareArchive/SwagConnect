@@ -22,10 +22,10 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
         var me = this;
         me.htmlTpl = [
             '<div class="bepado-home-page">',
-                '<h3 class="headline">Bepado – be part of it!</h3>',
+                '<h3 class="headline">bepado – be part of it!</h3>',
                 '<div class="content">',
                     '<p>',
-                    'Bepado ist die erste soziale B2B-Handelsplattform der Welt. Ziel des Portals ist die Vernetzung von ',
+                    'bepado ist die erste soziale B2B-Handelsplattform der Welt. Ziel des Portals ist die Vernetzung von ',
                     'Onlinehändlern untereinander, damit diese ihre Angebote durch die Sortimente anderer Teilnehmer ergänzen',
                     'können. Das schafft, ganz im Sinne eines sozialen Netzwerks, eine größere Reichweite für den Einzelnen,',
                     'sorgt für mehr Unabhängigkeit von großen Marktplätzen, erlaubt Dropshipping uvm. und bringt jedem ',

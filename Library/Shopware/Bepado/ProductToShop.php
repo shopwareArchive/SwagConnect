@@ -122,6 +122,9 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoSourceId($product->sourceId);
         $attribute->setBepadoExportStatus(null);
         $attribute->setBepadoCategories(serialize($product->categories));
+        $attribute->setBepadoPurchasePrice($product->purchasePrice);
+        $attribute->setBepadoFixedPrice($product->fixedPrice);
+        $attribute->setBepadoCategories(serialize($product->categories));
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
@@ -140,8 +143,6 @@ class ProductToShop implements ProductToShopBase
         ));
         $detail->setPrices(array($price));
 
-        $this->manager->flush();
-
         if($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
             $this->manager->flush();
@@ -151,6 +152,8 @@ class ProductToShop implements ProductToShopBase
             $attribute->setArticle($model);
             $this->manager->flush();
         }
+
+        $this->manager->flush();
 
         // @fixme WORKAROUND: there can always be an image update
         foreach ($model->getImages() as $image) {

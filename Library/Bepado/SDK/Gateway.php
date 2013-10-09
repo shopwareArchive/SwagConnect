@@ -17,10 +17,10 @@ namespace Bepado\SDK;
  * @api
  */
 abstract class Gateway implements
-    Gateway\ChangeGateway,
-    Gateway\ProductGateway,
-    Gateway\RevisionGateway,
-    Gateway\ShopConfiguration,
-    Gateway\ReservationGateway
+     Gateway\ChangeGateway,
+     Gateway\ProductGateway,
+     Gateway\RevisionGateway,
+     Gateway\ShopConfiguration,
+     Gateway\ReservationGateway
 {
 }

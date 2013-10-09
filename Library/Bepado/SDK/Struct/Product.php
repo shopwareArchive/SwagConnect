@@ -122,6 +122,8 @@ class Product extends ShopItem
      * during transactions and is required to be the same in both
      * shops during a transaction.
      *
+     * The price includes the VAT.
+     *
      * @var float
      */
     public $price;
@@ -136,6 +138,8 @@ class Product extends ShopItem
      * Defining this price is optional and the regular Bepado price groups
      * will take effect if its not given. If this price is given however
      * price groups will NOT be considered to calculate the profit margin.
+     *
+     * The price includes the VAT.
      *
      * @var float
      */

@@ -53,7 +53,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '0.1-alpha';
+    const VERSION = '$Revision$';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -444,16 +444,26 @@ final class SDK
     /**
      * Update the status of a bepado order.
      *
-     * @param int $orderId
+     * The $status is one of:
+     *
+     * - open
+     * - in_process
+     * - delivered
+     * - canceled
+     * - error
+     *
+     * @param int $providerOrderId
      * @param string $status
+     * @param \Bepado\SDK\Struct\Message[] $messages
      *
      * @return void
      */
-    public function updateOrderStatus($orderId, $status)
+    public function updateOrderStatus($providerOrderId, $status, array $messages = array())
     {
         $this->dependencies->getOrderStatusService()->update(
-            $orderId,
-            $status
+            $providerOrderId,
+            $status,
+            $messages
         );
     }
 }

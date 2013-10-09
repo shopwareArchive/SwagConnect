@@ -160,7 +160,8 @@ class Helper
             'u.unit',
             'd.purchaseUnit as volume',
             'd.referenceUnit as base',
-            'at.bepadoCategories as categories'
+            'at.bepadoCategories as categories',
+            'at.bepadoFixedPrice as fixedPrice'
             //'images = array()',
         ));
         if($this->productDescriptionField !== null) {

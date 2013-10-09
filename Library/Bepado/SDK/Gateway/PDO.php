@@ -1,6 +1,8 @@
 <?php
 /**
  * This file is part of the Bepado SDK Component.
+ *
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Gateway;
@@ -9,8 +11,9 @@ use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
 
 /**
+ * PDO implementation of the storage gateway
  *
- * @author Heiner Lohaus
+ * @version $Revision$
  */
 class PDO extends Gateway
 {

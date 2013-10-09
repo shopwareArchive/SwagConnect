@@ -140,6 +140,18 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            'text'
         );
 
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'purchase_price',
+           'double'
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'fixed_price',
+           'int(1)'
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_categories_attributes',
@@ -298,6 +310,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_Article',
+            'onPostDispatchBackendArticle'
+        );
+
+        $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Backend_Order',
             'onPostDispatchBackendOrder'
         );
@@ -367,7 +384,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	 */
 	public function uninstall()
 	{
-        $this->removeMyAttributes();
+//        $this->removeMyAttributes();
         return true;
 	}
 
@@ -913,6 +930,25 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             case 'list':
                 $subject->View()->data = $this->markBepadoProducts(
                     $subject->View()->data
+                );
+                break;
+            default:
+                break;
+        }
+    }
+
+    public function onPostDispatchBackendArticle(Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/article/bepado.js'
                 );
                 break;
             default:

@@ -67,11 +67,20 @@ class Address extends Verificator
             if (!is_string($struct->$required)) {
                 throw new \RuntimeException($required . ' MUST be a string.');
             }
+            if (@iconv('UTF-8', 'UTF-8', $struct->$required) != $struct->$required) {
+                throw new \RuntimeException("Property $required MUST be UTF-8 encoded.");
+            }
         }
 
         foreach ($optionalStringFields as $field) {
-            if ($struct->$field !== null && !is_string($struct->$field)) {
+            if ($struct->$field === null) {
+                continue;
+            }
+            if (!is_string($struct->$field)) {
                 throw new \RuntimeException($field . ' MUST be a string.');
+            }
+            if (@iconv('UTF-8', 'UTF-8', $struct->$field) != $struct->$field) {
+                throw new \RuntimeException("Property $field MUST be UTF-8 encoded.");
             }
         }
 

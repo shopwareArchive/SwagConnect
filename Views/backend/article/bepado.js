@@ -69,18 +69,34 @@ Ext.define('Shopware.apps.Article.view.detail.Prices-Bepado', {
 
     createElements: function() {
         var me = this,
-            attributes;
+            attributes,
+            style,
+            label,
+            tabPanel;
+
+
+        tabPanel =  me.callOverridden(arguments);
 
         if (me.article && me.article.getAttribute()) {
             attributes = me.article.getAttribute().first();
 
-            var style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
+            style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
             if(attributes.get('bepadoShopId') > 0 && attributes.get('bepadoFixedPrice')) {
-                return [{ xtype: 'label', html: '<div title="" class="bepado-icon" ' +  style + '>&nbsp;</div>{s name="bepadoFixedPriceMessage"}The supplier of this product has enabled the fixed price feature. For this reason you will not be able to edit the price.{/s}' }];
+                label = { xtype: 'label', html: '<div title="" class="bepado-icon" ' +  style + '>&nbsp;</div>{s name="bepadoFixedPriceMessage"}The supplier of this product has enabled the fixed price feature. For this reason you will not be able to edit the price.{/s}' };
+
+
+                tabPanel.setDisabled(true);
+
+                return [
+                    label,
+                    tabPanel
+                ];
             }
         }
-        return me.callOverridden(arguments);
+
+        return result;
+
     }
 });
 //{/block}

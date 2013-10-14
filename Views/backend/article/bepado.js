@@ -95,7 +95,7 @@ Ext.define('Shopware.apps.Article.view.detail.Prices-Bepado', {
             }
         }
 
-        return result;
+        return tabPanel;
 
     }
 });

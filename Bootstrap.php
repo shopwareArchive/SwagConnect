@@ -502,6 +502,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getBepadoFactory()
     {
+        $this->registerMyLibrary();
+
         if (!$this->bepadoFactory) {
             $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory();
         }
@@ -515,8 +517,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function onInitResourceSDK(Enlight_Event_EventArgs $args)
     {
-        $this->registerMyLibrary();
-
         return $this->getBepadoFactory()->createSDK();
     }
 
@@ -525,7 +525,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     private function getSDK()
     {
-
         return $this->getBepadoFactory()->getSDK();
     }
 

@@ -4,7 +4,7 @@
 /*
  {block name="backend/article/model/attribute/fields" append}
  { name: 'bepadoFixedPrice', type: 'boolean' },
- { name: 'bepadoShopId', type: 'int' },
+ { name: 'bepadoShopId', type: 'int', useNull: true },
  {/block}
  */
 

@@ -128,16 +128,13 @@ class ProductToShop implements ProductToShopBase
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
-        // TODO: Remove before ClosedBeta when purchasePrice is required
-        $purchasePrice = $product->purchasePrice ?: $product->price;
-
         $customerGroup = $this->helper->getDefaultCustomerGroup();
         $detail->getPrices()->clear();
         $price = new \Shopware\Models\Article\Price();
         $price->fromArray(array(
             'from' => 1,
             'price' => $product->price * 100 / (100 + 100 * $product->vat),
-            'basePrice' => $purchasePrice * 100 / (100 + 100 * $product->vat),
+            'basePrice' => $attribute->getBepadoPurchasePrice() * 100 / (100 + 100 * $product->vat),
             'customerGroup' => $customerGroup,
             'article' => $model
         ));

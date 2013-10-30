@@ -13,6 +13,7 @@ class BepadoFactory
     private $helper;
     private $sdk;
 
+
     private $modelManager;
 
     /**
@@ -139,6 +140,17 @@ class BepadoFactory
         }
 
         return $this->helper;
+    }
+
+    public function getBasketHelper()
+    {
+        return new \Shopware\Bepado\BasketHelper (
+            Shopware()->Db(),
+            $this->getSDK(),
+            $this->getHelper(),
+            Shopware()->Config()->getByNamespace('SwagBepado', 'checkoutShopInfo')
+        );
+
     }
 
     /**

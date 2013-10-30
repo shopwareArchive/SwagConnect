@@ -38,7 +38,7 @@
 	{/if}
 
     {$smarty.block.parent}
-	{if $bepadoContent}
+	{if $bepadoShops}
     	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=false}
 	{/if}
 {/block}

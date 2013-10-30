@@ -169,6 +169,7 @@ class Helper
         }
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
+        
         $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
     }
@@ -336,7 +337,7 @@ class Helper
     {
         $data = $this->getRowProductDataById($id);
         $data['images'] = $this->getImagesById($id);
-        return $this->getProductByRowData($data);
+        return $this->getProductByRowData($data) ;
     }
 
     /**

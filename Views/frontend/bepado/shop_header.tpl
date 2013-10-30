@@ -1,7 +1,11 @@
 <div class="table_row bepado-dispatch-row">
 	<div class="grid_6">
 		<span class="title">
-			{s name=bepado/checkout/dispatch_title}Versandkosten für die Lieferung {counter name=bepadoIndex} von {$bepadoShops|count + 1}{/s}
+            {if empty($bepadoContent)}
+                {s name=bepado/checkout/dispatch_title_single}Versandkosten für die Lieferung{/s}
+            {else}
+                {s name=bepado/checkout/dispatch_title}Versandkosten für die Lieferung {counter name=bepadoIndex} von {$bepadoShops|count + $addBaseShop}{/s}
+            {/if}
 		</span>
 		&nbsp;
 	</div>

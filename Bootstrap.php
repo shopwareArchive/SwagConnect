@@ -280,9 +280,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         // need it as dependency
         $handler = new \Enlight_Event_Handler_Default(
             'Enlight_Bootstrap_InitResource_BepadoSDK',
-            function() {
-                return $this->getBepadoFactory()->createSDK();
-            },
+            array($this, 'onInitResourceSDK'),
             0
         );
         $this->Application()->Events()->registerListener($handler);
@@ -292,11 +290,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
          * Have a look at the getEvents() method defined in each subscriber class
          */
         $subscribers = array(
-            new \Shopware\Bepado\Subscribers\Lifecycle(),
             new \Shopware\Bepado\Subscribers\ControllerPath(),
             new \Shopware\Bepado\Subscribers\TemplateExtension(),
             new \Shopware\Bepado\Subscribers\Checkout($this->getBasketHelper())
         );
+
+        if ($this->Config()->get('autoUpdateProducts', true)) {
+            $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
+        }
+
 
         /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
@@ -305,6 +307,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
     }
 
+    public function onInitResourceSDK()
+    {
+        $this->registerMyLibrary();
+
+        return $this->getBepadoFactory()->createSDK();
+    }
 
     /**
      * Create necessary tables

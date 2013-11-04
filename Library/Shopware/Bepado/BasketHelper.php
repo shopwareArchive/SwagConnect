@@ -251,7 +251,8 @@ class BasketHelper
     }
 
     /**
-     * Returns tax rates for all basket positions
+     * @todo: This function is basically a copy of the same function in Controllers/Frontend/Checkout.
+     * As that function cannot be called, I copied it for the time being - this should be refactored
      *
      * @param  $basket array returned from this->getBasket
      * @return array

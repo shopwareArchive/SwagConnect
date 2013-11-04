@@ -21,7 +21,7 @@ class BepadoFactory
      */
     public function getSDK()
     {
-        if($this->sdk === null) {
+        if(!$this->sdk) {
             $this->sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
         }
 
@@ -72,7 +72,7 @@ class BepadoFactory
             $requestSigner = $this->getNoSecurityRequestSigner($gateway, $apiKey);
         }
 
-        return new SDK\SDK(
+        $sdk = new SDK\SDK(
             $apiKey,
             $this->getSdkRoute($front),
             $gateway,
@@ -87,6 +87,10 @@ class BepadoFactory
             null,
             $requestSigner
         );
+
+
+        $this->getHelper()->setSDK($sdk);
+        return $sdk;
     }
 
     /**
@@ -125,17 +129,16 @@ class BepadoFactory
     }
 
     /**
-     * @return \Shopware\Bepado\Helper
+     * @return Helper
      */
     public function getHelper()
     {
         if($this->helper === null) {
-            $this->helper = new \Shopware\Bepado\Helper(
+            $this->helper = new Helper(
                 $this->getModelManager(),
                 $this->getImagePath(),
                 Shopware()->Config()->get('productDescriptionField'),
-                $this->getCategoryQuery(),
-                $this->getSDK()
+                $this->getCategoryQuery()
             );
         }
 
@@ -144,7 +147,7 @@ class BepadoFactory
 
     public function getBasketHelper()
     {
-        return new \Shopware\Bepado\BasketHelper (
+        return new BasketHelper (
             Shopware()->Db(),
             $this->getSDK(),
             $this->getHelper(),

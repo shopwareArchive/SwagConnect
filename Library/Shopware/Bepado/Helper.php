@@ -23,6 +23,7 @@
  */
 
 namespace Shopware\Bepado;
+use Bepado\SDK\SDK;
 use Bepado\SDK\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
     Shopware\Models\Category\Category as CategoryModel,
@@ -54,9 +55,6 @@ class Helper
 
     private $bepadoCategoryQuery;
 
-    /**
-     * @var \Bepado\SDK\SDK
-     */
     private $sdk;
 
     /**
@@ -64,16 +62,27 @@ class Helper
      * @param string $imagePath
      * @param string $productDescriptionField
      * @param CategoryQuery
-     * @param \Bepado\SDK\SDK $sdk
      */
-    public function __construct(ModelManager $manager, $imagePath, $productDescriptionField, $bepadoCategoryQuery, \Bepado\SDK\SDK $sdk)
+    public function __construct(ModelManager $manager, $imagePath, $productDescriptionField, $bepadoCategoryQuery)
     {
         $this->manager = $manager;
         $this->imagePath = $imagePath;
         $this->productDescriptionField = $productDescriptionField;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
-        $this->sdk = $sdk;
     }
+
+    /**
+     * @return SDK
+     */
+    public function getSDK()
+    {
+        return $this->sdk;
+    }
+
+   public function setSDK(SDK $sdk)
+   {
+       $this->sdk = $sdk;
+   }
 
     /**
      * @return \Shopware\Models\Article\Repository
@@ -105,14 +114,6 @@ class Helper
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
         $customerGroup = $repository->findOneBy(array('key' => 'EK'));
         return $customerGroup;
-    }
-
-    /**
-     * @return \Bepado\SDK\SDK
-     */
-    public function getSDK()
-    {
-        return $this->sdk;
     }
 
     /**
@@ -394,6 +395,7 @@ class Helper
     {
         return $this->bepadoCategoryQuery;
     }
+
 
     /**
      * Helper function to mark a given array of product ids for bepado update

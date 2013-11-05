@@ -48,182 +48,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
 
-    public function getCategoryListAction()
+    private $factory;
+
+    /**
+     * @return \Shopware\Bepado\Helper
+     */
+    public function getHelper()
     {
-        $sdk = $this->getSDK();
-
-        $list = $sdk->getCategories();
-        $parent = $this->Request()->get('node');
-        $count = $parent == 1 ? 1 : substr_count($parent, '/') + 1;
-        $parent = $parent == 1 ? '/' : $parent;
-
-        $data = array();
-        foreach($list as $id => $name) {
-            if(strpos($id, $parent) !== 0
-              || substr_count($id, '/') != $count) {
-                continue;
-            }
-            $data[] = array(
-                'id' => $id,
-                'name' => $name
-            );
+        if ($this->factory === null) {
+            $this->factory = new \Shopware\Bepado\BepadoFactory();
         }
 
-        $this->View()->assign(array(
-            'success' => true,
-            'data' => $data
-        ));
-    }
-
-    private function getListQueryBuilder($filter, $order)
-    {
-        $repository = $this->getArticleRepository();
-
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->join('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->join('d.attribute', 'at');
-        $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('a.tax', 't');
-
-        $builder->select(array(
-            'a.id',
-            'd.number as number',
-            'd.inStock as inStock',
-            'a.name as name',
-            's.name as supplier',
-            'a.active as active',
-            't.tax as tax',
-            'p.price * (100 + t.tax) / 100 as price',
-        ));
-
-        foreach($filter as $rule) {
-            switch($rule['property']) {
-                case 'search':
-                    $builder->where('d.number LIKE :search')
-                        ->orWhere('a.name LIKE :search')
-                        ->orWhere('s.name LIKE :search')
-                        ->setParameter('search', $rule['value']);
-                    break;
-                case 'categoryId':
-                    $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId')
-                        ->setParameter('categoryId', $rule['value']);
-                    break;
-                case 'status':
-                    $builder->where('at.bepadoExportStatus LIKE :status')
-                        ->setParameter('status', $rule['value']);
-                    break;
-                default:
-                    $builder->addFilter(array($rule));
-                    break;
-            }
-        }
-
-        $builder->addOrderBy($order);
-        return $builder;
-    }
-
-    public function getExportListAction()
-    {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-        $builder->addSelect(array(
-            'at.bepadoExportStatus as exportStatus',
-            'at.bepadoExportMessage as exportMessage',
-            'at.bepadoCategories'
-        ));
-        $builder->where('at.bepadoShopId IS NULL');
-
-        $query = $builder->getQuery();
-
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
-
-        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
-
-        $this->View()->assign(array(
-            'success' => true,
-            'data' => $data,
-            'total' => $total
-        ));
-    }
-
-    public function getImportListAction()
-    {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-        $builder->addSelect(array(
-            'at.bepadoShopId',
-            'at.bepadoSourceId'
-        ));
-        $builder->where('at.bepadoShopId IS NOT NULL');
-
-        $query = $builder->getQuery();
-
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
-
-        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
-
-        $this->View()->assign(array(
-            'success' => true,
-            'data' => $data,
-            'total' => $total
-        ));
-    }
-
-    public function getMappingListAction()
-    {
-        $node = (int)$this->Request()->getParam('node', 1);
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
-        $builder->leftJoin('c.attribute', 'ct');
-        $builder->select(array(
-            'c.id as id',
-            'c.name as name',
-            'c.position as position',
-            'c.parentId as parentId',
-            '(c.right - c.left - 1) / 2 as childrenCount',
-            'ct.bepadoMapping as mapping',
-        ));
-        $builder->where('c.parentId = :parentId');
-        $query = $builder->getQuery();
-        $query->setParameter('parentId', $node);
-        $count = Shopware()->Models()->getQueryCount($query);
-
-        $data = $query->getArrayResult();
-
-        foreach ($data as $key => $category) {
-            $data[$key]['text'] = $category['name'];
-            $data[$key]['cls'] = 'folder';
-            $data[$key]['childrenCount'] = (int)$category['childrenCount'];
-            $data[$key]['leaf'] = empty($data[$key]['childrenCount']);
-        }
-
-        $this->View()->assign(array(
-            'success' => true, 'data' => $data, 'total' => $count
-        ));
-    }
-
-    public function setMappingListAction()
-    {
-        $rows = $this->Request()->getPost('rows');
-        $rows = !isset($rows[0]) ? array($rows) : $rows;
-        $query = $this->getCategoryModelByIdQuery();
-        foreach($rows as $row) {
-            /** @var $result \Shopware\Models\Category\Category[] */
-            $result = $query->execute(array('id' => $row['id']));
-            if(isset($result[0])) {
-                $result[0]->getAttribute()->setBepadoMapping($row['mapping']);
-            }
-        }
-        Shopware()->Models()->flush();
+        return $this->factory->getHelper();
     }
 
     /**
@@ -251,241 +87,499 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * Lists categories for a given bepado category tree
+     */
+    public function getCategoryListAction()
+    {
+        $sdk = $this->getSDK();
+
+        $list = $sdk->getCategories();
+        $parent = $this->Request()->get('node');
+        $count = $parent == 1 ? 1 : substr_count($parent, '/') + 1;
+        $parent = $parent == 1 ? '/' : $parent;
+
+        $data = array();
+        foreach($list as $id => $name) {
+            if(strpos($id, $parent) !== 0
+              || substr_count($id, '/') != $count) {
+                continue;
+            }
+            $data[] = array(
+                'id' => $id,
+                'name' => $name
+            );
+        }
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data
+        ));
+    }
+
+    /**
+     * Helper function to return a QueryBuilder for creating the listing queries for the import and export listings
+     *
+     * @param $filter
+     * @param $order
      * @return \Doctrine\ORM\QueryBuilder
      */
-    private function getProductQueryBuilder()
+    private function getListQueryBuilder($filter, $order)
     {
         $repository = $this->getArticleRepository();
+
         $builder = $repository->createQueryBuilder('a');
         $builder->join('a.mainDetail', 'd');
+        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
         $builder->join('d.attribute', 'at');
         $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->join('a.tax', 't');
-        $builder->leftJoin('d.unit', 'u');
+        $builder->leftJoin('a.tax', 't');
+
         $builder->select(array(
-            'a.id as sourceId',
-            'd.ean',
-            'a.name as title',
-            'a.description as shortDescription',
-            'a.descriptionLong as longDescription',
-            's.name as vendor',
-            't.tax / 100 as vat',
-            'p.basePrice as price',
-            'p.price * (100 + t.tax) / 100 as purchasePrice',
-            //'"EUR" as currency',
-            'd.shippingFree as freeDelivery',
-            'd.releaseDate as deliveryDate',
-            'd.inStock as availability',
-
-            'd.width',
-            'd.height',
-            'd.len as length',
-
-            'd.weight',
-            'u.unit',
-            'd.purchaseUnit as volume',
-            'd.referenceUnit as base',
-            'at.bepadoExportStatus as status'
-            //'images = array()',
+            'a.id',
+            'd.number as number',
+            'd.inStock as inStock',
+            'a.name as name',
+            's.name as supplier',
+            'a.active as active',
+            't.tax as tax',
+            'p.price * (100 + t.tax) / 100 as price',
         ));
+        foreach($filter as $key => $rule) {
+            switch($rule['property']) {
+                case 'search':
+                    $builder->where('d.number LIKE :search')
+                        ->orWhere('a.name LIKE :search')
+                        ->orWhere('s.name LIKE :search')
+                        ->setParameter('search', $rule['value']);
+                    break;
+                case 'categoryId':
+                    $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId')
+                        ->setParameter('categoryId', $rule['value']);
+                    break;
+                case 'supplierId':
+                    $builder->where('a.supplierId = :supplierId')
+                        ->setParameter('supplierId', $rule['value']);
+                    break;
+                case 'exportStatus':
+                    $builder->where('at.bepadoExportStatus LIKE :status')
+                        ->setParameter('status', $rule['value']);
+                    break;
+                case 'active':
+                    $builder->where('a.active LIKE :active')
+                        ->setParameter('active', $rule['value']);
+                    break;
+                default:
+                    continue;
+            }
+        }
+        $builder->addOrderBy($order);
         return $builder;
     }
 
     /**
-     * @return \Doctrine\ORM\Query
+     * Get all products exported to bepado
      */
-    private function getArticleModelByIdQuery()
+    public function getExportListAction()
     {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.attribute', 'at');
-        $builder->addSelect('at');
-        $builder->where('a.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @return \Doctrine\ORM\Query
-     */
-    private function getCategoryModelByIdQuery()
-    {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
-        $builder->join('c.attribute', 'ct');
-        $builder->addSelect('ct');
-        $builder->where('c.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @param array $row
-     * @return Product
-     */
-    private function getProductByRowData($row)
-    {
-        if(isset($row['deliveryDate'])) {
-            $row['deliveryDate'] = $row['deliveryDate']->getTimestamp();
-        }
-        if(empty($row['price'])) {
-            $row['price'] = $row['purchasePrice'];
-        }
-
-        // Fix prices
-        foreach(array('price', 'purchasePrice', 'vat') as $name) {
-            $row[$name] = round($row[$name], 2);
-        }
-
-        // Fix attributes
-        foreach(array('weight', 'unit', 'base', 'volume') as $name) {
-            if(isset($row[$name])) {
-                $row['attributes'][$name] = $row[$name];
-            }
-            unset($row[$name]);
-        }
-
-        // Fix dimensions
-        if(!empty($row['width']) && !empty($row['height'])) {
-            $dimension = array(
-                $row['width'], $row['height']
-            );
-            if(!empty($row['length'])) {
-                $dimension[] = $row['length'];
-            }
-            $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
-        }
-        unset($row['width'], $row['height'], $row['length']);
-
-        $product = new Product(
-            $row
+        $builder = $this->getListQueryBuilder(
+            (array)$this->Request()->getParam('filter', array()),
+            $this->Request()->getParam('sort', array())
         );
-        return $product;
-    }
-
-    private function getSubProductCategoriesQuery()
-    {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('s');
-        $builder->join('s.attribute', 'st');
-        $builder->select('MAX(st.bepadoMapping) as subMapping');
-        $builder->andWhere('c.left > s.left')
-                ->andWhere('c.right < s.right');
-        $builder->orderBy('s.right', 'DESC');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_SCALAR);
-        return $query;
-    }
-
-    private function getProductCategoriesQuery()
-    {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.categories', 'c');
-        $builder->join('c.attribute', 'ct');
-
-        $subQuery = $this->getSubProductCategoriesQuery()->getDQL();
-
-        $builder->select('IFNULL(ct.bepadoMapping, (' . $subQuery . ')) as mapping')
-                ->where('a.id = :id');
-        $builder->groupBy('mapping');
-
-        return $builder->getQuery();
-    }
-
-    public function searchProductAction()
-    {
-        $sdk = $this->getSDK();
-        $search = new Bepado\SDK\Struct\Search(array(
-            'query' => $this->Request()->getParam('query')
+        $builder->addSelect(array(
+            'at.bepadoExportStatus as exportStatus',
+            'at.bepadoExportMessage as exportMessage',
+            'at.bepadoCategories'
         ));
-        $result = $sdk->search($search);
-        $this->View()->assign((array)$result);
-    }
+        $builder->andWhere('at.bepadoShopId IS NULL');
 
-    public function insertOrUpdateProductAction()
-    {
-        $sdk = $this->getSDK();
-        $ids = $this->Request()->getPost('ids');
-
-        $builder = $this->getProductQueryBuilder();
-        $builder->where('a.id = :id');
         $query = $builder->getQuery();
 
-        $articleQuery = $this->getArticleModelByIdQuery();
-        $categoryQuery = $this->getProductCategoriesQuery();
+        $query->setFirstResult($this->Request()->getParam('start'));
+        $query->setMaxResults($this->Request()->getParam('limit'));
 
-        foreach($ids as $id) {
-            $result = $query->execute(array('id' => $id));
-            if(!isset($result[0])) {
-                continue;
-            }
-            $data = $result[0];
+        $total = Shopware()->Models()->getQueryCount($query);
+        $data = $query->getArrayResult();
 
-            $result = $categoryQuery->execute(array('id' => $id));
-            $data['categories'] = array();
-            foreach($result as $row) {
-                if($row['mapping'] !== null) {
-                    $data['categories'][] = $row['mapping'];
-                }
-            }
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data,
+            'total' => $total
+        ));
+    }
 
-            $status = $data['status']; $message = null;
-            unset($data['status']);
-            $product = $this->getProductByRowData($data);
-            try {
-                if(empty($status) || $status == 'delete') {
-                    $sdk->recordInsert($product);
-                    $status = 'insert';
-                } else {
-                    $sdk->recordUpdate($product);
-                    $status = 'update';
-                }
-            } catch(Exception $e) {
-                $status = 'error';
-                $message = $e->getMessage();
-            }
+    /**
+     * Get all products imported from bepado
+     */
+    public function getImportListAction()
+    {
+        $builder = $this->getListQueryBuilder(
+            (array)$this->Request()->getParam('filter', array()),
+            $this->Request()->getParam('sort', array())
+        );
+        $builder->addSelect(array(
+            'at.bepadoShopId',
+            'at.bepadoSourceId',
+            'at.bepadoExportStatus as bepadoStatus',
+        ));
+        $builder->andWhere('at.bepadoShopId IS NOT NULL');
 
-            /** @var $model Shopware\Models\Article\Article[] */
-            $model = $articleQuery->execute(array('id' => $id));
-            if(isset($model[0])) {
-                $attribute = $model[0]->getAttribute();
-                $attribute->setBepadoExportStatus(
-                    $status
-                );
-                $attribute->setBepadoExportMessage(
-                    $message
-                );
-                $attribute->setBepadoCategories(
-                    serialize($data['categories'])
-                );
+        $query = $builder->getQuery();
+
+        $query->setFirstResult($this->Request()->getParam('start'));
+        $query->setMaxResults($this->Request()->getParam('limit'));
+
+        $total = Shopware()->Models()->getQueryCount($query);
+        $data = $query->getArrayResult();
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data,
+            'total' => $total
+        ));
+    }
+
+    /**
+     * Get all mappings for a given tree
+     */
+    public function getMappingListAction()
+    {
+        $node = (int)$this->Request()->getParam('node', 1);
+        $repository = $this->getCategoryRepository();
+
+        $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
+        $builder->leftJoin('c.attribute', 'ct');
+        $builder->add('select', 'ct.bepadoMapping as mapping', true);
+
+        $builder->where('c.parentId = :parentId');
+        $query = $builder->getQuery();
+        $query->setParameter('parentId', $node);
+        $count = Shopware()->Models()->getQueryCount($query);
+
+        $data = $query->getArrayResult();
+
+        foreach ($data as &$category) {
+            $category['text'] = $category['name'];
+            $category['cls'] = 'folder';
+            $category['childrenCount'] = (int)$category['childrenCount'];
+            $category['leaf'] = empty($category['childrenCount']);
+        }
+
+        $this->View()->assign(array(
+            'success' => true, 'data' => $data, 'total' => $count
+        ));
+    }
+
+    /**
+     * Save all mapped products
+     */
+    public function setMappingListAction()
+    {
+        $rows = $this->Request()->getPost('rows');
+        if($rows === null) {
+            $rows = json_decode($this->Request()->getRawBody(), true);
+        }
+        $rows = !isset($rows[0]) ? array($rows) : $rows;
+        $helper = $this->getHelper();
+        foreach($rows as $row) {
+            $result = $helper->getCategoryModelById($row['id']);
+            if($result !== null) {
+                $result->getAttribute()->setBepadoMapping($row['mapping']);
             }
         }
         Shopware()->Models()->flush();
     }
 
+    /**
+     * Import parts of the bepado category tree to shopware
+     */
+    public function importBepadoCategoriesAction()
+    {
+        $fromCategory = $this->Request()->getParam('fromCategory');
+        $toCategory = $this->Request()->getParam('toCategory');
+
+        $entityManager = $this->getModelManager();
+        $helper = $this->getHelper();
+
+        // Make sure that the target category exists
+        $toCategoryModel = $this->getCategoryRepository()->find($toCategory);
+        if (!$toCategoryModel) {
+            throw new \RuntimeException("Category with id  {$toCategory} not found");
+        }
+
+        // The user might have changed the mapping without saving and then hit the "importCategories"
+        // button. So we save the parent category's mapping first
+        $parentCategory = $helper->getCategoryModelById($toCategory);
+        $parentCategory->getAttribute()->setBepadoMapping($fromCategory);
+        $entityManager->flush();
+
+        try {
+            $entityManager->getConnection()->beginTransaction();
+            $this->importBepadoCategories($fromCategory, $toCategory);
+            $entityManager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $entityManager->getConnection()->rollback();
+            throw new \RuntimeException("Could not import categories", 0, $e);
+        }
+
+    }
+
+    /**
+     * Will import a bepado category tree into shopware.
+     *
+     * @param $fromCategory
+     * @param $toCategory
+     */
+    public function importBepadoCategories($fromCategory, $toCategory)
+    {
+        $categoriesToImport = $this->getFlatBepadoCategories($fromCategory);
+        $toCategoryModel = $this->getCategoryRepository()->find($toCategory);
+        $entityManager = $this->getModelManager();
+
+        /*
+         * The import string allows to identify categories, which have already been imported for
+         * this exact import. This does not prevent the user from importing the same sub-tree
+         * into multiple shopware categories. But it does prevent him from importing the same sub-tree
+         * into the same category multiple times
+         */
+        $importString = $fromCategory.'-'.$toCategory;
+
+        $currentLevel = 1;
+        $mappings = array();
+        foreach ($categoriesToImport as $id => $category) {
+            $name = $category['name'];
+            $parent = $category['parent'];
+            $level = $category['level'];
+
+            // Only flush after the level changed - this speeds up the import
+            if ($currentLevel != $level) {
+                Shopware()->Models()->flush();
+            }
+            $currentLevel = $level;
+
+            /** @var \Shopware\Models\Category\Category $parentModel */
+            if (!$parent) {
+                // Top category level - use toCategoryModel
+                $parentModel = $toCategoryModel;
+            } else {
+                // Parent was created before and is referenced in $mappings
+                $parentModel = $mappings[$parent];
+            }
+
+            // Check if there is already a category attribute for this import
+            $categoryAttributes = $entityManager->getRepository('\Shopware\Models\Attribute\Category')->findBy(
+                array('bepadoImported' => $importString, 'bepadoMapping' => $id),
+                null,
+                1
+            );
+
+            if (!empty($categoryAttributes)) {
+                /** @var \Shopware\Models\Attribute\Category $categoryAttribute */
+                $categoryAttribute = array_pop($categoryAttributes);
+                $category = $categoryAttribute->getCategory();
+            } else {
+                // Create category and attribute model
+                $category = new \Shopware\Models\Category\Category();
+                $category->setName($name);
+                $category->setParent($parentModel);
+
+                $attribute = new \Shopware\Models\Attribute\Category();
+                $attribute->setBepadoMapping($id);
+                $attribute->setBepadoImported($importString);
+                $category->setAttribute($attribute);
+
+                Shopware()->Models()->persist($category);
+                Shopware()->Models()->persist($attribute);
+            }
+
+
+            // Store the new category model in out $mappings array
+            $mappings[$id] = $category;
+        }
+
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Returns a flat array of bepado categories
+     *
+     * @param $rootCategory
+     * @return array(
+     *      string => array('id' => string, 'name' => string, 'level' => int, 'parent' => string|null)
+     * )
+     */
+    private function getFlatBepadoCategories($rootCategory)
+    {
+        $sdk = $this->getSDK();
+        $bepadoCategories = $sdk->getCategories();
+
+        $categoriesToImport = array();
+        foreach ($bepadoCategories as $id => $name) {
+            // Skip all entries which do not start with the parent or do not have it at all
+            if (strpos($id, $rootCategory) !== 0) {
+                continue;
+            }
+
+            $level = substr_count(preg_replace("#^{$rootCategory}#", '', $id), '/');
+
+            // Skip the root category
+            if ($level == 0) {
+                continue;
+            }
+
+            $categoriesToImport[$id] = array(
+                'id' => $id,
+                'name' => $name,
+                'level' => $level,
+                'parent' => $level == 1 ? null : implode('/', array_slice(explode('/', $id), 0, -1))
+            );
+        }
+
+        // Sort the categories ascending by their level, so parent categories can be imported first
+        uasort(
+            $categoriesToImport,
+            function ($a, $b) {
+                $a = $a['level'];
+                $b = $b['level'];
+                if ($a == $b) {
+                    return 0;
+                }
+                return ($a < $b) ? -1 : 1;
+            }
+        );
+        return $categoriesToImport;
+    }
+
+
+    /**
+     * Save a given mapping of a given category to all subcategories
+     */
+    public function applyMappingToChildrenAction()
+    {
+        $categoryId = $this->Request()->getParam('category');
+        $mapping = $this->Request()->getParam('mapping');
+
+        $entityManager = $this->getModelManager();
+
+        try {
+            $entityManager->getConnection()->beginTransaction();
+            $this->applyMappingToChildren($mapping, $categoryId);
+            $entityManager->getConnection()->commit();
+            $this->View()->assign(array(
+                'success' => true
+            ));
+        } catch (Exception $e) {
+            $entityManager->getConnection()->rollback();
+            $this->View()->assign(array(
+                'message' => $e->getMessage(),
+                'success' => false
+            ));
+        }
+    }
+
+    /**
+     * Helper that will assign a given mapping to all children of a given category
+     *
+     * @param $mapping string
+     * @param $categoryId int
+     */
+    private function applyMappingToChildren($mapping, $categoryId)
+    {
+        $helper = $this->getHelper();
+        $ids = $this->getChildCategoriesIds($categoryId);
+        $entityManager = $this->getModelManager();
+
+        // First of all try to save the mapping for the parent category. If that fails,
+        // it mustn't be done for the child categories
+        $parentCategory = $helper->getCategoryModelById($categoryId);
+        $parentCategory->getAttribute()->setBepadoMapping($mapping);
+        $entityManager->flush();
+
+        // Don't set the children with models in order to speed things up
+        $builder = $entityManager->createQueryBuilder();
+        $builder->update('\Shopware\Models\Attribute\Category', 'categoryAttribute')
+            ->set('categoryAttribute.bepadoMapping',  $builder->expr()->literal($mapping))
+            ->where($builder->expr()->in('categoryAttribute.categoryId', $ids));
+
+        $builder->getQuery()->execute();
+    }
+
+    /**
+     * Helper function which returns the IDs of the child categories of a given parent category
+     *
+     * @param $parentId int
+     * @return array
+     */
+    private function getChildCategoriesIds($parentId)
+    {
+        $query = $this->getModelManager()->createQuery('SELECT c.id from Shopware\Models\Category\Category c WHERE c.path LIKE ?1 ');
+        $query->setParameter(1, array("%|{$parentId}|%"));
+        $result = $query->getResult(Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
+
+        // Pop IDs from result rows
+        return array_map(
+            function ($row) {
+                return array_pop($row);
+            },
+            $result
+        );
+    }
+
+    /**
+     * Calles when a product was marked for update in the bepado backend module
+     */
+    public function insertOrUpdateProductAction()
+    {
+        $ids = $this->Request()->getPost('ids');
+        $helper = $this->getHelper();
+
+        $helper->insertOrUpdateProduct($ids);
+    }
+
+    /**
+     * Delete a product from bepado export
+     */
     public function deleteProductAction()
     {
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
-        $query = $this->getArticleModelByIdQuery();
         foreach($ids as $id) {
-            $sdk->recordDelete($id);
-            /** @var $model Shopware\Models\Article\Article[] */
-            $model = $query->execute(array('id' => $id));
-            if(isset($model[0])) {
-                $attribute = $model[0]->getAttribute();
-                $attribute->setBepadoExportStatus(
-                    'delete'
-                );
+            $model = $this->getHelper()->getArticleModelById($id);
+            if($model === null) {
+                continue;
             }
+            $attribute = $model->getAttribute();
+            $sdk->recordDelete($id);
+            $attribute->setBepadoExportStatus(
+                'delete'
+            );
         }
         Shopware()->Models()->flush();
     }
 
+    /**
+     * Updates products and flag the for bepado export.
+     */
+    public function updateProductAction()
+    {
+        $ids = $this->Request()->getPost('ids');
+        $active = (bool)$this->Request()->get('active');
+        foreach($ids as $id) {
+            $model = $this->getHelper()->getArticleModelById($id);
+            if($model === null) {
+                continue;
+            }
+            $attribute = $model->getAttribute();
+            if($attribute->getBepadoExportStatus() !== null) {
+                continue;
+            }
+            $model->setActive($active);
+        }
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Verify a given api key against the bepado server
+     */
     public function verifyApiKeyAction()
     {
         $sdk = $this->getSDK();

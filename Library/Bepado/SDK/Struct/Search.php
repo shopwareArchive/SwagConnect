@@ -39,14 +39,14 @@ class Search extends Struct
      *
      * @var int
      */
-    public $offset;
+    public $offset = 0;
 
     /**
      * Count of results to receive
      *
      * @var int
      */
-    public $limit;
+    public $limit = 10;
 
     /**
      * Limit search to specified vendor

@@ -49,10 +49,15 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
     public function indexAction()
     {
+        $this->Response()->setHeader('Content-Type', 'text/xml; charset=utf-8');
+
+        $request = file_get_contents('php://input');
+        //Shopware()->Log()->err('Request: ' . $request);
         $sdk = $this->getSDK();
-        echo $sdk->handle(
-            //file_get_contents(dirname(__FILE__) . '/test.xml')
-            file_get_contents('php://input')
+        $result = $sdk->handle(
+            $request
         );
+        //Shopware()->Log()->err('Result: ' . $result);
+        echo $result;
     }
 }

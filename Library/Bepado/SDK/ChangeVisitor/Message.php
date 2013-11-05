@@ -109,6 +109,15 @@ class Message extends ChangeVisitor
      */
     protected function visitDelete(Struct\Change\InterShop\Delete $change)
     {
-
+        return array(
+            new Struct\Message(
+                array(
+                    'message' => 'Product %product does not exist anymore.',
+                    'values' => array(
+                        'product' => $change->sourceId
+                    ),
+                )
+            )
+        );
     }
 }

@@ -14,7 +14,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         Ext.applyIf(me, {
             items: [{
                 xtype: 'treepanel',
-                //title: 'Category filter',
                 rootVisible: false,
                 root: {
                     id: 1,
@@ -30,9 +29,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                     xtype: 'treecolumn',
                     flex: 1,
                     dataIndex: 'text',
-                    text: 'Category'
+                    text: '{s name=mapping/columns/category}Category{/s}'
                 },{
-                    text: 'Mapping',
+                    text: '{s name=mapping/columns/mapping}Mapping{/s}',
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
@@ -45,6 +44,14 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
             }]
         });
 
+        me.addEvents(
+            /**
+             * Fired if the user clicks the "applyToChildren" action button.
+             * Will apply the current mapping to all empty child categories
+             */
+            'applyToChildren'
+        );
+
         me.callParent(arguments);
     },
 
@@ -52,16 +59,37 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         var me = this;
         return {
             xtype: 'actioncolumn',
-            width: 30,
+            width: 110,
             items: [{
                 iconCls: 'sprite-minus-circle-frame',
                 action: 'clear',
-                tooltip: 'Clear mapping',
+                tooltip: '{s name=mapping/options/clear}Clear mapping{/s}',
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
-                    me.fireEvent('clear', view, record, rowIndex);
+                    record.set('mapping', null);
                 },
                 getClass: function(value, meta, record) {
                     return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
+                }
+            }, {
+                iconCls: 'sprite-folder-tree',
+                action: 'importCategories',
+                tooltip: '{s name=mapping/options/importCategories}Import categories from bepado{/s}',
+                handler: function (view, rowIndex, colIndex, item, opts, record) {
+                    me.fireEvent('importCategories', record);
+                },
+                getClass: function(value, meta, record) {
+                    return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
+                }
+            }, {
+                iconCls: 'sprite-arrow-skip-270',
+                action: 'assignToChildren',
+                tooltip: '{s name=mapping/options/assignToChildren}Use assignment for children, too{/s}',
+                handler: function (view, rowIndex, colIndex, item, opts, record) {
+                    me.fireEvent('applyToChildren', record);
+                },
+                getClass: function(value, meta, record) {
+                    // Hide, if category has no children
+                    return record.get('childrenCount') > 0 ? 'x-grid-center-icon': 'x-hide-display';
                 }
             }]
         };
@@ -74,7 +102,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
             dock: 'bottom',
             xtype: 'toolbar',
             items: ['->', {
-                text: '{s name=form/save_text}Save{/s}',
+                text: '{s name=mapping/options/save}Save{/s}',
                 cls: 'primary',
                 action: 'save'
             }]

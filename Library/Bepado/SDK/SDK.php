@@ -8,6 +8,7 @@
 namespace Bepado\SDK;
 
 use Bepado\Common\Struct\RpcCall;
+use Bepado\SDK\Struct\Shop;
 
 /**
  * Central SDK class, which serves as an etnry point and service fromShop.
@@ -52,7 +53,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '0.1-alpha';
+    const VERSION = '$Revision$';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -66,7 +67,9 @@ final class SDK
         $apiEndpointUrl,
         Gateway $gateway,
         ProductToShop $toShop,
-        ProductFromShop $fromShop
+        ProductFromShop $fromShop,
+        ErrorHandler $errorHandler = null,
+        HttpClient\RequestSigner $requestSigner = null
     ) {
         $this->apiKey = $apiKey;
         $this->apiEndpointUrl = $apiEndpointUrl;
@@ -75,7 +78,14 @@ final class SDK
         // entirely pre-configured object, except for the properties available
         // through constructor injection. Dependency Injection is only used
         // internally in the SDK.
-        $this->dependencies = new DependencyResolver($gateway, $toShop, $fromShop, $apiKey);
+        $this->dependencies = new DependencyResolver(
+            $gateway,
+            $toShop,
+            $fromShop,
+            $errorHandler ? $errorHandler : new ErrorHandler\Exception(),
+            $apiKey,
+            $requestSigner
+        );
     }
 
     /**
@@ -107,11 +117,20 @@ final class SDK
      * the response.
      *
      * @param string $xml
+     * @param array $headers
+     *
      * @return string
      */
-    public function handle($xml)
+    public function handle($xml, array $headers = null)
     {
         $this->verifySdk();
+        $token = $this->verifyRequest($xml, $headers);
+
+        $serviceRegistry = $this->dependencies->getServiceRegistry();
+
+        if ($token->userIdentifier) {
+            $serviceRegistry = new ServiceRegistry\Authorization($serviceRegistry, $token);
+        }
 
         return $this->dependencies->getMarshaller()->marshal(
             new RpcCall(
@@ -119,13 +138,40 @@ final class SDK
                     'service' => 'null',
                     'command' => 'return',
                     'arguments' => array(
-                        $this->dependencies->getServiceRegistry()->dispatch(
+                        $serviceRegistry->dispatch(
                             $this->dependencies->getUnmarshaller()->unmarshal($xml)
                         ),
                     )
                 )
             )
         );
+    }
+
+    /**
+     * Check Authentication of the Request
+     *
+     * @return AuthenticationToken
+     */
+    private function verifyRequest($body, array $headers = null)
+    {
+        if ($headers === null) {
+            $headers = array();
+
+            foreach ($_SERVER as $name => $value) {
+                if (strpos($name, "HTTP_") === 0) {
+                    $headers[$name] = $value;
+                }
+            }
+        }
+
+        $requestSigner = $this->dependencies->getRequestSigner();
+        $token = $requestSigner->verifyRequest($body, $headers);
+
+        if (false === $token->authenticated) {
+            throw new SecurityException("Authorization of RPC request failed.");
+        }
+
+        return $token;
     }
 
     /**
@@ -155,16 +201,16 @@ final class SDK
      * Establish a hook in your shop and call this method for every new
      * product, which should be exported to Bepado.
      *
-     * @param string $id
-     * @param string $hash
-     * @param string $revision
-     * @param Struct\Product $product
+     * @param string $productId
      * @return void
      */
-    public function recordInsert(Struct\Product $product)
+    public function recordInsert($productId)
     {
         $this->verifySdk();
+
+        $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
+
         $this->dependencies->getVerificator()->verify($product);
         $this->dependencies->getGateway()->recordInsert(
             $product->sourceId,
@@ -180,16 +226,16 @@ final class SDK
      * Establish a hook in your shop and call this method for every update of a
      * product, which is exported to Bepado.
      *
-     * @param string $id
-     * @param string $hash
-     * @param string $revision
-     * @param Struct\Product $product
+     * @param string $productId
      * @return void
      */
-    public function recordUpdate(Struct\Product $product)
+    public function recordUpdate($productId)
     {
         $this->verifySdk();
+
+        $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
+
         $this->dependencies->getVerificator()->verify($product);
         $this->dependencies->getGateway()->recordUpdate(
             $product->sourceId,
@@ -200,18 +246,49 @@ final class SDK
     }
 
     /**
+     * Get single product from gateway
+     *
+     * @param mixed $productId
+     * @return Struct\Product
+     */
+    protected function getProduct($productId)
+    {
+        $products = $this->dependencies->getFromShop()->getProducts(array($productId));
+        return reset($products);
+    }
+
+    /**
      * Record product delete
      *
      * Establish a hook in your shop and call this method for every delete of a
      * product, which is exported to Bepado.
      *
-     * @param string $id
+     * @param string $productId
      * @return void
      */
-    public function recordDelete($id)
+    public function recordDelete($productId)
     {
         $this->verifySdk();
-        $this->dependencies->getGateway()->recordDelete($id, $this->dependencies->getRevisionProvider()->next());
+        $this->dependencies->getGateway()->recordDelete($productId, $this->dependencies->getRevisionProvider()->next());
+    }
+
+    /**
+     * Calculate shipping costs
+     *
+     * Calculate shipping costs for the given set of products.
+     *
+     * @param Struct\Product[] $products
+     * @return float
+     */
+    public function calculateShippingCosts(array $products)
+    {
+        $this->verifySdk();
+
+        $productList = new Struct\ProductList(array('products' => $products));
+
+        $this->dependencies->getVerificator()->verify($productList);
+
+        return $this->dependencies->getShoppingService()->calculateShippingCosts($productList);
     }
 
     /**
@@ -229,21 +306,26 @@ final class SDK
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\Order $order
+     * @param Struct\Product[] $products
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(array $products)
     {
         $this->verifySdk();
-        $this->dependencies->getVerificator()->verify($order);
-        $order->orderShop = $this->dependencies->getGateway()->getShopId();
-        return $this->dependencies->getShoppingService()->checkProducts($order);
+
+        $productList = new Struct\ProductList(array('products' => $products));
+
+        $this->dependencies->getVerificator()->verify($productList);
+
+        return $this->dependencies->getShoppingService()->checkProducts($productList);
     }
 
     /**
      * Reserve products
      *
-     * This method will reserve the given products in the remote shops.
+     * This method will reserve the given products in the remote shops. It
+     * should be called at the beginning of the checkout process. It is the
+     * last chance to verify that everything is OK with the order.
      *
      * If the product data change in a relevant way, this method will not
      * reserve the products, but instead return a Struct\Message, which should
@@ -271,20 +353,23 @@ final class SDK
     /**
      * Checkout product sets related to the given reservation IDs
      *
-     * This process is the final "buy" transaction. It should be part of the
-     * checkout process and be handled synchronously.
+     * This process is the final "buy" transaction. It should be the last step
+     * of the checkout process and be handled synchronously. Is supposed to
+     * "always" succeed, since the reservation beforhand should already ensure
+     * everything is fine.
      *
      * This method will just return true, if the transaction worked as
-     * expected. If it failed, or partially failed, a corresponding
-     * Struct\Message will be returned.
+     * expected. If it failed, or partially failed, an error will be logged
+     * with the ErrorHandler and the method will return false.
      *
      * @param Struct\Reservation $reservation
-     * @return mixed
+     * @param string $orderId
+     * @return bool[]
      */
-    public function checkout(Struct\Reservation $reservation)
+    public function checkout(Struct\Reservation $reservation, $orderId)
     {
         $this->verifySdk();
-        return $this->dependencies->getShoppingService()->checkout($reservation);
+        return $this->dependencies->getShoppingService()->checkout($reservation, $orderId);
     }
 
     /**
@@ -322,6 +407,8 @@ final class SDK
     }
 
     /**
+     * Verify a given API key is valid.
+     *
      * @param $key
      */
     public function verifyKey($key)
@@ -329,6 +416,54 @@ final class SDK
         $this->dependencies->getVerificationService()->verify(
             $key,
             $this->apiEndpointUrl
+        );
+    }
+
+    /**
+     * Get information about a shop given its remote shop-id.
+     *
+     * This method allows access to the shop name - which can be
+     * used for UI purposes.
+     *
+     * @param string $shopId
+     * @return \Bepado\SDK\Struct\Shop
+     */
+    public function getShop($shopId)
+    {
+        $shopConfiguration = $this->dependencies->getGateway()->getShopConfiguration($shopId);
+
+        return new Shop(
+            array(
+                'id' => $shopId,
+                'name' => $shopConfiguration->displayName,
+                'url' => $shopConfiguration->url,
+            )
+        );
+    }
+
+    /**
+     * Update the status of a bepado order.
+     *
+     * The $status is one of:
+     *
+     * - open
+     * - in_process
+     * - delivered
+     * - canceled
+     * - error
+     *
+     * @param int $providerOrderId
+     * @param string $status
+     * @param \Bepado\SDK\Struct\Message[] $messages
+     *
+     * @return void
+     */
+    public function updateOrderStatus($providerOrderId, $status, array $messages = array())
+    {
+        $this->dependencies->getOrderStatusService()->update(
+            $providerOrderId,
+            $status,
+            $messages
         );
     }
 }

@@ -117,7 +117,12 @@ class Product extends ShopItem
     /**
      * Current price of the product.
      *
-     * Provided as a float.
+     * Provided as a float. This is the selling price of the product
+     * that end customers will pay. The price is checked again
+     * during transactions and is required to be the same in both
+     * shops during a transaction.
+     *
+     * The price includes the VAT.
      *
      * @var float
      */
@@ -126,9 +131,38 @@ class Product extends ShopItem
     /**
      * The purchase price of this product.
      *
+     * This is the price the seller (from-shop) of a product offers
+     * a reseller (to-shop) for transactions in Bepado.
+     * The price - purchasePrice gap is the profit of the reseller.
+     *
+     * Defining this price is optional and the regular Bepado price groups
+     * will take effect if its not given. If this price is given however
+     * price groups will NOT be considered to calculate the profit margin.
+     *
+     * The price includes the VAT.
+     *
      * @var float
      */
     public $purchasePrice;
+
+    /**
+     * Do national laws require the price to be fixed at the suppliers level?
+     *
+     * This flag covers laws such as "Buchpreisbindung" in Germany.
+     * SDK implementors have to force the selling price to customers to
+     * be the same as given by the suplier.
+     *
+     * If this flag is not set, then selling shops are free to change
+     * the price in their shops to their wishes and SDK implementors
+     * **HAVE** to grant Shop users this possibility.
+     *
+     * This flag is **ONLY** for national price laws, not to prevent your
+     * partners to change the price. Using this flag for preventing partners
+     * to change the price is not allowed.
+     *
+     * @var boolean
+     */
+    public $fixedPrice = false;
 
     /**
      * Currency of the price
@@ -158,7 +192,10 @@ class Product extends ShopItem
      * Availability of the product
      *
      * Provide an integer with the amount of products currently in stock and
-     * ready for delivery.
+     * ready for delivery. When comparing availability during a transaction
+     * Bepado SDK will group the availability into empty, low, medium and high
+     * groups based on the interval 0 < 1-10 (low) < 11-100 (medium) < 101 to
+     * infinity (high).
      *
      * @var integer
      */
@@ -167,7 +204,7 @@ class Product extends ShopItem
     /**
      * List of product image URLs
      *
-     * @var string[][]
+     * @var string[]
      */
     public $images = array();
 
@@ -180,6 +217,24 @@ class Product extends ShopItem
      * @var string[]
      */
     public $categories = array();
+
+    /**
+     * Product Tags
+     *
+     * A list of tags that can help other shops find your product.
+     * Is limited to 10 tags maximum per product.
+     *
+     * @var array
+     */
+    public $tags = array();
+
+    /**
+     * Factor that affects the boost of products in search results.
+     * Valid values are -1, 0, 1.
+     *
+     * @var int
+     */
+    public $relevance = 0;
 
     /**
      * Contains additional attributes for this product. Use one of the constants

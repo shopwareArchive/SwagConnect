@@ -45,38 +45,49 @@ class Http extends ShopGateway
     protected $unmarshaller;
 
     /**
+     * @var ShopRequestSigner
+     */
+    protected $shopRequestSigner;
+
+    /**
      * @param Bepado\SDK\HttpClient $httpClient
      * @param Bepado\Common\Rpc\Marshaller\CallMarshaller $marshaller
      * @param Bepado\Common\Rpc\Marshaller\CallUnmarshaller $unmarshaller
      * @param Bepado\SDK\Gateway\ShopConfiguration $providerShopConfig
+     * @param Bepado\SDK\ShopGateway\ShopRequestSigner $shopRequestSigner
      */
-    public function __construct(HttpClient $httpClient, CallMarshaller $marshaller, CallUnmarshaller $unmarshaller)
-    {
+    public function __construct(
+        HttpClient $httpClient,
+        CallMarshaller $marshaller,
+        CallUnmarshaller $unmarshaller,
+        ShopRequestSigner $shopRequestSigner
+    ) {
         $this->httpClient = $httpClient;
         $this->marshaller = $marshaller;
         $this->unmarshaller = $unmarshaller;
+        $this->shopRequestSigner = $shopRequestSigner;
     }
 
     /**
      * Check order in shop
      *
-     * Verifies, if all products in the given order still have the same price
-     * and availability.
+     * Verifies, if all products in the given list still have the same price
+     * and availability as in the remote shop..
      *
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested products.
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $productList
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $productList)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'checkProducts',
-                    'arguments' => array($order),
+                    'arguments' => array($productList),
                 )
             )
         );
@@ -114,16 +125,17 @@ class Http extends ShopGateway
      * fail.
      *
      * @param string $reservationId
+     * @param string $orderId
      * @return mixed
      */
-    public function buy($reservationId)
+    public function buy($reservationId, $orderId)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'buy',
-                    'arguments' => array($reservationId),
+                    'arguments' => array($reservationId, $orderId),
                 )
             )
         );
@@ -136,16 +148,17 @@ class Http extends ShopGateway
      * fail.
      *
      * @param string $reservationId
+     * @param string $remoteLogTransactionId
      * @return mixed
      */
-    public function confirm($reservationId)
+    public function confirm($reservationId, $remoteLogTransactionId)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'confirm',
-                    'arguments' => array($reservationId),
+                    'arguments' => array($reservationId, $remoteLogTransactionId),
                 )
             )
         );
@@ -160,11 +173,13 @@ class Http extends ShopGateway
     protected function makeRpcCall(RpcCall $call)
     {
         $marshalledCall = $this->marshaller->marshal($call);
+        $signHeaders = $this->shopRequestSigner->signRequest($marshalledCall);
 
         $httpResponse = $this->httpClient->request(
             'POST',
             '',
-            $marshalledCall
+            $marshalledCall,
+            $signHeaders
         );
 
         // TODO: Check status

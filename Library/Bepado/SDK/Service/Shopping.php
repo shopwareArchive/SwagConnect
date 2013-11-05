@@ -10,8 +10,12 @@ namespace Bepado\SDK\Service;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
 use Bepado\SDK\ShopFactory;
+use Bepado\SDK\ShopGateway;
 use Bepado\SDK\ChangeVisitor;
+use Bepado\SDK\ProductToShop;
 use Bepado\SDK\Logger;
+use Bepado\SDK\ErrorHandler;
+use Bepado\SDK\ShippingCostCalculator;
 
 /**
  * Shopping service
@@ -36,14 +40,68 @@ class Shopping
      */
     protected $changeVisitor;
 
+    /**
+     * Product to shop gateway
+     *
+     * Stores changes to products reported by the remote shop
+     *
+     * @var ProductToShop
+     */
+    protected $productToShop;
+
+    /**
+     * Logger
+     *
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
+     * Error Handler
+     *
+     * @var ErrorHandler
+     */
+    protected $errorHandler;
+
+    /**
+     * Shipping cost calculator
+     *
+     * @var ShippingCostCalculator
+     */
+    protected $calculator;
+
     public function __construct(
         ShopFactory $shopFactory,
         ChangeVisitor $changeVisitor,
-        Logger $logger
+        ProductToShop $productToShop,
+        Logger $logger,
+        ErrorHandler $errorHandler,
+        ShippingCostCalculator $calculator
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
+        $this->productToShop = $productToShop;
         $this->logger = $logger;
+        $this->errorHandler = $errorHandler;
+        $this->calculator = $calculator;
+    }
+
+    /**
+     * Calculate shipping costs
+     *
+     * Calculate shipping costs for the given set of products.
+     *
+     * @param Struct\ProductList $productList
+     * @return float
+     */
+    public function calculateShippingCosts(Struct\ProductList $productList)
+    {
+        return array_sum(
+            array_map(
+                array($this->calculator, 'calculateProductListShippingCosts'),
+                $this->zipProductListByShopId($productList)
+            )
+        );
     }
 
     /**
@@ -61,21 +119,23 @@ class Shopping
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $productList
      * @return void
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $productList)
     {
         $responses = array();
-        $orders = $this->splitShopOrders($order);
-        foreach ($orders as $shopId => $order) {
+        $productLists = $this->zipProductListByShopId($productList);
+
+        foreach ($productLists as $shopId => $products) {
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
-            $responses[$shopId] = $shopGateway->checkProducts($order);
+            $responses[$shopId] = $shopGateway->checkProducts($products);
         }
 
         $result = array();
         foreach ($responses as $shopId => $changes) {
             if ($changes !== true) {
+                $this->applyRemoteShopChanges($changes);
                 $result = array_merge(
                     $result,
                     $this->changeVisitor->visit($changes)
@@ -84,6 +144,27 @@ class Shopping
         }
 
         return $result ?: true;
+    }
+
+    /**
+     * Zip product list by shop Id
+     *
+     * @param Struct\ProductList $productList
+     * @return Struct\ProductList[]
+     */
+    private function zipProductListByShopId(Struct\ProductList $productList)
+    {
+        $productLists = array();
+
+        foreach ($productList->products as $product) {
+            if (!isset($productLists[$product->shopId])) {
+                $productLists[$product->shopId] = new Struct\ProductList();
+            }
+
+            $productLists[$product->shopId]->products[] = $product;
+        }
+
+        return $productLists;
     }
 
     /**
@@ -125,6 +206,7 @@ class Shopping
             if (is_string($response)) {
                 $reservation->orders[$shopId]->reservationId = $response;
             } elseif (is_array($response)) {
+                $this->applyRemoteShopChanges($response);
                 $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
             } else {
                 // TODO: How to react on false value returned?
@@ -139,6 +221,30 @@ class Shopping
     }
 
     /**
+     * Apply changes reported by a remote shop
+     *
+     * @param Struct\Change[] $changes
+     * @return void
+     */
+    protected function applyRemoteShopChanges(array $changes)
+    {
+        foreach ($changes as $change) {
+            switch (true) {
+                case $change instanceof Struct\Change\InterShop\Update:
+                    $this->productToShop->insertOrUpdate($change->product);
+                    break;
+                case $change instanceof Struct\Change\InterShop\Delete:
+                    $this->productToShop->delete($change->shopId, $change->sourceId);
+                    break;
+                default:
+                    throw new \RuntimeException(
+                        'Invalid change calss provided: ' . get_class($change)
+                    );
+            }
+        }
+    }
+
+    /**
      * Checkout product sets related to the given reservation Ids
      *
      * This process is the final "buy" transaction. It should be part of the
@@ -148,25 +254,100 @@ class Shopping
      * expected. If it failed, or partially failed, a corresponding
      * Struct\Message will be returned.
      *
-     * @param string[] $products
+     * @param Struct\Reservation $reservation
+     * @param string $orderId
      * @return mixed
      */
-    public function checkout(Struct\Reservation $reservation)
+    public function checkout(Struct\Reservation $reservation, $orderId)
     {
         $results = array();
         foreach ($reservation->orders as $shopId => $order) {
+            $order->localOrderId = $orderId;
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
 
-            $results[$shopId] =
-                $shopGateway->buy($order->reservationId) &&
-                $shopGateway->confirm($order->reservationId);
-
-            if ($results[$shopId] === true) {
-                $this->logger->log($order);
+            if (($transactionIds = $this->tryBuy($shopGateway, $order, $orderId)) === false) {
+                $results[$shopId] = false;
+                continue;
             }
+
+            if ($this->tryConfirm($shopGateway, $order, $transactionIds) === false) {
+                $results[$shopId] = false;
+                continue;
+            }
+
+            $results[$shopId] = true;
         }
 
         return $results;
+    }
+
+    /**
+     * Try to issue a buy in the remote shop
+     *
+     * Returns false if an error occured. Returns the remote log transaction ID
+     * otherwise.
+     *
+     * @param ShopGateway $shopGateway
+     * @param Struct\Order $order
+     * @param string $orderId
+     * @return mixed
+     */
+    protected function tryBuy(ShopGateway $shopGateway, Struct\Order $order, $orderId)
+    {
+        $response = $shopGateway->buy($order->reservationId, $orderId);
+        if ($response instanceof Struct\Error) {
+            $this->errorHandler->handleError($response);
+            return false;
+        }
+
+        if (!$response) {
+            throw new \RuntimeException("Unexpected response: " . var_export($response, true));
+        }
+
+        try {
+            $transactionId = $this->logger->log($order);
+        } catch (\Exception $e) {
+            $this->errorHandler->handleException($e);
+            return false;
+        }
+
+        return array(
+            'local' => $transactionId,
+            'remote' => $response,
+        );
+    }
+
+    /**
+     * Try to issue a confirm in the remote shop
+     *
+     * Returns false if an error occured. Returns true, if the checkout
+     * succeeeded.
+     *
+     * @param ShopGateway $shopGateway
+     * @param Struct\Order $order
+     * @param array $transactionIds
+     * @return bool
+     */
+    protected function tryConfirm(ShopGateway $shopGateway, Struct\Order $order, array $transactionIds)
+    {
+        $response = $shopGateway->confirm($order->reservationId, $transactionIds['remote']);
+        if ($response instanceof Struct\Error) {
+            $this->errorHandler->handleError($response);
+            return false;
+        }
+
+        if (!$response) {
+            throw new \RuntimeException("Unexpected response: " . var_export($response, true));
+        }
+
+        try {
+            $this->logger->confirm($transactionIds['local']);
+        } catch (\Exception $e) {
+            $this->errorHandler->handleException($e);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -184,12 +365,19 @@ class Shopping
             $shopOrder = clone $order;
             $shopOrder->providerShop = $shopId;
             $shopOrder->products = $this->getShopProducts($order, $shopId);
+            $shopOrder->shippingCosts = $this->calculator->calculateOrderShippingCosts($shopOrder);
             $orders[$shopId] = $shopOrder;
         }
 
         return $orders;
     }
 
+    /**
+     * Get Shop IDs
+     *
+     * @param Struct\Order $order
+     * @return string[]
+     */
     protected function getShopIds(Struct\Order $order)
     {
         return array_unique(
@@ -202,6 +390,13 @@ class Shopping
         );
     }
 
+    /**
+     * Get order items of a single shop
+     *
+     * @param Struct\Order $order
+     * @param string $shopId
+     * @return Struct\OrderItem[]
+     */
     protected function getShopProducts(Struct\Order $order, $shopId)
     {
         return array_filter(

@@ -22,14 +22,15 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
         var me = this;
 
         me.statusFilter = me.getStatusFilter();
-        me.categoryFilter = me.getCategoryFilter();
+        //me.categoryFilter = me.getCategoryFilter();
         me.supplierFilter = me.getSupplierFilter();
         me.searchFilter = me.getSearchFilter();
 
         Ext.applyIf(me, {
             items: [
                 me.statusFilter, me.searchFilter,
-                me.supplierFilter, me.categoryFilter
+                me.supplierFilter
+                //me.categoryFilter
             ]
         });
 
@@ -39,7 +40,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
     getCategoryFilter: function() {
         return {
             xtype: 'treepanel',
-            title: 'Category filter',
+            title: '{s name=import/filter/category_title}Category filter{/s}',
             rootVisible: false,
             root: {
                 id: 1,
@@ -53,24 +54,24 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
     getStatusFilter: function() {
         return {
             xtype: 'form',
-            title: 'Active filter',
+            title: '{s name=import/filter/active_title}Active filter{/s}',
             //bodyPadding: 5,
             items: [{
                 xtype: 'fieldcontainer',
                 defaultType: 'radiofield',
                 items: [{
-                        boxLabel  : 'Show all',
+                        boxLabel  : '{s name=import/filter/active_all}Show all{/s}',
                         name      : 'active',
                         inputValue: '',
                         checked   : true,
                         id        : 'checkbox1'
                     }, {
-                        boxLabel  : 'Show only active',
+                        boxLabel  : '{s name=import/filter/active_true}Show only active{/s}',
                         name      : 'active',
                         inputValue: '1',
                         id        : 'checkbox2'
                     }, {
-                        boxLabel  : 'Show only inactive',
+                        boxLabel  : '{s name=import/filter/active_false}Show only inactive{/s}',
                         name      : 'active',
                         inputValue: '0',
                         id        : 'checkbox3'
@@ -83,7 +84,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
     getSupplierFilter: function() {
         return {
             xtype: 'form',
-            title: 'Supplier filter',
+            title: '{s name=import/filter/supplier_title}Supplier filter{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{
@@ -99,7 +100,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
     getSearchFilter: function() {
         return {
             xtype: 'form',
-            title: 'Search',
+            title: '{s name=import/filter/search_title}Search{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{
@@ -107,7 +108,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
                 name:'searchfield',
                 anchor: '100%',
                 cls:'searchfield',
-                emptyText:'{s name=search/empty_text}Search...{/s}',
+                emptyText:'{s name=import/filter/search_empty}Search...{/s}',
                 enableKeyEvents:true,
                 checkChangeBuffer:500
             }]

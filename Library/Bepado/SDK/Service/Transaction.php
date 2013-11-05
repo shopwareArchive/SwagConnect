@@ -41,6 +41,13 @@ class Transaction
     protected $logger;
 
     /**
+     * ShopConfiguration
+     *
+     * @var ShopConfiguration
+     */
+    protected $shopConfiguration;
+
+    /**
      * COnstruct from gateway
      *
      * @param ProductFromShop $fromShop
@@ -51,43 +58,67 @@ class Transaction
     public function __construct(
         ProductFromShop $fromShop,
         Gateway\ReservationGateway $reservations,
-        Logger $logger
+        Logger $logger,
+        Gateway\ShopConfiguration $shopConfiguration
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
         $this->logger = $logger;
+        $this->shopConfiguration = $shopConfiguration;
     }
 
     /**
-     * Check order in shop
+     * Check products that will be part of an order in shop
      *
-     * Verifies, if all orders in the given order still have the same price
-     * and availability.
+     * Verifies, if all products in the list still have the same price
+     * and availability as on the remote shop.
      *
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested orders.
      *
-     * @param Struct\Order $order
+     * @param Struct\ProductList $products
      * @return mixed
      */
-    public function checkProducts(Struct\Order $order)
+    public function checkProducts(Struct\ProductList $products)
     {
+        if (count($products->products) === 0) {
+            throw new \InvalidArgumentException(
+                "ProductList is not allowed to be empty in remote Transaction#checkProducts()"
+            );
+        }
+
         $currentProducts = $this->fromShop->getProducts(
             array_map(
-                function ($orderItem) {
-                    return $orderItem->product->sourceId;
+                function ($product) {
+                    return $product->sourceId;
                 },
-                $order->products
+                $products->products
             )
         );
 
+        $myShopId = $this->shopConfiguration->getShopId();
+
         $changes = array();
-        foreach ($order->products as $orderItem) {
-            $product = $orderItem->product;
+        foreach ($products->products as $product) {
             foreach ($currentProducts as $current) {
+                $current->shopId = $myShopId;
+
                 if ($current->sourceId === $product->sourceId) {
-                    if (($current->price !== $product->price) ||
-                        ($current->availability < $product->availability)) {
+                    if ($this->purchasePriceHasChanged($current, $product)) {
+
+                        $currentNotAvailable = clone $current;
+                        $currentNotAvailable->availability = 0;
+
+                        $changes[] = new Struct\Change\InterShop\Update(
+                            array(
+                                'sourceId' => $product->sourceId,
+                                'product' => $currentNotAvailable,
+                                'oldProduct' => $product,
+                            )
+                        );
+
+                    } elseif ($this->priceHasChanged($current, $product) ||
+                        $this->availabilityHasChanged($current, $product)) {
 
                         // Price or availability changed
                         $changes[] = new Struct\Change\InterShop\Update(
@@ -114,6 +145,34 @@ class Transaction
         return $changes ?: true;
     }
 
+    private function purchasePriceHasChanged($current, $product)
+    {
+        return ($current->purchasePrice !== $product->purchasePrice);
+    }
+
+    private function priceHasChanged($current, $product)
+    {
+        return ($current->fixedPrice && $current->price !== $product->price);
+    }
+
+    private function availabilityHasChanged($current, $product)
+    {
+        return ($this->groupAvailability($current) < $this->groupAvailability($product));
+    }
+
+    private function groupAvailability($product)
+    {
+        if ($product->availability > 100) {
+            return 100;
+        } elseif ($product->availability > 10) {
+            return 10;
+        } elseif ($product->availability > 0) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     /**
      * Reserve order in shop
      *
@@ -128,7 +187,19 @@ class Transaction
      */
     public function reserveProducts(Struct\Order $order)
     {
-        $verify = $this->checkProducts($order);
+        $products = array();
+        foreach ($order->products as $orderItem) {
+            $products[] = $orderItem->product;
+        }
+
+        $verify = $this->checkProducts(
+            new Struct\ProductList(
+                array(
+                    'products' => $products
+                )
+            )
+        );
+
         if ($verify !== true) {
             return $verify;
         }
@@ -137,7 +208,12 @@ class Transaction
             $reservationId = $this->reservations->createReservation($order);
             $this->fromShop->reserve($order);
         } catch (\Exception $e) {
-            return false;
+            return new Struct\Error(
+                array(
+                    'message' => $e->getMessage(),
+                    'debugText' => (string) $e,
+                )
+            );
         }
         return $reservationId;
     }
@@ -149,19 +225,26 @@ class Transaction
      * fail.
      *
      * @param string $reservationId
+     * @param string $orderId
      * @return mixed
      */
-    public function buy($reservationId)
+    public function buy($reservationId, $orderId)
     {
         try {
             $order = $this->reservations->getOrder($reservationId);
-            $order->localOrderId = $this->fromShop->buy($order);
+            $order->localOrderId = $orderId;
+            $order->providerOrderId = $this->fromShop->buy($order);
             $order->reservationId = $reservationId;
             $this->reservations->setBought($reservationId, $order);
+            return $this->logger->log($order);
         } catch (\Exception $e) {
-            return false;
+            return new Struct\Error(
+                array(
+                    'message' => $e->getMessage(),
+                    'debugText' => (string) $e,
+                )
+            );
         }
-        return true;
     }
 
     /**
@@ -171,16 +254,22 @@ class Transaction
      * fail.
      *
      * @param string $reservationId
+     * @param string $remoteLogTransactionId
      * @return mixed
      */
-    public function confirm($reservationId)
+    public function confirm($reservationId, $remoteLogTransactionId)
     {
         try {
             $order = $this->reservations->getOrder($reservationId);
             $this->reservations->setConfirmed($reservationId);
-            $this->logger->log($order);
+            $this->logger->confirm($remoteLogTransactionId);
         } catch (\Exception $e) {
-            return false;
+            return new Struct\Error(
+                array(
+                    'message' => $e->getMessage(),
+                    'debugText' => (string) $e,
+                )
+            );
         }
         return true;
     }

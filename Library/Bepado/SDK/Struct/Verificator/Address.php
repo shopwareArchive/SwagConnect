@@ -60,9 +60,27 @@ class Address extends Verificator
      */
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        foreach (array('name', 'line1', 'zip', 'city', 'country') as $required) {
+        $requiredFields = array('name', 'line1', 'zip', 'city', 'country');
+        $optionalStringFields = array('line2', 'company', 'state');
+
+        foreach ($requiredFields as $required) {
             if (!is_string($struct->$required)) {
                 throw new \RuntimeException($required . ' MUST be a string.');
+            }
+            if (@iconv('UTF-8', 'UTF-8', $struct->$required) != $struct->$required) {
+                throw new \RuntimeException("Property $required MUST be UTF-8 encoded.");
+            }
+        }
+
+        foreach ($optionalStringFields as $field) {
+            if ($struct->$field === null) {
+                continue;
+            }
+            if (!is_string($struct->$field)) {
+                throw new \RuntimeException($field . ' MUST be a string.');
+            }
+            if (@iconv('UTF-8', 'UTF-8', $struct->$field) != $struct->$field) {
+                throw new \RuntimeException("Property $field MUST be UTF-8 encoded.");
             }
         }
 

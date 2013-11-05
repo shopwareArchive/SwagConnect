@@ -33,49 +33,69 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
     getColumns: function() {
         var me = this;
         return [{
-            header: 'Number',
+            header: '{s name=export/columns/number}Number{/s}',
             dataIndex: 'number',
             flex: 2
         }, {
-            header: 'Name',
+            header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
             flex: 4
         }, {
-            header: 'Supplier',
+            header: '{s name=export/columns/supplier}Supplier{/s}',
             dataIndex: 'supplier',
             flex: 3
         }, {
-            header: 'Active',
+            header: '{s name=export/columns/active}Active{/s}',
             xtype: 'booleancolumn',
             dataIndex: 'active',
-            width: 50
+            width: 50,
+            sortable: false
         }, {
-            header: 'Price',
+            header: '{s name=export/columns/price}Price{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'price',
             align: 'right',
             width: 55
         }, {
-            header: 'Tax',
+            header: '{s name=export/columns/tax}Tax{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'tax',
             align: 'right',
             flex: 1
         }, {
-            header: 'Stock',
+            header: '{s name=export/columns/stock}Stock{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'inStock',
             format: '0,000',
             align: 'right',
             flex: 1
         }, {
-            header: 'Status',
+            header: '{s name=export/columns/status}Status{/s}',
             dataIndex: 'exportStatus',
             flex: 2,
             renderer: function(value, metaData, record) {
-                metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                if(record.get('exportMessage')) {
+                    metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                }
                 return value;
             }
+        }, {
+            xtype: 'actioncolumn',
+            width: 26,
+            items: [{
+                action: 'edit',
+                cls: 'editBtn',
+                iconCls: 'sprite-pencil',
+                handler: function(view, rowIndex, colIndex, item, opts, record) {
+                    Shopware.app.Application.addSubApplication({
+                        name: 'Shopware.apps.Article',
+                        action: 'detail',
+                        params: {
+                            articleId: record.get('id')
+                        }
+                    });
+                }
+            }]
         }];
     },
 
@@ -105,14 +125,12 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
         var items = [];
         items.push({
             iconCls:'sprite-plus-circle-frame',
-            text:'Produkt(e) exportieren / aktualisieren',
-            //tooltip:'{s name=list/add_tooltip}Add (ALT + INSERT){/s}',
+            text:'{s name=export/options/insert_text}Insert / update products to the export{/s}',
             action:'add'
         });
         items.push({
             iconCls:'sprite-minus-circle-frame',
-            text:'Aus dem Export löschen',
-            //tooltip:'{s name=list/delete_tooltip}Delete (ALT + DELETE){/s}',
+            text:'{s name=export/options/delete_text}Remove products from the export{/s}',
             action:'delete'
         });
         //items.push('->', {

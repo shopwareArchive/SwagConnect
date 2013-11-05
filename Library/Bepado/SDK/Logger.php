@@ -38,4 +38,12 @@ abstract class Logger
      * @return void
      */
     abstract protected function doLog(Struct\Order $order);
+
+    /**
+     * Confirm logging
+     *
+     * @param string $logTransactionId
+     * @return void
+     */
+    abstract public function confirm($logTransactionId);
 }

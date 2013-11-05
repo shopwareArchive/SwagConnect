@@ -39,7 +39,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
     getCategoryFilter: function() {
         return {
             xtype: 'treepanel',
-            title: 'Category filter',
+            title: '{s name=export/filter/category_title}Category filter{/s}',
             rootVisible: false,
             root: {
                 id: 1,
@@ -53,12 +53,12 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
     getStatusFilter: function() {
         return {
             xtype: 'form',
-            title: 'Status filter',
+            title: '{s name=export/filter/status_title}Status filter{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{
                 xtype: 'base-element-select',
-                name: 'status',
+                name: 'exportStatus',
                 anchor: '100%',
                 allowBlank: true,
                 store: [
@@ -74,7 +74,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
     getSupplierFilter: function() {
         return {
             xtype: 'form',
-            title: 'Supplier filter',
+            title: '{s name=export/filter/supplier_title}Supplier filter{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{
@@ -90,7 +90,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
     getSearchFilter: function() {
         return {
             xtype: 'form',
-            title: 'Search',
+            title: '{s name=export/filter/search_title}Search{/s}',
             height: 65,
             bodyPadding: 5,
             items: [{
@@ -98,7 +98,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 name:'searchfield',
                 anchor: '100%',
                 cls:'searchfield',
-                emptyText:'{s name=search/empty_text}Search...{/s}',
+                emptyText:'{s name=export/filter/search_empty}Search...{/s}',
                 enableKeyEvents:true,
                 checkChangeBuffer:500
             }]

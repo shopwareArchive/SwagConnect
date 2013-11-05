@@ -11,6 +11,7 @@ use Bepado\SDK\ShopFactory;
 use Bepado\SDK\ShopGateway;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\DependencyResolver;
+use Bepado\SDK\ShopGateway\ShopRequestSigner;
 
 /**
  * Shop factory
@@ -56,10 +57,14 @@ class Http extends ShopFactory
     public function getShopGateway($shopId)
     {
         $configuration = $this->configuration->getShopConfiguration($shopId);
+
         return new ShopGateway\Http(
-            $this->dependencyResolver->getHttpClient($configuration->serviceEndpoint),
+            $this->dependencyResolver->getHttpClient(
+                $configuration->serviceEndpoint
+            ),
             $this->dependencyResolver->getMarshaller(),
-            $this->dependencyResolver->getUnmarshaller()
+            $this->dependencyResolver->getUnmarshaller(),
+            new ShopRequestSigner($this->dependencyResolver->getRequestSigner(), $shopId)
         );
     }
 }

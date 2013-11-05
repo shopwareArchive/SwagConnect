@@ -44,6 +44,13 @@ class DependencyResolver
     protected $fromShop;
 
     /**
+     * Error handler
+     *
+     * @var ErrorHandler
+     */
+    protected $errorHandler;
+
+    /**
      * Service registry
      *
      * @var Rpc\ServiceRegistry
@@ -121,6 +128,13 @@ class DependencyResolver
     protected $revisionFromShop;
 
     /**
+     * OrderStatusUpdate service
+     *
+     * @var Service\OrderStatusUpdate
+     */
+    protected $orderStatusUpdate;
+
+    /**
      * Logger
      *
      * @var Logger
@@ -130,22 +144,27 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://Bepado:Shopware@socialnetwork.bepado.h2155039.stratoserver.net';
+    protected $socialNetworkHost = 'http://bepado.de';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://Bepado:Shopware@transaction.bepado.h2155039.stratoserver.net';
+    protected $transactionHost = 'http://transaction.bepado.de';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://Bepado:Shopware@search.bepado.h2155039.stratoserver.net';
+    protected $searchHost = 'http://search.bepado.de';
 
     /**
      * @var ChangeVisitor\Message
      */
     protected $changeVisitor;
+
+    /**
+     * @var HttpClient\RequestSigner
+     */
+    protected $requestSigner;
 
     /**
      * @param \Bepado\SDK\Gateway $gateway
@@ -157,12 +176,16 @@ class DependencyResolver
         Gateway $gateway,
         ProductToShop $toShop,
         ProductFromShop $fromShop,
-        $apiKey
+        ErrorHandler $errorHandler,
+        $apiKey,
+        HttpClient\RequestSigner $requestSigner = null
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
         $this->fromShop = $fromShop;
+        $this->errorHandler = $errorHandler;
         $this->apiKey = $apiKey;
+        $this->requestSigner = $requestSigner;
 
         if ($host = getenv('_SOCIALNETWORK_HOST')) {
             $this->socialNetworkHost = "http://{$host}";
@@ -175,6 +198,26 @@ class DependencyResolver
         }
 
         $this->apiKey = $apiKey;
+    }
+
+    /**
+     * Get from shop gateway
+     *
+     * @return ProductFromShop
+     */
+    public function getFromShop()
+    {
+        return $this->fromShop;
+    }
+
+    /**
+     * Get to shop gateway
+     *
+     * @return ProductToShop
+     */
+    public function getToShop()
+    {
+        return $this->toShop;
     }
 
     /**
@@ -212,6 +255,17 @@ class DependencyResolver
             );
 
             $this->registry->registerService(
+                'configuration',
+                array('update'),
+                new Service\Configuration(
+                    $this->gateway,
+                    $this->getHttpClient($this->socialNetworkHost),
+                    $this->apiKey,
+                    $this->getVerificator()
+                )
+            );
+
+            $this->registry->registerService(
                 'products',
                 array('fromShop', 'toShop', 'getLastRevision'),
                 new Service\ProductService(
@@ -223,21 +277,13 @@ class DependencyResolver
             );
 
             $this->registry->registerService(
-                'configuration',
-                array('update'),
-                new Service\Configuration(
-                    $this->gateway,
-                    $this->getVerificator()
-                )
-            );
-
-            $this->registry->registerService(
                 'transaction',
                 array('checkProducts', 'reserveProducts', 'buy', 'confirm'),
                 new Service\Transaction(
                     $this->fromShop,
                     $this->gateway,
-                    $this->getLogger()
+                    $this->getLogger(),
+                    $this->gateway
                 )
             );
         }
@@ -289,6 +335,8 @@ class DependencyResolver
                         new Struct\Verificator\Message(),
                     'Bepado\\SDK\\Struct\\Address' =>
                         new Struct\Verificator\Address(),
+                    'Bepado\\SDK\\Struct\\ProductList' =>
+                        new Struct\Verificator\ProductList()
                 )
             );
         }
@@ -337,7 +385,10 @@ class DependencyResolver
                     $this->gateway
                 ),
                 $this->getChangeVisitor(),
-                $this->getLogger()
+                $this->toShop,
+                $this->getLogger(),
+                $this->errorHandler,
+                new ShippingCostCalculator($this->gateway)
             );
         }
 
@@ -461,18 +512,50 @@ class DependencyResolver
 
     /**
      * @param string $server
+     *
      * @return \Bepado\SDK\HttpClient
      */
     public function getHttpClient($server)
     {
-        $client = new HttpClient\Stream($server);
-        $client->addDefaultHeaders(
-            array(
-                'X-Bepado-SDK-Version: ' . SDK::VERSION,
-                'Accept: applications/x-bepado-json-' . SDK::VERSION,
-            )
+        $headers = array(
+            'X-Bepado-SDK-Version: ' . SDK::VERSION,
+            'Accept: applications/x-bepado-json-' . SDK::VERSION,
         );
 
+        $client = new HttpClient\Stream($server);
+        $client->addDefaultHeaders($headers);
+
         return $client;
+    }
+
+    /**
+     * @return HttpClient\RequestSigner
+     */
+    public function getRequestSigner()
+    {
+        if ($this->requestSigner === null) {
+            $this->requestSigner = new HttpClient\SharedKeyRequestSigner(
+                $this->getGateway(),
+                new Service\Clock(),
+                $this->apiKey
+            );
+        }
+
+        return $this->requestSigner;
+    }
+
+    /**
+     * @return Service\OrderStatusUpdate
+     */
+    public function getOrderStatusService()
+    {
+        if ($this->orderStatusUpdate === null) {
+            $this->orderStatusUpdate = new Service\OrderStatusUpdate(
+                $this->getHttpClient($this->socialNetworkHost),
+                $this->apiKey
+            );
+        }
+
+        return $this->orderStatusUpdate;
     }
 }

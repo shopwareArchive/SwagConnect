@@ -8,6 +8,7 @@
 namespace Bepado\SDK\Service;
 
 use Bepado\SDK\Gateway;
+use Bepado\SDK\HttpClient;
 use Bepado\SDK\Struct;
 
 /**
@@ -25,41 +26,35 @@ class Configuration
     protected $configuration;
 
     /**
-     * Struct verificator
-     *
-     * @var Struct\VerificatorDispatcher
-     */
-    protected $verificator;
-
-    /**
      * Construct from gateway
      *
      * @param Gateway\ShopConfiguration $gateway
-     * @param Struct\VerificatorDispatcher $verificator
-     * @return void
      */
-    public function __construct(
-        Gateway\ShopConfiguration $configuration,
-        Struct\VerificatorDispatcher $verificator
-    ) {
+    public function __construct(Gateway\ShopConfiguration $configuration)
+    {
         $this->configuration = $configuration;
-        $this->verificator = $verificator;
     }
 
     /**
      * Store shop configuration updates
      *
-     * @param Struct\ShopConfiguration $shopConfigurations
      * @return void
-     *
-     * @todo This method does not seem to be used. The class can therefore be
-     *       deprecated.
      */
-    public function update(array $shopConfigurations)
+    public function update(array $configurations)
     {
-        foreach ($shopConfigurations as $shopId => $shopConfiguration) {
-            $this->verificator->verify($shopConfiguration);
-            $this->configuration->setShopConfiguration($shopId, $shopConfiguration);
+        foreach ($configurations as $configuration) {
+            $this->configuration->setShopConfiguration(
+                $configuration['shopId'],
+                new Struct\ShopConfiguration(
+                    array(
+                        'serviceEndpoint' => $configuration['serviceEndpoint'],
+                        'shippingCost' => $configuration['shippingCost'],
+                        'displayName' => $configuration['shopDisplayName'],
+                        'url' => $configuration['shopUrl'],
+                        'key' => $configuration['key'],
+                    )
+                )
+            );
         }
     }
 }

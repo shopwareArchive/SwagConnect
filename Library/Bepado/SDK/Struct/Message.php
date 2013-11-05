@@ -18,6 +18,11 @@ use Bepado\SDK\Struct;
 class Message extends Struct
 {
     /**
+     * Message that might contain placeholders.
+     *
+     * Placeholders are identified by "%foo" (without quotes). They will be
+     * replaced by values from $values.
+     *
      * @var string
      */
     public $message;

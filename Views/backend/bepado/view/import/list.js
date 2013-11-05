@@ -33,41 +33,65 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
     getColumns: function() {
         var me = this;
         return [{
-            header: 'Number',
+            header: '{s name=export/columns/number}Number{/s}',
             dataIndex: 'number',
             flex: 2
         }, {
-            header: 'Name',
+            header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
             flex: 4
         }, {
-            header: 'Supplier',
+            header: '{s name=export/columns/supplier}Supplier{/s}',
             dataIndex: 'supplier',
             flex: 3
         }, {
-            header: 'Active',
+            header: '{s name=export/columns/status}Status{/s}',
             xtype: 'booleancolumn',
             dataIndex: 'active',
+            sortable: false,
+            renderer: function(value, metaData, record) {
+                if(record.get('bepadoStatus')) {
+                    return record.get('bepadoStatus');
+                }
+                return value ? 'Aktiv' : 'Inaktiv';
+            },
             width: 50
         }, {
-            header: 'Price',
+            header: '{s name=export/columns/price}Price{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'price',
             align: 'right',
             width: 55
         }, {
-            header: 'Tax',
+            header: '{s name=export/columns/tax}Tax{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'tax',
             align: 'right',
             flex: 1
         }, {
-            header: 'Stock',
+            header: '{s name=export/columns/stock}Stock{/s}',
             xtype: 'numbercolumn',
             dataIndex: 'inStock',
             format: '0,000',
             align: 'right',
             flex: 1
+        }, {
+            xtype: 'actioncolumn',
+            width: 26,
+            items: [{
+                action: 'edit',
+                cls: 'editBtn',
+                iconCls: 'sprite-pencil',
+                handler: function(view, rowIndex, colIndex, item, opts, record) {
+                    Shopware.app.Application.addSubApplication({
+                        name: 'Shopware.apps.Article',
+                        action: 'detail',
+                        params: {
+                            articleId: record.get('id')
+                        }
+                    });
+                }
+            }]
         }];
     },
 
@@ -97,14 +121,12 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         var items = [];
         items.push({
             iconCls:'sprite-plus-circle-frame',
-            text:'Produkt(e) aktivieren',
-            //tooltip:'{s name=list/add_tooltip}Add (ALT + INSERT){/s}',
+            text:'{s name=export/options/activate_text}Enable products{/s}',
             action:'activate'
         });
         items.push({
             iconCls:'sprite-minus-circle-frame',
-            text:'Produkt(e) deaktivieren',
-            //tooltip:'{s name=list/delete_tooltip}Delete (ALT + DELETE){/s}',
+            text:'{s name=export/options/disable_text}Disable products{/s}',
             action:'deactivate'
         });
         return items;

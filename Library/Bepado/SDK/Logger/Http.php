@@ -68,6 +68,37 @@ class Http extends Logger
             throw new \RuntimeException("Logging failed: " . $message);
         }
 
+        return json_decode($response->body);
+    }
+
+    /**
+     * Confirm logging
+     *
+     * @param string $logTransactionId
+     * @return void
+     */
+    public function confirm($logTransactionId)
+    {
+        $hash = hash_hmac("sha256", $logTransactionId, $this->apiKey);
+
+        $response = $this->httpClient->request(
+            'POST',
+            '/transaction/confirm',
+            json_encode($logTransactionId),
+            array(
+                'Content-Type: application/json',
+                'X-Bepado-Order-Hash: ' . $hash
+            )
+        );
+
+        if ($response->status >= 400) {
+            $message = null;
+            if ($error = json_decode($response->body)) {
+                $message = $error->message;
+            }
+            throw new \RuntimeException("Logging confirmation failed: " . $message);
+        }
+
         return;
     }
 }

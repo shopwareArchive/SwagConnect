@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.0.0snapshot201303151129
+ * @version 1.0.0snapshot201305291116
  */
 
 namespace Bepado\Common\Rpc\Marshaller\ValueUnmarshaller;
@@ -55,7 +55,7 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
             case 'array':
                 $values = array();
                 foreach ($element->childNodes as $child) {
-                    $values[] = $this->unmarshalValue($child);
+                    $values[$child->getAttribute('key')] = $this->unmarshalValue($child);
                 }
                 return $values;
             default:

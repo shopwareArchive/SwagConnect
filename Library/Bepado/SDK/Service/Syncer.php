@@ -95,8 +95,12 @@ class Syncer
             }
         }
 
+        $myShopId = $this->products->getShopId();
+
         if ($inserts = array_diff($shopProducts, $knownProducts)) {
             foreach ($this->fromShop->getProducts($inserts) as $product) {
+                $product->shopId = $myShopId;
+
                 $this->changes->recordInsert(
                     $product->sourceId,
                     $this->hasher->hash($product),
@@ -108,6 +112,8 @@ class Syncer
 
         if ($toCheck = array_intersect($shopProducts, $knownProducts)) {
             foreach ($this->fromShop->getProducts($toCheck) as $product) {
+                $product->shopId = $myShopId;
+
                 if ($this->products->hasChanged(
                     $product->sourceId,
                     $this->hasher->hash($product)

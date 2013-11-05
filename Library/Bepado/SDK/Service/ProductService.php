@@ -53,12 +53,18 @@ class ProductService
     /**
      * Construct from gateway
      *
-     * @param \Bepado\SDK\Gateway\ChangeGateway $changes
-     * @param \Bepado\SDK\Gateway\RevisionGateway $revision
-     * @param \Bepado\SDK\ProductToShop $toShop
+     * @param ChangeGateway $changes
+     * @param RevisionGateway $revision
+     * @param ShopConfiguration $configurationGateway
+     * @param ProductToShop $toShop
+     * @return void
      */
-    public function __construct(ChangeGateway $changes, RevisionGateway $revision, ShopConfiguration $configurationGateway, ProductToShop $toShop)
-    {
+    public function __construct(
+        ChangeGateway $changes,
+        RevisionGateway $revision,
+        ShopConfiguration $configurationGateway,
+        ProductToShop $toShop
+    ) {
         $this->changes = $changes;
         $this->revision = $revision;
         $this->configurationGateway = $configurationGateway;
@@ -95,18 +101,6 @@ class ProductService
                     break;
                 default:
                     throw new \RuntimeException("Invalid change operation: $change");
-            }
-
-            if ($change->shopEndpoint !== null) {
-                $this->configurationGateway->setShopConfiguration(
-                    $change->shopId,
-                    new Struct\ShopConfiguration(
-                        array(
-                            'name' => $change->shopId,
-                            'serviceEndpoint' => $change->shopEndpoint,
-                        )
-                    )
-                );
             }
         }
 

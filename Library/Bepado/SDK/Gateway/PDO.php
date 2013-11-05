@@ -1,6 +1,8 @@
 <?php
 /**
  * This file is part of the Bepado SDK Component.
+ *
+ * @version $Revision$
  */
 
 namespace Bepado\SDK\Gateway;
@@ -9,8 +11,9 @@ use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
 
 /**
+ * PDO implementation of the storage gateway
  *
- * @author Heiner Lohaus
+ * @version $Revision$
  */
 class PDO extends Gateway
 {
@@ -117,16 +120,17 @@ class PDO extends Gateway
     {
         $offset = $offset ?: 0;
         $result = $this->connection->prepare(
-            'SELECT
-                COUNT(*) `changes`
+            'EXPLAIN SELECT
+                *
             FROM
                 `bepado_change`
             WHERE
                 `c_revision` > ?'
         );
         $result->execute(array($offset));
-        $changes = $result->fetchColumn();
-        return max(0, $changes - $limit);
+        $changes = $result->fetch(\PDO::FETCH_ASSOC);
+
+        return max(0, $changes['rows'] - $limit);
     }
 
     /**
@@ -152,12 +156,7 @@ class PDO extends Gateway
                 ?, ?, ?, ?
             );'
         );
-        $query->execute(array(
-            $id,
-            'insert',
-            $revision,
-            serialize($product)
-        ));
+        $query->execute(array($id, 'insert', $revision, serialize($product)));
 
         $query =  $this->connection->prepare(
             'INSERT INTO
@@ -168,10 +167,7 @@ class PDO extends Gateway
                 null
             );'
         );
-        $query->execute(array(
-            $id,
-            $hash
-        ));
+        $query->execute(array($id, $hash));
     }
 
     /**
@@ -197,12 +193,7 @@ class PDO extends Gateway
                 ?, ?, ? ,?
             );'
         );
-        $query->execute(array(
-            $id,
-            'update',
-            $revision,
-            serialize($product)
-        ));
+        $query->execute(array($id, 'update', $revision, serialize($product)));
 
         $query = $this->connection->prepare(
             '
@@ -211,10 +202,7 @@ class PDO extends Gateway
             WHERE p_source_id = ?
             '
         );
-        $query->execute(array(
-            $hash,
-            $id
-        ));
+        $query->execute(array($hash, $id));
     }
 
     /**
@@ -237,11 +225,7 @@ class PDO extends Gateway
                 ?, ?, ?
             );'
         );
-        $query->execute(array(
-            $id,
-            'delete',
-            $revision
-        ));
+        $query->execute(array($id, 'delete', $revision));
 
         $query = $this->connection->prepare(
             'DELETE FROM
@@ -250,9 +234,7 @@ class PDO extends Gateway
                 p_source_id = ?
             ;'
         );
-        $query->execute(array(
-            $id
-        ));
+        $query->execute(array($id));
     }
 
     /**
@@ -274,9 +256,7 @@ class PDO extends Gateway
             WHERE
                 p_source_id = ?'
         );
-        $query->execute(array(
-            $id
-        ));
+        $query->execute(array($id));
 
         $result = $query->fetchColumn();
         return $result !== $hash;
@@ -411,6 +391,7 @@ class PDO extends Gateway
     public function setShopId($shopId)
     {
         $this->setConfig('_self_', $shopId);
+        $this->setConfig('_last_update_', time());
     }
 
     /**
@@ -446,19 +427,19 @@ class PDO extends Gateway
     {
         $query = $this->connection->query(
             'SELECT
-                `changed`
+                `s_config`
             FROM
                 `bepado_shop_config`
             WHERE
-                `s_shop` = "_self_"'
+                `s_shop` = "_last_update_"'
         );
 
         $result = $query->fetchColumn();
         if ($result === null) {
-            return null;
+            return false;
         }
 
-        return strtotime($result);
+        return $result;
     }
 
     /**
@@ -471,7 +452,7 @@ class PDO extends Gateway
      */
     public function createReservation(Struct\Order $order)
     {
-        $reservationId = md5(microtime());
+        $order->reservationId = md5(microtime());
         $query = $this->connection->prepare(
             'INSERT INTO
                 `bepado_reservations` (
@@ -483,12 +464,8 @@ class PDO extends Gateway
                 ?, ?, ?
             );'
         );
-        $query->execute(array(
-            $reservationId,
-            'new',
-            serialize($order)
-        ));
-        return $reservationId;
+        $query->execute(array($order->reservationId, 'new', serialize($order)));
+        return $order->reservationId;
     }
 
     /**
@@ -511,7 +488,7 @@ class PDO extends Gateway
         $query->execute(array($reservationId));
 
         $result = $query->fetchColumn();
-        if ($result !== false) {
+        if ($result === false) {
             throw new \OutOfBoundsException("Reservation $reservationId not found.");
         }
 
@@ -608,9 +585,7 @@ class PDO extends Gateway
             WHERE
                 `s_shop` = ?'
         );
-        $query->execute(array(
-            $shopId
-        ));
+        $query->execute(array($shopId));
 
         $config = $query->fetchColumn();
         if ($config === false) {

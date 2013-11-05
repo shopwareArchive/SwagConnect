@@ -4,7 +4,14 @@ Ext.define('Shopware.apps.Bepado', {
 
     bulkLoad: true,
     loadPath: '{url action=load}',
-    controllers: ['Main'],
+    views: [
+        'main.Window', 'main.Navigation', 'main.HomePage',
+        'main.Panel', 'main.Config', 'main.Mapping',
+        'export.Panel', 'import.Panel',
+        'export.List', 'export.Filter',
+        'import.List', 'import.Filter'
+    ],
+    controllers: [ 'Main' ],
 
     //views: [],
 

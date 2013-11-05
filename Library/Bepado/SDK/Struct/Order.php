@@ -18,11 +18,15 @@ use Bepado\SDK\Struct;
 class Order extends Struct
 {
     /**
+     * Shop the order originates from.
+     *
      * @var string
      */
     public $orderShop;
 
     /**
+     * Shop providing the products, which are delivered to the customer.
+     *
      * @var string
      */
     public $providerShop;
@@ -33,9 +37,18 @@ class Order extends Struct
     public $reservationId;
 
     /**
+     * Order ID from the shop the order is placed with
+     *
      * @var string
      */
     public $localOrderId;
+
+    /**
+     * Order ID from the product provider shop
+     *
+     * @var string
+     */
+    public $providerOrderId;
 
     /**
      * @var float

@@ -108,7 +108,7 @@ class BepadoFactory
     /**
      * Returns a route to the bepado gateway controller
      *
-     * @param $front
+     * @param $front \Enlight_Controller_Front
      * @return string
      */
     private function getSdkRoute($front)

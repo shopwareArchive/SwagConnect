@@ -206,6 +206,10 @@ class TemplateExtension extends BaseSubscriber
             return (int)$row['articleId'];
         }, $data);
 
+        if (empty($articleIds)) {
+            return $data;
+        }
+
         $sql = 'SELECT articleID FROM s_articles_attributes WHERE articleID IN (' . implode(', ', $articleIds) . ') AND bepado_source_id IS NOT NULL';
         $bepadoArticleIds = array_map(function ($row) {
             return $row['articleID'];

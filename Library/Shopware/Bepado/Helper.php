@@ -55,7 +55,6 @@ class Helper
 
     private $bepadoCategoryQuery;
 
-    private $sdk;
 
     /**
      * @param ModelManager $manager
@@ -70,19 +69,6 @@ class Helper
         $this->productDescriptionField = $productDescriptionField;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
     }
-
-    /**
-     * @return SDK
-     */
-    public function getSDK()
-    {
-        return $this->sdk;
-    }
-
-   public function setSDK(SDK $sdk)
-   {
-       $this->sdk = $sdk;
-   }
 
     /**
      * @return \Shopware\Models\Article\Repository
@@ -401,10 +387,10 @@ class Helper
      * Helper function to mark a given array of product ids for bepado update
      *
      * @param array $ids
+     * @param $sdk SDK
      */
-    public function insertOrUpdateProduct(array $ids)
+    public function insertOrUpdateProduct(array $ids, $sdk)
     {
-        $sdk = $this->getSDK();
 
         foreach($ids as $id) {
             $model = $this->getArticleModelById($id);

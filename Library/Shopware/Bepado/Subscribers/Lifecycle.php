@@ -41,6 +41,6 @@ class Lifecycle extends BaseSubscriber
         }
 
         // Mark the product for bepado update
-        $this->getHelper()->insertOrUpdateProduct(array($id));
+        $this->getHelper()->insertOrUpdateProduct(array($id), $this->getSDK());
     }
 }

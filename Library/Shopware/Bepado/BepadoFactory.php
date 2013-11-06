@@ -72,7 +72,7 @@ class BepadoFactory
             $requestSigner = $this->getNoSecurityRequestSigner($gateway, $apiKey);
         }
 
-        $sdk = new SDK\SDK(
+        return new SDK\SDK(
             $apiKey,
             $this->getSdkRoute($front),
             $gateway,
@@ -87,10 +87,6 @@ class BepadoFactory
             null,
             $requestSigner
         );
-
-
-        $this->getHelper()->setSDK($sdk);
-        return $sdk;
     }
 
     /**

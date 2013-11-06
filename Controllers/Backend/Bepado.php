@@ -532,7 +532,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $ids = $this->Request()->getPost('ids');
         $helper = $this->getHelper();
 
-        $helper->insertOrUpdateProduct($ids);
+        $helper->insertOrUpdateProduct($ids, $this->getSDK());
     }
 
     /**

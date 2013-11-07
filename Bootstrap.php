@@ -90,7 +90,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function createMyEvents()
     {
         $this->subscribeEvent(
-            'Enlight_Controller_Front_RouteStartup',
+            'Enlight_Controller_Front_DispatchLoopStartup',
             'onStartDispatch'
         );
     }

@@ -5,41 +5,14 @@ namespace Shopware\Bepado\Subscribers;
 class Checkout extends BaseSubscriber
 {
 
-    /** @var  \Shopware\Bepado\BasketHelper */
-    protected $basketHelper;
-
     public function getSubscribedEvents()
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
             'sOrder::sSaveOrder::after' => 'checkoutReservedProducts',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish'
         );
     }
-
-    public function __construct($basketHelper)
-    {
-        $this->basketHelper = $basketHelper;
-
-        parent::__construct();
-    }
-
-    /**
-     * @param mixed $basketHelper
-     */
-    public function setBasketHelper($basketHelper)
-    {
-        $this->basketHelper = $basketHelper;
-    }
-
-    /**
-     * @return \Shopware\Bepado\BasketHelper
-     */
-    public function getBasketHelper()
-    {
-        return $this->basketHelper;
-    }
-
 
     /**
      * Event listener method for the checkout confirm- and cartAction.

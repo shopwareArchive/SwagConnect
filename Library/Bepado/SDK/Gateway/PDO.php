@@ -97,12 +97,13 @@ class PDO extends Gateway
             }
         }
 
-        $this->connection->exec(
+        // Disable cleanup for the first betas for debuggability and easier re-runs.
+        /*$this->connection->exec(
             'DELETE FROM
                 bepado_change
             WHERE
                 c_revision <= ' . $offset
-        );
+        );*/
 
         return $changes;
     }

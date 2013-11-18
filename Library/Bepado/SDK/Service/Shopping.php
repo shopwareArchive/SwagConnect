@@ -16,6 +16,7 @@ use Bepado\SDK\ProductToShop;
 use Bepado\SDK\Logger;
 use Bepado\SDK\ErrorHandler;
 use Bepado\SDK\ShippingCostCalculator;
+use Bepado\SDK\Gateway\ShopConfiguration;
 
 /**
  * Shopping service
@@ -76,7 +77,8 @@ class Shopping
         ProductToShop $productToShop,
         Logger $logger,
         ErrorHandler $errorHandler,
-        ShippingCostCalculator $calculator
+        ShippingCostCalculator $calculator,
+        ShopConfiguration $config
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
@@ -84,6 +86,7 @@ class Shopping
         $this->logger = $logger;
         $this->errorHandler = $errorHandler;
         $this->calculator = $calculator;
+        $this->config = $config;
     }
 
     /**
@@ -128,6 +131,8 @@ class Shopping
         $productLists = $this->zipProductListByShopId($productList);
 
         foreach ($productLists as $shopId => $products) {
+            $products = $this->applyPriceGroupMarginsToProductList($shopId, $products);
+
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->checkProducts($products);
         }
@@ -196,6 +201,8 @@ class Shopping
         $responses = array();
         $orders = $this->splitShopOrders($order);
         foreach ($orders as $shopId => $order) {
+            $order = $this->applyPriceGroupMarginsToOrder($shopId, $order);
+
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($order);
         }
@@ -221,6 +228,53 @@ class Shopping
     }
 
     /**
+     * Apply margin to product list
+     *
+     * @param integer $shopId
+     * @param \Bepado\SDK\Struct\ProductList $order
+     *
+     * @return \Bepado\SDK\Struct\ProductList
+     */
+    private function applyPriceGroupMarginsToProductList($shopId, Struct\ProductList $productList)
+    {
+        $margin = $this->getShopPriceGroupMargin($shopId);
+
+        foreach ($productList->products as $product) {
+            $product->priceGroupMargin = $margin;
+        }
+
+        return $productList;
+    }
+
+    /**
+     * Apply margin to purchase prices
+     *
+     * @param integer $shopId
+     * @param \Bepado\SDK\Struct\Order $order
+     *
+     * @return \Bepado\SDK\Struct\Order
+     */
+    private function applyPriceGroupMarginsToOrder($shopId, Struct\Order $order)
+    {
+        $margin = $this->getShopPriceGroupMargin($shopId);
+
+        foreach ($order->products as $orderItem) {
+            $orderItem->product->priceGroupMargin = $margin;
+        }
+
+        return $order;
+    }
+
+    private function getShopPriceGroupMargin($shopId)
+    {
+        /*$configuration = $this->config->getShopConfiguration($shopId);
+        $margin = $configuration->priceGroupMargin;*/
+        $margin = 0;
+
+        return $margin;
+    }
+
+    /**
      * Apply changes reported by a remote shop
      *
      * @param Struct\Change[] $changes
@@ -238,7 +292,7 @@ class Shopping
                     break;
                 default:
                     throw new \RuntimeException(
-                        'Invalid change calss provided: ' . get_class($change)
+                        'Invalid change class provided: ' . get_class($change)
                     );
             }
         }

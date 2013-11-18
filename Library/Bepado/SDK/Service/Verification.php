@@ -77,12 +77,11 @@ class Verification
         );
 
         if ($response->status >= 400) {
-            $message = null;
-            if (($error = json_decode($response->body)) &&
-                isset($error->message)) {
-                $message = $error->message;
+            if (($error = json_decode($response->body)) && isset($error->message)) {
+                throw new \RuntimeException("Verification failed: " . $error->message);
             }
-            throw new \RuntimeException("Verification failed: " . $message);
+
+            throw new \RuntimeException("Verification failed with HTTP status " . $response->status);
         }
 
         if ($response->body &&

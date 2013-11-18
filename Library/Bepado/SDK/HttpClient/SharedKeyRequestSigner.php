@@ -77,6 +77,7 @@ class SharedKeyRequestSigner implements RequestSigner
             return new AuthenticationToken(array('authenticated' => false));
         }
 
+        $party = "";
         if (preg_match('(^(party="([^"]+)\",nonce="([^"]+)")$)', $params, $matches)) {
             $party = $matches[2];
             $actualNonce = $matches[3];
@@ -98,7 +99,7 @@ class SharedKeyRequestSigner implements RequestSigner
             }
         }
 
-        return new AuthenticationToken(array('authenticated' => false));
+        return new AuthenticationToken(array('authenticated' => false, 'userIdentifier' => $party));
     }
 
     private function generateNonce($requestDate, $body, $key)

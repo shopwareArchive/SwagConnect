@@ -61,6 +61,8 @@ final class SDK
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
+     * @param \Bepado\SDK\ErrorHandler $errorHandler
+     * @param \Bepado\SDK\HttpClient\RequestSigner $requestSigner
      */
     public function __construct(
         $apiKey,
@@ -168,7 +170,13 @@ final class SDK
         $token = $requestSigner->verifyRequest($body, $headers);
 
         if (false === $token->authenticated) {
-            throw new SecurityException("Authorization of RPC request failed.");
+            throw new SecurityException(
+                sprintf(
+                    "Authorization of RPC request failed for user '%s' to shop '%d'.",
+                    $token->userIdentifier,
+                    $this->dependencies->getGateway()->getShopId()
+                )
+            );
         }
 
         return $token;

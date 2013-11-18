@@ -53,6 +53,14 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
+     * @return \Shopware\Bepado\BasketHelper
+     */
+    public function getBasketHelper()
+    {
+        return $this->bootstrap->getBasketHelper();
+    }
+
+    /**
      * @param \Shopware_Plugins_Backend_SwagBepado_Bootstrap $bootstrap
      */
     public function setBootstrap($bootstrap)

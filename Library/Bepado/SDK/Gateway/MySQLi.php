@@ -96,12 +96,13 @@ class MySQLi extends Gateway
             }
         }
 
-        $this->connection->query(
+        // Disable cleanup for the first betas for debuggability and easier re-runs.
+        /*$this->connection->query(
             'DELETE FROM
                 bepado_change
             WHERE
                 c_revision <= ' . $offset
-        );
+        );*/
 
         return $changes;
     }

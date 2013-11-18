@@ -144,17 +144,17 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://bepado.de';
+    protected $socialNetworkHost = 'http://socialnetwork.bepado.local';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://transaction.bepado.de';
+    protected $transactionHost = 'http://transaction.bepado.local';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://search.bepado.de';
+    protected $searchHost = 'http://search.bepado.local';
 
     /**
      * @var ChangeVisitor\Message
@@ -388,7 +388,8 @@ class DependencyResolver
                 $this->toShop,
                 $this->getLogger(),
                 $this->errorHandler,
-                new ShippingCostCalculator($this->gateway)
+                new ShippingCostCalculator($this->gateway),
+                $this->gateway
             );
         }
 

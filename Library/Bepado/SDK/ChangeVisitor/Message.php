@@ -74,7 +74,8 @@ class Message extends ChangeVisitor
     {
         $messages = array();
 
-        if ($change->product->availability !== $change->oldProduct->availability) {
+        if ($change->product->availability !== $change->oldProduct->availability
+            || $this->purchasePriceHasChanged($change->oldProduct, $change->product)) {
             $messages[] = new Struct\Message(
                 array(
                     'message' => 'Availability of product %product changed to %availability.',
@@ -99,6 +100,12 @@ class Message extends ChangeVisitor
         }
 
         return $messages;
+    }
+
+    private function purchasePriceHasChanged($current, $product)
+    {
+        $buyersDiscountedPrice = $current->purchasePrice * (100 - $product->priceGroupMargin) / 100;
+        return ($buyersDiscountedPrice !== $product->purchasePrice);
     }
 
     /**

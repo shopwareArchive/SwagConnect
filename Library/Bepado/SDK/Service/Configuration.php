@@ -47,11 +47,12 @@ class Configuration
                 $configuration['shopId'],
                 new Struct\ShopConfiguration(
                     array(
-                        'serviceEndpoint' => $configuration['serviceEndpoint'],
-                        'shippingCost' => $configuration['shippingCost'],
-                        'displayName' => $configuration['shopDisplayName'],
-                        'url' => $configuration['shopUrl'],
-                        'key' => $configuration['key'],
+                        'serviceEndpoint'  => $configuration['serviceEndpoint'],
+                        'shippingCost'     => $configuration['shippingCost'],
+                        'displayName'      => $configuration['shopDisplayName'],
+                        'url'              => $configuration['shopUrl'],
+                        'key'              => $configuration['key'],
+                        'priceGroupMargin' => $configuration['priceGroupMargin'],
                     )
                 )
             );

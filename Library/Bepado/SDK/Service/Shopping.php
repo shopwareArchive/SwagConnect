@@ -239,11 +239,12 @@ class Shopping
     {
         $margin = $this->getShopPriceGroupMargin($shopId);
 
+        $newList = new Struct\ProductList;
         foreach ($productList->products as $product) {
-            $product->priceGroupMargin = $margin;
+            $newList->products[] = $this->applyPriceGroupMarginsToProduct($product, $margin);
         }
 
-        return $productList;
+        return $newList;
     }
 
     /**
@@ -259,19 +260,36 @@ class Shopping
         $margin = $this->getShopPriceGroupMargin($shopId);
 
         foreach ($order->products as $orderItem) {
-            $orderItem->product->priceGroupMargin = $margin;
+            $orderItem->product = $this->applyPriceGroupMarginsToProduct($orderItem->product, $margin);
         }
 
         return $order;
     }
 
+    private function applyPriceGroupMarginsToProduct(Struct\Product $product, $margin)
+    {
+        $product = clone $product;
+        $product->purchasePrice = $product->purchasePrice * (100 - $margin) / 100;
+        $product->priceGroupMargin = $margin;
+
+        return $product;
+    }
+
+    /**
+     * Get price group margin for the given shop.
+     *
+     * @param string $shopId
+     * @return int
+     */
     private function getShopPriceGroupMargin($shopId)
     {
-        /*$configuration = $this->config->getShopConfiguration($shopId);
-        $margin = $configuration->priceGroupMargin;*/
-        $margin = 0;
+        $configuration = $this->config->getShopConfiguration($shopId);
 
-        return $margin;
+        if ($configuration === null) {
+            throw new \RuntimeException(sprintf('No configuration for shop "%d" found.', $shopId));
+        }
+
+        return $configuration->priceGroupMargin;
     }
 
     /**

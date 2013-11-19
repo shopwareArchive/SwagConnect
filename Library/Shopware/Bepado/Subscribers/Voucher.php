@@ -8,8 +8,39 @@ class Voucher extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            'Shopware_Modules_Basket_AddVoucher_Start' => 'preventPercentagedVoucher'
+            'Shopware_Modules_Basket_AddVoucher_Start' => 'preventPercentagedVoucher',
+            'Shopware_Modules_Basket_GetBasket_FilterSQL' => 'removeDiscount'
         );
+    }
+
+    /**
+     * Helper method to remove percentaged discounts from the basket if bepado products are available
+     *
+     * Alternative:
+     *  * Calculate discount only for the default products
+     *  * Removed percentaged discounts only if bepado product has a fixedPrice
+     *
+     * @event Shopware_Modules_Basket_GetBasket_FilterSQL
+     */
+    public function removeDiscount(\Enlight_Event_EventArgs $args)
+    {
+        $message = Shopware()->Snippets()->getNamespace('frontend/bepado/checkout')->get(
+            'noPercentagedDiscountsAllowed',
+            'In Kombination mit bepado-Produkten sind keine prozentualen Rabatte möglich.',
+            true
+        );
+
+        if ($this->isBepadoBasket()) {
+            $stmt = Shopware()->Db()->query(
+                "DELETE FROM s_order_basket WHERE sessionID=? AND modus=3",
+                array(Shopware()->SessionID())
+            );
+
+            // If rows where actually affected, show the corresponding message
+            if ($stmt->rowCount()) {
+                Shopware()->Template()->assign('sVoucherError', $message);
+            }
+        }
     }
 
     /**
@@ -23,12 +54,12 @@ class Voucher extends BaseSubscriber
     public function preventPercentagedVoucher(\Enlight_Event_EventArgs $args)
     {
         $code = $args->getCode();
-        /** @var \sBasket $basketInstance */
-        $basketInstance = $args->getSubject();
 
-        if (!$this->isBepadoBasket($basketInstance)) {
+        if (!$this->isBepadoBasket()) {
             return null;
         }
+
+        $basketHelper = $this->getBasketHelper();
 
         $message = Shopware()->Snippets()->getNamespace('frontend/bepado/checkout')->get(
             'noPercentagedVoucherAllowed',
@@ -37,14 +68,14 @@ class Voucher extends BaseSubscriber
         );
 
         // Exclude general percentaged vouchers
-        $result = $this->findPercentagedVouchers($code);
+        $result = $basketHelper->findPercentagedVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
             return true;
         }
 
         // Exclude individual percentaged vouchers
-        $result = $this->findPercentagedIndividualVouchers($code);
+        $result = $basketHelper->findPercentagedIndividualVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
             return true;
@@ -54,59 +85,23 @@ class Voucher extends BaseSubscriber
     /**
      * Check for bepado products in the basket
      *
-     * @param $basketInstance \sBasket
      * @return bool
      */
-    public function isBepadoBasket($basketInstance)
+    public function isBepadoBasket()
     {
-        $basket = $basketInstance->sGetBasket();
-        $basketHelper = $this->getBasketHelper();
+        $articles = Shopware()->Db()->fetchCol(
+            "SELECT articleID FROM s_order_basket WHERE sessionID=?",
+            array(Shopware()->SessionID())
+        );
 
-        $basketHelper->setBasket($basket);
-        $basketContent = $basketHelper->getBepadoContent();
+        foreach ($articles as $articleId) {
+            $product = $this->getHelper()->getProductById($articleId);
+            if ($product === null || $product->shopId === null) {
+                continue;
+            }
+            return true;
+        }
 
-        return !empty($basketContent);
+        return false;
     }
-
-    /**
-     * Find all percentaged vouchers for a given individual code
-     *
-     * @param $voucherCode
-     * @return mixed
-     */
-    public function findPercentagedIndividualVouchers($voucherCode)
-    {
-        $builder = Shopware()->Models()->createQueryBuilder();
-
-        $builder->select('voucher')
-            ->from('Shopware\Models\Voucher\Voucher', 'voucher')
-            ->innerJoin('voucher.codes', 'codes', 'WITH', 'codes.code LIKE :voucherCode')
-            ->where('voucher.percental = true')
-            ->setParameter('voucherCode', $voucherCode);
-
-
-        return $builder->getQuery()->getResult();    }
-
-    /**
-     * Find all vouchers matching the code
-     *
-     * @param $voucherCode
-     * @return mixed
-     */
-    public function findPercentagedVouchers($voucherCode)
-    {
-        $builder = Shopware()->Models()->createQueryBuilder();
-
-        $builder->select('voucher')
-            ->from('Shopware\Models\Voucher\Voucher', 'voucher')
-            ->where('voucher.voucherCode LIKE :voucherCode')
-            ->andWhere('voucher.percental = true')
-            ->setParameter('voucherCode', $voucherCode);
-
-        return $builder->getQuery()->getResult();
-    }
-
-
-
-
 }

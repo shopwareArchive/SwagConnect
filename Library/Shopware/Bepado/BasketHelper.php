@@ -461,6 +461,46 @@ class BasketHelper
         return $variables;
     }
 
+
+
+    /**
+     * Find all percentaged vouchers for a given individual code
+     *
+     * @param $voucherCode
+     * @return mixed
+     */
+    public function findPercentagedIndividualVouchers($voucherCode)
+    {
+        $builder = Shopware()->Models()->createQueryBuilder();
+
+        $builder->select('voucher')
+            ->from('Shopware\Models\Voucher\Voucher', 'voucher')
+            ->innerJoin('voucher.codes', 'codes', 'WITH', 'codes.code LIKE :voucherCode')
+            ->where('voucher.percental = true')
+            ->setParameter('voucherCode', $voucherCode);
+
+
+        return $builder->getQuery()->getResult();    }
+
+    /**
+     * Find all vouchers matching the code
+     *
+     * @param $voucherCode
+     * @return mixed
+     */
+    public function findPercentagedVouchers($voucherCode)
+    {
+        $builder = Shopware()->Models()->createQueryBuilder();
+
+        $builder->select('voucher')
+            ->from('Shopware\Models\Voucher\Voucher', 'voucher')
+            ->where('voucher.voucherCode LIKE :voucherCode')
+            ->andWhere('voucher.percental = true')
+            ->setParameter('voucherCode', $voucherCode);
+
+        return $builder->getQuery()->getResult();
+    }
+
     /**
      * @return mixed
      */

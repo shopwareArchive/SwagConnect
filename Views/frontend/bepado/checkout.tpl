@@ -24,8 +24,8 @@
 {/block}
 
 {block name='frontend_checkout_cart_cart_head' append}
-
 	{if $bepadoMessages[$shopId]}
+        <div class="doublespace"></div>
 		<div class="error" style="margin:0">
 			{foreach from=$bepadoMessages[$shopId] item=bepadomessage}
 				{$message = $bepadomessage->message}
@@ -34,7 +34,10 @@
 				{/foreach}
 				{$message}<br>
 			{/foreach}
+            <br>
+            <a href="{url}">{s name="frontend_checkout_cart_bepado_refresh"}Klicken Sie hier um die Seite zu aktualisieren{/s}</a>
 		</div>
+        <div class="space"></div>
 	{/if}
 
     {$smarty.block.parent}

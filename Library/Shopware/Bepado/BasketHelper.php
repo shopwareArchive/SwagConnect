@@ -71,6 +71,13 @@ class BasketHelper
     protected $helper;
 
     /**
+     * Indicates if the basket has only bepado products or not
+     *
+     * @var bool
+     */
+    protected $onlyBepadoProducts = false;
+
+    /**
      * @param \Enlight_Components_Db_Adapter_Pdo_Mysql $database
      * @param SDK\SDK $sdk
      * @param Helper $helper
@@ -175,6 +182,8 @@ class BasketHelper
 
         // If only bepado products are in the basket, do the basket fix
         if(empty($content)) {
+            $this->onlyBepadoProducts = true;
+
             $this->removeNonProductsFromBasket();
 
             $bepadoContent = $this->getBepadoContent();
@@ -432,7 +441,8 @@ class BasketHelper
             'bepadoMessages' => $bepadoMessages,
             'bepadoShippingCosts' => $this->getBepadoShippingCosts(),
             'bepadoShippingCostsOrg' => $this->getOriginalShippingCosts(),
-            'bepadoShopInfo' => $this->showCheckoutShopInfo
+            'bepadoShopInfo' => $this->showCheckoutShopInfo,
+            'addBaseShop' => $this->onlyBepadoProducts ? 0 : 1
         );
     }
 

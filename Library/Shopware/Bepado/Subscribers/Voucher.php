@@ -94,6 +94,7 @@ class Voucher extends BaseSubscriber
             array(Shopware()->SessionID())
         );
 
+        // @todo: This can be done with one single query
         foreach ($articles as $articleId) {
             $product = $this->getHelper()->getProductById($articleId);
             if ($product === null || $product->shopId === null) {

@@ -64,7 +64,7 @@ class BepadoFactory
          */
         $debugHost = Shopware()->Config()->get('bepadoDebugHost');
         if (!empty($debugHost)) {
-            $debugHost = ltrim($debugHost, 'http://');
+            $debugHost = str_replace('http://','', $debugHost);
             // Set the debugHost as environment vars for the DependencyResolver
             putenv("_SOCIALNETWORK_HOST={$debugHost}");
             putenv("_TRANSACTION_HOST={$debugHost}");

@@ -367,10 +367,17 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 'ids[]': ids
             },
             success: function(response, opts) {
-                //var operation = Ext.decode(response.responseText);
-                //if (operation.success == true) {
-                //}
-                me.createGrowlMessage(title, message);
+                var sticky = false;
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+                    if (operation) {
+                        if (!operation.success && operation.message) {
+                            message = operation.message;
+                            sticky = true;
+                        }
+                    }
+                }
+                me.createGrowlMessage(title, message, sticky);
                 list.setLoading(false);
                 list.store.load();
             }
@@ -428,10 +435,19 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      * @param title
      * @param message
      */
-    createGrowlMessage: function(title, message) {
+    createGrowlMessage: function(title, message, sticky) {
         var me = this,
             win = me.getWindow();
-        Shopware.Notification.createGrowlMessage(title, message, win.title);
+
+        if (!sticky) {
+            Shopware.Notification.createGrowlMessage(title, message, win.title);
+        } else {
+            Shopware.Notification.createStickyGrowlMessage({
+                title: title,
+                text: message,
+                width: 400
+            });
+        }
     },
 
     /**

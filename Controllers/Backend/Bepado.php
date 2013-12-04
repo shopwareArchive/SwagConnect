@@ -532,7 +532,20 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $ids = $this->Request()->getPost('ids');
         $helper = $this->getHelper();
 
-        $helper->insertOrUpdateProduct($ids, $this->getSDK());
+        try {
+            $helper->insertOrUpdateProduct($ids, $this->getSDK());
+        }catch (\RuntimeException $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+
     }
 
     /**

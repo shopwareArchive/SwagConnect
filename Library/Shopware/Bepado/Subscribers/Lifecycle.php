@@ -41,6 +41,15 @@ class Lifecycle extends BaseSubscriber
         }
 
         // Mark the product for bepado update
-        $this->getHelper()->insertOrUpdateProduct(array($id), $this->getSDK());
+        try {
+            $this->getHelper()->insertOrUpdateProduct(
+                array($id), $this->getSDK()
+            );
+
+        } catch (\Exception $e) {
+            // If the update fails due to missing requirements
+            // (e.g. category assignment), continue without error
+        }
+
     }
 }

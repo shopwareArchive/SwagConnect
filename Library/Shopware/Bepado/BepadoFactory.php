@@ -64,11 +64,11 @@ class BepadoFactory
          */
         $debugHost = Shopware()->Config()->get('bepadoDebugHost');
         if (!empty($debugHost)) {
-            $debugHost = str_replace('http://','', $debugHost);
-            // Set the debugHost as environment vars for the DependencyResolver
-            putenv("_SOCIALNETWORK_HOST={$debugHost}");
-            putenv("_TRANSACTION_HOST={$debugHost}");
-            putenv("_SEARCH_HOST={$debugHost}");
+            $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
+             // Set the debugHost as environment vars for the DependencyResolver
+            putenv("_SOCIALNETWORK_HOST=sn.{$debugHost}");
+            putenv("_TRANSACTION_HOST=transaction.{$debugHost}");
+            putenv("_SEARCH_HOST=search.{$debugHost}");
             $requestSigner = $this->getNoSecurityRequestSigner($gateway, $apiKey);
         }
 

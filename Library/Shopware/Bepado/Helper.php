@@ -23,6 +23,7 @@
  */
 
 namespace Shopware\Bepado;
+use Exception;
 use Bepado\SDK\SDK;
 use Bepado\SDK\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,

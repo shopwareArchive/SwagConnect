@@ -144,7 +144,7 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://bepado.de';
+    protected $socialNetworkHost = 'http://p.bepado.de';
 
     /**
      * @var string
@@ -154,7 +154,7 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $searchHost = 'http://search.bepado.de';
+    protected $searchHost = 'http://redirect.bepado.de';
 
     /**
      * @var ChangeVisitor\Message

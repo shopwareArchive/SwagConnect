@@ -40,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.2';
+        return '1.2.3';
     }
 
     /**
@@ -258,13 +258,40 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         ));
         $form->setElement('boolean', 'autoUpdateProducts', array(
             'label' => 'Geänderte Produkte automatisch mit bepado synchronisieren',
-            'value' => true
+            'value' => true,
+            'helpText' => 'Für Anbieter von Produkten: Export diese automatisch nach bepado, wenn die Produkte geändert werden.'
         ));
         $form->setElement('text', 'bepadoDebugHost', array(
                 'label' => 'Alternativer bepado Host (nur für Testzwecke)',
                 'minLength' => 11
             )
         );
+
+        $form->setElement('boolean', 'overwriteProductName', array(
+            'label' => 'Beim Import Produkt-Namen überschreiben',
+            'value' => true,
+            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
+        ));
+        $form->setElement('boolean', 'overwriteProductPrice', array(
+            'label' => 'Beim Import Produkt-Preise überschreiben',
+            'value' => true,
+            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
+        ));
+        $form->setElement('boolean', 'overwriteProductImage', array(
+            'label' => 'Beim Import Produkt-Bilder überschreiben',
+            'value' => true,
+            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
+        ));
+        $form->setElement('boolean', 'overwriteProductShortDescription', array(
+            'label' => 'Beim Import Produkt-Kurzbeschreibungen überschreiben',
+            'value' => true,
+            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
+        ));
+        $form->setElement('boolean', 'overwriteProductLongDescription', array(
+            'label' => 'Beim Import Produkt-Langbeschreibungen überschreiben',
+            'value' => true,
+            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
+        ));
     }
 
     /**

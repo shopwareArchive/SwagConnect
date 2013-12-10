@@ -5,6 +5,11 @@
  {block name="backend/article/model/attribute/fields" append}
  { name: 'bepadoFixedPrice', type: 'boolean' },
  { name: 'bepadoShopId', type: 'int', useNull: true },
+ { name: 'bepadoUpdatePrice', type: 'string' },
+ { name: 'bepadoUpdateImage', type: 'string' },
+ { name: 'bepadoUpdateLongDescription', type: 'string' },
+ { name: 'bepadoUpdateShortDescription', type: 'string' },
+ { name: 'bepadoUpdateName', type: 'string' },
  {/block}
  */
 
@@ -141,8 +146,8 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
 
         return [
             me.getFixedPriceCombo(),
-            me.getOverwriteCombo('Aktualisierung Preise', 'bepadoUpdatePrice'),
-            me.getOverwriteCombo('Aktualisierung Bilder', 'bepadoUpdateImage')
+            me.getOverwriteCombo('Aktualisierung Preise', 'attribute[bepadoUpdatePrice]'),
+            me.getOverwriteCombo('Aktualisierung Bilder', 'attribute[bepadoUpdateImage]')
         ];
     },
 
@@ -150,9 +155,9 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
         var me = this;
 
         return [
-            me.getOverwriteCombo('Aktualisierung Langbeschreibung', 'bepadoUpdateLongDescription'),
-            me.getOverwriteCombo('Aktualisierung Kurzbeschreibung', 'bepadoUpdateShortDescription'),
-            me.getOverwriteCombo('Aktualisierung Name', 'bepadoUpdateName')
+            me.getOverwriteCombo('Aktualisierung Langbeschreibung', 'attribute[bepadoUpdateLongDescription]'),
+            me.getOverwriteCombo('Aktualisierung Kurzbeschreibung', 'attribute[bepadoUpdateShortDescription]'),
+            me.getOverwriteCombo('Aktualisierung Name', 'attribute[bepadoUpdateName]')
         ];
     },
 
@@ -174,11 +179,11 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
         var me = this;
 
         return Ext.create('Ext.data.Store', {
-            fields: [ { name: 'value', useNull: true }, 'description'],
+            fields: [ 'value', 'description'],
             data: [
-                { value: null, description: 'Erben' },
-                { value: 'overwrite', description: 'Händisch pflegen' },
-                { value: 'no-overwrite', description: 'Automatisch' }
+                { value: 'inherit', description: 'Erben' },
+                { value: 'overwrite', description: 'Automatisch' },
+                { value: 'no-overwrite', description: 'Händisch pflegen' }
             ]
         });
 
@@ -195,6 +200,5 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
             uncheckedValue:false
         })
     }
-
 });
 //{/block}

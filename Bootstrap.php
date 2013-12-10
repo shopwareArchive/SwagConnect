@@ -169,40 +169,40 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_price',
             'varchar(255)',
-            true,
-            null
+            false,
+            'inherit'
         );
 
         $modelManager->addAttribute(
            's_articles_attributes',
            'bepado', 'update_image',
             'varchar(255)',
-            true,
-            null
+            false,
+            'inherit'
         );
 
         $modelManager->addAttribute(
            's_articles_attributes',
            'bepado', 'update_long_description',
             'varchar(255)',
-            true,
-            null
+            false,
+            'inherit'
         );
 
         $modelManager->addAttribute(
            's_articles_attributes',
            'bepado', 'update_short_description',
             'varchar(255)',
-            true,
-            null
+            false,
+            'inherit'
         );
 
         $modelManager->addAttribute(
            's_articles_attributes',
            'bepado', 'update_name',
             'varchar(255)',
-            true,
-            null
+            false,
+            'inherit'
         );
 
         $modelManager->generateAttributeModels(array(
@@ -436,7 +436,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	 */
 	public function uninstall()
 	{
-//        $this->removeMyAttributes();
+        // Removing the attributes will delete all mappings, product references to from-shops etc.
+        // Currently it does not seem to be a good choice to have this enabled
+
+        // $this->removeMyAttributes();
         return true;
 	}
 
@@ -501,6 +504,33 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 's_categories_attributes',
                 'bepado', 'imported'
             );
+
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'update_price'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'update_image'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'update_long_description'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'update_short_description'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'update_name'
+            );
+
 
             $modelManager->generateAttributeModels(array(
                 's_articles_attributes',

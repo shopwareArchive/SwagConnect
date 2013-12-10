@@ -393,6 +393,8 @@ class Helper
     public function insertOrUpdateProduct(array $ids, $sdk)
     {
 
+        $errors = array();
+
         foreach($ids as $id) {
             $model = $this->getArticleModelById($id);
             if($model === null) {
@@ -429,9 +431,16 @@ class Helper
                 $attribute->setBepadoExportMessage(
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
+
+
+                $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
+
+                $errors[] = $prefix . $e->getMessage();
                 Shopware()->Models()->flush($attribute);
             }
         }
+
+        return $errors;
     }
 
 }

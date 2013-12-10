@@ -165,6 +165,46 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            'int(1)'
         );
 
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'update_price',
+            'varchar(255)',
+            true,
+            null
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'update_image',
+            'varchar(255)',
+            true,
+            null
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'update_long_description',
+            'varchar(255)',
+            true,
+            null
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'update_short_description',
+            'varchar(255)',
+            true,
+            null
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'update_name',
+            'varchar(255)',
+            true,
+            null
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_categories_attributes',

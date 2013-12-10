@@ -157,7 +157,7 @@ class Helper
         }
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
-        
+
         $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
     }
@@ -427,7 +427,7 @@ class Helper
                     'error'
                 );
                 $attribute->setBepadoExportMessage(
-                    $e->getMessage()
+                    $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
                 Shopware()->Models()->flush($attribute);
             }

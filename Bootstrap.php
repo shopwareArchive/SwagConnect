@@ -40,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.3';
+        return '1.2.4';
     }
 
     /**
@@ -80,7 +80,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyTables();
         $this->createMyAttributes();
 
-	 	return true;
+	 	return array('success' => true, 'invalidateCache' => array('backend', 'config'));
 	}
 
     /**

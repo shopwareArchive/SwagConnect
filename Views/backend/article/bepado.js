@@ -5,6 +5,11 @@
  {block name="backend/article/model/attribute/fields" append}
  { name: 'bepadoFixedPrice', type: 'boolean' },
  { name: 'bepadoShopId', type: 'int', useNull: true },
+ { name: 'bepadoUpdatePrice', type: 'string' },
+ { name: 'bepadoUpdateImage', type: 'string' },
+ { name: 'bepadoUpdateLongDescription', type: 'string' },
+ { name: 'bepadoUpdateShortDescription', type: 'string' },
+ { name: 'bepadoUpdateName', type: 'string' },
  {/block}
  */
 
@@ -16,27 +21,6 @@
 //{block name="backend/article/view/detail/base" append}
 Ext.define('Shopware.apps.Article.view.detail.Base-Bepado', {
     override: 'Shopware.apps.Article.view.detail.Base',
-
-    /**
-     * @Override: Add a fixedPrice field
-     *
-     * @returns Array
-     */
-    createRightElements: function() {
-        var me = this,
-            result = me.callOverridden(arguments);
-
-        me.bepadoFixedPrice = Ext.create('Ext.form.field.Checkbox', {
-            name: 'attribute[bepadoFixedPrice]',
-            fieldLabel: '{s name=bepadoFixedPrice}Bepado: Enable price fixing{/s}',
-            inputValue: true,
-            uncheckedValue:false
-        });
-
-        result.push(me.bepadoFixedPrice);
-
-        return result;
-    },
 
     /**
      * Mark the fixedPrice field as readonly if the product is a remote product
@@ -52,7 +36,7 @@ Ext.define('Shopware.apps.Article.view.detail.Base-Bepado', {
         if (article && article.getAttribute()) {
             attributes = article.getAttribute().first();
 
-            me.bepadoFixedPrice.setReadOnly(attributes.get('bepadoShopId') > 0);
+            me.up('window').bepadoFixedPrice.setReadOnly(attributes.get('bepadoShopId') > 0);
         }
 
         return me.callOverridden(arguments);
@@ -97,6 +81,124 @@ Ext.define('Shopware.apps.Article.view.detail.Prices-Bepado', {
 
         return tabPanel;
 
+    }
+});
+//{/block}
+
+//{block name="backend/article/view/detail/window" append}
+Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
+    override: 'Shopware.apps.Article.view.detail.Window',
+
+    createBaseTab: function() {
+        var me = this,
+            result = me.callOverridden(arguments);
+
+        me.detailForm.insert(2, me.getBepadoContainer());
+
+        return result;
+    },
+
+    getBepadoContainer: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: 'bepado',
+            defaults: {
+                labelWidth: 155,
+                anchor: '100%'
+            },
+            items: me.getBepadoContent()
+        });
+    },
+
+    getBepadoContent: function() {
+        var me = this;
+
+        me.bepadoLeftContainer = Ext.create('Ext.container.Container', {
+            columnWidth:0.5,
+            defaults: {
+                labelWidth: 155,
+                anchor: '100%'
+            },
+            padding: '0 20 0 0',
+            layout: 'anchor',
+            border:false,
+            items:me.getLeftContainer()
+        });
+
+        me.bepadoRightContainer = Ext.create('Ext.container.Container', {
+            columnWidth:0.5,
+            layout: 'anchor',
+            defaults: {
+                labelWidth: 155,
+                anchor: '100%'
+            },
+            border:false,
+            items:me.getRightContainer()
+        });
+
+        return [ me.bepadoLeftContainer, me.bepadoRightContainer ];
+    },
+
+    getLeftContainer: function() {
+        var me = this;
+
+        return [
+            me.getFixedPriceCombo(),
+            me.getOverwriteCombo('Aktualisierung Preise', 'attribute[bepadoUpdatePrice]'),
+            me.getOverwriteCombo('Aktualisierung Bilder', 'attribute[bepadoUpdateImage]')
+        ];
+    },
+
+    getRightContainer: function() {
+        var me = this;
+
+        return [
+            me.getOverwriteCombo('Aktualisierung Langbeschreibung', 'attribute[bepadoUpdateLongDescription]'),
+            me.getOverwriteCombo('Aktualisierung Kurzbeschreibung', 'attribute[bepadoUpdateShortDescription]'),
+            me.getOverwriteCombo('Aktualisierung Name', 'attribute[bepadoUpdateName]')
+        ];
+    },
+
+    getOverwriteCombo: function(text, dataField) {
+        var me = this;
+
+        return {
+            xtype: 'combobox',
+            store: me.getOverwriteStore(),
+            displayField: 'description',
+            valueField: 'value',
+            fieldLabel: text,
+            name: dataField,
+            editable: false
+        };
+    },
+
+    getOverwriteStore: function() {
+        var me = this;
+
+        return Ext.create('Ext.data.Store', {
+            fields: [ 'value', 'description'],
+            data: [
+                { value: 'inherit', description: 'Erben' },
+                { value: 'overwrite', description: 'Automatisch' },
+                { value: 'no-overwrite', description: 'Händisch pflegen' }
+            ]
+        });
+
+    },
+
+    getFixedPriceCombo: function() {
+        var me = this;
+
+        return me.bepadoFixedPrice = Ext.create('Ext.form.field.Checkbox', {
+            labelWidth: 155,
+            name: 'attribute[bepadoFixedPrice]',
+            fieldLabel: '{s name=bepadoFixedPrice}Enable price fixing{/s}',
+            inputValue: true,
+            uncheckedValue:false
+        })
     }
 });
 //{/block}

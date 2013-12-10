@@ -533,7 +533,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $helper = $this->getHelper();
 
         try {
-            $helper->insertOrUpdateProduct($ids, $this->getSDK());
+            $errors = $helper->insertOrUpdateProduct($ids, $this->getSDK());
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
@@ -541,6 +541,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             ));
             return;
         }
+
+        if (!empty($errors)) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => implode("<br>\n", $errors)
+            ));
+            return;
+        }
+
 
         $this->View()->assign(array(
             'success' => true

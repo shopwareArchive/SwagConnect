@@ -157,7 +157,7 @@ class Helper
         }
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
-        
+
         $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
     }
@@ -393,6 +393,8 @@ class Helper
     public function insertOrUpdateProduct(array $ids, $sdk)
     {
 
+        $errors = array();
+
         foreach($ids as $id) {
             $model = $this->getArticleModelById($id);
             if($model === null) {
@@ -427,11 +429,18 @@ class Helper
                     'error'
                 );
                 $attribute->setBepadoExportMessage(
-                    $e->getMessage()
+                    $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
+
+
+                $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
+
+                $errors[] = $prefix . $e->getMessage();
                 Shopware()->Models()->flush($attribute);
             }
         }
+
+        return $errors;
     }
 
 }

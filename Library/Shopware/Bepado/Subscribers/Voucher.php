@@ -30,7 +30,7 @@ class Voucher extends BaseSubscriber
             true
         );
 
-        if ($this->isBepadoBasket()) {
+        if ($this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
             $stmt = Shopware()->Db()->query(
                 "DELETE FROM s_order_basket WHERE sessionID=? AND modus=3",
                 array(Shopware()->SessionID())
@@ -55,7 +55,7 @@ class Voucher extends BaseSubscriber
     {
         $code = $args->getCode();
 
-        if (!$this->isBepadoBasket()) {
+        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
             return null;
         }
 
@@ -80,29 +80,5 @@ class Voucher extends BaseSubscriber
             Shopware()->Template()->assign('sVoucherError', $message);
             return true;
         }
-    }
-
-    /**
-     * Check for bepado products in the basket
-     *
-     * @return bool
-     */
-    public function isBepadoBasket()
-    {
-        $articles = Shopware()->Db()->fetchCol(
-            "SELECT articleID FROM s_order_basket WHERE sessionID=?",
-            array(Shopware()->SessionID())
-        );
-
-        // @todo: This can be done with one single query
-        foreach ($articles as $articleId) {
-            $product = $this->getHelper()->getProductById($articleId);
-            if ($product === null || $product->shopId === null) {
-                continue;
-            }
-            return true;
-        }
-
-        return false;
     }
 }

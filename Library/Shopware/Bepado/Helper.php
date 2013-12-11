@@ -329,6 +329,33 @@ class Helper
     }
 
     /**
+     * Does the current basket contain bepado products?
+     *
+     * @param $session
+     * @return bool
+     */
+    public function hasBasketBepadoProducts($session)
+    {
+        $connection = $this->manager->getConnection();
+        $result = $connection->fetchArray(
+            'SELECT ob.articleID
+
+            FROM s_order_basket ob
+
+            INNER JOIN s_articles_attributes aa
+            ON aa.articleID = ob.articleID
+            AND aa.bepado_shop_id IS NOT NULL
+
+            WHERE sessionID=?
+            LIMIT 1
+            ',
+            array($session)
+        );
+
+        return !empty($result);
+    }
+
+    /**
      * @param $id
      * @return string[]
      */

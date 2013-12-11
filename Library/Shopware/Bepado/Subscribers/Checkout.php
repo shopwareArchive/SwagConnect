@@ -110,13 +110,12 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        // If the basket is empty - exit
+        // If the basket is empty or does not contain bepado products return
         $basket = Shopware()->Session()->bepadoGetBasket;
-        if (empty($basket)) {
+        if (empty($basket) || !$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
             return;
         }
 
-        // This will basically iterate the basket and check for bepado products
         $basketHelper = $this->getBasketHelper();
         $basketHelper->setBasket($basket);
 

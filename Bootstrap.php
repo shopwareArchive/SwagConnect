@@ -40,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.7';
+        return '1.2.8';
     }
 
     /**
@@ -446,7 +446,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         // Removing the attributes will delete all mappings, product references to from-shops etc.
         // Currently it does not seem to be a good choice to have this enabled
 
-         $this->removeMyAttributes();
+//         $this->removeMyAttributes();
         return true;
 	}
 

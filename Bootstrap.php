@@ -169,7 +169,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_price',
             'varchar(255)',
-            false,
+            true,
             'inherit'
         );
 
@@ -177,7 +177,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_image',
             'varchar(255)',
-            false,
+            true,
             'inherit'
         );
 
@@ -185,7 +185,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_long_description',
             'varchar(255)',
-            false,
+            true,
             'inherit'
         );
 
@@ -193,7 +193,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_short_description',
             'varchar(255)',
-            false,
+            true,
             'inherit'
         );
 
@@ -201,7 +201,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
            's_articles_attributes',
            'bepado', 'update_name',
             'varchar(255)',
-            false,
+            true,
             'inherit'
         );
 
@@ -439,7 +439,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         // Removing the attributes will delete all mappings, product references to from-shops etc.
         // Currently it does not seem to be a good choice to have this enabled
 
-        // $this->removeMyAttributes();
+         $this->removeMyAttributes();
         return true;
 	}
 

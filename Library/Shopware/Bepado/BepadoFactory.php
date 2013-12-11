@@ -78,7 +78,8 @@ class BepadoFactory
             $gateway,
             new ProductToShop(
                 $helper,
-                $manager
+                $manager,
+                Shopware()->Config()
             ),
             new ProductFromShop(
                 $helper,

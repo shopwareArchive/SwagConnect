@@ -5,11 +5,11 @@
  {block name="backend/article/model/attribute/fields" append}
  { name: 'bepadoFixedPrice', type: 'boolean' },
  { name: 'bepadoShopId', type: 'int', useNull: true },
- { name: 'bepadoUpdatePrice', type: 'string' },
- { name: 'bepadoUpdateImage', type: 'string' },
- { name: 'bepadoUpdateLongDescription', type: 'string' },
- { name: 'bepadoUpdateShortDescription', type: 'string' },
- { name: 'bepadoUpdateName', type: 'string' },
+ { name: 'bepadoUpdatePrice', type: 'string', useNull: true  },
+ { name: 'bepadoUpdateImage', type: 'string', useNull: true  },
+ { name: 'bepadoUpdateLongDescription', type: 'string', useNull: true  },
+ { name: 'bepadoUpdateShortDescription', type: 'string', useNull: true  },
+ { name: 'bepadoUpdateName', type: 'string', useNull: true  },
  {/block}
  */
 
@@ -146,8 +146,8 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
 
         return [
             me.getFixedPriceCombo(),
-            me.getOverwriteCombo('Aktualisierung Preise', 'attribute[bepadoUpdatePrice]'),
-            me.getOverwriteCombo('Aktualisierung Bilder', 'attribute[bepadoUpdateImage]')
+            me.getOverwriteCombo('{s name=updatePrice}Update prices{/s}', 'attribute[bepadoUpdatePrice]'),
+            me.getOverwriteCombo('{s name=updateImage}Update images{/s}', 'attribute[bepadoUpdateImage]')
         ];
     },
 
@@ -155,9 +155,9 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
         var me = this;
 
         return [
-            me.getOverwriteCombo('Aktualisierung Langbeschreibung', 'attribute[bepadoUpdateLongDescription]'),
-            me.getOverwriteCombo('Aktualisierung Kurzbeschreibung', 'attribute[bepadoUpdateShortDescription]'),
-            me.getOverwriteCombo('Aktualisierung Name', 'attribute[bepadoUpdateName]')
+            me.getOverwriteCombo('{s name=updateLongDescription}Update long description{/s}', 'attribute[bepadoUpdateLongDescription]'),
+            me.getOverwriteCombo('{s name=updateShortDescription}Update short description{/s}', 'attribute[bepadoUpdateShortDescription]'),
+            me.getOverwriteCombo('{s name=updateName}Update name{/s}', 'attribute[bepadoUpdateName]')
         ];
     },
 
@@ -171,7 +171,8 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
             valueField: 'value',
             fieldLabel: text,
             name: dataField,
-            editable: false
+            editable: false,
+            emptyText: '{s name=inherit}Inherit{/s}'
         };
     },
 
@@ -179,11 +180,11 @@ Ext.define('Shopware.apps.Article.view.detail.Window-Bepado', {
         var me = this;
 
         return Ext.create('Ext.data.Store', {
-            fields: [ 'value', 'description'],
+            fields: [ { name: 'value', useNull: true }, { name: 'description' } ],
             data: [
-                { value: 'inherit', description: 'Erben' },
-                { value: 'overwrite', description: 'Automatisch' },
-                { value: 'no-overwrite', description: 'Händisch pflegen' }
+                { value: 'inherit', description: '{s name=inherit}Inherit{/s}' },
+                { value: 'overwrite', description: '{s name=automatically}Automatic{/s}' },
+                { value: 'no-overwrite', description: '{s name=manually}Manual{/s}' }
             ]
         });
 

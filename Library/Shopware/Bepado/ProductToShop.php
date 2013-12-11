@@ -50,13 +50,37 @@ class ProductToShop implements ProductToShopBase
     private $manager;
 
     /**
+     * @var \Shopware_Components_Config
+     */
+    private $config;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
+     * @param \Shopware_Components_Config $config
      */
-    public function __construct(Helper $helper, ModelManager $manager)
+    public function __construct(Helper $helper, ModelManager $manager,  $config)
     {
         $this->helper = $helper;
         $this->manager = $manager;
+        $this->config = $config;
+    }
+
+    /**
+     * Wrapping the insert method to catch errors during development.
+     * @todo:dn Remove for closed beta
+     *
+     * @param Product $product
+     * @throws \Exception
+     */
+    public function insertOrUpdate(Product $product)
+    {
+        try {
+            $this->insertOrUpdateInternal($product);
+        } catch(\Exception $e) {
+            error_log(print_r($e->getMessage(), true)."\n", 3, Shopware()->DocPath().'/import_errors.log');
+            throw $e;
+        }
     }
 
     /**
@@ -67,7 +91,7 @@ class ProductToShop implements ProductToShopBase
      *
      * @param Product $product
      */
-    public function insertOrUpdate(Product $product)
+    public function insertOrUpdateInternal(Product $product)
     {
         if(empty($product->title) || empty($product->vendor)) {
             return;
@@ -86,14 +110,28 @@ class ProductToShop implements ProductToShopBase
             $model->setCategories(
                 $this->helper->getCategoriesByProduct($product)
             );
-            $model->setName($product->title);
-            $model->setDescription($product->shortDescription);
-            $model->setDescriptionLong($product->longDescription);
         } else {
             $detail = $model->getMainDetail();
         }
 
         $attribute = $detail->getAttribute() ?: new AttributeModel();
+
+        /*
+         * Make sure, that the following properties are set for
+         * - new products
+         * - products that have been configured to recieve these updates
+         */
+        if ($this->isFieldUpdateAllowed('name', $model, $attribute)) {
+            $model->setName($product->title);
+        }
+        if ($this->isFieldUpdateAllowed('shortDescription', $model, $attribute)) {
+            $model->setDescription($product->shortDescription);
+
+        }
+        if ($this->isFieldUpdateAllowed('longDescription', $model, $attribute)) {
+            $model->setDescriptionLong($product->longDescription);
+        }
+
 
         if($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
@@ -129,16 +167,21 @@ class ProductToShop implements ProductToShopBase
         $model->setLastStock(true);
 
         $customerGroup = $this->helper->getDefaultCustomerGroup();
-        $detail->getPrices()->clear();
-        $price = new \Shopware\Models\Article\Price();
-        $price->fromArray(array(
-            'from' => 1,
-            'price' => $product->price * 100 / (100 + 100 * $product->vat),
-            'basePrice' => $attribute->getBepadoPurchasePrice() * 100 / (100 + 100 * $product->vat),
-            'customerGroup' => $customerGroup,
-            'article' => $model
-        ));
-        $detail->setPrices(array($price));
+
+
+        // Only set prices, if fixedPrice is active or configured
+        if ($attribute->getBepadoFixedPrice() || $this->isFieldUpdateAllowed('price', $model, $attribute)) {
+            $detail->getPrices()->clear();
+            $price = new \Shopware\Models\Article\Price();
+            $price->fromArray(array(
+                'from' => 1,
+                'price' => $product->price * 100 / (100 + 100 * $product->vat),
+                'basePrice' => $attribute->getBepadoPurchasePrice() * 100 / (100 + 100 * $product->vat),
+                'customerGroup' => $customerGroup,
+                'article' => $model
+            ));
+            $detail->setPrices(array($price));
+        }
 
         if($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
@@ -233,4 +276,51 @@ class ProductToShop implements ProductToShopBase
         }
         $this->manager->flush($model);
     }
+
+    /**
+     * Helper method to determine if a given $fields may/must be updated
+     *
+     * @param $field
+     * @param $model
+     * @param $attribute
+     * @return bool|null
+     * @throws \RuntimeException
+     */
+    public function isFieldUpdateAllowed($field, $model, $attribute)
+    {
+        $allowed = array(
+            'ShortDescription',
+            'LongDescription',
+            'Image',
+            'Price',
+            'Name',
+        );
+
+        // Always allow updates for new models
+        if (!$model->getId()) {
+            error_log(print_r("new", true)."\n", 3, Shopware()->DocPath().'/error2.log');
+            return true;
+        }
+
+        $field = ucfirst($field);
+        $attributeGetter = 'getBepadoUpdate' . $field;
+        $configName = 'overwriteProduct' . $field;
+
+        if (!in_array($field, $allowed)) {
+            throw new \RuntimeException("Unknown field {$field}");
+        }
+
+        $attributeValue = $attribute->$attributeGetter();
+
+
+        
+        // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
+        if ($attributeValue == null || $attributeValue == 'inherit') {
+            return $this->config->get($configName, true);
+        }
+
+        return $attributeValue == 'overwrite';
+
+    }
+
 }

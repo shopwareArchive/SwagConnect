@@ -243,7 +243,7 @@ class BasketHelper
         $this->basket['AmountNumeric'] -= $removeItems['price'];
         $this->basket['AmountNetNumeric'] -= $removeItems['netprice'];
         $this->basket['sAmount'] -= $removeItems['price'];
-        $this->basket['Amount'] -= $removeItems['price'];
+        $this->basket['Amount'] = str_replace(',', '.', $this->basket['Amount']) - $removeItems['price'];
         if(!empty($this->basket['sAmountWithTax'])) {
             $this->basket['sAmountWithTax'] -= $removeItems['price'];
         }
@@ -458,8 +458,8 @@ class BasketHelper
         $basket = array_merge($this->basket);
         $newVariables = $this->getDefaultTemplateVariables();
 
-        // Replace the content with the original content
-        $basket['content'] = $basket['contentOrg'];
+        // We need the manipulated content as the order is created from the session
+        // $basket['content'] = $basket['contentOrg'];
         unset($basket['contentOrg']);
 
 

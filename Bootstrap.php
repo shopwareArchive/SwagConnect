@@ -40,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.5';
+        return '1.2.6';
     }
 
     /**
@@ -162,6 +162,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $modelManager->addAttribute(
            's_articles_attributes',
            'bepado', 'fixed_price',
+           'int(1)'
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'free_delivery',
            'int(1)'
         );
 
@@ -503,6 +509,21 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $modelManager->removeAttribute(
                 's_categories_attributes',
                 'bepado', 'imported'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'purchase_price'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'fixed_price'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'free_delivery'
             );
 
 

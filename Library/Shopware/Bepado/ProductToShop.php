@@ -114,6 +114,7 @@ class ProductToShop implements ProductToShopBase
             $detail = $model->getMainDetail();
         }
 
+        $detail->setShippingFree($product->freeDelivery);
         $attribute = $detail->getAttribute() ?: new AttributeModel();
 
         /*
@@ -162,6 +163,7 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoCategories(serialize($product->categories));
         $attribute->setBepadoPurchasePrice($product->purchasePrice);
         $attribute->setBepadoFixedPrice($product->fixedPrice);
+        $attribute->setBepadoFreeDelivery($product->freeDelivery);
         $attribute->setBepadoCategories(serialize($product->categories));
         $detail->setInStock($product->availability);
         $model->setLastStock(true);

@@ -366,7 +366,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\ControllerPath(),
             new \Shopware\Bepado\Subscribers\TemplateExtension(),
             new \Shopware\Bepado\Subscribers\Checkout(),
-            new \Shopware\Bepado\Subscribers\Voucher()
+            new \Shopware\Bepado\Subscribers\Voucher(),
+            new \Shopware\Bepado\Subscribers\BasketWidget()
         );
 
         if ($this->Config()->get('autoUpdateProducts', true)) {

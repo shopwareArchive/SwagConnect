@@ -41,6 +41,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
         disableProductTitle: '{s name=import/message/disable_title}Products import{/s}',
         disableProductMessage: '{s name=import/message/disable_message}Products have been disabled.{/s}',
+        unsubscribeProductTitle: '{s name=import/message/unsubscribe_title}Products unsubscribed{/s}',
+        unsubscribeProductMessage: '{s name=import/message/unsubscribe_message}Products have been unsubscribed.{/s}',
+
 
         applyMappingToChildCategoriesTitle: '{s name=mapping/applyConfirmTitle}Apply to child categories?{/s}',
         applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
@@ -403,6 +406,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             url = '{url action=updateProduct}?active=0';
             title = me.messages.disableProductTitle;
             message = me.messages.disableProductMessage;
+        } else if(btn.action == 'unsubscribe') {
+            url = '{url action=updateProduct}?unsubscribe=1';
+            title = me.messages.unsubscribeProductTitle;
+            message = me.messages.unsubscribeProductMessage;
         } else {
             return;
         }

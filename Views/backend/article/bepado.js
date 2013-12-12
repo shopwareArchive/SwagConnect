@@ -45,6 +45,40 @@ Ext.define('Shopware.apps.Article.view.detail.Base-Bepado', {
 //{/block}
 
 /**
+ * Disable the shippingFree field for bepado products
+ */
+//{block name="backend/article/view/detail/settings" append}
+Ext.define('Shopware.apps.Article.view.detail.Settings-Bepado', {
+    override: 'Shopware.apps.Article.view.detail.Settings',
+
+    /**
+     * Mark the fixedPrice field as readonly if the product is a remote product
+     *
+     * @param article
+     * @param stores
+     * @returns Array
+     */
+    onStoresLoaded: function(article, stores) {
+        var me = this,
+            attributes;
+
+        if (article && article.getAttribute()) {
+            attributes = article.getAttribute().first();
+
+            field = me.up('window').down('article-settings-field-set').down('checkboxfield[fieldLabel=' + me.snippets.shippingFree.field + ']');
+
+            if (field) {
+                field.setReadOnly(attributes.get('bepadoShopId') > 0);
+            }
+        }
+
+        return me.callOverridden(arguments);
+    }
+});
+//{/block}
+
+
+/**
  * Extend the article's price fieldset in order to disable it if the price was configured as fixedPrice in the source shop
  */
 //{block name="backend/article/view/detail/prices" append}

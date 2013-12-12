@@ -585,16 +585,27 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $ids = $this->Request()->getPost('ids');
         $active = (bool)$this->Request()->get('active');
+        $unsubscribe = (bool)$this->Request()->get('unsubscribe', false);
+
         foreach($ids as $id) {
             $model = $this->getHelper()->getArticleModelById($id);
             if($model === null) {
                 continue;
             }
-            $attribute = $model->getAttribute();
-            if($attribute->getBepadoExportStatus() !== null) {
-                continue;
+
+            // Unsubscribe the products and delete them locally
+            if ($unsubscribe) {
+
+
+
+            // Activate / disable products
+            } else {
+                $attribute = $model->getAttribute();
+                if($attribute->getBepadoExportStatus() !== null) {
+                    continue;
+                }
+                $model->setActive($active);
             }
-            $model->setActive($active);
         }
         Shopware()->Models()->flush();
     }

@@ -130,7 +130,7 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
                     { value: '80' },
                     { value: '100' },
                     { value: '250' },
-                    { value: '500' },
+                    { value: '500' }
                 ]
             }),
             displayField: 'value',

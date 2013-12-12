@@ -204,8 +204,8 @@ class ProductToShop implements ProductToShopBase
             }
 
             $this->manager->remove($image);
-            $this->manager->flush();
         }
+        $this->manager->flush();
         //if($model->getImages()->count() != 0)  {
         //    return;
         //}

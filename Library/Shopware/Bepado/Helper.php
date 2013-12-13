@@ -137,6 +137,11 @@ class Helper
             'p.basePrice * (100 + t.tax) / 100 as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
+            /*
+             * The bepadoFreeDelivery option will later replace the freeDelivery option
+             * if the product is a remote product. This is done in the getProductByRowData() method
+             */
+            'at.bepadoFreeDelivery as bepadoFreeDelivery',
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
 
@@ -272,6 +277,14 @@ class Helper
             $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
         }
         unset($row['width'], $row['height'], $row['length']);
+
+        // If the product is a remote product, replace the local shippingFree option
+        // with the freeDelivery option from the attribute
+        if (!empty($row['shopId'])) {
+            $row['freeDelivery'] = $row['bepadoFreeDelivery'];
+        }
+        unset($row['bepadoFreeDelivery']);
+
 
         $product = new Product(
             $row

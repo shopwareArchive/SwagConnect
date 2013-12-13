@@ -11,7 +11,16 @@
 	</div>
 
 	<div class="grid_3">
-		&nbsp;
+        {if isset($bepadoShippingCosts[$shopId])}
+             {if $bepadoShippingCosts[$shopId] eq 0 }
+                 <strong>
+                     {se
+                         namespace="frontend/plugins/index/delivery_informations"
+                         name="DetailDataInfoShippingfree"}
+                     {/se}
+                 </strong>
+             {/if}
+        {/if}
 	</div>
 
 	<div class="grid_1">
@@ -20,8 +29,10 @@
 
 	<div class="grid_2 textright">
 		{if !$hideSinglePrice}
-			{if $bepadoShippingCosts[$shopId]}
-				{$bepadoShippingCosts[$shopId]|currency}
+			{if isset($bepadoShippingCosts[$shopId])}
+                {if $bepadoShippingCosts[$shopId] > 0 }
+				    {$bepadoShippingCosts[$shopId]|currency}
+                {/if}
 			{elseif $bepadoShippingCostsOrg}
 				{$bepadoShippingCostsOrg|currency}
 			{/if}
@@ -29,8 +40,11 @@
 	</div>
 
 	<div class="grid_2 textright">
-		<strong>{if $bepadoShippingCosts[$shopId]}
-			{$bepadoShippingCosts[$shopId]|currency}
+		<strong>
+        {if isset($bepadoShippingCosts[$shopId])}
+            {if $bepadoShippingCosts[$shopId] > 0 }
+                {$bepadoShippingCosts[$shopId]|currency}
+            {/if}
 		{elseif $bepadoShippingCostsOrg}
 			{$bepadoShippingCostsOrg|currency}
 		{/if}</strong>

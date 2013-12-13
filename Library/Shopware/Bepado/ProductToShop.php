@@ -114,7 +114,12 @@ class ProductToShop implements ProductToShopBase
             $detail = $model->getMainDetail();
         }
 
-        $detail->setShippingFree($product->freeDelivery);
+        /*
+         * We cannot import the freeDelivery property to the default product
+         * as this might switch shopware shipping cost calculation for the local
+         * shop into "shipping free" mode.
+         * $detail->setShippingFree($product->freeDelivery);
+         */
         $attribute = $detail->getAttribute() ?: new AttributeModel();
 
         /*

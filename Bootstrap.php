@@ -464,8 +464,18 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	{
         // Removing the attributes will delete all mappings, product references to from-shops etc.
         // Currently it does not seem to be a good choice to have this enabled
+        // $this->removeMyAttributes();
 
-//         $this->removeMyAttributes();
+        // deactive all bepado products on uninstall
+        $sql = '
+        UPDATE s_articles
+        INNER JOIN s_articles_attributes
+          ON s_articles_attributes.articleID = s_articles.id
+          AND bepado_shop_id IS NOT NULL
+        SET s_articles.active = false
+        ';
+        Shopware()->Db()->execute($sql);
+
         return true;
 	}
 

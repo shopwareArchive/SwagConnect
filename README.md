@@ -1,3 +1,13 @@
+# General behaviour
+
+## Uninstall
+
+ - when the plugin is uninstalled, all attribute fields will be preserved
+ - all products imported from bepado will be de-activated
+ - currently there is no way to force the plugin to uninstall all attribute fields
+
+
+
 # FromShop
 
 
@@ -20,4 +30,5 @@ This is the global configuration you can overwrite or inherit this configuration
 - Manually added images will never be removed
 - In "overwrite" mode, updates will always recreate all the bepado images which have changed since the last update
 - In "non-overwrite" mode, images will imported only once at initial import
+
 

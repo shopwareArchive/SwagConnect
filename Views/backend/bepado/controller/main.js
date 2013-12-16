@@ -10,11 +10,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     stores: [
         'main.Navigation', 'main.Mapping', 'main.Category',
-        'export.List', 'import.List'
+        'export.List', 'import.List',
+        'changed_products.List'
     ],
     models: [
         'main.Mapping', 'main.Product',
-        'export.List', 'import.List'
+        'export.List', 'import.List',
+        'changed_products.List'
     ],
 
     refs: [

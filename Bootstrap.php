@@ -474,7 +474,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
           AND bepado_shop_id IS NOT NULL
         SET s_articles.active = false
         ';
-        Shopware()->Db()->execute($sql);
+        Shopware()->Db()->exec($sql);
 
         return true;
 	}

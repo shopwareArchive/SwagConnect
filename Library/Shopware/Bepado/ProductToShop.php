@@ -125,8 +125,7 @@ class ProductToShop implements ProductToShopBase
         $attribute = $detail->getAttribute() ?: new AttributeModel();
 
 
-        list($updateFields, $flag) = $this->getUpdateFields($model, $attribute);
-
+        list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $attribute, $product);
         /*
          * Make sure, that the following properties are set for
          * - new products
@@ -360,11 +359,14 @@ class ProductToShop implements ProductToShopBase
      * Get array of update info for the known fields
      *
      * @param $model
+     * @param $detail
      * @param $attribute
+     * @param $product
      * @return array
      */
-    public function getUpdateFields($model, $attribute)
+    public function getUpdateFields($model, $detail, $attribute, $product)
     {
+        // This also defines the flags of these fields
         $fields = array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price');
 
         $flag = 0;
@@ -372,12 +374,43 @@ class ProductToShop implements ProductToShopBase
         foreach ($fields as $key => $field) {
             $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
             $output[$field] = $updateAllowed;
-            if ($updateAllowed) {
+            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $attribute, $product)) {
                 $flag |= $key;
             }
         }
 
         return array($output, $flag);
+    }
+
+    /**
+     * Determine if a given field has changed
+     *
+     * @param $field
+     * @param ProductModel $model
+     * @param DetailModel $detail
+     * @param AttributeModel $attribute
+     * @param Product $product
+     * @return bool
+     */
+    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, AttributeModel $attribute, Product $product)
+    {
+
+        switch ($field) {
+            case 'shortDescription':
+                return $model->getDescription() != $product->shortDescription;
+            case 'longDescription':
+                return $model->getDescriptionLong() != $product->longDescription;
+            case 'name':
+                return $model->getName() != $product->title;
+            case 'image':
+                return count($model->getImages()) != count($product->images);
+            case 'price':
+                $prices = $detail->getPrices();
+                if (empty($prices)) {
+                    return true;
+                }
+                return $prices->first()->getPrice() != $product->price;
+        }
     }
 
     /**

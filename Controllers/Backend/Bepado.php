@@ -629,4 +629,37 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             ));
         }
     }
+
+    /**
+     * Get a list of products with remote changes which have not been applied
+     */
+    public function getChangedProductsAction()
+    {
+        $builder = $this->getListQueryBuilder(
+            (array)$this->Request()->getParam('filter', array()),
+            $this->Request()->getParam('sort', array())
+        );
+        $builder->addSelect(array(
+            'at.bepadoLastUpdate',
+            'at.bepadoLastUpdateFlag'
+        ));
+        $builder->andWhere('at.bepadoShopId IS NOT NULL')
+            ->andWHere('at.bepadoLastUpdateFlag IS NOT NULL')
+            ->andWHere('at.bepadoLastUpdateFlag > 0');
+
+
+        $query = $builder->getQuery();
+
+        $query->setFirstResult($this->Request()->getParam('start'));
+        $query->setMaxResults($this->Request()->getParam('limit'));
+
+        $total = Shopware()->Models()->getQueryCount($query);
+        $data = $query->getArrayResult();
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data,
+            'total' => $total
+        ));
+    }
 }

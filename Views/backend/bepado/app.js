@@ -9,7 +9,8 @@ Ext.define('Shopware.apps.Bepado', {
         'main.Panel', 'main.Config', 'main.Mapping',
         'export.Panel', 'import.Panel',
         'export.List', 'export.Filter',
-        'import.List', 'import.Filter'
+        'import.List', 'import.Filter',
+        'changed_products.Panel', 'changed_products.List'
     ],
     controllers: [ 'Main' ],
 

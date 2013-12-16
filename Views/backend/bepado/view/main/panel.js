@@ -16,6 +16,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-home-page',
                 itemId: 'home'
             }, {
+                xtype: 'bepado-changed-products',
+                itemId: 'changed'
+            }, {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {

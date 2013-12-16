@@ -459,7 +459,7 @@ class BasketHelper
         $newVariables = $this->getDefaultTemplateVariables();
 
         // We need the manipulated content as the order is created from the session
-        // $basket['content'] = $basket['contentOrg'];
+         $basket['content'] = $basket['contentOrg'];
         unset($basket['contentOrg']);
 
 

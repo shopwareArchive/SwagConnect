@@ -40,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.10';
+        return '1.2.14';
     }
 
     /**
@@ -211,11 +211,30 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'inherit'
         );
 
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'last_update',
+            'LONGTEXT'
+        );
+
+        $modelManager->addAttribute(
+           's_articles_attributes',
+           'bepado', 'last_update_flag',
+            'int(11)'
+        );
+
+        $modelManager->addAttribute(
+            's_media_attributes',
+            'bepado', 'hash',
+            'varchar(255)'
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
+            's_media_attributes'
         ));
     }
 
@@ -453,12 +472,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * @return bool
      */
-    public function update()
+    public function update($version)
     {
         $this->createMyEvents();
         $this->createMyForm();
         $this->createMyMenu();
         $this->createMyAttributes();
+
         return true;
     }
 
@@ -554,12 +574,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                'bepado', 'update_name'
             );
 
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'last_update'
+            );
+
+            $modelManager->removeAttribute(
+               's_articles_attributes',
+               'bepado', 'last_update_flag'
+            );
+
+            $modelManager->removeAttribute(
+                's_media_attributes',
+                'bepado', 'hash'
+            );
 
             $modelManager->generateAttributeModels(array(
                 's_articles_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',
                 's_order_basket_attributes',
+                's_media_attributes'
             ));
         } catch(Exception $e) { }
 

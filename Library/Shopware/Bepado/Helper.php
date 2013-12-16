@@ -423,6 +423,29 @@ class Helper
         return $this->bepadoCategoryQuery;
     }
 
+    /**
+     * Helper to determine, if there is a main image for a given articleId
+     *
+     * @param $articleId
+     * @return bool
+     */
+    public function hasArticleMainImage($articleId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('images'))
+            ->from('Shopware\Models\Article\Image', 'images')
+            ->where('images.articleId = :articleId')
+            ->andWhere('images.parentId IS NULL')
+            ->andWhere('images.main = :main')
+            ->setParameter('main', 1)
+            ->setParameter('articleId', $articleId)
+            ->setFirstResult(0)
+            ->setMaxResults(1);
+
+        $result = $builder->getQuery()->getResult();
+        return !empty($result);
+    }
+
 
     /**
      * Helper function to mark a given array of product ids for bepado update

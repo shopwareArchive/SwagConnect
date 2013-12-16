@@ -30,6 +30,8 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Models\Attribute\Media as MediaAttribute;
+use Shopware\Models\Media\Media as MediaModel;
 
 /**
  * @category  Shopware
@@ -79,6 +81,7 @@ class ProductToShop implements ProductToShopBase
             $this->insertOrUpdateInternal($product);
         } catch(\Exception $e) {
             error_log(print_r($e->getMessage(), true)."\n", 3, Shopware()->DocPath().'/import_errors.log');
+            error_log(print_r($e->getTraceAsString(), true)."\n\n", 3, Shopware()->DocPath().'/import_errors.log');
             throw $e;
         }
     }
@@ -96,7 +99,6 @@ class ProductToShop implements ProductToShopBase
         if(empty($product->title) || empty($product->vendor)) {
             return;
         }
-
         $model = $this->helper->getArticleModelByProduct($product);
 
         if($model === null) {
@@ -118,26 +120,28 @@ class ProductToShop implements ProductToShopBase
          * We cannot import the freeDelivery property to the default product
          * as this might switch shopware shipping cost calculation for the local
          * shop into "shipping free" mode.
-         * $detail->setShippingFree($product->freeDelivery);
          */
+        // $detail->setShippingFree($product->freeDelivery);
         $attribute = $detail->getAttribute() ?: new AttributeModel();
+
+
+        list($updateFields, $flag) = $this->getUpdateFields($model, $attribute);
 
         /*
          * Make sure, that the following properties are set for
          * - new products
          * - products that have been configured to recieve these updates
          */
-        if ($this->isFieldUpdateAllowed('name', $model, $attribute)) {
+        if ($updateFields['name']) {
             $model->setName($product->title);
         }
-        if ($this->isFieldUpdateAllowed('shortDescription', $model, $attribute)) {
+        if ($updateFields['shortDescription']) {
             $model->setDescription($product->shortDescription);
 
         }
-        if ($this->isFieldUpdateAllowed('longDescription', $model, $attribute)) {
+        if ($updateFields['longDescription']) {
             $model->setDescriptionLong($product->longDescription);
         }
-
 
         if($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
@@ -170,14 +174,25 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoFixedPrice($product->fixedPrice);
         $attribute->setBepadoFreeDelivery($product->freeDelivery);
         $attribute->setBepadoCategories(serialize($product->categories));
+        $attribute->setBepadoLastUpdateFlag($flag);
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
-        $customerGroup = $this->helper->getDefaultCustomerGroup();
+        // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
+        // This way a customer will be able to apply the most recent changes any time later
+        $attribute->setBepadoLastUpdate(json_encode(array(
+            'shortDescription'  => $product->shortDescription,
+            'longDescription'   => $product->longDescription,
+            'image'             => $product->images,
+            'price'             => $product->price,
+            'name'              => $product->title,
+            'vat'               => $product->vat
+        )));
 
+        // Only set prices, if fixedPrice is active or price updates are configured
+        if ($attribute->getBepadoFixedPrice() || $updateFields['price']) {
+            $customerGroup = $this->helper->getDefaultCustomerGroup();
 
-        // Only set prices, if fixedPrice is active or configured
-        if ($attribute->getBepadoFixedPrice() || $this->isFieldUpdateAllowed('price', $model, $attribute)) {
             $detail->getPrices()->clear();
             $price = new \Shopware\Models\Article\Price();
             $price->fromArray(array(
@@ -194,6 +209,7 @@ class ProductToShop implements ProductToShopBase
             $model->setMainDetail($detail);
             $this->manager->flush();
         }
+
         if($detail->getAttribute() === null) {
             $detail->setAttribute($attribute);
             $attribute->setArticle($model);
@@ -202,53 +218,109 @@ class ProductToShop implements ProductToShopBase
 
         $this->manager->flush();
 
-        // @fixme WORKAROUND: there can always be an image update
+        if ($updateFields['image']) {
+            $this->handleImageImport($product->images, $model);
+        }
+    }
+
+
+    /**
+     * Handles the image import of a product. This will:
+     * - delete all images imported from bepado before and not in the current import list
+     * - create new images which have not already been imported
+     * - set the main image, if there is no main image, yet
+     *
+     * Images are identified via the URL of the bepado image. So we don't need to md5 the
+     * actual image content every time.
+     *
+     * @param array $images
+     * @param $model
+     */
+    public function handleImageImport($images, $model)
+    {
+        // Build up an array of images imported from bepado
+        $positions = array();
+        $localImagesFromBepado = array();
+        /** @var $image \Shopware\Models\Article\Image */
+        /** @var $media \Shopware\Models\Media\Media */
         foreach ($model->getImages() as $image) {
-            if (file_exists($image->getPath())) {
-                unlink($image->getPath());
+            // Build a list of used position fields
+            $position[] = $image->getPosition();
+
+            $media = $image->getMedia();
+            if (!$media || !$media->getAttribute()) {
+                continue;
+            }
+            $attribute = $media->getAttribute();
+
+            // If the image was not imported from bepado, skip it
+            $bepadoHash = $attribute->getBepadoHash();
+            if (!$bepadoHash) {
+                continue;
             }
 
-            $this->manager->remove($image);
+            $localImagesFromBepado[$bepadoHash] = array('image' => $image, 'media' => $media);
+        }
+        $maxPosition = max($positions); // Get the highest position field
+
+        $remoteImagesFromBepado = array_flip($images);
+
+        // Build up arrays of images to delete and images to create
+        $imagesToDelete = array_diff_key($localImagesFromBepado, $remoteImagesFromBepado);
+        $imagesToCreate = array_diff_key($remoteImagesFromBepado, $localImagesFromBepado);
+
+        // Delete old bepado images and media objects
+        foreach ($imagesToDelete as $hash => $data) {
+            $this->manager->remove($data['image']);
+            $this->manager->remove($data['media']);
         }
         $this->manager->flush();
-        //if($model->getImages()->count() != 0)  {
-        //    return;
-        //}
 
+        // Check if we still have a main image
+        $hasMainImage = $this->helper->hasArticleMainImage($model->getId());
+
+        // @todo:dn Move flushes out of the loop
         try {
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);
             $tempDir = Shopware()->DocPath('media_temp');
-            foreach ($product->images as $key => $imageUrl) {
-                //$name = pathinfo($imageUrl, PATHINFO_FILENAME);
-                //$name = md5(uniqid('', true));
+
+            foreach ($imagesToCreate as $imageUrl => $key) {
                 $tempFile = tempnam($tempDir, 'image');
                 copy($imageUrl, $tempFile);
                 $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
 
-                $media = new \Shopware\Models\Media\Media();
+                // Create the media object
+                $media = new MediaModel();
                 $media->setAlbum($album);
-                //$media->setName($name);
                 $media->setDescription('');
                 $media->setCreated(new \DateTime());
                 $media->setUserId(0);
                 $media->setFile($file);
 
+                $mediaAttribute = $media->getAttribute() ?: new MediaAttribute();
+                $mediaAttribute->setBepadoHash($imageUrl);
+                $mediaAttribute->setMedia($media);
+
                 $this->manager->persist($media);
+                $this->manager->persist($mediaAttribute);
                 $this->manager->flush();
 
+                // Create the associated image object
                 $image = new \Shopware\Models\Article\Image();
-                $image->setMain($key == 0 ? 1 : 2);
+                // If there is no main image and we are in the first iteration, set the current image as main image
+                $image->setMain((!$hasMainImage && $key == 0) ? 1 : 2);
                 $image->setMedia($media);
-                $image->setPosition($key + 1);
+                $image->setPosition($maxPosition + $key + 1);
                 $image->setArticle($model);
                 $image->setPath($media->getName());
                 $image->setExtension($media->getExtension());
 
                 $this->manager->persist($image);
                 $this->manager->flush();
-
             }
-        } catch(\Exception $e) { }
+        } catch (\Exception $e) {
+        }
+
     }
 
     /**
@@ -285,7 +357,33 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * Helper method to determine if a given $fields may/must be updated
+     * Get array of update info for the known fields
+     *
+     * @param $model
+     * @param $attribute
+     * @return array
+     */
+    public function getUpdateFields($model, $attribute)
+    {
+        $fields = array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price');
+
+        $flag = 0;
+        $output = array();
+        foreach ($fields as $key => $field) {
+            $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
+            $output[$field] = $updateAllowed;
+            if ($updateAllowed) {
+                $flag |= $key;
+            }
+        }
+
+        return array($output, $flag);
+    }
+
+    /**
+     * Helper method to determine if a given $fields may/must be updated.
+     * This method will check for the model->id in order to determine, if it is a new entity. Therefore
+     * this method cannot be used after the model in question was already flushed.
      *
      * @param $field
      * @param $model
@@ -305,7 +403,6 @@ class ProductToShop implements ProductToShopBase
 
         // Always allow updates for new models
         if (!$model->getId()) {
-            error_log(print_r("new", true)."\n", 3, Shopware()->DocPath().'/error2.log');
             return true;
         }
 
@@ -329,5 +426,4 @@ class ProductToShop implements ProductToShopBase
         return $attributeValue == 'overwrite';
 
     }
-
 }

@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
-        'changed_products.List'
+        'changed_products.List', 'changed_products.Product'
     ],
 
     refs: [
@@ -26,7 +26,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'configForm', selector: 'bepado-config' },
         { ref: 'exportList', selector: 'bepado-export-list' },
         { ref: 'importList', selector: 'bepado-import-list' },
-        { ref: 'mapping', selector: 'bepado-mapping treepanel' }
+        { ref: 'mapping', selector: 'bepado-mapping treepanel' },
+        { ref: 'changeView', selector: 'bepado-changed-products-accordion' },
     ],
 
     messages: {
@@ -212,10 +213,76 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                         );
                     }
                 }
+            },
+            'bepado-changed-products-list': {
+                'selectionchange': me.onChangedProductsSelectionChanged
             }
         });
 
         me.callParent(arguments);
+    },
+
+    onChangedProductsSelectionChanged: function(grid, selected, eOpts) {
+        var me = this,
+            record,
+            remoteChangeSet,
+            changeRecord,
+            changeFlag = 0,
+            changeView = me.getChangeView();
+
+        if (selected && selected.length > 0) {
+            record = selected[0];
+
+            remoteChangeSet = Ext.JSON.decode(record.get('bepadoLastUpdate'));
+            changeFlag = record.get('bepadoLastUpdateFlag');
+
+            changeRecord = Ext.create('Shopware.apps.Bepado.model.changed_products.Product', {
+                shortDescriptionLocal: record.get('description'),
+                shortDescriptionRemote: remoteChangeSet['shortDescription'],
+
+                longDescriptionLocal: record.get('descriptionLong'),
+                longDescriptionRemote: remoteChangeSet['longDescription'],
+
+                nameLocal: record.get('name'),
+                nameRemote: remoteChangeSet['name'],
+
+                priceLocal: record.get('price'),
+                priceRemote: remoteChangeSet['price'],
+
+                imageLocal: record.get('images'),
+                imageRemote: remoteChangeSet['image'].join('|')
+            });
+
+
+            var flags = {
+                2: 'shortDescription',
+                4: 'longDescription',
+                8: 'name',
+                16: 'image',
+                32: 'price'
+            };
+
+            Ext.each(Object.keys(flags), function(key) {
+                var container = changeView.fields[flags[key]];
+
+                if (container) {
+                    changeView.remove(container, false);
+                }
+
+                if (changeFlag & key && container) {
+                    changeView.add(container);
+                    container.loadRecord(changeRecord);
+                }
+            });
+
+            changeView.setTitle(record.get('name'));
+
+            // hotfix: make sure that the tab is displayed correctly
+            changeView.setActiveTab(0);
+            changeView.setActiveTab(1);
+            changeView.setActiveTab(0);
+
+        }
     },
 
     /**

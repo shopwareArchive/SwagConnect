@@ -639,9 +639,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             (array)$this->Request()->getParam('filter', array()),
             $this->Request()->getParam('sort', array())
         );
+
         $builder->addSelect(array(
             'at.bepadoLastUpdate',
-            'at.bepadoLastUpdateFlag'
+            'at.bepadoLastUpdateFlag',
+            'a.description',
+            'a.descriptionLong',
+            'a.name'
         ));
         $builder->andWhere('at.bepadoShopId IS NOT NULL')
             ->andWHere('at.bepadoLastUpdateFlag IS NOT NULL')
@@ -656,10 +660,35 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
+        foreach ($data as &$datum) {
+            $datum['images'] = implode('|', $this->getImagesForArticle($datum['id']));
+        }
+
         $this->View()->assign(array(
             'success' => true,
             'data' => $data,
             'total' => $total
         ));
+    }
+
+    public function getImagesForArticle($articleId)
+    {
+
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->select('media.path')
+                ->from('Shopware\Models\Article\Image', 'images')
+                ->join('images.media', 'media')
+                ->where('images.articleId = :articleId')
+                ->andWhere('images.parentId IS NULL')
+                ->setParameter('articleId', $articleId)
+                ->orderBy('images.main', 'ASC')
+                ->addOrderBy('images.position', 'ASC');
+
+        return array_map(function($image) {
+                return $image['path'];
+            },
+            $builder->getQuery()->getArrayResult()
+        );
+
     }
 }

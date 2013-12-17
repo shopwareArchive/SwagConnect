@@ -18,7 +18,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Panel', {
 
         Ext.applyIf(me, {
             items: [notice,{
-                xtype: 'bepado-changed-products-accordion',
+                xtype: 'bepado-changed-products-tabs',
                 region: 'south',
                 collapsible: true,
                 collapsed: true,

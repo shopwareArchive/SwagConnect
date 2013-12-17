@@ -21,7 +21,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Images', {
         'Ext.form.field.Base'
     ],
 
-    height: 115,
+    height: 120,
 
     // base image path
     mediaPath: '{link file=""}',
@@ -63,6 +63,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Images', {
         var me = this;
 
         me.previewContainer = Ext.create('Ext.container.Container', {
+            overflowX: 'auto',
             flex: 1,
             style: "background: #fff",
             items: [ ]

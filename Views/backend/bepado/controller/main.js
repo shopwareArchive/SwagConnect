@@ -27,7 +27,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'exportList', selector: 'bepado-export-list' },
         { ref: 'importList', selector: 'bepado-import-list' },
         { ref: 'mapping', selector: 'bepado-mapping treepanel' },
-        { ref: 'changeView', selector: 'bepado-changed-products-accordion' },
+        { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
     ],
 
     messages: {
@@ -222,20 +222,30 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         me.callParent(arguments);
     },
 
+    /**
+     * Callback method called when the user selects a product in the "changed products" view.
+     * Will populate the bottom "change view" grid with the correct tabs
+     *
+     * @param grid
+     * @param selected
+     * @param eOpts
+     */
     onChangedProductsSelectionChanged: function(grid, selected, eOpts) {
         var me = this,
             record,
             remoteChangeSet,
             changeRecord,
-            changeFlag = 0,
+            changeFlag = 0, flags,
             changeView = me.getChangeView();
 
+        // make sure that we have a selection
         if (selected && selected.length > 0) {
             record = selected[0];
 
+            // Decode the lastUpdate info
             remoteChangeSet = Ext.JSON.decode(record.get('bepadoLastUpdate'));
-            changeFlag = record.get('bepadoLastUpdateFlag');
 
+            // Build a record for the changeset
             changeRecord = Ext.create('Shopware.apps.Bepado.model.changed_products.Product', {
                 shortDescriptionLocal: record.get('description'),
                 shortDescriptionRemote: remoteChangeSet['shortDescription'],
@@ -253,8 +263,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 imageRemote: remoteChangeSet['image'].join('|')
             });
 
-
-            var flags = {
+            // Read updateFlag and build update flag object
+            changeFlag = record.get('bepadoLastUpdateFlag');
+            flags = {
                 2: 'shortDescription',
                 4: 'longDescription',
                 8: 'name',
@@ -262,6 +273,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 32: 'price'
             };
 
+            // Check all flags and show the corresponding tab if it is active
+            // if not, remove the tab without destroying the component
             Ext.each(Object.keys(flags), function(key) {
                 var container = changeView.fields[flags[key]];
 

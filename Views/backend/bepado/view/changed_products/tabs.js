@@ -1,9 +1,9 @@
 //{namespace name=backend/bepado/view/main}
 
-//{block name="backend/bepado/view/changed_products/accordion"}
-Ext.define('Shopware.apps.Bepado.view.changed_products.Accordion', {
+//{block name="backend/bepado/view/changed_products/tabs"}
+Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
     extend: 'Ext.tab.Panel',
-    alias: 'widget.bepado-changed-products-accordion',
+    alias: 'widget.bepado-changed-products-tabs',
 
     height: 300,
 
@@ -20,6 +20,9 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Accordion', {
         me.callParent(arguments);
     },
 
+    /**
+     * Creates the actual tabs for the known fields
+     */
     createItems: function() {
         var me = this;
 
@@ -29,11 +32,19 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Accordion', {
         });
     },
 
+    /**
+     * Creates the tab for given field type. Each tab will have a field for the remote and for the local value
+     * so the user can compare them
+     *
+     * @param name
+     * @returns Object
+     */
     createContainer: function(name) {
         var me = this,
             config,
             local, remote;
 
+        // Define the fields for the given type
         switch (name) {
             case 'price':
                 config = {
@@ -65,10 +76,13 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Accordion', {
             case 'image':
                 config = {
                     xtype: 'shopware-images-field',
-                    title: 'image'
+                    title: 'image',
+                    margin: 10,
                 };
         }
 
+        // Define some default options for the local / remote field
+        // The name is generated from the passed name and the prefix "local"/"remote"
         local = {
             fieldLabel: 'Current',
             name: name + 'Local',
@@ -81,9 +95,11 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Accordion', {
         };
 
 
+        // Merge local/remote objects and the generated type-related object
         Ext.apply(local, config);
         Ext.apply(remote, config);
 
+        // Create a form and put the local and remote field into
         return Ext.create('Ext.form.Panel', {
                 autoScroll: true,
                 title: config.title,

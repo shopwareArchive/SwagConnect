@@ -35,6 +35,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         saveMappingSuccess: '{s name=mapping/message/success}Category mapping has been saved.{/s}',
         saveMappingError: '{s name=mapping/message/error}Category mapping could not be saved.{/s}',
 
+
         insertOrUpdateProductTitle: '{s name=export/message/import_product_title}Products export{/s}',
         insertOrUpdateProductMessage: '{s name=export/message/import_product_messag}Products were marked for inserting / updating.{/s}',
         deleteProductTitle: '{s name=export/message/delete_title}Products export{/s}',

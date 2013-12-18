@@ -183,7 +183,6 @@ class ProductFromShop implements ProductFromShopBase
                 'status' => $detailStatus
             ));
             $items[] = $item;
-            $productDetail->setInStock($productDetail->getInStock() - $product->count);
         }
         $model->setDetails($items);
 

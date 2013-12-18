@@ -445,7 +445,7 @@ class ProductToShop implements ProductToShopBase
         $configName = 'overwriteProduct' . $field;
 
         if (!in_array($field, $allowed)) {
-            throw new \RuntimeException("Unknown field {$field}");
+            throw new \RuntimeException("Unknown update field {$field}");
         }
 
         $attributeValue = $attribute->$attributeGetter();
@@ -453,11 +453,11 @@ class ProductToShop implements ProductToShopBase
 
         
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
+        // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {
             return $this->config->get($configName, true);
         }
 
         return $attributeValue == 'overwrite';
-
     }
 }

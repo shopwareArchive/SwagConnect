@@ -726,6 +726,23 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $customerGroup = $this->Request()->getParam('customerGroup');
         $priceField = $this->Request()->getParam('priceField');
 
+
+        // Validate customerGroup and price field
+        if (empty($customerGroup) || empty($priceField)) {
+            throw new \RuntimeException("Customer group and price field may not be empty. Got {$customerGroup} and {$priceField}");
+        }
+
+        if (!in_array($priceField, array('price', 'basePrice', 'pseudoPrice'))) {
+            throw new \RuntimeException("Unknown price field {$priceField}");
+        }
+
+        $customerGroupRepo = $this->getModelManager()->getRepository('Shopware\Models\Customer\Group');
+        $group = $customerGroupRepo->findOneBy(array('key' => $customerGroup));
+        if (!$group) {
+            throw new \RuntimeException("Could not find customer group with key {$customerGroup}");
+        }
+
+
         /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
         $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
 

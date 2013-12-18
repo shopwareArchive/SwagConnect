@@ -56,6 +56,8 @@ class Helper
 
     private $bepadoCategoryQuery;
 
+    /** @var  \Shopware\CustomModels\Bepado\ConfigRepository */
+    private $configRepo;
 
     /**
      * @param ModelManager $manager
@@ -69,6 +71,17 @@ class Helper
         $this->imagePath = $imagePath;
         $this->productDescriptionField = $productDescriptionField;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
+    }
+
+    /**
+     * @return \Shopware\CustomModels\Bepado\ConfigRepository
+     */
+    private function getConfigRepository()
+    {
+        if (!$this->configRepo) {
+            $this->configRepo = $this->manager->getRepository('Shopware\CustomModels\Bepado\Config');
+        }
+        return $this->configRepo;
     }
 
     /**
@@ -117,7 +130,12 @@ class Helper
      * As the fields might differ in some situations, the result of this query needs to be
      * postprocessed by the getProductByRowData method.
      *
-     * todo: This should be refactored so that the interaf
+     * Currently there are three field being "switched" in the getProductByRowData method:
+     * - price          (configurable in fromShop, d.price in toShop)
+     * - purchasePrice  (configurable in from Shop, d.basePrice in toShop)
+     * - freeDelivery   (d.shippingFree in fromShop, at.bepadoFreeDelivery in toShop)
+     *
+     * Two distinct queries?
      *
      * @return \Doctrine\ORM\Query
      */
@@ -144,11 +162,8 @@ class Helper
             'defaultPrice.basePrice * (100 + t.tax) / 100 as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
-            /*
-             * The bepadoFreeDelivery option will later replace the freeDelivery option
-             * if the product is a remote product. This is done in the getProductByRowData() method
-             */
-            'at.bepadoFreeDelivery as bepadoFreeDelivery',
+            '
+            at.bepadoFreeDelivery as bepadoFreeDelivery',
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
@@ -166,10 +181,13 @@ class Helper
             //'images = array()',
         ));
 
-        $exportPriceCustomerGroup = 'EK';
-        $exportPurchasePriceCustomerGroup = 'EK';
-        $exportPriceColumn = 'price';
-        $exportPurchasePriceColumn = 'basePrice';
+
+
+        $repo = $this->getConfigRepository();
+        $exportPriceCustomerGroup = $repo->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPurchasePriceCustomerGroup = $repo->getConfig('priceGroupForPurchasePriceExport', 'EK');
+        $exportPriceColumn = $repo->getConfig('priceFieldForPriceExport', 'price');
+        $exportPurchasePriceColumn = $repo->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
         $valid = $this->isPriceGroupConfigurationValid(
             $exportPriceColumn,

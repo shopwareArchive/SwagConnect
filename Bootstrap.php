@@ -21,6 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+use Shopware\CustomModels\Bepado\Config;
 
 /**
  * @category  Shopware
@@ -79,9 +80,30 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         $this->createMyTables();
         $this->createMyAttributes();
+        $this->populateConfigTable();
 
 	 	return array('success' => true, 'invalidateCache' => array('backend', 'config'));
 	}
+
+    /**
+     * Creates the default config
+     */
+    public function populateConfigTable()
+    {
+        $this->registerCustomModels();
+
+        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
+        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
+
+
+        $repo->setConfig('priceGroupForPriceExport', 'EK');
+        $repo->setConfig('priceGroupForPurchasePriceExport', 'EK');
+        $repo->setConfig('priceFieldForPriceExport', 'price');
+        $repo->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
+
+        Shopware()->Models()->flush();
+
+    }
 
     /**
      * Registers the bepado events. As we register all events on the fly, only the early
@@ -293,11 +315,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 });
             }"
         ));
-        $form->setElement('select', 'exportPriceGroup', array(
-            'label' => 'Export-Preisgruppe',
-            'store' => 'base.CustomerGroup',
-            'value' => 1
-        ));
+
         $form->setElement('boolean', 'importCreateCategories', array(
             'label' => 'Kategorien beim Import automatisch erzeugen',
             'value' => true
@@ -447,6 +465,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `s_config` mediumblob NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`s_shop`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_config` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `name` varchar(255) NOT NULL,
+              `value` varchar(255) NOT NULL,
+              PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
 
@@ -623,6 +647,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'Shopware\\Bepado',
             $this->Path() . 'Library/Shopware/Bepado/'
         );
+
+        $this->registerCustomModels();
     }
 
     /**

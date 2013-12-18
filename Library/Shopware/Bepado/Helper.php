@@ -112,6 +112,13 @@ class Helper
     }
 
     /**
+     * This method covers the fromShop products as well as the toShop products.
+     *
+     * As the fields might differ in some situations, the result of this query needs to be
+     * postprocessed by the getProductByRowData method.
+     *
+     * todo: This should be refactored so that the interaf
+     *
      * @return \Doctrine\ORM\Query
      */
     private function getProductQuery()
@@ -121,7 +128,7 @@ class Helper
         $builder->join('a.mainDetail', 'd');
         $builder->join('d.attribute', 'at');
         $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->leftJoin('d.prices', 'defaultPrice', 'with', "defaultPrice.from = 1 AND defaultPrice.customerGroupKey = 'EK'");
         $builder->join('a.tax', 't');
         $builder->leftJoin('d.unit', 'u');
         $builder->select(array(
@@ -133,8 +140,8 @@ class Helper
             'a.descriptionLong as longDescription',
             's.name as vendor',
             't.tax / 100 as vat',
-            'p.price * (100 + t.tax) / 100 as price',
-            'p.basePrice * (100 + t.tax) / 100 as purchasePrice',
+            'defaultPrice.price * (100 + t.tax) / 100 as price',
+            'defaultPrice.basePrice * (100 + t.tax) / 100 as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
             /*
@@ -142,6 +149,7 @@ class Helper
              * if the product is a remote product. This is done in the getProductByRowData() method
              */
             'at.bepadoFreeDelivery as bepadoFreeDelivery',
+
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
 
@@ -157,6 +165,28 @@ class Helper
             'at.bepadoFixedPrice as fixedPrice'
             //'images = array()',
         ));
+
+        $exportPriceCustomerGroup = 'EK';
+        $exportPurchasePriceCustomerGroup = 'EK';
+        $exportPriceColumn = 'price';
+        $exportPurchasePriceColumn = 'basePrice';
+
+        $valid = $this->isPriceGroupConfigurationValid(
+            $exportPriceColumn,
+            $exportPurchasePriceColumn,
+            $exportPurchasePriceCustomerGroup,
+            $exportPriceCustomerGroup
+        );
+
+        if ($valid) {
+            $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = 'EK'");
+            $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = 'EK'");
+            $builder->addSelect(array(
+                "exportPrice.{$exportPriceColumn} as bepadoExportPrice",
+                "exportPurchasePrice.{$exportPurchasePriceColumn} as bepadoExportPurchasePrice"
+            ));
+        }
+
         if($this->productDescriptionField !== null) {
             $builder->addSelect('at.' . $this->productDescriptionField . ' as altDescription');
         }
@@ -165,6 +195,23 @@ class Helper
 
         $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
+    }
+
+    private function isPriceGroupConfigurationValid($exportPriceColumn, $exportPurchasePriceColumn,
+        $exportPurchasePriceCustomerGroup, $exportPriceCustomerGroup)
+    {
+        if (empty($exportPriceColumn) || empty($exportPurchasePriceColumn)
+                || empty($exportPriceCustomerGroup) || empty($exportPurchasePriceCustomerGroup)) {
+            return false;
+        }
+
+        $validEntries = array('basePrice', 'pseudoPrice', 'price');
+        if (!in_array($exportPriceColumn, $validEntries) || !in_array($exportPurchasePriceColumn, $validEntries)) {
+            return false;
+        }
+
+
+        return true;
     }
 
     /**
@@ -278,12 +325,22 @@ class Helper
         }
         unset($row['width'], $row['height'], $row['length']);
 
-        // If the product is a remote product, replace the local shippingFree option
-        // with the freeDelivery option from the attribute
+        // If the product is a remote product, the freeDelivery needs to be replaced
+        // Else we need some price replacement
         if (!empty($row['shopId'])) {
             $row['freeDelivery'] = $row['bepadoFreeDelivery'];
+        }else{
+            if ($row['bepadoExportPrice']) {
+                $row['price'] = $row['bepadoExportPrice'];
+            }
+
+            if ($row['bepadoExportPurchasePrice']) {
+                $row['purchasePrice'] = $row['bepadoExportPurchasePrice'];
+            }
         }
         unset($row['bepadoFreeDelivery']);
+        unset($row['bepadoExportPrice']);
+        unset($row['bepadoExportPurchasePrice']);
 
 
         $product = new Product(

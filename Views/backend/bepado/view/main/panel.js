@@ -22,6 +22,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {
+                xtype: 'bepado-prices',
+                itemId: 'prices'
+            }, {
                 xtype: 'bepado-mapping',
                 itemId: 'mapping'
             }, {

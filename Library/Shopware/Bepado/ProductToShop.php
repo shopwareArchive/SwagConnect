@@ -182,6 +182,7 @@ class ProductToShop implements ProductToShopBase
         $attribute->setBepadoLastUpdate(json_encode(array(
             'shortDescription'  => $product->shortDescription,
             'longDescription'   => $product->longDescription,
+            'purchasePrice'     => $product->purchasePrice,
             'image'             => $product->images,
             'price'             => $product->price,
             'name'              => $product->title,

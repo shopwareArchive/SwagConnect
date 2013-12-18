@@ -714,4 +714,35 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'data' => $data
         ));
     }
+
+    /**
+     * Will set the configured price/customerGroup settings
+     *
+     * @throws RuntimeException
+     */
+    public function savePriceConfigAction()
+    {
+        $bepadoField = $this->Request()->getParam('bepadoField');
+        $customerGroup = $this->Request()->getParam('customerGroup');
+        $priceField = $this->Request()->getParam('priceField');
+
+        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
+        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
+
+        if ($bepadoField == 'purchasePrice') {
+            $configGroup = 'priceGroupForPurchasePriceExport';
+            $configField = 'priceFieldForPurchasePriceExport';
+        } elseif ($bepadoField == 'price') {
+            $configGroup = 'priceGroupForPriceExport';
+            $configField = 'priceFieldForPriceExport';
+        } else {
+            throw new \RuntimeException("Unknown field {$bepadoField}");
+        }
+
+        $repo->setConfig($configGroup, $customerGroup);
+        $repo->setConfig($configField, $priceField);
+        $this->getModelManager()->flush();
+
+        $this->View()->assign('success', true);
+    }
 }

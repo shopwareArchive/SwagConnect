@@ -19,6 +19,13 @@ Ext.define('Shopware.apps.Bepado.view.prices.List', {
             columns: me.getColumns()
         });
 
+        // Save the record when the 'update' button is clicked
+        me.on('edit', function(editor, e) {
+            var record = e.record;
+
+            record.save();
+        });
+
         me.callParent(arguments);
 
         me.store.load();

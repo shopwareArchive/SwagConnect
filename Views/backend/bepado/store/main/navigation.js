@@ -14,7 +14,6 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
             { id: 'config', text: "{s name=navigation/config}Configuration{/s}", leaf: false,
                 expanded: true,
                 children: [
-                    { id: 'general', text: "{s name=navigation/general}General{/s}", leaf: true },
                     { id: 'prices', text: "{s name=navigation/prices}Prices{/s}", leaf: true }
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: true },

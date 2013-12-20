@@ -344,11 +344,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'value' => true,
             'helpText' => 'Für Anbieter von Produkten: Export diese automatisch nach bepado, wenn die Produkte geändert werden.'
         ));
-        $form->setElement('text', 'bepadoDebugHost', array(
-                'label' => 'Alternativer bepado Host (nur für Testzwecke)',
-                'minLength' => 11
-            )
-        );
 
         $form->setElement('boolean', 'overwriteProductName', array(
             'label' => 'Beim Import Produkt-Namen überschreiben',
@@ -375,6 +370,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'value' => true,
             'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
         ));
+
+        $form->setElement('text', 'bepadoDebugHost', array(
+                'label' => 'Alternativer bepado Host (nur für Testzwecke)',
+                'minLength' => 11
+            )
+        );
     }
 
     /**

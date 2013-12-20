@@ -200,8 +200,8 @@ class Helper
             $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = 'EK'");
             $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = 'EK'");
             $builder->addSelect(array(
-                "exportPrice.{$exportPriceColumn} as bepadoExportPrice",
-                "exportPurchasePrice.{$exportPurchasePriceColumn} as bepadoExportPurchasePrice"
+                "exportPrice.{$exportPriceColumn} * (100 + t.tax) / 100 as bepadoExportPrice",
+                "exportPurchasePrice.{$exportPurchasePriceColumn} * (100 + t.tax) / 100 as bepadoExportPurchasePrice"
             ));
         }
 

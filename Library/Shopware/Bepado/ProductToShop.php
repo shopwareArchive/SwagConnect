@@ -197,8 +197,8 @@ class ProductToShop implements ProductToShopBase
             $price = new \Shopware\Models\Article\Price();
             $price->fromArray(array(
                 'from' => 1,
-                'price' => $product->price * 100 / (100 + 100 * $product->vat),
-                'basePrice' => $attribute->getBepadoPurchasePrice() * 100 / (100 + 100 * $product->vat),
+                'price' => $product->price,
+                'basePrice' => $attribute->getBepadoPurchasePrice(),
                 'customerGroup' => $customerGroup,
                 'article' => $model
             ));

@@ -407,6 +407,11 @@ class BasketHelper
         }
         $this->basket['sAmount'] += $shippingCosts;
 
+        // Core workaround: Shopware tries to re-calculate the shipping tax rate from the net price
+        // \Shopware_Models_Document_Order::processOrder
+        // Therefore we need to round the net price
+        $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
+
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(array($this->getTaxRates($this->basket), $this->getBepadoTaxRates()));
     }

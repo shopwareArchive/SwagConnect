@@ -158,8 +158,8 @@ class Helper
             'a.descriptionLong as longDescription',
             's.name as vendor',
             't.tax / 100 as vat',
-            'defaultPrice.price * (100 + t.tax) / 100 as price',
-            'defaultPrice.basePrice * (100 + t.tax) / 100 as purchasePrice',
+            'defaultPrice.price as price',
+            'defaultPrice.basePrice as purchasePrice',
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
             '
@@ -200,8 +200,8 @@ class Helper
             $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = 'EK'");
             $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = 'EK'");
             $builder->addSelect(array(
-                "exportPrice.{$exportPriceColumn} * (100 + t.tax) / 100 as bepadoExportPrice",
-                "exportPurchasePrice.{$exportPurchasePriceColumn} * (100 + t.tax) / 100 as bepadoExportPurchasePrice"
+                "exportPrice.{$exportPriceColumn}  as bepadoExportPrice",
+                "exportPurchasePrice.{$exportPurchasePriceColumn} as bepadoExportPurchasePrice"
             ));
         }
 

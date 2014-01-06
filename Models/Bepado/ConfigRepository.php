@@ -24,12 +24,11 @@ class ConfigRepository extends ModelRepository
 
         if (!$model) {
             $model = new Config();
-            $this->getManager->persist($model);
+            $this->getEntityManager()->persist($model);
         }
 
         $model->setName($name);
         $model->setValue($value);
-
     }
 
 }

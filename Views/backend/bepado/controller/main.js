@@ -246,7 +246,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             record = selected[0];
 
             // Decode the lastUpdate info
-            remoteChangeSet = Ext.JSON.decode(record.get('bepadoLastUpdate'));
+            remoteChangeSet = Ext.JSON.decode(record.get('lastUpdate'));
 
             // Build a record for the changeset
             changeRecord = Ext.create('Shopware.apps.Bepado.model.changed_products.Product', {
@@ -267,7 +267,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             });
 
             // Read updateFlag and build update flag object
-            changeFlag = record.get('bepadoLastUpdateFlag');
+            changeFlag = record.get('lastUpdateFlag');
             flags = {
                 2: 'shortDescription',
                 4: 'longDescription',

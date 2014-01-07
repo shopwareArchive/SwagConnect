@@ -30,6 +30,10 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
+use Shopware\Models\Article\Image;
+use Shopware\Models\Article\Price;
+use Shopware\Models\Article\Supplier;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Media\Media as MediaModel;
 
@@ -122,10 +126,10 @@ class ProductToShop implements ProductToShopBase
          * shop into "shipping free" mode.
          */
         // $detail->setShippingFree($product->freeDelivery);
-        $attribute = $detail->getAttribute() ?: new AttributeModel();
+        $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;
+        $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
 
-
-        list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $attribute, $product);
+        list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $bepadoAttribute, $product);
         /*
          * Make sure, that the following properties are set for
          * - new products
@@ -153,33 +157,33 @@ class ProductToShop implements ProductToShopBase
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
             if($supplier === null) {
-                $supplier = new \Shopware\Models\Article\Supplier();
+                $supplier = new Supplier();
                 $supplier->setName($product->vendor);
             }
             $model->setSupplier($supplier);
         }
 
         if(($descField = $this->helper->getProductDescriptionField()) !== null) {
-            $attribute->fromArray(array(
+            $bepadoAttribute->fromArray(array(
                 $descField => $product->longDescription
             ));
         }
 
-        $attribute->setBepadoShopId($product->shopId);
-        $attribute->setBepadoSourceId($product->sourceId);
-        $attribute->setBepadoExportStatus(null);
-        $attribute->setBepadoCategories(serialize($product->categories));
-        $attribute->setBepadoPurchasePrice($product->purchasePrice);
-        $attribute->setBepadoFixedPrice($product->fixedPrice);
-        $attribute->setBepadoFreeDelivery($product->freeDelivery);
-        $attribute->setBepadoCategories(serialize($product->categories));
-        $attribute->setBepadoLastUpdateFlag($flag);
+        $bepadoAttribute->setShopId($product->shopId);
+        $bepadoAttribute->setSourceId($product->sourceId);
+        $bepadoAttribute->setExportStatus(null);
+        $bepadoAttribute->setCategories(serialize($product->categories));
+        $bepadoAttribute->setPurchasePrice($product->purchasePrice);
+        $bepadoAttribute->setFixedPrice($product->fixedPrice);
+        $bepadoAttribute->setFreeDelivery($product->freeDelivery);
+        $bepadoAttribute->setCategories(serialize($product->categories));
+        $bepadoAttribute->setLastUpdateFlag($flag);
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
-        $attribute->setBepadoLastUpdate(json_encode(array(
+        $bepadoAttribute->setLastUpdate(json_encode(array(
             'shortDescription'  => $product->shortDescription,
             'longDescription'   => $product->longDescription,
             'purchasePrice'     => $product->purchasePrice,
@@ -190,15 +194,15 @@ class ProductToShop implements ProductToShopBase
         )));
 
         // Only set prices, if fixedPrice is active or price updates are configured
-        if ($attribute->getBepadoFixedPrice() || $updateFields['price']) {
+        if ($bepadoAttribute->getFixedPrice() || $updateFields['price']) {
             $customerGroup = $this->helper->getDefaultCustomerGroup();
 
             $detail->getPrices()->clear();
-            $price = new \Shopware\Models\Article\Price();
+            $price = new Price();
             $price->fromArray(array(
                 'from' => 1,
                 'price' => $product->price,
-                'basePrice' => $attribute->getBepadoPurchasePrice(),
+                'basePrice' => $bepadoAttribute->getPurchasePrice(),
                 'customerGroup' => $customerGroup,
                 'article' => $model
             ));
@@ -211,10 +215,14 @@ class ProductToShop implements ProductToShopBase
         }
 
         if($detail->getAttribute() === null) {
-            $detail->setAttribute($attribute);
-            $attribute->setArticle($model);
+            $detail->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
             $this->manager->flush();
         }
+
+        $bepadoAttribute->setArticle($model);
+        $bepadoAttribute->setArticleDetail($detail);
+        $this->manager->persist($bepadoAttribute);
 
         $this->manager->flush();
 
@@ -241,7 +249,7 @@ class ProductToShop implements ProductToShopBase
         // Build up an array of images imported from bepado
         $positions = array();
         $localImagesFromBepado = array();
-        /** @var $image \Shopware\Models\Article\Image */
+        /** @var $image Image */
         /** @var $media \Shopware\Models\Media\Media */
         foreach ($model->getImages() as $image) {
             // Build a list of used position fields
@@ -306,7 +314,7 @@ class ProductToShop implements ProductToShopBase
                 $this->manager->flush();
 
                 // Create the associated image object
-                $image = new \Shopware\Models\Article\Image();
+                $image = new Image();
                 // If there is no main image and we are in the first iteration, set the current image as main image
                 $image->setMain((!$hasMainImage && $key == 0) ? 1 : 2);
                 $image->setMedia($media);
@@ -350,8 +358,9 @@ class ProductToShop implements ProductToShopBase
         $model->setActive(false);
 
         // Not sure why, but the Attribute can be NULL
-        if ($model->getAttribute()) {
-            $model->getAttribute()->setBepadoExportStatus('delete');
+        $attribute = $this->helper->getBepadoAttributeByModel($model);
+        if ($attribute) {
+            $attribute->setExportStatus('delete');
         }
         $this->manager->flush($model);
     }
@@ -420,12 +429,12 @@ class ProductToShop implements ProductToShopBase
      * this method cannot be used after the model in question was already flushed.
      *
      * @param $field
-     * @param $model
-     * @param $attribute
+     * @param $model ProductModel
+     * @param $attribute BepadoAttribute
      * @return bool|null
      * @throws \RuntimeException
      */
-    public function isFieldUpdateAllowed($field, $model, $attribute)
+    public function isFieldUpdateAllowed($field, ProductModel $model, BepadoAttribute $attribute)
     {
         $allowed = array(
             'ShortDescription',
@@ -441,7 +450,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         $field = ucfirst($field);
-        $attributeGetter = 'getBepadoUpdate' . $field;
+        $attributeGetter = 'getUpdate' . $field;
         $configName = 'overwriteProduct' . $field;
 
         if (!in_array($field, $allowed)) {

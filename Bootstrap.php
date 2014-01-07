@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.18';
+        return '1.2.19';
     }
 
     /**
@@ -126,27 +126,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $modelManager = $this->Application()->Models();
         
         $modelManager->addAttribute(
-            's_articles_attributes',
-            'bepado', 'shop_id',
-            'varchar(255)'
-        );
-        $modelManager->addAttribute(
-            's_articles_attributes',
-            'bepado', 'source_id',
-            'varchar(255)'
-        );
-        $modelManager->addAttribute(
-            's_articles_attributes',
-            'bepado', 'export_status',
-            'text'
-        );
-        $modelManager->addAttribute(
-            's_articles_attributes',
-            'bepado', 'export_message',
-            'text'
-        );
-
-        $modelManager->addAttribute(
             's_order_attributes',
             'bepado', 'shop_id',
             'int(11)'
@@ -155,12 +134,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             's_order_attributes',
             'bepado', 'order_id',
             'int(11)'
-        );
-
-        $modelManager->addAttribute(
-            's_articles_attributes',
-            'bepado', 'categories',
-            'text'
         );
 
         $modelManager->addAttribute(
@@ -176,83 +149,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'purchase_price',
-           'double'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'fixed_price',
-           'int(1)'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'free_delivery',
-           'int(1)'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'update_price',
-            'varchar(255)',
-            true,
-            'inherit'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'update_image',
-            'varchar(255)',
-            true,
-            'inherit'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'update_long_description',
-            'varchar(255)',
-            true,
-            'inherit'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'update_short_description',
-            'varchar(255)',
-            true,
-            'inherit'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'update_name',
-            'varchar(255)',
-            true,
-            'inherit'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'last_update',
-            'LONGTEXT'
-        );
-
-        $modelManager->addAttribute(
-           's_articles_attributes',
-           'bepado', 'last_update_flag',
-            'int(11)'
-        );
-
-        $modelManager->addAttribute(
             's_media_attributes',
             'bepado', 'hash',
             'varchar(255)'
         );
 
         $modelManager->generateAttributeModels(array(
-            's_articles_attributes',
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
@@ -472,7 +374,30 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
+             `id` int(11) NOT NULL AUTO_INCREMENT,
+             `article_id` int(11) unsigned DEFAULT NULL,
+             `article_detail_id` int(11) unsigned DEFAULT NULL,
+             `shop_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+             `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+             `export_status` text COLLATE utf8_unicode_ci,
+             `export_message` text COLLATE utf8_unicode_ci,
+             `categories` text COLLATE utf8_unicode_ci,
+             `purchase_price` double DEFAULT NULL,
+             `fixed_price` int(1) DEFAULT NULL,
+             `free_delivery` int(1) DEFAULT NULL,
+             `update_price` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_long_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_short_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `last_update` longtext COLLATE utf8_unicode_ci,
+             `last_update_flag` int(11) DEFAULT NULL,
+             PRIMARY KEY (`id`),
+             UNIQUE KEY `article_detail_id` (`article_detail_id`),
+             KEY `article_id` (`article_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
         ");
 
         foreach ($queries as $query) {
@@ -494,9 +419,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         // deactive all bepado products on uninstall
         $sql = '
         UPDATE s_articles
-        INNER JOIN s_articles_attributes
-          ON s_articles_attributes.articleID = s_articles.id
-          AND bepado_shop_id IS NOT NULL
+        INNER JOIN s_plugin_bepado_items
+          ON s_plugin_bepado_items.article_id = s_articles.id
+          AND shop_id IS NOT NULL
         SET s_articles.active = false
         ';
         Shopware()->Db()->exec($sql);
@@ -509,10 +434,30 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function update($version)
     {
+
+        $this->createMyTables();
         $this->createMyEvents();
         $this->createMyForm();
         $this->createMyMenu();
         $this->createMyAttributes();
+
+        // Migrate old attributes to bepado attributes
+        if (version_compare($version, '1.2.18', '<=')) {
+            // Copy s_articles_attributes to own attribute table
+            $sql = 'INSERT INTO `s_plugin_bepado_items`
+              (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
+              `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
+              `update_long_description`, `update_short_description`, `update_name`, `last_update`,
+              `last_update_flag`)
+            SELECT `articleID`, `articledetailsID`, `bepado_shop_id`, `bepado_source_id`, `bepado_export_status`,
+            `bepado_export_message`, `bepado_categories`, `bepado_purchase_price`, `bepado_fixed_price`,
+            `bepado_free_delivery`, `bepado_update_price`, `bepado_update_image`, `bepado_update_long_description`,
+             `bepado_update_short_description`, `bepado_update_name`, `bepado_last_update`, `bepado_last_update_flag`
+            FROM `s_articles_attributes`';
+            Shopware()->Db()->execute($sql);
+
+            $this->removeMyAttributes();
+        }
 
         return true;
     }
@@ -544,29 +489,29 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 'bepado', 'export_message'
             );
 
-            $modelManager->removeAttribute(
-                's_order_attributes',
-                'bepado', 'shop_id'
-            );
-            $modelManager->removeAttribute(
-                's_order_attributes',
-                'bepado', 'order_id'
-            );
+//            $modelManager->removeAttribute(
+//                's_order_attributes',
+//                'bepado', 'shop_id'
+//            );
+//            $modelManager->removeAttribute(
+//                's_order_attributes',
+//                'bepado', 'order_id'
+//            );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
                 'bepado', 'categories'
             );
 
-            $modelManager->removeAttribute(
-                's_categories_attributes',
-                'bepado', 'mapping'
-            );
-
-            $modelManager->removeAttribute(
-                's_categories_attributes',
-                'bepado', 'imported'
-            );
+//            $modelManager->removeAttribute(
+//                's_categories_attributes',
+//                'bepado', 'mapping'
+//            );
+//
+//            $modelManager->removeAttribute(
+//                's_categories_attributes',
+//                'bepado', 'imported'
+//            );
 
             $modelManager->removeAttribute(
                's_articles_attributes',
@@ -619,17 +564,17 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                'bepado', 'last_update_flag'
             );
 
-            $modelManager->removeAttribute(
-                's_media_attributes',
-                'bepado', 'hash'
-            );
+//            $modelManager->removeAttribute(
+//                's_media_attributes',
+//                'bepado', 'hash'
+//            );
 
             $modelManager->generateAttributeModels(array(
                 's_articles_attributes',
-                's_categories_attributes',
-                's_order_details_attributes',
-                's_order_basket_attributes',
-                's_media_attributes'
+//                's_categories_attributes',
+//                's_order_details_attributes',
+//                's_order_basket_attributes',
+//                's_media_attributes'
             ));
         } catch(Exception $e) { }
 

@@ -125,12 +125,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     private function getListQueryBuilder($filter, $order)
     {
-        $repository = $this->getArticleRepository();
-
-        $builder = $repository->createQueryBuilder('a');
+        $builder = $this->getModelManager()->createQueryBuilder();
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->join('d.attribute', 'at');
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
 
@@ -161,7 +160,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                         ->setParameter('supplierId', $rule['value']);
                     break;
                 case 'exportStatus':
-                    $builder->where('at.bepadoExportStatus LIKE :status')
+                    $builder->where('at.exportStatus LIKE :status')
                         ->setParameter('status', $rule['value']);
                     break;
                 case 'active':
@@ -186,11 +185,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->Request()->getParam('sort', array())
         );
         $builder->addSelect(array(
-            'at.bepadoExportStatus as exportStatus',
-            'at.bepadoExportMessage as exportMessage',
-            'at.bepadoCategories'
+            'at.exportStatus as exportStatus',
+            'at.exportMessage as exportMessage',
+            'at.categories'
         ));
-        $builder->andWhere('at.bepadoShopId IS NULL');
+        $builder->andWhere('at.shopId IS NULL');
 
         $query = $builder->getQuery();
 
@@ -217,11 +216,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->Request()->getParam('sort', array())
         );
         $builder->addSelect(array(
-            'at.bepadoShopId',
-            'at.bepadoSourceId',
-            'at.bepadoExportStatus as bepadoStatus',
+            'at.shopId',
+            'at.sourceId',
+            'at.exportStatus as bepadoStatus',
         ));
-        $builder->andWhere('at.bepadoShopId IS NOT NULL');
+        $builder->andWhere('at.shopId IS NOT NULL');
 
         $query = $builder->getQuery();
 
@@ -569,9 +568,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             if($model === null) {
                 continue;
             }
-            $attribute = $model->getAttribute();
+            $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
             $sdk->recordDelete($id);
-            $attribute->setBepadoExportStatus(
+            $attribute->setExportStatus(
                 'delete'
             );
         }
@@ -600,8 +599,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
             // Activate / disable products
             } else {
-                $attribute = $model->getAttribute();
-                if($attribute->getBepadoExportStatus() !== null) {
+                $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
+                if($attribute->getExportStatus() !== null) {
                     continue;
                 }
                 $model->setActive($active);
@@ -641,15 +640,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
 
         $builder->addSelect(array(
-            'at.bepadoLastUpdate',
-            'at.bepadoLastUpdateFlag',
+            'at.lastUpdate',
+            'at.lastUpdateFlag',
             'a.description',
             'a.descriptionLong',
             'a.name'
         ));
-        $builder->andWhere('at.bepadoShopId IS NOT NULL')
-            ->andWHere('at.bepadoLastUpdateFlag IS NOT NULL')
-            ->andWHere('at.bepadoLastUpdateFlag > 0');
+        $builder->andWhere('at.shopId IS NOT NULL')
+            ->andWHere('at.lastUpdateFlag IS NOT NULL')
+            ->andWHere('at.lastUpdateFlag > 0');
 
 
         $query = $builder->getQuery();
@@ -761,5 +760,77 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $this->getModelManager()->flush();
 
         $this->View()->assign('success', true);
+    }
+
+    /**
+     * Returns the bepadoAttribute data for a given articleId
+     *
+     * @throws RuntimeException
+     * @throws Exception
+     */
+    public function getBepadoDataAction()
+    {
+        $articleId = $this->Request()->getParam('articleId');
+
+        if (!$articleId) {
+            throw new \Exception("Bepado: ArticleId empty");
+            
+        }
+
+        /** @var \Shopware\Models\Article\Article $articleModel */
+        $articleModel = $this->getArticleRepository()->find($articleId);
+
+        if (!$articleModel) {
+            throw new \RuntimeException("Could not find model for article with id {$articleId}");
+        }
+
+        $data = $this->getHelper()->getBepadoAttributeByModel($articleModel);
+
+        if (!$data) {
+            $data = new \Shopware\CustomModels\Bepado\Attribute();
+            $data->setArticle($articleModel);
+            $data->setArticleDetail($articleModel->getMainDetail());
+            $this->getModelManager()->persist($data);
+            $this->getModelManager()->flush($data);
+        }
+
+        $data = $this->getModelManager()->toArray($data);
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => array($data)
+        ));
+    }
+
+    /**
+     * Save a given bepado attribute
+     */
+    public function saveBepadoAttributeAction()
+    {
+        $data = $this->Request()->getParams();
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
+        $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
+
+        if (!$bepadoAttribute) {
+            throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
+        }
+
+        // Only allow changes in the fixedPrice field if this is a local product
+        if (!$bepadoAttribute->getShopId()) {
+            $bepadoAttribute->setFixedPrice($data['fixedPrice']);
+        }
+
+        // Save the update fields
+        foreach ($data as $key => $datum) {
+            if (strpos($key, 'update') === 0) {
+                $setter = 'set' . ucfirst($key);
+                $bepadoAttribute->$setter($datum);
+            }
+        }
+
+        $this->getModelManager()->flush();
+
+        $this->View()->assign(array('success' => true));
     }
 }

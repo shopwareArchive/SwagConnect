@@ -30,6 +30,8 @@ use Bepado\SDK\Struct\Product,
     Shopware\Models\Category\Category as CategoryModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
+use Shopware\Models\Article\Detail as ProductDetail;
 
 /**
  * @category  Shopware
@@ -133,7 +135,7 @@ class Helper
      * Currently there are three field being "switched" in the getProductByRowData method:
      * - price          (configurable in fromShop, d.price in toShop)
      * - purchasePrice  (configurable in from Shop, d.basePrice in toShop)
-     * - freeDelivery   (d.shippingFree in fromShop, at.bepadoFreeDelivery in toShop)
+     * - freeDelivery   (d.shippingFree in fromShop, at.freeDelivery in toShop)
      *
      * Two distinct queries?
      *
@@ -141,17 +143,18 @@ class Helper
      */
     private function getProductQuery()
     {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
-        $builder->join('d.attribute', 'at');
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('d.prices', 'defaultPrice', 'with', "defaultPrice.from = 1 AND defaultPrice.customerGroupKey = 'EK'");
         $builder->join('a.tax', 't');
         $builder->leftJoin('d.unit', 'u');
         $builder->select(array(
-            'at.bepadoShopId as shopId',
-            'IFNULL(at.bepadoSourceId, a.id) as sourceId',
+            'at.shopId as shopId',
+            'IFNULL(at.sourceId, a.id) as sourceId',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',
@@ -163,7 +166,7 @@ class Helper
             //'"EUR" as currency',
             'd.shippingFree as freeDelivery',
             '
-            at.bepadoFreeDelivery as bepadoFreeDelivery',
+            at.freeDelivery as bepadoFreeDelivery',
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
@@ -176,8 +179,8 @@ class Helper
             'u.unit',
             'd.purchaseUnit as volume',
             'd.referenceUnit as base',
-            'at.bepadoCategories as categories',
-            'at.bepadoFixedPrice as fixedPrice'
+            'at.categories as categories',
+            'at.fixedPrice as fixedPrice'
             //'images = array()',
         ));
 
@@ -189,21 +192,12 @@ class Helper
         $exportPriceColumn = $repo->getConfig('priceFieldForPriceExport', 'price');
         $exportPurchasePriceColumn = $repo->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
-        $valid = $this->isPriceGroupConfigurationValid(
-            $exportPriceColumn,
-            $exportPurchasePriceColumn,
-            $exportPurchasePriceCustomerGroup,
-            $exportPriceCustomerGroup
-        );
-
-        if ($valid) {
-            $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = 'EK'");
-            $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = 'EK'");
-            $builder->addSelect(array(
-                "exportPrice.{$exportPriceColumn}  as bepadoExportPrice",
-                "exportPurchasePrice.{$exportPurchasePriceColumn} as bepadoExportPurchasePrice"
-            ));
-        }
+        $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = 'EK'");
+        $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = 'EK'");
+        $builder->addSelect(array(
+            "exportPrice.{$exportPriceColumn}  as bepadoExportPrice",
+            "exportPurchasePrice.{$exportPurchasePriceColumn} as bepadoExportPurchasePrice"
+        ));
 
         if($this->productDescriptionField !== null) {
             $builder->addSelect('at.' . $this->productDescriptionField . ' as altDescription');
@@ -213,23 +207,6 @@ class Helper
 
         $query->setHydrationMode($query::HYDRATE_ARRAY);
         return $query;
-    }
-
-    private function isPriceGroupConfigurationValid($exportPriceColumn, $exportPurchasePriceColumn,
-        $exportPurchasePriceCustomerGroup, $exportPriceCustomerGroup)
-    {
-        if (empty($exportPriceColumn) || empty($exportPurchasePriceColumn)
-                || empty($exportPriceCustomerGroup) || empty($exportPurchasePriceCustomerGroup)) {
-            return false;
-        }
-
-        $validEntries = array('basePrice', 'pseudoPrice', 'price');
-        if (!in_array($exportPriceColumn, $validEntries) || !in_array($exportPurchasePriceColumn, $validEntries)) {
-            return false;
-        }
-
-
-        return true;
     }
 
     /**
@@ -259,7 +236,7 @@ class Helper
 
     /**
      * @param $id
-     * @return null|\Shopware\Models\Article\Article
+     * @return null|ProductModel
      */
     public function getArticleModelById($id)
     {
@@ -318,6 +295,23 @@ class Helper
             $row['categories'] = unserialize($row['categories']);
         }
 
+        // If the product is a remote product, the freeDelivery needs to be replaced
+        // Else we need some price replacement
+        if (!empty($row['shopId'])) {
+            $row['freeDelivery'] = $row['bepadoFreeDelivery'];
+        }else{
+            if ($row['bepadoExportPrice']) {
+                $row['price'] = $row['bepadoExportPrice'];
+            }
+
+            if ($row['bepadoExportPurchasePrice']) {
+                $row['purchasePrice'] = $row['bepadoExportPurchasePrice'];
+            }
+        }
+        unset($row['bepadoFreeDelivery']);
+        unset($row['bepadoExportPrice']);
+        unset($row['bepadoExportPurchasePrice']);
+
         // Fix prices
         foreach(array('price', 'purchasePrice', 'vat') as $name) {
             $row[$name] = round($row[$name], 2);
@@ -343,24 +337,6 @@ class Helper
         }
         unset($row['width'], $row['height'], $row['length']);
 
-        // If the product is a remote product, the freeDelivery needs to be replaced
-        // Else we need some price replacement
-        if (!empty($row['shopId'])) {
-            $row['freeDelivery'] = $row['bepadoFreeDelivery'];
-        }else{
-            if ($row['bepadoExportPrice']) {
-                $row['price'] = $row['bepadoExportPrice'];
-            }
-
-            if ($row['bepadoExportPurchasePrice']) {
-                $row['purchasePrice'] = $row['bepadoExportPurchasePrice'];
-            }
-        }
-        unset($row['bepadoFreeDelivery']);
-        unset($row['bepadoExportPrice']);
-        unset($row['bepadoExportPurchasePrice']);
-
-
         $product = new Product(
             $row
         );
@@ -368,14 +344,22 @@ class Helper
     }
 
     /**
+     * Returns an article model for a given (sdk) product.
+     *
      * @param Product $product
      * @param int $mode
      * @return null|ProductModel
      */
     public function getArticleModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
-        $builder = $this->getArticleModelQueryBuilder();
-        $builder->where('at.bepadoShopId = :shopId AND at.bepadoSourceId = :sourceId');
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('ba', 'a'));
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->join('ba.article', 'a');
+        $builder->join('a.mainDetail', 'd');
+        $builder->leftJoin('d.attribute', 'at');
+
+        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
         $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
@@ -386,7 +370,13 @@ class Helper
             $query::HYDRATE_OBJECT,
             $mode
         );
-        return isset($result[0]) ? $result[0] : null;
+
+        if (isset($result[0])) {
+            $attribute = $result[0];
+            return $attribute->getArticle();
+        }
+
+        return null;
     }
 
     /**
@@ -430,17 +420,41 @@ class Helper
 
             FROM s_order_basket ob
 
-            INNER JOIN s_articles_attributes aa
-            ON aa.articleID = ob.articleID
-            AND aa.bepado_shop_id IS NOT NULL
+            INNER JOIN s_plugin_bepado_items bi
+            ON bi.article_id = ob.articleID
+            AND bi.shop_id IS NOT NULL
 
-            WHERE sessionID=?
+            WHERE ob.sessionID=?
             LIMIT 1
             ',
             array($session)
         );
 
         return !empty($result);
+    }
+
+    /**
+     * Will return the bepadoAttribute for a given model. The model can be an Article\Article or Article\Detail
+     *
+     * @param $model ProductModel|ProductDetail
+     * @return BepadoAttribute
+     */
+    public function getBepadoAttributeByModel($model)
+    {
+        $repository = $this->manager->getRepository('Shopware\CustomModels\Bepado\Attribute');
+
+        if (!$model->getId()) {
+            return false;
+        }
+
+        if ($model instanceof ProductModel) {
+            if (!$model->getMainDetail()) {
+                return false;
+            }
+            return $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
+        } elseif ($model instanceof ProductDetail) {
+            return $repository->findOneBy(array('articleDetailId' => $model->getId()));
+        }
     }
 
     /**
@@ -538,24 +552,34 @@ class Helper
             if($model === null) {
                 continue;
             }
-            $attribute = $model->getAttribute();
+            $bepadoAttribute = $this->getBepadoAttributeByModel($model) ?: new BepadoAttribute;
 
-            $status = $attribute->getBepadoExportStatus();
+            // Enforce purchasePrices. Once the SDK validates this, this can be removed.
+            $product = $this->getProductById($id);
+            if ($product->purchasePrice == 0) {
+                $errors[] = "Product {$product->title} does not have a purchasePrice";
+                continue;
+            }
+
+            $status = $bepadoAttribute->getExportStatus();
             if(empty($status) || $status == 'delete' || $status == 'error') {
                 $status = 'insert';
             } else {
                 $status = 'update';
             }
-            $attribute->setBepadoExportStatus(
+            $bepadoAttribute->setExportStatus(
                 $status
             );
 
             $categories = $this->getRowProductCategoriesById($id);
-            $attribute->setBepadoCategories(
+            $bepadoAttribute->setCategories(
                 serialize($categories)
             );
 
-            Shopware()->Models()->flush($attribute);
+            if (!$bepadoAttribute->getId()) {
+                Shopware()->Models()->persist($bepadoAttribute);
+            }
+            Shopware()->Models()->flush($bepadoAttribute);
             try {
                 if($status == 'insert') {
                     $sdk->recordInsert($id);
@@ -563,10 +587,10 @@ class Helper
                     $sdk->recordUpdate($id);
                 }
             } catch(Exception $e) {
-                $attribute->setBepadoExportStatus(
+                $bepadoAttribute->setExportStatus(
                     'error'
                 );
-                $attribute->setBepadoExportMessage(
+                $bepadoAttribute->setExportMessage(
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
 
@@ -574,7 +598,7 @@ class Helper
                 $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
 
                 $errors[] = $prefix . $e->getMessage();
-                Shopware()->Models()->flush($attribute);
+                Shopware()->Models()->flush($bepadoAttribute);
             }
         }
 

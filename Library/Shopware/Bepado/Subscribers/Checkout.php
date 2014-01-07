@@ -29,7 +29,7 @@ class Checkout extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
-        if(!in_array($actionName, array('confirm', 'cart'))) {
+        if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
             return;
         }
         if(empty($view->sBasket) || !$request->isDispatched()) {

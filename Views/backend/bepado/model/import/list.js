@@ -4,9 +4,9 @@ Ext.define('Shopware.apps.Bepado.model.import.List', {
 
     fields: [
         //{block name="backend/bepado/model/import/list/fields"}{/block}
-        { name: 'bepadoShopId', type: 'string', useNull: true },
-        { name: 'bepadoSourceId', type: 'string', useNull: true },
-        { name: 'bepadoStatus', type: 'string', useNull: true }
+        { name: 'shopId', type: 'string', useNull: true },
+        { name: 'sourceId', type: 'string', useNull: true },
+        { name: 'status', type: 'string', useNull: true }
     ]
 });
 //{/block}

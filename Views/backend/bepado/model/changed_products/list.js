@@ -7,8 +7,8 @@ Ext.define('Shopware.apps.Bepado.model.changed_products.List', {
         { name: 'description', type: 'string', useNull: true },
         { name: 'descriptionLong', type: 'string', useNull: true },
         { name: 'images', type: 'string', useNull: true },
-        { name: 'bepadoLastUpdate', type: 'string', useNull: true },
-        { name: 'bepadoLastUpdateFlag', type: 'int', useNull: true },
+        { name: 'lastUpdate', type: 'string', useNull: true },
+        { name: 'lastUpdateFlag', type: 'int', useNull: true },
 
     ]
 });

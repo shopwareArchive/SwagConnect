@@ -42,7 +42,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.List', {
             flex: 3
         }, {
             header: '{s name=changed/columns/changed}Changed fields{/s}',
-            dataIndex: 'bepadoLastUpdateFlag',
+            dataIndex: 'lastUpdateFlag',
             renderer: function(value, metaData, record) {
                 if (!value) {
                     return '';

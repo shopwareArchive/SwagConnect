@@ -70,8 +70,34 @@ class TemplateExtension extends BaseSubscriber
 
         $bepadoOrderData = array();
 
-        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id FROM s_order_attributes WHERE orderID IN (' . implode(', ', $orderIds) . ')';
+        // This will apply for the fromShop
+        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id
+        FROM s_order_attributes
+        WHERE orderID IN (' . implode(', ', $orderIds) . ')
+        AND bepado_shop_id IS NOT NULL
+        ';
+        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+            $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
+        }
 
+        // This will apply for orders with remote bepado products in it
+        $sql = 'SELECT oa.orderID, bi.shop_id as bepado_shop_id,  "remote" as bepado_order_id
+
+        FROM s_order_attributes oa
+
+        INNER JOIN s_order_details od
+        ON od.orderID = oa.orderID
+
+        INNER JOIN s_articles_details ad
+        ON ad.articleID = od.articleID
+        AND ad.kind=1
+
+        INNER JOIN s_plugin_bepado_items bi
+        ON bi.article_detail_id=ad.id
+        AND bi.shop_id IS NOT NULL
+
+        WHERE oa.orderID In (' . implode(', ', $orderIds) . ')
+        ';
         foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
@@ -181,11 +207,18 @@ class TemplateExtension extends BaseSubscriber
         $request = $subject->Request();
 
         switch($request->getActionName()) {
-            case 'load':
+            case 'index':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
                     'backend/article/bepado.js'
+                );
+                break;
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/article/view/detail/bepado.js'
                 );
                 break;
             default:
@@ -210,9 +243,9 @@ class TemplateExtension extends BaseSubscriber
             return $data;
         }
 
-        $sql = 'SELECT articleID FROM s_articles_attributes WHERE articleID IN (' . implode(', ', $articleIds) . ') AND bepado_source_id IS NOT NULL';
+        $sql = 'SELECT article_id FROM s_plugin_bepado_items WHERE article_id IN (' . implode(', ', $articleIds) . ') AND source_id IS NOT NULL';
         $bepadoArticleIds = array_map(function ($row) {
-            return $row['articleID'];
+            return $row['article_id'];
         }, Shopware()->Db()->fetchAll($sql));
 
         foreach($data as $idx => $row) {

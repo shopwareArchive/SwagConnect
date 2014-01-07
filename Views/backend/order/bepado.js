@@ -3,7 +3,7 @@
  */
 /*
  {block name="backend/order/model/order/fields" append}
- { name: 'bepadoOrderId', type: 'int', useNull : true },
+ { name: 'bepadoOrderId', type: 'auto', useNull : true },
  { name: 'bepadoShopId', type: 'int', useNull : true },
  { name: 'bepadoShop', type: 'string', useNull : true },
  {/block}
@@ -31,8 +31,13 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
                 var style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
                 if (value) {
-                    result = '<div  title="" class="bepado-icon" ' + style + '>&nbsp;</div>';
-                    metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('bepadoShop') + '"';
+                    if (value == 'remote') {
+                        result = '<div  title="" class="bepado-icon" ' + style + '>&nbsp;</div>';
+                        metaData.tdAttr = 'data-qtip="{s name=order/fromRemote}This order contains remote bepado products{/s}"';
+                    } else {
+                        result = '<div  title="" class="bepado-icon-green" ' + style + '>&nbsp;</div>';
+                        metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('bepadoShop') + '"';
+                    }
                 }
 
                 return result;

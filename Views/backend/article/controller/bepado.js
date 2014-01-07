@@ -7,8 +7,6 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
      */
     extend:'Ext.app.Controller',
 
-    shouldCancel: false,
-
     refs: [
           { ref: 'bepadoForm', selector: 'article-bepado-form' },
       ],
@@ -42,7 +40,6 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
     onStoresLoaded: function() {
         var me = this;
         
-        console.log(234);
     },
 
     onSaveArticle: function(win, article, options) {
@@ -62,12 +59,18 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         });
     },
 
+    /**
+     * Callback function for the "bepadoStoreReloadNeeded" event
+     */
     onBepadoStoreReloadNeeded: function() {
         var me = this;
 
         me.doReloadBepadoStore();
     },
 
+    /**
+     * Actually do reload the bepado store
+     */
     doReloadBepadoStore: function() {
         var me = this,
             bepadoForm = me.getBepadoForm();
@@ -80,9 +83,46 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
                 if (records.length > 0) {
                     me.record = records[0];
                     bepadoForm.loadRecord(me.record);
+
+                    me.manageFields();
                 }
             }
         });
+    },
+
+    /**
+     * Manage some fields which needs to be disabled for remote products
+     */
+    manageFields: function() {
+        var me = this,
+            bepadoForm = me.getBepadoForm(),
+            settingsFieldSet = me.subApplication.articleWindow.down('article-settings-field-set'),
+            pricesFieldSet = me.subApplication.articleWindow.down('article-prices-field-set'),
+            shippingField, inStockField,
+            isPriceLocked;
+
+        bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
+
+        if (settingsFieldSet) {
+            shippingField = settingsFieldSet.down('checkboxfield[fieldLabel=' + settingsFieldSet.snippets.shippingFree.field + ']');
+            inStockField = settingsFieldSet.down('numberfield[fieldLabel=' + settingsFieldSet.snippets.stock + ']');
+
+            if (shippingField) {
+                shippingField.setReadOnly(me.record.get('shopId') > 0);
+            }
+            if (inStockField) {
+                inStockField.setReadOnly(me.record.get('shopId') > 0);
+            }
+        }
+
+        if (pricesFieldSet) {
+            isPriceLocked = me.record.get('fixedPrice') && me.record.get('shopId') > 0;
+            pricesFieldSet.tabPanel.setDisabled(isPriceLocked);
+            pricesFieldSet.bepadoLabel.setVisible(isPriceLocked);
+        }
+
     }
+
+
 });
 //{/block}

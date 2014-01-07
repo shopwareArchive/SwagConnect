@@ -6,6 +6,7 @@ Ext.define('Shopware.apps.Article.model.Bepado', {
         //{block name="backend/article/model/bepado/fields"}{/block}
         { name: 'fixedPrice', type: 'boolean' },
         { name: 'shopId', type: 'int', useNull: true },
+        { name: 'sourceId', type: 'int', useNull: true },
         { name: 'updatePrice', type: 'string', useNull: true  },
         { name: 'updateImage', type: 'string', useNull: true  },
         { name: 'updateLongDescription', type: 'string', useNull: true  },

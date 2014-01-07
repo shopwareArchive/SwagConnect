@@ -83,14 +83,16 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
         var me = this,
             tab = eOpts.tab;
 
+        tab.add(me.createBepadoComponents());
+
         var controller = me.subApplication.getController('Bepado');
 
         me.bepadoStore = Ext.create('Shopware.apps.Article.store.Bepado');
         me.bepadoStore.getProxy().extraParams.articleId = me.article.get('id');
 
         controller.bepadoStore = me.bepadoStore;
+        controller.doReloadBepadoStore();
 
-        tab.add(me.createBepadoComponents());
         tab.setDisabled(article.get('id') === null)
     },
 

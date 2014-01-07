@@ -218,7 +218,10 @@ class TemplateExtension extends BaseSubscriber
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
-                    'backend/article/view/detail/bepado.js'
+                    'backend/article/view/detail/bepado_tab.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/article/view/detail/prices_bepado.js'
                 );
                 break;
             default:

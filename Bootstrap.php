@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.19';
+        return '1.2.20';
     }
 
     /**
@@ -454,7 +454,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             `bepado_free_delivery`, `bepado_update_price`, `bepado_update_image`, `bepado_update_long_description`,
              `bepado_update_short_description`, `bepado_update_name`, `bepado_last_update`, `bepado_last_update_flag`
             FROM `s_articles_attributes`';
-            Shopware()->Db()->execute($sql);
+            Shopware()->Db()->exec($sql);
 
             $this->removeMyAttributes();
         }

@@ -223,6 +223,9 @@ class TemplateExtension extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/view/detail/prices_bepado.js'
                 );
+                $subject->View()->extendsTemplate(
+                    'backend/article/controller/detail_bepado.js'
+                );
                 break;
             default:
                 break;

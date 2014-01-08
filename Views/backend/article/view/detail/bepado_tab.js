@@ -83,6 +83,8 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
         var me = this,
             tab = eOpts.tab;
 
+        me.bepadoTab = tab;
+
         tab.add(me.createBepadoComponents());
 
         var controller = me.subApplication.getController('Bepado');

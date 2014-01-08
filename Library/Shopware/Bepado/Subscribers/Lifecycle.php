@@ -35,7 +35,11 @@ class Lifecycle extends BaseSubscriber
         }
 
         // Check if entity is a bepado product
-        $status = $model->getAttribute()->getBepadoExportStatus();
+        $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
+        if (!$attribute) {
+            return;
+        }
+        $status = $attribute->getExportStatus();
         if (empty($status)) {
             return;
         }

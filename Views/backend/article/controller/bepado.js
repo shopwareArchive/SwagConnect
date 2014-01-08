@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
 
     refs: [
           { ref: 'bepadoForm', selector: 'article-bepado-form' },
+          { ref: 'articleDetailWindow', selector: 'article-detail-window' },
       ],
 
 
@@ -36,15 +37,26 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         me.callParent(arguments);
     },
 
+    enableTab: function() {
+        var me = this,
+            detailWindow = me.getArticleDetailWindow();
+
+        detailWindow.bepadoTab.setDisabled(false);
+    },
 
     onStoresLoaded: function() {
         var me = this;
         
+
     },
 
     onSaveArticle: function(win, article, options) {
         var me = this,
             bepadoForm = me.getBepadoForm();
+
+        if (!me.subApplication.article || !me.subApplication.article.get('id')) {
+            return;
+        }
 
         bepadoForm.getForm().updateRecord(me.record);
 
@@ -75,6 +87,10 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         var me = this,
             bepadoForm = me.getBepadoForm();
 
+        if (!me.subApplication.article || !me.subApplication.article.get('id')) {
+            return;
+        }
+
         me.bepadoStore.load({
             callback: function(records, operation) {
                 if (!operation.wasSuccessful()) {
@@ -88,6 +104,8 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
                 }
             }
         });
+
+
     },
 
     /**

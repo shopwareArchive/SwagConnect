@@ -378,6 +378,35 @@ class Helper
     }
 
     /**
+     * Helper method to create a bepado attribute on the fly
+     *
+     * @param $model
+     * @return BepadoAttribute
+     * @throws \RuntimeException
+     */
+    public function getOrCreateBepadoAttributeByModel($model)
+    {
+        $attribute = $this->getBepadoAttributeByModel($model);
+
+        if (!$attribute) {
+            $attribute = new BepadoAttribute();
+            if ($model instanceof ProductModel) {
+                $attribute->setArticle($model);
+                $attribute->setArticleDetail($model->getMainDetail());
+            } elseif ($model instanceof ProductDetail) {
+                $attribute->setArticle($model->getArticle());
+                $attribute->setArticleDetail($model);
+            } else {
+                throw new \RuntimeException("Passed model needs to be an article or an article detail");
+            }
+            $this->manager->persist($attribute);
+            $this->manager->flush($attribute);
+        }
+
+        return $attribute;
+    }
+
+    /**
      * @param $id
      * @return string[]
      */

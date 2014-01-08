@@ -526,7 +526,7 @@ class Helper
             $categories = $this->getRowProductCategoriesById($id);
             // Don't allow vendor categories for export
             $filteredCategories = array_filter($categories, function($category) {
-                return strpos($category, '/vendor') !== 0;
+                return strpos($category, '/vendor/') !== 0 && $category != '/vendor';
             });
             $bepadoAttribute->setCategories(
                 serialize($filteredCategories)

@@ -160,8 +160,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                         ->setParameter('supplierId', $rule['value']);
                     break;
                 case 'exportStatus':
-                    $builder->where('at.exportStatus LIKE :status')
-                        ->setParameter('status', $rule['value']);
+                    if ($rule['value'] == 'online') {
+                        $builder->where('at.exportStatus IN (:insert, :update)')
+                            ->setParameter('insert', 'insert')
+                            ->setParameter('update', 'update');
+                    } else {
+                        $builder->where('at.exportStatus LIKE :status')
+                            ->setParameter('status', $rule['value']);
+                    }
                     break;
                 case 'active':
                     $builder->where('a.active LIKE :active')

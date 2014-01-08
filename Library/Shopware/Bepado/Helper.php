@@ -508,7 +508,7 @@ class Helper
             // Enforce purchasePrices. Once the SDK validates this, this can be removed.
             $product = $this->getProductById($id);
             if ($product->purchasePrice == 0) {
-                $errors[] = "Product {$product->title} does not have a purchasePrice";
+                $errors[] = " &bull; Product {$product->title} does not have a purchasePrice";
                 continue;
             }
 
@@ -534,7 +534,7 @@ class Helper
 
             if (empty($filteredCategories) && count($filteredCategories) != count($categories)) {
                 $removed = implode("\n", array_diff($categories, $filteredCategories));
-                $errors[] = " * {$prefix} Ignoring these vendor-categories {$product->title}: {$removed}";
+                $errors[] = " &bull; {$prefix} Ignoring these vendor-categories {$product->title}: {$removed}";
             }
 
             if (!$bepadoAttribute->getId()) {
@@ -555,7 +555,7 @@ class Helper
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
 
-                $errors[] = " * " . $prefix . $e->getMessage();
+                $errors[] = " &bull; " . $prefix . $e->getMessage();
                 Shopware()->Models()->flush($bepadoAttribute);
             }
         }

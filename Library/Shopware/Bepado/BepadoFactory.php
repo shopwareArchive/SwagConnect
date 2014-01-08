@@ -134,8 +134,8 @@ class BepadoFactory
             $this->helper = new Helper(
                 $this->getModelManager(),
                 $this->getImagePath(),
-                Shopware()->Config()->get('productDescriptionField'),
-                $this->getCategoryQuery()
+                $this->getCategoryQuery(),
+                $this->getProductQuery()
             );
         }
 
@@ -151,6 +151,14 @@ class BepadoFactory
             Shopware()->Config()->getByNamespace('SwagBepado', 'checkoutShopInfo')
         );
 
+    }
+
+    /**
+     * @return ProductQuery
+     */
+    private function getProductQuery()
+    {
+        return new ProductQuery($this->getModelManager(), Shopware()->Config()->get('productDescriptionField'));
     }
 
     /**

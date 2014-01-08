@@ -444,7 +444,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         // Migrate old attributes to bepado attributes
         if (version_compare($version, '1.2.18', '<=')) {
             // Copy s_articles_attributes to own attribute table
-            $sql = 'INSERT INTO `s_plugin_bepado_items`
+            $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
               (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
               `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
               `update_long_description`, `update_short_description`, `update_name`, `last_update`,

@@ -152,7 +152,10 @@ class ProductFromShop implements ProductFromShopBase
 
         $model->fromArray(array(
             'number' => $number,
-            'invoiceShipping' => $order->shippingCosts,
+            /**
+             * todo: shippingCosts needs to be calculated from the tax rate of the purchased products
+             */
+            'invoiceShipping' => $order->shippingCosts * 1.19,
             'invoiceShippingNet' => $order->shippingCosts,
             'currencyFactor' => 1,
             'orderStatus' => $status,

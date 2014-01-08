@@ -6,14 +6,17 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
     alias: 'widget.bepado-mapping',
 
     //border: false,
-    layout: 'fit',
-
+    layout: 'border',
+    
     initComponent: function() {
         var me = this;
 
         Ext.applyIf(me, {
-            items: [{
+            items: [
+                me.getNotificationBox(),
+            {
                 xtype: 'treepanel',
+                region: 'center',
                 rootVisible: false,
                 root: {
                     id: 1,
@@ -53,6 +56,17 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         );
 
         me.callParent(arguments);
+    },
+
+    getNotificationBox: function() {
+        var me = this,
+            notice;
+
+        notice = Shopware.Notification.createBlockMessage("{s name=mapping/info}The vendor category tree can only be used for importing products. Mappings for export will not apply.{/s}", 'error');
+
+        notice.margin = 10;
+        notice.region = 'north';
+        return notice;
     },
 
     getActionColumn: function() {

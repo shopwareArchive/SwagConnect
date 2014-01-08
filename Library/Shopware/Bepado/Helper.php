@@ -498,6 +498,8 @@ class Helper
 
         foreach($ids as $id) {
             $model = $this->getArticleModelById($id);
+            $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
+
             if($model === null) {
                 continue;
             }
@@ -519,11 +521,21 @@ class Helper
             $bepadoAttribute->setExportStatus(
                 $status
             );
+            $bepadoAttribute->setExportMessage(null);
 
             $categories = $this->getRowProductCategoriesById($id);
+            // Don't allow vendor categories for export
+            $filteredCategories = array_filter($categories, function($category) {
+                return strpos($category, '/vendor/') !== 0;
+            });
             $bepadoAttribute->setCategories(
-                serialize($categories)
+                serialize($filteredCategories)
             );
+
+            if (empty($filteredCategories) && count($filteredCategories) != count($categories)) {
+                $removed = implode("\n", array_diff($categories, $filteredCategories));
+                $errors[] = " * {$prefix} Ignoring these vendor-categories {$product->title}: {$removed}";
+            }
 
             if (!$bepadoAttribute->getId()) {
                 Shopware()->Models()->persist($bepadoAttribute);
@@ -543,10 +555,7 @@ class Helper
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
 
-
-                $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
-
-                $errors[] = $prefix . $e->getMessage();
+                $errors[] = " * " . $prefix . $e->getMessage();
                 Shopware()->Models()->flush($bepadoAttribute);
             }
         }

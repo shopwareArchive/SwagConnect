@@ -531,9 +531,9 @@ class Helper
             }
 
             if (!$bepadoAttribute->getId()) {
-                Shopware()->Models()->persist($bepadoAttribute);
+                $this->manager->persist($bepadoAttribute);
             }
-            Shopware()->Models()->flush($bepadoAttribute);
+            $this->manager->flush($bepadoAttribute);
             try {
                 if($status == 'insert') {
                     $sdk->recordInsert($id);
@@ -549,7 +549,7 @@ class Helper
                 );
 
                 $errors[] = " &bull; " . $prefix . $e->getMessage();
-                Shopware()->Models()->flush($bepadoAttribute);
+                $this->manager->flush($bepadoAttribute);
             }
         }
 

@@ -505,13 +505,6 @@ class Helper
             }
             $bepadoAttribute = $this->getBepadoAttributeByModel($model) ?: new BepadoAttribute;
 
-            // Enforce purchasePrices. Once the SDK validates this, this can be removed.
-            $product = $this->getProductById($id);
-            if ($product->purchasePrice == 0) {
-                $errors[] = " &bull; Product {$product->title} does not have a purchasePrice";
-                continue;
-            }
-
             $status = $bepadoAttribute->getExportStatus();
             if(empty($status) || $status == 'delete' || $status == 'error') {
                 $status = 'insert';
@@ -534,7 +527,7 @@ class Helper
 
             if (empty($filteredCategories) && count($filteredCategories) != count($categories)) {
                 $removed = implode("\n", array_diff($categories, $filteredCategories));
-                $errors[] = " &bull; {$prefix} Ignoring these vendor-categories {$product->title}: {$removed}";
+                $errors[] = " &bull; {$prefix} Ignoring these vendor-categories {$model->getName()}: {$removed}";
             }
 
             if (!$bepadoAttribute->getId()) {

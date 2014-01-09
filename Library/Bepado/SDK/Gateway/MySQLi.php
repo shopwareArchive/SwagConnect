@@ -77,6 +77,7 @@ class MySQLi extends Gateway
                 `bepado_change`
             WHERE
                 `c_revision` > ' . $offset . '
+            ORDER BY `c_revision` ASC
             LIMIT
                 ' . ((int) $limit)
         );
@@ -195,6 +196,18 @@ class MySQLi extends Gateway
      */
     public function recordUpdate($id, $hash, $revision, Struct\Product $product)
     {
+        $sql = 'SELECT p_hash FROM bepado_product ' .
+               'WHERE p_source_id = "' . $this->connection->real_escape_string($id) . '"';
+
+        $row = $this->connection
+            ->query($sql)
+            ->fetch_assoc();
+        $currentHash = $row['p_hash'];
+
+        if ($currentHash === $hash) {
+            return;
+        }
+
         $this->connection->query(
             'INSERT INTO
                 bepado_change (

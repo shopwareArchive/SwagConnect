@@ -78,6 +78,7 @@ class PDO extends Gateway
                 `bepado_change`
             WHERE
                 `c_revision` > ' . $offset . '
+            ORDER BY `c_revision` ASC
             LIMIT
                 ' . ((int) $limit)
         );
@@ -182,6 +183,16 @@ class PDO extends Gateway
      */
     public function recordUpdate($id, $hash, $revision, Struct\Product $product)
     {
+        $stmt = $this->connection
+            ->prepare('SELECT p_hash FROM bepado_product WHERE p_source_id = ?');
+        $stmt->execute(array($id));
+
+        $currentHash = $stmt->fetchColumn();
+
+        if ($currentHash === $hash) {
+            return;
+        }
+
         $query = $this->connection->prepare(
             'INSERT INTO
                 bepado_change (

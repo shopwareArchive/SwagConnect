@@ -54,6 +54,7 @@ class Product extends Verificator
                 'shopId',
                 'sourceId',
                 'price',
+                'purchasePrice',
                 'currency',
                 'availability',
                 'vat',
@@ -73,6 +74,10 @@ class Product extends Verificator
             if (@iconv('UTF-8', 'UTF-8', $struct->$property) != $struct->$property) {
                 throw new \RuntimeException("Property $property MUST be UTF-8 encoded.");
             }
+        }
+
+        if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
+            throw new \RuntimeException("The purchasePrice is not allowed to be 0 or smaller.");
         }
 
         if (!in_array($struct->vat, array(0.0, 0.07, 0.19))) {

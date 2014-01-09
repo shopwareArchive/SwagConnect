@@ -122,7 +122,7 @@ class Product extends ShopItem
      * during transactions and is required to be the same in both
      * shops during a transaction.
      *
-     * The price includes the VAT.
+     * The price is net and does *NOT* include the VAT.
      *
      * @var float
      */
@@ -139,7 +139,7 @@ class Product extends ShopItem
      * will take effect if its not given. If this price is given however
      * price groups will NOT be considered to calculate the profit margin.
      *
-     * The price includes the VAT.
+     * The price is net and does *NOT* include the VAT.
      *
      * @var float
      */

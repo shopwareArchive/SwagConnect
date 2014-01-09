@@ -33,6 +33,9 @@ use Bepado\SDK\Struct\Product,
     Doctrine\ORM\Query;
 use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Detail as ProductDetail;
+use Shopware\Models\Media\Media as MediaModel;
+use Shopware\Models\Attribute\Media as MediaAttribute;
+use Shopware\Models\Article\Image;
 
 /**
  * @category  Shopware
@@ -485,11 +488,122 @@ class Helper
     }
 
 
+
+    /**
+     * Handles the image import of a product. This will:
+     * - delete all images imported from bepado before and not in the current import list
+     * - create new images which have not already been imported
+     * - set the main image, if there is no main image, yet
+     *
+     * Images are identified via the URL of the bepado image. So we don't need to md5 the
+     * actual image content every time.
+     *
+     * @param array $images
+     * @param $model ProductModel
+     */
+    public function handleImageImport($images, $model)
+    {
+        // Build up an array of images imported from bepado
+        $positions = array();
+        $localImagesFromBepado = array();
+        /** @var $image Image */
+        /** @var $media \Shopware\Models\Media\Media */
+        foreach ($model->getImages() as $image) {
+            // Build a list of used position fields
+            $position[] = $image->getPosition();
+
+            $media = $image->getMedia();
+            if (!$media || !$media->getAttribute()) {
+                continue;
+            }
+            $attribute = $media->getAttribute();
+
+            // If the image was not imported from bepado, skip it
+            $bepadoHash = $attribute->getBepadoHash();
+            if (!$bepadoHash) {
+                continue;
+            }
+
+            $localImagesFromBepado[$bepadoHash] = array('image' => $image, 'media' => $media);
+        }
+        $maxPosition = max($positions); // Get the highest position field
+
+        $remoteImagesFromBepado = array_flip($images);
+
+        // Build up arrays of images to delete and images to create
+        $imagesToDelete = array_diff_key($localImagesFromBepado, $remoteImagesFromBepado);
+        $imagesToCreate = array_diff_key($remoteImagesFromBepado, $localImagesFromBepado);
+
+        // Delete old bepado images and media objects
+        foreach ($imagesToDelete as $hash => $data) {
+            $this->manager->remove($data['image']);
+            $this->manager->remove($data['media']);
+        }
+        $this->manager->flush();
+
+        // Check if we still have a main image
+        $hasMainImage = $this->hasArticleMainImage($model->getId());
+
+        // @todo:dn Move flushes out of the loop
+        try {
+            $album = $this->manager->find('Shopware\Models\Media\Album', -1);
+            $tempDir = Shopware()->DocPath('media_temp');
+
+            foreach ($imagesToCreate as $imageUrl => $key) {
+                $tempFile = tempnam($tempDir, 'image');
+                copy($imageUrl, $tempFile);
+                $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
+
+                // Create the media object
+                $media = new MediaModel();
+                $media->setAlbum($album);
+                $media->setDescription('');
+                $media->setCreated(new \DateTime());
+                $media->setUserId(0);
+                $media->setFile($file);
+
+                $mediaAttribute = $media->getAttribute() ?: new MediaAttribute();
+                $mediaAttribute->setBepadoHash($imageUrl);
+                $mediaAttribute->setMedia($media);
+
+                $this->manager->persist($media);
+                $this->manager->persist($mediaAttribute);
+                $this->manager->flush();
+
+                // Create the associated image object
+                $image = new Image();
+                // If there is no main image and we are in the first iteration, set the current image as main image
+                $image->setMain((!$hasMainImage && $key == 0) ? 1 : 2);
+                $image->setMedia($media);
+                $image->setPosition($maxPosition + $key + 1);
+                $image->setArticle($model);
+                $image->setPath($media->getName());
+                $image->setExtension($media->getExtension());
+
+                $this->manager->persist($image);
+                $this->manager->flush();
+            }
+        } catch (\Exception $e) {
+        }
+
+    }
+
+    /**
+     * Defines the update flags
+     *
+     * @return array
+     */
+    public function getUpdateFlags()
+    {
+        return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price');
+    }
+
     /**
      * Helper function to mark a given array of product ids for bepado update
      *
      * @param array $ids
      * @param $sdk SDK
+     * @return array
      */
     public function insertOrUpdateProduct(array $ids, $sdk)
     {

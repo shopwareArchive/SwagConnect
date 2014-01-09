@@ -360,6 +360,16 @@ class Attribute extends ModelEntity
     }
 
     /**
+     * Helper to inverse a given flag
+     *
+     * @param $flagToFlip
+     */
+    public function flipLastUpdateFlag($flagToFlip)
+    {
+        $this->lastUpdateFlag = $this->lastUpdateFlag ^ $flagToFlip;
+    }
+
+    /**
      * @return int
      */
     public function getLastUpdateFlag()

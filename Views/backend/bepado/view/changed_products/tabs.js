@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
      */
     createContainer: function(name) {
         var me = this,
-            config,
+            config, applyButton,
             local, remote;
 
         // Define the fields for the given type
@@ -99,6 +99,10 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
         Ext.apply(local, config);
         Ext.apply(remote, config);
 
+        applyButton = Ext.create('Ext.button.Button', {
+            text: '{s name=changed_products/applyButton}Apply changes now{/s}'
+        });
+
         // Create a form and put the local and remote field into
         return Ext.create('Ext.form.Panel', {
                 autoScroll: true,
@@ -112,7 +116,8 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                     padding: 10,
                     border: false
                 },
-                items: [local, remote]
+                applyButton: applyButton,
+                items: [applyButton, local, remote]
             });
     }
 

@@ -389,8 +389,8 @@ class BasketHelper
      */
     public function recalculate()
     {
-        $shippingCosts = array_sum($this->getBepadoShippingCosts());
-        $shippingCostsNet = $shippingCosts / (1 + $this->basket['sShippingcostsTax']*0.01);
+        $shippingCostsNet = array_sum($this->getBepadoShippingCosts());
+        $shippingCosts = $shippingCostsNet * (1 + $this->basket['sShippingcostsTax']*0.01);
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 

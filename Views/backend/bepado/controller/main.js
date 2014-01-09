@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'importList', selector: 'bepado-import-list' },
         { ref: 'mapping', selector: 'bepado-mapping treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
+        { ref: 'changedList', selector: 'bepado-changed-products-list' }
     ],
 
     messages: {
@@ -279,7 +280,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
             Ext.each(Object.keys(flags), function(key) {
-                var container = changeView.fields[flags[key]];
+                var fieldName = flags[key],
+                    container = changeView.fields[fieldName];
 
                 if (container) {
                     changeView.remove(container, false);
@@ -287,6 +289,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
                 if (changeFlag & key && container) {
                     changeView.add(container);
+
+                    container.applyButton.handler = function() {
+                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+                    }
+
                     container.loadRecord(changeRecord);
                 }
             });
@@ -299,6 +306,38 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             changeView.setActiveTab(0);
 
         }
+    },
+
+    /**
+     * Callback to apply a given change for a given product
+     *
+     * @param type
+     * @param value
+     * @param articleId
+     */
+    applyChanges: function(type, value, articleId) {
+        var me = this,
+            changedProductsList = me.getChangedList(),
+            store = changedProductsList.store;
+
+        Ext.Ajax.request({
+            url: '{url action=applyChanges}',
+            method: 'POST',
+            params: {
+                type: type,
+                value: value,
+                articleId: articleId
+            },
+            success: function(response, opts) {
+                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                store.reload();
+            },
+            failure: function(response, opts) {
+                me.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+            }
+
+        });
+
     },
 
     /**

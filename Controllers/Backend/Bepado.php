@@ -23,6 +23,8 @@
  */
 
 use \Bepado\SDK\Struct\Product;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Price;
 
 /**
  * @category  Shopware
@@ -676,6 +678,72 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Apply given changes to product
+     *
+     * @throws RuntimeException
+     */
+    public function applyChangesAction()
+    {
+        $type = $this->Request()->getParam('type');
+        $value = $this->Request()->getParam('value');
+        $articleId = $this->Request()->getParam('articleId');
+
+        /** @var Article $articleModel */
+        $articleModel = $this->getArticleRepository()->find($articleId);
+
+        if (!$articleModel) {
+            throw new \RuntimeException("Could not find model for article with id {$articleId}");
+        }
+
+        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($articleModel);
+
+        $updateFlags = $this->getHelper()->getUpdateFlags();
+        $updateFlagsByName = array_flip($updateFlags);
+        $flag = $updateFlagsByName[$type];
+
+
+        switch ($type) {
+            case 'shortDescription':
+                $articleModel->setDescription($value);
+                break;
+            case 'longDescription':
+                $articleModel->setDescriptionLong($value);
+                break;
+            case 'name':
+                break;
+            case 'image':
+                $images = explode('|', $value);
+                $this->getHelper()->handleImageImport($images, $articleModel);
+                break;
+            case 'price':
+                $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));
+                $customerGroup = $this->getHelper()->getDefaultCustomerGroup();
+                $detail = $articleModel->getMainDetail();
+
+                $detail->getPrices()->clear();
+                $price = new Price();
+                $price->fromArray(array(
+                    'from' => 1,
+                    'price' => $netPrice,
+                    'basePrice' => $bepadoAttribute->getPurchasePrice(),
+                    'customerGroup' => $customerGroup,
+                    'article' => $articleModel
+                ));
+                $detail->setPrices(array($price));
+                break;
+        }
+
+        if ($bepadoAttribute->getLastUpdateFlag() & $flag) {
+            $bepadoAttribute->flipLastUpdateFlag($flag);
+        }
+
+        $this->getModelManager()->flush();
+
+        $this->View()->assign('success', true);
+
+    }
+
     public function getImagesForArticle($articleId)
     {
 
@@ -783,7 +851,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             
         }
 
-        /** @var \Shopware\Models\Article\Article $articleModel */
+        /** @var Article $articleModel */
         $articleModel = $this->getArticleRepository()->find($articleId);
 
         if (!$articleModel) {

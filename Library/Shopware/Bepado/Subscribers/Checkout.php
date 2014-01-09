@@ -48,9 +48,8 @@ class Checkout extends BaseSubscriber
         $basketHelper = $this->getBasketHelper();
         $basketHelper->setBasket($view->sBasket);
 
-
         // If no messages are shown, yet, check products from remote shop and build message array
-        if(($bepadoMessages = $view->getAssign('bepadoMessages')) === null) {
+        if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
             $bepadoMessages = array();
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
                 /** @var $response \Bepado\SDK\Struct\Message */
@@ -60,6 +59,7 @@ class Checkout extends BaseSubscriber
                 }
             }
         }
+        Shopware()->Session()->BepadoMessages = null;
 
         // If no products are bought from the local shop, move the first bepado shop into
         // the content section. Also set that shop's id in the template
@@ -134,7 +134,7 @@ class Checkout extends BaseSubscriber
         /** @var $reservation \Bepado\SDK\Struct\Reservation */
         $reservation = $sdk->reserveProducts($order);
         if(!empty($reservation->messages)) {
-            $view->assign('bepadoMessages', $reservation->messages);
+            Shopware()->Session()->BepadoMessages = $reservation->messages;
             $controller->forward('confirm');
         } else {
             Shopware()->Session()->BepadoReservation = $reservation;

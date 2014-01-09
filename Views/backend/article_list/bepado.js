@@ -81,3 +81,32 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
 });
 //{/block}
+
+/**
+ * Add a bepado to filter to allow the user to only show (imported) bepado products
+ */
+//{block name="backend/article_list/view/main/window" append}
+Ext.define('Shopware.apps.ArticleList.view.main.Window-Bepado', {
+    override: 'Shopware.apps.ArticleList.view.main.Window',
+
+    /**
+     * @Override
+     */
+    createFilterPanel: function() {
+        var me = this,
+            panel = me.callOverridden(arguments),
+            radioGroup;
+
+        try {
+            radioGroup = panel.items.items[0];
+            radioGroup.add(
+                Ext.create('Ext.form.field.Radio', { boxLabel: 'bepado', name: 'filter', inputValue: 'bepado' })
+            );
+        }catch(e) {
+            return panel;
+        }
+
+        return panel;
+    }
+});
+//{/block}

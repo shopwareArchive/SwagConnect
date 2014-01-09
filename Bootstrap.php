@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.26';
+        return '1.2.27';
     }
 
     /**
@@ -307,7 +307,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\TemplateExtension(),
             new \Shopware\Bepado\Subscribers\Checkout(),
             new \Shopware\Bepado\Subscribers\Voucher(),
-            new \Shopware\Bepado\Subscribers\BasketWidget()
+            new \Shopware\Bepado\Subscribers\BasketWidget(),
+            new \Shopware\Bepado\Subscribers\ArticleList(),
         );
 
         if ($this->Config()->get('autoUpdateProducts', true)) {

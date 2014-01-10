@@ -51,9 +51,18 @@ class Order extends Struct
     public $providerOrderId;
 
     /**
+     * Net shipping costs.
+     *
      * @var float
      */
     public $shippingCosts;
+
+    /**
+     * Gross shipping costs with VAT applied.
+     *
+     * @var float
+     */
+    public $grossShippingCosts;
 
     /**
      * @var OrderItem[]

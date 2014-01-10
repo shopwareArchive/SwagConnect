@@ -39,7 +39,8 @@ class BasketHelper
      *
      * @var array
      */
-    protected $bepadoShippingCosts = array();
+    protected $bepadoGrossShippingCosts = array();
+    protected $bepadoNetShippingCosts = array();
 
     /**
      * The original shopware shipping costs
@@ -148,12 +149,16 @@ class BasketHelper
      */
     protected function buildShippingCostsArray()
     {
-        $this->bepadoShippingCosts = array();
+        $this->bepadoGrossShippingCosts = array();
+        $this->bepadoNetShippingCosts = array();
         $this->originalShippingCosts = 0;
 
         // Calculate bepado shipping costs
         foreach($this->bepadoProducts as $shopId => $products) {
-            $this->bepadoShippingCosts[$shopId] = $this->getSdk()->calculateShippingCosts($products);
+            /** @var \Bepado\SDK\Struct\ShippingCosts $shippingCosts */
+            $shippingCosts = $this->getSdk()->calculateShippingCosts($products);
+            $this->bepadoGrossShippingCosts[$shopId] = $shippingCosts->grossShippingCosts;
+            $this->bepadoNetShippingCosts[$shopId] = $shippingCosts->shippingCosts;
         }
     }
 
@@ -389,8 +394,8 @@ class BasketHelper
      */
     public function recalculate()
     {
-        $shippingCostsNet = array_sum($this->getBepadoShippingCosts());
-        $shippingCosts = $shippingCostsNet * (1 + $this->basket['sShippingcostsTax']*0.01);
+        $shippingCostsNet = array_sum($this->getBepadoNetShippingCosts());
+        $shippingCosts = array_sum($this->getBepadoGrossShippingCosts());
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
@@ -444,7 +449,7 @@ class BasketHelper
             'bepadoContent' => $this->getBepadoContent(),
             'bepadoShops' => $this->getBepadoShops(),
             'bepadoMessages' => $bepadoMessages,
-            'bepadoShippingCosts' => $this->getBepadoShippingCosts(),
+            'bepadoShippingCosts' => $this->getBepadoGrossShippingCosts(),
             'bepadoShippingCostsOrg' => $this->getOriginalShippingCosts(),
             'bepadoShopInfo' => $this->showCheckoutShopInfo,
             'addBaseShop' => $this->onlyBepadoProducts ? 0 : 1
@@ -605,15 +610,23 @@ class BasketHelper
      */
     public function setBepadoShippingCosts($bepadoShippingCosts)
     {
-        $this->bepadoShippingCosts = $bepadoShippingCosts;
+        $this->bepadoGrossShippingCosts = $bepadoShippingCosts;
     }
 
     /**
      * @return array
      */
-    public function getBepadoShippingCosts()
+    public function getBepadoGrossShippingCosts()
     {
-        return $this->bepadoShippingCosts;
+        return $this->bepadoGrossShippingCosts;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBepadoNetShippingCosts()
+    {
+        return $this->bepadoNetShippingCosts;
     }
 
     /**

@@ -18,6 +18,19 @@ Tiny shops might want to simply export the default customer group's prices to be
 
 
 # ToShop
+## Dispatch
+In order to exclude a given dispatch from bepado, configure a "bepado attribute" in the plugin configuration. By default this will be "attr19".
+
+In Settings->Configuration->Storefront->Dispatch module set add the following string to "extended sql query":
+
+, MAX(at.attr19) as bepado
+
+Know edit the dispatches you want to exclude from bepado and set navigate to "Additional settings".
+
+In the "own conditions" you can add
+
+!bepado
+
 ## The backend module
 ### Changed products
 The "changed products" view shows products, which have been changed by the supplier of the product but where the changes where not applied to the local products, as the toShop's owner configured the corresponding fields (e.g. price, name) to not be updated automatically.
@@ -42,5 +55,4 @@ This is the global configuration you can overwrite or inherit this configuration
 - Manually added images will never be removed
 - In "overwrite" mode, updates will always recreate all the bepado images which have changed since the last update
 - In "non-overwrite" mode, images will imported only once at initial import
-
 

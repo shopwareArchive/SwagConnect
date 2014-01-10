@@ -167,6 +167,10 @@ class ProductToShop implements ProductToShopBase
             ));
         }
 
+        // Set the configured attribute so users can easily check if a given product is a bepado attribute
+        $setter = 'setAttr' . $this->config->get('bepadoAttribute', 19);
+        $detailAttribute->$setter($product->sourceId);
+
         $bepadoAttribute->setShopId($product->shopId);
         $bepadoAttribute->setSourceId($product->sourceId);
         $bepadoAttribute->setExportStatus(null);

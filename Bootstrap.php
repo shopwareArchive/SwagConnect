@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.31';
+        return '1.2.32';
     }
 
     /**
@@ -241,6 +241,36 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('text', 'productDescriptionField', array(
             'label' => 'Feld für Produktbeschreibungen'
         ));
+        $form->setElement('select', 'bepadoAttribute',
+            array(
+                'required' => true,
+                'editable' => false,
+                'value' => 19,
+                'label' => 'bepado Attribut',
+                'store' => array(
+                    array(1, 'attr1'),
+                    array(2, 'attr2'),
+                    array(3, 'attr3'),
+                    array(4, 'attr4'),
+                    array(5, 'attr5'),
+                    array(6, 'attr6'),
+                    array(7, 'attr7'),
+                    array(8, 'attr8'),
+                    array(9, 'attr9'),
+                    array(10, 'attr10'),
+                    array(11, 'attr11'),
+                    array(12, 'attr12'),
+                    array(13, 'attr13'),
+                    array(14, 'attr14'),
+                    array(15, 'attr15'),
+                    array(16, 'attr16'),
+                    array(17, 'attr17'),
+                    array(18, 'attr18'),
+                    array(19, 'attr19'),
+                    array(20, 'attr20'),
+                )
+            )
+        );
         $form->setElement('boolean', 'autoUpdateProducts', array(
             'label' => 'Geänderte Produkte automatisch mit bepado synchronisieren',
             'value' => true,

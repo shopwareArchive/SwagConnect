@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.28';
+        return '1.2.29';
     }
 
     /**

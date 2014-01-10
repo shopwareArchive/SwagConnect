@@ -23,6 +23,9 @@
     {/if}
 {/block}
 
+{*
+    Show message during checkout, if product price / availability has changed
+*}
 {block name='frontend_checkout_cart_cart_head' append}
 	{if $bepadoMessages[$shopId]}
         <div class="doublespace"></div>
@@ -60,6 +63,9 @@
 	{/if}
 {/block}
 
+{*
+    Hide "buy" button on checkout finish if messages where passed.
+*}
 {block name='frontend_checkout_confirm_submit' prepend}
     {if $bepadoMessages}
         {include 'frontend/bepado/finish_message.tpl'}
@@ -67,7 +73,6 @@
         {$smarty.block.parent}
     {/if}
 {/block}
-
 {block name='frontend_checkout_confirm_stockinfo'}
     {if $bepadoMessages}
         {include 'frontend/bepado/finish_message.tpl'}

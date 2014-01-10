@@ -140,7 +140,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
             case 'shortDescription':
                 return '{s name=changed_products/title/shortDescription}shortDescription{/s}';
             default:
-                return '';
+                return title;
         }
     }
 

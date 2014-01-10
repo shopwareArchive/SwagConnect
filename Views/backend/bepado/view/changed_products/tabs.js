@@ -50,34 +50,34 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                 config = {
                     xtype: 'numberfield',
                     precision: 2,
-                    title: 'price'
+                    title: me.getTranslatedTitle('price')
                 };
                 break;
             case 'name':
                 config = {
                     xtype: 'textfield',
-                    title: 'name'
+                    title: me.getTranslatedTitle('name')
                 };
                 break;
             case 'shortDescription':
                 config = {
                     xtype: 'textarea',
-                    title: 'shortDescription',
+                    title: me.getTranslatedTitle('shortDescription'),
                     height: 150
                 };
                 break;
             case 'longDescription':
                 config = {
                     xtype: 'textarea',
-                    title: 'longDescription',
+                    title: me.getTranslatedTitle('longDescription'),
                     height: 150
                 };
                 break;
             case 'image':
                 config = {
                     xtype: 'shopware-images-field',
-                    title: 'image',
-                    margin: 10,
+                    title: me.getTranslatedTitle('image'),
+                    margin: 10
                 };
         }
 
@@ -85,11 +85,11 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
         // The name is generated from the passed name and the prefix "local"/"remote"
         local = {
             fieldLabel: 'Current',
-            name: name + 'Local',
+            name: name + '{s name=changed_products/local}Local{/s}',
             enabled: false
         };
         remote = {
-            fieldLabel: 'Remote',
+            fieldLabel: '{s name=changed_products/remote}Remote{/s}',
             name: name + 'Remote',
             enabled: false
         };
@@ -119,6 +119,26 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                 applyButton: applyButton,
                 items: [applyButton, local, remote]
             });
+    },
+
+    getTranslatedTitle: function(title) {
+        switch (title) {
+            case 'name':
+                return '{s name=changed_products/title/name}Name{/s}';
+                break
+            case 'price':
+                return '{s name=changed_products/title/price}Price{/s}';
+                break
+            case 'image':
+                return '{s name=changed_products/title/image}Image{/s}';
+                break
+            case 'longDescription':
+                return '{s name=changed_products/title/longDescription}longDescription{/s}';
+                break
+            case 'shortDescription':
+                return '{s name=changed_products/title/shortDescription}shortDescription{/s}';
+                break
+        }
     }
 
 });

@@ -252,9 +252,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     private function calculatePrice($product)
     {
-        if ($product->purchasePrice > 0) {
-            return $product->purchasePrice * ($product->vat + 1);
-        }
+        return $product->purchasePrice * ($product->vat + 1);
     }
 
     /**

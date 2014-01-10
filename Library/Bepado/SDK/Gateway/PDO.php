@@ -46,6 +46,17 @@ class PDO extends Gateway
     }
 
     /**
+     * Returns the full table name with $suffix.
+     *
+     * @param string $suffix
+     * @return string
+     */
+    protected function tableName($suffix)
+    {
+        return 'bepado_' . $suffix;
+    }
+
+    /**
      * Get next change
      *
      * The offset specified the revision to start from
@@ -75,7 +86,7 @@ class PDO extends Gateway
                 `c_revision`,
                 `c_product`
             FROM
-                `bepado_change`
+                `' . $this->tableName('change') . '`
             WHERE
                 `c_revision` > ' . $offset . '
             ORDER BY `c_revision` ASC
@@ -125,7 +136,7 @@ class PDO extends Gateway
             'EXPLAIN SELECT
                 *
             FROM
-                `bepado_change`
+                `' . $this->tableName('change') . '`
             WHERE
                 `c_revision` > ?'
         );
@@ -264,7 +275,7 @@ class PDO extends Gateway
             'SELECT
                 `p_hash`
             FROM
-                `bepado_product`
+                `' . $this->tableName('product') . '`
             WHERE
                 p_source_id = ?'
         );
@@ -285,7 +296,7 @@ class PDO extends Gateway
             'SELECT
                 `p_source_id`
             FROM
-                `bepado_product`'
+                `' . $this->tableName('product') . '`'
         );
 
         return $query->fetchAll(\PDO::FETCH_COLUMN);
@@ -302,7 +313,7 @@ class PDO extends Gateway
             'SELECT
                 `d_value`
             FROM
-                `bepado_data`
+                `' . $this->tableName('data') . '`
             WHERE
                 `d_key` = "revision"'
         );
@@ -417,7 +428,7 @@ class PDO extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `' . $this->tableName('shop_config') . '`
             WHERE
                 `s_shop` = "_self_"'
         );
@@ -441,7 +452,7 @@ class PDO extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `' . $this->tableName('shop_config') . '`
             WHERE
                 `s_shop` = "_last_update_"'
         );
@@ -467,7 +478,7 @@ class PDO extends Gateway
         $order->reservationId = md5(microtime());
         $query = $this->connection->prepare(
             'INSERT INTO
-                `bepado_reservations` (
+                `' . $this->tableName('reservations') . '` (
                     `r_id`,
                     `r_state`,
                     `r_order`
@@ -493,7 +504,7 @@ class PDO extends Gateway
             'SELECT
                 `r_order`
             FROM
-                `bepado_reservations`
+                `' . $this->tableName('reservations') . '`
             WHERE
                 `r_id` = ?;'
         );
@@ -519,7 +530,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'UPDATE
-                `bepado_reservations`
+                `' . $this->tableName('reservations') . '`
             SET
                 `r_state` = "bought",
                 `r_order` = ?
@@ -545,7 +556,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'UPDATE
-                `bepado_reservations`
+                `' . $this->tableName('reservations') . '`
             SET
                 `r_state` = "confirmed"
             WHERE
@@ -593,7 +604,7 @@ class PDO extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `' . $this->tableName('shop_config') . '`
             WHERE
                 `s_shop` = ?'
         );

@@ -286,7 +286,7 @@ final class SDK
      * Calculate shipping costs for the given set of products.
      *
      * @param Struct\Product[] $products
-     * @return float
+     * @return Struct\ShippingCosts
      */
     public function calculateShippingCosts(array $products)
     {

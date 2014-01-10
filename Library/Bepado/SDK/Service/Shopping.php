@@ -437,7 +437,12 @@ class Shopping
             $shopOrder = clone $order;
             $shopOrder->providerShop = $shopId;
             $shopOrder->products = $this->getShopProducts($order, $shopId);
-            $shopOrder->shippingCosts = $this->calculator->calculateOrderShippingCosts($shopOrder);
+
+            $shippingCosts = $this->calculator->calculateOrderShippingCosts($shopOrder);
+
+            $shopOrder->shippingCosts = $shippingCosts->shippingCosts;
+            $shopOrder->grossShippingCosts = $shippingCosts->grossShippingCosts;
+
             $orders[$shopId] = $shopOrder;
         }
 

@@ -31,7 +31,7 @@ class ShippingCostCalculator
      * Get shipping costs for order
      *
      * @param Struct\Order $order
-     * @return float
+     * @return Struct\ShippingCosts
      */
     public function calculateOrderShippingCosts(Struct\Order $order)
     {
@@ -47,7 +47,7 @@ class ShippingCostCalculator
      * Get shipping costs for order
      *
      * @param Struct\Order $order
-     * @return float
+     * @return Struct\ShippingCosts
      */
     public function calculateProductListShippingCosts(Struct\ProductList $productList)
     {
@@ -58,22 +58,44 @@ class ShippingCostCalculator
      * Get shipping costs
      *
      * @param Struct\Product[] $products
-     * @return float
+     * @return Struct\ShippingCosts
      */
     protected function getShippingCosts(array $products)
     {
         $productCount = 0;
+        $shopIds = array();
+        $maxVat = 0;
         foreach ($products as $product) {
+            $shopIds[$product->shopId] = true;
+            $maxVat = max($maxVat, $product->vat);
+
             if (!$product->freeDelivery) {
                 ++$productCount;
             }
         }
+
+        if (count($shopIds) > 1) {
+            throw new \InvalidArgumentException(
+                "ShippingCostCalculator can only calculate shipping costs for " .
+                "products belonging to exactly one remote shop."
+            );
+        }
+
+        $shopId = key($shopIds);
 
         if (!$productCount) {
             return 0.;
         }
 
         $shopConfiguration = $this->configuration->getShopConfiguration($product->shopId);
-        return $shopConfiguration->shippingCost;
+        $netShippingCost = $shopConfiguration->shippingCost;
+
+        return new Struct\ShippingCosts(
+            array(
+                'shopId' => $shopId,
+                'shippingCosts' => $netShippingCost,
+                'grossShippingCosts' => $netShippingCost * (1 + $maxVat),
+            )
+        );
     }
 }

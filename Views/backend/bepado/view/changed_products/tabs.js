@@ -121,23 +121,26 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
             });
     },
 
+    /**
+     * Helper to translate titles like name, price…
+     *
+     * @param title
+     * @returns string
+     */
     getTranslatedTitle: function(title) {
         switch (title) {
             case 'name':
                 return '{s name=changed_products/title/name}Name{/s}';
-                break
             case 'price':
                 return '{s name=changed_products/title/price}Price{/s}';
-                break
             case 'image':
                 return '{s name=changed_products/title/image}Image{/s}';
-                break
             case 'longDescription':
                 return '{s name=changed_products/title/longDescription}longDescription{/s}';
-                break
             case 'shortDescription':
                 return '{s name=changed_products/title/shortDescription}shortDescription{/s}';
-                break
+            default:
+                return '';
         }
     }
 

@@ -54,6 +54,11 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
                             '<strong>Cloud Search</strong>',
                             '<p>Durchsuchen Sie mit dieser ausgeklügelten Funktion das gesamte Netzwerk übergreifend nach für Sie in Frage kommenden Artikeln.</p>',
                         '</li>',
+
+                        '<li>',
+                            '<strong>Versandarten ausschließen</strong>',
+                            '<p>Schließen Sie bestimmte Versandarten für bepado aus, indem Sie unter Grundeinstellungen->Storefront->Versandkosten-Modul an die "Erweiterte SQL-Abfrage" folgende Zeichenkette anhängen: ", MAX(at.attr19) as bepado". Danach können Sie jede beliebige Versandart ausschließen, indem Sie unter "Eigene Bedingungen" "!bepado" definieren.</p>',
+                        '</li>',
                     '</ul>',
                 '</div>',
             '</div>'

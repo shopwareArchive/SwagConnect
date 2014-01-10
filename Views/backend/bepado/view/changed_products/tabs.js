@@ -84,8 +84,8 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
         // Define some default options for the local / remote field
         // The name is generated from the passed name and the prefix "local"/"remote"
         local = {
-            fieldLabel: 'Current',
-            name: name + '{s name=changed_products/local}Local{/s}',
+            fieldLabel: '{s name=changed_products/local}Local{/s}',
+            name: name + 'Local',
             enabled: false
         };
         remote = {

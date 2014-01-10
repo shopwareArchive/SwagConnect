@@ -119,30 +119,6 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                 applyButton: applyButton,
                 items: [applyButton, local, remote]
             });
-    },
-
-    /**
-     * Helper to translate titles like name, price…
-     *
-     * @param title
-     * @returns string
-     */
-    getTranslatedTitle: function(title) {
-        switch (title) {
-            case 'name':
-                return '{s name=changed_products/title/name}Name{/s}';
-            case 'price':
-                return '{s name=changed_products/title/price}Price{/s}';
-            case 'image':
-                return '{s name=changed_products/title/image}Image{/s}';
-            case 'longDescription':
-                return '{s name=changed_products/title/longDescription}longDescription{/s}';
-            case 'shortDescription':
-                return '{s name=changed_products/title/shortDescription}shortDescription{/s}';
-            default:
-                return title;
-        }
     }
-
 });
 //{/block}

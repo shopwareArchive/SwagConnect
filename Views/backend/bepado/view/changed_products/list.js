@@ -44,8 +44,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.List', {
             header: '{s name=changed/columns/changed}Changed fields{/s}',
             dataIndex: 'lastUpdateFlag',
             renderer: function(value, metaData, record) {
-                var me = this,
-                    panel = me.up().down('bepado-changed-products-tabs');
+                var me = this;
 
                 if (!value) {
                     return '';
@@ -63,7 +62,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.List', {
 
                 Ext.each(Object.keys(flags), function(key) {
                     if (value & key) {
-                        activeFlags.push(panel.getTranslatedTitle(flags[key]));
+                        activeFlags.push(me.getTranslatedTitle(flags[key]));
                     }
                 });
 

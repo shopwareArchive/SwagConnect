@@ -191,8 +191,11 @@ class ProductToShop implements ProductToShopBase
             'vat'               => $product->vat
         )));
 
+        // The basePrice (purchasePrice) needs to be updated in any case
+        $basePrice = $product->purchasePrice;
+
         // Only set prices, if fixedPrice is active or price updates are configured
-        if ($bepadoAttribute->getFixedPrice() || $updateFields['price']) {
+        if (count($detail->getPrices()) == 0 || $bepadoAttribute->getFixedPrice() || $updateFields['price']) {
             $customerGroup = $this->helper->getDefaultCustomerGroup();
 
             $detail->getPrices()->clear();
@@ -200,11 +203,16 @@ class ProductToShop implements ProductToShopBase
             $price->fromArray(array(
                 'from' => 1,
                 'price' => $product->price,
-                'basePrice' => $bepadoAttribute->getPurchasePrice(),
+                'basePrice' => $basePrice,
                 'customerGroup' => $customerGroup,
                 'article' => $model
             ));
             $detail->setPrices(array($price));
+        // If the price is not being update, update the basePrice anyway
+        } else {
+            /** @var \Shopware\Models\Article\Price $price */
+            $price = $detail->getPrices()->first();
+            $price->setBasePrice($basePrice);
         }
 
         if($model->getMainDetail() === null) {

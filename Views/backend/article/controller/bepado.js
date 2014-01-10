@@ -116,6 +116,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
             bepadoForm = me.getBepadoForm(),
             settingsFieldSet = me.subApplication.articleWindow.down('article-settings-field-set'),
             pricesFieldSet = me.subApplication.articleWindow.down('article-prices-field-set'),
+            basePriceColumn = me.subApplication.articleWindow.down('article-prices-field-set numbercolumn[dataIndex=basePrice]'),
             shippingField, inStockField,
             isPriceLocked;
 
@@ -137,6 +138,18 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
             isPriceLocked = me.record.get('fixedPrice') && me.record.get('shopId') > 0;
             pricesFieldSet.tabPanel.setDisabled(isPriceLocked);
             pricesFieldSet.bepadoLabel.setVisible(isPriceLocked);
+        }
+
+
+        if (basePriceColumn) {
+            if (!me.basePriceEditor) {
+                me.basePriceEditor = basePriceColumn.getEditor();
+            }
+            if (me.record.get('shopId') > 0) {
+                basePriceColumn.setEditor(false);
+            } else {
+                basePriceColumn.setEditor(me.basePriceEditor);
+            }
         }
 
     }

@@ -15,7 +15,7 @@ class Lifecycle extends BaseSubscriber
     }
 
     /**
-     * Callback function to delete an product from bepado after it was deleted locally
+     * Callback function to delete an product from bepado after it is going to be deleted locally
      *
      * @param \Enlight_Event_EventArgs $eventArgs
      */

@@ -57,8 +57,7 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
 
                         '<li>',
                             '<strong>Versandarten ausschließen</strong>',
-                            '<p>Schließen Sie bestimmte Versandarten für bepado aus, indem Sie unter Grundeinstellungen->Storefront->Versandkosten-Modul an die "Erweiterte SQL-Abfrage" folgende Zeichenkette anhängen:<br><br>',
-                            '<strong>, MAX(at.attr19) as bepado</strong><br><br>Danach können Sie jede beliebige Versandart ausschließen, indem Sie unter "Eigene Bedingungen" »<strong>!bepado</strong>« definieren.</p>',
+                            '<p>Um bestimmte Versandarten nicht in Kombination mit bepado-Produkten zu erlauben, öffnen Sie einfach das Versandkosten-Modul und entfernen Sie unter »Erweiterte Einstellungen« den Haken bei »Für bepado-Produkte freigeben«</p>',
                         '</li>',
                     '</ul>',
                 '</div>',

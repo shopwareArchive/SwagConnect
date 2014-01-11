@@ -907,4 +907,44 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $this->View()->assign(array('success' => true));
     }
+
+    /**
+     * Saves the changed "bepadoAllowed" attribute. Saving this attribute should be done
+     * by the shipping-module on its own, right now (as of SW 4.2.0) it does not do so.
+     *
+     * todo: Once the shipping module is fixed, increase the required version of this plugin
+     * and remove this and the unnecessary ExtJS extensions
+     */
+    public function saveShippingAttributeAction()
+    {
+        $shippingId = $this->Request()->getParam('shippingId');
+        $bepadoAllowed = $this->Request()->getParam('bepadoAllowed', true);
+
+        if (!$shippingId) {
+            return;
+        }
+
+        $shippingRepo = $this->getModelManager()->getRepository('\Shopware\Models\Dispatch\Dispatch');
+        /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
+        $shipping = $shippingRepo->find($shippingId);
+
+        if (!$shipping) {
+            return;
+        }
+
+        $attribute = $shipping->getAttribute();
+
+        if (!$attribute) {
+            $attribute = new \Shopware\Models\Attribute\Dispatch();
+            $attribute->setDispatch($shipping);
+            $shipping->setAttribute($attribute);
+            $this->getModelManager()->persist($attribute);
+        }
+
+        $attribute->setBepadoAllowed($bepadoAllowed);
+
+        $this->getModelManager()->flush();
+
+        $this->View()->assign('success', true);
+    }
 }

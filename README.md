@@ -19,17 +19,8 @@ Tiny shops might want to simply export the default customer group's prices to be
 
 # ToShop
 ## Dispatch
-In order to exclude a given dispatch from bepado, configure a "bepado attribute" in the plugin configuration. By default this will be "attr19".
-
-In Settings->Configuration->Storefront->Dispatch module set add the following string to "extended sql query":
-
-, MAX(at.attr19) as bepado
-
-Know edit the dispatches you want to exclude from bepado and set navigate to "Additional settings".
-
-In the "own conditions" you can add
-
-!bepado
+By default any dispatch can be used with bepado. You might want to disable some dispatches, however. In order to do so, just open Settings->Shipping and edit the shipping type you want to disable.
+In the "advanced configuration" you can now uncheck "Allow with bepado".
 
 ## The backend module
 ### Changed products

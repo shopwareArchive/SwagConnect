@@ -28,6 +28,8 @@ use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
+ * bepado specific attributes for bepado products
+ *
  * @ORM\Table(name="s_plugin_bepado_items")
  * @ORM\Entity()
  */

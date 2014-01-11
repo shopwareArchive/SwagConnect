@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Handles the whole checkout manipulation, which is required for the bepado checkout
+ *
+ * Class Checkout
+ * @package Shopware\Bepado\Subscribers
+ */
 class Checkout extends BaseSubscriber
 {
 

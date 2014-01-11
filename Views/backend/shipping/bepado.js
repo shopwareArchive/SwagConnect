@@ -34,6 +34,10 @@ Ext.define('Shopware.apps.Shipping.model.Attribute', {
 Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
     override: 'Shopware.apps.Shipping.view.edit.Advanced',
 
+    /**
+     * @Override
+     * @returns Array
+     */
     getFormElementsRight: function() {
         var me = this,
             items = me.callOverridden(arguments);
@@ -57,6 +61,13 @@ Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
 Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Bepado', {
     override: 'Shopware.apps.Shipping.controller.DefaultForm',
 
+    /**
+     * As the attributes are not persisted automatically, they are saved after everything else has been saved
+     *
+     * @Override
+     *
+     * @returns Object
+     */
     onDispatchSave: function() {
         var me = this,
             result = me.callOverridden(arguments),
@@ -68,6 +79,12 @@ Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Bepado', {
         return result;
     },
 
+    /**
+     * Save the given bepado value via an Ajax request
+     *
+     * @param shippingId
+     * @param attributeValue
+     */
     saveBepadoAttribute: function(shippingId, attributeValue) {
         Ext.Ajax.request({
             url: '{url controller=bepado action=saveShippingAttribute}',

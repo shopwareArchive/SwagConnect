@@ -33,10 +33,10 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Doctrine\ORM\Query;
 
 /**
+ * The interface for products exported *to* bepado *from* the local shop
+ *
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
  */
 class ProductFromShop implements ProductFromShopBase
 {

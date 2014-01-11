@@ -2,6 +2,13 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * The basket widget shows the current basket amount and the current basket's products.
+ * It needs to be modified in order to show the bepado products / valuess
+ *
+ * Class BasketWidget
+ * @package Shopware\Bepado\Subscribers
+ */
 class BasketWidget extends BaseSubscriber
 {
 

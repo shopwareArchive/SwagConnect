@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Handle vouchers, remove discounts and don't allow percentaged vouchers for bepado baskets
+ *
+ * Class Voucher
+ * @package Shopware\Bepado\Subscribers
+ */
 class Voucher extends BaseSubscriber
 {
 

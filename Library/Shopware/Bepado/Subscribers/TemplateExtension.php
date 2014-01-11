@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Loads various template extensions
+ *
+ * Class TemplateExtension
+ * @package Shopware\Bepado\Subscribers
+ */
 class TemplateExtension extends BaseSubscriber
 {
 

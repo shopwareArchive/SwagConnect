@@ -26,7 +26,6 @@ use Shopware\CustomModels\Bepado\Config;
 /**
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {

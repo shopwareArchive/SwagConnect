@@ -7,6 +7,9 @@ use Doctrine\ORM\QueryBuilder;
 
 /**
  * The ProductQuery will dynamically create a Query for a product depending on the current shopware configuration
+ *
+ * Class ProductQuery
+ * @package Shopware\Bepado
  */
 class ProductQuery
 {

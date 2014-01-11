@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Implements a 'bepado' filter for the article list
+ *
+ * Class ArticleList
+ * @package Shopware\Bepado\Subscribers
+ */
 class ArticleList extends BaseSubscriber
 {
     public function getSubscribedEvents()

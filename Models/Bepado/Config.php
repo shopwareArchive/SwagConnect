@@ -28,6 +28,8 @@ use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
+ * As writing config values in SW is quite hard, we use our own little configs
+ *
  * @ORM\Table(name="s_plugin_bepado_config")
  * @ORM\Entity(repositoryClass="ConfigRepository")
  */

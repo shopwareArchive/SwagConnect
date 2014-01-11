@@ -6,6 +6,14 @@ use         \Shopware\Components\Model\ModelRepository;
 class ConfigRepository extends ModelRepository
 {
 
+
+    /**
+     * Read a given config value by name
+     *
+     * @param $name
+     * @param null $default
+     * @return null
+     */
     public function getConfig($name, $default=null)
     {
         $model = $this->findOneBy(array('name' => $name));
@@ -18,6 +26,12 @@ class ConfigRepository extends ModelRepository
 
     }
 
+    /**
+     * Set a given config value
+     *
+     * @param $name
+     * @param $value
+     */
     public function setConfig($name, $value)
     {
         $model = $this->findOneBy(array('name' => $name));

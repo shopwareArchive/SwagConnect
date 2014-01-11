@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Register some controllers
+ *
+ * Class ControllerPath
+ * @package Shopware\Bepado\Subscribers
+ */
 class ControllerPath extends BaseSubscriber
 {
     public function getSubscribedEvents()

@@ -15,6 +15,11 @@
 //{block name="backend/order/view/list/list" append}
 Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
     override: 'Shopware.apps.Order.view.list.List',
+
+    /**
+     * @Override
+     * @returns Array
+     */
     getColumns: function() {
         var me = this,
             columns = me.callOverridden(arguments);

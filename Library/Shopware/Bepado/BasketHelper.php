@@ -5,6 +5,13 @@ namespace Shopware\Bepado;
 use Bepado\SDK;
 use Shopware\Bepado;
 
+/**
+ * Handles the basket manipulation. Most of it is done by modifying the template variables shown to the user.
+ * Once we have new basket and order core classes, this should be refactored.
+ *
+ * Class BasketHelper
+ * @package Shopware\Bepado
+ */
 class BasketHelper
 {
 

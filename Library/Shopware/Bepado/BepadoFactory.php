@@ -6,6 +6,12 @@ use Shopware\Bepado\CategoryQuery\Sw41Query;
 use Shopware\Bepado\CategoryQuery\Sw40Query;
 use Bepado\SDK;
 
+/**
+ * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
+ *
+ * Class BepadoFactory
+ * @package Shopware\Bepado
+ */
 class BepadoFactory
 {
     const CURRENT_SW_STABLE = '4.1';

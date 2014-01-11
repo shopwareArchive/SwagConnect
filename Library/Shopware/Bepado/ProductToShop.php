@@ -36,10 +36,10 @@ use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
 
 /**
+ * The interface for products imported *from* bepado *to* the local shop
+ *
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
  */
 class ProductToShop implements ProductToShopBase
 {

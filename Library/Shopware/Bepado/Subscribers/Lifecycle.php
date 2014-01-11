@@ -2,6 +2,12 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+/**
+ * Handles article lifecycle events in order to automatically update/delete products to/from bepado
+ *
+ * Class Lifecycle
+ * @package Shopware\Bepado\Subscribers
+ */
 class Lifecycle extends BaseSubscriber
 {
 

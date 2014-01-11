@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.33';
+        return '1.2.35';
     }
 
     /**
@@ -81,6 +81,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyTables();
         $this->createMyAttributes();
         $this->populateConfigTable();
+
+        // Populate the s_premium_dispatch_attributes table with attributes for all dispatches
+        // so that all existing dispatches are immediately available for bepado
+        Shopware()->Db()->exec('
+            INSERT IGNORE INTO `s_premium_dispatch_attributes` (`dispatchID`)
+            SELECT `id` FROM `s_premium_dispatch`
+        ');
 
 	 	return array('success' => true, 'invalidateCache' => array('backend', 'config'));
 	}
@@ -154,7 +161,16 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'varchar(255)'
         );
 
+        $modelManager->addAttribute(
+            's_premium_dispatch_attributes',
+            'bepado', 'allowed',
+            'int(1)',
+            false,
+            1
+        );
+
         $modelManager->generateAttributeModels(array(
+            's_premium_dispatch_attributes',
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
@@ -339,6 +355,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\Voucher(),
             new \Shopware\Bepado\Subscribers\BasketWidget(),
             new \Shopware\Bepado\Subscribers\ArticleList(),
+            new \Shopware\Bepado\Subscribers\Dispatches(),
         );
 
         if ($this->Config()->get('autoUpdateProducts', true)) {
@@ -596,12 +613,18 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             );
 
 //            $modelManager->removeAttribute(
+//                's_premium_dispatch_attributes',
+//                'bepado', 'allowed'
+//            );
+
+//            $modelManager->removeAttribute(
 //                's_media_attributes',
 //                'bepado', 'hash'
 //            );
 
             $modelManager->generateAttributeModels(array(
                 's_articles_attributes',
+//                's_premium_dispatch_attributes',
 //                's_categories_attributes',
 //                's_order_details_attributes',
 //                's_order_basket_attributes',

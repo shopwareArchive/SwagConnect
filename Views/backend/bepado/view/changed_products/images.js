@@ -17,7 +17,6 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Images', {
     },
 
     mixins: [
-        'Shopware.model.Helper',
         'Ext.form.field.Base'
     ],
 

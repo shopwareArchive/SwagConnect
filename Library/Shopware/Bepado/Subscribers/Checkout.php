@@ -59,6 +59,11 @@ class Checkout extends BaseSubscriber
                 }
             }
         }
+
+        if ($bepadoMessages) {
+            $bepadoMessages = $this->translateBepadoMessages($bepadoMessages);
+        }
+
         Shopware()->Session()->BepadoMessages = null;
 
         // If no products are bought from the local shop, move the first bepado shop into
@@ -84,6 +89,27 @@ class Checkout extends BaseSubscriber
         }
 
         $view->assign($basketHelper->getBepadoTemplateVariables($bepadoMessages));
+    }
+
+    private function translateBepadoMessages($bepadoMessages)
+    {
+        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
+
+        foreach($bepadoMessages as $shopId => &$shopMessages) {
+            foreach ($shopMessages as &$bepadoMessage) {
+                $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
+                $translation = $namespace->get(
+                    $normalized,
+                    $bepadoMessage->message,
+                    true
+                );
+
+                $bepadoMessage->message = $translation;
+            }
+
+        }
+
+        return $bepadoMessages;
     }
 
     /**

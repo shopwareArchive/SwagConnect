@@ -27,7 +27,6 @@ use Shopware\CustomModels\Bepado\Config;
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
@@ -41,7 +40,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.35';
+        return '1.2.36';
     }
 
     /**
@@ -81,6 +80,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyTables();
         $this->createMyAttributes();
         $this->populateConfigTable();
+        $this->importSnippets();
 
         // Populate the s_premium_dispatch_attributes table with attributes for all dispatches
         // so that all existing dispatches are immediately available for bepado
@@ -91,6 +91,47 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
 	 	return array('success' => true, 'invalidateCache' => array('backend', 'config'));
 	}
+
+    /**
+     * @return bool
+     */
+    public function update($version)
+    {
+
+        $this->createMyMenu();
+        $this->createMyForm();
+        $this->createMyEvents();
+
+        $this->createMyTables();
+        $this->createMyAttributes();
+        $this->importSnippets();
+
+        // Migrate old attributes to bepado attributes
+        if (version_compare($version, '1.2.18', '<=')) {
+            // Copy s_articles_attributes to own attribute table
+            $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
+              (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
+              `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
+              `update_long_description`, `update_short_description`, `update_name`, `last_update`,
+              `last_update_flag`)
+            SELECT `articleID`, `articledetailsID`, `bepado_shop_id`, `bepado_source_id`, `bepado_export_status`,
+            `bepado_export_message`, `bepado_categories`, `bepado_purchase_price`, `bepado_fixed_price`,
+            `bepado_free_delivery`, `bepado_update_price`, `bepado_update_image`, `bepado_update_long_description`,
+             `bepado_update_short_description`, `bepado_update_name`, `bepado_last_update`, `bepado_last_update_flag`
+            FROM `s_articles_attributes`';
+            Shopware()->Db()->exec($sql);
+
+            $this->removeMyAttributes();
+        }
+
+        return true;
+    }
+
+    public function importSnippets()
+    {
+        $sql = file_get_contents($this->Path() . 'Snippets/frontend.sql');
+        Shopware()->Db()->exec($sql);
+    }
 
     /**
      * Creates the default config
@@ -476,39 +517,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         return true;
 	}
-
-    /**
-     * @return bool
-     */
-    public function update($version)
-    {
-
-        $this->createMyTables();
-        $this->createMyEvents();
-        $this->createMyForm();
-        $this->createMyMenu();
-        $this->createMyAttributes();
-
-        // Migrate old attributes to bepado attributes
-        if (version_compare($version, '1.2.18', '<=')) {
-            // Copy s_articles_attributes to own attribute table
-            $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
-              (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
-              `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
-              `update_long_description`, `update_short_description`, `update_name`, `last_update`,
-              `last_update_flag`)
-            SELECT `articleID`, `articledetailsID`, `bepado_shop_id`, `bepado_source_id`, `bepado_export_status`,
-            `bepado_export_message`, `bepado_categories`, `bepado_purchase_price`, `bepado_fixed_price`,
-            `bepado_free_delivery`, `bepado_update_price`, `bepado_update_image`, `bepado_update_long_description`,
-             `bepado_update_short_description`, `bepado_update_name`, `bepado_last_update`, `bepado_last_update_flag`
-            FROM `s_articles_attributes`';
-            Shopware()->Db()->exec($sql);
-
-            $this->removeMyAttributes();
-        }
-
-        return true;
-    }
 
     /**
      * Remove the attributes when uninstalling the plugin

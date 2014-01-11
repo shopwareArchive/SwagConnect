@@ -138,8 +138,9 @@ class ProductFromShop implements ProductFromShopBase
             'name' => 'invoice',
         ));
 
+        // todo: Create the OrderModel without previous plain SQL
         //$model = new OrderModel\Order();
-        $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 12);';
+        $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 17);';
         Shopware()->Db()->query($sql, array($number));
         $modelId = Shopware()->Db()->lastInsertId();
         /** @var $model \Shopware\Models\Order\Order */

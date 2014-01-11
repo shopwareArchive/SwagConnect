@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.36';
+        return '1.2.38';
     }
 
     /**
@@ -303,6 +303,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 'editable' => false,
                 'value' => 19,
                 'label' => 'bepado Attribut',
+                'helpText' => 'In das gewählte Attribut wird die Quell-ID des jeweiligen bepado-Artikels gespeichert. So können Sie bspw. im RisikoManagment leicht bepado-Artikel identifizieren.',
                 'store' => array(
                     array(1, 'attr1'),
                     array(2, 'attr2'),
@@ -362,6 +363,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('text', 'bepadoDebugHost', array(
                 'label' => 'Alternativer bepado Host (nur für Testzwecke)',
                 'minLength' => 11
+            )
+        );
+        $form->setElement('boolean', 'logRequest', array(
+                'label' => 'Anfragen des bepado-Servers mitschreiben',
+                'value' => false,
+                'helpText' => 'Schreibt die Anfragen von bepado.de und die Antwort des bepado-Plugins mit. Hierbei können schnell viele Daten anfallen.'
             )
         );
     }
@@ -461,6 +468,16 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `isError` int(1) NOT NULL,
+              `service` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+              `command` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+              `request` text COLLATE utf8_unicode_ci DEFAULT NULL,
+              `response` text COLLATE utf8_unicode_ci DEFAULT NULL,
+              `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (

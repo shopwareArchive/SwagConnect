@@ -51,13 +51,39 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
     {
         $this->Response()->setHeader('Content-Type', 'text/xml; charset=utf-8');
 
+        $loggingEnabled = Shopware()->Config()->getByNamespace('SwagBepado', 'logRequest');
+
         $request = file_get_contents('php://input');
-        //Shopware()->Log()->err('Request: ' . $request);
-        $sdk = $this->getSDK();
-        $result = $sdk->handle(
-            $request
-        );
-        //Shopware()->Log()->err('Result: ' . $result);
+
+        try {
+            $sdk = $this->getSDK();
+            $result = $sdk->handle(
+                $request
+            );
+        } catch (Exception $e) {
+            if ($loggingEnabled) {
+                $this->writeLog(true, $request, $e->getMessage() . "\n\n" . $e->getTraceAsString());
+            }
+            throw $e;
+        }
+
+        if ($loggingEnabled) {
+            $this->writeLog(false, $request, $result);
+        }
+
         echo $result;
+    }
+
+    public function writeLog($isError, $request, $response)
+    {
+        $document = simplexml_load_string($request);
+        $service = $document->service;
+        $command = $document->command;
+
+        Shopware()->Db()->query('
+            INSERT INTO `s_plugin_bepado_log`
+            (`isError`, `service`, `command`, `request`, `response`, `time`)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ', array($isError, $service, $command, $request, $response));
     }
 }

@@ -27,13 +27,16 @@ use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
 
 /**
- * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
+ * Class Shopware_Controllers_Backend_Bepado
  */
 class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_ExtJs
 {
+    /**
+     * @var \Shopware\Bepado\BepadoFactory
+     */
+    private $factory;
+
+
     /**
      * @return Shopware\Components\Model\ModelManager
      */
@@ -49,8 +52,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
-
-    private $factory;
 
     /**
      * @return \Shopware\Bepado\Helper
@@ -532,7 +533,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Calles when a product was marked for update in the bepado backend module
+     * Called when a product was marked for update in the bepado backend module
      */
     public function insertOrUpdateProductAction()
     {
@@ -744,6 +745,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
     }
 
+    /**
+     * Helper: Read images for a given article
+     *
+     * @param $articleId
+     * @return array
+     */
     public function getImagesForArticle($articleId)
     {
 
@@ -764,6 +771,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
     }
 
+    /**
+     * Read current price configuration
+     */
     public function getPriceConfigAction()
     {
         /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
@@ -946,5 +956,58 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $this->getModelManager()->flush();
 
         $this->View()->assign('success', true);
+    }
+
+    /**
+     * Lists all logs
+     */
+    public function getLogsAction()
+    {
+        $order = $this->Request()->getParam('sort', array(array('property' => 'time', 'direction' => 'DESC')));
+
+        $filters = array();
+        foreach (array('fromShop', 'toShop', 'update', 'getLastRevision') as $filter) {
+            $f = $this->Request()->getParam($filter, "true");
+            if ($f === "true") {
+                $filters[] = $filter;
+            }
+        }
+
+        if (empty($filters)) {
+            return;
+        }
+
+        foreach ($order as &$rule) {
+            if ($rule['property'] == 'time') {
+                $rule['property'] = 'id';
+            }
+            $rule['property'] = 'logs.' . $rule['property'];
+        }
+
+        $builder = $this->getModelManager()->createQueryBuilder();
+        $builder->select('logs');
+        $builder->from('Shopware\CustomModels\Bepado\Log', 'logs')
+            ->addOrderBy($order)
+            ->where('logs.command IN (:commandFilter)')
+            ->setParameter('commandFilter', $filters);
+
+        $query = $builder->getQuery()
+            ->setFirstResult($this->Request()->getParam('start', 0))
+            ->setMaxResults($this->Request()->getParam('limit', 25));
+
+        $total = Shopware()->Models()->getQueryCount($query);
+        $data = $query->getArrayResult();
+
+//        $connection = $this->getModelManager()->getConnection();
+//        $count = $connection->fetchColumn('SELECT COUNT(`id`) as count FROM `s_plugin_bepado_log`');
+//        if ($count > 10000000) {
+//            $connection->exec('TRUNCATE `s_plugin_bepado_log`;');
+//        }
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data,
+            'total' => $total
+        ));
     }
 }

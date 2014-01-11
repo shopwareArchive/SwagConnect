@@ -18,7 +18,8 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: true },
             { id: 'export', text: "{s name=navigation/export}Product export{/s}", leaf: true },
-            { id: 'import', text: "{s name=navigation/import}Product import{/s}", leaf: true }
+            { id: 'import', text: "{s name=navigation/import}Product import{/s}", leaf: true },
+            { id: 'log', text: "{s name=navigation/log}Log{/s}", leaf: true }
         ]
     },
 

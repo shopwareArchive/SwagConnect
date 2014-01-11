@@ -33,6 +33,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
             }, {
                 xtype: 'bepado-import',
                 itemId: 'import'
+            }, {
+                xtype: 'bepado-log',
+                itemId: 'log'
             }]
         });
 

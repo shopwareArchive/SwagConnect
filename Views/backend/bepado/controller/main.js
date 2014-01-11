@@ -12,13 +12,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'main.Navigation', 'main.Mapping', 'main.Category',
         'export.List', 'import.List',
         'changed_products.List',
-        'config.Prices'
+        'config.Prices', 'log.List'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
-        'config.Prices'
+        'config.Prices', 'log.List'
     ],
 
     refs: [
@@ -30,7 +30,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'importList', selector: 'bepado-import-list' },
         { ref: 'mapping', selector: 'bepado-mapping treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
-        { ref: 'changedList', selector: 'bepado-changed-products-list' }
+        { ref: 'changedList', selector: 'bepado-changed-products-list' },
+        { ref: 'logList', selector: 'bepado-log-list' }
     ],
 
     messages: {
@@ -220,6 +221,15 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             },
             'bepado-changed-products-list': {
                 'selectionchange': me.onChangedProductsSelectionChanged
+            },
+            'bepado-log-filter [filter=commandFilter]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    store.getProxy().extraParams[field.name] = value;
+                    store.reload();
+                }
             }
         });
 

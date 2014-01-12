@@ -23,14 +23,42 @@ Ext.define('Shopware.apps.Bepado.view.log.Filter', {
 
         me.commandFilter = me.getCommandFilter();
         me.searchFilter = me.getSearchFilter();
+        me.errorFilter = me.getErrorFilter();
 
         Ext.applyIf(me, {
             items: [
-                me.commandFilter, me.searchFilter
+                me.searchFilter, me.commandFilter, me.errorFilter
             ]
         });
 
         me.callParent(arguments);
+    },
+
+    getErrorFilter: function() {
+        return {
+            xtype: 'form',
+            title: '{s name=log/filter/error}Error filter{/s}',
+            //bodyPadding: 5,
+            items: [{
+                xtype: 'fieldcontainer',
+                defaultType: 'radiofield',
+                items: [{
+                    boxLabel  : '{s name=import/filter/active_all}Show all{/s}',
+                    name      : 'error',
+                    inputValue: '-1',
+                    checked   : true
+                }, {
+                    boxLabel  : '{s name=log/filter/error_true}Show only errors{/s}',
+                    name      : 'error',
+                    inputValue: '0'
+                }, {
+                    boxLabel  : '{s name=log/filter/error_false}Show only success{/s}',
+                    name      : 'error',
+                    inputValue: '1'
+                }
+                ]
+            }]
+        }
     },
 
     /**

@@ -1002,6 +1002,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                     break;
             }
         }
+
+        switch ($this->Request()->getParam('errorFilter', -1)) {
+            case 0:
+                $builder->andWhere('logs.isError = 1');
+                break;
+            case 1:
+                $builder->andWhere('logs.isError = 0');
+                break;
+
+        }
+
         $query = $builder->getQuery()
             ->setFirstResult($this->Request()->getParam('start', 0))
             ->setMaxResults($this->Request()->getParam('limit', 25));

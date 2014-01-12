@@ -96,6 +96,9 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             (`isError`, `service`, `command`, `request`, `response`, `time`)
             VALUES (?, ?, ?, ?, ?, NOW())
         ', array($isError, $service, $command, $request, $response));
+
+        // Cleanup after 3 days
+        Shopware()->Db()->exec('DELETE FROM `s_plugin_bepado_log`  WHERE DATE_SUB(CURDATE(),INTERVAL 3 DAY) >= time');
     }
 
     /**

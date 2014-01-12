@@ -233,6 +233,19 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.reload();
                 }
             },
+            'bepado-log-filter [name=error]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    if (!value) {
+                        return;
+                    }
+
+                    store.getProxy().extraParams.errorFilter = field.inputValue;
+                    store.reload();
+                }
+            },
             'bepado-log-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getLogList(),

@@ -31,7 +31,7 @@
 class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Action
 {
     /**
-     * Init controller method
+     * Disable authentication and JSon renderer
      */
     public function init()
     {
@@ -47,6 +47,11 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
 
+    /**
+     * Main bepado interface
+     *
+     * @throws Exception
+     */
     public function indexAction()
     {
         $this->Response()->setHeader('Content-Type', 'text/xml; charset=utf-8');
@@ -61,9 +66,8 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
                 $request
             );
         } catch (Exception $e) {
-            if ($loggingEnabled) {
-                $this->writeLog(true, $request, $e->getMessage() . "\n\n" . $e->getTraceAsString());
-            }
+            // Always write errors to the log
+            $this->writeLog(true, $request, $this->formatException($e));
             throw $e;
         }
 
@@ -74,6 +78,13 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
         echo $result;
     }
 
+    /**
+     * Write the log
+     *
+     * @param $isError
+     * @param $request
+     * @param $response
+     */
     public function writeLog($isError, $request, $response)
     {
         $document = simplexml_load_string($request);
@@ -85,5 +96,21 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             (`isError`, `service`, `command`, `request`, `response`, `time`)
             VALUES (?, ?, ?, ?, ?, NOW())
         ', array($isError, $service, $command, $request, $response));
+    }
+
+    /**
+     * Format a given exception for the log
+     *
+     * @param Exception $e
+     * @return string
+     */
+    public function formatException(\Exception $e)
+    {
+        return sprintf(
+            "%s \n\n %s \n\n %s",
+            $e->getMessage(),
+            $e->getFile() . ': ' . $e->getLine(),
+            $e->getTraceAsString()
+        );
     }
 }

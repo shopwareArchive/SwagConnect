@@ -5,7 +5,7 @@ Ext.define('Shopware.apps.Bepado.model.log.List', {
     fields: [
         //{block name="backend/bepado/model/log/list/fields"}{/block}
         { name: 'id', type: 'integer' },
-        { name: 'isException', type: 'boolean' },
+        { name: 'isError', type: 'boolean' },
         { name: 'request', type: 'string', useNull: true },
         { name: 'response', type: 'string', useNull: true },
         { name: 'command', type: 'string', useNull: true },

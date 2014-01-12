@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.38';
+        return '1.2.39';
     }
 
     /**
@@ -368,7 +368,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $form->setElement('boolean', 'logRequest', array(
                 'label' => 'Anfragen des bepado-Servers mitschreiben',
                 'value' => false,
-                'helpText' => 'Schreibt die Anfragen von bepado.de und die Antwort des bepado-Plugins mit. Hierbei können schnell viele Daten anfallen.'
+                'helpText' => 'Schreibt alle Anfragen von bepado.de und die Antwort des bepado-Plugins mit. Hierbei können schnell viele Daten anfallen.'
             )
         );
     }

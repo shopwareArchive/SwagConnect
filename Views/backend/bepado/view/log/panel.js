@@ -20,6 +20,11 @@ Ext.define('Shopware.apps.Bepado.view.log.Panel', {
             },{
                 xtype: 'bepado-log-list',
                 region: 'center'
+            }, {
+                xtype: 'bepado-log-tabs',
+                collapsible: true,
+                split: true,
+                region: 'south'
             }]
         });
 

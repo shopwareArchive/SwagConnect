@@ -963,17 +963,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     public function getLogsAction()
     {
+        $params = $this->Request()->getParams();
         $order = $this->Request()->getParam('sort', array(array('property' => 'time', 'direction' => 'DESC')));
+        $filters = $this->Request()->getParam('filter');
 
-        $filters = array();
-        foreach (array('fromShop', 'toShop', 'update', 'getLastRevision') as $filter) {
-            $f = $this->Request()->getParam($filter, "true");
-            if ($f === "true") {
-                $filters[] = $filter;
+        $commandFilters = array();
+        foreach ($params as $key => $param) {
+            if (strpos($key, 'commandFilter_') !== false && $param == 'true') {
+                $commandFilters[] = str_replace('commandFilter_', '', $key);
             }
         }
 
-        if (empty($filters)) {
+        if (empty($commandFilters)) {
             return;
         }
 
@@ -989,8 +990,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $builder->from('Shopware\CustomModels\Bepado\Log', 'logs')
             ->addOrderBy($order)
             ->where('logs.command IN (:commandFilter)')
-            ->setParameter('commandFilter', $filters);
+            ->setParameter('commandFilter', $commandFilters);
 
+        foreach ($filters as $filter) {
+            switch ($filter['property']) {
+                case 'search':
+                    $builder->andWhere(
+                        'logs.request LIKE :search OR logs.response LIKE :search'
+                    );
+                    $builder->setParameter('search', $filter['value']);
+                    break;
+            }
+        }
         $query = $builder->getQuery()
             ->setFirstResult($this->Request()->getParam('start', 0))
             ->setMaxResults($this->Request()->getParam('limit', 25));
@@ -1008,6 +1019,25 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'success' => true,
             'data' => $data,
             'total' => $total
+        ));
+    }
+
+    /**
+     * Get a list of log commands
+     */
+    public function getLogCommandsAction()
+    {
+        $data = $this->getModelManager()->getConnection()->fetchAll(
+            'SELECT DISTINCT `command` FROM `s_plugin_bepado_log`'
+        );
+
+        $data = array_map(function($column) {
+            return $column['command'];
+        }, $data);
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $data
         ));
     }
 }

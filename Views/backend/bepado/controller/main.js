@@ -31,7 +31,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'mapping', selector: 'bepado-mapping treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
         { ref: 'changedList', selector: 'bepado-changed-products-list' },
-        { ref: 'logList', selector: 'bepado-log-list' }
+        { ref: 'logList', selector: 'bepado-log-list' },
+        { ref: 'logFilter', selector: 'bepado-log-filter' },
+        { ref: 'logTabs', selector: 'bepado-log-tabs' }
     ],
 
     messages: {
@@ -227,13 +229,91 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     var table = me.getLogList(),
                         store = table.getStore();
 
-                    store.getProxy().extraParams[field.name] = value;
+                    store.getProxy().extraParams['commandFilter_' + field.name] = value;
                     store.reload();
+                }
+            },
+            'bepado-log-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    if (value.length === 0 ) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'search',
+                            '%' + value + '%'
+                        );
+                    }
+                }
+            },
+            'bepado-log-list': {
+                'selectionchange': function(grid, selected, eOpts) {
+                    var me = this,
+                        record,
+                        tabs = me.getLogTabs(),
+                        request = tabs.down('textarea[name=request]'),
+                        response = tabs.down('textarea[name=response]');
+
+                    // make sure that we have a selection
+                    if (selected && selected.length > 0) {
+                        record = selected[0];
+
+                        request.setValue(record.get('request'));
+                        response.setValue(record.get('response'));
+                    }
+
                 }
             }
         });
 
+        me.populateLogCommandFilter();
+
         me.callParent(arguments);
+    },
+
+    /**
+     * Dynamically create filter fields for all known command types
+     */
+    populateLogCommandFilter: function() {
+        var me = this,
+            logList = me.getLogList(),
+            store = logList.store,
+            container = me.getLogFilter().down('fieldcontainer');
+
+        Ext.Ajax.request({
+            url: '{url action=getLogCommands}',
+            method: 'POST',
+            success: function(response, opts) {
+                var data;
+
+                if (!response || !response.responseText) {
+                    return;
+                }
+
+                data = Ext.JSON.decode(response.responseText);
+
+                Ext.each(data.data, function(command) {
+                    store.getProxy().extraParams['commandFilter_' + command] = true;
+                    container.add({
+                        boxLabel  : command,
+                        name      : command,
+                        inputValue:  true,
+                        checked   :  true,
+                        filter    : 'commandFilter'
+                    });
+                });
+
+                store.reload();
+            },
+            failure: function(response, opts) {
+                Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+            }
+
+        });
+
     },
 
     /**

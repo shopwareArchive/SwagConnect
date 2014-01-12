@@ -71,24 +71,6 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * Wrapping the insert method to catch errors during development.
-     * @todo:dn Remove for closed beta
-     *
-     * @param Product $product
-     * @throws \Exception
-     */
-    public function insertOrUpdate(Product $product)
-    {
-        try {
-            $this->insertOrUpdateInternal($product);
-        } catch(\Exception $e) {
-            error_log(print_r($e->getMessage(), true)."\n", 3, Shopware()->DocPath().'/import_errors.log');
-            error_log(print_r($e->getTraceAsString(), true)."\n\n", 3, Shopware()->DocPath().'/import_errors.log');
-            throw $e;
-        }
-    }
-
-    /**
      * Import or update given product
      *
      * Store product in your shop database as an external product. The
@@ -96,7 +78,7 @@ class ProductToShop implements ProductToShopBase
      *
      * @param Product $product
      */
-    public function insertOrUpdateInternal(Product $product)
+    public function insertOrUpdate(Product $product)
     {
         if(empty($product->title) || empty($product->vendor)) {
             return;

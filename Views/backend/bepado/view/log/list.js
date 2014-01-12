@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.Bepado.view.log.List', {
             xtype: 'booleancolumn',
             dataIndex: 'isError',
             renderer: function(value, metaData, record) {
-                return value ? ' &#9745;' : '&#9744;';
+                return value ? 'error' : '';
             },
             flex: 1
         }, {

@@ -33,41 +33,25 @@ Ext.define('Shopware.apps.Bepado.view.log.Filter', {
         me.callParent(arguments);
     },
 
+    /**
+     * Creates the filter for the bepado command
+     *
+     * @returns Ext.form.Panel
+     */
     getCommandFilter: function() {
-        return {
+        var me = this;
+
+        me.commandFilter = Ext.create('Ext.form.Panel', {
             xtype: 'form',
             title: '{s name=log/filter/command_title}Command filter{/s}',
             items: [{
                 xtype: 'fieldcontainer',
                 defaultType: 'checkboxfield',
-                items: [{
-                        boxLabel  : '{s name=log/filter/fromShop}From shop{/s}',
-                        name      : 'fromShop',
-                        inputValue:  true,
-                        checked   :  true,
-                        filter    : 'commandFilter'
-                    }, {
-                        boxLabel  : '{s name=log/filter/toShop}To shop{/s}',
-                        name      : 'toShop',
-                        inputValue:  true,
-                        checked   :  true,
-                        filter    : 'commandFilter'
-                    }, {
-                        boxLabel  : '{s name=log/filter/update}Update{/s}',
-                        name      : 'update',
-                        inputValue:  true,
-                        checked   :  true,
-                        filter    : 'commandFilter'
-                    }, {
-                        boxLabel  : '{s name=log/filter/getLastRevision}Last revision{/s}',
-                        name      : 'getLastRevision',
-                        inputValue:  true,
-                        checked   :  true,
-                        filter    : 'commandFilter'
-                    }
-                ]
+                items: []
             }]
-        }
+        });
+
+        return me.commandFilter;
     },
 
     getSearchFilter: function() {

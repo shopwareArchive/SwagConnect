@@ -99,12 +99,21 @@ class Shopping
      */
     public function calculateShippingCosts(Struct\ProductList $productList)
     {
-        return array_sum(
-            array_map(
-                array($this->calculator, 'calculateProductListShippingCosts'),
-                $this->zipProductListByShopId($productList)
-            )
+        $shippingCosts = array_map(
+            array($this->calculator, 'calculateProductListShippingCosts'),
+            $this->zipProductListByShopId($productList)
         );
+
+        $property = function ($property) {
+            return function ($shippingCost) use ($property) {
+                return $shippingCost->$property;
+            };
+        };
+
+        return new Struct\ShippingCosts(array(
+                'grossShippingCosts' => array_sum(array_map($property('grossShippingCosts'), $shippingCosts)),
+                'shippingCosts' => array_sum(array_map($property('shippingCosts'), $shippingCosts))
+            ));
     }
 
     /**

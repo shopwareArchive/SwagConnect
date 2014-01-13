@@ -68,10 +68,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 	/**
 	 * Install plugin method
 	 *
+     * @throws \RuntimeException
 	 * @return bool
 	 */
 	public function install()
-	{	
+	{
+        if (!$this->assertVersionGreaterThen('4.1.0')) {
+            throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
+        };
+
         $this->createMyMenu();
         $this->createMyForm();
         $this->createMyEvents();

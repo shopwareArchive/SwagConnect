@@ -93,7 +93,7 @@ class Message extends ChangeVisitor
                     'message' => 'Price of product %product changed to %price.',
                     'values' => array(
                         'product' => $change->product->title,
-                        'price' => $change->product->price * (1 + $change->product->vat),
+                        'price' => round($change->product->price * (1 + $change->product->vat), 2),
                     ),
                 )
             );

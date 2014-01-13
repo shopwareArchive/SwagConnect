@@ -1,0 +1,15 @@
+<p style="padding-bottom:8px;color:999;font-style:italic;">
+Bepado ist die erste soziale B2B-Handelsplattform der Welt. Ziel des Portals ist die Vernetzung von Onlinehändlern untereinander, damit diese ihre Angebote durch die Sortimente anderer Teilnehmer ergänzen können. Das schafft, ganz im Sinne eines sozialen Netzwerks, eine größere Reichweite für den Einzelnen, sorgt für mehr Unabhängigkeit von großen Marktplätzen, erlaubt Dropshipping uvm. und bringt jedem Teilnehmer unterm Strich mehr Umsatz ein. Kurzum: bepado ist ein Netzwerk, das den eCommerce nachhaltig stärken wird!
+
+<br><br>
+
+Nutzen Sie diese Erweiterung, um Ihre Artikel in das Netzwerk einzupflegen und Ihrerseits die für Sie in Frage kommenden Artikel in Ihren Online-Shop zu importieren.
+
+<br><br>
+
+Funktionen:<br>
+- Produkt Import: Importieren Sie Ihre abonnierten Artikel in Ihren Shop, um Ihr Produktsortiment mit wenigen Handgriffen zu erweitern.<br>
+- Produkt Export: Exportieren Sie beliebige Produkte nach bepado und stellen Sie diese anderen Shopbetreibern im Netzwerk zur Verfügung.<br>
+- Kategoriezuweisung: Weisen Sie Ihren Kategorien eine von den vorgebenen Kategorien auf bepado zu.<br>
+- Cloud Search: Durchsuchen Sie mit dieser ausgeklügelten Funktion das gesamte Netzwerk übergreifend nach für Sie in Frage kommenden Artikeln.
+</p>

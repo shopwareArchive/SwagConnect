@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.41';
+        return '1.2.43';
     }
 
     /**
@@ -60,7 +60,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return array(
             'version' => $this->getVersion(),
             'label' => $this->getLabel(),
-            //'description' => file_get_contents($this->Path() . 'info.txt'),
+            'description' => file_get_contents($this->Path() . 'info.txt'),
             'link' => 'http://www.shopware.de/',
         );
     }

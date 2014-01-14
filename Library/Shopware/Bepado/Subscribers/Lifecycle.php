@@ -61,7 +61,8 @@ class Lifecycle extends BaseSubscriber
             return;
         }
         $status = $attribute->getExportStatus();
-        if (empty($status)) {
+        $shopId = $attribute->getShopId();
+        if (empty($status) || !empty($shopId)) {
             return;
         }
 

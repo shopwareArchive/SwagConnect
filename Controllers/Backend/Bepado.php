@@ -1040,6 +1040,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             return $column['command'];
         }, $data);
 
+        // Enforce these fields
+        foreach (array('fromShop', 'toShop', 'getLastRevision', 'update', 'checkProducts') as $value) {
+            if (!in_array($value, $data)) {
+                $data[] = $value;
+            }
+        }
+
         $this->View()->assign(array(
             'success' => true,
             'data' => $data

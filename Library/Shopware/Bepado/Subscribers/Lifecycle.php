@@ -48,9 +48,14 @@ class Lifecycle extends BaseSubscriber
 
         $entity = $eventArgs->get('entity');
 
-        if ($entity instanceof \Shopware\Models\Article\Detail) {
-            $entity = $entity->getArticle();
+        try {
+            if ($entity instanceof \Shopware\Models\Article\Detail) {
+                $entity = $entity->getArticle();
+            }
+        } catch(\Exception $e) {
+            return;
         }
+
 
         $id = $entity->getId();
 

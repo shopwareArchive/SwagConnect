@@ -16,6 +16,7 @@ class Lifecycle extends BaseSubscriber
         return array(
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
+            'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle'
         );
     }
@@ -46,6 +47,11 @@ class Lifecycle extends BaseSubscriber
         }
 
         $entity = $eventArgs->get('entity');
+
+        if ($entity instanceof \Shopware\Models\Article\Detail) {
+            $entity = $entity->getArticle();
+        }
+
         $id = $entity->getId();
 
         $model = $this->getHelper()->getArticleModelById($id);

@@ -14,7 +14,7 @@ Ext.define('Shopware.apps.Bepado.view.log.List', {
 
         Ext.applyIf(me, {
             dockedItems: [
-//                me.getToolbar(),
+                me.getToolbar(),
                 me.getPagingToolbar()
             ],
             columns: me.getColumns()
@@ -117,6 +117,13 @@ Ext.define('Shopware.apps.Bepado.view.log.List', {
     getTopBar:function () {
         var me = this;
         var items = [];
+
+        items.push('->');
+        items.push({
+            iconCls:'sprite-minus-circle-frame',
+            text:'{s name=log/clear}Clear log{/s}',
+            action:'clear'
+        });
 
         return items;
     }

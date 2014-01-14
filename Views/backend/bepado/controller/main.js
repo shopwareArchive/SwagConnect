@@ -279,6 +279,30 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     }
 
                 }
+            },
+            'bepado-log-list button[action=clear]': {
+                click: function() {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    Ext.MessageBox.confirm(
+                        '{s name=log/clear/confirm}Delete log?{/s}',
+                        '{s name=log/clear/message}You are about to delete all log entries. Continue?{/s}',
+                        function (response) {
+                            if ( response !== 'yes' ) {
+                                return;
+                            }
+                            Ext.Ajax.request({
+                                url: '{url action=clearLog}',
+                                method: 'POST',
+                                success: function(response, opts) {
+                                    store.reload();
+                                }
+                            });
+
+                        }
+                    );
+                }
             }
         });
 

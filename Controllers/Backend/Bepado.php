@@ -1020,12 +1020,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
-//        $connection = $this->getModelManager()->getConnection();
-//        $count = $connection->fetchColumn('SELECT COUNT(`id`) as count FROM `s_plugin_bepado_log`');
-//        if ($count > 10000000) {
-//            $connection->exec('TRUNCATE `s_plugin_bepado_log`;');
-//        }
-
         $this->View()->assign(array(
             'success' => true,
             'data' => $data,
@@ -1050,5 +1044,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'success' => true,
             'data' => $data
         ));
+    }
+
+    /**
+     * Delete all log entries
+     */
+    public function clearLogAction()
+    {
+        $connection = $this->getModelManager()->getConnection();
+        $connection->exec('TRUNCATE `s_plugin_bepado_log`;');
     }
 }

@@ -171,12 +171,12 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             text:'{s name=export/options/disable_text}Disable products{/s}',
             action:'deactivate'
         });
-        items.push('->');
-        items.push({
-            iconCls:'sprite-minus-circle-frame',
-            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
-            action:'unsubscribe'
-        });
+//        items.push('->');
+//        items.push({
+//            iconCls:'sprite-minus-circle-frame',
+//            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
+//            action:'unsubscribe'
+//        });
         return items;
     }
 });

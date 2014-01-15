@@ -110,10 +110,12 @@ class Shopping
             };
         };
 
-        return new Struct\ShippingCosts(array(
+        return new Struct\ShippingCosts(
+            array(
                 'grossShippingCosts' => array_sum(array_map($property('grossShippingCosts'), $shippingCosts)),
                 'shippingCosts' => array_sum(array_map($property('shippingCosts'), $shippingCosts))
-            ));
+            )
+        );
     }
 
     /**

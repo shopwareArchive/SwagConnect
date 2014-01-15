@@ -73,6 +73,16 @@ class Address extends Struct
     public $country;
 
     /**
+     * @var string
+     */
+    public $phone;
+
+    /**
+     * @var string
+     */
+    public $email;
+
+    /**
      * Restores an address from a previously stored state array.
      *
      * @param array $state

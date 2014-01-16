@@ -28,7 +28,7 @@ class Sw40Query extends SwQuery
         $categories = array();
         foreach($product->categories as $category) {
             $categories = array_merge(
-                $query->execute(array('mapping' => $category))
+                $query->setParameter('mapping', $category)->execute()
             );
         }
         return $categories;
@@ -43,7 +43,7 @@ class Sw40Query extends SwQuery
         if($this->productCategoryQuery === null) {
             $this->productCategoryQuery = $this->getProductCategoriesQuery();
         }
-        $result = $this->productCategoryQuery->execute(array('id' => $id));
+        $result = $this->productCategoryQuery->setParameter('id', $id)->execute();
         $data = array();
         foreach($result as $row) {
             if($row['mapping'] !== null) {

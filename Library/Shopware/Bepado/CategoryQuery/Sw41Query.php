@@ -29,7 +29,7 @@ class Sw41Query extends SwQuery
         $categories = array();
         foreach($product->categories as $category) {
             $categories = array_merge(
-                $query->execute(array('mapping' => $category))
+                $query->setParameter('mapping', $category)->execute()
             );
         }
         return $categories;

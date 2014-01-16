@@ -167,7 +167,7 @@ class Helper
         if($this->modelQuery === null) {
             $this->modelQuery = $this->getArticleModelByIdQuery();
         }
-        $result = $this->modelQuery->execute(array('id' => $id));
+        $result = $this->modelQuery->setParameter('id', $id)->execute();
         return isset($result[0]) ? $result[0] : null;
     }
 
@@ -195,7 +195,7 @@ class Helper
         if($this->categoryQuery === null) {
             $this->categoryQuery = $this->getCategoryModelByIdQuery();
         }
-        $result = $this->categoryQuery->execute(array('id' => $id));
+        $result = $this->categoryQuery->seParameter('id', $id)->execute();
         return isset($result[0]) ? $result[0] : null;
     }
 
@@ -309,7 +309,10 @@ class Helper
      */
     public function getRowProductDataById($id)
     {
-        $result = $this->getProductQuery()->execute(array('id' => $id));
+        $result = $this->getProductQuery()->setParameter(
+            'id', $id
+        )->execute();
+
         if(!isset($result[0])) {
             return null;
         }

@@ -46,11 +46,10 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->Session())) {
-            return;
-        }
 
-        $this->enforcePhoneNumber();
+        if ($this->enforcePhoneNumber()) {
+            $this->View()->assign('sVoucherError', '2423');
+        }
 
         $this->registerMyTemplateDir();
         $view->extendsTemplate('frontend/bepado/checkout.tpl');
@@ -148,10 +147,6 @@ class Checkout extends BaseSubscriber
         if(empty($session['sOrderVariables'])) {
 			return;
 		}
-
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->Session())) {
-            return;
-        }
 
         $order = new \Bepado\SDK\Struct\Order();
         $order->products = array();

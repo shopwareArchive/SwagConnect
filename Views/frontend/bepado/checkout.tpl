@@ -23,6 +23,13 @@
     {/if}
 {/block}
 
+{block name='frontend_checkout_error_messages_voucher_error' append}
+{* Voucher error *}
+{if $phoneMissing}
+    {include 'frontend/bepado/phone_message.tpl'}
+{/if}
+{/block}
+
 {*
     Show message during checkout, if product price / availability has changed
 *}
@@ -69,6 +76,8 @@
 {block name='frontend_checkout_confirm_submit' prepend}
     {if $bepadoMessages}
         {include 'frontend/bepado/finish_message.tpl'}
+    {elseif $phoneMissing}
+        {include 'frontend/bepado/phone_message.tpl'}
     {else}
         {$smarty.block.parent}
     {/if}
@@ -76,6 +85,8 @@
 {block name='frontend_checkout_confirm_stockinfo'}
     {if $bepadoMessages}
         {include 'frontend/bepado/finish_message.tpl'}
+    {elseif $phoneMissing}
+        {include 'frontend/bepado/phone_message.tpl'}
     {else}
         {$smarty.block.parent}
     {/if}

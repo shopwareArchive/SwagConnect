@@ -47,9 +47,7 @@ class Checkout extends BaseSubscriber
         }
 
 
-        if ($this->enforcePhoneNumber()) {
-            $this->View()->assign('sVoucherError', '2423');
-        }
+        $this->enforcePhoneNumber($view);
 
         $this->registerMyTemplateDir();
         $view->extendsTemplate('frontend/bepado/checkout.tpl');
@@ -148,6 +146,8 @@ class Checkout extends BaseSubscriber
 			return;
 		}
 
+        $this->enforcePhoneNumber($view);
+
         $order = new \Bepado\SDK\Struct\Order();
         $order->products = array();
         $userData = $session['sOrderVariables']['sUserData'];
@@ -225,15 +225,22 @@ class Checkout extends BaseSubscriber
         }
     }
 
-    public function enforcePhoneNumber()
+    /**
+     * Asks the user to leave is phone number if bepado products are in the basket and the
+     * phone number was not configured, yet.
+     *
+     * @param $view
+     * @return null
+     */
+    public function enforcePhoneNumber($view)
     {
-        if (Shopware()->Session()->sUserId) {
+        if (Shopware()->Session()->sUserId && $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
             $id = Shopware()->Session()->sUserId;
 
             $sql = 'SELECT phone FROM s_user_billingaddress WHERE userID = :id';
             $result = Shopware()->Db()->fetchOne($sql, array('id' => $id));
             if (!$result) {
-                // Enforce phone number
+                $view->assign('phoneMissing', true);
             }
         }
     }

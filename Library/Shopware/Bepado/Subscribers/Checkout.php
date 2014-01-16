@@ -41,9 +41,16 @@ class Checkout extends BaseSubscriber
         if(empty($view->sBasket) || !$request->isDispatched()) {
             return;
         }
+
         if(!empty($view->sOrderNumber)) {
             return;
         }
+
+        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->Session())) {
+            return;
+        }
+
+        $this->enforcePhoneNumber();
 
         $this->registerMyTemplateDir();
         $view->extendsTemplate('frontend/bepado/checkout.tpl');
@@ -142,6 +149,10 @@ class Checkout extends BaseSubscriber
 			return;
 		}
 
+        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->Session())) {
+            return;
+        }
+
         $order = new \Bepado\SDK\Struct\Order();
         $order->products = array();
         $userData = $session['sOrderVariables']['sUserData'];
@@ -219,7 +230,16 @@ class Checkout extends BaseSubscriber
         }
     }
 
+    public function enforcePhoneNumber()
+    {
+        if (Shopware()->Session()->sUserId) {
+            $id = Shopware()->Session()->sUserId;
 
-
-
+            $sql = 'SELECT phone FROM s_user_billingaddress WHERE userID = :id';
+            $result = Shopware()->Db()->fetchOne($sql, array('id' => $id));
+            if (!$result) {
+                // Enforce phone number
+            }
+        }
+    }
 }

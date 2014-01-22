@@ -36,6 +36,10 @@ By selecting a row in this view, the toShop's owner can have a look at the actua
 
 This is the global configuration you can overwrite or inherit this configuration on per-product base
 
+## Importing images
+Images can be directly imported whenever a new product is transfered to the shop. This will, however, massively slow down the actual import.
+Bepado will automatically register a CronJob so images can automatically imported via the default shopware cronjob. In order to test this, you can just call http://www.your-shop.com/backend/cron.
+
 ### Prices
 
 - If the fromShop configured fixedPrices, prices will always be imported and cannot be modified in the local shop

@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.47';
+        return '1.2.51';
     }
 
     /**
@@ -166,6 +166,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->subscribeEvent(
             'Enlight_Controller_Front_DispatchLoopStartup',
             'onStartDispatch'
+        );
+
+        Shopware()->Db()->query('DELETE FROM s_crontab WHERE pluginID = :id', array('id' => $this->getId()));
+        $this->createCronJob(
+            'SwagBepado',
+            'importImages',
+            60*30,
+            true
         );
     }
 
@@ -333,6 +341,21 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 )
             )
         );
+
+        $form->setElement('select', 'importImagesOnFirstImport',
+            array(
+                'required' => true,
+                'editable' => false,
+                'value' => 0,
+                'label' => 'Bilder beim Produkt-Erstimport laden',
+                'helpText' => 'Das Importieren von Bildern beim Erstimport der Produkte kann den Import extrem verlängern. Empfohlen ist die Verwendung des Shopware-Cronjobs um die Bilder nachgelagert zu importieren. Auch über »Geänderte Produkte« können die Bilder nachgelagert importiert werden',
+                'store' => array(
+                    array(0, 'Nein (No)'),
+                    array(1, 'Ja (Yes)'),
+                )
+            )
+        );
+
         $form->setElement('boolean', 'autoUpdateProducts', array(
             'label' => 'Geänderte Produkte automatisch mit bepado synchronisieren',
             'value' => true,
@@ -408,6 +431,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\BasketWidget(),
             new \Shopware\Bepado\Subscribers\ArticleList(),
             new \Shopware\Bepado\Subscribers\Dispatches(),
+            new \Shopware\Bepado\Subscribers\CronJob()
         );
 
         if ($this->Config()->get('autoUpdateProducts', true)) {

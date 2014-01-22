@@ -738,6 +738,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         if ($bepadoAttribute->getLastUpdateFlag() & $flag) {
             $bepadoAttribute->flipLastUpdateFlag($flag);
         }
+        if ($type == 'image') {
+            if ($bepadoAttribute->getLastUpdateFlag() & $updateFlagsByName['imageInitialImport']) {
+                $bepadoAttribute->flipLastUpdateFlag($updateFlagsByName['imageInitialImport']);
+            }
+        }
 
         $this->getModelManager()->flush();
 
@@ -1041,7 +1046,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }, $data);
 
         // Enforce these fields
-        foreach (array('fromShop', 'toShop', 'getLastRevision', 'update', 'checkProducts') as $value) {
+        foreach (array('fromShop', 'toShop', 'getLastRevision', 'update', 'checkProducts', 'buy', 'reserveProducts', 'confirm') as $value) {
             if (!in_array($value, $data)) {
                 $data[] = $value;
             }

@@ -27,7 +27,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
         var me = this;
 
         me.fields = { };
-        Ext.each(['price', 'shortDescription', 'longDescription', 'name', 'image'], function(field) {
+        Ext.each(['price', 'shortDescription', 'longDescription', 'name', 'image', 'imageInitialImport'], function(field) {
             me.fields[field] = me.createContainer(field);
         });
     },
@@ -74,6 +74,7 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                 };
                 break;
             case 'image':
+            case 'imageInitialImport':
                 config = {
                     xtype: 'shopware-images-field',
                     title: me.getTranslatedTitle('image'),

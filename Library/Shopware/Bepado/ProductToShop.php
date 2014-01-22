@@ -271,10 +271,23 @@ class ProductToShop implements ProductToShopBase
     {
         // This also defines the flags of these fields
         $fields = $this->helper->getUpdateFlags();
+        $flagsByName = array_flip($fields);
 
         $flag = 0;
         $output = array();
         foreach ($fields as $key => $field) {
+            // Don't handle the imageInitialImport flag
+            if ($field == 'imageInitialImport') {
+                continue;
+            }
+
+            // If this is a new product
+            if (!$model->getId() && $field == 'image' && !$this->config->get('importImagesOnFirstImport', false)) {
+                $output[$field] = false;
+                $flag |= $flagsByName['imageInitialImport'];
+                continue;
+            }
+
             $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
             $output[$field] = $updateAllowed;
             if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $attribute, $product)) {

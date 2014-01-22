@@ -488,7 +488,64 @@ class Helper
         return !empty($result);
     }
 
+    /**
+     * Get ids of products that needs an image import
+     * @param null $limit
+     * @return array        Ids of products needing an image import
+     */
+    public function getProductsNeedingImageImport($limit=null)
+    {
+        $updateFlags = $this->getUpdateFlags();
+        $updateFlagsByName = array_flip($updateFlags);
 
+        $initialImportFlag = $updateFlagsByName['imageInitialImport'];
+
+        $builder = $this->manager->createQueryBuilder();
+            $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+            $builder->innerJoin('at.articleDetail', 'detail');
+            $builder->select('at.articleId');
+            $builder->andWhere('at.shopId IS NOT NULL')
+            ->andWHere('at.lastUpdateFlag IS NOT NULL')
+            ->andWHere('BIT_AND(at.lastUpdateFlag, :initialImportFlag) > 0')
+            ->setParameter('initialImportFlag', $initialImportFlag);
+
+        if ($limit) {
+            $builder->setMaxResults($limit);
+        }
+
+        $ids = $builder->getQuery()->getArrayResult();
+        return array_map('array_pop', $ids);
+
+    }
+
+    /**
+     * Batch import images for new products without images
+     *
+     * @param null $limit
+     */
+    public function importImages($limit=null)
+    {
+        $articleRepository = $this->manager->getRepository('Shopware\Models\Article\Article');
+
+        $flags = $this->getUpdateFlags();
+        $flagsByName = array_flip($flags);
+
+        $ids = $this->getProductsNeedingImageImport($limit);
+
+        foreach ($ids as $id) {
+            /** @var \Shopware\Models\Article\Article $model */
+            $model = $articleRepository->find($id);
+            $bepadoAttribute = $this->getBepadoAttributeByModel($model);
+
+            $lastUpdate = json_decode($bepadoAttribute->getLastUpdate(), true);
+
+            $this->handleImageImport($lastUpdate['image'], $model);
+
+            $bepadoAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+
+            $this->manager->flush();
+        }
+    }
 
     /**
      * Handles the image import of a product. This will:
@@ -507,6 +564,7 @@ class Helper
         // Build up an array of images imported from bepado
         $positions = array();
         $localImagesFromBepado = array();
+
         /** @var $image Image */
         /** @var $media \Shopware\Models\Media\Media */
         foreach ($model->getImages() as $image) {
@@ -596,7 +654,7 @@ class Helper
      */
     public function getUpdateFlags()
     {
-        return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price');
+        return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport');
     }
 
     /**

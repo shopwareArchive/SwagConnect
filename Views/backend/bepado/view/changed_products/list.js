@@ -55,7 +55,8 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.List', {
                         4: 'longDescription',
                         8: 'name',
                         16: 'image',
-                        32: 'price'
+                        32: 'price',
+                        64: 'imageInitialImport'
                     },
                     activeFlags = [];
 

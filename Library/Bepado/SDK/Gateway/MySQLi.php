@@ -140,7 +140,7 @@ class MySQLi extends Gateway
             FROM
                 `bepado_change`
             WHERE
-                `c_revision` > ' . $offset
+                `c_revision` > ' . $this->connection->real_escape_string($offset)
         );
 
         $row = $result->fetch_assoc();

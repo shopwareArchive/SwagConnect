@@ -187,8 +187,14 @@ class ProductFromShop implements ProductFromShopBase
         }
         $model->setDetails($items);
 
-        $hash = md5(serialize($order->deliveryAddress));
-        $email = substr($hash, 0, 8) . '@bepado.de';
+        $email = $order->deliveryAddress->email;
+
+        if (!$email) {
+            $hash = md5(serialize($order->deliveryAddress));
+            // todo@dn: Use real mail address here.600
+            $email = substr($hash, 0, 8) . '@bepado.de';
+        }
+
 
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
         $customer = $repository->findOneBy(array(

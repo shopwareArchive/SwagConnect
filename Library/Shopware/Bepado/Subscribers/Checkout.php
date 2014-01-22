@@ -192,6 +192,7 @@ class Checkout extends BaseSubscriber
         $address->zip = $shippingData['zipcode'];
         $address->city = $shippingData['city'];
         $address->country = $userData['additional']['countryShipping']['iso3'];
+        $address->phone = $userData['billingaddress']['phone'];
         if(!empty($userData['additional']['stateShipping']['shortcode'])) {
             $address->state = $userData['additional']['stateShipping']['shortcode'];
         }

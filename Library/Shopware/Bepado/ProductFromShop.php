@@ -189,8 +189,8 @@ class ProductFromShop implements ProductFromShopBase
 
         $email = $order->deliveryAddress->email;
 
+        $hash = md5(serialize($order->deliveryAddress));
         if (!$email) {
-            $hash = md5(serialize($order->deliveryAddress));
             // todo@dn: Use real mail address here.600
             $email = substr($hash, 0, 8) . '@bepado.de';
         }

@@ -278,6 +278,7 @@ class ProductFromShop implements ProductFromShopBase
             'city' => $address->city,
             'zipCode' => $address->zip,
             'street' => $address->line1,
+            'phone' => $address->phone,
             'country' => $country
         );
     }

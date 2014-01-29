@@ -74,6 +74,7 @@ class ProductQuery
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('d.prices', 'defaultPrice', 'with', "defaultPrice.from = 1 AND defaultPrice.customerGroupKey = 'EK'");
         $builder->join('a.tax', 't');
+        $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->select(array(
             'at.shopId as shopId',
@@ -109,9 +110,7 @@ class ProductQuery
 
         $this->addPriceExportSelect($builder);
 
-        if($this->productDescriptionField !== null) {
-            $builder->addSelect('at.' . $this->productDescriptionField . ' as altDescription');
-        }
+        $builder->addSelect($this->productDescriptionField . ' as altDescription');
         $builder->where('a.id = :id');
         $query = $builder->getQuery();
 

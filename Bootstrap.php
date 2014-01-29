@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.53';
+        return '1.2.60';
     }
 
     /**
@@ -101,6 +101,16 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function update($version)
     {
+
+        // Remove old productDescriptionField
+        // removeElement does seem to have some issued, so using plain SQL here
+        if (version_compare($version, '1.2.59', '<=')) {
+            $id = $this->Form()->getId();
+
+            Shopware()->Db()->query('DELETE FROM s_core_config_elements WHERE form_id = ? AND name = ?', array(
+               $id, 'productDescriptionField'
+            ));
+        }
 
         $this->createMyMenu();
         $this->createMyForm();
@@ -222,7 +232,17 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             1
         );
 
+
+        $modelManager->addAttribute(
+            's_articles_attributes',
+            'bepado', 'product_description',
+            'text'
+        );
+
+
+
         $modelManager->generateAttributeModels(array(
+            's_articles_attributes',
             's_premium_dispatch_attributes',
             's_categories_attributes',
             's_order_details_attributes',
@@ -307,9 +327,21 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'label' => 'Cloud-Search aktivieren',
             'value' => false
         ));
-        $form->setElement('text', 'productDescriptionField', array(
-            'label' => 'Feld für Produktbeschreibungen'
-        ));
+        $form->setElement('select', 'alternateDescriptionField',
+            array(
+                'required' => true,
+                'editable' => false,
+                'value' => 'a.descriptionLong',
+                'label' => 'Produkt Beschreibungsfeld',
+                'helpText' => 'Wenn Sie für bepado-Produkte nicht den Standard-Artikel-Langtext nutzen möchten, können Sie hier ein alternatives Feld definieren.',
+                'store' => array(
+                    array('attribute.bepadoProductDescription', 'attribute.bepadoProductDescription'),
+                    array('a.description', 'Artikel-Kurzbeschreibung'),
+                    array('a.descriptionLong', 'Artikel-Langbeschreibung')
+                )
+            )
+        );
+
         $form->setElement('select', 'bepadoAttribute',
             array(
                 'required' => true,

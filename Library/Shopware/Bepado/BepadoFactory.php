@@ -164,7 +164,7 @@ class BepadoFactory
      */
     private function getProductQuery()
     {
-        return new ProductQuery($this->getModelManager(), Shopware()->Config()->get('productDescriptionField'));
+        return new ProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
     }
 
     /**

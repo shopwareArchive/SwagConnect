@@ -143,12 +143,6 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
-        if(($descField = $this->helper->getProductDescriptionField()) !== null) {
-            $bepadoAttribute->fromArray(array(
-                $descField => $product->longDescription
-            ));
-        }
-
         // Set the configured attribute so users can easily check if a given product is a bepado attribute
         $setter = 'setAttr' . $this->config->get('bepadoAttribute', 19);
         $detailAttribute->$setter($product->sourceId);

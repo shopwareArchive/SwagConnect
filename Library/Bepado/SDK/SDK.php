@@ -172,9 +172,10 @@ final class SDK
         if (false === $token->authenticated) {
             throw new SecurityException(
                 sprintf(
-                    "Authorization of RPC request failed for user '%s' to shop '%d'.",
+                    "Authorization of RPC request failed for user '%s' to shop '%d'. (Reason: %s)",
                     $token->userIdentifier,
-                    $this->dependencies->getGateway()->getShopId()
+                    $this->dependencies->getGateway()->getShopId(),
+                    $token->errorMessage
                 )
             );
         }

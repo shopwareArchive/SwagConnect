@@ -26,9 +26,10 @@ abstract class ShopGateway
      * the requested products.
      *
      * @param Struct\ProductList $productList
+     * @param string $shopId
      * @return mixed
      */
-    abstract public function checkProducts(Struct\ProductList $productList);
+    abstract public function checkProducts(Struct\ProductList $productList, $shopId);
 
     /**
      * Reserve order in shop

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 
 namespace Bepado\Common\Rpc\Marshaller\ValueUnmarshaller;
@@ -55,7 +55,11 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
             case 'array':
                 $values = array();
                 foreach ($element->childNodes as $child) {
-                    $values[$child->getAttribute('key')] = $this->unmarshalValue($child);
+                    if ($child->hasAttribute('key')) {
+                        $values[$child->getAttribute('key')] = $this->unmarshalValue($child);
+                    } else {
+                        $values[] = $this->unmarshalValue($child);
+                    }
                 }
                 return $values;
             default:
@@ -71,6 +75,12 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
     private function unmarshalObject(\DOMElement $element)
     {
         $marshalledClass = $element->getAttribute("struct");
+
+        if (!is_subclass_of($marshalledClass, 'Bepado\Common\Struct') &&
+            !is_subclass_of($marshalledClass, 'Bepado\SDK\Struct')) {
+            throw new \RuntimeException("Cannot unmarshall non-Struct classes.");
+        }
+
         $marshalledObject = new $marshalledClass();
 
         foreach ($element->childNodes as $child) {

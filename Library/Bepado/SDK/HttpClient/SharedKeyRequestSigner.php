@@ -13,6 +13,24 @@ use Bepado\SDK\Struct\AuthenticationToken;
 
 class SharedKeyRequestSigner implements RequestSigner
 {
+    const HTTP_AUTH_HEADER = 'Authorization';
+
+    const HTTP_AUTH_HEADER_KEY = 'HTTP_AUTHORIZATION';
+
+    /**
+     * Custom HTTP header to ship around web servers filtering "Authorization".
+     */
+    const HTTP_CUSTOM_AUTH_HEADER = 'X-Bepado-Authorization';
+
+    /**
+     * $_SERVER key for custom HTTP header
+     */
+    const HTTP_CUSTOM_AUTH_HEADER_KEY = 'HTTP_X_BEPADO_AUTHORIZATION';
+
+    const HTTP_DATE_HEADER = 'Date';
+
+    const HTTP_DATE_HEADER_KEY = 'HTTP_DATE';
+
     /**
      * @param ShopConfiguration
      */
@@ -50,10 +68,22 @@ class SharedKeyRequestSigner implements RequestSigner
         $requestDate     = gmdate('D, d M Y H:i:s', $this->clock->time()) . ' GMT';
         $nonce           = $this->generateNonce($requestDate, $body, $verificationKey);
 
+        $authHeaderContent = 'SharedKey party="' . $myShopId . '",nonce="' . $nonce . '"';
+
         return array(
-            'Authorization: SharedKey party="' . $myShopId . '",nonce="' . $nonce . '"',
-            'Date: ' . $requestDate
+            $this->createHttpHeader(self::HTTP_AUTH_HEADER, $authHeaderContent),
+            $this->createHttpHeader(self::HTTP_CUSTOM_AUTH_HEADER, $authHeaderContent),
+            $this->createHttpHeader(self::HTTP_DATE_HEADER, $requestDate)
         );
+    }
+
+    /**
+     * @param string $headerName
+     * @param string $headerContent
+     */
+    private function createHttpHeader($headerName, $headerContent)
+    {
+        return sprintf('%s: %s', $headerName, $headerContent);
     }
 
     /**
@@ -65,16 +95,37 @@ class SharedKeyRequestSigner implements RequestSigner
      */
     public function verifyRequest($body, array $headers)
     {
-        if (!isset($headers['HTTP_AUTHORIZATION']) || !isset($headers['HTTP_DATE'])) {
-            return new AuthenticationToken(array('authenticated' => false));
+        $authHeader = $this->getAuthorizationHeader($headers);
+
+        if ($authHeader == '') {
+            return new AuthenticationToken(
+                array(
+                    'authenticated' => false,
+                    'errorMessage' => 'No authorization header found.',
+                )
+            );
+        }
+
+        if (!isset($headers[self::HTTP_DATE_HEADER_KEY])) {
+            return new AuthenticationToken(
+                array(
+                    'authenticated' => false,
+                    'errorMessage' => 'No date header found.',
+                )
+            );
         }
 
         $currentDate = time();
 
-        list($type, $params) = explode(" ", $headers['HTTP_AUTHORIZATION'], 2);
+        list($type, $params) = explode(" ", $authHeader, 2);
 
         if ($type !== "SharedKey") {
-            return new AuthenticationToken(array('authenticated' => false));
+            return new AuthenticationToken(
+                array(
+                    'authenticated' => false,
+                    'errorMessage' => 'Authorization type is not "SharedKey".',
+                )
+            );
         }
 
         $party = "";
@@ -89,7 +140,12 @@ class SharedKeyRequestSigner implements RequestSigner
                 $verificationKey = $configuration->key;
                 $party = (int)$party;
             } else {
-                return new AuthenticationToken(array('authenticated' => false));
+                return new AuthenticationToken(
+                    array(
+                        'authenticated' => false,
+                        'errorMessage' => 'Unrecognized party in SharedKey authorization.'
+                    )
+                );
             }
 
             $expectedNonce = $this->generateNonce($headers['HTTP_DATE'], $body, $verificationKey);
@@ -99,7 +155,37 @@ class SharedKeyRequestSigner implements RequestSigner
             }
         }
 
-        return new AuthenticationToken(array('authenticated' => false, 'userIdentifier' => $party));
+        return new AuthenticationToken(
+            array(
+                'authenticated' => false,
+                'userIdentifier' => $party,
+                'errorMessage' => 'Could not match SharedKey elements ot invalid nounce.',
+            )
+        );
+    }
+
+    /**
+     * Returns the content of the bepado authorization header.
+     *
+     * This method tries:
+     *
+     * - HTTP_AUTHORIZATION
+     * - HTTP_X_BEPADO_AUTHORIZATION
+     *
+     * If none of them worked, it returns an empty string
+     *
+     * @param array $headers
+     */
+    private function getAuthorizationHeader(array $headers)
+    {
+        if (isset($headers[self::HTTP_AUTH_HEADER_KEY])) {
+            return $headers[self::HTTP_AUTH_HEADER_KEY];
+        }
+        if (isset($headers[self::HTTP_CUSTOM_AUTH_HEADER_KEY])) {
+            return $headers[self::HTTP_CUSTOM_AUTH_HEADER_KEY];
+        }
+
+        return null;
     }
 
     private function generateNonce($requestDate, $body, $key)

@@ -144,17 +144,17 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'http://sn.bepado.de';
+    protected $socialNetworkHost = 'https://sn.bepado.de';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'http://transaction.bepado.de';
+    protected $transactionHost = 'https://transaction.bepado.de';
 
     /**
      * @var string
      */
-    protected $searchHost = 'http://search.bepado.de';
+    protected $searchHost = 'https://search.bepado.de';
 
     /**
      * @var ChangeVisitor\Message

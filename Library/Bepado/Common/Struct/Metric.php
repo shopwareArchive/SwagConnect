@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 
 namespace Bepado\Common\Struct;
@@ -12,7 +12,7 @@ use \Bepado\Common\Struct;
 /**
  * Base class for metric structs
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 abstract class Metric extends Struct
 {

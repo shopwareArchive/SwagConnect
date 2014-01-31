@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common component.
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 
 namespace Bepado\Common\Rpc;
@@ -12,7 +12,7 @@ use Bepado\Common\Struct;
 /**
  * RPC service registry
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 class ServiceRegistry
 {

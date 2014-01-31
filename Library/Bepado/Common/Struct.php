@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common component.
  *
- * @version 1.0.0snapshot201305291116
+ * @version $Revision$
  */
 
 namespace Bepado\Common;
@@ -21,16 +21,16 @@ abstract class Struct
 
     public function __get($name)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name}.");
     }
 
     public function __set($name, $value)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name}.");
     }
 
     public function __unset($name)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name}.");
     }
 }

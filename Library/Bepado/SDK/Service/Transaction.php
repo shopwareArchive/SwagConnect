@@ -79,7 +79,7 @@ class Transaction
      * @param Struct\ProductList $products
      * @return mixed
      */
-    public function checkProducts(Struct\ProductList $products)
+    public function checkProducts(Struct\ProductList $products, $buyerShopId)
     {
         if (count($products->products) === 0) {
             throw new \InvalidArgumentException(
@@ -97,6 +97,7 @@ class Transaction
         );
 
         $myShopId = $this->shopConfiguration->getShopId();
+        $buyerShopConfig = $this->shopConfiguration->getShopConfiguration($buyerShopId);
 
         $changes = array();
         foreach ($products->products as $product) {
@@ -104,7 +105,7 @@ class Transaction
                 $current->shopId = $myShopId;
 
                 if ($current->sourceId === $product->sourceId) {
-                    if ($this->purchasePriceHasChanged($current, $product)) {
+                    if ($this->purchasePriceHasChanged($current, $product, $buyerShopConfig->priceGroupMargin)) {
 
                         $currentNotAvailable = clone $current;
                         $currentNotAvailable->availability = 0;
@@ -145,16 +146,22 @@ class Transaction
         return $changes ?: true;
     }
 
-    private function purchasePriceHasChanged($current, $product)
+    private function purchasePriceHasChanged($current, $product, $priceGroupMargin)
     {
-        $buyersDiscountedPrice = $current->purchasePrice * (100 - $product->priceGroupMargin) / 100;
+        $discount = ($current->purchasePrice * $priceGroupMargin) / 100;
+        $discountedPrice = $current->purchasePrice - $discount;
 
-        return ($buyersDiscountedPrice !== $product->purchasePrice);
+        return !$this->floatsEqual($discountedPrice, $product->purchasePrice);
+    }
+
+    private function floatsEqual($a, $b)
+    {
+        return abs($a - $b) < 0.000001;
     }
 
     private function priceHasChanged($current, $product)
     {
-        return ($current->fixedPrice && $current->price !== $product->price);
+        return ($current->fixedPrice && ! $this->floatsEqual($current->price, $product->price));
     }
 
     private function availabilityHasChanged($current, $product)
@@ -199,7 +206,8 @@ class Transaction
                 array(
                     'products' => $products
                 )
-            )
+            ),
+            $order->orderShop
         );
 
         if ($verify !== true) {

@@ -140,12 +140,11 @@ class Shopping
     {
         $responses = array();
         $productLists = $this->zipProductListByShopId($productList);
+        $myShopId = $this->config->getShopId();
 
         foreach ($productLists as $shopId => $products) {
-            $products = $this->applyPriceGroupMarginsToProductList($shopId, $products);
-
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
-            $responses[$shopId] = $shopGateway->checkProducts($products);
+            $responses[$shopId] = $shopGateway->checkProducts($products, $myShopId);
         }
 
         $result = array();
@@ -212,8 +211,6 @@ class Shopping
         $responses = array();
         $orders = $this->splitShopOrders($order);
         foreach ($orders as $shopId => $order) {
-            $order = $this->applyPriceGroupMarginsToOrder($shopId, $order);
-
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($order);
         }
@@ -236,71 +233,6 @@ class Shopping
         }
 
         return $reservation;
-    }
-
-    /**
-     * Apply margin to product list
-     *
-     * @param integer $shopId
-     * @param \Bepado\SDK\Struct\ProductList $order
-     *
-     * @return \Bepado\SDK\Struct\ProductList
-     */
-    private function applyPriceGroupMarginsToProductList($shopId, Struct\ProductList $productList)
-    {
-        $margin = $this->getShopPriceGroupMargin($shopId);
-
-        $newList = new Struct\ProductList;
-        foreach ($productList->products as $product) {
-            $newList->products[] = $this->applyPriceGroupMarginsToProduct($product, $margin);
-        }
-
-        return $newList;
-    }
-
-    /**
-     * Apply margin to purchase prices
-     *
-     * @param integer $shopId
-     * @param \Bepado\SDK\Struct\Order $order
-     *
-     * @return \Bepado\SDK\Struct\Order
-     */
-    private function applyPriceGroupMarginsToOrder($shopId, Struct\Order $order)
-    {
-        $margin = $this->getShopPriceGroupMargin($shopId);
-
-        foreach ($order->products as $orderItem) {
-            $orderItem->product = $this->applyPriceGroupMarginsToProduct($orderItem->product, $margin);
-        }
-
-        return $order;
-    }
-
-    private function applyPriceGroupMarginsToProduct(Struct\Product $product, $margin)
-    {
-        $product = clone $product;
-        $product->purchasePrice = $product->purchasePrice * (100 - $margin) / 100;
-        $product->priceGroupMargin = $margin;
-
-        return $product;
-    }
-
-    /**
-     * Get price group margin for the given shop.
-     *
-     * @param string $shopId
-     * @return int
-     */
-    private function getShopPriceGroupMargin($shopId)
-    {
-        $configuration = $this->config->getShopConfiguration($shopId);
-
-        if ($configuration === null) {
-            throw new \RuntimeException(sprintf('No configuration for shop "%d" found.', $shopId));
-        }
-
-        return $configuration->priceGroupMargin;
     }
 
     /**

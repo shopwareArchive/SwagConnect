@@ -67,6 +67,14 @@ class Message extends ChangeVisitor
     /**
      * Visit update change
      *
+     * Note: Why no check on purchase price here? The Change\Message visitor
+     * is only used by the buyer shop to translate changes into error messages.
+     * When the seller shop sees a purchase price change, he will reduce
+     * the availability to "0", hence triggering the availability error message.
+     *
+     * With the current setup the purchase price check would be impossible here,
+     * because we don't have access to the price group margin.
+     *
      * @param Struct\Change\InterShop\Update $change
      * @return void
      */
@@ -74,8 +82,7 @@ class Message extends ChangeVisitor
     {
         $messages = array();
 
-        if ($change->product->availability !== $change->oldProduct->availability
-            || $this->purchasePriceHasChanged($change->oldProduct, $change->product)) {
+        if ($change->product->availability !== $change->oldProduct->availability) {
             $messages[] = new Struct\Message(
                 array(
                     'message' => 'Availability of product %product changed to %availability.',
@@ -100,12 +107,6 @@ class Message extends ChangeVisitor
         }
 
         return $messages;
-    }
-
-    private function purchasePriceHasChanged($current, $product)
-    {
-        $buyersDiscountedPrice = $current->purchasePrice * (100 - $product->priceGroupMargin) / 100;
-        return ($buyersDiscountedPrice !== $product->purchasePrice);
     }
 
     /**

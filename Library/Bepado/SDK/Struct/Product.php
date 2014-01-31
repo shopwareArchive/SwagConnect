@@ -146,18 +146,6 @@ class Product extends ShopItem
     public $purchasePrice;
 
     /**
-     * Price group margin applied to this product during transactions.
-     *
-     * This is a read-only property and setting this when registering products
-     * with Bepado is ignored. Bepado will use this property to calculate the
-     * margin that should be applied on top of the purchase price during a
-     * transaction between two shops.
-     *
-     * @var int
-     */
-    public $priceGroupMargin = 0;
-
-    /**
      * Do national laws require the price to be fixed at the suppliers level?
      *
      * This flag covers laws such as "Buchpreisbindung" in Germany.

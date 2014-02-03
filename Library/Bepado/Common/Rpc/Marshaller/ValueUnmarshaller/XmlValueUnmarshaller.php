@@ -84,7 +84,9 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
         $marshalledObject = new $marshalledClass();
 
         foreach ($element->childNodes as $child) {
-            $marshalledObject->{$child->localName} = $this->unmarshalValue($child->firstChild);
+            if (property_exists($marshalledObject, $child->localName)) {
+                $marshalledObject->{$child->localName} = $this->unmarshalValue($child->firstChild);
+            }
         }
 
         return $this->converter->convertObject(

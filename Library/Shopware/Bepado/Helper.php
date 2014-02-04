@@ -195,7 +195,7 @@ class Helper
         if($this->categoryQuery === null) {
             $this->categoryQuery = $this->getCategoryModelByIdQuery();
         }
-        $result = $this->categoryQuery->seParameter('id', $id)->execute();
+        $result = $this->categoryQuery->setParameter('id', $id)->execute();
         return isset($result[0]) ? $result[0] : null;
     }
 

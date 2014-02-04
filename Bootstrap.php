@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.62';
+        return '1.2.64';
     }
 
     /**
@@ -86,6 +86,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->populateConfigTable();
         $this->importSnippets();
 
+        $this->createEngineElement();
+
         // Populate the s_premium_dispatch_attributes table with attributes for all dispatches
         // so that all existing dispatches are immediately available for bepado
         Shopware()->Db()->exec('
@@ -120,6 +122,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createMyAttributes();
         $this->importSnippets();
 
+        $this->createEngineElement();
+
         // Migrate old attributes to bepado attributes
         if (version_compare($version, '1.2.18', '<=')) {
             // Copy s_articles_attributes to own attribute table
@@ -139,6 +143,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
 
         return true;
+    }
+
+    /**
+     * Creates an engine element so that the bepadoProductDescription is displayed in the article
+     */
+    public function createEngineElement()
+    {
+        $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
+        $element = $repo->findOneBy(array('name' => 'bepadoProductDescription'));
+
+        if (!$element) {
+            $element = new \Shopware\Models\Article\Element();
+            $element->setName('bepadoProductDescription');
+            $element->setType('html');
+            $element->setLabel('bepado Beschreibung');
+            $element->setTranslatable(1);
+            $element->setHelp('Falls Sie die Langbeschreibung ihres Artikels in diesem Attribut-Feld pflegen, wird statt der Langbeschreibung der Inhalt dieses Feldes exportiert');
+
+            Shopware()->Models()->persist($element);
+            Shopware()->Models()->flush();
+        }
     }
 
     public function importSnippets()

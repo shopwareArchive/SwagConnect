@@ -120,6 +120,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * When the backend module is being loaded, update bepado products.
+     *
+     * It might be considerable to move this to e.g. the lifecycle events of the products
+     */
+    public function indexAction()
+    {
+        $this->getHelper()->updateBepadoProducts();
+
+        parent::loadAction();
+    }
+
+    /**
      * Helper function to return a QueryBuilder for creating the listing queries for the import and export listings
      *
      * @param $filter

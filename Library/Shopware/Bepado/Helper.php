@@ -304,6 +304,43 @@ class Helper
     }
 
     /**
+     * Helper to update the bepado_items table
+     */
+    public function updateBepadoProducts()
+    {
+        // Insert new articles
+        $sql = '
+        INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id)
+        SELECT articleID, articledetailsID
+
+        FROM s_articles_attributes aa
+
+        LEFT JOIN `s_plugin_bepado_items` bi
+        ON bi.article_detail_id = aa.articledetailsid
+        AND bi.article_id = aa.articleID
+
+        WHERE aa.articleID IS NOT NULL
+        AND aa.articledetailsID IS NOT NULL
+        AND bi.id IS NULL
+        ';
+
+        $this->manager->getConnection()->exec($sql);
+
+        // Delete removed articles from s_plugin_bepado_items
+        $sql = '
+        DELETE bi FROM `s_plugin_bepado_items`  bi
+
+        LEFT JOIN `s_articles_attributes` aa
+        ON aa.articledetailsID = bi.article_detail_id
+
+        WHERE aa.articleID IS NULL
+        ';
+
+        $this->manager->getConnection()->exec($sql);
+
+    }
+
+    /**
      * @param $id
      * @return null|array
      */

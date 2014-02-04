@@ -171,16 +171,7 @@ class PDO extends Gateway
         );
         $query->execute(array($id, 'insert', $revision, serialize($product)));
 
-        $query =  $this->connection->prepare(
-            'INSERT INTO
-                bepado_product
-            VALUES (
-                ?,
-                ?,
-                null
-            );'
-        );
-        $query->execute(array($id, $hash));
+        $this->updateHash($id, $hash);
     }
 
     /**
@@ -218,14 +209,31 @@ class PDO extends Gateway
         );
         $query->execute(array($id, 'update', $revision, serialize($product)));
 
-        $query = $this->connection->prepare(
-            '
-            UPDATE bepado_product
-            SET p_hash = ?
-            WHERE p_source_id = ?
-            '
+        $this->updateHash($id, $hash);
+    }
+
+    /**
+     * Update hash for product
+     *
+     * Updates the hash of exisitng products or inserts the hash, if product is
+     * not yet in database.
+     *
+     * @param string $productId
+     * @param string $hash
+     * @return void
+     */
+    protected function updateHash($productId, $hash)
+    {
+        $query =  $this->connection->prepare(
+            'INSERT INTO
+                bepado_product
+                (p_source_id, p_hash)
+            VALUES
+                (?, ?)
+            ON DUPLICATE KEY UPDATE
+                p_hash = ?;'
         );
-        $query->execute(array($hash, $id));
+        $query->execute(array($productId, $hash, $hash));
     }
 
     /**

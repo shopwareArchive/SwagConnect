@@ -174,15 +174,7 @@ class MySQLi extends Gateway
             );'
         );
 
-        $this->connection->query(
-            'INSERT INTO
-                bepado_product
-            VALUES (
-                "' . $this->connection->real_escape_string($id) . '",
-                "' . $this->connection->real_escape_string($hash) . '",
-                null
-            );'
-        );
+        $this->updateHash($id, $hash);
     }
 
     /**
@@ -224,14 +216,32 @@ class MySQLi extends Gateway
             );'
         );
 
+        $this->updateHash($id, $hash);
+    }
+
+    /**
+     * Update hash for product
+     *
+     * Updates the hash of exisitng products or inserts the hash, if product is
+     * not yet in database.
+     *
+     * @param string $productId
+     * @param string $hash
+     * @return void
+     */
+    protected function updateHash($productId, $hash)
+    {
         $this->connection->query(
-            'UPDATE
+            'INSERT INTO
                 bepado_product
-            SET
-                p_hash = "' . $this->connection->real_escape_string($hash) . '"
-            WHERE
-                p_source_id = "' . $this->connection->real_escape_string($id) . '"
-            ;'
+                (p_source_id, p_hash)
+            VALUES
+                (
+                    "' . $this->connection->real_escape_string($productId) . '",
+                    "' . $this->connection->real_escape_string($hash) . '"
+                )
+            ON DUPLICATE KEY UPDATE
+                p_hash = "' . $this->connection->real_escape_string($hash) . '";'
         );
     }
 

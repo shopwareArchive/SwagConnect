@@ -243,6 +243,7 @@ class Shopping
      */
     protected function applyRemoteShopChanges(array $changes)
     {
+        $this->productToShop->startTransaction();
         foreach ($changes as $change) {
             switch (true) {
                 case $change instanceof Struct\Change\InterShop\Update:
@@ -257,6 +258,7 @@ class Shopping
                     );
             }
         }
+        $this->productToShop->commit();
     }
 
     /**

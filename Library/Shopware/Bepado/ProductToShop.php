@@ -71,6 +71,31 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
+     * Start transaction
+     *
+     * Starts a transaction, which includes all insertOrUpdate and delete
+     * operations, as well as the revision updates.
+     *
+     * @return void
+     */
+    public function startTransaction()
+    {
+        // TODO: Implement startTransaction() method.
+    }
+
+    /**
+     * Commit transaction
+     *
+     * Commits the transactions, once all operations are queued.
+     *
+     * @return void
+     */
+    public function commit()
+    {
+        // TODO: Implement commit() method.
+    }
+
+    /**
      * Import or update given product
      *
      * Store product in your shop database as an external product. The

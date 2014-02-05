@@ -91,6 +91,7 @@ class ProductService
      */
     public function toShop(array $changes)
     {
+        $this->toShop->startTransaction();
         foreach ($changes as $change) {
             switch (true) {
                 case $change instanceof Change\ToShop\InsertOrUpdate:
@@ -105,6 +106,8 @@ class ProductService
         }
 
         $this->revision->storeLastRevision($change->revision);
+
+        $this->toShop->commit();
         return $change->revision;
     }
 

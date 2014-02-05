@@ -86,17 +86,22 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
      * @param $response
      */
     public function writeLog($isError, $request, $response)
-    {
-        $document = simplexml_load_string($request);
-        $service = $document->service;
-        $command = $document->command;
+    {        
+        try {            
+            $document = simplexml_load_string($request);
+            $service = $document->service;
+            $command = $document->command;
+        } catch(\Exception $e) {
+            $service = 'general';
+            $command = 'error';
+        }
 
         Shopware()->Db()->query('
             INSERT INTO `s_plugin_bepado_log`
             (`isError`, `service`, `command`, `request`, `response`, `time`)
             VALUES (?, ?, ?, ?, ?, NOW())
         ', array($isError, $service, $command, $request, $response));
-
+        
         // Cleanup after 3 days
         Shopware()->Db()->exec('DELETE FROM `s_plugin_bepado_log`  WHERE DATE_SUB(CURDATE(),INTERVAL 3 DAY) >= time');
     }

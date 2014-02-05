@@ -42,4 +42,23 @@ interface ProductToShop
      * @return void
      */
     public function delete($shopId, $sourceId);
+
+    /**
+     * Start transaction
+     *
+     * Starts a transaction, which includes all insertOrUpdate and delete
+     * operations, as well as the revision updates.
+     *
+     * @return void
+     */
+    public function startTransaction();
+
+    /**
+     * Commit transaction
+     *
+     * Commits the transactions, once all operations are queued.
+     *
+     * @return void
+     */
+    public function commit();
 }

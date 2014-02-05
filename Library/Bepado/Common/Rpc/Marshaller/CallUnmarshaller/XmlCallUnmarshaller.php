@@ -81,8 +81,16 @@ class XmlCallUnmarshaller extends CallUnmarshaller
      */
     private function loadXml($data)
     {
+        if (!is_string($data)) {
+            throw new \UnexpectedValueException("XML string is required for unmarshalling.");
+        }
+
         $oldErrorState = libxml_use_internal_errors(true);
         libxml_clear_errors();
+
+        // https://bepado.atlassian.net/browse/BEP-534
+        // Fix for invalid UTF-16 BOM LE at the end of the file (weird)
+        $data = preg_replace('(\\A[^<]*|[^>]*\\Z)', '', $data);
 
         $document = new \DOMDocument();
         $document->preserveWhiteSpace = false;

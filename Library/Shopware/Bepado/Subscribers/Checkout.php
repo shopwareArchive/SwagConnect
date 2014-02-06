@@ -201,7 +201,8 @@ class Checkout extends BaseSubscriber
         if(!empty($shippingData['company'])) {
             $address->company = $shippingData['company'];
         }
-        $address->line1 = $shippingData['street'] . ' ' . $shippingData['streetnumber'];
+        $address->street = $shippingData['street'];
+        $address->streetNumber = $shippingData['streetnumber'];
         return $address;
     }
 

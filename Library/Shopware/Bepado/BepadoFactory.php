@@ -192,7 +192,7 @@ class BepadoFactory
      */
     public function getCategoryQuery()
     {
-        return $this->isMinorVersion('4.1.0')
+        return $this->checkMinimumVersion('4.1.0')
             ? $this->getShopware41CategoryQuery()
             : $this->getShopware40CategoryQuery();
     }
@@ -223,7 +223,7 @@ class BepadoFactory
      * @param $requiredVersion
      * @return bool
      */
-    public function isMinorVersion($requiredVersion)
+    public function checkMinimumVersion($requiredVersion)
     {
          $version = Shopware()->Config()->version;
 

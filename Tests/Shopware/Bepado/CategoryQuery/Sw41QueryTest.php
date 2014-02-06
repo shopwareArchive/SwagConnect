@@ -14,7 +14,7 @@ class Sw41QueryTest extends CategoryQueryTest
 
         $factory = new BepadoFactory();
 
-        if (!$factory->isMinorVersion('4.1')) {
+        if (!$factory->checkMinimumVersion('4.1.0')) {
             $this->markTestSkipped('This tests only run on Shopware 4.1.0 and greater');
         }
 

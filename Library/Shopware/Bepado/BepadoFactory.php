@@ -14,8 +14,6 @@ use Bepado\SDK;
  */
 class BepadoFactory
 {
-    const CURRENT_SW_STABLE = '4.1';
-
     private $helper;
     private $sdk;
 
@@ -194,7 +192,7 @@ class BepadoFactory
      */
     public function getCategoryQuery()
     {
-        return $this->isMinorVersion('4.1')
+        return $this->isMinorVersion('4.1.0')
             ? $this->getShopware41CategoryQuery()
             : $this->getShopware40CategoryQuery();
     }
@@ -229,11 +227,10 @@ class BepadoFactory
     {
          $version = Shopware()->Config()->version;
 
-         if ($version === '___VERSION___' && $requiredVersion === self::CURRENT_SW_STABLE) {
-             return true;
-         }
+        if ($version === '___VERSION___') {
+            return true;
+        }
 
-         return version_compare($version, $requiredVersion . '.0', '>=') &&
-                version_compare($version, $requiredVersion . '.99', '<');
+        return version_compare($version, $requiredVersion, '>=');
     }
 }

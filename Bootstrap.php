@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.67';
+        return '1.2.68';
     }
 
     /**
@@ -203,7 +203,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'onStartDispatch'
         );
 
-        Shopware()->Db()->query('DELETE FROM s_crontab WHERE pluginID = :id', array('id' => $this->getId()));
+        Shopware()->Db()->query(
+            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
+            array('name' => 'SwagBepado', 'action' => 'importImages')
+        );
         $this->createCronJob(
             'SwagBepado',
             'importImages',

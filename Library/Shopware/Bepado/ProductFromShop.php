@@ -274,11 +274,12 @@ class ProductFromShop implements ProductFromShopBase
         return array(
             'company' => $address->company ?: '',
             'salutation' => 'mr',
-            'lastName' => $address->name,
+            'lastName' => $address->surName,
+            'firstName' => $address->firstName,
             'city' => $address->city,
             'zipCode' => $address->zip,
             'street' => $address->street,
-            'streetnumber' => $address->streetNumber,
+            'streetNumber' => $address->streetNumber,
             'phone' => $address->phone,
             'country' => $country
         );

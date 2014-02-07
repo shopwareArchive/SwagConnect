@@ -197,7 +197,8 @@ class Checkout extends BaseSubscriber
         if(!empty($userData['additional']['stateShipping']['shortcode'])) {
             $address->state = $userData['additional']['stateShipping']['shortcode'];
         }
-        $address->name = $shippingData['firstname'] . ' ' . $shippingData['lastname'];
+        $address->firstName = $shippingData['firstname'];
+        $address->surName = $shippingData['lastname'];
         if(!empty($shippingData['company'])) {
             $address->company = $shippingData['company'];
         }

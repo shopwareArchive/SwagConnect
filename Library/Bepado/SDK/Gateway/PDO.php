@@ -109,6 +109,20 @@ class PDO extends Gateway
             }
         }
 
+
+        return $changes;
+    }
+
+    public function cleanChangesUntil($offset)
+    {
+        $offset = $offset ?: 0;
+        // Float type cast does NOT work here, since the inaccuracy of floating
+        // point representations otherwise omit changes. Yes, this actually
+        // really happens.
+        if (!preg_match('(^[\\d\\.]+$)', $offset)) {
+            throw new \InvalidArgumentException("Offset revision must be a numeric string.");
+        }
+
         // Disable cleanup for the first betas for debuggability and easier re-runs.
         /*$this->connection->exec(
             'DELETE FROM
@@ -116,8 +130,6 @@ class PDO extends Gateway
             WHERE
                 c_revision <= ' . $offset
         );*/
-
-        return $changes;
     }
 
     /**

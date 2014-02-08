@@ -128,11 +128,11 @@ class DependencyResolver
     protected $revisionFromShop;
 
     /**
-     * OrderStatusUpdate service
+     * SocialNetwork service
      *
-     * @var Service\OrderStatusUpdate
+     * @var Service\SocialNetwork
      */
-    protected $orderStatusUpdate;
+    protected $socialNetwork;
 
     /**
      * Logger
@@ -167,6 +167,11 @@ class DependencyResolver
     protected $requestSigner;
 
     /**
+     * @var string
+     */
+    protected $pluginSoftwareVersion;
+
+    /**
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
@@ -178,7 +183,8 @@ class DependencyResolver
         ProductFromShop $fromShop,
         ErrorHandler $errorHandler,
         $apiKey,
-        HttpClient\RequestSigner $requestSigner = null
+        HttpClient\RequestSigner $requestSigner = null,
+        $pluginSoftwareVersion = null
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
@@ -198,6 +204,7 @@ class DependencyResolver
         }
 
         $this->apiKey = $apiKey;
+        $this->pluginSoftwareVersion = $pluginSoftwareVersion;
     }
 
     /**
@@ -245,7 +252,10 @@ class DependencyResolver
     {
         if ($this->registry === null) {
             $this->registry = new ServiceRegistry\Metric(
-                new Rpc\ServiceRegistry()
+                new Rpc\ServiceRegistry(
+                    new Rpc\ErrorHandler\XmlErrorHandler()
+                ),
+                $this->pluginSoftwareVersion
             );
 
             $this->registry->registerMetric(
@@ -267,12 +277,13 @@ class DependencyResolver
 
             $this->registry->registerService(
                 'products',
-                array('fromShop', 'toShop', 'getLastRevision'),
+                array('fromShop', 'peakFromShop', 'peakProducts', 'toShop', 'getLastRevision'),
                 new Service\ProductService(
                     $this->gateway,
                     $this->gateway,
                     $this->gateway,
-                    $this->toShop
+                    $this->toShop,
+                    $this->fromShop
                 )
             );
 
@@ -336,7 +347,11 @@ class DependencyResolver
                     'Bepado\\SDK\\Struct\\Address' =>
                         new Struct\Verificator\Address(),
                     'Bepado\\SDK\\Struct\\ProductList' =>
-                        new Struct\Verificator\ProductList()
+                        new Struct\Verificator\ProductList(),
+                    'Bepado\\SDK\\Struct\\Tracking' =>
+                        new Struct\Verificator\Tracking(),
+                    'Bepado\\SDK\\Struct\\OrderStatus' =>
+                        new Struct\Verificator\OrderStatus(),
                 )
             );
         }
@@ -419,7 +434,8 @@ class DependencyResolver
         if ($this->searchService === null) {
             $this->searchService = new Service\Search(
                 $this->getHttpClient($this->searchHost),
-                $this->apiKey
+                $this->apiKey,
+                $this->gateway->getShopId()
             );
         }
 
@@ -518,9 +534,11 @@ class DependencyResolver
      */
     public function getHttpClient($server)
     {
+        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
+
         $headers = array(
-            'X-Bepado-SDK-Version: ' . SDK::VERSION,
-            'Accept: applications/x-bepado-json-' . SDK::VERSION,
+            'X-Bepado-SDK-Version: ' . $version,
+            'Accept: applications/x-bepado-json-' . $version,
         );
 
         $client = new HttpClient\Stream($server);
@@ -546,17 +564,19 @@ class DependencyResolver
     }
 
     /**
-     * @return Service\OrderStatusUpdate
+     * @return Service\SocialNetwork
      */
-    public function getOrderStatusService()
+    public function getSocialNetworkService()
     {
-        if ($this->orderStatusUpdate === null) {
-            $this->orderStatusUpdate = new Service\OrderStatusUpdate(
+        if ($this->socialNetwork === null) {
+            $this->socialNetwork = new Service\SocialNetwork(
                 $this->getHttpClient($this->socialNetworkHost),
+                $this->getVerificator(),
+                $this->gateway->getShopId(),
                 $this->apiKey
             );
         }
 
-        return $this->orderStatusUpdate;
+        return $this->socialNetwork;
     }
 }

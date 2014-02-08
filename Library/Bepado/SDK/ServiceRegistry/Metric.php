@@ -32,13 +32,20 @@ class Metric extends Rpc\ServiceRegistry
     protected $metrics = array();
 
     /**
+     * @var string
+     */
+    protected $pluginSoftwareVersion;
+
+    /**
      * Construct from inner service registry
      *
      * @param Rpc\ServiceRegistry $serviceRegistry
+     * @param string|null $pluginSoftwareVersion
      */
-    public function __construct(Rpc\ServiceRegistry $serviceRegistry)
+    public function __construct(Rpc\ServiceRegistry $serviceRegistry, $pluginSoftwareVersion = null)
     {
         $this->serviceRegistry = $serviceRegistry;
+        $this->pluginSoftwareVersion = $pluginSoftwareVersion;
     }
 
     /**
@@ -106,12 +113,13 @@ class Metric extends Rpc\ServiceRegistry
     public function dispatch(Struct\RpcCall $rpcCall)
     {
         $start = microtime(true);
+        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
 
         $response = new Struct\Response(
             array(
                 'result' => $this->serviceRegistry->dispatch($rpcCall),
                 'metrics' => $this->getMetrics($rpcCall),
-                'version' => SDK::VERSION,
+                'version' => sprintf('%s/%s', $version, $this->pluginSoftwareVersion)
             )
         );
 

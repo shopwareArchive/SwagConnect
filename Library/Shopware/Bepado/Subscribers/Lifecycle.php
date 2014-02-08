@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Utils;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado
@@ -17,8 +18,34 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
-            'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle'
+            'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
+            'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
         );
+    }
+
+    /**
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onUpdateOrder(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = $eventArgs->get('entity');
+
+        $attribute = $order->getAttribute();
+        if (!$attribute || !$attribute->getBepadoShopId()) {
+            return;
+        }
+
+        // Compute the changeset and return, if orderStatus did not change
+        $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($order);
+        if (!isset($changeSet['orderStatus'])) {
+            return;
+        }
+
+
+        $orderUtil = new Utils\OrderStatus();
+        $orderStatus = $orderUtil->getOrderStatusStructFromOrder($order);
+        $this->getSDK()->updateOrderStatus($orderStatus);
     }
 
     /**

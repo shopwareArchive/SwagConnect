@@ -24,12 +24,24 @@ class Search
      */
     protected $httpClient;
 
+    /**
+     * @var string
+     */
+    protected $apiKey;
+
+    /**
+     * @var int
+     */
+    protected $shopId;
+
     public function __construct(
         HttpClient $httpClient,
-        $apiKey
+        $apiKey,
+        $shopId
     ) {
         $this->httpClient = $httpClient;
         $this->apiKey = $apiKey;
+        $this->shopId = $shopId;
     }
 
     /**
@@ -41,11 +53,14 @@ class Search
      */
     public function search(Struct\Search $search)
     {
-        $search->apiKey = $this->apiKey;
+        $data = (array)$search;
+        $data['shopId'] = $this->shopId;
+        ksort($data);
+        $data['hash'] = hash_hmac('sha256', http_build_query($data), $this->apiKey);
 
         $response = $this->httpClient->request(
             'GET',
-            '/search?' . http_build_query((array) $search)
+            '/search?' . http_build_query($data)
         );
 
         if ($response->status >= 400) {

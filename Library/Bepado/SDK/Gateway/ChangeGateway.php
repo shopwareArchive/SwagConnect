@@ -32,6 +32,14 @@ interface ChangeGateway
     public function getNextChanges($offset, $limit);
 
     /**
+     * Remove changes from the storage until the given offset.
+     *
+     * @param string $offset
+     * @return void
+     */
+    public function cleanChangesUntil($offset);
+
+    /**
      * Get unprocessed changes count
      *
      * The offset specified the revision to start from

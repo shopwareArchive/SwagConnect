@@ -96,10 +96,6 @@ class Product extends Verificator
             throw new \RuntimeException("Invalid Datatype, Product#tags has to be an array.");
         }
 
-        if (count($unknown = array_diff($struct->categories, array_keys($this->categories)))) {
-            throw new \RuntimeException("Unknown categories: " . implode(", ", $unknown));
-        }
-
         if ($struct->relevance < -1 || $struct->relevance > 1) {
             throw new \RuntimeException("Invalid Value, Product#relevance has to be -1,0,1");
         }

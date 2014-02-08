@@ -63,6 +63,7 @@ final class SDK
      * @param \Bepado\SDK\ProductFromShop $fromShop
      * @param \Bepado\SDK\ErrorHandler $errorHandler
      * @param \Bepado\SDK\HttpClient\RequestSigner $requestSigner
+     * @param string $pluginSoftwareVersion
      */
     public function __construct(
         $apiKey,
@@ -71,7 +72,8 @@ final class SDK
         ProductToShop $toShop,
         ProductFromShop $fromShop,
         ErrorHandler $errorHandler = null,
-        HttpClient\RequestSigner $requestSigner = null
+        HttpClient\RequestSigner $requestSigner = null,
+        $pluginSoftwareVersion = null
     ) {
         $this->apiKey = $apiKey;
         $this->apiEndpointUrl = $apiEndpointUrl;
@@ -86,7 +88,8 @@ final class SDK
             $fromShop,
             $errorHandler ? $errorHandler : new ErrorHandler\Exception(),
             $apiKey,
-            $requestSigner
+            $requestSigner,
+            $pluginSoftwareVersion
         );
     }
 
@@ -453,26 +456,14 @@ final class SDK
     /**
      * Update the status of a bepado order.
      *
-     * The $status is one of:
-     *
-     * - open
-     * - in_process
-     * - delivered
-     * - canceled
-     * - error
-     *
-     * @param int $providerOrderId
-     * @param string $status
-     * @param \Bepado\SDK\Struct\Message[] $messages
+     * @param \Bepado\SDK\Struct\OrderStatus $status
      *
      * @return void
      */
-    public function updateOrderStatus($providerOrderId, $status, array $messages = array())
+    public function updateOrderStatus(Struct\OrderStatus $status)
     {
-        $this->dependencies->getOrderStatusService()->update(
-            $providerOrderId,
-            $status,
-            $messages
-        );
+        $this->verifySdk();
+
+        $this->dependencies->getSocialNetworkService()->updateOrderStatus($status);
     }
 }

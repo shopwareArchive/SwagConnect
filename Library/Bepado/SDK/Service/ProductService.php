@@ -9,6 +9,7 @@ namespace Bepado\SDK\Service;
 
 use Bepado\SDK\Gateway;
 use Bepado\SDK\ProductToShop;
+use Bepado\SDK\ProductFromShop;
 use Bepado\SDK\Struct\Change;
 use Bepado\SDK\Struct;
 use Bepado\SDK\Gateway\ChangeGateway;
@@ -51,24 +52,32 @@ class ProductService
     protected $toShop;
 
     /**
+     * @var \Bepado\SDK\ProductFromShop
+     */
+    protected $fromShop;
+
+    /**
      * Construct from gateway
      *
      * @param ChangeGateway $changes
      * @param RevisionGateway $revision
      * @param ShopConfiguration $configurationGateway
      * @param ProductToShop $toShop
+     * @param ProductFromShop $fromShop
      * @return void
      */
     public function __construct(
         ChangeGateway $changes,
         RevisionGateway $revision,
         ShopConfiguration $configurationGateway,
-        ProductToShop $toShop
+        ProductToShop $toShop,
+        ProductFromShop $fromShop
     ) {
         $this->changes = $changes;
         $this->revision = $revision;
         $this->configurationGateway = $configurationGateway;
         $this->toShop = $toShop;
+        $this->fromShop = $fromShop;
     }
 
     /**
@@ -80,7 +89,38 @@ class ProductService
      */
     public function fromShop($revision, $productCount)
     {
+        $changes = $this->changes->getNextChanges($revision, $productCount);
+
+        $this->changes->cleanChangesUntil($revision);
+
+        return $changes;
+    }
+
+    /**
+     * Take a look at products from given revision.
+     *
+     * @param string $revision
+     * @param int $productCount
+     * @return \Bepado\SDK\Struct\Change[]
+     */
+    public function peakFromShop($revision, $productCount)
+    {
         return $this->changes->getNextChanges($revision, $productCount);
+    }
+
+    /**
+     * Return all products matching the given ids.
+     *
+     * @param array<string> $ids
+     * @return \Bepado\SDK\Struct\Product[]
+     */
+    public function peakProducts(array $ids)
+    {
+        if (count($ids) > 50) {
+            throw new \InvalidArgumentException("Too many products requested.");
+        }
+
+        return $this->fromShop->getProducts($ids);
     }
 
     /**

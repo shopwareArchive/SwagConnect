@@ -55,7 +55,6 @@ class InMemory extends Gateway
             }
 
             if (!$record || $revision === $offset) {
-                unset($this->changes[$revision]);
                 continue;
             }
 
@@ -68,6 +67,21 @@ class InMemory extends Gateway
         }
 
         return $changes;
+    }
+
+    public function cleanChangesUntil($offset)
+    {
+        $record = $offset === null;
+
+        foreach ($this->changes as $revision => $data) {
+            if (strcmp($revision, $offset) > 0) {
+                $record = true;
+            }
+
+            if (!$record || $revision === $offset) {
+                unset($this->changes[$revision]);
+            }
+        }
     }
 
     /**

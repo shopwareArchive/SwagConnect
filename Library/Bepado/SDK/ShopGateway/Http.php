@@ -183,7 +183,6 @@ class Http extends ShopGateway
             $signHeaders
         );
 
-        // TODO: Check status
         $result = $this->unmarshaller->unmarshal($httpResponse->body);
 
         return $result->arguments[0]->result;

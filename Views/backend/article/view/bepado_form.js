@@ -5,7 +5,6 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
 
     alias: 'widget.article-bepado-form',
 
-    layout: 'column',
     defaults: {
         margin: 10,
         labelWidth: 155,
@@ -21,8 +20,36 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         me.callParent();
     },
 
-
     getBepadoContent: function() {
+        var me = this;
+
+        return [
+            me.getFixedPriceFieldSet(),
+            me.getBepadoImportConfigFieldSet()
+        ];
+
+    },
+
+    getFixedPriceFieldSet: function() {
+        var me = this;
+
+        return {
+            xtype: 'fieldset',
+            defaults: me.defaults,
+            title: '{s name=fixedPriceConfig}Fixed price configuration{/s}',
+            items:
+                [
+                    {
+                        xtype: 'label',
+                        html: '{s name=fixedPriceWarning}<strong>Warning:</strong> Fixed prices may only be used for products which are subject to price fixing by law.{/s}'
+                    },
+                    me.getFixedPriceCombo()
+                ]
+        };
+    },
+
+
+    getBepadoImportConfigFieldSet: function() {
         var me = this;
 
         me.bepadoLeftContainer = Ext.create('Ext.container.Container', {
@@ -48,16 +75,26 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             items:me.getRightContainer()
         });
 
-        return [ me.bepadoLeftContainer, me.bepadoRightContainer ];
+        return {
+            xtype: 'fieldset',
+            layout: 'column',
+            defaults: me.defaults,
+            title: '{s name=overrideConfig}Field update configuration{/s}',
+            items:
+                [
+                    me.bepadoLeftContainer,
+                    me.bepadoRightContainer
+                ]
+        };
     },
 
     getLeftContainer: function() {
         var me = this;
 
         return [
-            me.getFixedPriceCombo(),
             me.getOverwriteCombo('{s name=updatePrice}Update prices{/s}', 'updatePrice'),
-            me.getOverwriteCombo('{s name=updateImage}Update images{/s}', 'updateImage')
+            me.getOverwriteCombo('{s name=updateImage}Update images{/s}', 'updateImage'),
+            me.getOverwriteCombo('{s name=updateName}Update name{/s}', 'updateName')
         ];
     },
 
@@ -66,8 +103,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
 
         return [
             me.getOverwriteCombo('{s name=updateLongDescription}Update long description{/s}', 'updateLongDescription'),
-            me.getOverwriteCombo('{s name=updateShortDescription}Update short description{/s}', 'updateShortDescription'),
-            me.getOverwriteCombo('{s name=updateName}Update name{/s}', 'updateName')
+            me.getOverwriteCombo('{s name=updateShortDescription}Update short description{/s}', 'updateShortDescription')
         ];
     },
 

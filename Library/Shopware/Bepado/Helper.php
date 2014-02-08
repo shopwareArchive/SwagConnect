@@ -54,6 +54,11 @@ class Helper
     private $imagePath;
 
     /**
+     * @var \Enlight_Controller_Router
+     */
+    private $router;
+
+    /**
      * @var Query
      */
     private $modelQuery, $productQuery, $categoryQuery, $productCategoryQuery;
@@ -68,18 +73,21 @@ class Helper
      * @param string $imagePath
      * @param CategoryQuery
      * @param ProductQuery
+     * @param \Enlight_Controller_Router
      */
     public function __construct(
         ModelManager $manager,
         $imagePath,
         CategoryQuery $bepadoCategoryQuery,
-        ProductQuery $bepadoProductQuery
+        ProductQuery $bepadoProductQuery,
+        \Enlight_Controller_Router $router
     )
     {
         $this->manager = $manager;
         $this->imagePath = $imagePath;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
         $this->bepadoProductQuery = $bepadoProductQuery;
+        $this->router = $router;
     }
 
     /**
@@ -260,6 +268,16 @@ class Helper
             $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
         }
         unset($row['width'], $row['height'], $row['length']);
+
+        // Assemble the route for the article url.
+        // @todo: The shop to point to needs to be configurable.
+        $row['url'] = $this->router->assemble(
+            array(
+                'module' => 'frontend',
+                'controller' => 'detail',
+                'sArticle' => $row['sourceId']
+            )
+        );
 
         $product = new Product(
             $row

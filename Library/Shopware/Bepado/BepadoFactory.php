@@ -139,7 +139,8 @@ class BepadoFactory
                 $this->getModelManager(),
                 $this->getImagePath(),
                 $this->getCategoryQuery(),
-                $this->getProductQuery()
+                $this->getProductQuery(),
+                Shopware()->Front()->Router()
             );
         }
 

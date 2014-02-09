@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 
 use Bepado\SDK\Struct\Product;
 

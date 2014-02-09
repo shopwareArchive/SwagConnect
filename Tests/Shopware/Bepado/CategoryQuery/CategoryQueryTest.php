@@ -1,10 +1,10 @@
 <?php
 
-namespace Shopware\Bepado\CategoryQuery;
+namespace Shopware\Bepado\Components\CategoryQuery;
 
 use Enlight_Components_Test_Plugin_TestCase;
 use Bepado\SDK\Struct\Product;
-use Shopware\Bepado\BepadoFactory;
+use Shopware\Bepado\Components\BepadoFactory;
 
 abstract class CategoryQueryTest extends Enlight_Components_Test_Plugin_TestCase
 {

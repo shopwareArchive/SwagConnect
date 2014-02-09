@@ -1,7 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Utils;
+use Shopware\Bepado\Components\Utils;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado

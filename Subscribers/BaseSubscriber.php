@@ -53,7 +53,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @return \Shopware\Bepado\BasketHelper
+     * @return \Shopware\Bepado\Components\BasketHelper
      */
     public function getBasketHelper()
     {

@@ -6,7 +6,7 @@ namespace Shopware\Bepado\Subscribers;
  * Implements the \Enlight_Event_Subscriber "interface"
  *
  * Class SubscribeManager
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Bepado\Components\Subscribers
  */
 abstract class SubscribeManager extends \Enlight_Event_Subscriber
 {

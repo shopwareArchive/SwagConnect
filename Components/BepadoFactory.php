@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 
-use Shopware\Bepado\CategoryQuery\Sw41Query;
-use Shopware\Bepado\CategoryQuery\Sw40Query;
+use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
+use Shopware\Bepado\Components\CategoryQuery\Sw40Query;
 use Bepado\SDK;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
  *
  * Class BepadoFactory
- * @package Shopware\Bepado
+ * @package Shopware\Bepado\Components
  */
 class BepadoFactory
 {
@@ -20,7 +20,7 @@ class BepadoFactory
     private $modelManager;
     private $pluginVersion;
 
-    public function __construct($version)
+    public function __construct($version='')
     {
         $this->pluginVersion = $version;
     }

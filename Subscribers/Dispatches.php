@@ -6,7 +6,7 @@ namespace Shopware\Bepado\Subscribers;
  * Extends the dispatch module and removes non-bepado aware dispatches, if bepado products are in the basket
  *
  * Class Dispatches
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Bepado\Components\Subscribers
  */
 class Dispatches extends BaseSubscriber
 {

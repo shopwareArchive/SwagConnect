@@ -32,7 +32,7 @@ use Shopware\Models\Article\Price;
 class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_ExtJs
 {
     /**
-     * @var \Shopware\Bepado\BepadoFactory
+     * @var \Shopware\Bepado\Components\BepadoFactory
      */
     private $factory;
 
@@ -54,12 +54,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Bepado\Helper
+     * @return \Shopware\Bepado\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\BepadoFactory();
+            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
         }
 
         return $this->factory->getHelper();

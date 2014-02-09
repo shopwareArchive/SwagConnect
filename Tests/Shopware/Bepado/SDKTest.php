@@ -1,10 +1,10 @@
 <?php
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 
 use Enlight_Components_Test_Plugin_TestCase;
 use Bepado\SDK\Struct\Product;
-use Shopware\Bepado\BepadoFactory;
+use Shopware\Bepado\Components\BepadoFactory;
 
 class SDKTest extends Enlight_Components_Test_Plugin_TestCase
 {

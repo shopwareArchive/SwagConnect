@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Order,
     Bepado\SDK\Struct\Product,

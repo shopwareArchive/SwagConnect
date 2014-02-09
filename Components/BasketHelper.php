@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 
 use Bepado\SDK;
-use Shopware\Bepado;
+use Shopware\Bepado\Components;
 
 /**
  * Handles the basket manipulation. Most of it is done by modifying the template variables shown to the user.
  * Once we have new basket and order core classes, this should be refactored.
  *
  * Class BasketHelper
- * @package Shopware\Bepado
+ * @package Shopware\Bepado\Components
  */
 class BasketHelper
 {
@@ -529,7 +529,7 @@ class BasketHelper
     }
 
     /**
-     * @return mixed
+     * @return \Bepado\SDK\SDk
      */
     public function getSdk()
     {
@@ -537,7 +537,7 @@ class BasketHelper
     }
 
     /**
-     * @return mixed
+     * @return Helper
      */
     public function getHelper()
     {

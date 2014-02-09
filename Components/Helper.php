@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Bepado\SDK\SDK;
@@ -65,7 +65,7 @@ class Helper
 
     private $bepadoCategoryQuery;
 
-    /** @var \Shopware\Bepado\ProductQuery  */
+    /** @var \Shopware\Bepado\Components\ProductQuery  */
     private $bepadoProductQuery;
 
     /**

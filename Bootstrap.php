@@ -29,7 +29,7 @@ use Shopware\CustomModels\Bepado\Config;
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /** @var \Shopware\Bepado\BepadoFactory  */
+    /** @var \Shopware\Bepado\Components\BepadoFactory  */
     private $bepadoFactory;
 
     /**
@@ -760,7 +760,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
         $this->Application()->Loader()->registerNamespace(
             'Shopware\\Bepado',
-            $this->Path() . 'Components/Bepado/'
+            $this->Path()
         );
 
         $this->registerCustomModels();
@@ -769,14 +769,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * Lazy getter for the bepadoFactory
      *
-     * @return \Shopware\Bepado\BepadoFactory
+     * @return \Shopware\Bepado\Components\BepadoFactory
      */
     public function getBepadoFactory()
     {
         $this->registerMyLibrary();
 
         if (!$this->bepadoFactory) {
-            $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory($this->getVersion());
+            $this->bepadoFactory = new \Shopware\Bepado\Components\BepadoFactory($this->getVersion());
         }
 
         return $this->bepadoFactory;
@@ -791,7 +791,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * @return \Shopware\Bepado\Helper
+     * @return \Shopware\Bepado\Components\Helper
      */
     public function getHelper()
     {

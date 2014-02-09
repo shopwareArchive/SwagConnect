@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado;
+namespace Shopware\Bepado\Components;
 
 use Shopware\Components\Model\ModelManager;
 use Doctrine\ORM\QueryBuilder;
@@ -9,7 +9,7 @@ use Doctrine\ORM\QueryBuilder;
  * The ProductQuery will dynamically create a Query for a product depending on the current shopware configuration
  *
  * Class ProductQuery
- * @package Shopware\Bepado
+ * @package Shopware\Bepado\Components
  */
 class ProductQuery
 {

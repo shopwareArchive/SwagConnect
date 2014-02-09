@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Utils;
+namespace Shopware\Bepado\Components\Utils;
 
 use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\OrderStatus as OrderStatusStruct;

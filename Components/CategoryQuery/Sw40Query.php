@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\CategoryQuery;
+namespace Shopware\Bepado\Components\CategoryQuery;
 
 use Bepado\SDK\Struct\Product;
 use Doctrine\ORM\QueryBuilder;

@@ -6,7 +6,7 @@ namespace Shopware\Bepado\Subscribers;
  * Register some controllers
  *
  * Class ControllerPath
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Bepado\Components\Subscribers
  */
 class ControllerPath extends BaseSubscriber
 {

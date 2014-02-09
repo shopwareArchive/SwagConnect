@@ -46,6 +46,9 @@ class Checkout extends BaseSubscriber
             return;
         }
 
+        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+            return;
+        }
 
         $this->enforcePhoneNumber($view);
 
@@ -101,6 +104,12 @@ class Checkout extends BaseSubscriber
         $view->assign($basketHelper->getBepadoTemplateVariables($bepadoMessages));
     }
 
+    /**
+     * Helper to translate bepado messages from the SDK. Will use the normalized message itself as namespace key
+     *
+     * @param $bepadoMessages
+     * @return mixed
+     */
     private function translateBepadoMessages($bepadoMessages)
     {
         $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
@@ -146,6 +155,10 @@ class Checkout extends BaseSubscriber
 			return;
 		}
 
+        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+            return;
+        }
+
         $this->enforcePhoneNumber($view);
 
         $order = new \Bepado\SDK\Struct\Order();
@@ -167,6 +180,10 @@ class Checkout extends BaseSubscriber
             $orderItem->product = $product;
             $orderItem->count = (int)$row['quantity'];
             $order->products[] = $orderItem;
+        }
+
+        if (empty($order->products)) {
+            return;
         }
 
         /** @var $reservation \Bepado\SDK\Struct\Reservation */

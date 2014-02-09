@@ -494,6 +494,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\CronJob()
         );
 
+
+
         if ($this->Config()->get('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
@@ -758,7 +760,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
         $this->Application()->Loader()->registerNamespace(
             'Shopware\\Bepado',
-            $this->Path() . 'Library/Shopware/Bepado/'
+            $this->Path() . 'Components/Bepado/'
         );
 
         $this->registerCustomModels();

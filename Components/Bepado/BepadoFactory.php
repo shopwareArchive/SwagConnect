@@ -17,8 +17,13 @@ class BepadoFactory
     private $helper;
     private $sdk;
 
-
     private $modelManager;
+    private $pluginVersion;
+
+    public function __construct($version)
+    {
+        $this->pluginVersion = $version;
+    }
 
     /**
      * @return SDK\SDK
@@ -90,9 +95,11 @@ class BepadoFactory
                 $manager
             ),
             null,
-            $requestSigner
+            $requestSigner,
+            $this->getPluginVersion()
         );
     }
+
 
     /**
      * Creates an instance of the NoSecurityRequestSigner
@@ -145,6 +152,23 @@ class BepadoFactory
         }
 
         return $this->helper;
+    }
+
+    /**
+     * Will return a version string for this plugin. Will also append the SW version
+     * in order to make the information more useful.
+     */
+    public function getPluginVersion()
+    {
+        $swVersion = \Shopware::VERSION;
+
+        if ($swVersion == '___VERSION___') {
+            $swVersion = 'DEV';
+        }
+
+        $version = sprintf('sw%s_%s', $swVersion, $this->pluginVersion);
+
+        return $version;
     }
 
     public function getBasketHelper()

@@ -776,7 +776,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->registerMyLibrary();
 
         if (!$this->bepadoFactory) {
-            $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory();
+            $this->bepadoFactory = new \Shopware\Bepado\BepadoFactory($this->getVersion());
         }
 
         return $this->bepadoFactory;

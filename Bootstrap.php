@@ -551,7 +551,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
             CREATE TABLE IF NOT EXISTS `bepado_shop_config` (
               `s_shop` varchar(32) NOT NULL,
-              `s_config` mediumblob NOT NULL,
+              `s_config` LONGBLOB NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`s_shop`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","

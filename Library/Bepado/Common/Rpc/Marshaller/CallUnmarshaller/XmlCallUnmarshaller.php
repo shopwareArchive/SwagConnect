@@ -90,7 +90,8 @@ class XmlCallUnmarshaller extends CallUnmarshaller
 
         // https://bepado.atlassian.net/browse/BEP-534
         // Fix for invalid UTF-16 BOM LE at the end of the file (weird)
-        $data = preg_replace('(\\A[^<]*|[^>]*\\Z)', '', $data);
+        $data = substr($data, strpos($data, '<'));
+        $data = substr($data, 0, strrpos($data, '>')+1);
 
         $document = new \DOMDocument();
         $document->preserveWhiteSpace = false;

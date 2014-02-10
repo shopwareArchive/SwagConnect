@@ -17,6 +17,12 @@ use Bepado\Common\Struct;
 class ServiceRegistry
 {
     private $services = array();
+    private $errorHandler;
+
+    public function __construct(ErrorHandler $errorHandler = null)
+    {
+        $this->errorHandler = $errorHandler ?: new ErrorHandler\NullErrorHandler();
+    }
 
     /**
      * @param string $name
@@ -64,10 +70,16 @@ class ServiceRegistry
      */
     public function dispatch(Struct\RpcCall $rpcCall)
     {
+        $this->errorHandler->registerHandlers();
         $service = $this->getService($rpcCall->service, $rpcCall->command);
-        return call_user_func_array(
+
+        $response = call_user_func_array(
             array($service['provider'], $service['command']),
             $rpcCall->arguments
         );
+
+        $this->errorHandler->restore();
+
+        return $response;
     }
 }

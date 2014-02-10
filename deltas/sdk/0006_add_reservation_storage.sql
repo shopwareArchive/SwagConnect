@@ -1,0 +1,8 @@
+-- Table: Reservations (r)
+CREATE TABLE IF NOT EXISTS `bepado_reservations` (
+  `r_id` VARCHAR(32) NOT NULL,
+  `r_state` VARCHAR(12) NOT NULL,
+  `r_order` LONGBLOB NOT NULL,
+  `changed` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`r_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

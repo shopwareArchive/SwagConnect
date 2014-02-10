@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `article_id` int(11) unsigned DEFAULT NULL,
+   `article_detail_id` int(11) unsigned DEFAULT NULL,
+   `shop_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+   `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+   `export_status` text COLLATE utf8_unicode_ci,
+   `export_message` text COLLATE utf8_unicode_ci,
+   `categories` text COLLATE utf8_unicode_ci,
+   `purchase_price` double DEFAULT NULL,
+   `fixed_price` int(1) DEFAULT NULL,
+   `free_delivery` int(1) DEFAULT NULL,
+   `update_price` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+   `update_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+   `update_long_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+   `update_short_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+   `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+   `last_update` longtext COLLATE utf8_unicode_ci,
+   `last_update_flag` int(11) DEFAULT NULL,
+   PRIMARY KEY (`id`),
+   UNIQUE KEY `article_detail_id` (`article_detail_id`),
+   KEY `article_id` (`article_id`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci

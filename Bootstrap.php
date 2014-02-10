@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.69';
+        return '1.2.70';
     }
 
     /**
@@ -515,86 +515,29 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return $this->getBepadoFactory()->createSDK();
     }
 
+    private function getDeltas($directory)
+    {
+        $deltas = [];
+        $files = scandir($directory);
+        foreach ($files as $key => $fileName) {
+            $path = $directory . $fileName;
+            if ($fileName == '.' || $fileName == '..' || is_dir($path)) {
+                continue;
+            }
+            $deltas[] = file_get_contents($files[$key]);
+        }
+        return $deltas;
+    }
+
     /**
      * Create necessary tables
      */
     private function createMyTables()
     {
-        $queries = array("
-            CREATE TABLE IF NOT EXISTS `bepado_change` (
-              `c_source_id` varchar(64) NOT NULL,
-              `c_operation` char(8) NOT NULL,
-              `c_revision` decimal(20,10) NOT NULL,
-              `c_product` longblob,
-              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              UNIQUE KEY `c_revision` (`c_revision`),
-              KEY `c_source_id` (`c_source_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-           CREATE TABLE IF NOT EXISTS `bepado_data` (
-              `d_key` varchar(32) NOT NULL,
-              `d_value` varchar(256) NOT NULL,
-              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (`d_key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_product` (
-              `p_source_id` varchar(64) NOT NULL,
-              `p_hash` varchar(64) NOT NULL,
-              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (`p_source_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_reservations` (
-              `r_id` varchar(32) NOT NULL,
-              `r_state` varchar(12) NOT NULL,
-              `r_order` longblob NOT NULL,
-              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (`r_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
-            CREATE TABLE IF NOT EXISTS `bepado_shop_config` (
-              `s_shop` varchar(32) NOT NULL,
-              `s_config` mediumblob NOT NULL,
-              `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (`s_shop`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_config` (
-              `id` int(11) NOT NULL AUTO_INCREMENT,
-              `name` varchar(255) NOT NULL,
-              `value` varchar(255) NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (
-              `id` int(11) NOT NULL AUTO_INCREMENT,
-              `isError` int(1) NOT NULL,
-              `service` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `command` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `request` text COLLATE utf8_unicode_ci DEFAULT NULL,
-              `response` text COLLATE utf8_unicode_ci DEFAULT NULL,
-              `time` datetime NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
-             `id` int(11) NOT NULL AUTO_INCREMENT,
-             `article_id` int(11) unsigned DEFAULT NULL,
-             `article_detail_id` int(11) unsigned DEFAULT NULL,
-             `shop_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-             `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-             `export_status` text COLLATE utf8_unicode_ci,
-             `export_message` text COLLATE utf8_unicode_ci,
-             `categories` text COLLATE utf8_unicode_ci,
-             `purchase_price` double DEFAULT NULL,
-             `fixed_price` int(1) DEFAULT NULL,
-             `free_delivery` int(1) DEFAULT NULL,
-             `update_price` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
-             `update_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
-             `update_long_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
-             `update_short_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
-             `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
-             `last_update` longtext COLLATE utf8_unicode_ci,
-             `last_update_flag` int(11) DEFAULT NULL,
-             PRIMARY KEY (`id`),
-             UNIQUE KEY `article_detail_id` (`article_detail_id`),
-             KEY `article_id` (`article_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-        ");
+        $deltasSdk = $this->getDeltas($this->Path() . 'deltas/sdk/');
+        $deltasPlugin = $this->getDeltas($this->Path() . 'deltas/');
+
+        $queries = array_merge($deltasPlugin, $deltasSdk);
 
         foreach ($queries as $query) {
             Shopware()->Db()->exec($query);

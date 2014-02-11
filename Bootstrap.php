@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.2.71';
+        return '1.2.72';
     }
 
     /**
@@ -103,6 +103,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function update($version)
     {
+
+        // Force an SDK re-verify
+        Shopware()->Db()->query('
+            UPDATE bepado_shop_config
+            SET s_config = ?
+            WHERE s_shop = "_last_update_"
+            LIMIT 1; ',
+            array(time() - 8 * 60 * 60 * 24)
+        );
 
         // Remove old productDescriptionField
         // removeElement does seem to have some issued, so using plain SQL here

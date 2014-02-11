@@ -65,7 +65,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             $result = $sdk->handle(
                 $request
             );
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Always write errors to the log
             $this->writeLog(true, $request, $this->formatException($e));
             throw $e;

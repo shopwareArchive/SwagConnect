@@ -63,12 +63,9 @@ class BepadoFactory
         $apiKey = Shopware()->Config()->get('apiKey');
 
         $gateway = new SDK\Gateway\PDO($connection);
-        $requestSigner = null;
 
         /*
          * The debugHost allows to specify an alternative bepado host.
-         * This will automatically make bepado use the noSecurityRequestSigner
-         * and should never used in a productive environment.
          * Furthermore currently only one debugHost for *all* service can be specified
          */
         $debugHost = Shopware()->Config()->get('bepadoDebugHost');
@@ -78,7 +75,6 @@ class BepadoFactory
             putenv("_SOCIALNETWORK_HOST=sn.{$debugHost}");
             putenv("_TRANSACTION_HOST=transaction.{$debugHost}");
             putenv("_SEARCH_HOST=search.{$debugHost}");
-            $requestSigner = $this->getNoSecurityRequestSigner($gateway, $apiKey);
         }
 
         return new SDK\SDK(
@@ -95,25 +91,8 @@ class BepadoFactory
                 $manager
             ),
             null,
-            $requestSigner,
+            null,
             $this->getPluginVersion()
-        );
-    }
-
-
-    /**
-     * Creates an instance of the NoSecurityRequestSigner
-     *
-     * @param $gateway
-     * @param $apiKey
-     * @return SDK\HttpClient\NoSecurityRequestSigner
-     */
-    private function getNoSecurityRequestSigner($gateway, $apiKey)
-    {
-        return new SDK\HttpClient\NoSecurityRequestSigner(
-            $gateway,
-            new SDK\Service\Clock(),
-            $apiKey
         );
     }
 

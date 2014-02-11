@@ -269,15 +269,17 @@ class Helper
         }
         unset($row['width'], $row['height'], $row['length']);
 
-        // Assemble the route for the article url.
-        // @todo: The shop to point to needs to be configurable.
-        $row['url'] = $this->router->assemble(
-            array(
-                'module' => 'frontend',
-                'controller' => 'detail',
-                'sArticle' => $row['sourceId']
-            )
-        );
+        if ($this->router) {
+            // Assemble the route for the article url.
+            // @todo: The shop to point to needs to be configurable.
+            $row['url'] = $this->router->assemble(
+                array(
+                    'module' => 'frontend',
+                    'controller' => 'detail',
+                    'sArticle' => $row['sourceId']
+                )
+            );
+        }
 
         $product = new Product(
             $row
@@ -731,7 +733,7 @@ class Helper
             if($model === null) {
                 continue;
             }
-            $bepadoAttribute = $this->getBepadoAttributeByModel($model) ?: new BepadoAttribute;
+            $bepadoAttribute = $this->getOrCreateBepadoAttributeByModel($model);
 
             $status = $bepadoAttribute->getExportStatus();
             if(empty($status) || $status == 'delete' || $status == 'error') {

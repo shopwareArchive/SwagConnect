@@ -214,6 +214,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function createMyEvents()
     {
         $this->subscribeEvent(
+            'Enlight_Bootstrap_InitResource_BepadoSDK',
+            'onInitResourceSDK'
+        );
+
+        $this->subscribeEvent(
             'Enlight_Controller_Front_DispatchLoopStartup',
             'onStartDispatch'
         );
@@ -484,15 +489,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
         $this->registerMyLibrary();
-
-        // Subscribe to the InitResource_BepadoSDK event first, some of the Subscribers might
-        // need it as dependency
-        $handler = new \Enlight_Event_Handler_Default(
-            'Enlight_Bootstrap_InitResource_BepadoSDK',
-            array($this, 'onInitResourceSDK'),
-            0
-        );
-        $this->Application()->Events()->registerListener($handler);
 
         /**
          * Here we subscribe to the needed events and hooks.

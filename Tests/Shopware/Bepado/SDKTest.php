@@ -1,17 +1,13 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Tests\Shopware\Bepado;
 
-use Enlight_Components_Test_Plugin_TestCase;
 use Bepado\SDK\Struct\Product;
-use Shopware\Bepado\Components\BepadoFactory;
 
-class SDKTest extends Enlight_Components_Test_Plugin_TestCase
+class SDKTest extends BepadoTestHelper
 {
     public function testHandleProductUpdates()
     {
-        $sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
-
         // pseudo verify SDK
         $conn = Shopware()->Db();
         $conn->delete('bepado_shop_config', array());
@@ -43,16 +39,10 @@ class SDKTest extends Enlight_Components_Test_Plugin_TestCase
         ));
     }
 
-    private function dispatchRpcCall($service, $command, array $args)
+    public function testExportProduct()
     {
-        $sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
-        $refl = new \ReflectionObject($sdk);
-        $property = $refl->getProperty('dependencies');
-        $property->setAccessible(true);
-        $deps = $property->getValue($sdk);
-        $serviceRegistry = $deps->getServiceRegistry();
-        $callable = $serviceRegistry->getService($service, $command);
+        $this->getHelper()->insertOrUpdateProduct(array(2), $this->getSDK());
 
-        return call_user_func_array(array($callable['provider'], $callable['command']), $args);
     }
+
 }

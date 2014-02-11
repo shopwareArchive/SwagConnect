@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="./../../../../../../tests/Shopware/TestHelper.php" colors="true">
+<phpunit bootstrap="./Tests/Shopware/Bepado/Bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="Shopware Bepado Plugin">
             <directory>Tests/</directory>

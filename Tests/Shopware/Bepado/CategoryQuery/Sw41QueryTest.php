@@ -10,8 +10,6 @@ class Sw41QueryTest extends CategoryQueryTest
 {
     protected function createQuery()
     {
-        Shopware()->Bootstrap()->getResource('BepadoSDK');
-
         $factory = new BepadoFactory();
 
         if (!$factory->checkMinimumVersion('4.1.0')) {

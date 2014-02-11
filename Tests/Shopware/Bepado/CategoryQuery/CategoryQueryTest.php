@@ -1,12 +1,11 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace Tests\Shopware\Bepado\CategoryQuery;
 
-use Enlight_Components_Test_Plugin_TestCase;
 use Bepado\SDK\Struct\Product;
-use Shopware\Bepado\Components\BepadoFactory;
+use Tests\Shopware\Bepado\BepadoTestHelper;
 
-abstract class CategoryQueryTest extends Enlight_Components_Test_Plugin_TestCase
+abstract class CategoryQueryTest extends BepadoTestHelper
 {
     abstract protected function createQuery();
 
@@ -44,22 +43,5 @@ abstract class CategoryQueryTest extends Enlight_Components_Test_Plugin_TestCase
     {
         $conn = Shopware()->Db();
         $conn->exec('UPDATE s_categories_attributes SET bepado_mapping = NULL');
-    }
-
-    private function changeCategoryBepadoMappingForCategoryTo($categoryId, $mapping)
-    {
-        $modelManager = Shopware()->Models();
-        $categoryRepository = $modelManager->getRepository('Shopware\Models\Category\Category');
-        $category = $categoryRepository->find($categoryId);
-
-        if (!$category) {
-            $this->fail('Could not find category with ID ' . $categoryId);
-        }
-
-        $attribute = $category->getAttribute() ?: new \Shopware\Models\Attribute\Category();
-        $attribute->setBepadoMapping($mapping);
-        $category->setAttribute($attribute);
-
-        $modelManager->flush();
     }
 }

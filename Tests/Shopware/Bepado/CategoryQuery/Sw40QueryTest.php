@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace Tests\Shopware\Bepado\CategoryQuery;
 
 use Shopware\Bepado\Components\BepadoFactory;
 

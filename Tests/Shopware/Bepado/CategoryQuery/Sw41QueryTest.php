@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace Tests\Shopware\Bepado\CategoryQuery;
 
 use Enlight_Components_Test_Plugin_TestCase;
 use Bepado\SDK\Struct\Product;

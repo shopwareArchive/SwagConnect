@@ -20,6 +20,23 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return Shopware()->Plugins()->Backend()->SwagBepado()->getHelper();
     }
 
+    public function changeCategoryBepadoMappingForCategoryTo($categoryId, $mapping)
+    {
+        $modelManager = Shopware()->Models();
+        $categoryRepository = $modelManager->getRepository('Shopware\Models\Category\Category');
+        $category = $categoryRepository->find($categoryId);
+
+        if (!$category) {
+            $this->fail('Could not find category with ID ' . $categoryId);
+        }
+
+        $attribute = $category->getAttribute() ?: new \Shopware\Models\Attribute\Category();
+        $attribute->setBepadoMapping($mapping);
+        $category->setAttribute($attribute);
+
+        $modelManager->flush();
+    }
+
     public function dispatchRpcCall($service, $command, array $args)
     {
         $sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');

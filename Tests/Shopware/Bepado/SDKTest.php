@@ -39,10 +39,37 @@ class SDKTest extends BepadoTestHelper
         ));
     }
 
-    public function testExportProduct()
+    public function testExportProductWithoutPurchasePrice()
     {
+        $this->getHelper()->insertOrUpdateProduct(array(3), $this->getSDK());
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $model */
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));
+        $message = $model->getExportMessage();
+
+        $this->assertContains('purchasePrice', $message);
+
+    }
+
+    public function testExportProductWithPurchasePrice()
+    {
+        // Set a purchase price
+        /** @var \Shopware\Models\Article\Price $price */
+        $price = Shopware()->Models()->getRepository('Shopware\Models\Article\Price')->findOneBy(array('articleDetailsId' => 125, 'from' => 1, 'customerGroup' => 'EK'));
+        $price->setBasePrice($price->getPrice());
+        Shopware()->Models()->flush();
+
+        // Assign a category mapping
+        $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
+
+        // Insert the product
         $this->getHelper()->insertOrUpdateProduct(array(2), $this->getSDK());
 
+        /** @var \Shopware\CustomModels\Bepado\Attribute $model */
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 2));
+        $message = $model->getExportMessage();
+
+        $this->assertNull($message);
     }
 
 }

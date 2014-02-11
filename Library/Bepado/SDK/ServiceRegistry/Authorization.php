@@ -89,9 +89,9 @@ class Authorization extends Rpc\ServiceRegistry
 
                 // second argument to checkProducts() is the shop the order is happening in.
                 if ($rpcCall->command === 'checkProducts') {
-                    if ($this->token->userIdentifier !== $rpcCall->arguments[1]) {
+                    if ($this->token->userIdentifier != $rpcCall->arguments[1]) {
                         throw new SecurityException(
-                            "No authorization to call 'transaction.reserve' for a different order shop."
+                            "No authorization to call 'transaction.checkProducts' for a different order shop."
                         );
                     }
                 }

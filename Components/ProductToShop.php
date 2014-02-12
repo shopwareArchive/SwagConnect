@@ -80,7 +80,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function startTransaction()
     {
-        // TODO: Implement startTransaction() method.
+        $this->manager->getConnection()->beginTransaction();
     }
 
     /**
@@ -92,7 +92,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function commit()
     {
-        // TODO: Implement commit() method.
+       $this->manager->getConnection()->commit();
     }
 
     /**
@@ -105,6 +105,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        // todo@dn: Set dummy values and make product inactive
         if(empty($product->title) || empty($product->vendor)) {
             return;
         }
@@ -222,13 +223,11 @@ class ProductToShop implements ProductToShopBase
 
         if($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
-            $this->manager->flush();
         }
 
         if($detail->getAttribute() === null) {
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
-            $this->manager->flush();
         }
 
         $bepadoAttribute->setArticle($model);
@@ -240,6 +239,9 @@ class ProductToShop implements ProductToShopBase
         if ($updateFields['image']) {
             $this->helper->handleImageImport($product->images, $model);
         }
+
+        $this->manager->clear();
+
     }
 
 

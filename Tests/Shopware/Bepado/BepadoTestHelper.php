@@ -4,12 +4,24 @@ namespace Tests\Shopware\Bepado;
 
 class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
+
     /**
      * @return \Bepado\SDK\SDK
      */
     public function getSDK()
     {
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
+    }
+
+    /**
+     * @return string
+     */
+    public function getBepadoProductArticleId()
+    {
+        $id = Shopware()->Db()->fetchOne(
+            'SELECT article_id FROM s_plugin_bepado_items WHERE source_id IS NOT NULL LIMIT 1'
+        );
+        return $id;
     }
 
     /**
@@ -37,7 +49,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $modelManager->flush();
     }
 
-    public function dispatchRpcCall($service, $command, array $args)
+    public static function dispatchRpcCall($service, $command, array $args)
     {
         $sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
         $refl = new \ReflectionObject($sdk);

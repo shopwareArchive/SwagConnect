@@ -196,15 +196,4 @@ class HelperTest extends BepadoTestHelper
 
         $this->assertNotEmpty($result);
     }
-
-    /**
-     * @return string
-     */
-    public function getBepadoProductArticleId()
-    {
-        $id = Shopware()->Db()->fetchOne(
-            'SELECT article_id FROM s_plugin_bepado_items WHERE source_id IS NOT NULL LIMIT 1'
-        );
-        return $id;
-    }
 }

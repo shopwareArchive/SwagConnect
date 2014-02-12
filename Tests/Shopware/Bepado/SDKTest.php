@@ -31,6 +31,7 @@ class SDKTest extends BepadoTestHelper
                         'price' => 9.99,
                         'purchasePrice' => 6.99,
                         'availability' => 100,
+                        'images' => array('http://lorempixel.com/400/200'),
                         'categories' => array('/bücher'),
                     )),
                     'revision' => time(),

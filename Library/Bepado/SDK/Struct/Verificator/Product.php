@@ -19,24 +19,6 @@ use Bepado\SDK\Struct;
 class Product extends Verificator
 {
     /**
-     * Categories
-     *
-     * @var array
-     */
-    protected $categories;
-
-    /**
-     * Construct from category mapping
-     *
-     * @param array $categories
-     * @return void
-     */
-    public function __construct(array $categories)
-    {
-        $this->categories = $categories;
-    }
-
-    /**
      * Method to verify a structs integrity
      *
      * Throws a RuntimeException if the struct does not verify.
@@ -86,10 +68,6 @@ class Product extends Verificator
 
         if (!is_array($struct->categories)) {
             throw new \RuntimeException("Invalid Datatype, Product#categories has to be an array.");
-        }
-
-        if (!count($struct->categories)) {
-            throw new \RuntimeException("Assign at least one category to the product.");
         }
 
         if (!is_array($struct->tags)) {

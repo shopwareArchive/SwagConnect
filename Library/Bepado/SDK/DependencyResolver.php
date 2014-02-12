@@ -321,9 +321,7 @@ class DependencyResolver
                     'Bepado\\SDK\\Struct\\OrderItem' =>
                         new Struct\Verificator\OrderItem(),
                     'Bepado\\SDK\\Struct\\Product' =>
-                        new Struct\Verificator\Product(
-                            $this->gateway->getCategories()
-                        ),
+                        new Struct\Verificator\Product(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Insert' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Update' =>

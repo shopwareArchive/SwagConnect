@@ -65,10 +65,8 @@ class OrderStatus
      */
     public function getOrderStatusStructFromOrder(Order $order)
     {
-        $attribute = $order->getAttribute();
-
         return new OrderStatusStruct(array(
-            'id' => (string) $attribute->getBepadoOrderId(),
+            'id' => (string) $order->getNumber(),
             'status' => $this->mapShopwareOrderStatusToBepado($order->getOrderStatus()->getId()),
             'messages' => array(
                 new Message(array('message' => $order->getOrderStatus()->getDescription()))

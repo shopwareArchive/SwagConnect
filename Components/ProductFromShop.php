@@ -81,26 +81,12 @@ class ProductFromShop implements ProductFromShopBase
     /**
      * Get all IDs of all exported products
      *
+     * @throws \BadMethodCallException
      * @return string[]
      */
     public function getExportedProductIDs()
     {
-        $repository = $this->manager->getRepository(
-            'Shopware\Models\Article\Article'
-        );
-        $builder = $repository->createQueryBuilder('a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->join('d.attribute', 'at');
-        $builder->where("at.bepadoExportStatus IN ('online', 'update', 'insert')");
-        $builder->select(array(
-            'a.id as sourceId'
-        ));
-        $query = $builder->getQuery();
-        $ids = $query->getArrayResult();
-        $ids = array_map(function($id) {
-            return $id['sourceId'];
-        }, $ids);
-        return $ids;
+        throw new \BadMethodCallException('Not implemented');
     }
 
     /**
@@ -115,9 +101,9 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
-     * Buy products mentioned in order
+     * Create order in shopware
+     * Wraps the actual order process into a transaction
      *
-     * Should return the internal order ID.
      *
      * @param Order $order
      * @return string
@@ -127,6 +113,26 @@ class ProductFromShop implements ProductFromShopBase
      *                    Do validation in {@see reserve} instead.
      */
     public function buy(Order $order)
+    {
+        try {
+            $this->manager->getConnection()->beginTransaction();
+            $orderNumber = $this->buy($order);
+            $this->manager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+            throw $e;
+        }
+
+        return $orderNumber;
+    }
+
+    /**
+     * Actually creates the remote order in shopware.
+     *
+     * @param Order $order
+     * @return string
+     */
+    public function doBuy(Order $order)
     {
         $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $status = $this->manager->find('Shopware\Models\Order\Status', 0);
@@ -241,11 +247,11 @@ class ProductFromShop implements ProductFromShopBase
 
         $model->calculateInvoiceAmount();
 
-        //$this->manager->persist($model);
         $this->manager->flush();
 
         return $model->getNumber();
     }
+
 
     /**
      * Calculate the price (including VAT) that the from shop needs to pay.

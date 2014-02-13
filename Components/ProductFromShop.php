@@ -114,9 +114,10 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function buy(Order $order)
     {
+        $this->manager->getConnection()->beginTransaction();
+
         try {
-            $this->manager->getConnection()->beginTransaction();
-            $orderNumber = $this->buy($order);
+            $orderNumber = $this->doBuy($order);
             $this->manager->getConnection()->commit();
         } catch (\Exception $e) {
             $this->manager->getConnection()->rollBack();

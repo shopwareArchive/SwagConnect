@@ -619,7 +619,7 @@ class Helper
     public function handleImageImport($images, $model)
     {
         // Build up an array of images imported from bepado
-        $positions = array();
+        $positions = array(0);
         $localImagesFromBepado = array();
 
         /** @var $image Image */
@@ -655,7 +655,6 @@ class Helper
             $this->manager->remove($data['image']);
             $this->manager->remove($data['media']);
         }
-        $this->manager->flush();
 
         // Check if we still have a main image
         $hasMainImage = $this->hasArticleMainImage($model->getId());
@@ -664,8 +663,8 @@ class Helper
         try {
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);
             $tempDir = Shopware()->DocPath('media_temp');
-
             foreach ($imagesToCreate as $imageUrl => $key) {
+                
                 $tempFile = tempnam($tempDir, 'image');
                 copy($imageUrl, $tempFile);
                 $file = new \Symfony\Component\HttpFoundation\File\File($tempFile);
@@ -684,7 +683,6 @@ class Helper
 
                 $this->manager->persist($media);
                 $this->manager->persist($mediaAttribute);
-                $this->manager->flush();
 
                 // Create the associated image object
                 $image = new Image();
@@ -697,10 +695,19 @@ class Helper
                 $image->setExtension($media->getExtension());
 
                 $this->manager->persist($image);
-                $this->manager->flush();
+
+
+                $manager = Shopware()->Container()->get('thumbnail_manager');
+                $manager->createMediaThumbnail(
+                    $media,
+                    $media->getDefaultThumbnails(),
+                    true
+                );
             }
         } catch (\Exception $e) {
         }
+
+        $this->manager->flush();
 
     }
 

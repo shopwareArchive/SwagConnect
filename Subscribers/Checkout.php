@@ -1,7 +1,8 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
+use Bepado\SDK\Struct\Message;
+use Bepado\SDK\Struct\Reservation;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -172,11 +173,7 @@ class Checkout extends BaseSubscriber
             if(!empty($row['mode'])) {
                 continue;
             }
-            $products = $helper->getRemoteProducts($row['articleID']);
-            if (empty($products)) {
-                continue;
-            }
-            $product = $products[0];
+            $product = $helper->getProductById($row['articleID']);
             if($product === null || $product->shopId === null) {
                 continue;
             }
@@ -225,7 +222,7 @@ class Checkout extends BaseSubscriber
             $address->company = $shippingData['company'];
         }
         $address->street = $shippingData['street'];
-        $address->streetNumber = (string) $shippingData['streetnumber'];
+        $address->streetNumber = $shippingData['streetnumber'];
         return $address;
     }
 

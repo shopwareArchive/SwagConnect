@@ -2,8 +2,7 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Bepado\SDK\Struct\Message;
-use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
-use Shopware\Bepado\Components\Logger;
+use Bepado\SDK\Struct\Reservation;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -72,8 +71,6 @@ class Checkout extends BaseSubscriber
                 try {
                     $response = $sdk->checkProducts($products);
                 } catch (\Exception $e) {
-                    $logger = new Logger(Shopware()->Db());
-                    $logger->write(true, "Could not connect to bepado shop {$shopId}", $e);
                     // If the checkout results in an exception because the remote shop is not available
                     // don't show the exception to the user but tell him to remove the products from that shop
                     $response = $this->getNotAvailableMessageForProducts($products);
@@ -124,7 +121,6 @@ class Checkout extends BaseSubscriber
     private function translateBepadoMessages($bepadoMessages)
     {
         $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
-
         foreach($bepadoMessages as $shopId => &$shopMessages) {
             foreach ($shopMessages as &$bepadoMessage) {
                 $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
@@ -133,7 +129,6 @@ class Checkout extends BaseSubscriber
                     $bepadoMessage->message,
                     true
                 );
-
                 $bepadoMessage->message = $translation;
             }
 
@@ -197,15 +192,26 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        /** @var $reservation \Bepado\SDK\Struct\Reservation */
-        $reservation = $sdk->reserveProducts($order);
-        if(!empty($reservation->messages)) {
-            Shopware()->Session()->BepadoMessages = $reservation->messages;
+        try {
+            /** @var $reservation \Bepado\SDK\Struct\Reservation */
+            $reservation = $sdk->reserveProducts($order);
+            if(!empty($reservation->messages)) {
+                $messages = $reservation->messages;
+            }
+        } catch (\Exception $e) {
+            $messages = $this->getNotAvailableMessageForProducts($order->products);
+        }
+
+
+
+        if ($messages) {
+            Shopware()->Session()->BepadoMessages = $messages;
             $controller->forward('confirm');
         } else {
             Shopware()->Session()->BepadoReservation = $reservation;
         }
     }
+
 
     /**
      * Helper method to create an address struct from shopware session info
@@ -277,12 +283,12 @@ class Checkout extends BaseSubscriber
         }
     }
 
-    public function getNotAvailableMessageForProducts($products)
+    protected function getNotAvailableMessageForProducts($products)
     {
         $messages = array();
         /** \Bepado\SDK\Struct\Product */
         foreach ($products as $product) {
-            new Message(array(
+            $messages[] = new Message(array(
                 'message' => 'Availablility of product %product changed to %availability',
                 'values' => array(
                     'product' => $product->title,
@@ -292,6 +298,5 @@ class Checkout extends BaseSubscriber
         }
 
         return $messages;
-
     }
 }

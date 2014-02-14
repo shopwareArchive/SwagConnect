@@ -1,6 +1,9 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Bepado\SDK\Struct\Message;
+use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -65,8 +68,16 @@ class Checkout extends BaseSubscriber
         if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
             $bepadoMessages = array();
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
-                /** @var $response \Bepado\SDK\Struct\Message */
-                $response = $sdk->checkProducts($products);
+                /** @var $response Message */
+                try {
+                    $response = $sdk->checkProducts($products);
+                } catch (\Exception $e) {
+                    $logger = new Logger(Shopware()->Db());
+                    $logger->write(true, "Could not connect to bepado shop {$shopId}", $e);
+                    // If the checkout results in an exception because the remote shop is not available
+                    // don't show the exception to the user but tell him to remove the products from that shop
+                    $response = $this->getNotAvailableMessageForProducts($products);
+                }
                 if($response !== true) {
                     $bepadoMessages[$shopId] = $response;
                 }
@@ -264,5 +275,23 @@ class Checkout extends BaseSubscriber
                 $view->assign('phoneMissing', true);
             }
         }
+    }
+
+    public function getNotAvailableMessageForProducts($products)
+    {
+        $messages = array();
+        /** \Bepado\SDK\Struct\Product */
+        foreach ($products as $product) {
+            new Message(array(
+                'message' => 'Availablility of product %product changed to %availability',
+                'values' => array(
+                    'product' => $product->title,
+                    'availability' => 0
+                )
+            ));
+        }
+
+        return $messages;
+
     }
 }

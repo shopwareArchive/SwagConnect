@@ -45,7 +45,12 @@ class Lifecycle extends BaseSubscriber
 
         $orderUtil = new Utils\OrderStatus();
         $orderStatus = $orderUtil->getOrderStatusStructFromOrder($order);
-        $this->getSDK()->updateOrderStatus($orderStatus);
+
+        try {
+            $this->getSDK()->updateOrderStatus($orderStatus);
+        } catch (\Exception $e) {
+            // if sn is not available, proceed without exception
+        }
     }
 
     /**

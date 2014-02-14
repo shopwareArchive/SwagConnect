@@ -188,10 +188,19 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        /** @var $reservation \Bepado\SDK\Struct\Reservation */
-        $reservation = $sdk->reserveProducts($order);
-        if(!empty($reservation->messages)) {
-            Shopware()->Session()->BepadoMessages = $reservation->messages;
+        try {
+            /** @var $reservation \Bepado\SDK\Struct\Reservation */
+            $reservation = $sdk->reserveProducts($order);
+            if(!empty($reservation->messages)) {
+                $messages = $reservation->messages;
+            }
+        } catch (\Exception $e) {
+            $messages = $this->getNotAvailableMessageForProducts($order->products);
+        }
+
+
+        if(!empty($messages)) {
+            Shopware()->Session()->BepadoMessages = $messages;
             $controller->forward('confirm');
         } else {
             Shopware()->Session()->BepadoReservation = $reservation;

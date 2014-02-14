@@ -254,11 +254,23 @@ class Helper
     }
 
 
+    /**
+     * Returns a remote bepadoProduct e.g. for checkout maniputlations
+     *
+     * @param array $ids
+     * @return array
+     */
     public function getRemoteProducts(array $ids)
     {
         return $this->bepadoProductQuery->getRemote($ids);
     }
 
+    /**
+     * Returns a local bepadoProduct for export
+     *
+     * @param array $ids
+     * @return array
+     */
     public function getLocalProduct(array $ids)
     {
         return $this->bepadoProductQuery->getLocal($ids);

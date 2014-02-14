@@ -65,8 +65,8 @@ class LocalProductQuery extends BaseProductQuery
 
             'd.weight',
             'u.unit',
-            'd.purchaseUnit as volume',
-            'd.referenceUnit as base',
+            'd.purchaseUnit as purchaseUnit',
+            'd.referenceUnit as referenceUnit',
             'at.categories as categories',
             'at.fixedPrice as fixedPrice'
         ));

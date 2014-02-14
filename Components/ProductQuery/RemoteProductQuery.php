@@ -11,6 +11,7 @@ class RemoteProductQuery extends BaseProductQuery
 
     /**
      *
+     *
      * @return \Doctrine\ORM\QueryBuilder
      */
     public function getProductQuery()
@@ -49,8 +50,8 @@ class RemoteProductQuery extends BaseProductQuery
 
             'd.weight',
             'u.unit',
-            'd.purchaseUnit as volume',
-            'd.referenceUnit as base',
+            'd.purchaseUnit as purchaseUnit',
+            'd.referenceUnit as referenceUnit',
             'at.categories as categories',
             'at.fixedPrice as fixedPrice'
         ));
@@ -59,6 +60,8 @@ class RemoteProductQuery extends BaseProductQuery
     }
 
     /**
+     * Returns a list of bepado products
+     *
      * @param array $rows
      * @return array
      */
@@ -75,6 +78,8 @@ class RemoteProductQuery extends BaseProductQuery
     }
 
     /**
+     * Returns a bepado product or null if the given row does not reference a imported product
+     *
      * @param $row
      * @return Product|null
      */

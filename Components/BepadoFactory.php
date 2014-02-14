@@ -177,7 +177,6 @@ class BepadoFactory
     private function getProductQuery()
     {
         return new ProductQuery(
-            $this->getModelManager(),
             $this->getLocalProductQuery(),
             $this->getRemoteProductQuery()
         );

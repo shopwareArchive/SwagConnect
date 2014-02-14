@@ -15,7 +15,6 @@ class ProductQueryTest extends BepadoTestHelper
     {
         if (!$this->productQuery) {
             $this->productQuery = new ProductQuery(
-                Shopware()->Models(),
                 new LocalProductQuery(Shopware()->Models(), Shopware()->Config()->get('alternateDescriptionField')),
                 new RemoteProductQuery(Shopware()->Models(), Shopware()->Config()->get('alternateDescriptionField'))
             );

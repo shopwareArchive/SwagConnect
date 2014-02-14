@@ -11,8 +11,8 @@ abstract class BaseProductQuery
     protected $attributeMapping = array(
         'weight' => Product::ATTRIBUTE_WEIGHT,
         'unit' => Product::ATTRIBUTE_UNIT,
-        'base' => 'ref_quantity',
-        'volume' => Product::ATTRIBUTE_VOLUME,
+        'referenceUnit' => 'ref_quantity',
+        'purchaseUnit' => 'quantity'
     );
 
 
@@ -151,13 +151,10 @@ abstract class BaseProductQuery
      */
     public function prepareProductDimensions($row)
     {
-        if (!empty($row['width']) && !empty($row['height'])) {
+        if (!empty($row['width']) && !empty($row['height']) && !empty($row['length'])) {
             $dimension = array(
-                $row['width'], $row['height']
+                $row['length'], $row['width'], $row['height']
             );
-            if (!empty($row['length'])) {
-                $dimension[] = $row['length'];
-            }
             $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
         }
         unset($row['width'], $row['height'], $row['length']);

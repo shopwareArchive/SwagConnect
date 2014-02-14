@@ -8,13 +8,11 @@ use Doctrine\ORM\QueryBuilder;
 class ProductQuery
 {
 
-    protected $manager;
     protected $localProductQuery;
     protected $remoteProductQuery;
 
-    public function __construct($manager, ProductQuery\LocalProductQuery $localProductQuery, ProductQuery\RemoteProductQuery $remoteProductQuery)
+    public function __construct(ProductQuery\LocalProductQuery $localProductQuery, ProductQuery\RemoteProductQuery $remoteProductQuery)
     {
-        $this->manager = $manager;
         $this->localProductQuery = $localProductQuery;
         $this->remoteProductQuery = $remoteProductQuery;
     }

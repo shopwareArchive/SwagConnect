@@ -2,7 +2,7 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Utils;
-
+use Shopware\Bepado\Components\BepadoExport;
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado
  *
@@ -20,6 +20,18 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
+        );
+    }
+
+    /**
+     * @return BepadoExport
+     */
+    public function getBepadoExport()
+    {
+        return new BepadoExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            Shopware()->Models()
         );
     }
 
@@ -98,6 +110,8 @@ class Lifecycle extends BaseSubscriber
         if (!$attribute) {
             return;
         }
+
+        // todo@dn: Check logic
         $status = $attribute->getExportStatus();
         $shopId = $attribute->getShopId();
         if (empty($status) || !empty($shopId)) {
@@ -106,14 +120,12 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the product for bepado update
         try {
-            $this->getHelper()->insertOrUpdateProduct(
-                array($id), $this->getSDK()
+            $this->getBepadoExport()->export(
+                array($id)
             );
-
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
         }
-
     }
 }

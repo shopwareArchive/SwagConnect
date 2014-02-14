@@ -16,28 +16,6 @@ class MassImportTest extends BepadoTestHelper
         $conn->insert('bepado_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
     }
 
-    protected function getProduct()
-    {
-        $number = rand(1, 999999999);
-        $product =  new \Bepado\SDK\Struct\Product(array(
-            'shopId' => 3,
-            'revisionId' => time(),
-            'sourceId' => $number,
-            'ean' => $number,
-            'url' => 'http://shopware.de',
-            'title' => 'MassImport #'. $number,
-            'shortDescription' => 'Ein Produkt aus Bepado',
-            'longDescription' => 'Ein Produkt aus Bepado',
-            'vendor' => 'Bepado',
-            'price' => 9.99,
-            'purchasePrice' => 6.99,
-            'availability' => 100,
-            'categories' => array('/bücher'),
-        ));
-
-        return $product;
-    }
-
 
     public function _testMassImportProducts()
     {

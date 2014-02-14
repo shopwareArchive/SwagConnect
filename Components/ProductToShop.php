@@ -59,15 +59,22 @@ class ProductToShop implements ProductToShopBase
     private $config;
 
     /**
+     * @var ImageImport
+     */
+    private $imageImport;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
+     * @param ImageImport $imageImport
      * @param \Shopware_Components_Config $config
      */
-    public function __construct(Helper $helper, ModelManager $manager,  $config)
+    public function __construct(Helper $helper, ModelManager $manager, ImageImport $imageImport, $config)
     {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->config = $config;
+        $this->imageImport = $imageImport;
     }
 
     /**
@@ -237,11 +244,10 @@ class ProductToShop implements ProductToShopBase
         $this->manager->flush();
 
         if ($updateFields['image']) {
-            $this->helper->handleImageImport($product->images, $model);
+            $this->imageImport->importImagesForArticle($product->images, $model);
         }
 
         $this->manager->clear();
-
     }
 
 

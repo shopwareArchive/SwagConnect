@@ -120,11 +120,17 @@ class BasketHelper
         $this->bepadoContent = array();
 
         $this->basket['contentOrg'] = $this->basket['content'];
+
         foreach ($this->basket['content'] as $key => &$row) {
             if (!empty($row['mode'])) {
                 continue;
             }
-            $product = $this->getHelper()->getProductById($row['articleID']);
+            try {
+                $products = $this->getHelper()->getRemoteProducts(array($row['articleID']));
+            } catch (Components\Exceptions\NoRemoteProductException $e) {
+                continue;
+            }
+            $product = $products[0];
             if ($product === null || $product->shopId === null) {
                 continue;
             }

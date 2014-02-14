@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\ImageImport;
 
 /**
  * Cronjob callback
@@ -18,6 +19,17 @@ class CronJob extends BaseSubscriber
     }
 
     /**
+     * @return ImageImport
+     */
+    public function getImageImport()
+    {
+        return new ImageImport(
+            Shopware()->Models(),
+            $this->getHelper()
+        );
+    }
+
+    /**
      * Import images of new products
      *
      * @param \Shopware_Components_Cron_CronJob $job
@@ -25,9 +37,7 @@ class CronJob extends BaseSubscriber
      */
     public function importImages(\Shopware_Components_Cron_CronJob $job)
     {
-        $helper = $this->getHelper();
-
-        $helper->importImages();
+        $this->getImageImport()->import();
 
         return true;
     }

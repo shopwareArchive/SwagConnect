@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
 
 /**
  * Loads various template extensions
@@ -157,7 +158,13 @@ class TemplateExtension extends BaseSubscriber
             return;
         }
 
-        $product = $helper->getProductById($articleData['articleID']);
+        try {
+            $products = $helper->getRemoteProducts($articleData['articleID']);
+        } catch (NoRemoteProductException $e) {
+            return;
+        }
+
+        $product = $products[0];
         if(empty($product->shopId)) {
             return;
         }
@@ -170,7 +177,6 @@ class TemplateExtension extends BaseSubscriber
             'bepadoNoIndex' => $this->Config()->get('detailProductNoIndex')
         ));
     }
-
 
     /**
      * Extends the product list in the backend in order to have a special hint for bepado products

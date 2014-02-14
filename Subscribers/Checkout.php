@@ -67,8 +67,14 @@ class Checkout extends BaseSubscriber
         if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
             $bepadoMessages = array();
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
-                /** @var $response \Bepado\SDK\Struct\Message */
-                $response = $sdk->checkProducts($products);
+                /** @var $response Message */
+                try {
+                    $response = $sdk->checkProducts($products);
+                } catch (\Exception $e) {
+                    // If the checkout results in an exception because the remote shop is not available
+                    // don't show the exception to the user but tell him to remove the products from that shop
+                    $response = $this->getNotAvailableMessageForProducts($products);
+                }
                 if($response !== true) {
                     $bepadoMessages[$shopId] = $response;
                 }

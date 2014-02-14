@@ -222,7 +222,7 @@ class Checkout extends BaseSubscriber
             $address->company = $shippingData['company'];
         }
         $address->street = $shippingData['street'];
-        $address->streetNumber = $shippingData['streetnumber'];
+        $address->streetNumber = (string) $shippingData['streetnumber'];
         return $address;
     }
 
@@ -266,5 +266,22 @@ class Checkout extends BaseSubscriber
                 $view->assign('phoneMissing', true);
             }
         }
+    }
+
+    protected function getNotAvailableMessageForProducts($products)
+    {
+        $messages = array();
+        /** \Bepado\SDK\Struct\Product */
+        foreach ($products as $product) {
+            $messages[] = new Message(array(
+                'message' => 'Availablility of product %product changed to %availability',
+                'values' => array(
+                    'product' => $product->title,
+                    'availability' => 0
+                )
+            ));
+        }
+
+        return $messages;
     }
 }

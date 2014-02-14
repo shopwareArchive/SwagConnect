@@ -35,18 +35,10 @@ class ProductQueryTest extends BepadoTestHelper
         $this->assertEquals(16.80, $product->price);
     }
 
-    /**
-     * @expectedException \Shopware\Bepado\Components\Exceptions\NoRemoteProductException
-     */
-    public function testGetRemoteShouldThrowException()
+    public function testGetRemoteShouldReturnEmptyArray()
     {
         $result = $this->getProductQuery()->getRemote(array(2));
-        /** @var \Bepado\SDK\Struct\Product $product */
-        $product = $result[0];
-
-        $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
-        $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
-        $this->assertEquals(16.80, $product->price);
+        $this->assertEmpty($result);
     }
 
     public function testGetRemote()

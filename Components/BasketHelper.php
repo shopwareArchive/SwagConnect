@@ -125,9 +125,8 @@ class BasketHelper
             if (!empty($row['mode'])) {
                 continue;
             }
-            try {
-                $products = $this->getHelper()->getRemoteProducts(array($row['articleID']));
-            } catch (Components\Exceptions\NoRemoteProductException $e) {
+            $products = $this->getHelper()->getRemoteProducts(array($row['articleID']));
+            if (empty($products)) {
                 continue;
             }
             $product = $products[0];

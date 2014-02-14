@@ -158,9 +158,8 @@ class TemplateExtension extends BaseSubscriber
             return;
         }
 
-        try {
-            $products = $helper->getRemoteProducts($articleData['articleID']);
-        } catch (NoRemoteProductException $e) {
+        $products = $helper->getRemoteProducts($articleData['articleID']);
+        if (empty($products)) {
             return;
         }
 

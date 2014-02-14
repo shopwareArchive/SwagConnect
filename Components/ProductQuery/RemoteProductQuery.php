@@ -4,7 +4,6 @@ namespace Shopware\Bepado\Components\ProductQuery;
 
 use Bepado\SDK\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
-use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
 
 class RemoteProductQuery extends BaseProductQuery
 {
@@ -67,22 +66,24 @@ class RemoteProductQuery extends BaseProductQuery
     {
         $products = array();
         foreach ($rows as $row) {
-            $products[] = $this->getBepadoProduct($row);
+            $product = $this->getBepadoProduct($row);
+            if ($product) {
+                $products[] = $product;
+            }
         }
         return $products;
     }
 
     /**
      * @param $row
-     * @return Product
-     * @throws \Shopware\Bepado\Components\Exceptions\NoRemoteProductException
+     * @return Product|null
      */
     protected function getBepadoProduct($row)
     {
         $row = $this->prepareCommonAttributes($row);
 
         if (empty($row['shopId'])) {
-            throw new NoRemoteProductException("Product {$row['title']} is no remote product");
+            return null;
         }
         unset($row['localId']);
 

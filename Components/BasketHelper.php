@@ -120,11 +120,16 @@ class BasketHelper
         $this->bepadoContent = array();
 
         $this->basket['contentOrg'] = $this->basket['content'];
+
         foreach ($this->basket['content'] as $key => &$row) {
             if (!empty($row['mode'])) {
                 continue;
             }
-            $product = $this->getHelper()->getProductById($row['articleID']);
+            $products = $this->getHelper()->getRemoteProducts(array($row['articleID']));
+            if (empty($products)) {
+                continue;
+            }
+            $product = $products[0];
             if ($product === null || $product->shopId === null) {
                 continue;
             }

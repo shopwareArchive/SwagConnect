@@ -5,6 +5,8 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Shopware\Bepado\Components\CategoryQuery\Sw40Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
+use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
@@ -84,16 +86,25 @@ class BepadoFactory
             new ProductToShop(
                 $helper,
                 $manager,
+                $this->getImageImport(),
                 Shopware()->Config()
             ),
             new ProductFromShop(
                 $helper,
                 $manager
             ),
-            null,
+            new ShopwareErrorHandler(),
             null,
             $this->getPluginVersion()
         );
+    }
+
+    /**
+     * @return ImageImport
+     */
+    public function getImageImport()
+    {
+        return new ImageImport($this->getModelManager(), $this->getHelper());
     }
 
     /**
@@ -123,7 +134,6 @@ class BepadoFactory
         if($this->helper === null) {
             $this->helper = new Helper(
                 $this->getModelManager(),
-                $this->getImagePath(),
                 $this->getCategoryQuery(),
                 $this->getProductQuery(),
                 Shopware()->Front()->Router()
@@ -166,27 +176,10 @@ class BepadoFactory
      */
     private function getProductQuery()
     {
-        return new ProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
-    }
-
-    /**
-     * Returns URL for the shopware image directory
-     *
-     * @return string
-     */
-    protected function getImagePath()
-    {
-        $request = Shopware()->Front()->Request();
-
-        if (!$request) {
-            return '';
-        }
-
-        $imagePath = $request->getScheme() . '://'
-                   . $request->getHttpHost() . $request->getBasePath();
-        $imagePath .= '/media/image/';
-
-        return $imagePath;
+        return new ProductQuery(
+            $this->getLocalProductQuery(),
+            $this->getRemoteProductQuery()
+        );
     }
 
     /**
@@ -236,5 +229,21 @@ class BepadoFactory
         }
 
         return version_compare($version, $requiredVersion, '>=');
+    }
+
+    /**
+     * @return RemoteProductQuery
+     */
+    private function getRemoteProductQuery()
+    {
+        return new RemoteProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
+    }
+
+    /**
+     * @return LocalProductQuery
+     */
+    private function getLocalProductQuery()
+    {
+        return new LocalProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
     }
 }

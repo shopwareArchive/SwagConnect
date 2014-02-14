@@ -42,7 +42,7 @@ class SDKTest extends BepadoTestHelper
 
     public function testExportProductWithoutPurchasePrice()
     {
-        $this->getHelper()->insertOrUpdateProduct(array(3), $this->getSDK());
+        $this->getBepadoExport()->export(array(3));
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
         $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));
@@ -64,7 +64,7 @@ class SDKTest extends BepadoTestHelper
         $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
 
         // Insert the product
-        $this->getHelper()->insertOrUpdateProduct(array(2), $this->getSDK());
+        $this->getBepadoExport()->export(array(2));
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
         $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 2));

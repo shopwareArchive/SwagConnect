@@ -22,6 +22,8 @@
  * our trademarks remain entirely with us.
  */
 
+use Shopware\Bepado\Components\Logger;
+
 /**
  * @category  Shopware
  * @package   Shopware\Plugins\SwagBepado
@@ -37,6 +39,15 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
     {
         Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
+    }
+
+
+    /**
+     * @return Logger
+     */
+    public function getLogger()
+    {
+        return new Logger(Shopware()->Db());
     }
 
     /**
@@ -58,6 +69,8 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
         $loggingEnabled = Shopware()->Config()->getByNamespace('SwagBepado', 'logRequest');
 
+        $logger = $this->getLogger();
+
         $request = file_get_contents('php://input');
 
         try {
@@ -67,58 +80,14 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             );
         } catch (\Exception $e) {
             // Always write errors to the log
-            $this->writeLog(true, $request, $this->formatException($e));
+            $logger->write(true, $request, $e);
             throw $e;
         }
 
         if ($loggingEnabled) {
-            $this->writeLog(false, $request, $result);
+            $logger->write(false, $request, $result);
         }
 
         echo $result;
-    }
-
-    /**
-     * Write the log
-     *
-     * @param $isError
-     * @param $request
-     * @param $response
-     */
-    public function writeLog($isError, $request, $response)
-    {        
-        try {            
-            $document = simplexml_load_string($request);
-            $service = $document->service;
-            $command = $document->command;
-        } catch(\Exception $e) {
-            $service = 'general';
-            $command = 'error';
-        }
-
-        Shopware()->Db()->query('
-            INSERT INTO `s_plugin_bepado_log`
-            (`isError`, `service`, `command`, `request`, `response`, `time`)
-            VALUES (?, ?, ?, ?, ?, NOW())
-        ', array($isError, $service, $command, $request, $response));
-        
-        // Cleanup after 3 days
-        Shopware()->Db()->exec('DELETE FROM `s_plugin_bepado_log`  WHERE DATE_SUB(CURDATE(),INTERVAL 3 DAY) >= time');
-    }
-
-    /**
-     * Format a given exception for the log
-     *
-     * @param Exception $e
-     * @return string
-     */
-    public function formatException(\Exception $e)
-    {
-        return sprintf(
-            "%s \n\n %s \n\n %s",
-            $e->getMessage(),
-            $e->getFile() . ': ' . $e->getLine(),
-            $e->getTraceAsString()
-        );
     }
 }

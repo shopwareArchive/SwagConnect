@@ -121,6 +121,7 @@ class Checkout extends BaseSubscriber
     private function translateBepadoMessages($bepadoMessages)
     {
         $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
+
         foreach($bepadoMessages as $shopId => &$shopMessages) {
             foreach ($shopMessages as &$bepadoMessage) {
                 $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
@@ -129,6 +130,7 @@ class Checkout extends BaseSubscriber
                     $bepadoMessage->message,
                     true
                 );
+
                 $bepadoMessage->message = $translation;
             }
 
@@ -203,15 +205,13 @@ class Checkout extends BaseSubscriber
         }
 
 
-
-        if ($messages) {
+        if(!empty($messages)) {
             Shopware()->Session()->BepadoMessages = $messages;
             $controller->forward('confirm');
         } else {
             Shopware()->Session()->BepadoReservation = $reservation;
         }
     }
-
 
     /**
      * Helper method to create an address struct from shopware session info
@@ -237,7 +237,7 @@ class Checkout extends BaseSubscriber
             $address->company = $shippingData['company'];
         }
         $address->street = $shippingData['street'];
-        $address->streetNumber = $shippingData['streetnumber'];
+        $address->streetNumber = (string) $shippingData['streetnumber'];
         return $address;
     }
 

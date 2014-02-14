@@ -23,6 +23,8 @@
  */
 
 use \Bepado\SDK\Struct\Product;
+use Shopware\Bepado\Components\BepadoExport;
+use Shopware\Bepado\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
 
@@ -87,6 +89,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'Shopware\Models\Category\Category'
         );
         return $repository;
+    }
+
+    /**
+     * @return ImageImport
+     */
+    public function getImageImport()
+    {
+        return new ImageImport(
+            Shopware()->Models(),
+            $this->getHelper()
+        );
     }
 
     /**
@@ -550,10 +563,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function insertOrUpdateProductAction()
     {
         $ids = $this->Request()->getPost('ids');
-        $helper = $this->getHelper();
+
+        $bepadoExport = $this->getBepadoExport();
 
         try {
-            $errors = $helper->insertOrUpdateProduct($ids, $this->getSDK());
+            $errors = $bepadoExport->export($ids);
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
@@ -727,7 +741,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 break;
             case 'image':
                 $images = explode('|', $value);
-                $this->getHelper()->handleImageImport($images, $articleModel);
+                $this->getImageImport()->importImagesForArticle($images, $articleModel);
                 break;
             case 'price':
                 $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));
@@ -1077,5 +1091,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $connection = $this->getModelManager()->getConnection();
         $connection->exec('TRUNCATE `s_plugin_bepado_log`;');
+    }
+
+    /**
+     * @return BepadoExport
+     */
+    public function getBepadoExport()
+    {
+        return new BepadoExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            $this->getModelManager()
+        );
     }
 }

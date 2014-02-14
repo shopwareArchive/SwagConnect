@@ -71,11 +71,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $ids)
     {
-        $products = array();
-        foreach($ids as $id) {
-            $products[] = $this->helper->getProductById($id);
-        }
-        return $products;
+        return $this->helper->getLocalProduct($ids);
     }
 
     /**

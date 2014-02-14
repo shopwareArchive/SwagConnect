@@ -22,6 +22,11 @@ class BepadoExport
         $this->manager = $manager;
     }
 
+    public function getArticleModelById($id)
+    {
+        return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
+    }
+
     /**
      * Helper function to mark a given array of product ids for bepado update
      *
@@ -30,11 +35,10 @@ class BepadoExport
      */
     public function export(array $ids)
     {
-
         $errors = array();
 
         foreach($ids as $id) {
-            $model = $this->helper->getArticleModelById($id);
+            $model = $this->getArticleModelById($id);
             $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
 
             if($model === null) {

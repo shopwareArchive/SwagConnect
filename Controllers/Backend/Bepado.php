@@ -92,6 +92,34 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * Will return a category model for the given id. If the attribute should not exist
+     * it will be created
+     *
+     * @param $id
+     * @return null|\Shopware\Models\Category\Category
+     */
+    private function getCategoryModelById($id)
+    {
+        $categoryModel = $this->getCategoryRepository()->find($id);
+        $attribute = new \Shopware\Models\Attribute\Category();
+        $attribute->setCategory($categoryModel);
+        $this->getModelManager()->persist($attribute);
+        $this->getModelManager()->flush($attribute);
+
+        return $categoryModel;
+    }
+
+    /**
+     * @param $id
+     * @return null|Shopware\Models\Article\Article
+     */
+    private function getArticleModelById($id)
+    {
+        return $this->getModelManager()->getRepository('Shopware\Models\Article\Article')->find($id);
+    }
+
+
+    /**
      * @return ImageImport
      */
     public function getImageImport()
@@ -314,7 +342,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $rows = !isset($rows[0]) ? array($rows) : $rows;
         $helper = $this->getHelper();
         foreach($rows as $row) {
-            $result = $helper->getCategoryModelById($row['id']);
+            $result = $this->getCategoryModelById($row['id']);
             if($result !== null) {
                 $result->getAttribute()->setBepadoMapping($row['mapping']);
             }
@@ -341,7 +369,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         // The user might have changed the mapping without saving and then hit the "importCategories"
         // button. So we save the parent category's mapping first
-        $parentCategory = $helper->getCategoryModelById($toCategory);
+        $parentCategory = $this->getCategoryModelById($toCategory);
         $parentCategory->getAttribute()->setBepadoMapping($fromCategory);
         $entityManager->flush();
 
@@ -513,6 +541,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      * Helper that will assign a given mapping to all children of a given category
      *
      * @param $mapping string
+     * @throws \Exception
      * @param $categoryId int
      */
     private function applyMappingToChildren($mapping, $categoryId)
@@ -521,9 +550,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $ids = $this->getChildCategoriesIds($categoryId);
         $entityManager = $this->getModelManager();
 
+
+        if (!$categoryId) {
+            throw new \RuntimeException("Category '{$categoryId}' not found");
+        }
+
         // First of all try to save the mapping for the parent category. If that fails,
         // it mustn't be done for the child categories
-        $parentCategory = $helper->getCategoryModelById($categoryId);
+        $parentCategory = $this->getCategoryModelById($categoryId);
         $parentCategory->getAttribute()->setBepadoMapping($mapping);
         $entityManager->flush();
 
@@ -599,7 +633,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
-            $model = $this->getHelper()->getArticleModelById($id);
+            $model = $this->getArticleModelById($id);
             if($model === null) {
                 continue;
             }
@@ -622,7 +656,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $unsubscribe = (bool)$this->Request()->get('unsubscribe', false);
 
         foreach($ids as $id) {
-            $model = $this->getHelper()->getArticleModelById($id);
+            $model = $this->getArticleModelById($id);
             if($model === null) {
                 continue;
             }

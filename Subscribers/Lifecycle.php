@@ -103,7 +103,7 @@ class Lifecycle extends BaseSubscriber
 
         $id = $entity->getId();
 
-        $model = $this->getHelper()->getArticleModelById($id);
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
 
         // Check if we have a valid model
         if (!$model) {

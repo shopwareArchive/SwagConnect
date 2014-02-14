@@ -22,58 +22,6 @@ class HelperTest extends BepadoTestHelper
         }
     }
 
-    public function testGetArticleModelById()
-    {
-        $model = $this->getHelper()->getArticleModelById(2);
-        $this->assertEquals(2, $model->getId());
-    }
-
-    public function testGetCategoryModelById()
-    {
-        $model = $this->getHelper()->getCategoryModelById(14);
-        $this->assertEquals(14, $model->getId());
-    }
-
-    public function testGetProductByRowData()
-    {
-        $product = $this->getHelper()->getProductByRowData(array(
-            'sourceId' => 1,
-            'ean' => 'asdf',
-            'url' => 'http://www.example.org',
-            'title' => 'Example Article',
-            'altDescription' => 'alt',
-            'shortDescription' => 'short desc',
-            'longDescription' => 'long',
-            'vendor' => 'Shopware',
-            'price' => 33.20,
-            'purchasePrice' => 20.00,
-            'fixedPrice' => 1,
-            'weight' => 23,
-            'categories' => serialize(array('/bücher'))
-        ));
-
-        $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
-
-        // Check array unserializeation
-        $this->assertArrayCount(1, $product->categories);
-
-        // Check alt-description switch
-        $this->assertEquals('alt', $product->longDescription);
-
-        // Check attributes
-        $this->assertEquals(23, $product->attributes['weight']);
-    }
-
-    public function testGetProductById()
-    {
-        $id = $this->getBepadoProductArticleId();
-
-        $product = $this->getHelper()->getProductById($id);
-        $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
-
-        return $product;
-    }
-
     /**
      * @depends testGetProductById
      */

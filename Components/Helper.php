@@ -53,11 +53,6 @@ class Helper
      */
     private $router;
 
-    /**
-     * @var Query
-     */
-    private $modelQuery, $productQuery, $categoryQuery, $productCategoryQuery;
-
     private $bepadoCategoryQuery;
 
     /** @var \Shopware\Bepado\Components\ProductQuery  */
@@ -83,28 +78,6 @@ class Helper
     }
 
     /**
-     * @return \Shopware\Models\Article\Repository
-     */
-    private function getArticleRepository()
-    {
-        $repository = $this->manager->getRepository(
-            'Shopware\Models\Article\Article'
-        );
-        return $repository;
-    }
-
-    /**
-     * @return \Shopware\Models\Category\Repository
-     */
-    private function getCategoryRepository()
-    {
-        $repository = $this->manager->getRepository(
-            'Shopware\Models\Category\Category'
-        );
-        return $repository;
-    }
-
-    /**
      * @return \Shopware\Models\Customer\Group
      */
     public function getDefaultCustomerGroup()
@@ -112,72 +85,6 @@ class Helper
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
         $customerGroup = $repository->findOneBy(array('key' => 'EK'));
         return $customerGroup;
-    }
-
-    /**
-     * @return QueryBuilder
-     */
-    private function getArticleModelQueryBuilder()
-    {
-        $repository = $this->getArticleRepository();
-        $builder = $repository->createQueryBuilder('a');
-        $builder->select(array('a', 'd', 'at'));
-        $builder->join('a.mainDetail', 'd');
-        $builder->leftJoin('d.attribute', 'at');
-        return $builder;
-    }
-
-    /**
-     * @return \Doctrine\ORM\Query
-     */
-    private function getArticleModelByIdQuery()
-    {
-        $builder = $this->getArticleModelQueryBuilder();
-        $builder->where('a.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @param $id
-     * @return null|ProductModel
-     */
-    public function getArticleModelById($id)
-    {
-        if($this->modelQuery === null) {
-            $this->modelQuery = $this->getArticleModelByIdQuery();
-        }
-        $result = $this->modelQuery->setParameter('id', $id)->execute();
-        return isset($result[0]) ? $result[0] : null;
-    }
-
-    /**
-     * @return \Doctrine\ORM\Query
-     */
-    private function getCategoryModelByIdQuery()
-    {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
-        $builder->join('c.attribute', 'ct');
-        $builder->addSelect('ct');
-        $builder->where('c.id = :id');
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        return $query;
-    }
-
-    /**
-     * @param $id
-     * @return null|\Shopware\Models\Category\Category
-     */
-    public function getCategoryModelById($id)
-    {
-        if($this->categoryQuery === null) {
-            $this->categoryQuery = $this->getCategoryModelByIdQuery();
-        }
-        $result = $this->categoryQuery->setParameter('id', $id)->execute();
-        return isset($result[0]) ? $result[0] : null;
     }
 
     /**

@@ -741,7 +741,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 break;
             case 'image':
                 $images = explode('|', $value);
-                $this->getImageImport($images, $articleModel);
+                $this->getImageImport()->importImagesForArticle($images, $articleModel);
                 break;
             case 'price':
                 $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));

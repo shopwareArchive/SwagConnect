@@ -154,6 +154,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-import-list button[action=deactivate]': {
                 click: me.onImportFilterAction
             },
+            'bepado-import-list button[action=unsubscribe]': {
+                click: me.onImportFilterAction
+            },
             'bepado-import-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getImportList(),

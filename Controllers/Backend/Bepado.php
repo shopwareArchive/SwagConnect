@@ -657,24 +657,42 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $active = (bool)$this->Request()->get('active');
         $unsubscribe = (bool)$this->Request()->get('unsubscribe', false);
 
-        foreach($ids as $id) {
-            $model = $this->getArticleModelById($id);
-            if($model === null) {
-                continue;
-            }
+        if (!$unsubscribe) {
+            foreach ($ids as $id) {
+                $model = $this->getArticleModelById($id);
+                if ($model === null) {
+                    continue;
+                }
 
-            // Unsubscribe the products and delete them locally
-            if ($unsubscribe) {
-
-
-
-            // Activate / disable products
-            } else {
                 $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
-                if($attribute->getExportStatus() !== null) {
+                if ($attribute->getExportStatus() !== null) {
                     continue;
                 }
                 $model->setActive($active);
+            }
+        } else {
+            $unsubscribedProducts = array();
+            $products = $this->getHelper()->getRemoteProducts($ids);
+
+            /** @var \Bepado\SDK\Struct\Product $product */
+            foreach ($products as $product) {
+                $unsubscribedProducts[] = new \Bepado\SDK\Struct\ProductId(array(
+                    'shopId' => $product->shopId,
+                    'sourceId' => $product->sourceId
+                ));
+            }
+            if (empty($unsubscribedProducts)) {
+                return;
+            }
+            $this->getSDK()->unsubscribeProducts($unsubscribedProducts);
+
+            $repository = $this->getArticleRepository();
+            foreach ($ids as $id) {
+                $article = $repository->find($id);
+                if (!$article) {
+                    continue;
+                }
+                Shopware()->Models()->remove($article);
             }
         }
         Shopware()->Models()->flush();

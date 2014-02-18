@@ -114,8 +114,8 @@ class HelperTest extends BepadoTestHelper
 
     public function testGetCategoriesByProduct()
     {
-        $product = $this->getHelper()->getProductById(2);
-        $categories = $this->getHelper()->getCategoriesByProduct($product);
+        $products = $this->getHelper()->getLocalProduct(array(2));
+        $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
 
         $this->assertNotEmpty($categories);
     }

@@ -193,7 +193,13 @@ class Checkout extends BaseSubscriber
             if(!empty($row['mode'])) {
                 continue;
             }
-            $product = $helper->getProductById($row['articleID']);
+            $products = $helper->getRemoteProducts(array($row['articleID']));
+            if (empty($products)) {
+                continue;
+            } else {
+                $product = $products[0];
+            }
+
             if($product === null || $product->shopId === null) {
                 continue;
             }

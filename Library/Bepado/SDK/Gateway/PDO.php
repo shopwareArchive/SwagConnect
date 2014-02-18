@@ -591,6 +591,27 @@ class PDO extends Gateway
     }
 
     /**
+     * Set the last revision of the category tree that the SDK has seen.
+     *
+     * @param string
+     * @return void
+     */
+    public function setCategoriesLastRevision($revision)
+    {
+        $this->setConfig('_categories_revision_', $revision);
+    }
+
+    /**
+     * Get the last revision of the category tree that the SDK has seen.
+     *
+     * @return string
+     */
+    public function getCategoriesLastRevision()
+    {
+        return $this->getConfig('_categories_revision_');
+    }
+
+    /**
      * @param mixed $shopId
      * @param mixed $config
      * @return bool

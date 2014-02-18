@@ -94,6 +94,17 @@ final class SDK
     }
 
     /**
+     * Check if the SDK was verified before successfully.
+     *
+     * @return bool
+     */
+    public function isVerified()
+    {
+        return ($this->verified ||
+            $this->dependencies->getVerificationService()->isVerified());
+    }
+
+    /**
      * Tries to verify this SDK, if this did not happen yet.
      *
      * Throws an exception if the verification failed and the required data
@@ -397,7 +408,7 @@ final class SDK
     public function search(Struct\Search $search)
     {
         $this->verifySdk();
-        $search->apiKey = $this->apiKey;
+
         return $this->dependencies->getSearchService()->search($search);
     }
 
@@ -465,5 +476,18 @@ final class SDK
         $this->verifySdk();
 
         $this->dependencies->getSocialNetworkService()->updateOrderStatus($status);
+    }
+
+    /**
+     * Request unsubscribe of product subscriptions
+     *
+     * @param \Bepado\SDK\Struct\ProductId[]
+     * @return void
+     */
+    public function unsubscribeProducts(array $productIds)
+    {
+        $this->verifySdk();
+
+        $this->dependencies->getSocialNetworkService()->unsubscribeProducts($productIds);
     }
 }

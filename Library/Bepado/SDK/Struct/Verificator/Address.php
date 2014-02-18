@@ -60,8 +60,8 @@ class Address extends Verificator
      */
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        $requiredFields = array('name', 'line1', 'zip', 'city', 'country');
-        $optionalStringFields = array('line2', 'company', 'state', 'email', 'phone');
+        $requiredFields = array('firstName', 'surName', 'street', 'zip', 'city', 'country', 'email', 'phone');
+        $optionalStringFields = array('company', 'state', 'streetNumber', 'middleName');
 
         foreach ($requiredFields as $required) {
             if (!is_string($struct->$required)) {

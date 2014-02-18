@@ -50,5 +50,24 @@ class Order extends Verificator
             throw new \RuntimeException('Delivery address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
         }
         $dispatcher->verify($struct->deliveryAddress);
+
+        $paymentTypes = array(
+            Struct\Order::PAYMENT_ADVANCE,
+            Struct\Order::PAYMENT_INVOICE,
+            Struct\Order::PAYMENT_DEBIT,
+            Struct\Order::PAYMENT_CREDITCARD,
+            Struct\Order::PAYMENT_PROVIDER,
+            Struct\Order::PAYMENT_UNKNOWN,
+            Struct\Order::PAYMENT_OTHER,
+        );
+
+        if (!in_array($struct->paymentType, $paymentTypes)) {
+            throw new \runtimeException(
+                sprintf(
+                    'Invalid paymentType specified in order, must be one of: %s',
+                    implode(", ", $paymentTypes)
+                )
+            );
+        }
     }
 }

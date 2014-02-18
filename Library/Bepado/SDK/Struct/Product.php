@@ -18,36 +18,36 @@ use Bepado\SDK\Struct;
 class Product extends ShopItem
 {
     /**
+     * Describes the weight of this product, e.g. "4.8" in kilograms Kg
+     *
+     * May be used for shipping cost weight calculation.
+     */
+    const ATTRIBUTE_WEIGHT = 'weight';
+
+    /**
+     * Describes the volume of this product, e.g. "0.75" in liters (L)
+     */
+    const ATTRIBUTE_VOLUME = 'volume';
+
+    /**
+     * Describes the product dimension, e.g. 40x20x100 (Length, Width, Height)
+     */
+    const ATTRIBUTE_DIMENSION = 'dimension';
+
+    /**
      * Describes the unit of this product, for example "Kg" or "ml"
      */
     const ATTRIBUTE_UNIT = 'unit';
 
     /**
-     * Describes the weight of this product, e.g. "4.8" Kg
+     * Reference quantity in the configured unit
      */
-    const ATTRIBUTE_WEIGHT = 'weight';
+    const ATTRIBUTE_REFERENCE_QUANTITY = 'ref_quantity';
 
     /**
-     * Describes the volume of this product, e.g. "0.75" L
+     * Units of the reference quantity the product has
      */
-    const ATTRIBUTE_VOLUME = 'volume';
-
-    /**
-     * Describes the product dimension, e.g. 40 x 20 x 100
-     */
-    const ATTRIBUTE_DIMENSION = 'dimension';
-
-    /**
-     * Describes the base weight of a product, e.g "1.0" Kg for a product with
-     * a weight of 0.500 Kg
-     */
-    const ATTRIBUTE_BASE_WEIGHT = 'base_weight';
-
-    /**
-     * Describes the base volume of a product, e.g "1.0" L for a product with
-     * a weight of 0.75 L
-     */
-    const ATTRIBUTE_BASE_VOLUME = 'base_volume';
+    const ATTRIBUTE_QUANTITY = 'quantity';
 
     /**
      * Local ID of the product in your shop.
@@ -249,6 +249,13 @@ class Product extends ShopItem
      * @var string[]
      */
     public $attributes = array();
+
+    /**
+     * Workdays until this product can be delivered.
+     *
+     * @var int
+     */
+    public $deliveryWorkDays;
 
     /**
      * Restores a product from a previously stored state array.

@@ -43,12 +43,22 @@ class Verification
     /**
      * Checks if verification is still valid
      *
-     * @return void
+     * @return bool
      */
     public function isValid()
     {
         return $this->config->getShopId() &&
             ($this->config->getLastVerificationDate() > (time() - (7 * 86400)));
+    }
+
+    /**
+     * Check if a successful SDK verification has happend before.
+     *
+     * @return bool
+     */
+    public function isVerified()
+    {
+        return $this->config->getShopId() > 0;
     }
 
     /**

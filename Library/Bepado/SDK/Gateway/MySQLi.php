@@ -673,4 +673,62 @@ class MySQLi extends Gateway
             throw new \OutOfBoundsException("Reservation $reservationId not found.");
         }
     }
+
+    /**
+     * Set the last revision of the category tree that the SDK has seen.
+     *
+     * @param string
+     * @return void
+     */
+    public function setCategoriesLastRevision($revision)
+    {
+        $this->setConfig('_categories_revision_', $revision);
+    }
+
+    /**
+     * Get the last revision of the category tree that the SDK has seen.
+     *
+     * @return string
+     */
+    public function getCategoriesLastRevision()
+    {
+        return $this->getConfig('_categories_revision_');
+    }
+
+    private function setConfig($name, $value)
+    {
+        $this->connection->query(
+            'INSERT INTO
+                bepado_shop_config (
+                    `s_shop`,
+                    `s_config`
+                )
+            VALUES (
+                "' . $this->connection->real_escape_string($name) . '",
+                "' . $this->connection->real_escape_string($value) . '"
+            )
+            ON DUPLICATE KEY UPDATE
+                `s_config` = VALUES(`s_config`)
+            ;'
+        );
+    }
+
+    private function getConfig($name)
+    {
+        $result = $this->connection->query(
+            'SELECT
+                `s_config`
+            FROM
+                `bepado_shop_config`
+            WHERE
+                `s_shop` = "' . $this->connection->real_escape_string($name) . '"'
+        );
+
+        $rows = $result->fetch_all(\MYSQLI_ASSOC);
+        if (!count($rows)) {
+            return false;
+        }
+
+        return $rows[0]['s_config'];
+    }
 }

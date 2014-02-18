@@ -50,6 +50,11 @@ class Address extends Struct
     /**
      * @var string
      */
+    public $doorCode;
+
+    /**
+     * @var string
+     */
     public $additionalAddressLine;
 
     /**
@@ -68,6 +73,8 @@ class Address extends Struct
     public $state;
 
     /**
+     * ISO-3 Country Code
+     *
      * @var string
      */
     public $country;

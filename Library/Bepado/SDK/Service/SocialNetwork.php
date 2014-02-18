@@ -11,6 +11,7 @@ use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\HttpClient;
 use Bepado\SDK\Struct\OrderStatus;
+use Bepado\SDK\Struct\ProductId;
 
 /**
  * Allows updating the status of orders for provider shops,
@@ -64,28 +65,63 @@ class SocialNetwork
     {
         $this->verificator->verify($orderStatus);
 
-        $data = json_encode($orderStatus);
-        $key = hash_hmac('sha512', $data, $this->apiKey);
+        $response = $this->request('/sdk/update-order-status', $orderStatus);
+        $this->handleResponse($response, "Order status update");
+    }
 
-        $response = $this->httpClient->request(
+    /**
+     * Notify SocialNetwork to unsubscribe the given set of products.
+     *
+     * The Updater will then push those deletions back to the shop at some
+     * point in the future.
+     *
+     * @param \Bepado\SDK\Struct\ProductId[]
+     *
+     * @return void
+     */
+    public function unsubscribeProducts(array $productIds)
+    {
+        $this->verifyProductIds($productIds);
+
+        $response = $this->request('/sdk/unsubscribe-products', $productIds);
+        $this->handleResponse($response, "Unsubscribe products");
+    }
+
+    private function verifyProductIds(array $productIds)
+    {
+        foreach ($productIds as $productId) {
+            if (!($productId instanceof ProductId)) {
+                throw new \RuntimeException("No \Bepado\SDK\Struct\ProductId given.");
+            }
+        }
+    }
+
+    private function request($url, $data)
+    {
+        $payload = json_encode($data);
+        $key = hash_hmac('sha512', $payload, $this->apiKey);
+
+        return $this->httpClient->request(
             'POST',
-            '/sdk/update-order-status',
-            $data,
+            $url,
+            $payload,
             array(
                 'Content-Type: application/json',
                 'X-Bepado-Shop: ' . $this->shopId,
                 'X-Bepado-Key: ' . $key,
             )
         );
+    }
 
+    private function handleResponse($response, $op)
+    {
         if ($response->status >= 400) {
-            echo($response->body);
             $message = null;
             if (($error = json_decode($response->body)) &&
                 isset($error->message)) {
                 $message = $error->message;
             }
-            throw new \RuntimeException("Order status update failed: " . $message);
+            throw new \RuntimeException($op . " failed: " . $message);
         }
     }
 }

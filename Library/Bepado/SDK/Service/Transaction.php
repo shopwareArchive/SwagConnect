@@ -166,20 +166,7 @@ class Transaction
 
     private function availabilityHasChanged($current, $product)
     {
-        return ($this->groupAvailability($current) < $this->groupAvailability($product));
-    }
-
-    private function groupAvailability($product)
-    {
-        if ($product->availability > 100) {
-            return 100;
-        } elseif ($product->availability > 10) {
-            return 10;
-        } elseif ($product->availability > 0) {
-            return 1;
-        }
-
-        return 0;
+        return $current->availability <= 0;
     }
 
     /**

@@ -29,4 +29,13 @@ abstract class ErrorHandler
      * @return void
      */
     abstract public function handleException(\Exception $exception);
+
+    /**
+     * Notify error handler about \Bepado\SDK\SDK#handle shutdown.
+     *
+     * @param string $messsage
+     */
+    public function notifyRpcShutdown($message)
+    {
+    }
 }

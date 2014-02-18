@@ -12,13 +12,11 @@ namespace Bepado\Common\Rpc;
  */
 abstract class ErrorHandler
 {
-    private $oldErrorHandler;
     private $oldExceptionHandler;
 
     public function registerHandlers()
     {
         ini_set('display_errors', false);
-        $this->oldErrorHandler = set_error_handler(array($this, 'handleError'));
         $this->oldExceptionHandler = set_exception_handler(array($this, 'handleException'));
 
         register_shutdown_function(array($this, 'handleShutdown'));
@@ -26,19 +24,8 @@ abstract class ErrorHandler
 
     public function restore()
     {
-        set_error_handler($this->oldErrorHandler);
         set_exception_handler($this->oldExceptionHandler);
-
         $this->oldErrorHandler = $this->oldExceptionHandler = null;
-    }
-
-    public function handleError($type, $string, $file, $line)
-    {
-        if ($type > 4) {
-            return;
-        }
-
-        throw new \Exception("$string in $file +$line");
     }
 
     public function handleShutdown()

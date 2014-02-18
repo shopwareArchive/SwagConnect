@@ -18,6 +18,17 @@ use Bepado\SDK\Struct;
 class Order extends Struct
 {
     /**
+     * Describe different Payment Types used for the order.
+     */
+    const PAYMENT_ADVANCE = 'advance';
+    const PAYMENT_INVOICE = 'invoice';
+    const PAYMENT_DEBIT = 'debit';
+    const PAYMENT_CREDITCARD = 'creditcard';
+    const PAYMENT_PROVIDER = 'provider';
+    const PAYMENT_OTHER = 'other';
+    const PAYMENT_UNKNOWN = 'unknown';
+
+    /**
      * Shop the order originates from.
      *
      * @var string
@@ -65,9 +76,25 @@ class Order extends Struct
     public $grossShippingCosts;
 
     /**
+     * The delivery type that is used for this order.
+     *
+     * Is calculated internally by the SDK.
+     *
+     * @var string
+     */
+    public $deliveryType;
+
+    /**
+     * The payment type that is used for this order.
+     *
+     * @var string
+     */
+    public $paymentType = self::PAYMENT_UNKNOWN;
+
+    /**
      * @var OrderItem[]
      */
-    public $products;
+    public $orderItems;
 
     /**
      * Delivery address
@@ -85,5 +112,28 @@ class Order extends Struct
     public static function __set_state(array $state)
     {
         return new Order($state);
+    }
+
+    public function &__get($property)
+    {
+        switch ($property) {
+            case 'products':
+                return $this->orderItems;
+
+            default:
+                return parent::__get($property);
+        }
+    }
+
+    public function __set($property, $value)
+    {
+        switch ($property) {
+            case 'products':
+                $this->orderItems = $value;
+                break;
+
+            default:
+                return parent::__set($property, $value);
+        }
     }
 }

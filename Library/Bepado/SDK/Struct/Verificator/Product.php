@@ -77,5 +77,28 @@ class Product extends Verificator
         if ($struct->relevance < -1 || $struct->relevance > 1) {
             throw new \RuntimeException("Invalid Value, Product#relevance has to be -1,0,1");
         }
+
+        if ($struct->deliveryWorkDays !== null && !is_numeric($struct->deliveryWorkDays)) {
+            throw new \RuntimeException("Delivery Workdays needs to be either null or a number of days.");
+        }
+
+        if (!is_array($struct->attributes)) {
+            throw new \RuntimeException("Product#attributes has to be an array.");
+        }
+
+        if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {
+            if (!preg_match('(^(\d+x\d+x\d+)$', $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION])) {
+                throw new \RuntimeException(
+                    "Product Dimensions Attribute has to be in format " .
+                    "'Length x Width x Height' without spaces, i.e. 20x40x60"
+                );
+            }
+        }
+
+        if (array_key_exists(Struct\Product::ATTRIBUTE_WEIGHT, $struct->attributes)) {
+            if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_WEIGHT])) {
+                throw new \RuntimeException("Product Weight Attribute has to be a number.");
+            }
+        }
     }
 }

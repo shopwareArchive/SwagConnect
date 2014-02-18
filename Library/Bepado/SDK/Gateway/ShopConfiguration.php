@@ -51,6 +51,21 @@ interface ShopConfiguration
     public function getCategories();
 
     /**
+     * Set the last revision of the category tree that the SDK has seen.
+     *
+     * @param string
+     * @return void
+     */
+    public function setCategoriesLastRevision($revision);
+
+    /**
+     * Get the last revision of the category tree that the SDK has seen.
+     *
+     * @return string
+     */
+    public function getCategoriesLastRevision();
+
+    /**
      * Set own shop ID
      *
      * @param string $shopId

@@ -106,7 +106,7 @@ class LocalProductQuery extends BaseProductQuery
         if ($router) {
             // Assemble the route for the article url.
             // @todo: The shop to point to needs to be configurable.
-            $row['url'] = $this->router->assemble(
+            $row['url'] = $router->assemble(
                 array(
                     'module' => 'frontend',
                     'controller' => 'detail',

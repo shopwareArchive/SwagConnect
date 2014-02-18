@@ -3,6 +3,7 @@
 namespace Shopware\Bepado\Subscribers;
 use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\Reservation;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -13,6 +14,8 @@ use Bepado\SDK\Struct\Reservation;
 class Checkout extends BaseSubscriber
 {
 
+    protected $logger;
+
     public function getSubscribedEvents()
     {
         return array(
@@ -20,6 +23,16 @@ class Checkout extends BaseSubscriber
             'sOrder::sSaveOrder::after' => 'checkoutReservedProducts',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish'
         );
+    }
+
+
+    public function getLogger()
+    {
+        if (!$this->logger) {
+            $this->logger = new Logger(Shopware()->Db());
+        }
+
+        return $this->logger;
     }
 
     /**
@@ -71,6 +84,7 @@ class Checkout extends BaseSubscriber
                 try {
                     $response = $sdk->checkProducts($products);
                 } catch (\Exception $e) {
+                    $this->getLogger()->write(true, 'Error during checkout', $e);
                     // If the checkout results in an exception because the remote shop is not available
                     // don't show the exception to the user but tell him to remove the products from that shop
                     $response = $this->getNotAvailableMessageForProducts($products);

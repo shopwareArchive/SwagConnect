@@ -101,10 +101,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     private function getCategoryModelById($id)
     {
         $categoryModel = $this->getCategoryRepository()->find($id);
-        $attribute = new \Shopware\Models\Attribute\Category();
-        $attribute->setCategory($categoryModel);
-        $this->getModelManager()->persist($attribute);
-        $this->getModelManager()->flush($attribute);
+        if (!$categoryModel || !$categoryModel->getAttribute()) {
+            $attribute = new \Shopware\Models\Attribute\Category();
+            $attribute->setCategory($categoryModel);
+            $this->getModelManager()->persist($attribute);
+            $this->getModelManager()->flush($attribute);
+        }
 
         return $categoryModel;
     }

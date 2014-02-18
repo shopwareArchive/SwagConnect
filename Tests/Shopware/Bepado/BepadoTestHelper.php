@@ -19,10 +19,11 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     /**
      * @return string
      */
-    public function getBepadoProductArticleId()
+    public function getBepadoProductArticleId($sourceId, $shopId=3)
     {
         $id = Shopware()->Db()->fetchOne(
-            'SELECT article_id FROM s_plugin_bepado_items WHERE source_id IS NOT NULL LIMIT 1'
+            'SELECT article_id FROM s_plugin_bepado_items WHERE source_id = ? and shop_id =  ? LIMIT 1',
+            array($sourceId, $shopId)
         );
         return $id;
     }
@@ -134,5 +135,22 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $products[] = $this->getProduct($withImage);
         }
         return $products;
+    }
+
+    protected function insertOrUpdateProducts($number, $withImage)
+    {
+        $commands = array();
+        foreach ($this->getProducts($number, $withImage) as $product) {
+            $commands[$product->sourceId] = new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
+                'product' => $product,
+                'revision' => time(),
+            ));
+        }
+
+        $this->dispatchRpcCall('products', 'toShop', array(
+            $commands
+        ));
+
+        return array_keys($commands);
     }
 }

@@ -210,8 +210,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                         ->setParameter('search', $rule['value']);
                     break;
                 case 'categoryId':
-                    $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId')
-                        ->setParameter('categoryId', $rule['value']);
+                    $builder->join('a.categories', 'c', 'with', 'c.id = :categoryId OR c.path LIKE :categoryPath')
+                        ->setParameter('categoryId', $rule['value'])
+                        ->setParameter('categoryPath', '%|' . $rule['value'] . '|%');
                     break;
                 case 'supplierId':
                     $builder->where('a.supplierId = :supplierId')

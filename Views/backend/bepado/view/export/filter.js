@@ -37,8 +37,10 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
     },
 
     getCategoryFilter: function() {
+        var me = this;
         return {
             xtype: 'treepanel',
+            id: 'export-category-filter',
             title: '{s name=export/filter/category_title}Category filter{/s}',
             rootVisible: false,
             root: {
@@ -46,7 +48,21 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 expanded: true
             },
             store: 'base.CategoryTree',
-            flex: 2
+            flex: 2,
+            dockedItems: [
+                me.createTreeBottomBar()
+            ]
+        }
+    },
+
+    createTreeBottomBar: function () {
+        return { xtype: 'toolbar',
+            dock: 'bottom',
+            items: [{
+                    xtype: 'button',
+                    text: '{s name=export/filter/clear_category_filter}Clear category filter{/s}',
+                    action: 'category-clear-filter'
+            }]
         }
     },
 

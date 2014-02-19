@@ -53,8 +53,6 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup");
-        $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup");
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
@@ -86,6 +84,8 @@ class LocalProductQuery extends BaseProductQuery
             'at.categories as categories',
             'at.fixedPrice as fixedPrice'
         ));
+
+        $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);
 
         $builder->setParameter('priceCustomerGroup', $exportPriceCustomerGroup);
         $builder->setParameter('purchasePriceCustomerGroup', $exportPurchasePriceCustomerGroup);
@@ -128,6 +128,36 @@ class LocalProductQuery extends BaseProductQuery
             $row
         );
         return $product;
+    }
+
+    /**
+     * Will add the correct joins depending on the configuration of the price columns
+     *
+     * @param $builder QueryBuilder
+     * @param $exportPriceColumn
+     * @param $exportPurchasePriceColumn
+     * @return QueryBuilder
+     */
+    public function addPriceJoins(QueryBuilder $builder, $exportPriceColumn, $exportPurchasePriceColumn)
+    {
+        // When the price attribute is used, we need two joins to get it
+        if ($exportPriceColumn == 'bepadoPrice') {
+            $builder->leftJoin('d.prices', 'price_join_for_export_price', 'with', "price_join_for_export_price.from = 1 AND price_join_for_export_price.customerGroupKey = :priceCustomerGroup");
+            $builder->leftJoin('price_join_for_export_price.attribute', 'exportPrice');
+        } else {
+            $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup");
+        }
+
+        // When the price attribute is used, we need two joins to get it
+        if ($exportPurchasePriceColumn == 'bepadoPrice') {
+            $builder->leftJoin('d.prices', 'price_join_for_export_purchase_price', 'with', "price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup");
+            $builder->leftJoin('price_join_for_export_purchase_price.attribute', 'exportPurchasePrice');
+        } else {
+            $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup");
+        }
+
+
+        return $builder;
     }
 
     public function getUrlForProduct($productId)

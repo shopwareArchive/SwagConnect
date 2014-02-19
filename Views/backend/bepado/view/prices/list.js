@@ -78,6 +78,7 @@ Ext.define('Shopware.apps.Bepado.view.prices.List', {
                 store: Ext.create('Ext.data.Store', {
                     fields: ['field'],
                     data: [
+                        { field: 'bepadoPrice' },
                         { field: 'basePrice' },
                         { field: 'price' },
                         { field: 'pseudoPrice' },

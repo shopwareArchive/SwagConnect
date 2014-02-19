@@ -20,7 +20,30 @@ Ext.define('Shopware.apps.Article.controller.DetailBepado', {
         bepadoController.doReloadBepadoStore();
         bepadoController.enableTab();
 
+    },
+
+
+    /**
+     * @Override clonePrices in order to enforce the price attributes
+     *
+     * @param arguments
+     */
+    clonePrices: function() {
+        var me = this,
+            prices = me.callParent(arguments),
+            firstGroupPrices = arguments[0],
+            length = prices.length,
+            originalPrice;
+
+        // Make sure that the copy also has a copy of the price attributes
+        for(var i=0; i<length; i++) {
+            originalPrice = firstGroupPrices[i];
+            prices[i].getAttributesStore = Ext.clone(originalPrice.getAttributes());
+        }
+
+        return prices;
     }
+
 
 });
 //{/block}

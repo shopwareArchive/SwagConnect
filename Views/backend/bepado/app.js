@@ -13,6 +13,7 @@ Ext.define('Shopware.apps.Bepado', {
         'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
         'prices.Panel', 'prices.List',
+        'config.general.Panel', 'config.import.Panel', 'config.export.Panel', 'config.Tabs'
     ],
     controllers: [ 'Main' ],
 

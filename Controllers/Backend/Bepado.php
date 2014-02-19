@@ -201,12 +201,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             't.tax as tax',
             'p.price * (100 + t.tax) / 100 as price',
         ));
+
         foreach($filter as $key => $rule) {
             switch($rule['property']) {
                 case 'search':
-                    $builder->where('d.number LIKE :search')
-                        ->orWhere('a.name LIKE :search')
-                        ->orWhere('s.name LIKE :search')
+                    $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR s.name LIKE :search')
                         ->setParameter('search', $rule['value']);
                     break;
                 case 'categoryId':
@@ -215,28 +214,30 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                         ->setParameter('categoryPath', '%|' . $rule['value'] . '|%');
                     break;
                 case 'supplierId':
-                    $builder->where('a.supplierId = :supplierId')
+                      $builder->andWhere('a.supplierId = :supplierId')
                         ->setParameter('supplierId', $rule['value']);
                     break;
                 case 'exportStatus':
                     if ($rule['value'] == 'online') {
-                        $builder->where('at.exportStatus IN (:insert, :update)')
+                        $builder->andWhere('at.exportStatus IN (:insert, :update)')
                             ->setParameter('insert', 'insert')
                             ->setParameter('update', 'update');
                     } else {
-                        $builder->where('at.exportStatus LIKE :status')
+                        $builder->andWhere('at.exportStatus LIKE :status')
                             ->setParameter('status', $rule['value']);
                     }
                     break;
                 case 'active':
-                    $builder->where('a.active LIKE :active')
+                    $builder->andWhere('a.active LIKE :active')
                         ->setParameter('active', $rule['value']);
                     break;
                 default:
                     continue;
             }
         }
+
         $builder->addOrderBy($order);
+
         return $builder;
     }
 

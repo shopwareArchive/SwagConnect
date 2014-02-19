@@ -27,6 +27,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'panel', selector: 'bepado-panel' },
         { ref: 'configForm', selector: 'bepado-config' },
         { ref: 'exportList', selector: 'bepado-export-list' },
+        { ref: 'exportFilter', selector: 'bepado-export-filter' },
         { ref: 'importList', selector: 'bepado-import-list' },
         { ref: 'mapping', selector: 'bepado-mapping treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
@@ -100,52 +101,72 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-export-list button[action=delete]': {
                 click: me.onExportFilterAction
             },
+            'bepado-export-filter button[action=category-clear-filter]': {
+                click: me.onExportCategoryFilterClearAction
+            },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
-
-                    if (value.length === 0 ) {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            'search',
-                            '%' + value + '%'
-                        );
+                        store.filters.removeAtKey('search');
+                    if (value.length > 0 ) {
+                        store.filters.add('search', new Ext.util.Filter({
+                            property: 'search',
+                            value: '%' + value + '%'
+                        }));
                     }
+                    store.load();
                 }
             },
-            'bepado-export-filter base-element-select': {
+
+            'bepado-export-filter base-element-select[name=supplierId]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
 
-                    if (!value) {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            field.name,
-                            value
-                        );
+                        store.filters.removeAtKey('supplierId');
+                    if (value) {
+                        store.filters.add('supplierId', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
                     }
+                    store.load();
                 }
             },
+
+            'bepado-export-filter base-element-select[name=exportStatus]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                        store.filters.removeAtKey('exportStatus');
+                    if (value) {
+                        store.filters.add('exportStatus', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
+                    }
+                    store.load();
+
+                }
+            },
+
             'bepado-export-filter treepanel': {
                 select: function(tree, node) {
                     var table = me.getExportList(),
                         store = table.getStore();
 
                     if (!node) {
-                        store.clearFilter();
+                        store.filters.removeAtKey('exportCategoryFilter');
                     } else {
-                        store.filters.clear();
-                        store.filter(
-                            'categoryId',
-                            node.get('id')
-                        );
+                        store.filters.removeAtKey('exportCategoryFilter');
+                        store.filters.add('exportCategoryFilter', new Ext.util.Filter({
+                            property: 'categoryId',
+                            value:  node.get('id')
+                        }));
                     }
+                    store.load();
                 }
             },
             'bepado-import-list button[action=activate]': {
@@ -161,32 +182,28 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
-
-                    if (value.length === 0 ) {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            'search',
-                            '%' + value + '%'
-                        );
+                    store.filters.removeAtKey('search');
+                    if (value.length > 0 ) {
+                        store.filters.add('search', new Ext.util.Filter({
+                            property: 'search',
+                            value: '%' + value + '%'
+                        }));
                     }
+                    store.load();
                 }
             },
             'bepado-import-filter base-element-select': {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
-
-                    if (!value) {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            field.name,
-                            value
-                        );
+                        store.filters.removeAtKey('supplierId');
+                    if (value) {
+                        store.filters.add('supplierId', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
                     }
+                    store.load();
                 }
             },
             'bepado-import-filter [name=active]': {
@@ -196,16 +213,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     if(!value) {
                         return;
                     }
-
-                    if(field.inputValue == '') {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            field.name,
-                            field.inputValue
-                        );
+                        store.filters.removeAtKey('isActive');
+                    if(field.inputValue != '') {
+                        store.filters.add('isActive', new Ext.util.Filter({
+                            property: field.name,
+                            value: field.inputValue
+                        }));
                     }
+                    store.load();
                 }
             },
             'bepado-import-filter treepanel': {
@@ -354,6 +369,22 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
         });
 
+    },
+
+    /**
+     * Method called when clear category button is clicked.
+     */
+    onExportCategoryFilterClearAction: function() {
+        var me = this;
+
+        var table = me.getExportList(),
+            filter = me.getExportFilter(),
+            store = table.getStore();
+        store.filters.removeAtKey('exportCategoryFilter');
+        store.load();
+
+        //deselect all nodes
+        Ext.getCmp('export-category-filter').getSelectionModel().deselectAll();
     },
 
     /**

@@ -232,6 +232,9 @@ class TemplateExtension extends BaseSubscriber
                     'backend/article/model/attribute_bepado.js'
                 );
                 $subject->View()->extendsTemplate(
+                    'backend/article/model/price_attribute_bepado.js'
+                );
+                $subject->View()->extendsTemplate(
                     'backend/article/view/detail/bepado_tab.js'
                 );
                 $subject->View()->extendsTemplate(

@@ -48,11 +48,6 @@ class Helper
      */
     private $manager;
 
-    /**
-     * @var \Enlight_Controller_Router
-     */
-    private $router;
-
     private $bepadoCategoryQuery;
 
     /** @var \Shopware\Bepado\Components\ProductQuery  */
@@ -62,19 +57,16 @@ class Helper
      * @param ModelManager $manager
      * @param CategoryQuery
      * @param ProductQuery
-     * @param \Enlight_Controller_Router
      */
     public function __construct(
         ModelManager $manager,
         CategoryQuery $bepadoCategoryQuery,
-        ProductQuery $bepadoProductQuery,
-        \Enlight_Controller_Router $router
+        ProductQuery $bepadoProductQuery
     )
     {
         $this->manager = $manager;
         $this->bepadoCategoryQuery = $bepadoCategoryQuery;
         $this->bepadoProductQuery = $bepadoProductQuery;
-        $this->router = $router;
     }
 
     /**

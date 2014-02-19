@@ -135,8 +135,7 @@ class BepadoFactory
             $this->helper = new Helper(
                 $this->getModelManager(),
                 $this->getCategoryQuery(),
-                $this->getProductQuery(),
-                Shopware()->Front()->Router()
+                $this->getProductQuery()
             );
         }
 
@@ -244,6 +243,21 @@ class BepadoFactory
      */
     private function getLocalProductQuery()
     {
-        return new LocalProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
+        return new LocalProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'), $this->getProductBaseUrl());
+    }
+
+    private function getProductBaseUrl()
+    {
+        if (!Shopware()->Front()->Router()) {
+            return null;
+        }
+
+        return Shopware()->Front()->Router()->assemble(array(
+            'module' => 'frontend',
+            'controller' => 'bepado_product_gateway',
+            'action' => 'product',
+            'id' => '',
+            'fullPath' => true
+        ));
     }
 }

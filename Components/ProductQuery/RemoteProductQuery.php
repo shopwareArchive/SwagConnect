@@ -4,10 +4,20 @@ namespace Shopware\Bepado\Components\ProductQuery;
 
 use Bepado\SDK\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
+use Shopware\Components\Model\ModelManager;
 
 class RemoteProductQuery extends BaseProductQuery
 {
 
+    protected $manager;
+
+    protected $productDescriptionField;
+
+    public function __construct(ModelManager $manager, $productDescriptionField)
+    {
+        $this->manager = $manager;
+        $this->productDescriptionField = $productDescriptionField;
+    }
 
     /**
      *

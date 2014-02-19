@@ -5,9 +5,25 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
+use Shopware\Components\Model\ModelManager;
 
 class LocalProductQuery extends BaseProductQuery
 {
+
+    protected $configRepo;
+
+    protected $manager;
+
+    protected $productDescriptionField;
+
+    protected $baseProductUrl;
+
+    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl)
+    {
+        $this->manager = $manager;
+        $this->productDescriptionField = $productDescriptionField;
+        $this->baseProductUrl = $baseProductUrl;
+    }
 
     /**
      * @return \Shopware\CustomModels\Bepado\ConfigRepository
@@ -102,19 +118,8 @@ class LocalProductQuery extends BaseProductQuery
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
         }
 
-        $router = $this->getRouter();
-        if ($router) {
-            // Assemble the route for the article url.
-            // @todo: The shop to point to needs to be configurable.
-            $row['url'] = $router->assemble(
-                array(
-                    'module' => 'frontend',
-                    'controller' => 'detail',
-                    'sArticle' => $row['sourceId']
-                )
-            );
-        }
 
+        $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);
         unset($row['localId']);
@@ -124,5 +129,11 @@ class LocalProductQuery extends BaseProductQuery
         );
         return $product;
     }
+
+    public function getUrlForProduct($productId)
+    {
+        return $this->baseProductUrl  . $productId;
+    }
+
 }
 

@@ -16,17 +16,6 @@ abstract class BaseProductQuery
     );
 
 
-    protected $manager;
-
-    protected $productDescriptionField;
-
-    public function __construct(ModelManager $manager, $productDescriptionField)
-    {
-        $this->manager = $manager;
-        $this->productDescriptionField = $productDescriptionField;
-
-    }
-
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
@@ -134,15 +123,6 @@ abstract class BaseProductQuery
 
 
         return $row;
-    }
-
-    public function getRouter()
-    {
-        $front = Shopware()->Front();
-        if (!$front->Router()) {
-            return false;
-        }
-        return $front->Router();
     }
 
     /**

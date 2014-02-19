@@ -15,6 +15,7 @@ class ControllerPath extends BaseSubscriber
         return array(
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoGateway' => 'onGetControllerPathGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Bepado' => 'onGetControllerPathFrontend',
+            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_BepadoProductGateway' => 'onGetControllerPathFrontendBepadoControllerGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado' => 'onGetControllerPathBackend'
         );
     }
@@ -55,5 +56,17 @@ class ControllerPath extends BaseSubscriber
     {
         $this->registerMyTemplateDir();
         return $this->Path() . 'Controllers/Frontend/Bepado.php';
+    }
+
+    /**
+     * Register the bepado product frontend controller
+     *
+     * @param   \Enlight_Event_EventArgs $args
+     * @return  string
+     */
+    public function onGetControllerPathFrontendBepadoControllerGateway(\Enlight_Event_EventArgs $args)
+    {
+        $this->registerMyTemplateDir();
+        return $this->Path() . 'Controllers/Frontend/BepadoProductGateway.php';
     }
 }

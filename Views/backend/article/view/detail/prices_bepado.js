@@ -65,6 +65,33 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
     },
 
     /**
+     * @Override preparePriceStore to make sure, that new products have a price attribute as well
+     */
+    preparePriceStore: function() {
+        var me = this,
+            record;
+
+        me.callParent(arguments);
+        // Get the first price
+        record = me.priceStore.first();
+
+        if (!record) {
+            return;
+        }
+
+        // Make sure that we have a proper attributesStore
+        if (!record.hasOwnProperty('getAttributesStore')) {
+            record.getAttributesStore = Ext.create('Ext.data.Store', {
+                model: 'Shopware.apps.Article.model.PriceAttribute'
+            });
+            record.getAttributesStore.add(Ext.create('Shopware.apps.Article.model.PriceAttribute', {
+
+            }));
+
+        }
+    },
+
+    /**
      * @Override getColumn in order to add the bepdo price column
      *
      * @returns Array

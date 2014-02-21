@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
 
 /**
@@ -169,11 +170,15 @@ class TemplateExtension extends BaseSubscriber
         }
         $shop = $sdk->getShop($product->shopId);
 
+        $modelsManager = Shopware()->Models();
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new Config($modelsManager);
+
         $view->assign(array(
             'bepadoProduct' => $product,
             'bepadoShop' => $shop,
-            'bepadoShopInfo' => $this->Config()->get('detailShopInfo'),
-            'bepadoNoIndex' => $this->Config()->get('detailProductNoIndex')
+            'bepadoShopInfo' => $configComponent->getConfig('detailShopInfo'),
+            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex')
         ));
     }
 
@@ -316,7 +321,11 @@ class TemplateExtension extends BaseSubscriber
         if(!$request->isDispatched() || $request->getActionName() != 'defaultSearch') {
             return;
         }
-        if(!$this->Config()->get('cloudSearch')) {
+
+        $modelManager = Shopware()->Models();
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new Config($modelManager);
+        if(!$configComponent->getConfig('cloudSearch')) {
             return;
         }
         if(!empty($view->sSearchResults['sArticlesCount'])) {

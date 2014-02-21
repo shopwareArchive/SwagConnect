@@ -22,6 +22,9 @@ class BepadoFactory
     private $modelManager;
     private $pluginVersion;
 
+    /** @var  \Shopware\Bepado\Components\Config */
+    private $configComponent;
+
     public function __construct($version='')
     {
         $this->pluginVersion = $version;
@@ -87,7 +90,7 @@ class BepadoFactory
                 $helper,
                 $manager,
                 $this->getImageImport(),
-                Shopware()->Config()
+                $this->getConfigComponent()
             ),
             new ProductFromShop(
                 $helper,
@@ -161,11 +164,14 @@ class BepadoFactory
 
     public function getBasketHelper()
     {
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new Config($this->modelManager);
+
         return new BasketHelper (
             Shopware()->Db(),
             $this->getSDK(),
             $this->getHelper(),
-            Shopware()->Config()->getByNamespace('SwagBepado', 'checkoutShopInfo')
+            $configComponent->getConfig('SwagBepado', 'checkoutShopInfo')
         );
 
     }
@@ -235,7 +241,7 @@ class BepadoFactory
      */
     private function getRemoteProductQuery()
     {
-        return new RemoteProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
+        return new RemoteProductQuery($this->getModelManager(), $this->getConfigComponent()->getConfig('alternateDescriptionField'));
     }
 
     /**
@@ -243,7 +249,7 @@ class BepadoFactory
      */
     private function getLocalProductQuery()
     {
-        return new LocalProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'), $this->getProductBaseUrl());
+        return new LocalProductQuery($this->getModelManager(), $this->getConfigComponent()->getConfig('alternateDescriptionField'), $this->getProductBaseUrl());
     }
 
     private function getProductBaseUrl()
@@ -259,5 +265,17 @@ class BepadoFactory
             'id' => '',
             'fullPath' => true
         ));
+    }
+
+    /**
+     * @return Config
+     */
+    private function getConfigComponent()
+    {
+        if (!$this->configComponent) {
+            $this->configComponent = new Config($this->getModelManager());
+        }
+
+        return $this->configComponent;
     }
 }

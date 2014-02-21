@@ -67,7 +67,7 @@ class ProductToShop implements ProductToShopBase
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
-     * @param \Shopware_Components_Config $config
+     * @param \Shopware\Bepado\Components\Config $config
      */
     public function __construct(Helper $helper, ModelManager $manager, ImageImport $imageImport, $config)
     {
@@ -177,7 +177,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // Set the configured attribute so users can easily check if a given product is a bepado attribute
-        $setter = 'setAttr' . $this->config->get('bepadoAttribute', 19);
+        $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
         $detailAttribute->$setter($product->sourceId);
 
         $bepadoAttribute->setShopId($product->shopId);
@@ -309,7 +309,7 @@ class ProductToShop implements ProductToShopBase
             }
 
             // If this is a new product
-            if (!$model->getId() && $field == 'image' && !$this->config->get('importImagesOnFirstImport', false)) {
+            if (!$model->getId() && $field == 'image' && !$this->config->getConfig('importImagesOnFirstImport', false)) {
                 $output[$field] = false;
                 $flag |= $flagsByName['imageInitialImport'];
                 continue;
@@ -397,7 +397,7 @@ class ProductToShop implements ProductToShopBase
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
         // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {
-            return $this->config->get($configName, true);
+            return $this->config->getConfig($configName, true);
         }
 
         return $attributeValue == 'overwrite';

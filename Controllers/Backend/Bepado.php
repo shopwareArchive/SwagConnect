@@ -863,20 +863,19 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     public function getPriceConfigAction()
     {
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
-
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new \Shopware\Bepado\Components\Config($this->getModelManager());
 
         $data = array(
             array(
                 'bepadoField' => 'purchasePrice',
-                'customerGroup' => $repo->getConfig('priceGroupForPurchasePriceExport'),
-                'priceField' => $repo->getConfig('priceFieldForPurchasePriceExport')
+                'customerGroup' => $configComponent->getConfig('priceGroupForPurchasePriceExport'),
+                'priceField' => $configComponent->getConfig('priceFieldForPurchasePriceExport')
             ),
             array(
                 'bepadoField' => 'price',
-                'customerGroup' => $repo->getConfig('priceGroupForPriceExport'),
-                'priceField' => $repo->getConfig('priceFieldForPriceExport')
+                'customerGroup' => $configComponent->getConfig('priceGroupForPriceExport'),
+                'priceField' => $configComponent->getConfig('priceFieldForPriceExport')
             ),
         );
 

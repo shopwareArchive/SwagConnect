@@ -12,16 +12,6 @@ class HelperTest extends BepadoTestHelper
         $this->assertInstanceOf('\Shopware\Models\Customer\Group', $group);
     }
 
-    public function testGetProductDescriptionField()
-    {
-        $allowedFields = array('a.descriptionLong', 'a.description', 'attribute.bepadoProductDescription');
-
-        $field = $this->getHelper()->getProductDescriptionField();
-        if (!in_array($field, $allowedFields)) {
-            $this->fail("Failed asserting that {$field} is a valid field");
-        }
-    }
-
     /**
      * @depends testGetProductById
      */

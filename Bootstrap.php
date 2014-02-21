@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.2';
+        return '1.4.6';
     }
 
     /**
@@ -156,6 +156,42 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
 
+        if (version_compare($version, '1.4.6', '<=')) {
+            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `shopId` INT( 11 ) NULL DEFAULT NULL;');
+            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
+
+            $this->registerMyLibrary();
+            /** @var Shopware\Components\Model\ModelManager $modelManager */
+            $modelManager = $this->Application()->Models();
+            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+
+            $apiKey = $this->Config()->get('apiKey');
+            if ($apiKey) {
+                $configComponent->setConfig('apiKey', $apiKey);
+            }
+
+            $bepadoDebugHost = $this->Config()->get('bepadoDebugHost');
+            if ($bepadoDebugHost) {
+                $configComponent->setConfig('bepadoDebugHost', $bepadoDebugHost);
+            }
+
+            $configComponent->setConfig('importCreateCategories', $this->Config()->get('importCreateCategories'));
+            $configComponent->setConfig('detailProductNoIndex', $this->Config()->get('detailProductNoIndex'));
+            $configComponent->setConfig('detailShopInfo', $this->Config()->get('detailShopInfo'));
+            $configComponent->setConfig('checkoutShopInfo', $this->Config()->get('checkoutShopInfo'));
+            $configComponent->setConfig('cloudSearch', $this->Config()->get('cloudSearch'));
+            $configComponent->setConfig('alternateDescriptionField', $this->Config()->get('alternateDescriptionField'));
+            $configComponent->setConfig('bepadoAttribute', $this->Config()->get('bepadoAttribute'));
+            $configComponent->setConfig('importImagesOnFirstImport', $this->Config()->get('importImagesOnFirstImport'));
+            $configComponent->setConfig('autoUpdateProducts', $this->Config()->get('autoUpdateProducts'));
+            $configComponent->setConfig('overwriteProductName', $this->Config()->get('overwriteProductName'));
+            $configComponent->setConfig('overwriteProductPrice', $this->Config()->get('overwriteProductPrice'));
+            $configComponent->setConfig('overwriteProductImage', $this->Config()->get('overwriteProductImage'));
+            $configComponent->setConfig('overwriteProductShortDescription', $this->Config()->get('overwriteProductShortDescription'));
+            $configComponent->setConfig('overwriteProductLongDescription', $this->Config()->get('overwriteProductLongDescription'));
+            $configComponent->setConfig('logRequest', $this->Config()->get('logRequest'));
+
+        }
 
         return true;
     }
@@ -194,14 +230,41 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerCustomModels();
 
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
 
+        $this->registerMyLibrary();
+        /** @var Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
 
-        $repo->setConfig('priceGroupForPriceExport', 'EK');
-        $repo->setConfig('priceGroupForPurchasePriceExport', 'EK');
-        $repo->setConfig('priceFieldForPriceExport', 'price');
-        $repo->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
+//        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
+//        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
+//
+//        $repo->setConfig('priceGroupForPriceExport', 'EK');
+//        $repo->setConfig('priceGroupForPurchasePriceExport', 'EK');
+//        $repo->setConfig('priceFieldForPriceExport', 'price');
+//        $repo->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
+
+        $configComponent->setConfig('priceGroupForPriceExport', 'EK');
+        $configComponent->setConfig('priceGroupForPurchasePriceExport', 'EK');
+        $configComponent->setConfig('priceFieldForPriceExport', 'price');
+        $configComponent->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
+
+        $configComponent->setConfig('importCreateCategories', '1');
+        $configComponent->setConfig('detailProductNoIndex', '1');
+        $configComponent->setConfig('detailShopInfo', '1');
+        $configComponent->setConfig('checkoutShopInfo', '1');
+        $configComponent->setConfig('cloudSearch', '0');
+        $configComponent->setConfig('alternateDescriptionField', 'a.descriptionLong');
+        $configComponent->setConfig('bepadoAttribute', '19');
+        $configComponent->setConfig('importImagesOnFirstImport', '0');
+        $configComponent->setConfig('autoUpdateProducts', '1');
+        $configComponent->setConfig('overwriteProductName', '1');
+        $configComponent->setConfig('overwriteProductPrice', '1');
+        $configComponent->setConfig('overwriteProductImage', '1');
+        $configComponent->setConfig('overwriteProductShortDescription', '1');
+        $configComponent->setConfig('overwriteProductLongDescription', '1');
+        $configComponent->setConfig('logRequest', '0');
 
         Shopware()->Models()->flush();
 
@@ -505,12 +568,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\CronJob()
         );
 
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
 
-
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+        //todo: get config from the database
         if ($this->Config()->get('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
-
 
         /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
@@ -570,6 +636,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
+              `shopId` int(11) NULL,
+              `groupName` varchar(255) NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (

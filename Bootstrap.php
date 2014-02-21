@@ -506,7 +506,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
-            $subscribers = array_merge($subscribers, $this->getVerifiedSubscribers());
+            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
+        // These subscribers are used if the api key is not valid
+        } else {
+            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
 
         /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
@@ -516,6 +519,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
     }
 
+    public function getSubscribersForUnverifiedKeys()
+    {
+        return array(
+            new \Shopware\Bepado\Subscribers\DisableBepadoInFrontend()
+        );
+    }
+
     /**
      * These subscribers will only be used, once the user has verified his api key
      * This will prevent the users from having bepado extensions in their frontend
@@ -523,7 +533,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      *
      * @return array
      */
-    public function getVerifiedSubscribers()
+    public function getSubscribersForVerifiedKeys()
     {
         $subscribers = array(
             new \Shopware\Bepado\Subscribers\TemplateExtension(),

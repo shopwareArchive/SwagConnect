@@ -498,20 +498,39 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyLibrary();
 
-        /**
-         * Here we subscribe to the needed events and hooks.
-         * Have a look at the getEvents() method defined in each subscriber class
-         */
+        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
+        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
+        $verified = $repo->getConfig('apiKeyVerified', false);
+
+        $subscribers = $this->getDefaultSubscribers();
+
+        // Some subscribers may only be used, if the SDK is verified
+        if ($verified) {
+            $subscribers = array_merge($subscribers, $this->getVerifiedSubscribers());
+        }
+
+        /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
+        foreach ($subscribers as $subscriber) {
+            $subscriber->setBootstrap($this);
+            $this->Application()->Events()->registerSubscriber($subscriber);
+        }
+    }
+
+    /**
+     * These subscribers will only be used, once the user has verified his api key
+     * This will prevent the users from having bepado extensions in their frontend
+     * even if they cannot use bepado due to the missing / wrong api key
+     *
+     * @return array
+     */
+    public function getVerifiedSubscribers()
+    {
         $subscribers = array(
-            new \Shopware\Bepado\Subscribers\ControllerPath(),
             new \Shopware\Bepado\Subscribers\TemplateExtension(),
             new \Shopware\Bepado\Subscribers\Checkout(),
             new \Shopware\Bepado\Subscribers\Voucher(),
             new \Shopware\Bepado\Subscribers\BasketWidget(),
-            new \Shopware\Bepado\Subscribers\ArticleList(),
-            new \Shopware\Bepado\Subscribers\Article(),
             new \Shopware\Bepado\Subscribers\Dispatches(),
-            new \Shopware\Bepado\Subscribers\CronJob()
         );
 
 
@@ -519,12 +538,23 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
 
+        return $subscribers;
+    }
 
-        /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriber->setBootstrap($this);
-            $this->Application()->Events()->registerSubscriber($subscriber);
-        }
+    /**
+     * Default subscribers can safely be used, even if the api key wasn't verified, yet
+     *
+     * @return array
+     */
+    public function getDefaultSubscribers()
+    {
+        return array(
+            new \Shopware\Bepado\Subscribers\ControllerPath(),
+            new \Shopware\Bepado\Subscribers\CronJob(),
+            new \Shopware\Bepado\Subscribers\ArticleList(),
+            new \Shopware\Bepado\Subscribers\Article(),
+            new \Shopware\Bepado\Subscribers\Bepado(),
+        );
     }
 
     public function onInitResourceSDK()

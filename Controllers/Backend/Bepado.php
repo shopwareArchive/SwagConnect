@@ -705,6 +705,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     public function verifyApiKeyAction()
     {
+        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
+        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
+
         $sdk = $this->getSDK();
         try {
             $key = $this->Request()->getPost('apiKey');
@@ -712,12 +715,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->View()->assign(array(
                 'success' => true
             ));
+            $repo->setConfig('apiKeyVerified', true);
         } catch (Exception $e) {
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
                 'success' => false
             ));
+            $repo->setConfig('apiKeyVerified', false);
         }
+
+        $this->getModelManager()->flush();
+
     }
 
     /**

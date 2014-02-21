@@ -105,7 +105,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
             header: "{s name=detail/price/bepadoPrice}bepado price{/s}",
             renderer: function (value, arg, record) {
                 if (value) {
-                    return value;
+                    return Ext.util.Format.number(value, '0.00');;
                 }
 
                 var attributeStore,
@@ -117,7 +117,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
                 if (attributeStore) {
                     attribute = attributeStore.first();
-                    return attribute.get('bepadoPrice');
+                    return Ext.util.Format.number(attribute.get('bepadoPrice'), '0.00');
                 }
             },
             dataIndex: 'attribute[bepadoPrice]',

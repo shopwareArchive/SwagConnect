@@ -2,6 +2,7 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Models\Attribute\ArticlePrice;
+use Shopware\Models\Customer\Group;
 
 /**
  * Class Article
@@ -13,8 +14,23 @@ class Article extends BaseSubscriber
     {
         return array(
             'Shopware_Controllers_Backend_Article::getPrices::after' => 'onEnforcePriceAttributes',
+            'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'taxRatesForPriceAttributes',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle'
         );
+    }
+
+    /** @var  Group */
+    protected $customerGroupRepository;
+
+    /**
+     * @return \Shopware\Components\Model\ModelRepository|Group
+     */
+    public function getCustomerGroupRepository()
+    {
+        if (!$this->customerGroupRepository) {
+            $this->customerGroupRepository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        }
+        return $this->customerGroupRepository;
     }
 
     /**
@@ -77,6 +93,33 @@ class Article extends BaseSubscriber
             default:
                 break;
         }
+    }
+
+
+    /**
+     * When saving prices make sure, that the bepadoPrice is stored in net
+     *
+     * @param \Enlight_Hook_HookArgs $args
+     */
+    public function taxRatesForPriceAttributes(\Enlight_Hook_HookArgs $args)
+    {
+        /** @var array $prices */
+        $prices = $args->getReturn();
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $args->get('article');
+        /** @var \Shopware\Models\Tax\Tax $tax */
+        $tax = $args->get('tax');
+
+        foreach ($prices as $key => &$priceData) {
+            /** @var \Shopware\Models\Customer\Group $customerGroup */
+            $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $priceData['customerGroupKey']));
+
+            if ($customerGroup->getTaxInput()) {
+                $priceData['attribute']['bepadoPrice'] = $priceData['attribute']['bepadoPrice'] / (100 + $tax->getTax()) * 100;
+            }
+        }
+
+        $args->setReturn($prices);
     }
 
 

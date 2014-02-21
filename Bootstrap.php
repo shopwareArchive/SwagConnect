@@ -29,7 +29,7 @@ use Shopware\CustomModels\Bepado\Config;
  */
 final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /** @var \Shopware\Bepado\Components\BepadoFactory  */
+    /** @var \Shopware\Bepado\Components\BepadoFactory */
     private $bepadoFactory;
 
     /**
@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.4';
+        return '1.4.5';
     }
 
     /**
@@ -65,14 +65,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
     }
 
-	/**
-	 * Install plugin method
-	 *
+    /**
+     * Install plugin method
+     *
      * @throws \RuntimeException
-	 * @return bool
-	 */
-	public function install()
-	{
+     * @return bool
+     */
+    public function install()
+    {
         if (!$this->assertVersionGreaterThen('4.1.0')) {
             throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
         };
@@ -95,8 +95,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             SELECT `id` FROM `s_premium_dispatch`
         ');
 
-	 	return array('success' => true, 'invalidateCache' => array('backend', 'config'));
-	}
+        return array('success' => true, 'invalidateCache' => array('backend', 'config'));
+    }
 
     /**
      * @return bool
@@ -119,7 +119,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $id = $this->Form()->getId();
 
             Shopware()->Db()->query('DELETE FROM s_core_config_elements WHERE form_id = ? AND name = ?', array(
-               $id, 'productDescriptionField'
+                $id, 'productDescriptionField'
             ));
         }
 
@@ -230,7 +230,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->createCronJob(
             'SwagBepado',
             'importImages',
-            60*30,
+            60 * 30,
             true
         );
     }
@@ -242,7 +242,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         /** @var Shopware\Components\Model\ModelManager $modelManager */
         $modelManager = $this->Application()->Models();
-        
+
         $modelManager->addAttribute(
             's_order_attributes',
             'bepado', 'shop_id',
@@ -255,15 +255,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $modelManager->addAttribute(
-           's_categories_attributes',
-           'bepado', 'mapping',
-           'text'
+            's_categories_attributes',
+            'bepado', 'mapping',
+            'text'
         );
 
         $modelManager->addAttribute(
-           's_categories_attributes',
-           'bepado', 'imported',
-           'text'
+            's_categories_attributes',
+            'bepado', 'imported',
+            'text'
         );
 
         $modelManager->addAttribute(
@@ -298,6 +298,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
+            's_articles_prices_attributes',
             's_premium_dispatch_attributes',
             's_categories_attributes',
             's_order_details_attributes',
@@ -514,7 +515,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
 
-
         if ($this->Config()->get('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
@@ -567,19 +567,19 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `r_order` longblob NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`r_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `bepado_shop_config` (
               `s_shop` varchar(32) NOT NULL,
               `s_config` LONGBLOB NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`s_shop`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_config` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `isError` int(1) NOT NULL,
@@ -589,7 +589,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `response` text COLLATE utf8_unicode_ci DEFAULT NULL,
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
              `id` int(11) NOT NULL AUTO_INCREMENT,
              `article_id` int(11) unsigned DEFAULT NULL,
@@ -619,14 +619,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Db()->exec($query);
         }
     }
-	
-	/**
-	 * Uninstall plugin method
-	 *
-	 * @return bool
-	 */
-	public function uninstall()
-	{
+
+    /**
+     * Uninstall plugin method
+     *
+     * @return bool
+     */
+    public function uninstall()
+    {
         // Removing the attributes will delete all mappings, product references to from-shops etc.
         // Currently it does not seem to be a good choice to have this enabled
         // $this->removeMyAttributes();
@@ -642,7 +642,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         Shopware()->Db()->exec($sql);
 
         return true;
-	}
+    }
 
     /**
      * Remove the attributes when uninstalling the plugin
@@ -696,54 +696,54 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 //            );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'purchase_price'
+                's_articles_attributes',
+                'bepado', 'purchase_price'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'fixed_price'
+                's_articles_attributes',
+                'bepado', 'fixed_price'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'free_delivery'
+                's_articles_attributes',
+                'bepado', 'free_delivery'
             );
 
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'update_price'
+                's_articles_attributes',
+                'bepado', 'update_price'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'update_image'
+                's_articles_attributes',
+                'bepado', 'update_image'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'update_long_description'
+                's_articles_attributes',
+                'bepado', 'update_long_description'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'update_short_description'
+                's_articles_attributes',
+                'bepado', 'update_short_description'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'update_name'
+                's_articles_attributes',
+                'bepado', 'update_name'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'last_update'
+                's_articles_attributes',
+                'bepado', 'last_update'
             );
 
             $modelManager->removeAttribute(
-               's_articles_attributes',
-               'bepado', 'last_update_flag'
+                's_articles_attributes',
+                'bepado', 'last_update_flag'
             );
 
 //            $modelManager->removeAttribute(
@@ -764,7 +764,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 //                's_order_basket_attributes',
 //                's_media_attributes'
             ));
-        } catch(Exception $e) { }
+        } catch (Exception $e) {
+        }
 
     }
 

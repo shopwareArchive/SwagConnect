@@ -87,7 +87,7 @@ class Product extends Verificator
         }
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {
-            if (!preg_match('(^(\d+x\d+x\d+)$', $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION])) {
+            if (!preg_match('(^(\d+x\d+x\d+)$)', $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION])) {
                 throw new \RuntimeException(
                     "Product Dimensions Attribute has to be in format " .
                     "'Length x Width x Height' without spaces, i.e. 20x40x60"

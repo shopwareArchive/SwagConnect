@@ -2,7 +2,9 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Bepado\SDK\Struct\Message;
+use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
+use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
 
 /**
@@ -20,7 +22,7 @@ class Checkout extends BaseSubscriber
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
-            'sOrder::sSaveOrder::after' => 'checkoutReservedProducts',
+            'Shopware_Modules_Order_SaveOrder_FilterSQL' => 'checkoutReservedProducts',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish'
         );
     }
@@ -84,7 +86,7 @@ class Checkout extends BaseSubscriber
                 try {
                     $response = $sdk->checkProducts($products);
                 } catch (\Exception $e) {
-                    $this->getLogger()->write(true, 'Error during checkout', $e);
+                    $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                     // If the checkout results in an exception because the remote shop is not available
                     // don't show the exception to the user but tell him to remove the products from that shop
                     $response = $this->getNotAvailableMessageForProducts($products);
@@ -138,10 +140,15 @@ class Checkout extends BaseSubscriber
 
         foreach($bepadoMessages as $shopId => &$shopMessages) {
             foreach ($shopMessages as &$bepadoMessage) {
+                $message = trim($bepadoMessage->message);
                 $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
+                if (empty($normalized) || empty($message)) {
+                    $normalized = "unknown-bepado-error-{$shopId}";
+                    $message = "Unknown error for {$shopId}";
+                }
                 $translation = $namespace->get(
                     $normalized,
-                    $bepadoMessage->message,
+                    $message,
                     true
                 );
 
@@ -184,7 +191,7 @@ class Checkout extends BaseSubscriber
         $this->enforcePhoneNumber($view);
 
         $order = new \Bepado\SDK\Struct\Order();
-        $order->products = array();
+        $order->orderItems = array();
         $userData = $session['sOrderVariables']['sUserData'];
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
         $basket = $session['sOrderVariables']['sBasket'];
@@ -207,10 +214,10 @@ class Checkout extends BaseSubscriber
             $orderItem = new \Bepado\SDK\Struct\OrderItem();
             $orderItem->product = $product;
             $orderItem->count = (int)$row['quantity'];
-            $order->products[] = $orderItem;
+            $order->orderItems[] = $orderItem;
         }
 
-        if (empty($order->products)) {
+        if (empty($order->orderItems)) {
             return;
         }
 
@@ -221,9 +228,13 @@ class Checkout extends BaseSubscriber
                 $messages = $reservation->messages;
             }
         } catch (\Exception $e) {
-            $messages = $this->getNotAvailableMessageForProducts($order->products);
+            $messages = $this->getNotAvailableMessageForProducts(array_map(
+                function ($orderItem) {
+                    return $orderItem->product;
+                },
+                $order->orderItems
+            ));
         }
-
 
         if(!empty($messages)) {
             Shopware()->Session()->BepadoMessages = $messages;
@@ -265,12 +276,14 @@ class Checkout extends BaseSubscriber
     /**
      * Hooks the sSaveOrder frontend method and reserves the bepado products
      *
-     * @event sOrder::sSaveOrder::after
-     * @param \Enlight_Hook_HookArgs $args
+     * @event Shopware_Modules_Order_SaveOrder_FilterSQL
+     * @throws CheckoutException
+     * @param \Enlight_Event_EventArgs $args
      */
-    public function checkoutReservedProducts(\Enlight_Hook_HookArgs $args)
+    public function checkoutReservedProducts(\Enlight_Event_EventArgs $args)
     {
-        $orderNumber = $args->getReturn();
+        $orderNumber = $args->getSubject()->sOrderNumber;
+
         $sdk = $this->getSDK();
 
         if (empty($orderNumber)) {
@@ -279,7 +292,14 @@ class Checkout extends BaseSubscriber
 
         $reservation = Shopware()->Session()->BepadoReservation;
         if($reservation !== null) {
-            $sdk->checkout($reservation, $orderNumber);
+            $result = $sdk->checkout($reservation, $orderNumber);
+            foreach($result as $shopId => $success) {
+                if (!$success) {
+                    $e = new CheckoutException("Could not checkout from warehouse {$shopId}");
+                    $this->getLogger()->write(true, 'Error during checkout with this reservation: ' . json_encode($reservation, JSON_PRETTY_PRINT), $e, 'checkout');
+                    throw $e;
+                }
+            }
         }
     }
 

@@ -25,17 +25,21 @@ class Logger
      * @param $isError
      * @param $request
      * @param $response
+     * @param $custom
      */
-    public function write($isError, $request, $response)
+    public function write($isError, $request, $response, $custom=null)
     {
         if ($response instanceof \Exception) {
             $this->formatException($response);
         }
 
-        $service = 'general';
-        $command = 'error';
+        $service='general';
+        $command = 'custom-error';
+        if ($custom) {
+            $command = $command . '-' . $custom;
+        }
 
-        if ($request) {
+        if ($request && !$custom) {
             $document = simplexml_load_string($request);
             if ($document)  {
                 $service = $document->service;

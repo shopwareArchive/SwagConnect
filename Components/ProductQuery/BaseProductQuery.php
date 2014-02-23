@@ -103,6 +103,14 @@ abstract class BaseProductQuery
         // Fix categories
         if(is_string($row['categories'])) {
             $row['categories'] = unserialize($row['categories']);
+
+            if (empty($row['categories'])) {
+                //add default export category
+                $defaultExportCategory = Shopware()->Config()->getByNamespace('SwagBepado', 'defaultExportCategory');
+                if ($defaultExportCategory) {
+                    $row['categories'][] = $defaultExportCategory;
+                }
+            }
         }
 
         // Fix prices

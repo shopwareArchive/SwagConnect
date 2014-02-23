@@ -31,6 +31,19 @@ class Sw40Query extends SwQuery
                 $query->setParameter('mapping', $category)->execute()
             );
         }
+
+        if (empty($categories)) {
+            //add default import category
+            $defaultCategoryId = Shopware()->Config()->getByNamespace('SwagBepado', 'defaultImportCategory');
+            if ($defaultCategoryId) {
+                /** @var \Shopware\Models\Category\Category $defaultCategory */
+                $defaultCategory = $repository->find($defaultCategoryId);
+                if ($defaultCategory) {
+                    $categories[] = $defaultCategory;
+                }
+            }
+        }
+
         return $categories;
     }
 

@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.2';
+        return '1.4.7';
     }
 
     /**
@@ -479,6 +479,33 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
                 'helpText' => 'Schreibt alle Anfragen von bepado.de und die Antwort des bepado-Plugins mit. Hierbei können schnell viele Daten anfallen.'
             )
         );
+
+        $categoryRepository = Shopware()->Models()->getRepository('Shopware\Models\Category\Category');
+        $categories = $categoryRepository->findAll();
+        $categoriesStore = array();
+        /** @var \Shopware\Models\Category\Category $category */
+        foreach ($categories as $category) {
+            if (count($category->getChildren()) == 0) {
+                $categoriesStore[] = array($category->getId(), $category->getName());
+            }
+        }
+
+        $form->setElement('select', 'defaultImportCategory',
+            array(
+                'required' => true,
+                'editable' => false,
+                'label' => 'Standard-Import-Kategorie',
+                'store' => $categoriesStore
+            )
+        );
+
+        $form->setElement('text', 'defaultExportCategory', array(
+                'label' => 'Standard-Export-Kategorie',
+                'description' => '',
+                'required' => true,
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+                'uniqueId' => 'defaultExportCategory'
+        ));
     }
 
     /**

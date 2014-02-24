@@ -155,7 +155,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $this->removeMyAttributes();
         }
 
-        if (version_compare($version, '1.2.70', '<=') && version_compare($version, '0.0.1', '>')) {
+        if (version_compare($version, '1.2.70', '<=')) {
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
 

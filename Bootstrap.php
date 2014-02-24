@@ -103,19 +103,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function update($version)
     {
-        try {
-            // Force an SDK re-verify
-            Shopware()->Db()->query('
-                UPDATE bepado_shop_config
-                SET s_config = ?
-                WHERE s_shop = "_last_update_"
-                LIMIT 1; ',
-                array(time() - 8 * 60 * 60 * 24)
-            );
-        } catch (\Exception $e) {
-            // don't trigger exception, if table is not available, yet
-        }
-
         // Remove old productDescriptionField
         // removeElement does seem to have some issued, so using plain SQL here
         if (version_compare($version, '1.2.59', '<=')) {
@@ -136,6 +123,20 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         $this->createEngineElement();
 
+        // When the dummy plugin is going to be installed, don't do the later updates
+        if (version_compare($version, '0.0.1', '<=')) {
+            return true;
+        }
+
+        // Force an SDK re-verify
+        Shopware()->Db()->query('
+            UPDATE bepado_shop_config
+            SET s_config = ?
+            WHERE s_shop = "_last_update_"
+            LIMIT 1; ',
+            array(time() - 8 * 60 * 60 * 24)
+        );
+
         // Migrate old attributes to bepado attributes
         if (version_compare($version, '1.2.18', '<=')) {
             // Copy s_articles_attributes to own attribute table
@@ -154,11 +155,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $this->removeMyAttributes();
         }
 
-
-        if (version_compare($version, '1.2.70', '<=')) {
+        if (version_compare($version, '1.2.70', '<=') && version_compare($version, '0.0.1', '>')) {
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
-
 
         return true;
     }

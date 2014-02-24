@@ -244,6 +244,8 @@ class ProductToShop implements ProductToShopBase
         $this->manager->flush();
 
         if ($updateFields['image']) {
+            // Reload the model in order to not to work an the already flushed model
+            $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
 

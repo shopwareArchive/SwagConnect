@@ -104,8 +104,8 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
             xtype: 'numbercolumn',
             header: "{s name=detail/price/bepadoPrice}bepado price{/s}",
             renderer: function (value, arg, record) {
-                if (value) {
-                    return Ext.util.Format.number(value, '0.00');;
+                if (value != undefined) {
+                    return Ext.util.Format.number(value, '0.00');
                 }
 
                 var attributeStore,

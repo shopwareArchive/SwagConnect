@@ -12,6 +12,7 @@
 /**
  * Extend the article's base fieldSet and add out customizing field
  */
+//{namespace name=backend/bepado/view/main}
 //{block name="backend/order/view/list/list" append}
 Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
     override: 'Shopware.apps.Order.view.list.List',

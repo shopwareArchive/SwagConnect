@@ -14,7 +14,8 @@ class Article extends BaseSubscriber
     {
         return array(
             'Shopware_Controllers_Backend_Article::getPrices::after' => 'onEnforcePriceAttributes',
-            'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'taxRatesForPriceAttributes',
+            'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'fixTaxRatesWhenSaving',
+            'Shopware_Controllers_Backend_Article::formatPricesFromNetToGross::after' => 'fixTaxRatesWhenLoading',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle'
         );
     }
@@ -101,7 +102,7 @@ class Article extends BaseSubscriber
      *
      * @param \Enlight_Hook_HookArgs $args
      */
-    public function taxRatesForPriceAttributes(\Enlight_Hook_HookArgs $args)
+    public function fixTaxRatesWhenSaving(\Enlight_Hook_HookArgs $args)
     {
         /** @var array $prices */
         $prices = $args->getReturn();
@@ -122,5 +123,26 @@ class Article extends BaseSubscriber
         $args->setReturn($prices);
     }
 
+    /**
+     * When loading prices make sure, that the tax rate is added
+     *
+     * @param \Enlight_Hook_HookArgs $args
+     */
+    public function fixTaxRatesWhenLoading(\Enlight_Hook_HookArgs $args)
+    {
+        /** @var array $prices */
+        $prices = $args->getReturn();
+        $tax = $args->get('tax');
 
+        foreach ($prices as $key => $price) {
+            $customerGroup = $price['customerGroup'];
+            if ($customerGroup['taxInput']) {
+                $price['attribute']['bepadoPrice'] = $price['attribute']['bepadoPrice'] / 100 * (100 + $tax['tax']) ;
+            }
+            $prices[$key] = $price;
+        }
+
+
+        $args->setReturn($prices);
+    }
 }

@@ -323,7 +323,7 @@ class BasketHelper
                     $tax = Shopware()->Config()->get('sVOUCHERTAX');
                 } elseif ($resultVoucherTaxMode == "auto") {
                     // Automatically determinate tax
-                    $tax = $this->basket->getMaxTax();
+                    $tax = Shopware()->Modules()->Basket()->getMaxTax();
                 } elseif ($resultVoucherTaxMode == "none") {
                     // No tax
                     $tax = "0";
@@ -338,7 +338,7 @@ class BasketHelper
                 // Ticket 4842 - dynamic tax-rates
                 $taxAutoMode = Shopware()->Config()->get('sTAXAUTOMODE');
                 if (!empty($taxAutoMode)) {
-                    $tax = $this->basket->getMaxTax();
+                    $tax = Shopware()->Modules()->Basket()->getMaxTax();
                 } else {
                     $tax = Shopware()->Config()->get('sDISCOUNTTAX');
                 }

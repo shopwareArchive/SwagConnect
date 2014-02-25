@@ -242,14 +242,13 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($bepadoAttribute);
 
         $this->manager->flush();
+        $this->manager->clear();
 
         if ($updateFields['image']) {
             // Reload the model in order to not to work an the already flushed model
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
-
-        $this->manager->clear();
     }
 
 

@@ -210,6 +210,7 @@ class ImageImport
         }
 
         $this->manager->flush();
+        $this->manager->clear();
     }
 
 }

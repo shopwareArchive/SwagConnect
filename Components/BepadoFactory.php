@@ -184,23 +184,11 @@ class BepadoFactory
     /**
      * Returns category query depending on the current shopware version
      *
-     * @return Sw40Query|Sw41Query
+     * @return Sw41Query
      */
     public function getCategoryQuery()
     {
-        return $this->checkMinimumVersion('4.1.0')
-            ? $this->getShopware41CategoryQuery()
-            : $this->getShopware40CategoryQuery();
-    }
-
-    /**
-     * Getter for the shopware < 4.1 category query
-     *
-     * @return Sw40Query
-     */
-    public function getShopware40CategoryQuery()
-    {
-        return new Sw40Query($this->getModelManager());
+        return $this->getShopware41CategoryQuery();
     }
 
     /**

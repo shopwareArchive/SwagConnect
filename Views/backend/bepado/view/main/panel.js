@@ -16,9 +16,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-home-page',
                 itemId: 'home'
             }, {
-                xtype: 'bepado-changed-products',
-                itemId: 'changed'
-            }, {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {
@@ -28,11 +25,20 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-mapping',
                 itemId: 'mapping'
             }, {
+                xtype: 'bepado-mapping-import',
+                itemId: 'mapping-import'
+            }, {
+                xtype: 'bepado-mapping-export',
+                itemId: 'mapping-export'
+            }, {
                 xtype: 'bepado-export',
                 itemId: 'export'
             }, {
                 xtype: 'bepado-import',
                 itemId: 'import'
+            }, {
+                xtype: 'bepado-changed-products',
+                itemId: 'changed'
             }, {
                 xtype: 'bepado-log',
                 itemId: 'log'

@@ -1,9 +1,9 @@
 //{namespace name=backend/bepado/view/main}
 
-//{block name='backend/bepado/view/main/mapping'}
-Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
+//{block name='backend/bepado/view/main/mapping/export'}
+Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-mapping',
+    alias: 'widget.bepado-mapping-export',
 
     //border: false,
     layout: 'border',
@@ -12,9 +12,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         var me = this;
 
         Ext.applyIf(me, {
-            items: [
-                me.getNotificationBox(),
-            {
+            items: [{
                 xtype: 'treepanel',
                 region: 'center',
                 rootVisible: false,
@@ -22,7 +20,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                     id: 1,
                     expanded: true
                 },
-                store: 'main.Mapping',
+                store: 'mapping.Export',
                 plugins: [{
                     ptype: 'cellediting',
                     pluginId: 'cellediting',
@@ -32,15 +30,15 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                     xtype: 'treecolumn',
                     flex: 1,
                     dataIndex: 'text',
-                    text: '{s name=mapping/columns/category}Category{/s}'
+                    text: '{s name=mapping/columns/shopware-category}Shopware Category{/s}'
                 },{
-                    text: '{s name=mapping/columns/mapping}Mapping{/s}',
+                    text: '{s name=mapping/columns/bepado-category}bepado Category{/s}',
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
-                        store: 'main.Category'
+                        store: 'mapping.BepadoCategoriesExport'
                     }
                 }, me.getActionColumn()],
                 dockedItems: [ me.getButtons() ]
@@ -58,17 +56,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
         me.callParent(arguments);
     },
 
-    getNotificationBox: function() {
-        var me = this,
-            notice;
-
-        notice = Shopware.Notification.createBlockMessage("{s name=mapping/info}The vendor category tree can only be used for importing products. Mappings for export will not apply.{/s}", 'error');
-
-        notice.margin = 10;
-        notice.region = 'north';
-        return notice;
-    },
-
     getActionColumn: function() {
         var me = this;
         return {
@@ -80,16 +67,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                 tooltip: '{s name=mapping/options/clear}Clear mapping{/s}',
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
                     record.set('mapping', null);
-                },
-                getClass: function(value, meta, record) {
-                    return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
-                }
-            }, {
-                iconCls: 'sprite-folder-tree',
-                action: 'importCategories',
-                tooltip: '{s name=mapping/options/importCategories}Import categories from bepado{/s}',
-                handler: function (view, rowIndex, colIndex, item, opts, record) {
-                    me.fireEvent('importCategories', record);
                 },
                 getClass: function(value, meta, record) {
                     return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';

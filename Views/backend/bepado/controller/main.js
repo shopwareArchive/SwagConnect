@@ -9,10 +9,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     extend: 'Enlight.app.Controller',
 
     stores: [
-        'main.Navigation', 'main.Mapping', 'main.Category',
+        'main.Navigation',
         'export.List', 'import.List',
         'changed_products.List',
-        'config.Prices', 'log.List'
+        'config.Prices', 'log.List',
+        'mapping.Import', 'mapping.Export',
+        'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
     ],
     models: [
         'main.Mapping', 'main.Product',
@@ -29,7 +31,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'exportList', selector: 'bepado-export-list' },
         { ref: 'exportFilter', selector: 'bepado-export-filter' },
         { ref: 'importList', selector: 'bepado-import-list' },
-        { ref: 'mapping', selector: 'bepado-mapping treepanel' },
+        { ref: 'importMapping', selector: 'bepado-mapping-import treepanel' },
+        { ref: 'exportMapping', selector: 'bepado-mapping-export treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
         { ref: 'changedList', selector: 'bepado-changed-products-list' },
         { ref: 'logList', selector: 'bepado-log-list' },
@@ -88,11 +91,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-config button[action=save]': {
                 click: me.onSaveConfigForm
             },
-            'bepado-mapping button[action=save]': {
-                click: me.onSaveMapping
+            'bepado-mapping-import button[action=save]': {
+                click: me.onSaveImportMapping
             },
-            'bepado-mapping': {
-                applyToChildren: me.onApplyMappingToChildCategories,
+            'bepado-mapping-export button[action=save]': {
+                click: me.onSaveExportMapping
+            },
+            'bepado-mapping-export': {
+                applyToChildren: me.onApplyMappingToChildCategories
+            },
+            'bepado-mapping-import': {
                 importCategories: me.onImportCategoriesFromBepado
             },
             'bepado-export-list button[action=add]': {
@@ -509,7 +517,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      */
     onImportCategoriesFromBepado: function(record) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getImportMapping(),
             store = panel.store;
 
         Ext.MessageBox.confirm(
@@ -551,7 +559,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      */
     onApplyMappingToChildCategories: function(record) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getExportMapping(),
             store = panel.store;
 
         // No message needed, if there aren't any child nodes
@@ -592,13 +600,44 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     /**
+     * Callback function that will save the current import mapping
+     *
+     * @param button
+     */
+    onSaveImportMapping: function(button) {
+        var me = this,
+            panel = me.getImportMapping(),
+            title = me.messages.saveMappingTitle, message;
+
+        if(panel.store.getUpdatedRecords().length < 1) {
+            return;
+        }
+        panel.setLoading();
+        panel.store.sync({
+            success :function (records, operation) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingSuccess;
+                me.createGrowlMessage(title, message);
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingError;
+                if(batch.proxy.reader.rawData.message) {
+                    message += '<br />' + batch.proxy.reader.rawData.message;
+                }
+                me.createGrowlMessage(title, message);
+            }
+        });
+    },
+
+    /**
      * Callback function that will save the current mapping
      *
      * @param button
      */
-    onSaveMapping: function(button) {
+    onSaveExportMapping: function(button) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getExportMapping(),
             title = me.messages.saveMappingTitle, message;
         if(panel.store.getUpdatedRecords().length < 1) {
             return;

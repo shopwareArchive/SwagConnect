@@ -1,11 +1,12 @@
 //{namespace name=backend/bepado/view/main}
 
-// {include file="backend/bepado/_resources/html/home_page.tpl" assign="homePageContent"}
+// {include file="backend/bepado/_resources/html/mapping_general.tpl" assign="mappingGeneralContent"}
 
-//{block name='backend/bepado/view/main/home_page'}
-Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
+
+//{block name="backend/bepado/view/mapping/general"}
+Ext.define('Shopware.apps.Bepado.view.mapping.General', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.bepado-home-page',
+    alias: 'widget.bepado-mapping',
 
     //border: false,
     layout: 'fit',
@@ -22,7 +23,7 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
 
     getHTMLContent: function() {
         var me = this;
-        me.htmlTpl = '{$homePageContent|replace:"\n":""|replace:"\r":""}';
+        me.htmlTpl = '{$mappingGeneralContent|replace:"\n":""|replace:"\r":""}';
 
         return me.htmlTpl;
     }

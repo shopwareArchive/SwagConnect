@@ -34,7 +34,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
                     editor: {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
-                        store: 'main.Category'
+                        store: 'mapping.BepadoCategoriesImport'
                     }
                 },{
                     xtype: 'treecolumn',

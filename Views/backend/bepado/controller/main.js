@@ -9,11 +9,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     extend: 'Enlight.app.Controller',
 
     stores: [
-        'main.Navigation', 'main.Category',
+        'main.Navigation',
         'export.List', 'import.List',
         'changed_products.List',
         'config.Prices', 'log.List',
-        'mapping.Import', 'mapping.Export'
+        'mapping.Import', 'mapping.Export',
+        'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
     ],
     models: [
         'main.Mapping', 'main.Product',

@@ -38,7 +38,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                     editor: {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
-                        store: 'main.Category'
+                        store: 'mapping.BepadoCategoriesExport'
                     }
                 }, me.getActionColumn()],
                 dockedItems: [ me.getButtons() ]
@@ -67,16 +67,6 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                 tooltip: '{s name=mapping/options/clear}Clear mapping{/s}',
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
                     record.set('mapping', null);
-                },
-                getClass: function(value, meta, record) {
-                    return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';
-                }
-            }, {
-                iconCls: 'sprite-folder-tree',
-                action: 'importCategories',
-                tooltip: '{s name=mapping/options/importCategories}Import categories from bepado{/s}',
-                handler: function (view, rowIndex, colIndex, item, opts, record) {
-                    me.fireEvent('importCategories', record);
                 },
                 getClass: function(value, meta, record) {
                     return record.get('mapping') ? 'x-grid-center-icon': 'x-hide-display';

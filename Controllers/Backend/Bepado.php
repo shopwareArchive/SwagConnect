@@ -139,6 +139,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         $sdk = $this->getSDK();
 
+        $type = $this->Request()->getParam('type');
         $list = $sdk->getCategories();
         $parent = $this->Request()->get('node');
         $count = $parent == 1 ? 1 : substr_count($parent, '/') + 1;
@@ -146,6 +147,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $data = array();
         foreach($list as $id => $name) {
+            // Skip vendor category for export
+            if ($type == 'export' && ($id == '/vendor' || strpos($id, '/vendor/') === 0)) {
+                continue;
+            }
             if(strpos($id, $parent) !== 0
               || substr_count($id, '/') != $count) {
                 continue;

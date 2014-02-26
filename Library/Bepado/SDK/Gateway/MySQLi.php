@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Gateway;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Default MySQLi implementation of the storage gateway
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class MySQLi extends Gateway
 {

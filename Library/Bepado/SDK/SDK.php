@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK;
@@ -17,7 +17,7 @@ use Bepado\SDK\Struct\Shop;
  * dispatched to this class. It constructs the required helper classes as
  * required.
  *
- * @version $Revision$
+ * @version 1.0.129
  * @api
  */
 final class SDK
@@ -53,7 +53,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.0.126';
+    const VERSION = '1.0.129';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado

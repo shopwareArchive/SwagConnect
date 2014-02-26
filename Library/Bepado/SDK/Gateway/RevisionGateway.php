@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Gateway;
@@ -10,7 +10,7 @@ namespace Bepado\SDK\Gateway;
 /**
  * Gateaway interface to maintain revision data
  *
- * @version $Revision$
+ * @version 1.0.129
  * @api
  */
 interface RevisionGateway

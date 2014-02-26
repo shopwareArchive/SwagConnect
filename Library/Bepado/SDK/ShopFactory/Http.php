@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\ShopFactory;
@@ -18,7 +18,7 @@ use Bepado\SDK\ShopGateway\ShopRequestSigner;
  *
  * Constructs gateways to interact with other shops
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class Http extends ShopFactory
 {

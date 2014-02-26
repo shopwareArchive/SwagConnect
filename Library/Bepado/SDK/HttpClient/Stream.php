@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\HttpClient;
@@ -15,7 +15,7 @@ use Bepado\SDK\HttpClient;
  * The constructor of this class expects the remote REST server as argument.
  * This includes host/ip, port and protocol.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class Stream extends HttpClient
 {

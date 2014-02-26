@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\ServiceRegistry;
@@ -113,7 +113,7 @@ class Metric extends Rpc\ServiceRegistry
     public function dispatch(Struct\RpcCall $rpcCall)
     {
         $start = microtime(true);
-        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
+        $version = SDK::VERSION === '1.0.129' ? 'dev' : SDK::VERSION;
 
         $response = new Struct\Response(
             array(

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Struct\Verificator\Change;
@@ -16,7 +16,7 @@ use Bepado\SDK\Struct\Product;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class InterShopUpdate extends Change
 {

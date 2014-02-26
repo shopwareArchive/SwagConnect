@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class Product extends Verificator
 {
@@ -62,8 +62,8 @@ class Product extends Verificator
             throw new \RuntimeException("The purchasePrice is not allowed to be 0 or smaller.");
         }
 
-        if (!in_array($struct->vat, array(0.0, 0.07, 0.19))) {
-            throw new \RuntimeException("Only 0.00, 0.07 and 0.19 are allowed as value added tax.");
+        if (!is_numeric($struct->vat) || $struct->vat < 0 || $struct->vat > 1) {
+            throw new \RuntimeException("Value added tax must be a number between 0 and 1.");
         }
 
         if (!is_array($struct->categories)) {

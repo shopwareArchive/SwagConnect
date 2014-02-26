@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Service;
@@ -14,7 +14,7 @@ use Bepado\SDK\SDK;
 /**
  * Verification service
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class Verification
 {

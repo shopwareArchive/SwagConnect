@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK;
@@ -532,7 +532,7 @@ class DependencyResolver
      */
     public function getHttpClient($server)
     {
-        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
+        $version = SDK::VERSION === '1.0.129' ? 'dev' : SDK::VERSION;
 
         $headers = array(
             'X-Bepado-SDK-Version: ' . $version,

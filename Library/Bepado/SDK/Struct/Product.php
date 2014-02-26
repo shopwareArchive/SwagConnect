@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\SDK\Struct;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Struct class, representing products
  *
- * @version $Revision$
+ * @version 1.0.129
  * @api
  */
 class Product extends ShopItem
@@ -107,8 +107,8 @@ class Product extends ShopItem
     public $vendor;
 
     /**
-     * The value added tax for this product. The property must be set as a float
-     * value. At the moment only 0.00, 0.07 and 0.19 are supported.
+     * The value added tax for this product. The property must be set as a numerical
+     * value between 0 and 1. Default value is 0.19, the German default VAT.
      *
      * @var float
      */

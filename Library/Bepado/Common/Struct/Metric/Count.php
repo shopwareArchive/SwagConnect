@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 
 namespace Bepado\Common\Struct\Metric;
@@ -12,7 +12,7 @@ use \Bepado\Common\Struct\Metric;
 /**
  * Count metric
  *
- * @version $Revision$
+ * @version 1.0.129
  */
 class Count extends Metric
 {

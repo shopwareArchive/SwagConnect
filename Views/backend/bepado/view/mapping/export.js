@@ -30,9 +30,9 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                     xtype: 'treecolumn',
                     flex: 1,
                     dataIndex: 'text',
-                    text: '{s name=mapping/columns/category}Category{/s}'
+                    text: '{s name=mapping/columns/shopware-category}Shopware Category{/s}'
                 },{
-                    text: '{s name=mapping/columns/mapping}Mapping{/s}',
+                    text: '{s name=mapping/columns/bepado-category}bepado Category{/s}',
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {

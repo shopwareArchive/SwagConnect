@@ -104,7 +104,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
         if (!empty($product->categories)) {
             foreach ($product->categories as $mapping) {
                 /** @var Shopware\Models\Attribute\Category $attribute */
-                $attribute = $attributeRepository->findOneBy(array('bepadoMapping' => $mapping));
+                $attribute = $attributeRepository->findOneBy(array('bepadoExportMapping' => $mapping));
                 if ($attribute) {
                     $category = $attribute->getCategory();
                     if (!$this->doesArticleBelongToCategory($category, $id)) {

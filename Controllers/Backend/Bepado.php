@@ -306,14 +306,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     /**
      * Get all mappings for a given tree
      */
-    public function getMappingListAction()
+    public function getImportMappingListAction()
     {
         $node = (int)$this->Request()->getParam('node', 1);
         $repository = $this->getCategoryRepository();
 
         $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
-        $builder->add('select', 'ct.bepadoMapping as mapping', true);
+        $builder->add('select', 'ct.bepadoImportMapping as mapping', true);
 
         $builder->where('c.parentId = :parentId');
         $query = $builder->getQuery();
@@ -337,7 +337,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     /**
      * Save all mapped products
      */
-    public function setMappingListAction()
+    public function setImportMappingListAction()
     {
         $rows = $this->Request()->getPost('rows');
         if($rows === null) {
@@ -348,7 +348,58 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         foreach($rows as $row) {
             $result = $this->getCategoryModelById($row['id']);
             if($result !== null) {
-                $result->getAttribute()->setBepadoMapping($row['mapping']);
+                $result->getAttribute()->setBepadoImportMapping($row['mapping']);
+            }
+        }
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Get all mappings for a given tree
+     */
+    public function getExportMappingListAction()
+    {
+        $node = (int)$this->Request()->getParam('node', 1);
+        $repository = $this->getCategoryRepository();
+
+        $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
+        $builder->leftJoin('c.attribute', 'ct');
+        $builder->add('select', 'ct.bepadoExportMapping as mapping', true);
+
+        $builder->where('c.parentId = :parentId');
+        $query = $builder->getQuery();
+        $query->setParameter('parentId', $node);
+        $count = Shopware()->Models()->getQueryCount($query);
+
+        $data = $query->getArrayResult();
+
+        foreach ($data as &$category) {
+            $category['text'] = $category['name'];
+            $category['cls'] = 'folder';
+            $category['childrenCount'] = (int)$category['childrenCount'];
+            $category['leaf'] = empty($category['childrenCount']);
+        }
+
+        $this->View()->assign(array(
+            'success' => true, 'data' => $data, 'total' => $count
+        ));
+    }
+
+    /**
+     * Save all mapped products
+     */
+    public function setExportMappingListAction()
+    {
+        $rows = $this->Request()->getPost('rows');
+        if($rows === null) {
+            $rows = json_decode($this->Request()->getRawBody(), true);
+        }
+        $rows = !isset($rows[0]) ? array($rows) : $rows;
+        $helper = $this->getHelper();
+        foreach($rows as $row) {
+            $result = $this->getCategoryModelById($row['id']);
+            if($result !== null) {
+                $result->getAttribute()->setBepadoExportMapping($row['mapping']);
             }
         }
         Shopware()->Models()->flush();
@@ -374,7 +425,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         // The user might have changed the mapping without saving and then hit the "importCategories"
         // button. So we save the parent category's mapping first
         $parentCategory = $this->getCategoryModelById($toCategory);
-        $parentCategory->getAttribute()->setBepadoMapping($fromCategory);
+        $parentCategory->getAttribute()->setBepadoImportMapping($fromCategory);
         $entityManager->flush();
 
         try {
@@ -432,7 +483,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
             // Check if there is already a category attribute for this import
             $categoryAttributes = $entityManager->getRepository('\Shopware\Models\Attribute\Category')->findBy(
-                array('bepadoImported' => $importString, 'bepadoMapping' => $id),
+                array('bepadoImported' => $importString, 'bepadoImportMapping' => $id),
                 null,
                 1
             );
@@ -448,7 +499,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $category->setParent($parentModel);
 
                 $attribute = new \Shopware\Models\Attribute\Category();
-                $attribute->setBepadoMapping($id);
+                $attribute->setBepadoImportMapping($id);
                 $attribute->setBepadoImported($importString);
                 $category->setAttribute($attribute);
 
@@ -562,13 +613,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         // First of all try to save the mapping for the parent category. If that fails,
         // it mustn't be done for the child categories
         $parentCategory = $this->getCategoryModelById($categoryId);
-        $parentCategory->getAttribute()->setBepadoMapping($mapping);
+        $parentCategory->getAttribute()->setBepadoExportMapping($mapping);
         $entityManager->flush();
 
         // Don't set the children with models in order to speed things up
         $builder = $entityManager->createQueryBuilder();
         $builder->update('\Shopware\Models\Attribute\Category', 'categoryAttribute')
-            ->set('categoryAttribute.bepadoMapping',  $builder->expr()->literal($mapping))
+            ->set('categoryAttribute.bepadoExportMapping',  $builder->expr()->literal($mapping))
             ->where($builder->expr()->in('categoryAttribute.categoryId', $ids));
 
         $builder->getQuery()->execute();

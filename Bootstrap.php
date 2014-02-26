@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.8';
+        return '1.4.9';
     }
 
     /**
@@ -159,6 +159,17 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
 
+        // Split category mapping into mapping for import and export
+        if (version_compare($version, '1.4.8', '<=')) {
+            Shopware()->Models()->removeAttribute(
+                's_categories_attributes',
+                'bepado', 'mapping'
+            );
+            Shopware()->Models()->generateAttributeModels(array(
+                's_categories_attributes'
+            ));
+        }
+
         return true;
     }
 
@@ -258,7 +269,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         $modelManager->addAttribute(
             's_categories_attributes',
-            'bepado', 'mapping',
+            'bepado', 'import_mapping',
+            'text'
+        );
+
+        $modelManager->addAttribute(
+            's_categories_attributes',
+            'bepado', 'export_mapping',
             'text'
         );
 

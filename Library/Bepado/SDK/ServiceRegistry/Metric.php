@@ -113,7 +113,7 @@ class Metric extends Rpc\ServiceRegistry
     public function dispatch(Struct\RpcCall $rpcCall)
     {
         $start = microtime(true);
-        $version = SDK::VERSION === '1.0.129' ? 'dev' : SDK::VERSION;
+        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
 
         $response = new Struct\Response(
             array(

@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/main/mapping"}
-Ext.define('Shopware.apps.Bepado.store.main.Mapping', {
+//{block name="backend/bepado/store/mapping/export"}
+Ext.define('Shopware.apps.Bepado.store.mapping.Export', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,
@@ -11,8 +11,8 @@ Ext.define('Shopware.apps.Bepado.store.main.Mapping', {
     proxy : {
         type : 'ajax',
         api : {
-            read : '{url action=getMappingList}',
-            update: '{url action=setMappingList targetField=rows}'
+            read : '{url action=getExportMappingList}',
+            update: '{url action=setExportMappingList targetField=rows}'
         },
         reader : {
             type : 'json',

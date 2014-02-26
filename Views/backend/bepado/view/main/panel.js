@@ -28,6 +28,12 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-mapping',
                 itemId: 'mapping'
             }, {
+                xtype: 'bepado-mapping-import',
+                itemId: 'mapping-import'
+            }, {
+                xtype: 'bepado-mapping-export',
+                itemId: 'mapping-export'
+            }, {
                 xtype: 'bepado-export',
                 itemId: 'export'
             }, {

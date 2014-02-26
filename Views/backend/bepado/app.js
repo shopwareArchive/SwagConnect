@@ -6,13 +6,14 @@ Ext.define('Shopware.apps.Bepado', {
     loadPath: '{url action=load}',
     views: [
         'main.Window', 'main.Navigation', 'main.HomePage',
-        'main.Panel', 'main.Config', 'main.Mapping',
+        'main.Panel', 'main.Config',
         'export.Panel', 'import.Panel',
         'export.List', 'export.Filter',
         'import.List', 'import.Filter',
         'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
         'prices.Panel', 'prices.List',
+        'mapping.General', 'mapping.Export', 'mapping.Import',
     ],
     controllers: [ 'Main' ],
 

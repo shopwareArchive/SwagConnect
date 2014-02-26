@@ -1,9 +1,9 @@
 //{namespace name=backend/bepado/view/main}
 
-//{block name='backend/bepado/view/main/mapping'}
-Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
+//{block name='backend/bepado/view/main/mapping/export'}
+Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-mapping',
+    alias: 'widget.bepado-mapping-export',
 
     //border: false,
     layout: 'border',
@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Mapping', {
                     id: 1,
                     expanded: true
                 },
-                store: 'main.Mapping',
+                store: 'mapping.Export',
                 plugins: [{
                     ptype: 'cellediting',
                     pluginId: 'cellediting',

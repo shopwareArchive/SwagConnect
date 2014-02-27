@@ -6,7 +6,7 @@ Ext.define('Shopware.apps.Bepado', {
     loadPath: '{url action=load}',
     views: [
         'main.Window', 'main.Navigation', 'main.HomePage',
-        'main.Panel', 'main.Config', 'main.Mapping',
+        'main.Panel', 'main.Mapping',
         'export.Panel', 'import.Panel',
         'export.List', 'export.Filter',
         'import.List', 'import.Filter',

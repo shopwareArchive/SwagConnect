@@ -22,9 +22,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-config',
                 itemId: 'config'
             }, {
-                xtype: 'bepado-config-general',
-                itemId: 'config-general'
-            }, {
                 xtype: 'bepado-config-import',
                 itemId: 'config-import'
             }, {

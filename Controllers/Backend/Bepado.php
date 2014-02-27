@@ -258,7 +258,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $builder->addSelect(array(
             'at.exportStatus as exportStatus',
             'at.exportMessage as exportMessage',
-            'at.categories'
+            'at.category'
         ));
         $builder->andWhere('at.shopId IS NULL');
 

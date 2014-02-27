@@ -57,19 +57,10 @@ class BepadoExport
             );
             $bepadoAttribute->setExportMessage(null);
 
-            $categories = $this->helper->getRowProductCategoriesById($id);
-            // Don't allow vendor categories for export
-            $filteredCategories = array_filter($categories, function($category) {
-                return strpos($category, '/vendor/') !== 0 && $category != '/vendor';
-            });
-            $bepadoAttribute->setCategories(
-                serialize($filteredCategories)
+            $category = $this->helper->getBepadoCategoryForProduct($id);
+            $bepadoAttribute->setCategory(
+                $category
             );
-
-            if (empty($filteredCategories) && count($filteredCategories) != count($categories)) {
-                $removed = implode("\n", array_diff($categories, $filteredCategories));
-                $errors[] = " &bull; {$prefix} Ignoring these vendor-categories {$model->getName()}: {$removed}";
-            }
 
             if (!$bepadoAttribute->getId()) {
                 $this->manager->persist($bepadoAttribute);

@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.9';
+        return '1.4.12';
     }
 
     /**
@@ -168,6 +168,43 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Models()->generateAttributeModels(array(
                 's_categories_attributes'
             ));
+        }
+
+        // A product does only have one bepado category mapped
+        if (version_compare($version, '1.4.11', '<=')) {
+            try {
+                $sql = 'ALTER TABLE `s_plugin_bepado_items` change `categories` `category` text;';
+                Shopware()->Db()->exec($sql);
+            } catch (\Exception $e) {
+                // if table was already altered, ignore
+            }
+
+            // Get serialized categories -.-
+            $sql = 'SELECT id, category FROM `s_plugin_bepado_items` WHERE `category` LIKE "%{%" OR `category` = "N;"';
+            $rows = Shopware()->Db()->fetchAll($sql);
+
+            // Build values array with unserialized categories
+            $values = array();
+            foreach ($rows as $row) {
+                $category = unserialize($row['category']);
+                if (!empty($category) && is_array($category)) {
+                    $category = array_pop($category);
+                } else {
+                    $category = null;
+                }
+                $values[$row['id']] = $category;
+            }
+
+            // Update the category one by one. This is not optimal, but only affects a few beta testers
+            Shopware()->Db()->beginTransaction();
+            foreach ($values as $id => $value) {
+                Shopware()->Db()->query('UPDATE `s_plugin_bepado_items` SET `category` = ? WHERE id = ? ',
+                array(
+                    $category,
+                    $id
+                ));
+            }
+            Shopware()->Db()->commit();
         }
 
         return true;
@@ -657,7 +694,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
              `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
              `export_status` text COLLATE utf8_unicode_ci,
              `export_message` text COLLATE utf8_unicode_ci,
-             `categories` text COLLATE utf8_unicode_ci,
+             `category` text COLLATE utf8_unicode_ci,
              `purchase_price` double DEFAULT NULL,
              `fixed_price` int(1) DEFAULT NULL,
              `free_delivery` int(1) DEFAULT NULL,

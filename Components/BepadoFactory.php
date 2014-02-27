@@ -2,6 +2,7 @@
 
 namespace Shopware\Bepado\Components;
 
+use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Shopware\Bepado\Components\CategoryQuery\Sw40Query;
 use Bepado\SDK;
@@ -198,7 +199,7 @@ class BepadoFactory
      */
     public function getShopware41CategoryQuery()
     {
-        return new Sw41Query($this->getModelManager());
+        return new Sw41Query($this->getModelManager(), new RelevanceSorter());
     }
 
     /**

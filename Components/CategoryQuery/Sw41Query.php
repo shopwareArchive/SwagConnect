@@ -38,20 +38,34 @@ class Sw41Query extends SwQuery
     }
 
     /**
-     * Return bepado category mappings for a given product id
+     * Return bepado category mapping for the given product id
      *
      * @param $id
      * @return array
      */
-    public function getRowProductCategoriesById($id)
+    public function getBepadoCategoryForProduct($id)
     {
         $sql = 'SELECT ca.bepado_export_mapping FROM s_categories_attributes ca ' .
                'INNER JOIN s_articles_categories ac ON ca.categoryID = ac.categoryID ' .
                'WHERE ac.articleID = ?';
         $rows = Shopware()->Db()->fetchAll($sql, array($id));
 
-        return array_filter(array_map(function ($row) {
-            return $row['bepado_export_mapping'];
-        }, $rows));
+        $categories = array_filter(
+            array_map(
+                function ($row) {
+                    // Flatten the array
+                    return $row['bepado_export_mapping'];
+                },
+                $rows
+            ), function($category) {
+                // Don't allow vendor categories for export
+                return strpos($category, '/vendor/') !== 0 && $category != '/vendor';
+            }
+        );
+
+        usort($categories, array($this->relevanceSorter, 'sortBepadoCategoriesByRelevance'));
+
+        return array_pop($categories);
+
     }
 }

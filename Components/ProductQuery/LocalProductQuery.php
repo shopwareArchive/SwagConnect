@@ -81,7 +81,7 @@ class LocalProductQuery extends BaseProductQuery
             'u.unit',
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
-            'at.categories as categories',
+            'at.category as category',
             'at.fixedPrice as fixedPrice'
         ));
 

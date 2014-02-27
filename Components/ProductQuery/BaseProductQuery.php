@@ -101,9 +101,10 @@ abstract class BaseProductQuery
         }
 
         // Fix categories
-        if(is_string($row['categories'])) {
-            $row['categories'] = unserialize($row['categories']);
+        if(is_string($row['category'])) {
+            $row['categories'] = array($row['category']);
         }
+        unset($row['category']);
 
         // Fix prices
         foreach(array('price', 'purchasePrice', 'vat') as $name) {
@@ -120,7 +121,6 @@ abstract class BaseProductQuery
 
         // Fix dimensions
         $row = $this->prepareProductDimensions($row);
-
 
         return $row;
     }

@@ -10,11 +10,16 @@ interface CategoryQuery
      * @param $id
      * @return array
      */
-    public function getRowProductCategoriesById($id);
+    public function getBepadoCategoryForProduct($id);
 
     /**
      * @param Product $product
      * @return \Shopware\Models\Category\Category[]
      */
     public function getCategoriesByProduct(Product $product);
+
+    /**
+     * @return CategoryQuery\RelevanceSorter
+     */
+    public function getRelevanceSorter();
 }

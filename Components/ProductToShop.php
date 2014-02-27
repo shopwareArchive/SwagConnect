@@ -183,11 +183,10 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setShopId($product->shopId);
         $bepadoAttribute->setSourceId($product->sourceId);
         $bepadoAttribute->setExportStatus(null);
-        $bepadoAttribute->setCategories(serialize($product->categories));
         $bepadoAttribute->setPurchasePrice($product->purchasePrice);
         $bepadoAttribute->setFixedPrice($product->fixedPrice);
         $bepadoAttribute->setFreeDelivery($product->freeDelivery);
-        $bepadoAttribute->setCategories(serialize($product->categories));
+        $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
         $bepadoAttribute->setLastUpdateFlag($flag);
         $detail->setInStock($product->availability);
         $model->setLastStock(true);

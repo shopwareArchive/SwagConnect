@@ -35,13 +35,29 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
     border: false,
     layout: 'anchor',
+    autoScroll: true,
+
+    /**
+     * Contains the field set defaults.
+     */
+    defaults: {
+        labelWidth: 170,
+        anchor: '100%'
+    },
 
     snippets: {
         apiKeyHeader: '{s name=config/api_key}API-Key{/s}',
         apiKeyDescription: '{s name=config/api_key_description}{/s}',
         apiKeyCheck: '{s name=config/api_key_check}Überprüfen{/s}',
-        save: '{s name=cofig/save}Speichern{/s}',
-        cancel: '{s name=config/cancel}Zurücksetzen{/s}'
+        save: '{s name=config/save}Speichern{/s}',
+        cancel: '{s name=config/cancel}Zurücksetzen{/s}',
+        cloudSearchLabel: '{s name=config/cloud_search_label}Cloud-Search aktivieren{/s}',
+        detailPageHintLabel: '{s name=config/details_page_hint}Auf der Detailseite auf Marktplatz-Artikel hinweisen{/s}',
+        noIndexLabel: '{s name=config/noindex_label}Ein "noindex"-Meta-Tag bei Bepado-Produkten setzen{/s}',
+        basketHintLabel: '{s name=config/basket_hint_label}Im Warenkorb auf Marktplatz Artikel hinweisen{/s}',
+        bepadoAttributeLabel: '{s name=config/bepado_attribute_label}bepado Attribut{/s}',
+        alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternativer bepado Host (nur für Testzwecke){/s}',
+        logLabel: '{s name=config/log_label}Anfragen des bepado-Servers mitschreiben{/s}'
     },
 
     initComponent: function() {
@@ -67,11 +83,13 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     createElements: function(isDefaultShop) {
         var me = this,
             apiFieldset = me.getApiKeyFieldset(),
+            configFieldset = me.getConfigFieldset(),
             elements = [];
 
         if (isDefaultShop) {
             elements.push(apiFieldset);
         }
+        elements.push(configFieldset);
 
         return elements;
     },
@@ -152,6 +170,156 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         });
 
         return apiFieldset;
+    },
+
+    getConfigFieldset: function() {
+        var me = this;
+
+        var fieldset = Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            border: false,
+            defaults: {
+                labelWidth: 170,
+                anchor: '100%'
+            },
+            items: [
+                me.createLeftElements(),
+                me.createRightElements(),
+                me.createBottomElements()
+            ]
+        });
+
+        return fieldset;
+    },
+
+    /**
+     * Creates the field set items which displayed in the left column
+     * @return Array
+     */
+    createLeftElements: function () {
+        var me = this;
+
+        var leftContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            padding: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'cloudSearch',
+                    fieldLabel: me.snippets.cloudSearchLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }, {
+                    xtype: 'checkbox',
+                    name: 'detailShopInfo',
+                    fieldLabel: me.snippets.detailPageHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }
+            ]
+        });
+
+        return leftContainer;
+    },
+
+    /**
+     * Creates the field set items which displayed in the right column
+     * @return Array
+     */
+    createRightElements: function () {
+        var me = this;
+
+        var rightContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'detailProductNoIndex',
+                    fieldLabel: me.snippets.noIndexLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }, {
+                    xtype: 'checkbox',
+                    name: 'checkoutShopInfo',
+                    fieldLabel: me.snippets.basketHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }
+            ]
+        });
+
+        return rightContainer;
+    },
+
+    createBottomElements: function() {
+        var me = this;
+
+        var attributeStore = new Ext.data.ArrayStore({
+            fields: ['id', 'name'],
+            data : [
+                [1, 'attr1'],
+                [2, 'attr2'],
+                [3, 'attr3'],
+                [4, 'attr4'],
+                [5, 'attr5'],
+                [6, 'attr6'],
+                [7, 'attr7'],
+                [8, 'attr8'],
+                [9, 'attr9'],
+                [10, 'attr10'],
+                [11, 'attr11'],
+                [12, 'attr12'],
+                [13, 'attr13'],
+                [14, 'attr14'],
+                [15, 'attr15'],
+                [16, 'attr16'],
+                [17, 'attr17'],
+                [18, 'attr18'],
+                [19, 'attr19'],
+                [20, 'attr20']
+            ]
+        });
+
+        var bottomContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 1,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'combo',
+                    name: 'bepadoAttribute',
+                    required: true,
+                    editable: false,
+                    valueField: 'id',
+                    displayField: 'name',
+                    value: 19,
+                    fieldLabel: me.snippets.bepadoAttributeLabel,
+                    store: attributeStore,
+                    labelWidth: me.defaults.labelWidth
+                }, {
+                    xtype: 'textfield',
+                    name: 'bepadoDebugHost',
+                    fieldLabel: me.snippets.alternativeHostLabel
+                }, {
+                    xtype: 'checkbox',
+                    name: 'logRequest',
+                    fieldLabel: me.snippets.logLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }
+            ]
+        });
+
+        return bottomContainer;
     }
 });
 //{/block}

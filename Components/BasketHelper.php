@@ -692,17 +692,22 @@ class BasketHelper
                 'city' => 'Schöppingen',
                 'phone' => '+49 (0) 2555 92885-0',
                 'email' => 'info@shopware.com'
-            ))
-        ));
+            )),
+        // todo@dn: Remove this workaround
+        'orderShop' => $this->getDatabase()->fetchOne('
+            SELECT s_config FROM bepado_shop_config WHERE s_shop = "_self_"
+            ')
+     ));
 
-        foreach ($this->bepadoProducts as $shopId => $products) {
-            foreach ($products as $product) {
-                $dummyOrder->orderItems[] = new \Bepado\SDK\Struct\OrderItem(array(
-                    'count' => $this->getQuantityForProduct($product),
-                    'product' => $product,
-                ));
-            }
-        }
+     foreach ($this->bepadoProducts as $shopId => $products) {
+         $dummyOrder->providerShop = $shopId;
+         foreach ($products as $product) {
+             $dummyOrder->orderItems[] = new \Bepado\SDK\Struct\OrderItem(array(
+                 'count' => $this->getQuantityForProduct($product),
+                 'product' => $product,
+             ));
+         }
+     }
         return $dummyOrder;
     }
 }

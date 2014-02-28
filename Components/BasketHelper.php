@@ -357,10 +357,13 @@ class BasketHelper
                 $item['tax_rate'] = $tax;
             }
 
-            if (empty($item['tax_rate']) || empty($item["tax"])) continue; // Ignore 0 % tax
-
+            // Ignore 0 % tax
+            if (empty($item['tax_rate']) || empty($item["tax"])) {
+                continue;
+            }
             $taxKey = number_format(floatval($item['tax_rate']), 2);
             $result[$taxKey] += str_replace(',', '.', $item['tax']);
+
         }
 
         ksort($result, SORT_NUMERIC);
@@ -440,6 +443,12 @@ class BasketHelper
         // \Shopware_Models_Document_Order::processOrder
         // Therefore we need to round the net price
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
+
+        // todo@dn: Review: In which situations is this actually required?
+        // If the shipping cost tax rate is not calculated, yet, calculate it from the gross/net difference
+        if (empty($this->basket['sShippingcostsTax'])) {
+            $this->basket['sShippingcostsTax'] = round(($shippingCosts / $shippingCostsNet) * 100 - 100, 2);
+        }
 
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(array($this->getTaxRates($this->basket), $this->getBepadoTaxRates()));

@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.14';
+        return '1.4.15';
     }
 
     /**
@@ -675,6 +675,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            CREATE TABLE IF NOT EXISTS `bepado_shipping_costs` (
+              `sc_from_shop` VARCHAR(32) NOT NULL,
+              `sc_to_shop` VARCHAR(32) NOT NULL,
+              `sc_revision` VARCHAR(32) NOT NULL,
+              `sc_shipping_costs` LONGBLOB NOT NULL,
+              `changed` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`sc_from_shop`, `sc_to_shop`),
+              INDEX (`sc_revision`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (
               `id` int(11) NOT NULL AUTO_INCREMENT,

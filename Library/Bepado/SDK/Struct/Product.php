@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Struct class, representing products
  *
- * @version 1.0.129
+ * @version 1.1.133
  * @api
  */
 class Product extends ShopItem
@@ -35,7 +35,12 @@ class Product extends ShopItem
     const ATTRIBUTE_DIMENSION = 'dimension';
 
     /**
-     * Describes the unit of this product, for example "Kg" or "ml"
+     * Describes the unit of this product, for example "kg" or "ml".
+     *
+     * Has to be a unit from the available units defined in
+     * {@see \Bepado\SDK\Units::$units}.
+     *
+     * To check if a unit is avialable call {Bepado\SDK\Units::exists($unit)}.
      */
     const ATTRIBUTE_UNIT = 'unit';
 

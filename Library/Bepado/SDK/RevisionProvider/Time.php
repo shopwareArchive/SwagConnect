@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\RevisionProvider;
@@ -13,7 +13,7 @@ use Bepado\SDK\RevisionProvider;
  * Time and iteration based revision provider, which provides ordered revisions 
  * for non-clustered systems.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class Time extends RevisionProvider
 {

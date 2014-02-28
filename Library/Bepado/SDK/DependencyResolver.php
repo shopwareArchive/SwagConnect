@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK;
@@ -167,6 +167,11 @@ class DependencyResolver
     protected $requestSigner;
 
     /**
+     * @var ShippingCostCalculator
+     */
+    protected $shippingCostCalculator;
+
+    /**
      * @var string
      */
     protected $pluginSoftwareVersion;
@@ -294,7 +299,17 @@ class DependencyResolver
                     $this->fromShop,
                     $this->gateway,
                     $this->getLogger(),
-                    $this->gateway
+                    $this->gateway,
+                    $this->getShippingCostCalculator()
+                )
+            );
+
+            $this->registry->registerService(
+                'shippingCosts',
+                array('lastRevision', 'replicate'),
+                new Service\ShippingCosts(
+                    $this->gateway,
+                    $this->getShippingCostCalculator()
                 )
             );
         }
@@ -401,12 +416,29 @@ class DependencyResolver
                 $this->toShop,
                 $this->getLogger(),
                 $this->errorHandler,
-                new ShippingCostCalculator($this->gateway),
+                $this->getShippingCostCalculator(),
                 $this->gateway
             );
         }
 
         return $this->shoppingService;
+    }
+
+    public function getShippingCostCalculator()
+    {
+        if ($this->shippingCostCalculator === null) {
+            if ($this->gateway->isFeatureEnabled('shipping_rules')) {
+                $this->shippingCostCalculator = new ShippingCostCalculator\RuleCalculator(
+                    $this->gateway
+                );
+            } else {
+                $this->shippingCostCalculator = new ShippingCostCalculator\GlobalConfigCalculator(
+                    $this->gateway
+                );
+            }
+        }
+
+        return $this->shippingCostCalculator;
     }
 
     /**
@@ -532,7 +564,7 @@ class DependencyResolver
      */
     public function getHttpClient($server)
     {
-        $version = SDK::VERSION === '$Revision$' ? 'dev' : SDK::VERSION;
+        $version = strpos(SDK::VERSION, '$') === 0 ? 'dev' : SDK::VERSION;
 
         $headers = array(
             'X-Bepado-SDK-Version: ' . $version,

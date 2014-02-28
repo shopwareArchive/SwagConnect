@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct\SearchResult;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Struct class representing a product in a search result
  *
- * @version 1.0.129
+ * @version 1.1.133
  * @api
  */
 class Product extends Struct

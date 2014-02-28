@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK;
@@ -13,7 +13,7 @@ namespace Bepado\SDK;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.0.129
+ * @version 1.1.133
  * @api
  */
 abstract class Gateway implements
@@ -21,6 +21,7 @@ abstract class Gateway implements
     Gateway\ProductGateway,
     Gateway\RevisionGateway,
     Gateway\ShopConfiguration,
-    Gateway\ReservationGateway
+    Gateway\ReservationGateway,
+    Gateway\ShippingCosts
 {
 }

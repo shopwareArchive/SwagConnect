@@ -2,18 +2,19 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
 
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCosts\Rules;
 
 /**
  * Default MySQLi implementation of the storage gateway
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class MySQLi extends Gateway
 {
@@ -617,7 +618,6 @@ class MySQLi extends Gateway
                 `r_id` = "' . $this->connection->real_escape_string($reservationId) . '";'
         );
 
-        $changes = array();
         $rows = $result->fetch_all();
         if (!count($rows)) {
             throw new \OutOfBoundsException("Reservation $reservationId not found.");
@@ -675,6 +675,120 @@ class MySQLi extends Gateway
     }
 
     /**
+     * Get last revision
+     *
+     * @return string
+     */
+    public function getLastShippingCostsRevision()
+    {
+        $result = $this->connection->query(
+            'SELECT
+                MAX(`sc_revision`)
+            FROM
+                `bepado_shipping_costs`'
+        );
+
+        $rows = $result->fetch_all();
+        if (!count($rows)) {
+            return null;
+        }
+
+        return $rows[0][0];
+    }
+
+    /**
+     * Store shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @param string $revision
+     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @return void
+     */
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts)
+    {
+        $this->connection->query(
+            'INSERT INTO
+                bepado_shipping_costs (
+                    `sc_from_shop`,
+                    `sc_to_shop`,
+                    `sc_revision`,
+                    `sc_shipping_costs`
+                )
+            VALUES (
+               "' . $this->connection->real_escape_string($fromShop) . '",
+               "' . $this->connection->real_escape_string($toShop) . '",
+               "' . $this->connection->real_escape_string($revision) . '",
+               "' . $this->connection->real_escape_string(serialize($shippingCosts)) . '"
+            )
+            ON DUPLICATE KEY UPDATE
+                `sc_revision` = "' . $this->connection->real_escape_string($revision) . '",
+                `sc_shipping_costs` = "' . $this->connection->real_escape_string(serialize($shippingCosts)) . '"
+            ;'
+        );
+    }
+
+    /**
+     * Get shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @return \Bepado\SDK\ShippingCosts\Rules
+     */
+    public function getShippingCosts($fromShop, $toShop)
+    {
+        $result = $this->connection->query(
+            'SELECT
+                `sc_shipping_costs`
+            FROM
+                `bepado_shipping_costs`
+            WHERE
+                `sc_from_shop` = "' . $this->connection->real_escape_string($fromShop) . '" AND
+                `sc_to_shop` = "' . $this->connection->real_escape_string($toShop) . '"
+            ORDER BY `sc_revision` DESC
+            LIMIT 1'
+        );
+
+        $rows = $result->fetch_all();
+
+        if (!count($rows)) {
+            throw new \OutOfBoundsException("Shipping costs for shops $fromShop-$toShop not found.");
+        }
+
+        return unserialize($rows[0][0]);
+    }
+
+    /**
+     * Set all the enabled features.
+     *
+     * @param array<string>
+     */
+    public function setEnabledFeatures(array $features)
+    {
+        $this->setConfig(
+            '_features_',
+            strtolower(implode(',', $features))
+        );
+    }
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $featureName
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        $features = $this->getConfig('_features_');
+
+        if ($features === null) {
+            return false;
+        }
+
+        return in_array($feature, explode(',', $features));
+    }
+
+    /**
      * Set the last revision of the category tree that the SDK has seen.
      *
      * @param string
@@ -726,7 +840,7 @@ class MySQLi extends Gateway
 
         $rows = $result->fetch_all(\MYSQLI_ASSOC);
         if (!count($rows)) {
-            return false;
+            return null;
         }
 
         return $rows[0]['s_config'];

@@ -42,12 +42,9 @@ class BasketHelper
     protected $bepadoShops = array();
 
     /**
-     * Shipping costs of bepado products
-     *
-     * @var array
+     * @var \Bepado\SDK\Struct\TotalShippingCosts
      */
-    protected $bepadoGrossShippingCosts = array();
-    protected $bepadoNetShippingCosts = array();
+    protected $totalShippingCosts;
 
     /**
      * The original shopware shipping costs
@@ -102,13 +99,14 @@ class BasketHelper
     /**
      * Prepare the basket for bepado
      *
+     * @param string $currentDefaultCountry ISO-3 code
      * @return array
      */
-    public function prepareBasketForBepado()
+    public function prepareBasketForBepado($currentDefaultCountry = 'DEU')
     {
         $this->buildProductsArray();
         $this->buildShopsArray();
-        $this->buildShippingCostsArray();
+        $this->buildShippingCostsArray($currentDefaultCountry);
     }
 
     /**
@@ -159,19 +157,33 @@ class BasketHelper
     /**
      * Build array of shipping costs
      */
-    protected function buildShippingCostsArray()
+    protected function buildShippingCostsArray($currentDefaultCountry)
     {
         $this->bepadoGrossShippingCosts = array();
         $this->bepadoNetShippingCosts = array();
         $this->originalShippingCosts = 0;
 
-        // Calculate bepado shipping costs
-        foreach($this->bepadoProducts as $shopId => $products) {
-            /** @var \Bepado\SDK\Struct\ShippingCosts $shippingCosts */
-            $shippingCosts = $this->getSdk()->calculateShippingCosts($products);
-            $this->bepadoGrossShippingCosts[$shopId] = $shippingCosts->grossShippingCosts;
-            $this->bepadoNetShippingCosts[$shopId] = $shippingCosts->shippingCosts;
+        $dummyOrder = $this->createDummyOrderForShippingCostCalculation($currentDefaultCountry);
+
+        $this->totalShippingCosts = $this->getSdk()->calculateShippingCosts($dummyOrder);
+    }
+
+    /**
+     * Returns the quantity of a given product in the sw basket
+     *
+     * @param SDK\Struct\Product $product
+     * @return mixed
+     */
+    public function getQuantityForProduct(SDK\Struct\Product $product)
+    {
+        if (isset($this->bepadoContent[$product->shopId]) &&
+            isset($this->bepadoContent[$product->shopId][$product->sourceId])
+        ) {
+
+            return (int) $this->bepadoContent[$product->shopId][$product->sourceId]['quantity'];
         }
+
+        return 1;
     }
 
     /**
@@ -406,8 +418,8 @@ class BasketHelper
      */
     public function recalculate()
     {
-        $shippingCostsNet = array_sum($this->getBepadoNetShippingCosts());
-        $shippingCosts = array_sum($this->getBepadoGrossShippingCosts());
+        $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
+        $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
@@ -618,27 +630,16 @@ class BasketHelper
     }
 
     /**
-     * @param array $bepadoShippingCosts
-     */
-    public function setBepadoShippingCosts($bepadoShippingCosts)
-    {
-        $this->bepadoGrossShippingCosts = $bepadoShippingCosts;
-    }
-
-    /**
      * @return array
      */
     public function getBepadoGrossShippingCosts()
     {
-        return $this->bepadoGrossShippingCosts;
-    }
-
-    /**
-     * @return array
-     */
-    public function getBepadoNetShippingCosts()
-    {
-        return $this->bepadoNetShippingCosts;
+        return array_map(
+            function (ShippingCost $cost) {
+                return $cost->grossShippingCosts;
+            },
+            $this->totalShippingCosts->shops
+        );
     }
 
     /**
@@ -673,6 +674,35 @@ class BasketHelper
         return $this->database;
     }
 
+    /**
+     * Creates a dummy order struct for the SDK's shipping cost calculation
+     *
+     * @param $currentDefaultCountry
+     * @return SDK\Struct\Order
+     */
+    protected function createDummyOrderForShippingCostCalculation($currentDefaultCountry)
+    {
+        $dummyOrder = new \Bepado\SDK\Struct\Order(array(
+            'deliveryAddress' => new \Bepado\SDK\Struct\Address(array(
+                'country' => $currentDefaultCountry,
+                'firstName' => 'Shopware',
+                'surName' => 'AG',
+                'street' => 'Eggeroder Str. 6',
+                'zip' => '48624',
+                'city' => 'Schöppingen',
+                'phone' => '+49 (0) 2555 92885-0',
+                'email' => 'info@shopware.com'
+            ))
+        ));
 
-
+        foreach ($this->bepadoProducts as $shopId => $products) {
+            foreach ($products as $product) {
+                $dummyOrder->orderItems[] = new \Bepado\SDK\Struct\OrderItem(array(
+                    'count' => $this->getQuantityForProduct($product),
+                    'product' => $product,
+                ));
+            }
+        }
+        return $dummyOrder;
+    }
 }

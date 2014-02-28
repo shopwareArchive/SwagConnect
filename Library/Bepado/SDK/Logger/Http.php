@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Logger;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Base class for logger implementations
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class Http extends Logger
 {

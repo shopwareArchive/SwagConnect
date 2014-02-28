@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Service;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Service to store configuration updates
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class Configuration
 {
@@ -38,9 +38,12 @@ class Configuration
     /**
      * Store shop configuration updates
      *
+     * @param array $configurations
+     * @param array $features
+     *
      * @return void
      */
-    public function update(array $configurations)
+    public function update(array $configurations, array $features = null)
     {
         foreach ($configurations as $configuration) {
             $this->configuration->setShopConfiguration(
@@ -56,6 +59,10 @@ class Configuration
                     )
                 )
             );
+        }
+
+        if (is_array($features)) {
+            $this->configuration->setEnabledFeatures($features);
         }
     }
 

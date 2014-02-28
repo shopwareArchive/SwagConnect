@@ -116,6 +116,11 @@ abstract class BaseProductQuery
             unset ($row['weight']);
         }
 
+        // Make sure that there is a unit
+        if ($row['unit'] === null) {
+            unset ($row['unit']);
+        }
+
         // Fix attributes
         $row['attributes'] = array();
         foreach ($this->attributeMapping as $swField => $bepadoField) {

@@ -2,18 +2,19 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
 
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCosts\Rules;
 
 /**
  * PDO implementation of the storage gateway
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class PDO extends Gateway
 {
@@ -657,5 +658,115 @@ class PDO extends Gateway
         }
 
         return $config;
+    }
+
+    /**
+     * Get last revision
+     *
+     * @return string
+     */
+    public function getLastShippingCostsRevision()
+    {
+        $query = $this->connection->prepare(
+            'SELECT
+                MAX(`sc_revision`)
+            FROM
+                `' . $this->tableName('shipping_costs') . '`'
+        );
+        $query->execute();
+
+        $revision = $query->fetchColumn();
+        if ($revision === false) {
+            return null;
+        }
+
+        return $revision;
+    }
+
+    /**
+     * Store shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @param string $revision
+     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @return void
+     */
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts)
+    {
+        $query = $this->connection->prepare(
+            'INSERT INTO
+                ' . $this->tableName('shipping_costs') . ' (
+                    `sc_from_shop`,
+                    `sc_to_shop`,
+                    `sc_revision`,
+                    `sc_shipping_costs`
+                )
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                `sc_revision` = VALUES(`sc_revision`),
+                `sc_shipping_costs` = VALUES(`sc_shipping_costs`)
+            ;'
+        );
+        $query->execute(array($fromShop, $toShop, $revision, serialize($shippingCosts)));
+    }
+
+    /**
+     * Get shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @return \Bepado\SDK\ShippingCosts\Rules
+     */
+    public function getShippingCosts($fromShop, $toShop)
+    {
+        $query = $this->connection->prepare(
+            'SELECT
+                `sc_shipping_costs`
+            FROM
+                `' . $this->tableName('shipping_costs') . '`
+            WHERE
+                `sc_from_shop` = ? AND `sc_to_shop` = ?
+            ORDER BY `sc_revision` DESC
+            LIMIT 1'
+        );
+        $query->execute(array($fromShop, $toShop));
+
+        $costs = $query->fetchColumn();
+        if ($costs === false) {
+            return array();
+        }
+
+        return unserialize($costs);
+    }
+
+    /**
+     * Set all the enabled features.
+     *
+     * @param array<string>
+     */
+    public function setEnabledFeatures(array $features)
+    {
+        $this->setConfig(
+            '_features_',
+            strtolower(implode(',', $features))
+        );
+    }
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $featureName
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        $features = $this->getConfig('_features_');
+
+        if ($features === null) {
+            return false;
+        }
+
+        return in_array($feature, explode(',', $features));
     }
 }

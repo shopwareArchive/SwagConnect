@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK;
@@ -10,7 +10,7 @@ namespace Bepado\SDK;
 /**
  * Abstract base class for revision providers
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 abstract class RevisionProvider
 {

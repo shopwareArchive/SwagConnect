@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\Common\Struct;
@@ -13,7 +13,7 @@ use Bepado\Common\Common;
 /**
  * Struct class representing a message
  *
- * @version 1.0.129
+ * @version 1.1.133
  * @api
  */
 class Response extends Struct

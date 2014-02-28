@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class Product extends Verificator
 {
@@ -99,6 +99,44 @@ class Product extends Verificator
             if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_WEIGHT])) {
                 throw new \RuntimeException("Product Weight Attribute has to be a number.");
             }
+        }
+
+        if (array_key_exists(Struct\Product::ATTRIBUTE_UNIT, $struct->attributes)) {
+            $this->validateUnit($struct);
+        }
+    }
+
+    private function validateUnit($struct)
+    {
+        if (!\Bepado\SDK\Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
+            throw new \RuntimeException(sprintf(
+                "Unit has to be one value from the available Bepado units, %s given",
+                $struct->attributes[Struct\Product::ATTRIBUTE_UNIT]
+            ));
+        }
+
+        if (!array_key_exists(Struct\Product::ATTRIBUTE_QUANTITY, $struct->attributes)) {
+            throw new \RuntimeException(
+                "When unit is given for product, specifying the quantity is required."
+            );
+        }
+
+        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_QUANTITY])) {
+            throw new \RuntimeException(
+                "Product Quantity Attribute has to be an integer."
+            );
+        }
+
+        if (!array_key_exists(Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY, $struct->attributes)) {
+            throw new \RuntimeException(
+                "When unit is given for product, specifying the reference quantity is required."
+            );
+        }
+
+        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
+            throw new \RuntimeException(
+                "Product Quantity Attribute has to be an integer."
+            );
         }
     }
 }

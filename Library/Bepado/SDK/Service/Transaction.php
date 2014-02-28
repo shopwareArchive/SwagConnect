@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Service;
@@ -11,11 +11,12 @@ use Bepado\SDK\ProductFromShop;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Logger;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCostCalculator;
 
 /**
  * Service to maintain transactions
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 class Transaction
 {
@@ -48,6 +49,13 @@ class Transaction
     protected $shopConfiguration;
 
     /**
+     * Shipping cost calculator
+     *
+     * @var ShippingCostCalculator
+     */
+    protected $calculator;
+
+    /**
      * COnstruct from gateway
      *
      * @param ProductFromShop $fromShop
@@ -59,12 +67,14 @@ class Transaction
         ProductFromShop $fromShop,
         Gateway\ReservationGateway $reservations,
         Logger $logger,
-        Gateway\ShopConfiguration $shopConfiguration
+        Gateway\ShopConfiguration $shopConfiguration,
+        ShippingCostCalculator $calculator
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
         $this->logger = $logger;
         $this->shopConfiguration = $shopConfiguration;
+        $this->calculator = $calculator;
     }
 
     /**
@@ -213,6 +223,31 @@ class Transaction
             ),
             $order->orderShop
         );
+
+        $myShippingCosts = $this->calculator->calculateShippingCosts($order);
+
+        if (!$myShippingCosts->isShippable) {
+            return new Struct\Message(array(
+                'message' => 'Products cannot be shipped to %country.',
+                'values' => array(
+                    'country' => $order->deliveryAddress->country
+                )
+            ));
+        }
+
+        if (!$this->floatsEqual($order->shippingCosts, $myShippingCosts->shippingCosts) ||
+            !$this->floatsEqual($order->grossShippingCosts, $myShippingCosts->grossShippingCosts)) {
+
+            return new Struct\Message(
+                array(
+                    'message' => "Shipping costs have changed from %oldValue to %newValue.",
+                    'values' => array(
+                        'oldValue' => round($order->grossShippingCosts, 2),
+                        'newValue' => round($myShippingCosts->grossShippingCosts, 2),
+                    ),
+                )
+            );
+        }
 
         if ($verify !== true) {
             return $verify;

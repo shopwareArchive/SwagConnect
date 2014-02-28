@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK;
@@ -17,7 +17,12 @@ use Bepado\SDK\Struct\Shop;
  * dispatched to this class. It constructs the required helper classes as
  * required.
  *
- * @version 1.0.129
+ * NOTICE: Use the \Bepado\SDK\SDKBuilder to create an instance of the SDK.
+ * This handles all the complexity of creating the different dependencies.
+ * The constructor may change in the future, using the SDKBuilder is
+ * required to implement a supported plugin.
+ *
+ * @version 1.1.133
  * @api
  */
 final class SDK
@@ -53,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.0.129';
+    const VERSION = '1.1.133';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -300,18 +305,16 @@ final class SDK
      *
      * Calculate shipping costs for the given set of products.
      *
-     * @param Struct\Product[] $products
-     * @return Struct\ShippingCosts
+     * @param Struct\Order $order
+     * @return Struct\TotalShippingCosts
      */
-    public function calculateShippingCosts(array $products)
+    public function calculateShippingCosts(Struct\Order $order)
     {
         $this->verifySdk();
 
-        $productList = new Struct\ProductList(array('products' => $products));
+        $this->dependencies->getVerificator()->verify($order);
 
-        $this->dependencies->getVerificator()->verify($productList);
-
-        return $this->dependencies->getShoppingService()->calculateShippingCosts($productList);
+        return $this->dependencies->getShoppingService()->calculateShippingCosts($order);
     }
 
     /**
@@ -351,19 +354,21 @@ final class SDK
      * last chance to verify that everything is OK with the order.
      *
      * If the product data change in a relevant way, this method will not
-     * reserve the products, but instead return a Struct\Message, which should
-     * be ACK'ed by the user. Afterwards another reservation may be issued.
+     * reserve the products, but instead the messages property will contain
+     * messages, which should be displayed to the user and the success property
+     * will be false. The messages should be ACK'ed by the user. Afterwards
+     * another reservation may be issued.
      *
-     * If The reservation of the product set succeeded a hash of reservation
-     * IDs for all involved shops will be returned. This hash must be stored in
-     * the shop for all further transactions. The session is probably the best
-     * location for this.
+     * If The reservation of the product set succeeded the orders in the
+     * reservation struct will have a reservationID set. The reservation struct
+     * should be sored in the shop for the checkout process. The session is
+     * probably the best location for this.
      *
      * If data updated are detected, the local product database will be updated
      * accordingly.
      *
      * @param Struct\Order $order
-     * @return mixed
+     * @return Struct\Reservation
      */
     public function reserveProducts(Struct\Order $order)
     {
@@ -392,6 +397,24 @@ final class SDK
     public function checkout(Struct\Reservation $reservation, $orderId)
     {
         $this->verifySdk();
+
+        if (!$reservation->success ||
+            count($reservation->messages) ||
+            !array_reduce(
+                array_map(
+                    function (Struct\Order $order) {
+                        return $order->reservationId;
+                    },
+                    $reservation->orders
+                ),
+                function ($old, $reservationID) {
+                    return $old && $reservationID;
+                },
+                true
+            )) {
+            throw new \RuntimeException("Invalid reservation provided.");
+        }
+
         return $this->dependencies->getShoppingService()->checkout($reservation, $orderId);
     }
 

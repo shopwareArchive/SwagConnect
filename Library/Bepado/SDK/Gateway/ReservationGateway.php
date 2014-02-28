@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.0.129
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Gateway interface to maintain product hashes and exported products
  *
- * @version 1.0.129
+ * @version 1.1.133
  * @api
  */
 interface ReservationGateway

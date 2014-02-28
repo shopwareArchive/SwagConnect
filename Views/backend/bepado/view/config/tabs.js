@@ -23,24 +23,27 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
     createItems: function() {
         var me = this;
 
+        me.shopStore = me.subApp.getController('Main').shopStore;
 
-        me.tab1 = Ext.create('Ext.form.Panel', {
-            autoScroll: true,
-            title: 'Tab 1',
-            border: false,
-            layout: 'fit',
-            items: []
+        var tabs = [];
+        me.shopStore.each(function() {
+            var record = this;
+
+            me.generalForm = Ext.create('Shopware.apps.Bepado.view.config.general.Form', {
+                defaultShop: record.get('default')
+            });
+
+            var tab = Ext.create('Ext.form.Panel', {
+                autoScroll: true,
+                title: record.get('name'),
+                border: false,
+                layout: 'fit',
+                items: [ me.generalForm ]
+            });
+
+            tabs.push(tab);
         });
-
-        me.tab2 = Ext.create('Ext.form.Panel', {
-            autoScroll: true,
-            title: 'Tab 2',
-            border: false,
-            layout: 'fit',
-            items: []
-        });
-
-        return [me.tab1, me.tab2];
+        return tabs;
     }
 });
 //{/block}

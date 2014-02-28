@@ -57,7 +57,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
 
         descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.general.Description');
 
-        return [ descriptionFieldset ];
+        return [ descriptionFieldset, { xtype: 'bepado-config-tabs' } ];
     }
 });
 //{/block}

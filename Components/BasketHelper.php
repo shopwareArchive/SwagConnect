@@ -700,6 +700,7 @@ class BasketHelper
      ));
 
      foreach ($this->bepadoProducts as $shopId => $products) {
+         // todo@dn: Remove this workaround
          $dummyOrder->providerShop = $shopId;
          foreach ($products as $product) {
              $dummyOrder->orderItems[] = new \Bepado\SDK\Struct\OrderItem(array(

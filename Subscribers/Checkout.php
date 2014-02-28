@@ -228,6 +228,7 @@ class Checkout extends BaseSubscriber
                 $messages = $reservation->messages;
             }
         } catch (\Exception $e) {
+            $this->getLogger()->write(true, 'Error during reservation', $e, 'reservation');
             $messages = $this->getNotAvailableMessageForProducts(array_map(
                 function ($orderItem) {
                     return $orderItem->product;

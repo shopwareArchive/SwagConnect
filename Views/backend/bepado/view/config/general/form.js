@@ -63,7 +63,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     initComponent: function() {
         var me = this;
 
-        me.items = me.createElements(me.defaultShop);
+        me.items = me.createElements();
         me.dockedItems = [{
                 xtype: 'toolbar',
                 dock: 'bottom',
@@ -86,13 +86,13 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      * @param isDefaultShop
      * @return Array
      */
-    createElements: function(isDefaultShop) {
+    createElements: function() {
         var me = this,
             apiFieldset = me.getApiKeyFieldset(),
             configFieldset = me.getConfigFieldset(),
             elements = [];
 
-        if (isDefaultShop) {
+        if (me.defaultShop) {
             elements.push(apiFieldset);
         }
         elements.push(configFieldset);
@@ -183,7 +183,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      * @return Ext.form.FieldSet
      */
     getConfigFieldset: function() {
-        var me = this;
+        var me = this,
+            items = [],
+            leftElements = me.createLeftElements(),
+            rightElements = me.createRightElements();
+
+        items.push(leftElements);
+        items.push(rightElements);
+
+        if (me.defaultShop) {
+            var bottomElements = me.createBottomElements();
+            items.push(bottomElements);
+        }
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
             layout: 'column',
@@ -192,11 +203,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 labelWidth: 170,
                 anchor: '100%'
             },
-            items: [
-                me.createLeftElements(),
-                me.createRightElements(),
-                me.createBottomElements()
-            ]
+            items: items
         });
 
         return fieldset;

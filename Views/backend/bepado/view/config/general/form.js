@@ -72,6 +72,12 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 items: me.getFormButtons()
             }];
 
+        me.generalConfigStore = Ext.create('Shopware.apps.Bepado.store.config.General');
+        me.generalConfigStore.load();
+        me.generalConfigStore.on('load', function() {
+            me.populateForm();
+        });
+
         me.callParent(arguments);
     },
 
@@ -172,6 +178,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         return apiFieldset;
     },
 
+    /**
+     * Creates the field set which displayed
+     * @return Ext.form.FieldSet
+     */
     getConfigFieldset: function() {
         var me = this;
 
@@ -193,8 +203,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which displayed in the left column
-     * @return Array
+     * Creates the field set items which are displayed in the left column
+     * @return Ext.container.Container
      */
     createLeftElements: function () {
         var me = this;
@@ -227,8 +237,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which displayed in the right column
-     * @return Array
+     * Creates the field set items which are displayed in the right column
+     * @return Ext.container.Container
      */
     createRightElements: function () {
         var me = this;
@@ -259,6 +269,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         return rightContainer;
     },
 
+    /**
+     * Creates the field set items which are displayed in the bottom
+     * @return Ext.container.Container
+     */
     createBottomElements: function() {
         var me = this;
 
@@ -320,6 +334,17 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         });
 
         return bottomContainer;
+    },
+
+    /**
+     * Find general config record by id
+     * and load into form
+     */
+    populateForm: function() {
+        var me = this,
+            record = me.generalConfigStore.getById(me.shopId);
+
+        me.loadRecord(record);
     }
 });
 //{/block}

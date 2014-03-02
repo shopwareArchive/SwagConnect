@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
             var record = this;
 
             me.generalForm = Ext.create('Shopware.apps.Bepado.view.config.general.Form', {
+                shopId: record.get('id'),
                 defaultShop: record.get('default')
             });
 

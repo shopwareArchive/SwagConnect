@@ -146,6 +146,42 @@ class Config
     }
 
     /**
+     * Helper function which returns general configuration
+     * for each shop.
+     *
+     * @return array
+     */
+    public function getGeneralConfigArrays()
+    {
+        $configsArray = array();
+
+        $shops = $this->getShopRepository()->findAll();
+        /** @var \Shopware\Models\Shop\Shop $shop */
+
+        foreach ($shops as $shop) {
+            $shopId = $shop->getId();
+            $shopConfig = array();
+
+            if ($shop->getDefault() === false) {
+                $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+                          WHERE `shopId` = $shopId AND `groupName` = 'general'";
+                $shopConfig['shopId'] = $shopId;
+                $shopConfig['isDefaultShop'] = $shop->getDefault();
+            } else {
+                $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+                WHERE `shopId` IS NULL AND `groupName` = 'general'";
+                $shopConfig['shopId'] = $shopId;
+                $shopConfig['isDefaultShop'] = $shop->getDefault();
+            }
+
+            $result = Shopware()->Db()->fetchPairs($query);
+            $configsArray[] = array_merge($shopConfig, $result);
+        }
+
+        return $configsArray;
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

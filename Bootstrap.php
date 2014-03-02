@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.7';
+        return '1.5.1';
     }
 
     /**
@@ -167,21 +167,21 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
             $apiKey = $this->Config()->get('apiKey');
             if ($apiKey) {
-                $configComponent->setConfig('apiKey', $apiKey);
+                $configComponent->setConfig('apiKey', $apiKey, null, 'general');
             }
 
             $bepadoDebugHost = $this->Config()->get('bepadoDebugHost');
             if ($bepadoDebugHost) {
-                $configComponent->setConfig('bepadoDebugHost', $bepadoDebugHost);
+                $configComponent->setConfig('bepadoDebugHost', $bepadoDebugHost, null, 'general');
             }
 
             $configComponent->setConfig('importCreateCategories', $this->Config()->get('importCreateCategories'));
-            $configComponent->setConfig('detailProductNoIndex', $this->Config()->get('detailProductNoIndex'));
-            $configComponent->setConfig('detailShopInfo', $this->Config()->get('detailShopInfo'));
-            $configComponent->setConfig('checkoutShopInfo', $this->Config()->get('checkoutShopInfo'));
-            $configComponent->setConfig('cloudSearch', $this->Config()->get('cloudSearch'));
+            $configComponent->setConfig('detailProductNoIndex', $this->Config()->get('detailProductNoIndex'), null, 'general');
+            $configComponent->setConfig('detailShopInfo', $this->Config()->get('detailShopInfo'), null, 'general');
+            $configComponent->setConfig('checkoutShopInfo', $this->Config()->get('checkoutShopInfo'), null, 'general');
+            $configComponent->setConfig('cloudSearch', $this->Config()->get('cloudSearch'), null, 'general');
             $configComponent->setConfig('alternateDescriptionField', $this->Config()->get('alternateDescriptionField'));
-            $configComponent->setConfig('bepadoAttribute', $this->Config()->get('bepadoAttribute'));
+            $configComponent->setConfig('bepadoAttribute', $this->Config()->get('bepadoAttribute'), null, 'general');
             $configComponent->setConfig('importImagesOnFirstImport', $this->Config()->get('importImagesOnFirstImport'));
             $configComponent->setConfig('autoUpdateProducts', $this->Config()->get('autoUpdateProducts'));
             $configComponent->setConfig('overwriteProductName', $this->Config()->get('overwriteProductName'));
@@ -189,7 +189,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $configComponent->setConfig('overwriteProductImage', $this->Config()->get('overwriteProductImage'));
             $configComponent->setConfig('overwriteProductShortDescription', $this->Config()->get('overwriteProductShortDescription'));
             $configComponent->setConfig('overwriteProductLongDescription', $this->Config()->get('overwriteProductLongDescription'));
-            $configComponent->setConfig('logRequest', $this->Config()->get('logRequest'));
+            $configComponent->setConfig('logRequest', $this->Config()->get('logRequest'), null, 'general');
 
         }
 

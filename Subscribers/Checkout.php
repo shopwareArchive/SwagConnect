@@ -6,6 +6,7 @@ use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
+use Shopware\Bepado\Components\Utils\Country;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -35,6 +36,23 @@ class Checkout extends BaseSubscriber
         }
 
         return $this->logger;
+    }
+
+
+    /**
+     * Returns the iso3 country id for the current customer.
+     *
+     * @return string
+     */
+    protected function getCountryCode()
+    {
+        $customer = null;
+        if (Shopware()->Session()->sUserId) {
+            $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
+        }
+
+        $countryCodeUtil = new Country(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        return $countryCodeUtil->getIso3CountryCode();
     }
 
     /**
@@ -111,7 +129,7 @@ class Checkout extends BaseSubscriber
         }
 
         // Increase amount and shipping costs by the amount of bepado shipping costs
-        $basketHelper->recalculate();
+        $basketHelper->recalculate($this->getCountryCode());
 
         $view->assign($basketHelper->getDefaultTemplateVariables());
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Utils\Country;
 
 /**
  * The basket widget shows the current basket amount and the current basket's products.
@@ -21,6 +22,21 @@ class BasketWidget extends BaseSubscriber
         );
     }
 
+    /**
+     * Returns the iso3 country id for the current customer.
+     *
+     * @return string
+     */
+    protected function getCountryCode()
+    {
+        $customer = null;
+        if (Shopware()->Session()->sUserId) {
+            $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
+        }
+
+        $countryCodeUtil = new Country(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        return $countryCodeUtil->getIso3CountryCode();
+    }
 
     /**
      * Fix the basket widget
@@ -56,7 +72,7 @@ class BasketWidget extends BaseSubscriber
 
         // Fix the basket for bepado
         $basketHelper->fixBasket();
-        $basketHelper->recalculate();
+        $basketHelper->recalculate($this->getCountryCode());
         $vars = $basketHelper->getDefaultTemplateVariables();
 
         // Fix the basket widget template

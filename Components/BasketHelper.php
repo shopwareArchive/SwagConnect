@@ -99,14 +99,12 @@ class BasketHelper
     /**
      * Prepare the basket for bepado
      *
-     * @param string $currentDefaultCountry ISO-3 code
      * @return array
      */
-    public function prepareBasketForBepado($currentDefaultCountry = 'DEU')
+    public function prepareBasketForBepado()
     {
         $this->buildProductsArray();
         $this->buildShopsArray();
-        $this->buildShippingCostsArray($currentDefaultCountry);
     }
 
     /**
@@ -156,14 +154,16 @@ class BasketHelper
 
     /**
      * Build array of shipping costs
+     *
+     * @param $country string iso3
      */
-    protected function buildShippingCostsArray($currentDefaultCountry)
+    protected function calculateShippingCosts($country=null)
     {
         $this->bepadoGrossShippingCosts = array();
         $this->bepadoNetShippingCosts = array();
         $this->originalShippingCosts = 0;
 
-        $dummyOrder = $this->createDummyOrderForShippingCostCalculation($currentDefaultCountry);
+        $dummyOrder = $this->createDummyOrderForShippingCostCalculation($country);
 
         $this->totalShippingCosts = $this->getSdk()->calculateShippingCosts($dummyOrder);
     }
@@ -418,9 +418,12 @@ class BasketHelper
 
     /**
      * Increase the basket's shipping costs and amount by the total value of bepado shipping costs
+     *
+     * @param $country string iso3
      */
-    public function recalculate()
+    public function recalculate($country=null)
     {
+        $this->calculateShippingCosts($country);
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
         $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
 
@@ -683,17 +686,18 @@ class BasketHelper
         return $this->database;
     }
 
+
     /**
      * Creates a dummy order struct for the SDK's shipping cost calculation
      *
-     * @param $currentDefaultCountry
+     * @param $country string iso3
      * @return SDK\Struct\Order
      */
-    protected function createDummyOrderForShippingCostCalculation($currentDefaultCountry)
+    protected function createDummyOrderForShippingCostCalculation($country='DEU')
     {
         $dummyOrder = new \Bepado\SDK\Struct\Order(array(
             'deliveryAddress' => new \Bepado\SDK\Struct\Address(array(
-                'country' => $currentDefaultCountry,
+                'country' => $country,
                 'firstName' => 'Shopware',
                 'surName' => 'AG',
                 'street' => 'Eggeroder Str. 6',

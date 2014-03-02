@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.17';
+        return '1.4.18';
     }
 
     /**
@@ -207,6 +207,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Db()->commit();
         }
 
+        // Make the bepado price nullable in order to prevent issues with variant generation
+        if (version_compare($version, '1.4.17', '<=')) {
+            try {
+                $sql = 'ALTER TABLE `s_articles_prices_attributes` MODIFY COLUMN `bepado_price` DOUBLE DEFAULT 0 NULL;';
+                Shopware()->Db()->exec($sql);
+            } catch (\Exception $e) {
+            }
+        }
+
         return true;
     }
 
@@ -347,7 +356,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             's_articles_prices_attributes',
             'bepado', 'price',
             'double',
-            false,
+            true,
             0
         );
 

@@ -56,7 +56,7 @@ class Country
      */
     public function getShippingCountry()
     {
-        if ($this->customer) {
+        if ($this->customer && $this->customer->getShipping()) {
             $countryId = $this->customer->getShipping()->getCountryId();
         } else if ($this->countryId) {
             $countryId = $this->countryId;

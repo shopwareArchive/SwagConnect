@@ -78,10 +78,12 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     {
         $importConfigArray = $this->getConfigComponent()->getImportConfig();
 
-        $this->View()->assign(array(
+        $this->View()->assign(
+            array(
                 'success' => true,
                 'data' => $importConfigArray
-            ));
+            )
+        );
     }
 
     /**
@@ -96,9 +98,48 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
         $this->getConfigComponent()->setImportConfigs($data);
 
-        $this->View()->assign(array(
+        $this->View()->assign(
+            array(
                 'success' => true
-            ));
+            )
+        );
+    }
+
+    /**
+     * The getExportAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the export config form.
+     * @return string
+     */
+    public function getExportAction()
+    {
+        $exportConfigArray = $this->getConfigComponent()->getExportConfig();
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $exportConfigArray
+            )
+        );
+    }
+
+    /**
+     * The saveExportAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to save store data.
+     * @return string
+     */
+    public function saveExportAction()
+    {
+        $data = $this->Request()->getParam('data');
+        $data = !isset($data[0]) ? array($data) : $data;
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $this->View()->assign(
+            array(
+                'success' => true
+            )
+        );
     }
 
     /**

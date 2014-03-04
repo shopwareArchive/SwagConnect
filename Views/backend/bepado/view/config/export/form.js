@@ -66,6 +66,12 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             items: me.getFormButtons()
         }];
 
+        me.exportConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Export');
+        me.exportConfigStore.load();
+        me.exportConfigStore.on('load', function() {
+            me.populateForm();
+        });
+
         me.callParent(arguments);
     },
 
@@ -79,7 +85,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
         var saveButton = Ext.create('Ext.button.Button', {
             text: me.snippets.save,
-            action:'save-import-config',
+            action:'save-export-config',
             cls:'primary'
         });
 
@@ -97,26 +103,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     },
 
     /**
-     * Creates the field set
-     * @return Ext.form.FieldSet
-     */
-    getConfigFieldset: function() {
-        var me = this,
-            items = [],
-            elements = me.createElements();
-
-        items.push(elements);
-
-        var fieldset = Ext.create('Ext.form.FieldSet', {
-            layout: 'column',
-            border: false,
-            items: items
-        });
-
-        return fieldset;
-    },
-
-    /**
      * Creates the field set items
      * @return Ext.container.Container
      */
@@ -129,9 +115,11 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             layout: 'anchor',
             border: false,
             items: [
-                Ext.create('Ext.form.ComboBox', {
+                {
+                    xtype: 'combobox',
                     fieldLabel: me.snippets.productDescriptionFieldLabel,
-                    emptyText: 'Bitte wählen',
+                    emptyText: me.snippets.emptyText,
+                    name: 'alternateDescriptionField',
                     store: new Ext.data.SimpleStore({
                         fields: [ 'value', 'text' ],
                         data: [
@@ -143,7 +131,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     queryMode: 'local',
                     displayField: 'text',
                     valueField: 'value'
-                }), {
+                }, {
                     xtype      : 'fieldcontainer',
                     fieldLabel : me.snippets.autoProductSync,
                     defaultType: 'checkboxfield',
@@ -165,10 +153,24 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         return [ container, priceGrid ];
     },
 
+    /**
+     * Creates price grid
+     * @return Shopware.apps.Bepado.view.prices.List
+     */
     createPriceGrid: function() {
         return Ext.create('Shopware.apps.Bepado.view.prices.List', {
             minHeight: 250
         });
+    },
+
+    /**
+     * Populate export config form
+     */
+    populateForm: function() {
+        var me = this,
+            record = me.exportConfigStore.getAt(0);
+
+        me.loadRecord(record);
     }
 });
 //{/block}

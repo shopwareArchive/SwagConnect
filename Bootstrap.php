@@ -180,10 +180,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $configComponent->setConfig('detailShopInfo', $this->Config()->get('detailShopInfo'), null, 'general');
             $configComponent->setConfig('checkoutShopInfo', $this->Config()->get('checkoutShopInfo'), null, 'general');
             $configComponent->setConfig('cloudSearch', $this->Config()->get('cloudSearch'), null, 'general');
-            $configComponent->setConfig('alternateDescriptionField', $this->Config()->get('alternateDescriptionField'));
+            $configComponent->setConfig('alternateDescriptionField', $this->Config()->get('alternateDescriptionField'), null, 'export');
             $configComponent->setConfig('bepadoAttribute', $this->Config()->get('bepadoAttribute'), null, 'general');
             $configComponent->setConfig('importImagesOnFirstImport', $this->Config()->get('importImagesOnFirstImport'), null, 'import');
-            $configComponent->setConfig('autoUpdateProducts', $this->Config()->get('autoUpdateProducts'));
+            $configComponent->setConfig('autoUpdateProducts', $this->Config()->get('autoUpdateProducts'), null, 'export');
             $configComponent->setConfig('overwriteProductName', $this->Config()->get('overwriteProductName'), null, 'import');
             $configComponent->setConfig('overwriteProductPrice', $this->Config()->get('overwriteProductPrice'), null, 'import');
             $configComponent->setConfig('overwriteProductImage', $this->Config()->get('overwriteProductImage'), null, 'import');
@@ -255,10 +255,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $configComponent->setConfig('detailShopInfo', '1');
         $configComponent->setConfig('checkoutShopInfo', '1');
         $configComponent->setConfig('cloudSearch', '0');
-        $configComponent->setConfig('alternateDescriptionField', 'a.descriptionLong');
+        $configComponent->setConfig('alternateDescriptionField', 'a.descriptionLong', null, 'export');
         $configComponent->setConfig('bepadoAttribute', '19');
         $configComponent->setConfig('importImagesOnFirstImport', '0', null, 'import');
-        $configComponent->setConfig('autoUpdateProducts', '1');
+        $configComponent->setConfig('autoUpdateProducts', '1', null, 'export');
         $configComponent->setConfig('overwriteProductName', '1');
         $configComponent->setConfig('overwriteProductPrice', '1', null, 'import');
         $configComponent->setConfig('overwriteProductImage', '1', null, 'import');

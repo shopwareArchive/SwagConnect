@@ -27,6 +27,7 @@ use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
+use Shopware\Bepado\Components\Config;
 
 /**
  * Class Shopware_Controllers_Backend_Bepado
@@ -37,6 +38,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      * @var \Shopware\Bepado\Components\BepadoFactory
      */
     private $factory;
+
+    /** @var  \Shopware\Bepado\Components\Config */
+    private $configComponent;
 
 
     /**
@@ -911,10 +915,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Could not find customer group with key {$customerGroup}");
         }
 
-
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
-
         if ($bepadoField == 'purchasePrice') {
             $configGroup = 'priceGroupForPurchasePriceExport';
             $configField = 'priceFieldForPurchasePriceExport';
@@ -925,9 +925,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Unknown field {$bepadoField}");
         }
 
-        $repo->setConfig($configGroup, $customerGroup);
-        $repo->setConfig($configField, $priceField);
-        $this->getModelManager()->flush();
+        $this->getConfigComponent()->setConfig($configGroup, $customerGroup);
+        $this->getConfigComponent()->setConfig($configField, $priceField);
 
         $this->View()->assign('success', true);
     }
@@ -1158,5 +1157,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->getSDK(),
             $this->getModelManager()
         );
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\Config
+     */
+    public function getConfigComponent()
+    {
+        if ($this->configComponent === null) {
+            $this->configComponent = new \Shopware\Bepado\Components\Config($this->getModelManager());
+        }
+
+        return $this->configComponent;
     }
 }

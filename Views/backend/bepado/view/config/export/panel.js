@@ -34,9 +34,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Panel', {
     alias: 'widget.bepado-config-export',
 
     border: false,
-    layout: 'anchor',
+    layout: 'border',
     autoScroll: true,
-    padding: '20 20 20 20',
 
     initComponent: function() {
         var me = this;
@@ -53,13 +52,11 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Panel', {
      * @return [Array]
      */
     createElements:function () {
-        var descriptionFieldset,
-            form;
+        var form;
 
-        descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.export.Description');
         form = Ext.create('Shopware.apps.Bepado.view.config.export.Form');
 
-        return [ descriptionFieldset, form ];
+        return [ form ];
     }
 });
 //{/block}

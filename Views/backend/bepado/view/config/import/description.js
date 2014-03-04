@@ -58,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Description', {
      * @object
      */
     snippets: {
-        title: '{s name=config/description}Description{/s}'
+        title: '{s name=config/description}Beschreibung{/s}'
     },
 
     /**

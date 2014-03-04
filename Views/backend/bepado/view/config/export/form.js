@@ -36,6 +36,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     border: false,
     layout: 'anchor',
     autoScroll: true,
+    region: 'center',
+    bodyPadding: 20,
 
     /**
      * Contains the field set defaults.
@@ -104,15 +106,17 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
     /**
      * Creates the field set items
-     * @return Ext.container.Container
+     * @return Array
      */
     createElements: function () {
         var me = this;
 
+        var descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.export.Description')
+
         var container = Ext.create('Ext.container.Container', {
             columnWidth: 1,
-            padding: '0 20 0 0',
-            layout: 'anchor',
+            padding: '0 0 20 0',
+            layout: 'fit',
             border: false,
             items: [
                 {
@@ -130,7 +134,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     }),
                     queryMode: 'local',
                     displayField: 'text',
-                    valueField: 'value'
+                    valueField: 'value',
+                    labelWidth: me.defaults.labelWidth
                 }, {
                     xtype      : 'fieldcontainer',
                     fieldLabel : me.snippets.autoProductSync,
@@ -150,7 +155,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
         var priceGrid = me.createPriceGrid();
 
-        return [ container, priceGrid ];
+        return [ descriptionFieldset, container, priceGrid ];
     },
 
     /**

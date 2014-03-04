@@ -52,6 +52,24 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * The saveGeneralAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the general config form.
+     * @return string
+     */
+    public function saveGeneralAction()
+    {
+        $data = $this->Request()->getParam('data');
+        $data = !isset($data[0]) ? array($data) : $data;
+
+        $this->getConfigComponent()->setGeneralConfigsArrays($data);
+
+        $this->View()->assign(array(
+                'success' => true
+        ));
+    }
+
+    /**
      * Helper function to get access on the Config component
      *
      * @return \Shopware\Bepado\Components\Config

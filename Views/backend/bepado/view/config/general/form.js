@@ -110,7 +110,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
         var saveButton = Ext.create('Ext.button.Button', {
             text: me.snippets.save,
-            action:'save-config',
+            action:'save-general-config',
             cls:'primary'
         });
 

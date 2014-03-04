@@ -73,6 +73,15 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
             type: 'json',
             root: 'data',
             totalProperty: 'total'
+        },
+
+        /**
+         * Configure the data writer
+         * @object
+         */
+        writer: {
+            type: 'json',
+            root: 'data'
         }
     }
 });

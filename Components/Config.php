@@ -25,7 +25,7 @@
 namespace Shopware\Bepado\Components;
 
 use Shopware\Components\Model\ModelManager;
-use Symfony\Component\Debug\Debug;
+use Shopware\CustomModels\Bepado\Config as ConfigModel;
 
 /**
  * @category  Shopware
@@ -133,7 +133,7 @@ class Config
         $model = $this->getConfigRepository()->findOneBy(array('name' => $name));
 
         if (!$model) {
-            $model = new \Shopware\CustomModels\Bepado\Config();
+            $model = new ConfigModel();
             $this->manager->persist($model);
         }
 
@@ -179,6 +179,56 @@ class Config
         }
 
         return $configsArray;
+    }
+
+    /**
+     * Stores data general config
+     * data into database.
+     *
+     * @param array $data
+     */
+    public function setGeneralConfigsArrays($data)
+    {
+        foreach ($data as $shopConfig) {
+            $shopId = null;
+            if ($shopConfig['isDefaultShop'] === false) {
+                $shopId = $shopConfig['shopId'];
+                // store only config options
+                // which are different for each shop
+                $shopConfig = array(
+                    'cloudSearch' =>$shopConfig['cloudSearch'],
+                    'detailShopInfo' =>$shopConfig['detailShopInfo'],
+                    'detailProductNoIndex' =>$shopConfig['detailProductNoIndex'],
+                    'checkoutShopInfo' =>$shopConfig['checkoutShopInfo'],
+                );
+            } else {
+                unset($shopConfig['shopId']);
+            }
+
+            unset($shopConfig['isDefaultShop']);
+
+            foreach ($shopConfig as $key => $configItem) {
+
+            /** @var \Shopware\CustomModels\Bepado\Config $model */
+            $model = $this->getConfigRepository()->findOneBy(array(
+                    'name' => $key,
+                    'shopId' => $shopId,
+                    'groupName' => 'general'
+                ));
+
+                if (is_null($model)) {
+                    $model = new ConfigModel();
+                    $model->setName($key);
+                    $model->setGroupName('general');
+                    $model->setShopId($shopId);
+                }
+
+                $model->setValue($configItem);
+                $this->manager->persist($model);
+            }
+        }
+
+        $this->manager->flush();
     }
 
     /**

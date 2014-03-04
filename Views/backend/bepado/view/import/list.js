@@ -25,9 +25,28 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             columns: me.getColumns()
         });
 
+        me.groupingFeature = me.createGroupingFeature()
+        me.features =  [ me.groupingFeature ];
+
         me.callParent(arguments);
 
         me.store.load();
+    },
+
+    createGroupingFeature: function() {
+        var me = this;
+
+        return Ext.create('Ext.grid.feature.Grouping', {
+            groupHeaderTpl: Ext.create('Ext.XTemplate',
+                '<span>{ name:this.formatHeader }</span>',
+                '<span>&nbsp;({ rows.length } Products)</span>',
+                {
+                    formatHeader: function(category) {
+                        return category;
+                    }
+                }
+            )
+        });
     },
 
     getColumns: function() {
@@ -121,6 +140,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             store: Ext.create('Ext.data.Store', {
                 fields: [ 'value' ],
                 data: [
+                    { value: '10' },
                     { value: '20' },
                     { value: '40' },
                     { value: '60' },
@@ -172,11 +192,11 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             action:'deactivate'
         });
         items.push('->');
-        items.push({
-            iconCls:'sprite-minus-circle-frame',
-            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
-            action:'unsubscribe'
-        });
+//        items.push({
+//            iconCls:'sprite-minus-circle-frame',
+//            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
+//            action:'unsubscribe'
+//        });
         return items;
     }
 });

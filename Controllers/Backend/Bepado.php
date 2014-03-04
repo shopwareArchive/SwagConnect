@@ -205,6 +205,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'a.active as active',
             't.tax as tax',
             'p.price * (100 + t.tax) / 100 as price',
+            'at.category'
         ));
 
         foreach($filter as $key => $rule) {
@@ -282,9 +283,18 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     public function getImportListAction()
     {
+        $filter = (array)$this->Request()->getParam('filter', array());
+        $sort = $this->Request()->getParam('sort', array());
+
+        foreach ($sort as $key => $currentSorter) {
+            if ($currentSorter['property'] == 'category') {
+                unset($sort[$key]);
+            }
+        }
+
         $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
+            $filter,
+            $sort
         );
         $builder->addSelect(array(
             'at.shopId',
@@ -292,6 +302,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'at.exportStatus as bepadoStatus',
         ));
         $builder->andWhere('at.shopId IS NOT NULL');
+
+        $builder->addOrderBy('at.category', 'ASC');
 
         $query = $builder->getQuery();
 

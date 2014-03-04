@@ -1,13 +1,12 @@
 //{namespace name=backend/bepado/view/main}
-
 //{block name="backend/bepado/view/config/tabs"}
 Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
     extend: 'Ext.tab.Panel',
     alias: 'widget.bepado-config-tabs',
 
-    height: 300,
-
-    border: false,
+    layout: 'fit',
+    autoScroll: true,
+    border: true,
 
     initComponent: function() {
         var me = this;

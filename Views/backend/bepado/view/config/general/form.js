@@ -36,6 +36,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     border: false,
     layout: 'anchor',
     autoScroll: true,
+    region: 'center',
+    bodyPadding: 20,
 
     /**
      * Contains the field set defaults.
@@ -57,7 +59,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         basketHintLabel: '{s name=config/basket_hint_label}Im Warenkorb auf Marktplatz Artikel hinweisen{/s}',
         bepadoAttributeLabel: '{s name=config/bepado_attribute_label}bepado Attribut{/s}',
         alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternativer bepado Host (nur für Testzwecke){/s}',
-        logLabel: '{s name=config/log_label}Anfragen des bepado-Servers mitschreiben{/s}'
+        logLabel: '{s name=config/log_label}Anfragen des bepado-Servers mitschreiben{/s}',
+        logDescription: '{s name=config/log_description}Alle operationen werden in den Log geschrieben{/s}'
     },
 
     initComponent: function() {
@@ -87,7 +90,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      * @return Array
      */
     createElements: function() {
-        var me = this,
+        var me = this;
             apiFieldset = me.getApiKeyFieldset(),
             configFieldset = me.getConfigFieldset(),
             elements = [];
@@ -110,8 +113,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
         var saveButton = Ext.create('Ext.button.Button', {
             text: me.snippets.save,
-            action:'save-general-config',
-            cls:'primary'
+            action: 'save-general-config',
+            cls: 'primary'
         });
 
         var cancelButton = Ext.create('Ext.button.Button', {
@@ -140,37 +143,48 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             title: me.snippets.apiKeyHeader,
             defaultType: 'textfield',
             layout: 'anchor',
-            items :[
+            items: [
                 {
                     xtype: 'container',
                     html: me.snippets.apiKeyDescription
                 }, {
-                    fieldLabel: me.snippets.apiKeyHeader,
-                    labelWidth: 200,
-                    name: 'apiKey'
-                }, {
-                    xtype: 'button',
-                    text: me.snippets.apiKeyCheck,
-                    handler: function(btn) {
-                        var apiField = btn.up('form').down('textfield[name=apiKey]'),
-                            apiKey = apiField.getValue();
-                        Ext.Ajax.request({
-                            scope: this,
-                            url: window.location.pathname + 'bepado/verifyApiKey',
-                            success: function(result, request) {
-                                var response = Ext.JSON.decode(result.responseText);
-                                Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
-                                if(response.message) {
-                                    Shopware.Notification.createGrowlMessage(
-                                        btn.title,
-                                        response.message
-                                    );
-                                }
-                            },
-                            failure: function() { },
-                            params: { apiKey: apiKey }
-                        });
-                    }
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: me.snippets.apiKeyHeader,
+                            labelWidth: 100,
+                            name: 'apiKey',
+                            flex: 5,
+                            padding: '0 20 0 0'
+                        }, {
+                            xtype: 'button',
+                            flex: 1,
+                            height: 27,
+                            text: me.snippets.apiKeyCheck,
+                            handler: function(btn) {
+                                var apiField = btn.up('form').down('textfield[name=apiKey]'),
+                                    apiKey = apiField.getValue();
+                                Ext.Ajax.request({
+                                    scope: this,
+                                    url: window.location.pathname + 'bepado/verifyApiKey',
+                                    success: function(result, request) {
+                                        var response = Ext.JSON.decode(result.responseText);
+                                        Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
+                                        if(response.message) {
+                                            Shopware.Notification.createGrowlMessage(
+                                                btn.title,
+                                                response.message
+                                            );
+                                        }
+                                    },
+                                    failure: function() { },
+                                    params: { apiKey: apiKey }
+                                });
+                            }
+                        }
+                    ]
                 }
             ]
         });
@@ -285,7 +299,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
         var attributeStore = new Ext.data.ArrayStore({
             fields: ['id', 'name'],
-            data : [
+            data: [
                 [1, 'attr1'],
                 [2, 'attr2'],
                 [3, 'attr3'],
@@ -317,6 +331,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 {
                     xtype: 'combo',
                     name: 'bepadoAttribute',
+                    anchor: '100%',
                     required: true,
                     editable: false,
                     valueField: 'id',
@@ -328,14 +343,22 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 }, {
                     xtype: 'textfield',
                     name: 'bepadoDebugHost',
-                    fieldLabel: me.snippets.alternativeHostLabel
-                }, {
-                    xtype: 'checkbox',
-                    name: 'logRequest',
-                    fieldLabel: me.snippets.logLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
+                    anchor: '100%',
+                    fieldLabel: me.snippets.alternativeHostLabel,
                     labelWidth: me.defaults.labelWidth
+                }, {
+                    xtype: 'fieldcontainer',
+                    fieldLabel: me.snippets.logLabel,
+                    defaultType: 'checkboxfield',
+                    labelWidth: me.defaults.labelWidth,
+                    items: [
+                        {
+                            boxLabel: me.snippets.logDescription,
+                            name: 'logRequest',
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }
+                    ]
                 }
             ]
         });

@@ -33,11 +33,11 @@ Ext.define('Shopware.apps.Bepado.model.config.Import', {
 
     fields: [
         //{block name="backend/bepado/model/config/import/fields"}{/block}
-        { name: 'overwriteProductName', type: 'boolean' },
-        { name: 'overwriteProductPrice', type: 'boolean' },
-        { name: 'overwriteProductImage', type: 'boolean' },
-        { name: 'overwriteProductShortDescription', type: 'boolean' },
-        { name: 'overwriteProductLongDescription', type: 'boolean' }
+        { name: 'overwriteProductName', type: 'int' },
+        { name: 'overwriteProductPrice', type: 'int' },
+        { name: 'overwriteProductImage', type: 'int' },
+        { name: 'overwriteProductShortDescription', type: 'int' },
+        { name: 'overwriteProductLongDescription', type: 'int' }
     ],
 
     proxy: {

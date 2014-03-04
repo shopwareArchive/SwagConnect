@@ -96,6 +96,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     'bepado-config button[action=save-general-config]': {
                         click: me.onSaveConfigForm
                     },
+                    'bepado-config-import-form button[action=save-import-config]': {
+                        click: me.onSaveImportConfigForm
+                    },
                     'bepado-mapping button[action=save]': {
                         click: me.onSaveMapping
                     },
@@ -779,6 +782,35 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     onSaveConfigForm: function(btn) {
         var me = this;
             form = btn.up('form');
+
+        form.setLoading();
+        if (form.getRecord()) {
+            var model = form.getRecord();
+
+            form.getForm().updateRecord(model);
+            model.save({
+                success: function(record) {
+                    form.setLoading(false);
+                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                },
+                failure: function(record) {
+                    form.setLoading(false);
+                    var rawData = record.getProxy().getReader().rawData,
+                        message = rawData.message;
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                }
+            });
+        }
+    },
+
+    /**
+     * Callback function to save the import configuration form
+     *
+     * @param button
+     */
+    onSaveImportConfigForm: function(btn) {
+        var me = this;
+        form = btn.up('form');
 
         form.setLoading();
         if (form.getRecord()) {

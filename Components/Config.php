@@ -247,6 +247,38 @@ class Config
     }
 
     /**
+     * Stores data import config
+     * data into database.
+     *
+     * @param array $data
+     */
+    public function setImportConfigs($data)
+    {
+        foreach ($data as $config) {
+            unset($config['id']);
+            foreach ($config as $key => $configValue) {
+                /** @var \Shopware\CustomModels\Bepado\Config $model */
+                $model = $this->getConfigRepository()->findOneBy(array(
+                        'name' => $key,
+                        'shopId' => null,
+                        'groupName' => 'import'
+                    ));
+                if (is_null($model)) {
+                    $model = new ConfigModel();
+                    $model->setName($key);
+                    $model->setGroupName('general');
+                    $model->setShopId(null);
+                }
+
+                $model->setValue($configValue);
+                $this->manager->persist($model);
+            }
+        }
+
+        $this->manager->flush();
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

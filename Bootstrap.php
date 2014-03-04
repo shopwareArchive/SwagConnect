@@ -78,7 +78,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         };
 
         $this->createMyMenu();
-        $this->createMyForm();
         $this->createMyEvents();
 
         $this->createMyTables();
@@ -124,7 +123,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
 
         $this->createMyMenu();
-        $this->createMyForm();
         $this->createMyEvents();
 
         $this->createMyTables();
@@ -376,172 +374,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             'active' => 1,
             'parent' => $parent
         ));
-    }
-
-    /**
-     * Creates the plugin configuration form
-     */
-    private function createMyForm()
-    {
-        $form = $this->Form();
-
-        $form->setElement('text', 'apiKey', array(
-            'label' => 'API Key',
-            'description' => '',
-            'required' => true,
-            'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
-            'uniqueId' => 'apiKey'
-        ));
-        $form->setElement('button', 'verifyApiKey', array(
-            'label' => '<strong>API Key testen</strong>',
-            'handler' => "function(btn) {
-                var apiField = btn.up('form').down('textfield[uniqueId=apiKey]'),
-                    apiKey = apiField.getValue(),
-                    title = btn.up('window').title;
-                Ext.Ajax.request({
-                    scope: this,
-                    url: window.location.pathname + 'bepado/verifyApiKey',
-                    success: function(result, request) {
-                        var response = Ext.JSON.decode(result.responseText);
-                        Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
-                        if(response.message) {
-                            Shopware.Notification.createGrowlMessage(
-                                btn.title,
-                                response.message,
-                                title
-                            );
-                        }
-                    },
-                    failure: function() { },
-                    params: { apiKey: apiKey }
-                });
-            }"
-        ));
-
-        $form->setElement('boolean', 'importCreateCategories', array(
-            'label' => 'Kategorien beim Import automatisch erzeugen',
-            'value' => true
-        ));
-        $form->setElement('boolean', 'detailProductNoIndex', array(
-            'label' => 'Ein "noindex"-Meta-Tag bei Bepado-Produkten setzten',
-            'value' => true
-        ));
-        $form->setElement('boolean', 'detailShopInfo', array(
-            'label' => 'Auf der Detailseite auf Marktplatz-Artikel hinweisen',
-            'value' => true
-        ));
-        $form->setElement('boolean', 'checkoutShopInfo', array(
-            'label' => 'Im Warenkorb auf Marktplatz-Artikel hinweisen',
-            'value' => true
-        ));
-        $form->setElement('boolean', 'cloudSearch', array(
-            'label' => 'Cloud-Search aktivieren',
-            'value' => false
-        ));
-        $form->setElement('select', 'alternateDescriptionField',
-            array(
-                'required' => true,
-                'editable' => false,
-                'value' => 'a.descriptionLong',
-                'label' => 'Produkt Beschreibungsfeld',
-                'helpText' => 'Wenn Sie für bepado-Produkte nicht den Standard-Artikel-Langtext nutzen möchten, können Sie hier ein alternatives Feld definieren.',
-                'store' => array(
-                    array('attribute.bepadoProductDescription', 'attribute.bepadoProductDescription'),
-                    array('a.description', 'Artikel-Kurzbeschreibung'),
-                    array('a.descriptionLong', 'Artikel-Langbeschreibung')
-                )
-            )
-        );
-
-        $form->setElement('select', 'bepadoAttribute',
-            array(
-                'required' => true,
-                'editable' => false,
-                'value' => 19,
-                'label' => 'bepado Attribut',
-                'helpText' => 'In das gewählte Attribut wird die Quell-ID des jeweiligen bepado-Artikels gespeichert. So können Sie bspw. im RisikoManagment leicht bepado-Artikel identifizieren.',
-                'store' => array(
-                    array(1, 'attr1'),
-                    array(2, 'attr2'),
-                    array(3, 'attr3'),
-                    array(4, 'attr4'),
-                    array(5, 'attr5'),
-                    array(6, 'attr6'),
-                    array(7, 'attr7'),
-                    array(8, 'attr8'),
-                    array(9, 'attr9'),
-                    array(10, 'attr10'),
-                    array(11, 'attr11'),
-                    array(12, 'attr12'),
-                    array(13, 'attr13'),
-                    array(14, 'attr14'),
-                    array(15, 'attr15'),
-                    array(16, 'attr16'),
-                    array(17, 'attr17'),
-                    array(18, 'attr18'),
-                    array(19, 'attr19'),
-                    array(20, 'attr20'),
-                )
-            )
-        );
-
-        $form->setElement('select', 'importImagesOnFirstImport',
-            array(
-                'required' => true,
-                'editable' => false,
-                'value' => 0,
-                'label' => 'Bilder beim Produkt-Erstimport laden',
-                'helpText' => 'Das Importieren von Bildern beim Erstimport der Produkte kann den Import extrem verlängern. Empfohlen ist die Verwendung des Shopware-Cronjobs um die Bilder nachgelagert zu importieren. Auch über »Geänderte Produkte« können die Bilder nachgelagert importiert werden',
-                'store' => array(
-                    array(0, 'Nein (No)'),
-                    array(1, 'Ja (Yes)'),
-                )
-            )
-        );
-
-        $form->setElement('boolean', 'autoUpdateProducts', array(
-            'label' => 'Geänderte Produkte automatisch mit bepado synchronisieren',
-            'value' => true,
-            'helpText' => 'Für Anbieter von Produkten: Export diese automatisch nach bepado, wenn die Produkte geändert werden.'
-        ));
-
-        $form->setElement('boolean', 'overwriteProductName', array(
-            'label' => 'Beim Import Produkt-Namen überschreiben',
-            'value' => true,
-            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
-        ));
-        $form->setElement('boolean', 'overwriteProductPrice', array(
-            'label' => 'Beim Import Produkt-Preise überschreiben',
-            'value' => true,
-            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
-        ));
-        $form->setElement('boolean', 'overwriteProductImage', array(
-            'label' => 'Beim Import Produkt-Bilder überschreiben',
-            'value' => true,
-            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
-        ));
-        $form->setElement('boolean', 'overwriteProductShortDescription', array(
-            'label' => 'Beim Import Produkt-Kurzbeschreibungen überschreiben',
-            'value' => true,
-            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
-        ));
-        $form->setElement('boolean', 'overwriteProductLongDescription', array(
-            'label' => 'Beim Import Produkt-Langbeschreibungen überschreiben',
-            'value' => true,
-            'helpText' => 'Wenn Sie dieses Feld in der Regel selbst pflegen, wählen sie hier »Nein« aus. Sie können auf Artikel-Ebene Ausnahmen verwalten.'
-        ));
-
-        $form->setElement('text', 'bepadoDebugHost', array(
-                'label' => 'Alternativer bepado Host (nur für Testzwecke)',
-                'minLength' => 11
-            )
-        );
-        $form->setElement('boolean', 'logRequest', array(
-                'label' => 'Anfragen des bepado-Servers mitschreiben',
-                'value' => false,
-                'helpText' => 'Schreibt alle Anfragen von bepado.de und die Antwort des bepado-Plugins mit. Hierbei können schnell viele Daten anfallen.'
-            )
-        );
     }
 
     /**

@@ -15,8 +15,7 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 expanded: true,
                 children: [
                     { id: 'config-import', text: "{s name=navigation/config_import}Import{/s}", leaf: true },
-                    { id: 'config-export', text: "{s name=navigation/config_export}Export{/s}", leaf: true },
-                    { id: 'prices', text: "{s name=navigation/prices}Prices{/s}", leaf: true }
+                    { id: 'config-export', text: "{s name=navigation/config_export}Export{/s}", leaf: true }
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: true },
             { id: 'export', text: "{s name=navigation/export}Product export{/s}", leaf: true },

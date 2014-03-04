@@ -36,6 +36,8 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     border: false,
     layout: 'anchor',
     autoScroll: true,
+    region: 'center',
+    bodyPadding: 20,
 
     /**
      * Contains the field set defaults.
@@ -142,10 +144,11 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
 
     /**
      * Creates the field set items
-     * @return Ext.container.Container
+     * @return Array
      */
     createElements: function () {
-        var me = this;
+        var me = this,
+        descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.import.Description');
 
         var container = Ext.create('Ext.container.Container', {
             columnWidth: 1,
@@ -197,7 +200,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             ]
         });
 
-        return container;
+        return [ descriptionFieldset, container ];
     },
 
     /**

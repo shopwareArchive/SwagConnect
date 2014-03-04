@@ -35,6 +35,11 @@ Ext.define('Shopware.apps.Article.controller.DetailBepado', {
             length = prices.length,
             originalPrice;
 
+        if ('{$disableBepadoPrice}' == 'true') {
+            return prices;
+        }
+
+
         // Make sure that the copy also has a copy of the price attributes
         for(var i=0; i<length; i++) {
             originalPrice = firstGroupPrices[i];

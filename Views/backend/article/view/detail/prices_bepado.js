@@ -15,7 +15,9 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
         tabPanel =  me.callOverridden(arguments);
 
-        me.registerCellEditListener();
+        if ('{$disableBepadoPrice}' != 'true') {
+            me.registerCellEditListener();
+        }
 
         style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
@@ -72,6 +74,11 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
             record;
 
         me.callParent(arguments);
+
+        if ('{$disableBepadoPrice}' == 'true') {
+            return;
+        }
+
         // Get the first price
         record = me.priceStore.first();
 
@@ -99,6 +106,10 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
     getColumns: function() {
         var me = this,
             columns = me.callParent(arguments);
+
+        if ('{$disableBepadoPrice}' == 'true') {
+            return columns;
+        }
 
         columns.splice(-1, 0, {
             xtype: 'numbercolumn',
@@ -130,7 +141,6 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
         return columns;
 
     }
-
 });
 //{/block}
 

@@ -69,6 +69,12 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             items: me.getFormButtons()
         }];
 
+        me.importConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Import');
+        me.importConfigStore.load();
+        me.importConfigStore.on('load', function() {
+            me.populateForm();
+        });
+
         me.callParent(arguments);
     },
 
@@ -163,7 +169,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                         {
                             boxLabel  : me.snippets.overwriteProductName,
                             name      : 'overwriteProductName',
-                            inputValue: '1',
+                            inputValue: 1,
                             uncheckedValue: 0
                         }, {
                             boxLabel  : me.snippets.overwriteProductPrice,
@@ -192,6 +198,16 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         });
 
         return container;
+    },
+
+    /**
+     * Populate import config form
+     */
+    populateForm: function() {
+        var me = this,
+            record = me.importConfigStore.getAt(0);
+
+        me.loadRecord(record);
     }
 });
 //{/block}

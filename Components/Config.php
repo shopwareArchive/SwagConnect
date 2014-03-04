@@ -232,6 +232,21 @@ class Config
     }
 
     /**
+     * Helper function which returns import configuration.
+     *
+     * @return array
+     */
+    public function getImportConfig()
+    {
+        $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+        WHERE `shopId` IS NULL AND `groupName` = 'import'";
+
+        $result = Shopware()->Db()->fetchPairs($query);
+
+        return $result;
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

@@ -182,13 +182,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $configComponent->setConfig('cloudSearch', $this->Config()->get('cloudSearch'), null, 'general');
             $configComponent->setConfig('alternateDescriptionField', $this->Config()->get('alternateDescriptionField'));
             $configComponent->setConfig('bepadoAttribute', $this->Config()->get('bepadoAttribute'), null, 'general');
-            $configComponent->setConfig('importImagesOnFirstImport', $this->Config()->get('importImagesOnFirstImport'));
+            $configComponent->setConfig('importImagesOnFirstImport', $this->Config()->get('importImagesOnFirstImport'), null, 'import');
             $configComponent->setConfig('autoUpdateProducts', $this->Config()->get('autoUpdateProducts'));
-            $configComponent->setConfig('overwriteProductName', $this->Config()->get('overwriteProductName'));
-            $configComponent->setConfig('overwriteProductPrice', $this->Config()->get('overwriteProductPrice'));
-            $configComponent->setConfig('overwriteProductImage', $this->Config()->get('overwriteProductImage'));
-            $configComponent->setConfig('overwriteProductShortDescription', $this->Config()->get('overwriteProductShortDescription'));
-            $configComponent->setConfig('overwriteProductLongDescription', $this->Config()->get('overwriteProductLongDescription'));
+            $configComponent->setConfig('overwriteProductName', $this->Config()->get('overwriteProductName'), null, 'import');
+            $configComponent->setConfig('overwriteProductPrice', $this->Config()->get('overwriteProductPrice'), null, 'import');
+            $configComponent->setConfig('overwriteProductImage', $this->Config()->get('overwriteProductImage'), null, 'import');
+            $configComponent->setConfig('overwriteProductShortDescription', $this->Config()->get('overwriteProductShortDescription'), null, 'import');
+            $configComponent->setConfig('overwriteProductLongDescription', $this->Config()->get('overwriteProductLongDescription'), null, 'import');
             $configComponent->setConfig('logRequest', $this->Config()->get('logRequest'), null, 'general');
 
         }
@@ -257,13 +257,13 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $configComponent->setConfig('cloudSearch', '0');
         $configComponent->setConfig('alternateDescriptionField', 'a.descriptionLong');
         $configComponent->setConfig('bepadoAttribute', '19');
-        $configComponent->setConfig('importImagesOnFirstImport', '0');
+        $configComponent->setConfig('importImagesOnFirstImport', '0', null, 'import');
         $configComponent->setConfig('autoUpdateProducts', '1');
         $configComponent->setConfig('overwriteProductName', '1');
-        $configComponent->setConfig('overwriteProductPrice', '1');
-        $configComponent->setConfig('overwriteProductImage', '1');
-        $configComponent->setConfig('overwriteProductShortDescription', '1');
-        $configComponent->setConfig('overwriteProductLongDescription', '1');
+        $configComponent->setConfig('overwriteProductPrice', '1', null, 'import');
+        $configComponent->setConfig('overwriteProductImage', '1', null, 'import');
+        $configComponent->setConfig('overwriteProductShortDescription', '1', null, 'import');
+        $configComponent->setConfig('overwriteProductLongDescription', '1', null, 'import');
         $configComponent->setConfig('logRequest', '0');
 
         Shopware()->Models()->flush();

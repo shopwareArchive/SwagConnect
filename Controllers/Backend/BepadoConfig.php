@@ -70,6 +70,22 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * The getImportAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the import config form.
+     * @return string
+     */
+    public function getImportAction()
+    {
+        $importConfigArray = $this->getConfigComponent()->getImportConfig();
+
+        $this->View()->assign(array(
+                'success' => true,
+                'data' => $importConfigArray
+            ));
+    }
+
+    /**
      * Helper function to get access on the Config component
      *
      * @return \Shopware\Bepado\Components\Config

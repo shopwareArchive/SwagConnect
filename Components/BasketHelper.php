@@ -427,6 +427,9 @@ class BasketHelper
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
         $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
 
+        // Set the shipping cost tax rate for shopware
+        $this->basket['sShippingcostsTax'] = ($shippingCosts / $shippingCostsNet) * 100 - 100;
+
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
         // Update shipping costs
@@ -446,12 +449,6 @@ class BasketHelper
         // \Shopware_Models_Document_Order::processOrder
         // Therefore we need to round the net price
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
-
-        // todo@dn: Review: In which situations is this actually required?
-        // If the shipping cost tax rate is not calculated, yet, calculate it from the gross/net difference
-        if (empty($this->basket['sShippingcostsTax'])) {
-            $this->basket['sShippingcostsTax'] = round(($shippingCosts / $shippingCostsNet) * 100 - 100, 2);
-        }
 
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(array($this->getTaxRates($this->basket), $this->getBepadoTaxRates()));

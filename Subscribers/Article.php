@@ -84,7 +84,7 @@ class Article extends BaseSubscriber
                 );
 
 //                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.2', '<')) {
-//                    $subject->View()->assign('disableBepadoPrice', 'true');
+                    $subject->View()->assign('disableBepadoPrice', 'true');
 //
 //                    $subject->View()->extendsTemplate(
 //                        'backend/article/model/price_attribute_bepado.js'

@@ -345,7 +345,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             1
         );
 
-
         $modelManager->addAttribute(
             's_articles_attributes',
             'bepado', 'product_description',
@@ -360,9 +359,9 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             0
         );
 
-
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
+            's_order_attributes',
             's_articles_prices_attributes',
             's_premium_dispatch_attributes',
             's_categories_attributes',

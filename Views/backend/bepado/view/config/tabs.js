@@ -7,11 +7,21 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
     layout: 'fit',
     autoScroll: true,
     border: true,
+    activeTab: 0,
+    items: [],
 
     initComponent: function() {
         var me = this;
 
-        me.items = me.createItems();
+        me.shopStore = Ext.create('Shopware.apps.Base.store.Shop', {
+            filters: []
+        }).load({
+            callback: function () {
+                me.add(me.createItems());
+                me.setActiveTab(0);
+            }
+        });
+
 
         me.callParent(arguments);
     },
@@ -21,8 +31,6 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
      */
     createItems: function() {
         var me = this;
-
-        me.shopStore = me.subApp.getController('Main').shopStore;
 
         var tabs = [];
         me.shopStore.each(function() {

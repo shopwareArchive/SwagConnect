@@ -78,272 +78,262 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     init: function () {
         var me = this;
 
+        me.mainWindow = me.getView('main.Window').create({
 
-        me.shopStore = Ext.create('Shopware.apps.Base.store.Shop', {
-            filters: []
-        }).load({
-            callback: function () {
+        }).show();
 
-
-                me.mainWindow = me.getView('main.Window').create({
-
-                }).show();
-
-                me.control({
-                    'bepado-navigation': {
-                        select: me.onSelectNavigationEntry
-                    },
-                    'bepado-config button[action=save-general-config]': {
-                        click: me.onSaveConfigForm
-                    },
-                    'bepado-config-import-form button[action=save-import-config]': {
-                        click: me.onSaveImportConfigForm
-                    },
-                    'bepado-config-export-form button[action=save-export-config]': {
-                        click: me.onSaveExportConfigForm
-                    },
-                    'bepado-mapping button[action=save]': {
-                        click: me.onSaveMapping
-                    },
-                    'bepado-mapping': {
-                        applyToChildren: me.onApplyMappingToChildCategories,
-                        importCategories: me.onImportCategoriesFromBepado
-                    },
-                    'bepado-export-list button[action=add]': {
-                        click: me.onExportFilterAction
-                    },
-                    'bepado-export-list button[action=delete]': {
-                        click: me.onExportFilterAction
-                    },
-                    'bepado-export-filter button[action=category-clear-filter]': {
-                        click: me.onExportCategoryFilterClearAction
-                    },
-                    'bepado-export-filter textfield[name=searchfield]': {
-                        change: function(field, value) {
-                            var table = me.getExportList(),
-                                store = table.getStore();
-                            store.filters.removeAtKey('search');
-                            if (value.length > 0 ) {
-                                store.filters.add('search', new Ext.util.Filter({
-                                    property: 'search',
-                                    value: '%' + value + '%'
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-
-                    'bepado-export-filter base-element-select[name=supplierId]': {
-                        change: function(field, value) {
-                            var table = me.getExportList(),
-                                store = table.getStore();
-
-                            store.filters.removeAtKey('supplierId');
-                            if (value) {
-                                store.filters.add('supplierId', new Ext.util.Filter({
-                                    property: field.name,
-                                    value: value
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-
-                    'bepado-export-filter base-element-select[name=exportStatus]': {
-                        change: function(field, value) {
-                            var table = me.getExportList(),
-                                store = table.getStore();
-
-                            store.filters.removeAtKey('exportStatus');
-                            if (value) {
-                                store.filters.add('exportStatus', new Ext.util.Filter({
-                                    property: field.name,
-                                    value: value
-                                }));
-                            }
-                            store.load();
-
-                        }
-                    },
-
-                    'bepado-export-filter treepanel': {
-                        select: function(tree, node) {
-                            var table = me.getExportList(),
-                                store = table.getStore();
-
-                            if (!node) {
-                                store.filters.removeAtKey('exportCategoryFilter');
-                            } else {
-                                store.filters.removeAtKey('exportCategoryFilter');
-                                store.filters.add('exportCategoryFilter', new Ext.util.Filter({
-                                    property: 'categoryId',
-                                    value:  node.get('id')
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-                    'bepado-import-list button[action=activate]': {
-                        click: me.onImportFilterAction
-                    },
-                    'bepado-import-list button[action=deactivate]': {
-                        click: me.onImportFilterAction
-                    },
-                    'bepado-import-list button[action=unsubscribe]': {
-                        click: me.onImportFilterAction
-                    },
-                    'bepado-import-filter textfield[name=searchfield]': {
-                        change: function(field, value) {
-                            var table = me.getImportList(),
-                                store = table.getStore();
-                            store.filters.removeAtKey('search');
-                            if (value.length > 0 ) {
-                                store.filters.add('search', new Ext.util.Filter({
-                                    property: 'search',
-                                    value: '%' + value + '%'
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-                    'bepado-import-filter base-element-select': {
-                        change: function(field, value) {
-                            var table = me.getImportList(),
-                                store = table.getStore();
-                            store.filters.removeAtKey('supplierId');
-                            if (value) {
-                                store.filters.add('supplierId', new Ext.util.Filter({
-                                    property: field.name,
-                                    value: value
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-                    'bepado-import-filter [name=active]': {
-                        change: function(field, value) {
-                            var table = me.getImportList(),
-                                store = table.getStore();
-                            if(!value) {
-                                return;
-                            }
-                            store.filters.removeAtKey('isActive');
-                            if(field.inputValue != '') {
-                                store.filters.add('isActive', new Ext.util.Filter({
-                                    property: field.name,
-                                    value: field.inputValue
-                                }));
-                            }
-                            store.load();
-                        }
-                    },
-                    'bepado-import-filter treepanel': {
-                        select: function(tree, node) {
-                            var table = me.getImportList(),
-                                store = table.getStore();
-
-                            if (!node) {
-                                store.clearFilter();
-                            } else {
-                                store.filters.clear();
-                                store.filter(
-                                    'categoryId',
-                                    node.get('id')
-                                );
-                            }
-                        }
-                    },
-                    'bepado-changed-products-list': {
-                        'selectionchange': me.onChangedProductsSelectionChanged
-                    },
-                    'bepado-log-filter [filter=commandFilter]': {
-                        change: function(field, value) {
-                            var table = me.getLogList(),
-                                store = table.getStore();
-
-                            store.getProxy().extraParams['commandFilter_' + field.name] = value;
-                            store.reload();
-                        }
-                    },
-                    'bepado-log-filter [name=error]': {
-                        change: function(field, value) {
-                            var table = me.getLogList(),
-                                store = table.getStore();
-
-                            if (!value) {
-                                return;
-                            }
-
-                            store.getProxy().extraParams.errorFilter = field.inputValue;
-                            store.reload();
-                        }
-                    },
-                    'bepado-log-filter textfield[name=searchfield]': {
-                        change: function(field, value) {
-                            var table = me.getLogList(),
-                                store = table.getStore();
-
-                            if (value.length === 0 ) {
-                                store.clearFilter();
-                            } else {
-                                store.filters.clear();
-                                store.filter(
-                                    'search',
-                                    '%' + value + '%'
-                                );
-                            }
-                        }
-                    },
-                    'bepado-log-list': {
-                        'selectionchange': function(grid, selected, eOpts) {
-                            var me = this,
-                                record,
-                                tabs = me.getLogTabs(),
-                                request = tabs.down('textarea[name=request]'),
-                                response = tabs.down('textarea[name=response]');
-
-                            // make sure that we have a selection
-                            if (selected && selected.length > 0) {
-                                record = selected[0];
-
-                                request.setValue(record.get('request'));
-                                response.setValue(record.get('response'));
-                            }
-
-                        }
-                    },
-                    'bepado-log-list button[action=clear]': {
-                        click: function() {
-                            var table = me.getLogList(),
-                                store = table.getStore();
-
-                            Ext.MessageBox.confirm(
-                                '{s name=log/clear/confirm}Delete log?{/s}',
-                                '{s name=log/clear/message}You are about to delete all log entries. Continue?{/s}',
-                                function (response) {
-                                    if ( response !== 'yes' ) {
-                                        return;
-                                    }
-                                    Ext.Ajax.request({
-                                        url: '{url action=clearLog}',
-                                        method: 'POST',
-                                        success: function(response, opts) {
-                                            store.reload();
-                                        }
-                                    });
-
-                                }
-                            );
-                        }
+        me.control({
+            'bepado-navigation': {
+                select: me.onSelectNavigationEntry
+            },
+            'bepado-config button[action=save-general-config]': {
+                click: me.onSaveConfigForm
+            },
+            'bepado-config-import-form button[action=save-import-config]': {
+                click: me.onSaveImportConfigForm
+            },
+            'bepado-config-export-form button[action=save-export-config]': {
+                click: me.onSaveExportConfigForm
+            },
+            'bepado-mapping button[action=save]': {
+                click: me.onSaveMapping
+            },
+            'bepado-mapping': {
+                applyToChildren: me.onApplyMappingToChildCategories,
+                importCategories: me.onImportCategoriesFromBepado
+            },
+            'bepado-export-list button[action=add]': {
+                click: me.onExportFilterAction
+            },
+            'bepado-export-list button[action=delete]': {
+                click: me.onExportFilterAction
+            },
+            'bepado-export-filter button[action=category-clear-filter]': {
+                click: me.onExportCategoryFilterClearAction
+            },
+            'bepado-export-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+                    store.filters.removeAtKey('search');
+                    if (value.length > 0 ) {
+                        store.filters.add('search', new Ext.util.Filter({
+                            property: 'search',
+                            value: '%' + value + '%'
+                        }));
                     }
-                });
+                    store.load();
+                }
+            },
 
-                me.populateLogCommandFilter();
+            'bepado-export-filter base-element-select[name=supplierId]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
 
+                    store.filters.removeAtKey('supplierId');
+                    if (value) {
+                        store.filters.add('supplierId', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
+                    }
+                    store.load();
+                }
+            },
 
+            'bepado-export-filter base-element-select[name=exportStatus]': {
+                change: function(field, value) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                    store.filters.removeAtKey('exportStatus');
+                    if (value) {
+                        store.filters.add('exportStatus', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
+                    }
+                    store.load();
+
+                }
+            },
+
+            'bepado-export-filter treepanel': {
+                select: function(tree, node) {
+                    var table = me.getExportList(),
+                        store = table.getStore();
+
+                    if (!node) {
+                        store.filters.removeAtKey('exportCategoryFilter');
+                    } else {
+                        store.filters.removeAtKey('exportCategoryFilter');
+                        store.filters.add('exportCategoryFilter', new Ext.util.Filter({
+                            property: 'categoryId',
+                            value:  node.get('id')
+                        }));
+                    }
+                    store.load();
+                }
+            },
+            'bepado-import-list button[action=activate]': {
+                click: me.onImportFilterAction
+            },
+            'bepado-import-list button[action=deactivate]': {
+                click: me.onImportFilterAction
+            },
+            'bepado-import-list button[action=unsubscribe]': {
+                click: me.onImportFilterAction
+            },
+            'bepado-import-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+                    store.filters.removeAtKey('search');
+                    if (value.length > 0 ) {
+                        store.filters.add('search', new Ext.util.Filter({
+                            property: 'search',
+                            value: '%' + value + '%'
+                        }));
+                    }
+                    store.load();
+                }
+            },
+            'bepado-import-filter base-element-select': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+                    store.filters.removeAtKey('supplierId');
+                    if (value) {
+                        store.filters.add('supplierId', new Ext.util.Filter({
+                            property: field.name,
+                            value: value
+                        }));
+                    }
+                    store.load();
+                }
+            },
+            'bepado-import-filter [name=active]': {
+                change: function(field, value) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+                    if(!value) {
+                        return;
+                    }
+                    store.filters.removeAtKey('isActive');
+                    if(field.inputValue != '') {
+                        store.filters.add('isActive', new Ext.util.Filter({
+                            property: field.name,
+                            value: field.inputValue
+                        }));
+                    }
+                    store.load();
+                }
+            },
+            'bepado-import-filter treepanel': {
+                select: function(tree, node) {
+                    var table = me.getImportList(),
+                        store = table.getStore();
+
+                    if (!node) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'categoryId',
+                            node.get('id')
+                        );
+                    }
+                }
+            },
+            'bepado-changed-products-list': {
+                'selectionchange': me.onChangedProductsSelectionChanged
+            },
+            'bepado-log-filter [filter=commandFilter]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    store.getProxy().extraParams['commandFilter_' + field.name] = value;
+                    store.reload();
+                }
+            },
+            'bepado-log-filter [name=error]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    if (!value) {
+                        return;
+                    }
+
+                    store.getProxy().extraParams.errorFilter = field.inputValue;
+                    store.reload();
+                }
+            },
+            'bepado-log-filter textfield[name=searchfield]': {
+                change: function(field, value) {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    if (value.length === 0 ) {
+                        store.clearFilter();
+                    } else {
+                        store.filters.clear();
+                        store.filter(
+                            'search',
+                            '%' + value + '%'
+                        );
+                    }
+                }
+            },
+            'bepado-log-list': {
+                'selectionchange': function(grid, selected, eOpts) {
+                    var me = this,
+                        record,
+                        tabs = me.getLogTabs(),
+                        request = tabs.down('textarea[name=request]'),
+                        response = tabs.down('textarea[name=response]');
+
+                    // make sure that we have a selection
+                    if (selected && selected.length > 0) {
+                        record = selected[0];
+
+                        request.setValue(record.get('request'));
+                        response.setValue(record.get('response'));
+                    }
+
+                }
+            },
+            'bepado-log-list button[action=clear]': {
+                click: function() {
+                    var table = me.getLogList(),
+                        store = table.getStore();
+
+                    Ext.MessageBox.confirm(
+                        '{s name=log/clear/confirm}Delete log?{/s}',
+                        '{s name=log/clear/message}You are about to delete all log entries. Continue?{/s}',
+                        function (response) {
+                            if ( response !== 'yes' ) {
+                                return;
+                            }
+                            Ext.Ajax.request({
+                                url: '{url action=clearLog}',
+                                method: 'POST',
+                                success: function(response, opts) {
+                                    store.reload();
+                                }
+                            });
+
+                        }
+                    );
+                }
             }
         });
-                me.callParent(arguments);
+
+        me.populateLogCommandFilter();
+
+        me.callParent(arguments);
     },
 
     /**

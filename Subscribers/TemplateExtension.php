@@ -2,6 +2,7 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
+use Shopware\Bepado\Components\Utils\BepadoOrders;
 
 /**
  * Loads various template extensions
@@ -74,35 +75,17 @@ class TemplateExtension extends BaseSubscriber
 
         $bepadoOrderData = array();
 
-        // This will apply for the fromShop
-        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id
-        FROM s_order_attributes
-        WHERE orderID IN (' . implode(', ', $orderIds) . ')
-        AND bepado_shop_id IS NOT NULL
-        ';
-        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+
+        $orderUtil = new BepadoOrders();
+        $result = $orderUtil->getRemoteBepadoOrders($orderIds);
+
+        foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
 
-        // This will apply for orders with remote bepado products in it
-        $sql = 'SELECT oa.orderID, bi.shop_id as bepado_shop_id,  "remote" as bepado_order_id
+        $result = $orderUtil->getLocalBepadoOrders($orderIds);
 
-        FROM s_order_attributes oa
-
-        INNER JOIN s_order_details od
-        ON od.orderID = oa.orderID
-
-        INNER JOIN s_articles_details ad
-        ON ad.articleID = od.articleID
-        AND ad.kind=1
-
-        INNER JOIN s_plugin_bepado_items bi
-        ON bi.article_detail_id=ad.id
-        AND bi.shop_id IS NOT NULL
-
-        WHERE oa.orderID In (' . implode(', ', $orderIds) . ')
-        ';
-        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+        foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
 

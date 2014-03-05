@@ -241,20 +241,20 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $configComponent->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
         $configComponent->setConfig('importCreateCategories', '1');
-        $configComponent->setConfig('detailProductNoIndex', '1');
-        $configComponent->setConfig('detailShopInfo', '1');
-        $configComponent->setConfig('checkoutShopInfo', '1');
-        $configComponent->setConfig('cloudSearch', '0');
+        $configComponent->setConfig('detailProductNoIndex', '1', null, 'general');
+        $configComponent->setConfig('detailShopInfo', '1', null, 'general');
+        $configComponent->setConfig('checkoutShopInfo', '1', null, 'general');
+        $configComponent->setConfig('cloudSearch', '0', null, 'general');
         $configComponent->setConfig('alternateDescriptionField', 'a.descriptionLong', null, 'export');
-        $configComponent->setConfig('bepadoAttribute', '19');
+        $configComponent->setConfig('bepadoAttribute', '19', null, 'general');
         $configComponent->setConfig('importImagesOnFirstImport', '0', null, 'import');
         $configComponent->setConfig('autoUpdateProducts', '1', null, 'export');
-        $configComponent->setConfig('overwriteProductName', '1');
+        $configComponent->setConfig('overwriteProductName', '1', null, 'import');
         $configComponent->setConfig('overwriteProductPrice', '1', null, 'import');
         $configComponent->setConfig('overwriteProductImage', '1', null, 'import');
         $configComponent->setConfig('overwriteProductShortDescription', '1', null, 'import');
         $configComponent->setConfig('overwriteProductLongDescription', '1', null, 'import');
-        $configComponent->setConfig('logRequest', '0');
+        $configComponent->setConfig('logRequest', '0', null, 'general');
 
         Shopware()->Models()->flush();
 
@@ -397,8 +397,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         /** @var \Shopware\Bepado\Components\Config $configComponent */
         $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
-        //todo: get config from the database
-        if ($this->Config()->get('autoUpdateProducts', true)) {
+        if ($configComponent->getConfig('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
 

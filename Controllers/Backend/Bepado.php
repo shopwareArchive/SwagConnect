@@ -978,7 +978,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Customer group and price field may not be empty. Got {$customerGroup} and {$priceField}");
         }
 
-        if (!in_array($priceField, array('price', 'basePrice', 'pseudoPrice', 'bepadoPrice'))) {
+        if (!in_array($priceField, array('price', 'basePrice', 'pseudoPrice'))) {
             throw new \RuntimeException("Unknown price field {$priceField}");
         }
 

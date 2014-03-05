@@ -83,13 +83,14 @@ class Article extends BaseSubscriber
                     'backend/article/model/attribute_bepado.js'
                 );
 
-                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.2', '<')) {
-                    $subject->View()->assign('disableBepadoPrice', 'true');
+//                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.2', '<')) {
+//                    $subject->View()->assign('disableBepadoPrice', 'true');
+//
+//                    $subject->View()->extendsTemplate(
+//                        'backend/article/model/price_attribute_bepado.js'
+//                    );
+//                }
 
-                    $subject->View()->extendsTemplate(
-                        'backend/article/model/price_attribute_bepado.js'
-                    );
-                }
                 $subject->View()->extendsTemplate(
                     'backend/article/view/detail/bepado_tab.js'
                 );
@@ -179,6 +180,8 @@ class Article extends BaseSubscriber
      */
     public function bepadoPricePossible()
     {
+        return false;
+
         return version_compare(\Shopware::VERSION, '4.2.2', '>=')
                 || \Shopware::VERSION == '__VERSION__';
     }

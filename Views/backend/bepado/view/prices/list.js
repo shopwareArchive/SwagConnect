@@ -96,9 +96,9 @@ Ext.define('Shopware.apps.Bepado.view.prices.List', {
                 { field: 'pseudoPrice' }
         ];
 
-        if (me.isVersionAtLeast422()) {
-            columns.splice(0, 0, { field: 'bepadoPrice' });
-        }
+//        if (me.isVersionAtLeast422()) {
+//            columns.splice(0, 0, { field: 'bepadoPrice' });
+//        }
 
 
         return columns;

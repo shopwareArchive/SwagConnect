@@ -299,20 +299,8 @@ class BasketHelper
     {
         $result = array();
 
-        
-        if (!empty($basket['sShippingcostsTax']))
-        {
-            $basket['sShippingcostsTax'] = number_format(floatval($basket['sShippingcostsTax']),2);
-
-            $result[$basket['sShippingcostsTax']] = $basket['sShippingcostsWithTax']-$basket['sShippingcostsNet'];
-            if (empty($result[$basket['sShippingcostsTax']])) unset($result[$basket['sShippingcostsTax']]);
-        }
-        elseif ($basket['sShippingcostsWithTax'])
-        {
-            $result[number_format(floatval(Shopware()->Config()->get('sTAXSHIPPING')),2)] = $basket['sShippingcostsWithTax']-$basket['sShippingcostsNet'];
-            
-            if (empty($result[number_format(floatval(Shopware()->Config()->get('sTAXSHIPPING')),2)])) unset($result[number_format(floatval(Shopware()->Config()->get('sTAXSHIPPING')),2)]);
-        }
+        // The original method also calculates the tax rates of the shipping costs - this
+        // is done in a separate methode here
 
         if(empty($basket['content'])){
             ksort($result, SORT_NUMERIC);
@@ -428,7 +416,6 @@ class BasketHelper
         $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
 
         // Set the shipping cost tax rate for shopware
-        $this->basket['sShippingcostsTax'] = ($shippingCosts / $shippingCostsNet) * 100 - 100;
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
@@ -451,8 +438,56 @@ class BasketHelper
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
 
         // Recalculate the tax rates
-        $this->basket['sTaxRates'] = $this->getMergedTaxRates(array($this->getTaxRates($this->basket), $this->getBepadoTaxRates()));
+        $this->basket['sTaxRates'] = $this->getMergedTaxRates(
+            array(
+                $this->getTaxRates($this->basket),
+                $this->getBepadoTaxRates(),
+                $this->getShippingCostsTaxRates()
+            )
+        );
     }
+
+    /**
+     * Returns the tax rate of the shipping costs and also sets the the net shipping cost amount(!)
+     */
+    public function getShippingCostsTaxRates()
+    {
+        $taxAmount = $this->basket['sShippingcosts'] - $this->basket['sShippingcostsNet'];
+
+        $taxRate = number_format($this->getMaxTaxRate(), 2, '.', '');
+        $this->basket['sShippingcostsNet'] = $this->basket['sShippingcosts'] / (($taxRate/100)+1);
+
+        return array(
+            (string) $taxRate => $taxAmount
+        );
+    }
+
+    /**
+     * Get the highest tax rate from basket - currently only this is supported by SW
+     *
+     * @return int
+     */
+    public function getMaxTaxRate()
+    {
+
+        $taxRate = 0;
+        foreach ($this->getBepadoContent() as $shopId => $products) {
+            foreach ($products as $product) {
+                if ($product['tax_rate'] > $taxRate) {
+                    $taxRate = $product['tax_rate'];
+                }
+            }
+        }
+
+        foreach ($this->basket['content'] as $product) {
+            if ($product['tax_rate'] > $taxRate) {
+                $taxRate = $product['tax_rate'];
+            }
+        }
+        
+        return $taxRate;
+    }
+
 
     /**
      * Return array of variables which need to be available in the default template

@@ -22,9 +22,7 @@ class OrderDocument extends BaseSubscriber
     {
         $orderModel = $args->getSubject();
         $order = $orderModel->order;
-        
 
-        
         // This will apply for remote orders
         if ($order->attributes && $order->attributes['bepado_order_id']) {
             $this->setDefaultTaxRate($order);

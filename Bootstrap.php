@@ -235,14 +235,6 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         /** @var Shopware\Bepado\Components\Config $configComponent */
         $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
 
-//        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-//        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
-//
-//        $repo->setConfig('priceGroupForPriceExport', 'EK');
-//        $repo->setConfig('priceGroupForPurchasePriceExport', 'EK');
-//        $repo->setConfig('priceFieldForPriceExport', 'price');
-//        $repo->setConfig('priceFieldForPurchasePriceExport', 'basePrice');
-
         $configComponent->setConfig('priceGroupForPriceExport', 'EK');
         $configComponent->setConfig('priceGroupForPurchasePriceExport', 'EK');
         $configComponent->setConfig('priceFieldForPriceExport', 'price');

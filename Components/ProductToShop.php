@@ -63,6 +63,9 @@ class ProductToShop implements ProductToShopBase
      */
     private $imageImport;
 
+    /** @var  \Shopware\Bepado\Components\Config */
+    private $configComponent;
+
     /**
      * @param Helper $helper
      * @param ModelManager $manager
@@ -177,7 +180,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // Set the configured attribute so users can easily check if a given product is a bepado attribute
-        $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
+        $setter = 'setAttr' . $this->getConfigComponent()->getConfig('bepadoAttribute', 19);
         $detailAttribute->$setter($product->sourceId);
 
         $bepadoAttribute->setShopId($product->shopId);
@@ -309,7 +312,7 @@ class ProductToShop implements ProductToShopBase
             }
 
             // If this is a new product
-            if (!$model->getId() && $field == 'image' && !$this->config->getConfig('importImagesOnFirstImport', false)) {
+            if (!$model->getId() && $field == 'image' && !$this->getConfigComponent()->getConfig('importImagesOnFirstImport', false)) {
                 $output[$field] = false;
                 $flag |= $flagsByName['imageInitialImport'];
                 continue;
@@ -397,9 +400,21 @@ class ProductToShop implements ProductToShopBase
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
         // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {
-            return $this->config->getConfig($configName, true);
+            return $this->getConfigComponent()->getConfig($configName, true);
         }
 
         return $attributeValue == 'overwrite';
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\Config
+     */
+    private function getConfigComponent()
+    {
+        if (!$this->configComponent) {
+            $this->configComponent = new Config($this->manager);
+        }
+
+        return $this->configComponent;
     }
 }

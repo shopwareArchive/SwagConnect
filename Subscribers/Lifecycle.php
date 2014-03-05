@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils;
 use Shopware\Bepado\Components\BepadoExport;
 /**

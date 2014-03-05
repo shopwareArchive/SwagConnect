@@ -65,7 +65,7 @@ class BepadoFactory
         $manager = $this->getModelManager();
         $front = Shopware()->Front();
         $helper = $this->getHelper();
-        $apiKey = Shopware()->Config()->get('apiKey');
+        $apiKey = $this->getConfigComponent()->getConfig('apiKey');
 
         $gateway = new SDK\Gateway\PDO($connection);
 
@@ -73,7 +73,7 @@ class BepadoFactory
          * The debugHost allows to specify an alternative bepado host.
          * Furthermore currently only one debugHost for *all* service can be specified
          */
-        $debugHost = Shopware()->Config()->get('bepadoDebugHost');
+        $debugHost = $this->getConfigComponent()->getConfig('bepadoDebugHost');
         if (!empty($debugHost)) {
             $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver

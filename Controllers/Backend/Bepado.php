@@ -787,13 +787,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->View()->assign(array(
                 'success' => true
             ));
-            $repo->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
         } catch (Exception $e) {
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
                 'success' => false
             ));
-            $repo->setConfig('apiKeyVerified', false);
+            $this->getConfigComponent()->setConfig('apiKeyVerified', false);
         }
 
         $this->getModelManager()->flush();

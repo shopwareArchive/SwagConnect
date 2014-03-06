@@ -450,9 +450,10 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyLibrary();
 
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = $this->Application()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
-        $verified = $repo->getConfig('apiKeyVerified', false);
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
+        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+        $verified = $configComponent->getConfig('apiKeyVerified', false);
 
         $subscribers = $this->getDefaultSubscribers();
 
@@ -495,8 +496,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\Dispatches(),
         );
 
+        $this->registerMyLibrary();
+        /** @var Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->Application()->Models();
+        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
 
-        if ($this->Config()->get('autoUpdateProducts', true)) {
+        if ($configComponent->getConfig('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
         }
 

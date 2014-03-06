@@ -92,6 +92,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
         } catch (\Exception $e) {
             // Always write errors to the log
             $logger->write(true, $request, $e);
+            $logger->write(true, 'Headers: '.print_r($_SERVER, true), $e, 'request-headers');
             throw $e;
         }
 

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Service;
@@ -21,7 +21,7 @@ use Bepado\SDK\Gateway\ShopConfiguration;
 /**
  * Shopping service
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 class Shopping
 {
@@ -94,28 +94,49 @@ class Shopping
      *
      * Calculate shipping costs for the given set of products.
      *
-     * @param Struct\ProductList $productList
-     * @return float
+     * @param Struct\Order $order
+     * @return Struct\Order
      */
-    public function calculateShippingCosts(Struct\ProductList $productList)
+    public function calculateShippingCosts(Struct\Order $order)
     {
-        $shippingCosts = array_map(
-            array($this->calculator, 'calculateProductListShippingCosts'),
-            $this->zipProductListByShopId($productList)
+        $shops = array();
+        $orders = $this->splitShopOrders($order);
+
+        foreach ($orders as $shopId => $shopOrder) {
+            $shops[$shopId] = $this->calculator->calculateShippingCosts($shopOrder);
+            $shops[$shopId]->shopId = $shopId;
+        }
+
+        $isShippable = array_reduce(
+            $shops,
+            function ($all, $shippingCosts) {
+                return $all && $shippingCosts->isShippable;
+            },
+            true
         );
 
-        $property = function ($property) {
-            return function ($shippingCost) use ($property) {
-                return $shippingCost->$property;
-            };
-        };
-
-        return new Struct\ShippingCosts(
-            array(
-                'grossShippingCosts' => array_sum(array_map($property('grossShippingCosts'), $shippingCosts)),
-                'shippingCosts' => array_sum(array_map($property('shippingCosts'), $shippingCosts))
+        $netShippingCosts = array_sum(
+            array_map(function (Struct\ShippingCosts $costs) {
+                    return $costs->shippingCosts;
+                },
+                $shops
             )
         );
+
+        $grossShippingCosts = array_sum(
+            array_map(function (Struct\ShippingCosts $costs) {
+                    return $costs->grossShippingCosts;
+                },
+                $shops
+            )
+        );
+
+        return new Struct\TotalShippingCosts(array(
+            'shops' => $shops,
+            'isShippable' => $isShippable,
+            'shippingCosts' => $netShippingCosts,
+            'grossShippingCosts' => $grossShippingCosts,
+        ));
     }
 
     /**
@@ -188,13 +209,15 @@ class Shopping
      * This method will reserve the given products in the remote shops.
      *
      * If the product data change in a relevant way, this method will not
-     * reserve the products, but instead return a Struct\Message, which should
-     * be ACK'ed by the user. Afterwards another reservation may be issued.
+     * reserve the products, but instead the messages property will contain
+     * messages, which should be displayed to the user and the success property
+     * will be false. The messages should be ACK'ed by the user. Afterwards
+     * another reservation may be issued.
      *
-     * If The reservation of the product set succeeded a hash of reservation
-     * Ids for all involved shops will be returned. This hash must be stored in
-     * the shop for all further transactions. The session is probably the best
-     * location for this.
+     * If The reservation of the product set succeeded the orders in the
+     * reservation struct will have a reservationID set. The reservation struct
+     * should be sored in the shop for the checkout process. The session is
+     * probably the best location for this.
      *
      * If data updated are detected, the local product database will be updated
      * accordingly.
@@ -210,7 +233,17 @@ class Shopping
     {
         $responses = array();
         $orders = $this->splitShopOrders($order);
+
+        $shippingCosts = $this->calculateShippingCosts($order);
+
+        if (!$shippingCosts->isShippable) {
+            return $this->failedReservationNotShippable($orders, $shippingCosts);
+        }
+
         foreach ($orders as $shopId => $order) {
+            $order->shippingCosts = $shippingCosts->shops[$shopId]->shippingCosts;
+            $order->grossShippingCosts = $shippingCosts->shops[$shopId]->grossShippingCosts;
+
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($order);
         }
@@ -223,12 +256,43 @@ class Shopping
             } elseif (is_array($response)) {
                 $this->applyRemoteShopChanges($response);
                 $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
+            } elseif ($response instanceof Struct\Message) {
+                $reservation->messages[$shopId] = array($response);
             } else {
                 // TODO: How to react on false value returned?
                 // This might occur if a reservation is canceled by the provider shop
                 // see Service\Transaction::reserveProducts().
                 // SDK::reserveProducts() needs an according update, too.
                 return false;
+            }
+        }
+
+        $reservation->success = !count($reservation->messages);
+        return $reservation;
+    }
+
+    /**
+     * Create failed reservation with order not shippable error messages.
+     *
+     * @return Struct\Reservation
+     */
+    private function failedReservationNotShippable(array $orders, Struct\TotalShippingCosts $shippingCosts)
+    {
+        $reservation = new Struct\Reservation();
+        $reservation->orders = $orders;
+        $reservation->success = false;
+        $reservation->messages = array();
+
+        foreach ($shippingCosts->shops as $shopId => $shopShippingCosts) {
+            if (!$shopShippingCosts->isShippable) {
+                $reservation->messages[$shopId] = array(
+                    new Struct\Message(array(
+                        'message' => 'Products cannot be shipped to %country.',
+                        'values' => array(
+                            'country' => $orders[$shopId]->deliveryAddress->country
+                        )
+                    ))
+                );
             }
         }
 
@@ -382,11 +446,6 @@ class Shopping
             $shopOrder = clone $order;
             $shopOrder->providerShop = $shopId;
             $shopOrder->products = $this->getShopProducts($order, $shopId);
-
-            $shippingCosts = $this->calculator->calculateOrderShippingCosts($shopOrder);
-
-            $shopOrder->shippingCosts = $shippingCosts->shippingCosts;
-            $shopOrder->grossShippingCosts = $shippingCosts->grossShippingCosts;
 
             $orders[$shopId] = $shopOrder;
         }

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\Common\Struct\Metric;
@@ -12,7 +12,7 @@ use \Bepado\Common\Struct\Metric;
 /**
  * Time metric
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 class Time extends Metric
 {

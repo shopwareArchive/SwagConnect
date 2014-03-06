@@ -101,26 +101,38 @@ abstract class BaseProductQuery
         }
 
         // Fix categories
-        if(is_string($row['categories'])) {
-            $row['categories'] = unserialize($row['categories']);
+        if(is_string($row['category'])) {
+            $row['categories'] = array($row['category']);
         }
+        unset($row['category']);
 
         // Fix prices
         foreach(array('price', 'purchasePrice', 'vat') as $name) {
             $row[$name] = round($row[$name], 2);
         }
 
+        // The SDK expects the weight to be numeric. So if it is NULL, we unset it here
+        if ($row['weight'] === null) {
+            unset ($row['weight']);
+        }
+
+        // Make sure that there is a unit
+        if ($row['unit'] === null) {
+            unset ($row['unit']);
+        }
 
         // Fix attributes
         $row['attributes'] = array();
         foreach ($this->attributeMapping as $swField => $bepadoField) {
+            if (!array_key_exists($swField, $row)) {
+                continue;
+            }
             $row['attributes'][$bepadoField] = $row[$swField];
-            unset ($row[$swField]);
+            unset($row[$swField]);
         }
 
         // Fix dimensions
         $row = $this->prepareProductDimensions($row);
-
 
         return $row;
     }

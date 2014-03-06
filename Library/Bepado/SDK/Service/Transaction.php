@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Service;
@@ -11,11 +11,12 @@ use Bepado\SDK\ProductFromShop;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\Logger;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCostCalculator;
 
 /**
  * Service to maintain transactions
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 class Transaction
 {
@@ -48,6 +49,13 @@ class Transaction
     protected $shopConfiguration;
 
     /**
+     * Shipping cost calculator
+     *
+     * @var ShippingCostCalculator
+     */
+    protected $calculator;
+
+    /**
      * COnstruct from gateway
      *
      * @param ProductFromShop $fromShop
@@ -59,12 +67,14 @@ class Transaction
         ProductFromShop $fromShop,
         Gateway\ReservationGateway $reservations,
         Logger $logger,
-        Gateway\ShopConfiguration $shopConfiguration
+        Gateway\ShopConfiguration $shopConfiguration,
+        ShippingCostCalculator $calculator
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
         $this->logger = $logger;
         $this->shopConfiguration = $shopConfiguration;
+        $this->calculator = $calculator;
     }
 
     /**
@@ -87,6 +97,64 @@ class Transaction
             );
         }
 
+        $currentProducts = $this->getCurrentProducts($products);
+
+        $myShopId = $this->shopConfiguration->getShopId();
+        $buyerShopConfig = $this->shopConfiguration->getShopConfiguration($buyerShopId);
+
+        $changes = array();
+        foreach ($products->products as $product) {
+            if (!isset($currentProducts[$product->sourceId])) {
+                // Product does not exist any more
+                $changes[] = new Struct\Change\InterShop\Delete(
+                    array(
+                        'sourceId' => $product->sourceId,
+                    )
+                );
+
+                continue;
+            }
+
+            $current = $currentProducts[$product->sourceId];
+            $current->shopId = $myShopId;
+
+            if ($this->purchasePriceHasChanged($current, $product, $buyerShopConfig->priceGroupMargin)) {
+
+                $currentNotAvailable = clone $current;
+                $currentNotAvailable->availability = 0;
+
+                $changes[] = new Struct\Change\InterShop\Update(
+                    array(
+                        'sourceId' => $product->sourceId,
+                        'product' => $currentNotAvailable,
+                        'oldProduct' => $product,
+                    )
+                );
+
+            } elseif ($this->priceHasChanged($current, $product) ||
+                $this->availabilityHasChanged($current, $product)) {
+
+                // Price or availability changed
+                $changes[] = new Struct\Change\InterShop\Update(
+                    array(
+                        'sourceId' => $product->sourceId,
+                        'product' => $current,
+                        'oldProduct' => $product,
+                    )
+                );
+            }
+        }
+
+        return $changes ?: true;
+    }
+
+    /**
+     * Get current products from the database indexed by source-id.
+     *
+     * @return array<string, \Bepado\SDK\Struct\Product>
+     */
+    private function getCurrentProducts($products)
+    {
         $currentProducts = $this->fromShop->getProducts(
             array_map(
                 function ($product) {
@@ -96,54 +164,13 @@ class Transaction
             )
         );
 
-        $myShopId = $this->shopConfiguration->getShopId();
-        $buyerShopConfig = $this->shopConfiguration->getShopConfiguration($buyerShopId);
+        $indexedProducts = array();
 
-        $changes = array();
-        foreach ($products->products as $product) {
-            foreach ($currentProducts as $current) {
-                $current->shopId = $myShopId;
-
-                if ($current->sourceId === $product->sourceId) {
-                    if ($this->purchasePriceHasChanged($current, $product, $buyerShopConfig->priceGroupMargin)) {
-
-                        $currentNotAvailable = clone $current;
-                        $currentNotAvailable->availability = 0;
-
-                        $changes[] = new Struct\Change\InterShop\Update(
-                            array(
-                                'sourceId' => $product->sourceId,
-                                'product' => $currentNotAvailable,
-                                'oldProduct' => $product,
-                            )
-                        );
-
-                    } elseif ($this->priceHasChanged($current, $product) ||
-                        $this->availabilityHasChanged($current, $product)) {
-
-                        // Price or availability changed
-                        $changes[] = new Struct\Change\InterShop\Update(
-                            array(
-                                'sourceId' => $product->sourceId,
-                                'product' => $current,
-                                'oldProduct' => $product,
-                            )
-                        );
-                    }
-                }
-
-                continue 2;
-            }
-
-            // Product does not exist any more
-            $changes[] = new Struct\Change\InterShop\Delete(
-                array(
-                    'sourceId' => $product->sourceId,
-                )
-            );
+        foreach ($currentProducts as $product) {
+            $indexedProducts[$product->sourceId] = $product;
         }
 
-        return $changes ?: true;
+        return $indexedProducts;
     }
 
     private function purchasePriceHasChanged($current, $product, $priceGroupMargin)
@@ -196,6 +223,31 @@ class Transaction
             ),
             $order->orderShop
         );
+
+        $myShippingCosts = $this->calculator->calculateShippingCosts($order);
+
+        if (!$myShippingCosts->isShippable) {
+            return new Struct\Message(array(
+                'message' => 'Products cannot be shipped to %country.',
+                'values' => array(
+                    'country' => $order->deliveryAddress->country
+                )
+            ));
+        }
+
+        if (!$this->floatsEqual($order->shippingCosts, $myShippingCosts->shippingCosts) ||
+            !$this->floatsEqual($order->grossShippingCosts, $myShippingCosts->grossShippingCosts)) {
+
+            return new Struct\Message(
+                array(
+                    'message' => "Shipping costs have changed from %oldValue to %newValue.",
+                    'values' => array(
+                        'oldValue' => round($order->grossShippingCosts, 2),
+                        'newValue' => round($myShippingCosts->grossShippingCosts, 2),
+                    ),
+                )
+            );
+        }
 
         if ($verify !== true) {
             return $verify;

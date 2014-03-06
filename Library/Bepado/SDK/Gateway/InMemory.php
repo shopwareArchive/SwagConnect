@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
@@ -11,6 +11,7 @@ use Bepado\SDK\Gateway;
 use Bepado\SDK\Struct;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\Product;
+use Bepado\SDK\ShippingCosts\Rules;
 
 /**
  * Abstract base class to store SDK related data
@@ -18,7 +19,7 @@ use Bepado\SDK\Struct\Product;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version $Revision$
+ * @version 1.1.133
  * @api
  */
 class InMemory extends Gateway
@@ -32,6 +33,9 @@ class InMemory extends Gateway
     protected $categories = array();
     protected $categoriesLastRevision = null;
     protected $reservations = array();
+    protected $shippingCosts = array();
+    protected $shippingCostsRevision;
+    protected $features = array();
 
     /**
      * Get next changes
@@ -417,6 +421,51 @@ class InMemory extends Gateway
     }
 
     /**
+     * Get last revision
+     *
+     * @return string
+     */
+    public function getLastShippingCostsRevision()
+    {
+        return $this->shippingCostsRevision;
+    }
+
+    /**
+     * Store shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @param string $revision
+     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @return void
+     */
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts)
+    {
+        $this->shippingCostsRevision = max($this->shippingCostsRevision, $revision);
+        $this->shippingCosts[$fromShop][$toShop] = $shippingCosts;
+    }
+
+    /**
+     * Get shop shipping costs
+     *
+     * @param string $fromShop
+     * @param string $toShop
+     * @return \Bepado\SDK\ShippingCosts\Rules
+     */
+    public function getShippingCosts($fromShop, $toShop)
+    {
+        if (!isset($this->shippingCosts[$fromShop][$toShop])) {
+            $pairs = array_map(function ($fromShop) {
+                return $fromShop . ": " . implode(", ", array_keys($this->shippingCosts[$fromShop]));
+            }, array_keys($this->shippingCosts));
+
+            throw new \RuntimeException("Unknown shops $fromShop-$toShop, knowing " . implode(', ', $pairs));
+        }
+
+        return $this->shippingCosts[$fromShop][$toShop];
+    }
+
+    /**
      * Restores an in-memory gateway from a previously stored state array.
      *
      * @param array $state
@@ -434,6 +483,27 @@ class InMemory extends Gateway
         foreach ($state as $name => $value) {
             $this->$name = $value;
         }
+    }
+
+    /**
+     * Set all the enabled features.
+     *
+     * @param array<string>
+     */
+    public function setEnabledFeatures(array $features)
+    {
+        $this->features = array_map('strtolower', $features);
+    }
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $featureName
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        return in_array(strtolower($feature), $this->features);
     }
 
     /**

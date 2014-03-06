@@ -77,14 +77,59 @@ Ext.define('Shopware.apps.Bepado.view.prices.List', {
                 valueField: 'field',
                 store: Ext.create('Ext.data.Store', {
                     fields: ['field'],
-                    data: [
-                        { field: 'basePrice' },
-                        { field: 'price' },
-                        { field: 'pseudoPrice' },
-                    ]
+                    data: me.getPriceData()
                 })
             }
         }];
+    },
+
+    /**
+     * Returns allowed price columns
+     *
+     * @returns Array
+     */
+    getPriceData: function() {
+        var me = this,
+            columns = [
+                { field: 'basePrice' },
+                { field: 'price' },
+                { field: 'pseudoPrice' }
+        ];
+
+//        if (me.isVersionAtLeast422()) {
+//            columns.splice(0, 0, { field: 'bepadoPrice' });
+//        }
+
+
+        return columns;
+    },
+
+    isVersionAtLeast422: function() {
+        var me = this,
+            currentVersion = '{config name=version}',
+            parts = currentVersion.split('.');
+
+        if (currentVersion == '__VERSION__') {
+            return true;
+        }
+
+        // If major version >= 5, return true
+        if (parts[0] >= 5 ) {
+            return true;
+        }
+
+        // If minor version < 2, return false
+        if (parts[1] < 2) {
+            return false
+        }
+
+        // If revision < 2, return false
+        if (parts[2] < 2) {
+            return false;
+        }
+
+        // Now we made sure, that we have at least 4.2.2
+        return true;
     }
 });
 //{/block}

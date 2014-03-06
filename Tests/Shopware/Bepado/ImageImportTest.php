@@ -33,7 +33,7 @@ class ImageImportTest extends BepadoTestHelper
         $model = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
         $this->getImageImport()->importImagesForArticle($images, $model);
 
-        $this->assertArrayCount(13, $model->getImages());
+        $this->assertEquals(13, $model->getImages()->count());
     }
 
 }

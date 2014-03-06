@@ -12,10 +12,18 @@ abstract class SwQuery implements CategoryQuery
      * @var ModelManager
      */
     protected $manager;
+    /** @var  RelevanceSorter */
+    protected $relevanceSorter;
 
-    public function __construct(ModelManager $manager)
+    public function __construct(ModelManager $manager, RelevanceSorter $relevanceSorter)
     {
         $this->manager = $manager;
+        $this->relevanceSorter = $relevanceSorter;
+    }
+
+    public function getRelevanceSorter()
+    {
+        return $this->relevanceSorter;
     }
 
     /**

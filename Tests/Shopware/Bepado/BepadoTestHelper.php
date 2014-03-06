@@ -83,7 +83,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         }
 
         $attribute = $category->getAttribute() ?: new \Shopware\Models\Attribute\Category();
-        $attribute->setBepadoMapping($mapping);
+        $attribute->setBepadoImportMapping($mapping);
         $category->setAttribute($attribute);
 
         $modelManager->flush();

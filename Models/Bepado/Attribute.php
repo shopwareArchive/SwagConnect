@@ -93,11 +93,11 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $categories
+     * @var string $category
      *
-     * @ORM\Column(name="categories", type="text", nullable=true)
+     * @ORM\Column(name="category", type="text", nullable=true)
      */
-     protected $categories;
+     protected $category;
 
 
     /**
@@ -250,19 +250,19 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @param string $categories
+     * @param string $category
      */
-    public function setCategories($categories)
+    public function setCategory($category)
     {
-        $this->categories = $categories;
+        $this->category = $category;
     }
 
     /**
      * @return string
      */
-    public function getCategories()
+    public function getCategory()
     {
-        return $this->categories;
+        return $this->category;
     }
 
     /**

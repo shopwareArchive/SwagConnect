@@ -9,11 +9,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     extend: 'Enlight.app.Controller',
 
     stores: [
-        'main.Navigation', 'main.Mapping', 'main.Category',
+        'main.Navigation',
         'export.List', 'import.List',
         'changed_products.List',
         'config.Prices', 'log.List',
-        'config.General', 'config.Import'
+        'mapping.Import', 'mapping.Export',
+        'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
+		'config.General', 'config.Import'
     ],
     models: [
         'main.Mapping', 'main.Product',
@@ -30,7 +32,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'exportList', selector: 'bepado-export-list' },
         { ref: 'exportFilter', selector: 'bepado-export-filter' },
         { ref: 'importList', selector: 'bepado-import-list' },
-        { ref: 'mapping', selector: 'bepado-mapping treepanel' },
+        { ref: 'importMapping', selector: 'bepado-mapping-import treepanel' },
+        { ref: 'exportMapping', selector: 'bepado-mapping-export treepanel' },
         { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
         { ref: 'changedList', selector: 'bepado-changed-products-list' },
         { ref: 'logList', selector: 'bepado-log-list' },
@@ -89,21 +92,29 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-config button[action=save-general-config]': {
                 click: me.onSaveConfigForm
             },
-            'bepado-config-import-form button[action=save-import-config]': {
+			'bepado-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
             },
-            'bepado-config-export-form button[action=save-export-config]': {
+			'bepado-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
             },
-            'bepado-mapping button[action=save]': {
+			'bepado-mapping button[action=save]': {
                 click: me.onSaveMapping
             },
-            'bepado-mapping': {
-                applyToChildren: me.onApplyMappingToChildCategories,
+            'bepado-mapping-import button[action=save]': {
+                click: me.onSaveImportMapping
+            },
+            'bepado-mapping-export button[action=save]': {
+                click: me.onSaveExportMapping
+            },
+            'bepado-mapping-export': {
+                applyToChildren: me.onApplyMappingToChildCategories
+            },
+            'bepado-mapping-import': {
                 importCategories: me.onImportCategoriesFromBepado
             },
             'bepado-export-list button[action=add]': {
-                click: me.onExportFilterAction
+               click: me.onExportFilterAction
             },
             'bepado-export-list button[action=delete]': {
                 click: me.onExportFilterAction
@@ -115,7 +126,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
-                    store.filters.removeAtKey('search');
+                        store.filters.removeAtKey('search');
                     if (value.length > 0 ) {
                         store.filters.add('search', new Ext.util.Filter({
                             property: 'search',
@@ -131,7 +142,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     var table = me.getExportList(),
                         store = table.getStore();
 
-                    store.filters.removeAtKey('supplierId');
+                        store.filters.removeAtKey('supplierId');
                     if (value) {
                         store.filters.add('supplierId', new Ext.util.Filter({
                             property: field.name,
@@ -147,7 +158,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     var table = me.getExportList(),
                         store = table.getStore();
 
-                    store.filters.removeAtKey('exportStatus');
+                        store.filters.removeAtKey('exportStatus');
                     if (value) {
                         store.filters.add('exportStatus', new Ext.util.Filter({
                             property: field.name,
@@ -203,7 +214,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
-                    store.filters.removeAtKey('supplierId');
+                        store.filters.removeAtKey('supplierId');
                     if (value) {
                         store.filters.add('supplierId', new Ext.util.Filter({
                             property: field.name,
@@ -220,7 +231,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     if(!value) {
                         return;
                     }
-                    store.filters.removeAtKey('isActive');
+                        store.filters.removeAtKey('isActive');
                     if(field.inputValue != '') {
                         store.filters.add('isActive', new Ext.util.Filter({
                             property: field.name,
@@ -516,7 +527,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      */
     onImportCategoriesFromBepado: function(record) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getImportMapping(),
             store = panel.store;
 
         Ext.MessageBox.confirm(
@@ -558,7 +569,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      */
     onApplyMappingToChildCategories: function(record) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getExportMapping(),
             store = panel.store;
 
         // No message needed, if there aren't any child nodes
@@ -599,13 +610,44 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     /**
+     * Callback function that will save the current import mapping
+     *
+     * @param button
+     */
+    onSaveImportMapping: function(button) {
+        var me = this,
+            panel = me.getImportMapping(),
+            title = me.messages.saveMappingTitle, message;
+
+        if(panel.store.getUpdatedRecords().length < 1) {
+            return;
+        }
+        panel.setLoading();
+        panel.store.sync({
+            success :function (records, operation) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingSuccess;
+                me.createGrowlMessage(title, message);
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+                message = me.messages.saveMappingError;
+                if(batch.proxy.reader.rawData.message) {
+                    message += '<br />' + batch.proxy.reader.rawData.message;
+                }
+                me.createGrowlMessage(title, message);
+            }
+        });
+    },
+
+    /**
      * Callback function that will save the current mapping
      *
      * @param button
      */
-    onSaveMapping: function(button) {
+    onSaveExportMapping: function(button) {
         var me = this,
-            panel = me.getMapping(),
+            panel = me.getExportMapping(),
             title = me.messages.saveMappingTitle, message;
         if(panel.store.getUpdatedRecords().length < 1) {
             return;

@@ -14,6 +14,7 @@ class ArticleList extends BaseSubscriber
     {
         return array(
             'Shopware_Controllers_Backend_ArticleList_SQLParts' => 'onFilterArticle',
+            'Enlight_Controller_Action_PostDispatch_Backend_ArticleList' => 'extentBackendArticleList'
         );
     }
 
@@ -42,4 +43,64 @@ class ArticleList extends BaseSubscriber
         return array($sqlParams, $filterSql, $categorySql, $imageSQL, $order);
 
     }
+
+    /**
+     * Extends the product list in the backend in order to have a special hint for bepado products
+     *
+     * @event Enlight_Controller_Action_PostDispatch_Backend_ArticleList
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function extentBackendArticleList(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/article_list/bepado.js'
+                );
+                break;
+            case 'list':
+                $subject->View()->data = $this->markBepadoProducts(
+                    $subject->View()->data
+                );
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Helper method which adds an additional 'bepado' field to article objects in order to indicate
+     * if they are bepado articles or not
+     *
+     * @param $data
+     * @return mixed
+     */
+    private function markBepadoProducts($data)
+    {
+        $articleIds = array_map(function ($row) {
+            return (int)$row['articleId'];
+        }, $data);
+
+        if (empty($articleIds)) {
+            return $data;
+        }
+
+        $sql = 'SELECT article_id FROM s_plugin_bepado_items WHERE article_id IN (' . implode(', ', $articleIds) . ') AND source_id IS NOT NULL';
+        $bepadoArticleIds = array_map(function ($row) {
+            return $row['article_id'];
+        }, Shopware()->Db()->fetchAll($sql));
+
+        foreach($data as $idx => $row) {
+            $data[$idx]['bepado'] = in_array($row['articleId'], $bepadoArticleIds);
+        }
+
+        return $data;
+    }
+
 }

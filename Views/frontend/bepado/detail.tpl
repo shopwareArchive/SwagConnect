@@ -6,7 +6,12 @@
 {/block}
 
 {block name='frontend_detail_buy_button'}
-	{if $bepadoShopInfo && $bepadoProduct}
+    {if $hideBepado}
+        <div class="space">&nbsp;</div>
+        <div class="error bold center">
+            {s name="DetailBuyInfoNotAvailable" namespace="frontend/detail/buy"}{/s}
+        </div>
+	{elseif $bepadoShopInfo && $bepadoProduct}
 		{* Include the basket button *}
 		<div class="bepado-detail-product">
 			{$smarty.block.parent}

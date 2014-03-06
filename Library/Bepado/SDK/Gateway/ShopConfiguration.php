@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Gateaway interface to maintain shop configurations
  *
- * @version $Revision$
+ * @version 1.1.133
  * @api
  */
 interface ShopConfiguration
@@ -86,4 +86,19 @@ interface ShopConfiguration
      * @return string
      */
     public function getShopId();
+
+    /**
+     * Set all the enabled features.
+     *
+     * @param array<string>
+     */
+    public function setEnabledFeatures(array $features);
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $featureName
+     * @return bool
+     */
+    public function isFeatureEnabled($feature);
 }

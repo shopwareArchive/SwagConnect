@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK;
@@ -10,7 +10,7 @@ namespace Bepado\SDK;
 /**
  * Base class for error handler implementations
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 abstract class ErrorHandler
 {

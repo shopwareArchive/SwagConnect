@@ -186,11 +186,10 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setShopId($product->shopId);
         $bepadoAttribute->setSourceId($product->sourceId);
         $bepadoAttribute->setExportStatus(null);
-        $bepadoAttribute->setCategories(serialize($product->categories));
         $bepadoAttribute->setPurchasePrice($product->purchasePrice);
         $bepadoAttribute->setFixedPrice($product->fixedPrice);
         $bepadoAttribute->setFreeDelivery($product->freeDelivery);
-        $bepadoAttribute->setCategories(serialize($product->categories));
+        $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
         $bepadoAttribute->setLastUpdateFlag($flag);
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
@@ -245,12 +244,13 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($bepadoAttribute);
 
         $this->manager->flush();
+        $this->manager->clear();
 
         if ($updateFields['image']) {
+            // Reload the model in order to not to work an the already flushed model
+            $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
-
-        $this->manager->clear();
     }
 
 

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\ChangeVisitor;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Visits intershop changes ito messages
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 class Message extends ChangeVisitor
 {

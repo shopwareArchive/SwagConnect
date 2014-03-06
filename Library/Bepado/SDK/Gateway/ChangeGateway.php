@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Gateway;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct\Product;
 /**
  * Gateway interface to maintain changes feed
  *
- * @version $Revision$
+ * @version 1.1.133
  * @api
  */
 interface ChangeGateway

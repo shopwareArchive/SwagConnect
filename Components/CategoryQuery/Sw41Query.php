@@ -8,6 +8,8 @@ use Doctrine\ORM\QueryBuilder;
 class Sw41Query extends SwQuery
 {
     /**
+     * Return local SW categories für a given product
+     *
      * @param Product $product
      * @return \Shopware\Models\Category\Category[]
      */
@@ -17,7 +19,7 @@ class Sw41Query extends SwQuery
         $builder = $repository->createQueryBuilder('c');
         $builder->join('c.attribute', 'ca');
         $builder->select('c');
-        $builder->andWhere('ca.bepadoMapping = :mapping');
+        $builder->andWhere('ca.bepadoImportMapping = :mapping');
 
         $builder->leftJoin('c.children', 'children');
         $builder->andWhere('children.id IS NULL');
@@ -36,18 +38,34 @@ class Sw41Query extends SwQuery
     }
 
     /**
+     * Return bepado category mapping for the given product id
+     *
      * @param $id
      * @return array
      */
-    public function getRowProductCategoriesById($id)
+    public function getBepadoCategoryForProduct($id)
     {
-        $sql = 'SELECT ca.bepado_mapping FROM s_categories_attributes ca ' .
+        $sql = 'SELECT ca.bepado_export_mapping FROM s_categories_attributes ca ' .
                'INNER JOIN s_articles_categories ac ON ca.categoryID = ac.categoryID ' .
                'WHERE ac.articleID = ?';
         $rows = Shopware()->Db()->fetchAll($sql, array($id));
 
-        return array_filter(array_map(function ($row) {
-            return $row['bepado_mapping'];
-        }, $rows));
+        $categories = array_filter(
+            array_map(
+                function ($row) {
+                    // Flatten the array
+                    return $row['bepado_export_mapping'];
+                },
+                $rows
+            ), function($category) {
+                // Don't allow vendor categories for export
+                return strpos($category, '/vendor/') !== 0 && $category != '/vendor';
+            }
+        );
+
+        usort($categories, array($this->relevanceSorter, 'sortBepadoCategoriesByRelevance'));
+
+        return array_pop($categories);
+
     }
 }

@@ -3,6 +3,7 @@
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
+use Shopware\Bepado\Components\Utils\BepadoOrders;
 
 /**
  * Loads various template extensions
@@ -18,9 +19,6 @@ class TemplateExtension extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addBepadoTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Backend_ArticleList' => 'extentBackendArticleList',
-            'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
-            'Enlight_Controller_Action_PostDispatch_Backend_Index' => 'injectBackendBepadoMenuEntry',
             'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults'
         );
     }
@@ -78,35 +76,17 @@ class TemplateExtension extends BaseSubscriber
 
         $bepadoOrderData = array();
 
-        // This will apply for the fromShop
-        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id
-        FROM s_order_attributes
-        WHERE orderID IN (' . implode(', ', $orderIds) . ')
-        AND bepado_shop_id IS NOT NULL
-        ';
-        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+
+        $orderUtil = new BepadoOrders();
+        $result = $orderUtil->getRemoteBepadoOrders($orderIds);
+
+        foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
 
-        // This will apply for orders with remote bepado products in it
-        $sql = 'SELECT oa.orderID, bi.shop_id as bepado_shop_id,  "remote" as bepado_order_id
+        $result = $orderUtil->getLocalBepadoOrders($orderIds);
 
-        FROM s_order_attributes oa
-
-        INNER JOIN s_order_details od
-        ON od.orderID = oa.orderID
-
-        INNER JOIN s_articles_details ad
-        ON ad.articleID = od.articleID
-        AND ad.kind=1
-
-        INNER JOIN s_plugin_bepado_items bi
-        ON bi.article_detail_id=ad.id
-        AND bi.shop_id IS NOT NULL
-
-        WHERE oa.orderID In (' . implode(', ', $orderIds) . ')
-        ';
-        foreach (Shopware()->Db()->fetchAll($sql) as $bepadoOrder) {
+        foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
 
@@ -180,129 +160,6 @@ class TemplateExtension extends BaseSubscriber
             'bepadoShopInfo' => $configComponent->getConfig('detailShopInfo'),
             'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex')
         ));
-    }
-
-    /**
-     * Extends the product list in the backend in order to have a special hint for bepado products
-     *
-     * @event Enlight_Controller_Action_PostDispatch_Backend_ArticleList
-     * @param \Enlight_Event_EventArgs $args
-     */
-    public function extentBackendArticleList(\Enlight_Event_EventArgs $args)
-    {
-        /** @var $subject \Enlight_Controller_Action */
-        $subject = $args->getSubject();
-        $request = $subject->Request();
-
-        switch($request->getActionName()) {
-            case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-                $subject->View()->extendsTemplate(
-                    'backend/article_list/bepado.js'
-                );
-                break;
-            case 'list':
-                $subject->View()->data = $this->markBepadoProducts(
-                    $subject->View()->data
-                );
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * @event Enlight_Controller_Action_PostDispatch_Backend_Article
-     * @param \Enlight_Event_EventArgs $args
-     */
-    public function extendBackendArticle(\Enlight_Event_EventArgs $args)
-    {
-        /** @var $subject \Enlight_Controller_Action */
-        $subject = $args->getSubject();
-        $request = $subject->Request();
-
-        switch($request->getActionName()) {
-            case 'index':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-                $subject->View()->extendsTemplate(
-                    'backend/article/bepado.js'
-                );
-                break;
-            case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-                $subject->View()->extendsTemplate(
-                    'backend/article/model/attribute_bepado.js'
-                );
-                $subject->View()->extendsTemplate(
-                    'backend/article/view/detail/bepado_tab.js'
-                );
-                $subject->View()->extendsTemplate(
-                    'backend/article/view/detail/prices_bepado.js'
-                );
-                $subject->View()->extendsTemplate(
-                    'backend/article/controller/detail_bepado.js'
-                );
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Helper method which adds an additional 'bepado' field to article objects in order to indicate
-     * if they are bepado articles or not
-     *
-     * @param $data
-     * @return mixed
-     */
-    private function markBepadoProducts($data)
-    {
-        $articleIds = array_map(function ($row) {
-            return (int)$row['articleId'];
-        }, $data);
-
-        if (empty($articleIds)) {
-            return $data;
-        }
-
-        $sql = 'SELECT article_id FROM s_plugin_bepado_items WHERE article_id IN (' . implode(', ', $articleIds) . ') AND source_id IS NOT NULL';
-        $bepadoArticleIds = array_map(function ($row) {
-            return $row['article_id'];
-        }, Shopware()->Db()->fetchAll($sql));
-
-        foreach($data as $idx => $row) {
-            $data[$idx]['bepado'] = in_array($row['articleId'], $bepadoArticleIds);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Callback method for the Backend/Index postDispatch event.
-     * Will add the bepado sprite to the menu
-     *
-     * @event Enlight_Controller_Action_PostDispatch_Backend_Index
-     * @param \Enlight_Event_EventArgs $args
-     * @returns boolean|void
-     */
-    public function injectBackendBepadoMenuEntry(\Enlight_Event_EventArgs $args)
-    {
-        /** @var $action \Enlight_Controller_Action */
-        $action = $args->getSubject();
-        $request = $action->Request();
-        $response = $action->Response();
-        $view = $action->View();
-
-        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate()
-        ) {
-            return;
-        }
-
-        $view->addTemplateDir($this->Path() . 'Views/');
-        $view->extendsTemplate('backend/bepado/menu_entry.tpl');
     }
 
     /**

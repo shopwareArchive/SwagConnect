@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.Bepado.model.main.Product', {
         { name: 'number',  type: 'string' },
         { name: 'supplier',  type: 'string' },
         { name: 'inStock',  type: 'int' },
+        { name: 'category',  type: 'string' },
         { name: 'active', type: 'boolean' },
         { name: 'price', type: 'float', useNull: true },
         { name: 'tax', type: 'float', useNull: true }

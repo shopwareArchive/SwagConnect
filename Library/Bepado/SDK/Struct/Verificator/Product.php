@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -14,7 +14,7 @@ use Bepado\SDK\Struct;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 class Product extends Verificator
 {
@@ -62,8 +62,8 @@ class Product extends Verificator
             throw new \RuntimeException("The purchasePrice is not allowed to be 0 or smaller.");
         }
 
-        if (!in_array($struct->vat, array(0.0, 0.07, 0.19))) {
-            throw new \RuntimeException("Only 0.00, 0.07 and 0.19 are allowed as value added tax.");
+        if (!is_numeric($struct->vat) || $struct->vat < 0 || $struct->vat > 1) {
+            throw new \RuntimeException("Value added tax must be a number between 0 and 1.");
         }
 
         if (!is_array($struct->categories)) {
@@ -87,7 +87,7 @@ class Product extends Verificator
         }
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {
-            if (!preg_match('(^(\d+x\d+x\d+)$', $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION])) {
+            if (!preg_match('(^(\d+x\d+x\d+)$)', $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION])) {
                 throw new \RuntimeException(
                     "Product Dimensions Attribute has to be in format " .
                     "'Length x Width x Height' without spaces, i.e. 20x40x60"
@@ -99,6 +99,44 @@ class Product extends Verificator
             if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_WEIGHT])) {
                 throw new \RuntimeException("Product Weight Attribute has to be a number.");
             }
+        }
+
+        if (array_key_exists(Struct\Product::ATTRIBUTE_UNIT, $struct->attributes)) {
+            $this->validateUnit($struct);
+        }
+    }
+
+    private function validateUnit($struct)
+    {
+        if (!\Bepado\SDK\Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
+            throw new \RuntimeException(sprintf(
+                "Unit has to be one value from the available Bepado units, %s given",
+                $struct->attributes[Struct\Product::ATTRIBUTE_UNIT]
+            ));
+        }
+
+        if (!array_key_exists(Struct\Product::ATTRIBUTE_QUANTITY, $struct->attributes)) {
+            throw new \RuntimeException(
+                "When unit is given for product, specifying the quantity is required."
+            );
+        }
+
+        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_QUANTITY])) {
+            throw new \RuntimeException(
+                "Product Quantity Attribute has to be an integer."
+            );
+        }
+
+        if (!array_key_exists(Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY, $struct->attributes)) {
+            throw new \RuntimeException(
+                "When unit is given for product, specifying the reference quantity is required."
+            );
+        }
+
+        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
+            throw new \RuntimeException(
+                "Product Quantity Attribute has to be an integer."
+            );
         }
     }
 }

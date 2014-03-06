@@ -157,7 +157,7 @@ class ProductFromShop implements ProductFromShopBase
         $model->fromArray(array(
             'number' => $number,
             'invoiceShipping' => $order->grossShippingCosts,
-            'invoiceShippingNet' => $order->shippingCosts,
+            'invoiceShippingNet' => $this->getShippingCostsNet($order),
             'currencyFactor' => 1,
             'orderStatus' => $status,
             'shop' => $shop,
@@ -249,6 +249,29 @@ class ProductFromShop implements ProductFromShopBase
         return $model->getNumber();
     }
 
+    public function getShippingCostsNet(Order $order)
+    {
+        $taxRate = $this->getMaxTaxRate($order) + 1;
+        return $order->grossShippingCosts / $taxRate;
+    }
+
+    /**
+     * Returns the highest tax rate of the products
+     *
+     * @param Order $order
+     * @return mixed
+     */
+    public function getMaxTaxRate(Order $order)
+    {
+        return max(
+            array_map(
+                function ($orderItem) {
+                    return $orderItem->product->vat;
+                },
+                $order->products
+            )
+        );
+    }
 
     /**
      * Calculate the price (including VAT) that the from shop needs to pay.

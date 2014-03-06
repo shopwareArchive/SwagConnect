@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct\Change\ToShop;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct\Change;
 /**
  * Delete change struct
  *
- * @version $Revision$
+ * @version 1.1.133
  * @api
  */
 class Delete extends Change

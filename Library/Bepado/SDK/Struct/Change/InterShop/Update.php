@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version $Revision$
+ * @version 1.1.133
  */
 
 namespace Bepado\SDK\Struct\Change\InterShop;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct\Product;
 /**
  * Update change struct
  *
- * @version $Revision$
+ * @version 1.1.133
  * @api
  */
 class Update extends Change

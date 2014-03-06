@@ -23,6 +23,7 @@
  */
 
 namespace Shopware\Bepado\Components;
+use Bepado\Common\Struct\Product\ShopProduct;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Bepado\SDK\SDK;
@@ -259,9 +260,9 @@ class Helper
      * @param $id
      * @return null|array
      */
-    public function getRowProductCategoriesById($id)
+    public function getBepadoCategoryForProduct($id)
     {
-        return $this->getCategoryQuery()->getRowProductCategoriesById($id);
+        return $this->getCategoryQuery()->getBepadoCategoryForProduct($id);
     }
 
     /**
@@ -276,6 +277,19 @@ class Helper
     protected function getCategoryQuery()
     {
         return $this->bepadoCategoryQuery;
+    }
+
+    public function getMostRelevantBepadoCategory($categories)
+    {
+        usort(
+            $categories,
+            array(
+                $this->getCategoryQuery()->getRelevanceSorter(),
+                'sortBepadoCategoriesByRelevance'
+            )
+        );
+
+        return array_pop($categories);
     }
 
     /**

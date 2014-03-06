@@ -165,16 +165,12 @@ class BepadoFactory
 
     public function getBasketHelper()
     {
-        /** @var \Shopware\Bepado\Components\Config $configComponent */
-        $configComponent = new Config($this->modelManager);
-
         return new BasketHelper (
             Shopware()->Db(),
             $this->getSDK(),
             $this->getHelper(),
-            $configComponent->getConfig('SwagBepado', 'checkoutShopInfo')
+            $this->getConfigComponent()->getConfig('SwagBepado', 'checkoutShopInfo')
         );
-
     }
 
     /**

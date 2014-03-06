@@ -140,3 +140,9 @@
 #confirm .bepado-dispatch-row .title {
     top: 0;
 }
+.basket_bottom_paypal {
+    display: none;
+}
+.modal_paypal_button {
+    display: none;
+}

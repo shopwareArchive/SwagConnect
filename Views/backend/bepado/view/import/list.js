@@ -191,6 +191,11 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             text:'{s name=export/options/disable_text}Disable products{/s}',
             action:'deactivate'
         });
+        items.push({
+            iconCls:'sprite-plus-circle-frame',
+            text:'{s name=import/options/assign_category_text}Assign category{/s}',
+            action:'assignCategory'
+        });
         items.push('->');
 //        items.push({
 //            iconCls:'sprite-minus-circle-frame',

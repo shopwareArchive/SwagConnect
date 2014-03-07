@@ -183,6 +183,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-import-list button[action=deactivate]': {
                 click: me.onImportFilterAction
             },
+            'bepado-import-list button[action=assignCategory]': {
+                click: me.onAssignCategoryAction
+            },
             'bepado-import-list button[action=unsubscribe]': {
                 click: me.onImportFilterAction
             },
@@ -811,6 +814,21 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         form.onSaveForm(form, false, function() {
             form.setLoading(false);
         });
+    },
+
+    /**
+     * Callback function that will assign products to category
+     *
+     * @param btn
+     */
+    onAssignCategoryAction: function(btn) {
+        var me = this,
+            list = me.getImportList(),
+            records = list.selModel.getSelection();
+
+        if (records.length > 0) {
+            Ext.create('Shopware.apps.Bepado.view.import.AssignCategory').show();
+        }
     }
 });
 //{/block}

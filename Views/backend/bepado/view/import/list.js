@@ -191,6 +191,23 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             text:'{s name=export/options/disable_text}Disable products{/s}',
             action:'deactivate'
         });
+        items.push({
+            xtype: 'tbseparator'
+        });
+        items.push({
+            xtype: 'checkbox',
+            fieldLabel: '{s name=import/toolbar/show_in_groups}Show in groups{/s}',
+            checked: true,
+            listeners: {
+                'change': function(checkbox) {
+                    if (checkbox.getValue()) {
+                        me.groupingFeature.enable();
+                    } else {
+                        me.groupingFeature.disable();
+                    }
+                }
+            }
+        });
         items.push('->');
 //        items.push({
 //            iconCls:'sprite-minus-circle-frame',

@@ -1,6 +1,11 @@
 {block name="frontend_index_header_css_screen" append}
     <link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
 {/block}
+{block name="frontend_index_header_javascript" append}
+    {if $bepadoProduct || $hasBepadoProduct}
+        <script src="{link file='frontend/_resources/javascripts/bepado.js'}"></script>
+    {/if}
+{/block}
 
 {block name='frontend_checkout_cart_premiums' prepend}
     {include file='frontend/bepado/checkout_cart.tpl'}

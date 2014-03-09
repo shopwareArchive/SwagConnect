@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     layout: 'anchor',
     autoScroll: true,
     region: 'center',
-    bodyPadding: 20,
+    bodyPadding: 10,
 
     /**
      * Contains the field set defaults.
@@ -48,15 +48,15 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     },
 
     snippets: {
-        save: '{s name=config/save}Speichern{/s}',
-        cancel: '{s name=config/cancel}Zurücksetzen{/s}',
-        importPicturesLabel: '{s name=config/import/pictures_label}Bilder beim Produkt-Erstimport laden{/s}',
-        overwritePropertiesLabel: '{s name=config/import/overwrite_properties_label}Folgende Eigenschaften beim Import überschreiben{/s}',
-        overwriteProductName: '{s name=config/import/overwrite_product_name}Artikelnamen{/s}',
-        overwriteProductPrice: '{s name=config/import/overwrite_product_price}Preise{/s}',
-        overwriteProductImages: '{s name=config/import/overwrite_product_images}Bilder{/s}',
-        overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Kurzbeschreibung{/s}',
-        overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Beim Import Produkt-Langbeschreibungen überschreiben{/s}'
+        save: '{s name=config/save}Sav{/s}',
+        cancel: '{s name=config/cancel}Cancel{/s}',
+        importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
+        overwritePropertiesLabel: '{s name=config/import/overwrite_properties_label}Overwrite the following properties during import{/s}',
+        overwriteProductName: '{s name=config/import/overwrite_product_name}Product name{/s}',
+        overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
+        overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
+        overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
+        overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}'
     },
 
     initComponent: function() {
@@ -71,10 +71,10 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             items: me.getFormButtons()
         }];
 
-        me.importConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Import');
-        me.importConfigStore.load();
-        me.importConfigStore.on('load', function() {
-            me.populateForm();
+        me.importConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Import').load({
+            callback: function() {
+                me.populateForm();
+            }
         });
 
         me.callParent(arguments);
@@ -147,23 +147,14 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
      * @return Array
      */
     createElements: function () {
-        var me = this,
-        descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.import.Description');
+        var me = this;
 
         var container = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
             padding: '0 20 0 0',
-            layout: 'anchor',
+            flex: 1,
+            layout: 'hbox',
             border: false,
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'importImagesOnFirstImport',
-                    fieldLabel: me.snippets.importPicturesLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth
-                }, {
+            items: [{
                     xtype      : 'fieldcontainer',
                     fieldLabel : me.snippets.overwritePropertiesLabel,
                     defaultType: 'checkboxfield',
@@ -196,11 +187,21 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             uncheckedValue: 0
                         }
                     ]
-                }
-            ]
+                }, {
+                xtype: 'checkbox',
+                name: 'importImagesOnFirstImport',
+                fieldLabel: me.snippets.importPicturesLabel,
+                inputValue: 1,
+                uncheckedValue: 0,
+                labelWidth: me.defaults.labelWidth
+            }]
         });
 
-        return [ descriptionFieldset, container ];
+        return [ {
+            xtype: 'bepado-config-import-description'
+        },
+            container
+        ];
     },
 
     /**

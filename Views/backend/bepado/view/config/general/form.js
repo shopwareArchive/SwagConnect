@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     layout: 'anchor',
     autoScroll: true,
     region: 'center',
-    bodyPadding: 20,
+    bodyPadding: 10,
 
     /**
      * Contains the field set defaults.
@@ -49,18 +49,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
     snippets: {
         apiKeyHeader: '{s name=config/api_key}API-Key{/s}',
-        apiKeyDescription: '{s name=config/api_key_description}{/s}',
-        apiKeyCheck: '{s name=config/api_key_check}Überprüfen{/s}',
-        save: '{s name=config/save}Speichern{/s}',
-        cancel: '{s name=config/cancel}Zurücksetzen{/s}',
-        cloudSearchLabel: '{s name=config/cloud_search_label}Cloud-Search aktivieren{/s}',
-        detailPageHintLabel: '{s name=config/details_page_hint}Auf der Detailseite auf Marktplatz-Artikel hinweisen{/s}',
-        noIndexLabel: '{s name=config/noindex_label}Ein "noindex"-Meta-Tag bei Bepado-Produkten setzen{/s}',
-        basketHintLabel: '{s name=config/basket_hint_label}Im Warenkorb auf Marktplatz Artikel hinweisen{/s}',
-        bepadoAttributeLabel: '{s name=config/bepado_attribute_label}bepado Attribut{/s}',
-        alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternativer bepado Host (nur für Testzwecke){/s}',
-        logLabel: '{s name=config/log_label}Anfragen des bepado-Servers mitschreiben{/s}',
-        logDescription: '{s name=config/log_description}Alle operationen werden in den Log geschrieben{/s}'
+        apiKeyDescription: '{s name=config/api_key_description}Your bepado API key{/s}',
+        apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
+        save: '{s name=config/save}Save{/s}',
+        cancel: '{s name=config/cancel}Cancel{/s}',
+        cloudSearchLabel: '{s name=config/cloud_search_label}Enable cloud search{/s}',
+        detailPageHintLabel: '{s name=config/details_page_hint}Show marketplace hint on article detail page{/s}',
+        noIndexLabel: '{s name=config/noindex_label}Set noindex meta tag for bepado products{/s}',
+        basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
+        bepadoAttributeLabel: '{s name=config/bepado_attribute_label}bepado attribute{/s}',
+        alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternate bepado host (for testing purpose){/s}',
+        logLabel: '{s name=config/log_label}Log bepado requests{/s}',
+        logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}'
     },
 
     initComponent: function() {
@@ -75,10 +75,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 items: me.getFormButtons()
             }];
 
-        me.generalConfigStore = Ext.create('Shopware.apps.Bepado.store.config.General');
-        me.generalConfigStore.load();
-        me.generalConfigStore.on('load', function() {
-            me.populateForm();
+        me.generalConfigStore = Ext.create('Shopware.apps.Bepado.store.config.General').load({
+            callback:function() {
+                me.populateForm();
+            }
         });
 
         me.callParent(arguments);
@@ -86,7 +86,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
     /**
      * Creates form elements
-     * @param isDefaultShop
      * @return Array
      */
     createElements: function() {
@@ -339,13 +338,15 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     value: 19,
                     fieldLabel: me.snippets.bepadoAttributeLabel,
                     store: attributeStore,
-                    labelWidth: me.defaults.labelWidth
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}',
                 }, {
                     xtype: 'textfield',
                     name: 'bepadoDebugHost',
                     anchor: '100%',
                     fieldLabel: me.snippets.alternativeHostLabel,
-                    labelWidth: me.defaults.labelWidth
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}',
                 }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: me.snippets.logLabel,

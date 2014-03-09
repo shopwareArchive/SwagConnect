@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.25';
+        return '1.4.27';
     }
 
     /**
@@ -214,7 +214,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             }
         }
 
-		if (version_compare($version, '1.4.25', '<=')) {
+        // Migration from shopware config to new config system
+		if (version_compare($version, '1.4.24', '<=')) {
             Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `shopId` INT( 11 ) NULL DEFAULT NULL;');
             Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
 
@@ -248,7 +249,17 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $configComponent->setConfig('overwriteProductShortDescription', $this->Config()->get('overwriteProductShortDescription'), null, 'import');
             $configComponent->setConfig('overwriteProductLongDescription', $this->Config()->get('overwriteProductLongDescription'), null, 'import');
             $configComponent->setConfig('logRequest', $this->Config()->get('logRequest'), null, 'general');
+        }
 
+        // Move the price config to the 'export' config
+        if (version_compare($version, '1.4.26', '<=')) {
+            $modelManager = $this->Application()->Models();
+            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+
+            $configComponent->setConfig('priceGroupForPriceExport', $configComponent->getConfig('priceGroupForPriceExport', 'EK'), null, 'export');
+            $configComponent->setConfig('priceFieldForPriceExport', $configComponent->getConfig('priceFieldForPriceExport', 'EK'), null, 'export');
+            $configComponent->setConfig('priceGroupForPurchasePriceExport', $configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK'), null, 'export');
+            $configComponent->setConfig('priceFieldForPurchasePriceExport', $configComponent->getConfig('priceFieldForPurchasePriceExport', 'EK'), null, 'export');
         }
 
         return true;
@@ -450,10 +461,17 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyLibrary();
 
-        /** @var Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = $this->Application()->Models();
-        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
-        $verified = $configComponent->getConfig('apiKeyVerified', false);
+        try {
+            /** @var Shopware\Components\Model\ModelManager $modelManager */
+            $modelManager = $this->Application()->Models();
+            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+            $verified = $configComponent->getConfig('apiKeyVerified', false);
+        } catch (\Exception $e) {
+            // if the config table is not available, just assume, that the update
+            // still needs to be installed
+            $verified = false;
+        }
+
 
         $subscribers = $this->getDefaultSubscribers();
 

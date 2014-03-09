@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     layout: 'anchor',
     autoScroll: true,
     region: 'center',
-    bodyPadding: 20,
+    bodyPadding: 10,
 
     /**
      * Contains the field set defaults.
@@ -48,30 +48,32 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     },
 
     snippets: {
-        save: '{s name=config/save}Speichern{/s}',
-        cancel: '{s name=config/cancel}Zurücksetzen{/s}',
-        productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Produkt-Beschreibungsfeld{/s}',
-        autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch mit bepoado synchronisieren{/s}',
-        autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Änderungen werden automatisch auf bepado gespielt{/s}',
-        emptyText: '{s name=config/export/empty_text_combo}Bitte wählen{/s}'
+        save: '{s name=config/save}Save{/s}',
+        cancel: '{s name=config/cancel}Cancel{/s}',
+        productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
+        autoProductSync: '{s name=config/export/auto_product_sync_label}Automatically sync changed products to bepado{/s}',
+        autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
+        emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}'
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.createElements();
-        me.dockedItems = [{
-            xtype: 'toolbar',
-            dock: 'bottom',
-            ui: 'shopware-ui',
-            cls: 'shopware-toolbar',
-            items: me.getFormButtons()
-        }];
+        me.dockedItems = [
+            {
+                xtype: 'toolbar',
+                dock: 'bottom',
+                ui: 'shopware-ui',
+                cls: 'shopware-toolbar',
+                items: me.getFormButtons()
+            }
+        ];
 
-        me.exportConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Export');
-        me.exportConfigStore.load();
-        me.exportConfigStore.on('load', function() {
-            me.populateForm();
+        me.exportConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Export').load({
+            callback: function() {
+                me.populateForm();
+            }
         });
 
         me.callParent(arguments);
@@ -81,19 +83,19 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      * Returns form buttons, save and cancel
      * @returns Array
      */
-    getFormButtons: function() {
+    getFormButtons: function () {
         var me = this,
             buttons = ['->'];
 
         var saveButton = Ext.create('Ext.button.Button', {
             text: me.snippets.save,
-            action:'save-export-config',
-            cls:'primary'
+            action: 'save-export-config',
+            cls: 'primary'
         });
 
         var cancelButton = Ext.create('Ext.button.Button', {
             text: me.snippets.cancel,
-            handler: function(btn) {
+            handler: function (btn) {
                 btn.up('window').close();
             }
         });
@@ -110,8 +112,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      */
     createElements: function () {
         var me = this;
-
-        var descriptionFieldset = Ext.create('Shopware.apps.Bepado.view.config.export.Description')
 
         var container = Ext.create('Ext.container.Container', {
             columnWidth: 1,
@@ -135,16 +135,18 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     queryMode: 'local',
                     displayField: 'text',
                     valueField: 'value',
+                    editable: false,
                     labelWidth: me.defaults.labelWidth
-                }, {
-                    xtype      : 'fieldcontainer',
-                    fieldLabel : me.snippets.autoProductSync,
+                },
+                {
+                    xtype: 'fieldcontainer',
+                    fieldLabel: me.snippets.autoProductSync,
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
                     items: [
                         {
-                            boxLabel  : me.snippets.autoPlayedChanges,
-                            name      : 'autoUpdateProducts',
+                            boxLabel: me.snippets.autoPlayedChanges,
+                            name: 'autoUpdateProducts',
                             inputValue: 1,
                             uncheckedValue: 0
                         }
@@ -153,25 +155,95 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             ]
         });
 
-        var priceGrid = me.createPriceGrid();
-
-        return [ descriptionFieldset, container, priceGrid ];
+        return [
+            {
+                xtype: 'bepado-config-export-description'
+            },
+            container,
+            me.createPriceField('price'),
+            me.createPriceField('purchasePrice'),
+        ];
     },
 
     /**
-     * Creates price grid
-     * @return Shopware.apps.Bepado.view.prices.List
+     * Creates a price config fieldcontainer for price or purchasePrice
+     *
+     * @return Object
      */
-    createPriceGrid: function() {
-        return Ext.create('Shopware.apps.Bepado.view.prices.List', {
-            minHeight: 250
-        });
+    createPriceField: function (type) {
+        var me = this,
+            fieldLabel,
+            dataIndexCustomerGroup,
+            dataIndexField,
+            helpText;
+
+        if (type == 'price') {
+            fieldLabel = '{s name=config/price/price}Price{/s}';
+            dataIndexCustomerGroup = 'priceGroupForPriceExport';
+            dataIndexField = 'priceFieldForPriceExport';
+            helpText = '{s name=config/export/help/price}Configure, which price field of which customer group should be exported as the product\'s end user price{/s}';
+        } else if (type == 'purchasePrice') {
+            fieldLabel = '{s name=config/price/purchasePrice}PurchasePrice{/s}';
+            dataIndexCustomerGroup = 'priceGroupForPurchasePriceExport';
+            dataIndexField = 'priceFieldForPurchasePriceExport';
+            helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
+        } else {
+            return { };
+        }
+
+        return {
+            fieldLabel: fieldLabel,
+            xtype: 'fieldcontainer',
+            layout: 'hbox',
+            items: [
+                {
+                    xtype: 'combobox',
+                    queryMode: 'remote',
+                    editable: false,
+                    name: dataIndexCustomerGroup,
+                    allowBlank: false,
+                    displayField: 'name',
+                    valueField: 'key',
+                    store: 'base.CustomerGroup'
+                },
+                {
+                    xtype: 'combobox',
+                    name: dataIndexField,
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['field'],
+                        data: me.getPriceData()
+                    }),
+                    queryMode: 'local',
+                    editable: false,
+                    allowBlank: false,
+                    displayField: 'field',
+                    valueField: 'field',
+                    helpText: helpText
+                }
+            ]
+        };
+    },
+
+    /**
+     * Returns allowed price columns
+     *
+     * @returns Array
+     */
+    getPriceData: function () {
+        var me = this,
+            columns = [
+                { field: 'basePrice' },
+                { field: 'price' },
+                { field: 'pseudoPrice' }
+            ];
+
+        return columns;
     },
 
     /**
      * Populate export config form
      */
-    populateForm: function() {
+    populateForm: function () {
         var me = this,
             record = me.exportConfigStore.getAt(0);
 

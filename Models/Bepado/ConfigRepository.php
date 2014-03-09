@@ -29,7 +29,7 @@ class ConfigRepository extends ModelRepository
             $builder->andWhere('c.name = :name');
             $builder->setParameter(':name', $name);
         }
-//
+
         if (!is_null($groupName)) {
             $builder->andWhere('c.groupName = :groupName');
             $builder->setParameter(':groupName', $groupName);

@@ -54,9 +54,9 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Panel', {
     createElements:function () {
         var form;
 
-        form = Ext.create('Shopware.apps.Bepado.view.config.import.Form');
-
-        return [ form ];
+        return [{
+            xtype: 'bepado-config-import-form'
+        }];
     }
 });
 //{/block}

@@ -28,6 +28,7 @@
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
 //{namespace name=backend/bepado/view/main}
+//{include file="backend/bepado/_resources/html/config_import.tpl" assign="importConfigContent"}
 //{block name="backend/bepado/view/config/import/description"}
 Ext.define('Shopware.apps.Bepado.view.config.import.Description', {
     /**
@@ -47,18 +48,14 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Description', {
      * @string
      */
     alias:'widget.bepado-config-import-description',
-    /**
-     * Set css class for this component
-     * @string
-     */
-    cls: Ext.baseCSSPrefix + 'bepado-config-import-description',
 
     /**
      * Contains all snippets for the component
      * @object
      */
     snippets: {
-        title: '{s name=config/description}Beschreibung{/s}'
+        title: '{s name=config/import/description}Import{/s}'
+
     },
 
     /**
@@ -81,17 +78,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Description', {
      */
     getHTMLContent: function() {
         var me = this;
-        me.htmlTpl = [
-            '<p style="padding-bottom:8px;font-style:italic;">',
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras et nisi a erat varius tincidunt.',
-            'Donec eu lacus vel sapien varius aliquet a pretium diam. Aliquam lacinia nibh sed urna rutrum semper',
-            'sollicitudin sed lectus. Donec sollicitudin neque lacus, ac adipiscing urna rhoncus eget. Etiam bibendum',
-            'rutrum aliquet. Phasellus tempus vestibulum ullamcorper. Suspendisse vehicula aliquet ligula ut rhoncus.',
-            'Nam dapibus iaculis nunc, vel pretium lorem faucibus in. Nam eleifend luctus turpis id dapibus. Mauris ut',
-            'pharetra erat. Etiam porta vitae dui ut tempor. Proin ullamcorper ultrices urna nec tincidunt. Phasellus',
-            'ut tempor massa. Morbi at pharetra purus. Nullam iaculis accumsan dui, eget mattis ipsum volutpat a.',
-            '</p>'
-        ].join('');
+        me.htmlTpl = '{$importConfigContent|replace:"\n":""|replace:"\r":""}';
 
         return me.htmlTpl;
     }

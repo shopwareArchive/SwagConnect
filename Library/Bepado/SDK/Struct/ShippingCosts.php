@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Struct;
@@ -15,6 +15,11 @@ class ShippingCosts extends Struct
      * @var integer
      */
     public $shopId;
+
+    /**
+     * @var \Bepado\SDK\ShippingCosts\Rule
+     */
+    public $rule;
 
     /**
      * @return bool

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -17,7 +17,7 @@ use Bepado\SDK\Struct\Address;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 class Order extends Verificator
 {
@@ -62,12 +62,16 @@ class Order extends Verificator
         );
 
         if (!in_array($struct->paymentType, $paymentTypes)) {
-            throw new \runtimeException(
+            throw new \RuntimeException(
                 sprintf(
                     'Invalid paymentType specified in order, must be one of: %s',
                     implode(", ", $paymentTypes)
                 )
             );
+        }
+
+        if ($struct->shippingRule && !($struct->shipingRule instanceof \Bepado\SDK\ShippingCosts\Rule)) {
+            throw new \RuntimeException('Shipping Rule MUST be an instance of \\Bepado\\SDK\\ShippingCosts\\Rule.');
         }
     }
 }

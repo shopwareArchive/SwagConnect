@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Service;
@@ -13,7 +13,7 @@ use Bepado\SDK\ShippingCostCalculator;
 /**
  * Service to maintain transactions
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 class ShippingCosts
 {

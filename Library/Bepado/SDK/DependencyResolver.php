@@ -2,13 +2,13 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK;
 
-use Bepado\Common\Rpc;
-use Bepado\Common\Struct\RpcCall;
+use Bepado\SDK\Rpc;
+use Bepado\SDK\Struct\RpcCall;
 
 /**
  * SDK Dependency Resolver
@@ -300,7 +300,8 @@ class DependencyResolver
                     $this->gateway,
                     $this->getLogger(),
                     $this->gateway,
-                    $this->getShippingCostCalculator()
+                    $this->getShippingCostCalculator(),
+                    $this->getVerificator()
                 )
             );
 
@@ -393,7 +394,7 @@ class DependencyResolver
     {
         if ($this->marshaller === null) {
             $this->marshaller = new Rpc\Marshaller\CallMarshaller\XmlCallMarshaller(
-                new \Bepado\Common\XmlHelper(),
+                new \Bepado\SDK\XmlHelper(),
                 new Rpc\Marshaller\Converter\ExceptionToErrorConverter()
             );
         }

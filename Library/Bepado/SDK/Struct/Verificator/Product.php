@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -10,11 +10,12 @@ namespace Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Struct;
+use Bepado\SDK\Units;
 
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 class Product extends Verificator
 {
@@ -108,7 +109,7 @@ class Product extends Verificator
 
     private function validateUnit($struct)
     {
-        if (!\Bepado\SDK\Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
+        if (!Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
             throw new \RuntimeException(sprintf(
                 "Unit has to be one value from the available Bepado units, %s given",
                 $struct->attributes[Struct\Product::ATTRIBUTE_UNIT]

@@ -196,6 +196,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         });
         items.push({
             xtype: 'checkbox',
+            labelWidth: 180,
             fieldLabel: '{s name=import/toolbar/show_in_groups}Show in groups{/s}',
             checked: true,
             listeners: {

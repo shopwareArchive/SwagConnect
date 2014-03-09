@@ -63,7 +63,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \Shopware\Bepado\Components\Config($this->getModelManager());
+            $this->configComponent = new \Shopware\Bepado\Components\Config(Shopware()->Models());
         }
 
         return $this->configComponent;

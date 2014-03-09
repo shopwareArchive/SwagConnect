@@ -11,30 +11,21 @@ use Shopware\Bepado\Components\Config;
 class LocalProductQuery extends BaseProductQuery
 {
 
-    protected $configRepo;
-
     protected $manager;
 
     protected $productDescriptionField;
 
     protected $baseProductUrl;
 
-    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl)
+    /** @var \Shopware\Bepado\Components\Config $configComponent */
+    protected $configComponent;
+
+    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl, $configComponent)
     {
         $this->manager = $manager;
         $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
-    }
-
-    /**
-     * @return \Shopware\CustomModels\Bepado\ConfigRepository
-     */
-    private function getConfigRepository()
-    {
-        if (!$this->configRepo) {
-            $this->configRepo = $this->manager->getRepository('Shopware\CustomModels\Bepado\Config');
-        }
-        return $this->configRepo;
+        $this->configComponent = $configComponent;
     }
 
     /**
@@ -42,13 +33,11 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-        /** @var \Shopware\Bepado\Components\Config $configComponent */
-        $configComponent = new Config($this->manager);
 
-        $exportPriceCustomerGroup = $configComponent->getConfig('priceGroupForPriceExport', 'EK');
-        $exportPurchasePriceCustomerGroup = $configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
-        $exportPriceColumn = $configComponent->getConfig('priceFieldForPriceExport', 'price');
-        $exportPurchasePriceColumn = $configComponent->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
+        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
+        $exportPurchasePriceColumn = $this->configComponent->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
         $builder = $this->manager->createQueryBuilder();
 

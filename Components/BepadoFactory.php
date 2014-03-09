@@ -225,7 +225,10 @@ class BepadoFactory
      */
     private function getRemoteProductQuery()
     {
-        return new RemoteProductQuery($this->getModelManager(), $this->getConfigComponent()->getConfig('alternateDescriptionField'));
+        return new RemoteProductQuery(
+            $this->getModelManager(),
+            $this->getConfigComponent()->getConfig('alternateDescriptionField')
+        );
     }
 
     /**
@@ -233,7 +236,12 @@ class BepadoFactory
      */
     private function getLocalProductQuery()
     {
-        return new LocalProductQuery($this->getModelManager(), $this->getConfigComponent()->getConfig('alternateDescriptionField'), $this->getProductBaseUrl());
+        return new LocalProductQuery(
+            $this->getModelManager(),
+            $this->getConfigComponent()->getConfig('alternateDescriptionField'),
+            $this->getProductBaseUrl(),
+            $this->getConfigComponent()
+        );
     }
 
     private function getProductBaseUrl()

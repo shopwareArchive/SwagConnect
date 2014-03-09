@@ -4,7 +4,6 @@ namespace Shopware\Bepado\Components;
 
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
-use Shopware\Bepado\Components\CategoryQuery\Sw40Query;
 use Bepado\SDK;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
@@ -255,7 +254,7 @@ class BepadoFactory
     /**
      * @return Config
      */
-    private function getConfigComponent()
+    public function getConfigComponent()
     {
         if (!$this->configComponent) {
             $this->configComponent = new Config($this->getModelManager());

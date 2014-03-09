@@ -39,7 +39,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.27';
+        return '1.4.28';
     }
 
     /**
@@ -86,6 +86,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->importSnippets();
 
         $this->createEngineElement();
+        $this->createBepadoCustomerGroup();
 
         // Populate the s_premium_dispatch_attributes table with attributes for all dispatches
         // so that all existing dispatches are immediately available for bepado
@@ -120,6 +121,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->importSnippets();
 
         $this->createEngineElement();
+        $this->createBepadoCustomerGroup();
 
         // When the dummy plugin is going to be installed, don't do the later updates
         if (version_compare($version, '0.0.1', '<=')) {
@@ -220,9 +222,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
 
             $this->registerMyLibrary();
-            /** @var Shopware\Components\Model\ModelManager $modelManager */
-            $modelManager = $this->Application()->Models();
-            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+            $configComponent = $this->getConfigComponents();
 
             $apiKey = $this->Config()->get('apiKey');
             if ($apiKey) {
@@ -253,8 +253,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         // Move the price config to the 'export' config
         if (version_compare($version, '1.4.26', '<=')) {
-            $modelManager = $this->Application()->Models();
-            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+            $configComponent = $this->getConfigComponents();
 
             $configComponent->setConfig('priceGroupForPriceExport', $configComponent->getConfig('priceGroupForPriceExport', 'EK'), null, 'export');
             $configComponent->setConfig('priceFieldForPriceExport', $configComponent->getConfig('priceFieldForPriceExport', 'EK'), null, 'export');
@@ -263,6 +262,30 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
 
         return true;
+    }
+
+    /**
+     * Creates a bepado customer group - this can be used by the shop owner to manage the bepado product prices
+     *
+     * Logic is very simple here - if a group with the key 'BEP' already exists, no new group is created
+     */
+    public function createBepadoCustomerGroup()
+    {
+        $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        $model = $repo->findOneBy(array('key' => 'BEP'));
+
+
+        if (!$model) {
+            $customerGroup = new Shopware\Models\Customer\Group();
+            $customerGroup->setKey('BEP');
+            $customerGroup->setTax(false);
+            $customerGroup->setTaxInput(false);
+            $customerGroup->setMode(0);
+            $customerGroup->setName('bepado');
+
+            Shopware()->Models()->persist($customerGroup);
+            Shopware()->Models()->flush();
+        }
     }
 
     /**
@@ -299,12 +322,8 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerCustomModels();
 
-        /** @var Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = $this->Application()->Models();
-
         $this->registerMyLibrary();
-        /** @var Shopware\Bepado\Components\Config $configComponent */
-        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+        $configComponent = $this->getConfigComponents();
 
         $configComponent->setConfig('priceGroupForPriceExport', 'EK');
         $configComponent->setConfig('priceGroupForPurchasePriceExport', 'EK');
@@ -463,8 +482,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
 
         try {
             /** @var Shopware\Components\Model\ModelManager $modelManager */
-            $modelManager = $this->Application()->Models();
-            $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+            $configComponent = $this->getConfigComponents();
             $verified = $configComponent->getConfig('apiKeyVerified', false);
         } catch (\Exception $e) {
             // if the config table is not available, just assume, that the update
@@ -515,9 +533,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         );
 
         $this->registerMyLibrary();
-        /** @var Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = $this->Application()->Models();
-        $configComponent = new \Shopware\Bepado\Components\Config($modelManager);
+        $configComponent = $this->getConfigComponents();
 
         if ($configComponent->getConfig('autoUpdateProducts', true)) {
             $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
@@ -850,5 +866,12 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return $this->getBepadoFactory()->getBasketHelper();
     }
 
+    /**
+     * @return \Shopware\Bepado\Components\Config
+     */
+    public function getConfigComponents()
+    {
+        return $this->getBepadoFactory()->getConfigComponent();
+    }
 
 }

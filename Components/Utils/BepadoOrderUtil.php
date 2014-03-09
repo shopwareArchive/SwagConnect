@@ -5,10 +5,10 @@ namespace Shopware\Bepado\Components\Utils;
 /**
  * Util to check orders for bepado products
  *
- * Class BepadoOrders
+ * Class BepadoOrderUtil
  * @package Shopware\Bepado\Components\Utils
  */
-class BepadoOrders
+class BepadoOrderUtil
 {
 
     /**

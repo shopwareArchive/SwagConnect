@@ -6,6 +6,12 @@ use Bepado\SDK\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelManager;
 
+/**
+ * Will return an *imported* product as Bepado\SDK\Struct\Product
+ *
+ * Class RemoteProductQuery
+ * @package Shopware\Bepado\Components\ProductQuery
+ */
 class RemoteProductQuery extends BaseProductQuery
 {
 

@@ -6,7 +6,11 @@ use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\OrderStatus as OrderStatusStruct;
 use Shopware\Models\Order\Order;
 
-class OrderStatus
+/**
+ * Class OrderStatusMapper
+ * @package Shopware\Bepado\Components\Utils
+ */
+class OrderStatusMapper
 {
 
     private $mapping;

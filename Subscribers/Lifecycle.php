@@ -56,8 +56,8 @@ class Lifecycle extends BaseSubscriber
         }
 
 
-        $orderUtil = new Utils\OrderStatus();
-        $orderStatus = $orderUtil->getOrderStatusStructFromOrder($order);
+        $orderStatusMapper = new Utils\OrderStatusMapper();
+        $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
 
         try {
             $this->getSDK()->updateOrderStatus($orderStatus);

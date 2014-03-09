@@ -8,6 +8,13 @@ use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 
+/**
+ * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
+ * Configured fields for price- and description export will be taken into account
+ *
+ * Class LocalProductQuery
+ * @package Shopware\Bepado\Components\ProductQuery
+ */
 class LocalProductQuery extends BaseProductQuery
 {
 

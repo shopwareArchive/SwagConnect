@@ -3,7 +3,7 @@
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
-use Shopware\Bepado\Components\Utils\BepadoOrders;
+use Shopware\Bepado\Components\Utils\BepadoOrderUtil;
 
 /**
  * Loads various template extensions
@@ -77,14 +77,14 @@ class TemplateExtension extends BaseSubscriber
         $bepadoOrderData = array();
 
 
-        $orderUtil = new BepadoOrders();
-        $result = $orderUtil->getRemoteBepadoOrders($orderIds);
+        $bepadoOrderUtil = new BepadoOrderUtil();
+        $result = $bepadoOrderUtil->getRemoteBepadoOrders($orderIds);
 
         foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
         }
 
-        $result = $orderUtil->getLocalBepadoOrders($orderIds);
+        $result = $bepadoOrderUtil->getLocalBepadoOrders($orderIds);
 
         foreach ($result as $bepadoOrder) {
             $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;

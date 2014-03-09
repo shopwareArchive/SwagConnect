@@ -2,7 +2,7 @@
 
 namespace Shopware\Bepado\Subscribers;
 
-use Shopware\Bepado\Components\Utils\BepadoOrders;
+use Shopware\Bepado\Components\Utils\BepadoOrderUtil;
 
 class OrderDocument extends BaseSubscriber
 {
@@ -29,8 +29,8 @@ class OrderDocument extends BaseSubscriber
         }
 
         // This will apply for local bepado orders
-        $bepadoOrderUtil = new BepadoOrders();
-        if ($bepadoOrderUtil->hasLocalOrderBepadoProducts($order->id)) {
+        $orderUtil = new BepadoOrderUtil();
+        if ($orderUtil->hasLocalOrderBepadoProducts($order->id)) {
             $this->setDefaultTaxRate($order);
         }
 

@@ -7,12 +7,12 @@ use \Shopware\Components\Model\ModelManager;
 use \Shopware\Models\Customer\Customer;
 
 /**
- * The Country class helps to determine the country code for the current user
+ * The CountryCodeResolver class helps to determine the country code for the current user
  *
  * Class CountryCode
  * @package Shopware\Bepado\Components
  */
-class Country
+class CountryCodeResolver
 {
 
     /** @var \Shopware\Components\Model\ModelManager  */

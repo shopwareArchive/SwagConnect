@@ -6,7 +6,7 @@ use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\Utils\Country;
+use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -51,7 +51,7 @@ class Checkout extends BaseSubscriber
             $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
         }
 
-        $countryCodeUtil = new Country(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        $countryCodeUtil = new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
         return $countryCodeUtil->getIso3CountryCode();
     }
 

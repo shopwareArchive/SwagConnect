@@ -27,6 +27,7 @@ use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
+use Shopware\Bepado\Components\Config;
 
 /**
  * Class Shopware_Controllers_Backend_Bepado
@@ -37,6 +38,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      * @var \Shopware\Bepado\Components\BepadoFactory
      */
     private $factory;
+
+    /** @var  \Shopware\Bepado\Components\Config */
+    private $configComponent;
 
 
     /**
@@ -783,13 +787,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->View()->assign(array(
                 'success' => true
             ));
-            $repo->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
         } catch (Exception $e) {
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
                 'success' => false
             ));
-            $repo->setConfig('apiKeyVerified', false);
+            $this->getConfigComponent()->setConfig('apiKeyVerified', false);
         }
 
         $this->getModelManager()->flush();
@@ -932,81 +936,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             },
             $builder->getQuery()->getArrayResult()
         );
-    }
-
-    /**
-     * Read current price configuration
-     */
-    public function getPriceConfigAction()
-    {
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Config');
-
-
-        $data = array(
-            array(
-                'bepadoField' => 'purchasePrice',
-                'customerGroup' => $repo->getConfig('priceGroupForPurchasePriceExport'),
-                'priceField' => $repo->getConfig('priceFieldForPurchasePriceExport')
-            ),
-            array(
-                'bepadoField' => 'price',
-                'customerGroup' => $repo->getConfig('priceGroupForPriceExport'),
-                'priceField' => $repo->getConfig('priceFieldForPriceExport')
-            ),
-        );
-
-        $this->View()->assign(array(
-            'data' => $data
-        ));
-    }
-
-    /**
-     * Will set the configured price/customerGroup settings
-     *
-     * @throws RuntimeException
-     */
-    public function savePriceConfigAction()
-    {
-        $bepadoField = $this->Request()->getParam('bepadoField');
-        $customerGroup = $this->Request()->getParam('customerGroup');
-        $priceField = $this->Request()->getParam('priceField');
-
-
-        // Validate customerGroup and price field
-        if (empty($customerGroup) || empty($priceField)) {
-            throw new \RuntimeException("Customer group and price field may not be empty. Got {$customerGroup} and {$priceField}");
-        }
-
-        if (!in_array($priceField, array('price', 'basePrice', 'pseudoPrice'))) {
-            throw new \RuntimeException("Unknown price field {$priceField}");
-        }
-
-        $customerGroupRepo = $this->getModelManager()->getRepository('Shopware\Models\Customer\Group');
-        $group = $customerGroupRepo->findOneBy(array('key' => $customerGroup));
-        if (!$group) {
-            throw new \RuntimeException("Could not find customer group with key {$customerGroup}");
-        }
-
-
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
-
-        if ($bepadoField == 'purchasePrice') {
-            $configGroup = 'priceGroupForPurchasePriceExport';
-            $configField = 'priceFieldForPurchasePriceExport';
-        } elseif ($bepadoField == 'price') {
-            $configGroup = 'priceGroupForPriceExport';
-            $configField = 'priceFieldForPriceExport';
-        } else {
-            throw new \RuntimeException("Unknown field {$bepadoField}");
-        }
-
-        $repo->setConfig($configGroup, $customerGroup);
-        $repo->setConfig($configField, $priceField);
-        $this->getModelManager()->flush();
-
-        $this->View()->assign('success', true);
     }
 
     /**
@@ -1235,5 +1164,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->getSDK(),
             $this->getModelManager()
         );
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\Config
+     */
+    public function getConfigComponent()
+    {
+        if ($this->configComponent === null) {
+            $this->configComponent = new \Shopware\Bepado\Components\Config($this->getModelManager());
+        }
+
+        return $this->configComponent;
     }
 }

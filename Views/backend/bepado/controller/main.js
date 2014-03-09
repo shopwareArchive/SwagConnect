@@ -12,22 +12,23 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'main.Navigation',
         'export.List', 'import.List',
         'changed_products.List',
-        'config.Prices', 'log.List',
+        'log.List',
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
+		'config.General', 'config.Import', 'config.Export'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
-        'config.Prices', 'log.List'
+        'log.List',
+        'config.General', 'config.Import'
     ],
 
     refs: [
         { ref: 'window', selector: 'bepado-window' },
         { ref: 'navigation', selector: 'bepado-navigation' },
         { ref: 'panel', selector: 'bepado-panel' },
-        { ref: 'configForm', selector: 'bepado-config' },
         { ref: 'exportList', selector: 'bepado-export-list' },
         { ref: 'exportFilter', selector: 'bepado-export-filter' },
         { ref: 'importList', selector: 'bepado-import-list' },
@@ -88,8 +89,17 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-navigation': {
                 select: me.onSelectNavigationEntry
             },
-            'bepado-config button[action=save]': {
+            'bepado-config button[action=save-general-config]': {
                 click: me.onSaveConfigForm
+            },
+			'bepado-config-import-form button[action=save-import-config]': {
+                click: me.onSaveImportConfigForm
+            },
+			'bepado-config-export-form button[action=save-export-config]': {
+                click: me.onSaveExportConfigForm
+            },
+			'bepado-mapping button[action=save]': {
+                click: me.onSaveMapping
             },
             'bepado-mapping-import button[action=save]': {
                 click: me.onSaveImportMapping
@@ -804,13 +814,86 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
      *
      * @param button
      */
-    onSaveConfigForm: function(button) {
-        var me = this,
-            form = me.getConfigForm();
+    onSaveConfigForm: function(btn) {
+        var me = this;
+            form = btn.up('form');
+
         form.setLoading();
-        form.onSaveForm(form, false, function() {
-            form.setLoading(false);
-        });
+        if (form.getRecord()) {
+            var model = form.getRecord();
+
+            form.getForm().updateRecord(model);
+            model.save({
+                success: function(record) {
+                    form.setLoading(false);
+                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                },
+                failure: function(record) {
+                    form.setLoading(false);
+                    var rawData = record.getProxy().getReader().rawData,
+                        message = rawData.message;
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                }
+            });
+        }
+    },
+
+    /**
+     * Callback function to save the import configuration form
+     *
+     * @param button
+     */
+    onSaveImportConfigForm: function(btn) {
+        var me = this;
+        form = btn.up('form');
+
+        form.setLoading();
+        if (form.getRecord()) {
+            var model = form.getRecord();
+
+            form.getForm().updateRecord(model);
+            model.save({
+                success: function(record) {
+                    form.setLoading(false);
+                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                },
+                failure: function(record) {
+                    form.setLoading(false);
+                    var rawData = record.getProxy().getReader().rawData,
+                        message = rawData.message;
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                }
+            });
+        }
+    },
+
+    /**
+     * Callback function to save the export configuration form
+     *
+     * @param button
+     */
+    onSaveExportConfigForm: function(btn) {
+        var me = this;
+        form = btn.up('form');
+
+        form.setLoading();
+        if (form.getRecord()) {
+            var model = form.getRecord();
+
+            form.getForm().updateRecord(model);
+            model.save({
+                success: function(record) {
+                    form.setLoading(false);
+                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                },
+                failure: function(record) {
+                    form.setLoading(false);
+                    var rawData = record.getProxy().getReader().rawData,
+                        message = rawData.message;
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                }
+            });
+        }
     }
 });
 //{/block}

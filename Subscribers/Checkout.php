@@ -70,6 +70,14 @@ class Checkout extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
+        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID());
+        $view->hasBepadoProduct = $hasBepadoProduct;
+
+        if ($actionName == 'ajax_add_article') {
+            $this->registerMyTemplateDir();
+            $view->extendsTemplate('frontend/bepado/ajax_add_article.tpl');
+        }
+
         if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
             return;
         }
@@ -81,7 +89,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if (!$hasBepadoProduct) {
             return;
         }
 

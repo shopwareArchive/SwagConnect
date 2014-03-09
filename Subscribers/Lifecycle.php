@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils;
 use Shopware\Bepado\Components\BepadoExport;
 /**
@@ -86,7 +87,10 @@ class Lifecycle extends BaseSubscriber
      */
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
-        if (!$this->Config()->get('autoUpdateProducts', true)) {
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new Config(Shopware()->Models());
+
+        if (!$configComponent->getConfig('autoUpdateProducts', true)) {
             return;
         }
 

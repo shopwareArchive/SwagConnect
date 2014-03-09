@@ -58,6 +58,20 @@ class Config extends ModelEntity
      */
     protected $value = null;
 
+    /**
+     * @var integer $shopId
+     *
+     * @ORM\Column(name="shopId", type="integer", nullable=true)
+     */
+    protected $shopId = null;
+
+    /**
+     * @var string $groupName
+     *
+     * @ORM\Column(name="groupName", type="string", nullable=true)
+     */
+    protected $groupName = null;
+
     public function __construct($name=null, $value=null)
     {
         $this->name = $name;
@@ -102,6 +116,38 @@ class Config extends ModelEntity
     public function getValue()
     {
         return $this->value;
+    }
+
+    /**
+     * @param string $groupName
+     */
+    public function setGroupName($groupName)
+    {
+        $this->groupName = $groupName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupName()
+    {
+        return $this->groupName;
+    }
+
+    /**
+     * @param int $shopId
+     */
+    public function setShopId($shopId)
+    {
+        $this->shopId = $shopId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getShopId()
+    {
+        return $this->shopId;
     }
 
 

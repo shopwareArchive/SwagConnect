@@ -12,7 +12,6 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
     layout: 'border',
     width: 1100,
     height:'90%',
-    modal: true,
     title: '{s name=window/title}bepado{/s}',
 
     titleTemplate: '{s name=window/title_template}bepado - [text]{/s}',

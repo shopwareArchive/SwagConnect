@@ -6,6 +6,7 @@ use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Bepado\Components\Config;
 
 class LocalProductQuery extends BaseProductQuery
 {
@@ -41,11 +42,13 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-        $repo = $this->getConfigRepository();
-        $exportPriceCustomerGroup = $repo->getConfig('priceGroupForPriceExport', 'EK');
-        $exportPurchasePriceCustomerGroup = $repo->getConfig('priceGroupForPurchasePriceExport', 'EK');
-        $exportPriceColumn = $repo->getConfig('priceFieldForPriceExport', 'price');
-        $exportPurchasePriceColumn = $repo->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
+        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        $configComponent = new Config($this->manager);
+
+        $exportPriceCustomerGroup = $configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPurchasePriceCustomerGroup = $configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
+        $exportPriceColumn = $configComponent->getConfig('priceFieldForPriceExport', 'price');
+        $exportPurchasePriceColumn = $configComponent->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
         $builder = $this->manager->createQueryBuilder();
 

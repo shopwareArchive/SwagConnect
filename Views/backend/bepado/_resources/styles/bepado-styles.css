@@ -17,6 +17,24 @@
     margin: 0 0 18px;
 }
 
+/** General info text */
+.bepado-info {
+    line-height: 18px;
+}
+.bepado-info strong { font-weight: bold }
+.bepado-info p { margin: 0 0 18px; }
+.bepado-info li {
+    margin: 0 0 8px;
+    background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
+    padding: 0 0 0 25px;
+}
+.bepado-info .content { width: 100% }
+.bepado-info .headline {
+    font-size: 21px;
+    line-height: 26px;
+    margin: 0 0 18px;
+}
+
 /** Configuration */
 div[id^=bepado-window] div[id^=bepado-config] .x-window-body-default {
     border: 0 none;

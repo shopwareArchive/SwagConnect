@@ -1,48 +1,41 @@
 <?php
 
 namespace   Shopware\CustomModels\Bepado;
+use Doctrine\Common\Util\Debug;
 use         \Shopware\Components\Model\ModelRepository;
 
 class ConfigRepository extends ModelRepository
 {
 
-
-    /**
-     * Read a given config value by name
-     *
-     * @param $name
-     * @param null $default
-     * @return null
-     */
-    public function getConfig($name, $default=null)
+    public function getConfigsQuery($name=null, $shopId=null, $groupName=null)
     {
-        $model = $this->findOneBy(array('name' => $name));
+        $builder = $this->getConfigsQueryBuilder($name, $shopId, $groupName);
 
-        if ($model) {
-            return $model->getValue();
-        }
-
-        return $default;
-
+        return $builder->getQuery();
     }
 
-    /**
-     * Set a given config value
-     *
-     * @param $name
-     * @param $value
-     */
-    public function setConfig($name, $value)
+    public function getConfigsQueryBuilder($name, $shopId, $groupName)
     {
-        $model = $this->findOneBy(array('name' => $name));
+        $builder = $this->createQueryBuilder('c');
 
-        if (!$model) {
-            $model = new Config();
-            $this->getEntityManager()->persist($model);
+        if (!is_null($shopId)) {
+            $builder->where('c.shopId = :shopId');
+            $builder->setParameter(':shopId', $shopId);
+        } else {
+            $builder->where('c.shopId IS NULL');
         }
 
-        $model->setName($name);
-        $model->setValue($value);
+        if (!is_null($name)) {
+            $builder->andWhere('c.name = :name');
+            $builder->setParameter(':name', $name);
+        }
+
+        if (!is_null($groupName)) {
+            $builder->andWhere('c.groupName = :groupName');
+            $builder->setParameter(':groupName', $groupName);
+        }
+
+        return $builder;
     }
 
 }

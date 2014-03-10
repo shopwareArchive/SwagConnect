@@ -192,6 +192,11 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             action:'deactivate'
         });
         items.push({
+            iconCls:'sprite-blue-folders-stack',
+            text:'{s name=import/options/assign_category_text}Assign category{/s}',
+            action:'assignCategory'
+        });
+        items.push({
             xtype: 'tbseparator'
         });
         items.push({

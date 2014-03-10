@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Service;
@@ -17,7 +17,7 @@ use Bepado\SDK\RevisionProvider;
 /**
  * Service to sync product database with changes feed
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class Syncer
 {

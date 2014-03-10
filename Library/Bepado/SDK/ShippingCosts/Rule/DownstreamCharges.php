@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\ShippingCosts\Rule;
@@ -15,6 +15,16 @@ use Bepado\SDK\Struct\Order;
  */
 class DownstreamCharges extends Rule
 {
+    /**
+     * @var string
+     */
+    public $label;
+
+    /**
+     * @var string
+     */
+    public $url;
+
     /**
      * Check if shipping cost is applicable to given order
      *

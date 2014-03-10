@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Gateway;
@@ -19,7 +19,7 @@ use Bepado\SDK\ShippingCosts\Rules;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.1.141
+ * @version 1.1.142
  * @api
  */
 class InMemory extends Gateway

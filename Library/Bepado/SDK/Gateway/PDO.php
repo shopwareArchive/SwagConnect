@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Gateway;
@@ -14,7 +14,7 @@ use Bepado\SDK\ShippingCosts\Rules;
 /**
  * PDO implementation of the storage gateway
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class PDO extends Gateway
 {

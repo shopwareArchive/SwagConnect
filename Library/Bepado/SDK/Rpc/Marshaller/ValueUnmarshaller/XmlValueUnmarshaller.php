@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Rpc\Marshaller\ValueUnmarshaller;
@@ -77,7 +77,7 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
         $marshalledClass = $element->getAttribute("struct");
 
         if (!is_subclass_of($marshalledClass, 'Bepado\SDK\Struct') &&
-            !is_subclass_of($marshalledClass, 'Bepado\SDK\Struct')) {
+            !is_subclass_of($marshalledClass, 'Bepado\Common\Struct')) {
             throw new \RuntimeException("Cannot unmarshall non-Struct classes.");
         }
 

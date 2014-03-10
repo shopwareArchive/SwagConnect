@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK;
@@ -22,7 +22,7 @@ use Bepado\SDK\Struct\Shop;
  * The constructor may change in the future, using the SDKBuilder is
  * required to implement a supported plugin.
  *
- * @version 1.1.141
+ * @version 1.1.142
  * @api
  */
 final class SDK
@@ -58,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.1.141';
+    const VERSION = '1.1.142';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado

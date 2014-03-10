@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Rpc;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * RPC service registry
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class ServiceRegistry
 {

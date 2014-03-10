@@ -67,6 +67,10 @@ Ext.define('Shopware.apps.Bepado.view.import.AssignCategory', {
         me.callParent(arguments);
     },
 
+    /**
+     * Creates category tree buttons
+     * @returns string
+     */
     getButtons: function() {
         var me = this;
 

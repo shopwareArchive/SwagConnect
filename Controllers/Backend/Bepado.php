@@ -1236,4 +1236,34 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->getModelManager()
         );
     }
+
+    /**
+     * Add given category to products
+     */
+    public function assignProductsToCategoryAction()
+    {
+        $articleIds = $this->Request()->getParam('ids');
+        $categoryId = (int)$this->Request()->getParam('category');
+
+        /** @var \Shopware\Models\Category\Category $category */
+        $category = $this->getCategoryModelById($categoryId);
+        if (!is_null($category)) {
+            foreach ($articleIds as $id) {
+                /** @var \Shopware\Models\Article\Article $article */
+                $article = $this->getArticleModelById($id);
+                if (is_null($article)) {
+                    continue;
+                }
+                $article->addCategory($category);
+                $this->getModelManager()->persist($article);
+            }
+            $this->getModelManager()->flush();
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true
+            )
+        );
+    }
 }

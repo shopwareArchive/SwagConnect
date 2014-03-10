@@ -63,7 +63,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
 
         importBepadoCategoriesTitle: '{s name=mapping/importBepadoCategoriesTitle}Import categories?{/s}',
-        importBepadoCategoriesMessage: '{s name=mapping/importBepadoCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}'
+        importBepadoCategoriesMessage: '{s name=mapping/importBepadoCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
+        importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
     },
 
     /**
@@ -185,6 +186,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             },
             'bepado-import-list button[action=assignCategory]': {
                 click: me.onAssignCategoryAction
+            },
+            'bepado-assign-category-window button[action=save]': {
+                click: me.onSaveAssignCategoryAction
             },
             'bepado-import-list button[action=unsubscribe]': {
                 click: me.onImportFilterAction
@@ -817,8 +821,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     /**
-     * Callback function that will assign products to category
-     *
+     * Show categories tree window
      * @param btn
      */
     onAssignCategoryAction: function(btn) {
@@ -829,6 +832,72 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         if (records.length > 0) {
             Ext.create('Shopware.apps.Bepado.view.import.AssignCategory').show();
         }
+    },
+
+    /**
+     * Callback function that will assign products to category
+     * @param btn
+     */
+    onSaveAssignCategoryAction: function(btn) {
+        var me = this,
+            ids = [],
+            records = me.getImportList().getSelectionModel().getSelection(),
+            treeSelection = btn.up('treepanel').getSelectionModel().getSelection(),
+            categoriesWindow = btn.up('window');
+
+        if (treeSelection.length == 0) {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
+        Ext.MessageBox.confirm(
+            '{s name=confirm}Confirm{/s}',
+            Ext.String.format(me.messages.importAssignCategoryConfirm, records.length),
+            function(button) {
+                if (button == 'yes') {
+                    categoriesWindow.setLoading(true);
+                    var categoryId = treeSelection[0].get('id');
+
+                    var url = '{url action=assignProductsToCategory}';
+                    Ext.Ajax.request({
+                        url: url,
+                        method: 'POST',
+                        params: {
+                            'ids[]': ids,
+                            'category': categoryId
+                        },
+                        success: function(response, opts) {
+                            var sticky = false;
+                            categoriesWindow.setLoading(false);
+
+                            if (response.responseText) {
+                                var operation = Ext.decode(response.responseText);
+                                if (operation) {
+                                    if (!operation.success) {
+                                        me.createGrowlMessage('{s name=error}Error{/s}',
+                                            '{s name=import/message/error_assign_category}Category has not been added successfully.{/s}',
+                                            false
+                                        );
+                                    } else {
+                                        me.createGrowlMessage('{s name=success}Success{/s}',
+                                            '{s name=import/message/success_assign_category}Category has been added successfully.{/s}',
+                                            sticky
+                                        );
+                                        btn.up('window').close();
+                                    }
+                                }
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                        }
+                    });
+                }
+            }
+        );
     }
 });
 //{/block}

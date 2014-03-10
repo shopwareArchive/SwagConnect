@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Struct;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * Struct class representing a multi-shop reservation
  *
- * @version 1.1.133
+ * @version 1.1.141
  * @api
  */
 class Reservation extends Struct

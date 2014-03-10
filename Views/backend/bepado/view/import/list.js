@@ -196,6 +196,24 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             text:'{s name=import/options/assign_category_text}Assign category{/s}',
             action:'assignCategory'
         });
+        items.push({
+            xtype: 'tbseparator'
+        });
+        items.push({
+            xtype: 'checkbox',
+            labelWidth: 180,
+            fieldLabel: '{s name=import/toolbar/show_in_groups}Show in groups{/s}',
+            checked: true,
+            listeners: {
+                'change': function(checkbox) {
+                    if (checkbox.getValue()) {
+                        me.groupingFeature.enable();
+                    } else {
+                        me.groupingFeature.disable();
+                    }
+                }
+            }
+        });
         items.push('->');
 //        items.push({
 //            iconCls:'sprite-minus-circle-frame',

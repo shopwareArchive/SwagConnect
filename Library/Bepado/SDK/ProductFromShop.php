@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK;
@@ -10,7 +10,7 @@ namespace Bepado\SDK;
 /**
  * Interface for product providers
  *
- * @version 1.1.133
+ * @version 1.1.141
  * @api
  */
 interface ProductFromShop

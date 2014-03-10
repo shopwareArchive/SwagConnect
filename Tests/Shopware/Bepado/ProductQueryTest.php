@@ -3,6 +3,7 @@
 namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Verificator\Product;
+use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\ProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
@@ -14,9 +15,12 @@ class ProductQueryTest extends BepadoTestHelper
     public function getProductQuery()
     {
         if (!$this->productQuery) {
+            /** @var \Shopware\Bepado\Components\Config $configComponent */
+            $configComponent = new Config(Shopware()->Models());
+
             $this->productQuery = new ProductQuery(
-                new LocalProductQuery(Shopware()->Models(), Shopware()->Config()->get('alternateDescriptionField')),
-                new RemoteProductQuery(Shopware()->Models(), Shopware()->Config()->get('alternateDescriptionField'))
+                new LocalProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField')),
+                new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );
         }
         return $this->productQuery;

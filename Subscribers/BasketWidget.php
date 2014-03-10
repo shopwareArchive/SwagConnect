@@ -1,7 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Utils\Country;
+use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
  * The basket widget shows the current basket amount and the current basket's products.
@@ -34,7 +34,7 @@ class BasketWidget extends BaseSubscriber
             $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
         }
 
-        $countryCodeUtil = new Country(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        $countryCodeUtil = new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
         return $countryCodeUtil->getIso3CountryCode();
     }
 

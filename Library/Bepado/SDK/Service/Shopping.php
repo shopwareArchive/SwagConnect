@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\Service;
@@ -21,7 +21,7 @@ use Bepado\SDK\Gateway\ShopConfiguration;
 /**
  * Shopping service
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 class Shopping
 {
@@ -100,6 +100,7 @@ class Shopping
     public function calculateShippingCosts(Struct\Order $order)
     {
         $shops = array();
+        $order->orderShop = $this->config->getShopId();
         $orders = $this->splitShopOrders($order);
 
         foreach ($orders as $shopId => $shopOrder) {
@@ -243,6 +244,7 @@ class Shopping
         foreach ($orders as $shopId => $order) {
             $order->shippingCosts = $shippingCosts->shops[$shopId]->shippingCosts;
             $order->grossShippingCosts = $shippingCosts->shops[$shopId]->grossShippingCosts;
+            $order->shippingRule = $shippingCosts->shops[$shopId]->rule;
 
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($order);

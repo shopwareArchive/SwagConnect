@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK;
@@ -12,7 +12,7 @@ namespace Bepado\SDK;
  *
  * Constructs gateways to interact with other shops
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 abstract class ShopFactory
 {

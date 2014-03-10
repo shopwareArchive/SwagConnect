@@ -2,12 +2,12 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK;
 
-use Bepado\Common\Struct\RpcCall;
+use Bepado\SDK\Struct\RpcCall;
 use Bepado\SDK\Struct\Shop;
 
 /**
@@ -22,7 +22,7 @@ use Bepado\SDK\Struct\Shop;
  * The constructor may change in the future, using the SDKBuilder is
  * required to implement a supported plugin.
  *
- * @version 1.1.133
+ * @version 1.1.141
  * @api
  */
 final class SDK
@@ -58,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.1.133';
+    const VERSION = '1.1.141';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -312,7 +312,9 @@ final class SDK
     {
         $this->verifySdk();
 
-        $this->dependencies->getVerificator()->verify($order);
+        foreach ($order->orderItems as $orderItem) {
+            $this->dependencies->getVerificator()->verify($orderItem);
+        }
 
         return $this->dependencies->getShoppingService()->calculateShippingCosts($order);
     }

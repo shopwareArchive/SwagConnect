@@ -4,7 +4,6 @@ namespace Shopware\Bepado\Components;
 
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
-use Shopware\Bepado\Components\CategoryQuery\Sw40Query;
 use Bepado\SDK;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
@@ -22,6 +21,9 @@ class BepadoFactory
 
     private $modelManager;
     private $pluginVersion;
+
+    /** @var  \Shopware\Bepado\Components\Config */
+    private $configComponent;
 
     public function __construct($version='')
     {
@@ -63,7 +65,7 @@ class BepadoFactory
         $manager = $this->getModelManager();
         $front = Shopware()->Front();
         $helper = $this->getHelper();
-        $apiKey = Shopware()->Config()->get('apiKey');
+        $apiKey = $this->getConfigComponent()->getConfig('apiKey');
 
         $gateway = new SDK\Gateway\PDO($connection);
 
@@ -71,7 +73,7 @@ class BepadoFactory
          * The debugHost allows to specify an alternative bepado host.
          * Furthermore currently only one debugHost for *all* service can be specified
          */
-        $debugHost = Shopware()->Config()->get('bepadoDebugHost');
+        $debugHost = $this->getConfigComponent()->getConfig('bepadoDebugHost');
         if (!empty($debugHost)) {
             $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
@@ -88,7 +90,7 @@ class BepadoFactory
                 $helper,
                 $manager,
                 $this->getImageImport(),
-                Shopware()->Config()
+                $this->getConfigComponent()
             ),
             new ProductFromShop(
                 $helper,
@@ -166,9 +168,8 @@ class BepadoFactory
             Shopware()->Db(),
             $this->getSDK(),
             $this->getHelper(),
-            Shopware()->Config()->getByNamespace('SwagBepado', 'checkoutShopInfo')
+            $this->getConfigComponent()->getConfig('SwagBepado', 'checkoutShopInfo')
         );
-
     }
 
     /**
@@ -224,7 +225,10 @@ class BepadoFactory
      */
     private function getRemoteProductQuery()
     {
-        return new RemoteProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'));
+        return new RemoteProductQuery(
+            $this->getModelManager(),
+            $this->getConfigComponent()->getConfig('alternateDescriptionField')
+        );
     }
 
     /**
@@ -232,7 +236,12 @@ class BepadoFactory
      */
     private function getLocalProductQuery()
     {
-        return new LocalProductQuery($this->getModelManager(), Shopware()->Config()->get('alternateDescriptionField'), $this->getProductBaseUrl());
+        return new LocalProductQuery(
+            $this->getModelManager(),
+            $this->getConfigComponent()->getConfig('alternateDescriptionField'),
+            $this->getProductBaseUrl(),
+            $this->getConfigComponent()
+        );
     }
 
     private function getProductBaseUrl()
@@ -248,5 +257,17 @@ class BepadoFactory
             'id' => '',
             'fullPath' => true
         ));
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfigComponent()
+    {
+        if (!$this->configComponent) {
+            $this->configComponent = new Config($this->getModelManager());
+        }
+
+        return $this->configComponent;
     }
 }

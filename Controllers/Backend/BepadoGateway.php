@@ -32,6 +32,8 @@ use Shopware\Bepado\Components\Logger;
  */
 class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Action
 {
+    private $configComponent;
+
     /**
      * Disable authentication and JSon renderer
      */
@@ -58,6 +60,15 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
 
+    public function getConfigComponent()
+    {
+        if (!$this->configComponent) {
+            $this->configComponent = new \Shopware\Bepado\Components\Config(Shopware()->Models());
+        }
+
+        return $this->configComponent;
+    }
+
     /**
      * Main bepado interface
      *
@@ -67,7 +78,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
     {
         $this->Response()->setHeader('Content-Type', 'text/xml; charset=utf-8');
 
-        $loggingEnabled = Shopware()->Config()->getByNamespace('SwagBepado', 'logRequest');
+        $loggingEnabled = $this->getConfigComponent()->getConfig('logRequest');
 
         $logger = $this->getLogger();
 

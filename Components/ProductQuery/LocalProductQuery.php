@@ -6,11 +6,17 @@ use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Bepado\Components\Config;
 
+/**
+ * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
+ * Configured fields for price- and description export will be taken into account
+ *
+ * Class LocalProductQuery
+ * @package Shopware\Bepado\Components\ProductQuery
+ */
 class LocalProductQuery extends BaseProductQuery
 {
-
-    protected $configRepo;
 
     protected $manager;
 
@@ -18,22 +24,15 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $baseProductUrl;
 
-    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl)
+    /** @var \Shopware\Bepado\Components\Config $configComponent */
+    protected $configComponent;
+
+    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl, $configComponent)
     {
         $this->manager = $manager;
         $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
-    }
-
-    /**
-     * @return \Shopware\CustomModels\Bepado\ConfigRepository
-     */
-    private function getConfigRepository()
-    {
-        if (!$this->configRepo) {
-            $this->configRepo = $this->manager->getRepository('Shopware\CustomModels\Bepado\Config');
-        }
-        return $this->configRepo;
+        $this->configComponent = $configComponent;
     }
 
     /**
@@ -41,11 +40,11 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-        $repo = $this->getConfigRepository();
-        $exportPriceCustomerGroup = $repo->getConfig('priceGroupForPriceExport', 'EK');
-        $exportPurchasePriceCustomerGroup = $repo->getConfig('priceGroupForPurchasePriceExport', 'EK');
-        $exportPriceColumn = $repo->getConfig('priceFieldForPriceExport', 'price');
-        $exportPurchasePriceColumn = $repo->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
+
+        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
+        $exportPurchasePriceColumn = $this->configComponent->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
 
         $builder = $this->manager->createQueryBuilder();
 

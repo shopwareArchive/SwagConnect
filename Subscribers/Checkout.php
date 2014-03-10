@@ -6,7 +6,7 @@ use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\Utils\Country;
+use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -51,7 +51,7 @@ class Checkout extends BaseSubscriber
             $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
         }
 
-        $countryCodeUtil = new Country(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        $countryCodeUtil = new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
         return $countryCodeUtil->getIso3CountryCode();
     }
 
@@ -70,6 +70,14 @@ class Checkout extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
+        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID());
+        $view->hasBepadoProduct = $hasBepadoProduct;
+
+        if ($actionName == 'ajax_add_article') {
+            $this->registerMyTemplateDir();
+            $view->extendsTemplate('frontend/bepado/ajax_add_article.tpl');
+        }
+
         if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
             return;
         }
@@ -81,7 +89,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if (!$hasBepadoProduct) {
             return;
         }
 

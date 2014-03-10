@@ -2,13 +2,13 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\ServiceRegistry;
 
 use Bepado\SDK\ErrorHandler as SDKErrorHandler;
-use Bepado\Common\Rpc\ErrorHandler as RpcErrorHandler;
+use Bepado\SDK\Rpc\ErrorHandler as RpcErrorHandler;
 
 /**
  * Wrapper for RpcErrorHandler to notify SDK error handler about pending shutdown.

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 
 namespace Bepado\SDK\ShopGateway;
@@ -10,16 +10,16 @@ namespace Bepado\SDK\ShopGateway;
 use Bepado\SDK\ShopGateway;
 use Bepado\SDK\Struct;
 use Bepado\SDK\HttpClient;
-use Bepado\Common\Rpc\Marshaller\CallMarshaller;
-use Bepado\Common\Rpc\Marshaller\CallUnmarshaller;
-use Bepado\Common\Struct\RpcCall;
+use Bepado\SDK\Rpc\Marshaller\CallMarshaller;
+use Bepado\SDK\Rpc\Marshaller\CallUnmarshaller;
+use Bepado\SDK\Struct\RpcCall;
 
 /**
  * Shop gateway HTTP implementation
  *
  * Gateway to interact with other shops
  *
- * @version 1.1.133
+ * @version 1.1.141
  */
 class Http extends ShopGateway
 {
@@ -51,8 +51,8 @@ class Http extends ShopGateway
 
     /**
      * @param Bepado\SDK\HttpClient $httpClient
-     * @param Bepado\Common\Rpc\Marshaller\CallMarshaller $marshaller
-     * @param Bepado\Common\Rpc\Marshaller\CallUnmarshaller $unmarshaller
+     * @param Bepado\SDK\Rpc\Marshaller\CallMarshaller $marshaller
+     * @param Bepado\SDK\Rpc\Marshaller\CallUnmarshaller $unmarshaller
      * @param Bepado\SDK\Gateway\ShopConfiguration $providerShopConfig
      * @param Bepado\SDK\ShopGateway\ShopRequestSigner $shopRequestSigner
      */

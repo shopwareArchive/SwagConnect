@@ -13,22 +13,57 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
             { id: 'config', text: "{s name=navigation/config}Configuration{/s}", leaf: false,
                 expanded: true,
                 children: [
-                    { id: 'config-import', text: "{s name=navigation/config_import}Import{/s}", leaf: true, iconCls: 'sprite-drive-download' },
-                    { id: 'config-export', text: "{s name=navigation/config_export}Export{/s}", leaf: true, iconCls: 'sprite-inbox-upload' }
+                    {
+                        id: 'config-import',
+                        text: "{s name=navigation/config_import}Import{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-drive-download'
+                    },
+                    {
+                        id: 'config-export',
+                        text: "{s name=navigation/config_export}Export{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-inbox-upload'
+                    }
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: false,
                 expanded: true,
                 children: [
-                    { id: 'mapping-import', text: "{s name=navigation/mapping/import}Import{/s}", leaf: true, iconCls: 'sprite-drive-download' },
-                    { id: 'mapping-export', text: "{s name=navigation/mapping/export}export{/s}", leaf: true, iconCls: 'sprite-inbox-upload' },
+                    {
+                        id: 'mapping-import',
+                        text: "{s name=navigation/mapping/import}Import{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-drive-download'
+                    },
+                    {
+                        id: 'mapping-export',
+                        text: "{s name=navigation/mapping/export}export{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-inbox-upload'
+                    },
                 ]
             },
             { id: 'products', text: "{s name=navigation/products}Products{/s}", leaf: false,
                 expanded: true,
                 children: [
-                    { id: 'import', text: "{s name=navigation/import}Import{/s}", leaf: true, iconCls: 'sprite-drive-download' },
-                    { id: 'export', text: "{s name=navigation/export}Export{/s}", leaf: true, iconCls: 'sprite-inbox-upload' },
-                    { id: 'changed', text: "{s name=navigation/changed}Changed{/s}", leaf: true, iconCls: 'sprite-clock' },
+                    {
+                        id: 'import',
+                        text: "{s name=navigation/import}Import{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-drive-download'
+                    },
+                    {
+                        id: 'export',
+                        text: "{s name=navigation/export}Export{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-inbox-upload'
+                    },
+                    {
+                        id: 'changed',
+                        text: "{s name=navigation/changed}Changed{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-clock'
+                    },
                 ]
             },
             { id: 'log', text: "{s name=navigation/log}Log{/s}", leaf: true, iconCls: 'sprite-database' }

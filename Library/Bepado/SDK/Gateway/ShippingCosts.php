@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Gateway;
@@ -13,7 +13,7 @@ use Bepado\SDK\ShippingCosts\Rules;
 /**
  * Gateaway interface to maintain shipping costs
  *
- * @version 1.1.141
+ * @version 1.1.142
  * @api
  */
 interface ShippingCosts

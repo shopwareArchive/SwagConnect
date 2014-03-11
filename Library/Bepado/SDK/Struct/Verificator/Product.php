@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Struct\Verificator;
@@ -15,7 +15,7 @@ use Bepado\SDK\Units;
 /**
  * Visitor verifying integrity of struct classes
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class Product extends Verificator
 {

@@ -294,12 +294,18 @@ class Setup
         foreach ($configs as $name => $values) {
             list($value, $shopId, $group) = $values;
 
-            $configComponent->setConfig(
-                $name,
-                $configComponent->getConfig($name, $value, $shopId),
-                $shopId,
-                $group
-            );
+            try {
+                $configComponent->setConfig(
+                    $name,
+                    $configComponent->getConfig($name, $value, $shopId),
+                    $shopId,
+                    $group
+                );
+            } catch(\Exception $e) {
+                // This may fail if the config table was not updated, yet.
+                // The Updater will take care of this
+            }
+
         }
     }
 

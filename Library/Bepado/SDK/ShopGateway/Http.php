@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\ShopGateway;
@@ -19,7 +19,7 @@ use Bepado\SDK\Struct\RpcCall;
  *
  * Gateway to interact with other shops
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class Http extends ShopGateway
 {

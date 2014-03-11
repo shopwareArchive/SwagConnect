@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 
 namespace Bepado\SDK\Service;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Service to receive current shop metrics
  *
- * @version 1.1.141
+ * @version 1.1.142
  */
 class Metric
 {

@@ -143,6 +143,33 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * The getStaticPagesAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the general config form for static cms pages combo.
+     * @return string
+     */
+    public function getStaticPagesAction()
+    {
+        $builder = $this->getModelManager()->createQueryBuilder();
+        $builder->select('st.id, st.description AS name');
+        $builder->from('Shopware\Models\Site\Site', 'st');
+
+        $query = $builder->getQuery();
+        $query->setFirstResult($this->Request()->getParam('start'));
+        $query->setMaxResults($this->Request()->getParam('limit'));
+
+        $total = Shopware()->Models()->getQueryCount($query);
+        $data = $query->getArrayResult();
+
+        $this->View()->assign(array(
+                'success' => true,
+                'data' => $data,
+                'total' => $total
+            ));
+
+    }
+
+    /**
      * Helper function to get access on the Config component
      *
      * @return \Shopware\Bepado\Components\Config
@@ -156,5 +183,4 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
         return $this->configComponent;
     }
-
 } 

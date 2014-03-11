@@ -5,6 +5,17 @@
 	{/if}
 {/block}
 
+{* Article price *}
+{block name='frontend_detail_data_price_info'}
+    <p class="tax_attention modal_open">
+        {if $shippingCostsPage}
+            {s name="detail_date_price_info" namespace="frontend/detail/bepado"}{/s}
+        {else}
+            {s name="DetailDataPriceInfo" namespace="frontend/detail/data"}{/s}
+        {/if}
+    </p>
+{/block}
+
 {block name='frontend_detail_buy_button'}
     {if $hideBepado}
         <div class="space">&nbsp;</div>

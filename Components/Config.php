@@ -200,6 +200,7 @@ class Config
                     'detailShopInfo' =>$shopConfig['detailShopInfo'],
                     'detailProductNoIndex' =>$shopConfig['detailProductNoIndex'],
                     'checkoutShopInfo' =>$shopConfig['checkoutShopInfo'],
+                    'shippingCostsPage' =>$shopConfig['shippingCostsPage'],
                 );
             } else {
                 unset($shopConfig['shopId']);

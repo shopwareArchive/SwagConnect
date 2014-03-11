@@ -140,6 +140,7 @@ class TemplateExtension extends BaseSubscriber
         }
 
         $products = $helper->getRemoteProducts($articleData['articleID']);
+
         if (empty($products)) {
             return;
         }
@@ -153,12 +154,12 @@ class TemplateExtension extends BaseSubscriber
         $modelsManager = Shopware()->Models();
         /** @var \Shopware\Bepado\Components\Config $configComponent */
         $configComponent = new Config($modelsManager);
-
         $view->assign(array(
             'bepadoProduct' => $product,
             'bepadoShop' => $shop,
             'bepadoShopInfo' => $configComponent->getConfig('detailShopInfo'),
-            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex')
+            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
+            'shippingCostsPage' => $configComponent->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId() , 'general')
         ));
     }
 

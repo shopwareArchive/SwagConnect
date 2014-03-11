@@ -30,15 +30,17 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
      * Creates the actual tabs for the known fields
      */
     createItems: function() {
-        var me = this;
+        var me = this,
+            tabs = [],
+            staticPagesStore = Ext.create('Shopware.apps.Bepado.store.config.Pages').load();
 
-        var tabs = [];
         me.shopStore.each(function() {
             var record = this;
 
             me.generalForm = Ext.create('Shopware.apps.Bepado.view.config.general.Form', {
                 shopId: record.get('id'),
-                defaultShop: record.get('default')
+                defaultShop: record.get('default'),
+                staticPagesStore: staticPagesStore
             });
 
             var tab = Ext.create('Ext.form.Panel', {

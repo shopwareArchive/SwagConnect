@@ -60,7 +60,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         bepadoAttributeLabel: '{s name=config/bepado_attribute_label}bepado attribute{/s}',
         alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternate bepado host (for testing purpose){/s}',
         logLabel: '{s name=config/log_label}Log bepado requests{/s}',
-        logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}'
+        logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}',
+        shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}'
     },
 
     initComponent: function() {
@@ -199,14 +200,16 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         var me = this,
             items = [],
             leftElements = me.createLeftElements(),
-            rightElements = me.createRightElements();
+            rightElements = me.createRightElements(),
+            bottomElements = me.createBottomElements();
 
         items.push(leftElements);
         items.push(rightElements);
+        items.push(bottomElements);
 
         if (me.defaultShop) {
-            var bottomElements = me.createBottomElements();
-            items.push(bottomElements);
+            var defaultElements = me.createDefaultElements();
+            items.push(defaultElements);
         }
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
@@ -290,10 +293,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which are displayed in the bottom
+     * Creates the field set items which are displayed only for default shop
      * @return Ext.container.Container
      */
-    createBottomElements: function() {
+    createDefaultElements: function() {
         var me = this;
 
         var attributeStore = new Ext.data.ArrayStore({
@@ -322,7 +325,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             ]
         });
 
-        var bottomContainer = Ext.create('Ext.container.Container', {
+        var defaultContainer = Ext.create('Ext.container.Container', {
             columnWidth: 1,
             layout: 'anchor',
             border: false,
@@ -360,6 +363,39 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                             uncheckedValue: 0
                         }
                     ]
+                }
+            ]
+        });
+
+        return defaultContainer;
+    },
+
+    /**
+     * Creates the field set items which are displayed in the bottom
+     * @return Ext.container.Container
+     */
+    createBottomElements: function() {
+        var me = this;
+
+        var bottomContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 1,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'pagingcombo',
+                    name: 'shippingCostsPage',
+                    anchor: '100%',
+                    required: false,
+                    editable: false,
+                    valueField: 'id',
+                    displayField: 'name',
+                    fieldLabel: me.snippets.shippingCostsLabel,
+                    store: me.staticPagesStore,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/bepado_shipping_costs_page}Select which page to display in the detail page of the bepado products.{/s}',
+                    forceSelection: true,
+                    triggerAction: 'all'
                 }
             ]
         });

@@ -743,6 +743,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                     continue;
                 }
                 $model->setActive($active);
+
+                foreach ($model->getDetails() as $detail) {
+                    $detail->setActive($active);
+                }
             }
         } else {
             $unsubscribedProducts = array();

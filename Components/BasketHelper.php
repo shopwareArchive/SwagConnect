@@ -413,7 +413,8 @@ class BasketHelper
     {
         $this->calculateShippingCosts($country);
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
-        $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
+        $shippingCosts = $shippingCostsNet * (1+$this->getMaxTaxRate()/100);
+        
 
         // Set the shipping cost tax rate for shopware
 
@@ -680,7 +681,7 @@ class BasketHelper
     {
         return array_map(
             function (ShippingCost $cost) {
-                return $cost->grossShippingCosts;
+                return $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
             },
             $this->totalShippingCosts->shops
         );
@@ -753,6 +754,7 @@ class BasketHelper
                  'product' => $product,
              ));
          }
+         
      }
         return $dummyOrder;
     }

@@ -65,9 +65,10 @@ class Config
         if (is_null($shopId)) {
             return $this->getMainConfig($name, $default);
         }
-
         $query = $this->getConfigRepository()->getConfigsQuery($name, $shopId);
-        $model = $query->getOneOrNullResult();
+        $query->setMaxResults(1);
+        $result = $query->getResult();
+        $model = $result[0];
 
         if ($model) {
             return $model->getValue();
@@ -82,7 +83,9 @@ class Config
         if ($mainShop) {
             $mainShopId = $mainShop->getId();
             $query = $this->getConfigRepository()->getConfigsQuery($name, $mainShopId);
-            $model = $query->getOneOrNullResult();
+            $query->setMaxResults(1);
+            $result = $query->getResult();
+            $model = $result[0];
 
             if ($model) {
                 return $model->getValue();
@@ -100,8 +103,10 @@ class Config
     private function getMainConfig($name, $default=null)
     {
         $query = $this->getConfigRepository()->getConfigsQuery($name);
+        $query->setMaxResults(1);
+        $result = $query->getResult();
+        $model = $result[0];
 
-        $model = $query->getOneOrNullResult();
         if ($model) {
             return $model->getValue();
         }

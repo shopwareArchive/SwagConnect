@@ -204,7 +204,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     allowBlank: false,
                     displayField: 'name',
                     valueField: 'key',
-                    store: 'base.CustomerGroup'
+                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load()
                 },
                 {
                     xtype: 'combobox',

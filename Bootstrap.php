@@ -226,6 +226,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return array(
             new \Shopware\Bepado\Subscribers\OrderDocument(),
             new \Shopware\Bepado\Subscribers\ControllerPath(),
+            new \Shopware\Bepado\Subscribers\CustomerGroup(),
             new \Shopware\Bepado\Subscribers\CronJob(),
             new \Shopware\Bepado\Subscribers\ArticleList(),
             new \Shopware\Bepado\Subscribers\Article(),

@@ -15,7 +15,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'log.List',
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
-		'config.General', 'config.Import', 'config.Export'
+		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup'
     ],
     models: [
         'main.Mapping', 'main.Product',

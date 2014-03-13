@@ -376,7 +376,12 @@ class BasketHelper
                 if (!isset($taxes[$vat])) {
                     $taxes[$vat] = 0;
                 }
-                $taxes[$vat] += $product['priceNumeric'] - $product['netprice'];
+
+                if ($this->hasTax()) {
+                    $taxes[$vat] += $product['priceNumeric'] - $product['netprice'];
+                } else {
+                    $taxes[$vat] += $product['amountWithTax'] - $product['netprice'];
+                }
             }
         }
         return $taxes;
@@ -413,30 +418,45 @@ class BasketHelper
     {
         $this->calculateShippingCosts($country);
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
-        $shippingCosts = $shippingCostsNet * (1+$this->getMaxTaxRate()/100);
-        
+        $shippingCosts = $shippingCostsNet;
+        $shippingCostsWithTax = $shippingCosts * (1+$this->getMaxTaxRate()/100);
+
+        $basketHasTax = $this->hasTax();
 
         // Set the shipping cost tax rate for shopware
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
         // Update shipping costs
-        $this->basket['sShippingcosts'] += $shippingCosts;
+        if ($basketHasTax) {
+            $this->basket['sShippingcosts'] += $shippingCostsWithTax;
+        } else {
+            $this->basket['sShippingcosts'] += $shippingCosts;
+        }
         $this->basket['sShippingcostsNet'] += $shippingCostsNet;
-        $this->basket['sShippingcostsWithTax'] += $shippingCosts;
+        $this->basket['sShippingcostsWithTax'] += $shippingCostsWithTax;
 
         // Update total amount
         $this->basket['AmountNumeric'] += $shippingCosts;
         $this->basket['AmountNetNumeric'] += $shippingCostsNet;
+
         if(!empty($this->basket['sAmountWithTax'])) {
-            $this->basket['sAmountWithTax'] += $shippingCosts;
+                $this->basket['sAmountWithTax'] += $this->basket['sShippingcostsWithTax'];
         }
-        $this->basket['sAmount'] += $shippingCosts;
+
+        if ($basketHasTax) {
+            $this->basket['sAmount'] += $shippingCostsWithTax;
+        } else {
+            $this->basket['sAmount'] += $shippingCosts;
+        }
+
+        $this->basket['sAmountTax'] += $this->basket['sShippingcostsWithTax'] - $shippingCosts;
 
         // Core workaround: Shopware tries to re-calculate the shipping tax rate from the net price
         // \Shopware_Models_Document_Order::processOrder
         // Therefore we need to round the net price
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
+
 
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(
@@ -446,6 +466,7 @@ class BasketHelper
                 $this->getShippingCostsTaxRates()
             )
         );
+
     }
 
     /**
@@ -453,10 +474,10 @@ class BasketHelper
      */
     public function getShippingCostsTaxRates()
     {
-        $taxAmount = $this->basket['sShippingcosts'] - $this->basket['sShippingcostsNet'];
+        $taxAmount = $this->basket['sShippingcostsWithTax'] - $this->basket['sShippingcostsNet'];
 
         $taxRate = number_format($this->getMaxTaxRate(), 2, '.', '');
-        $this->basket['sShippingcostsNet'] = $this->basket['sShippingcosts'] / (($taxRate/100)+1);
+        $this->basket['sShippingcostsNet'] = $this->basket['sShippingcostsWithTax'] / (($taxRate/100)+1);
 
         return array(
             (string) $taxRate => $taxAmount
@@ -681,7 +702,11 @@ class BasketHelper
     {
         return array_map(
             function (ShippingCost $cost) {
-                return $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
+                if ($this->hasTax()) {
+                    return $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
+                } else {
+                    return $cost->shippingCosts;
+                }
             },
             $this->totalShippingCosts->shops
         );
@@ -757,5 +782,22 @@ class BasketHelper
          
      }
         return $dummyOrder;
+    }
+
+    /**
+     * Returns "Gross price displayed in frontend" value
+     * @return boolean
+     */
+    protected function hasTax()
+    {
+        $customerGroup = Shopware()->Session()->sUserGroup;
+        if (!$customerGroup) {
+            $customerGroup = 'EK';
+        }
+
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        $groupModel = $repository->findOneBy(array('key' => $customerGroup));
+
+        return $groupModel->getTax();
     }
 }

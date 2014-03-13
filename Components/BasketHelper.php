@@ -224,7 +224,7 @@ class BasketHelper
             unset($this->bepadoContent[$shopId]);
 
             // Remove original shop's shipping costs
-            $shippingCostsOrg = $this->basket['sShippingcosts'];
+            $shippingCostsOrg = $this->basket['sShippingcostsWithTax'];
             $shippingCostsOrgNet = $this->basket['sShippingcostsNet'];
             $this->basket['sShippingcosts'] = 0;
             $this->basket['sShippingcostsWithTax'] = 0;

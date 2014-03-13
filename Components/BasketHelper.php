@@ -391,7 +391,7 @@ class BasketHelper
                 if ($this->hasTax()) {
                     $taxes[$vat] += $product['priceNumeric'] - $product['netprice'];
                 } else {
-                    $taxes[$vat] += $product['amountWithTax'] - $product['netprice'];
+                    $taxes[$vat] += $product['amountWithTax'] - ($product['netprice'] * $product['quantity']);
                 }
             }
         }

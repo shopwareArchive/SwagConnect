@@ -233,6 +233,7 @@ class BasketHelper
             $this->basket['AmountNetNumeric'] -= $shippingCostsOrgNet;
             $this->basket['sAmount'] -= $shippingCostsOrg;
             $rate = number_format($this->basket['sShippingcostsTax'], 2, '.', '');
+
             $this->basket['sTaxRates'][$rate] -= $shippingCostsOrg - $shippingCostsOrgNet;
             if(!empty($this->basket['sAmountWithTax'])) {
                 $this->basket['sAmountWithTax'] -= $shippingCostsOrg;
@@ -451,7 +452,11 @@ class BasketHelper
         $this->basket['AmountNetNumeric'] += $shippingCostsNet;
 
         if(!empty($this->basket['sAmountWithTax'])) {
+            if ($basketHasTax) {
                 $this->basket['sAmountWithTax'] += $this->basket['sShippingcostsWithTax'];
+            } else {
+                $this->basket['sAmountWithTax'] += $shippingCostsWithTax;
+            }
         }
 
         if ($basketHasTax) {

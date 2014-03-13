@@ -370,7 +370,7 @@ class Setup
             $customerGroup->setTax(false);
             $customerGroup->setTaxInput(false);
             $customerGroup->setMode(0);
-            $customerGroup->setName('bepado export price');
+            $customerGroup->setName('bepado export');
 
             $attribute = new \Shopware\Models\Attribute\CustomerGroup();
             $attribute->setBepadoGroup(true);

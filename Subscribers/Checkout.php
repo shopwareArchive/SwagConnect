@@ -211,6 +211,8 @@ class Checkout extends BaseSubscriber
 		}
 
         if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+            // reset bepado reserved products in session
+            Shopware()->Session()->BepadoReservation = null;
             return;
         }
 

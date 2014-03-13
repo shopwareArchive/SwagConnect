@@ -245,9 +245,16 @@ class Setup
             0
         );
 
+        $modelManager->addAttribute(
+            's_core_customergroups_attributes',
+            'bepado', 'group',
+            'int(1)'
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',
+            's_core_customergroups_attributes',
             's_articles_prices_attributes',
             's_premium_dispatch_attributes',
             's_categories_attributes',
@@ -348,21 +355,55 @@ class Setup
      */
     public function createBepadoCustomerGroup()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
-        $model = $repo->findOneBy(array('key' => 'BEP'));
+        $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        /** @var \Shopware\Models\Attribute\CustomerGroup $model */
+        $model = $repo->findOneBy(array('bepadoGroup' => true));
 
+        $customerGroup = null;
+        if ($model && $model->getCustomerGroup()) {
+            $customerGroup = $model->getCustomerGroup();
+        }
 
-        if (!$model) {
+        if (!$customerGroup) {
             $customerGroup = new Group();
-            $customerGroup->setKey('BEP');
+            $customerGroup->setKey($this->getAvailableCustomerGroupName());
             $customerGroup->setTax(false);
             $customerGroup->setTaxInput(false);
             $customerGroup->setMode(0);
-            $customerGroup->setName('bepado');
+            $customerGroup->setName('bepado export price');
+
+            $attribute = new \Shopware\Models\Attribute\CustomerGroup();
+            $attribute->setBepadoGroup(true);
+            $customerGroup->setAttribute($attribute);
+
 
             Shopware()->Models()->persist($customerGroup);
+            Shopware()->Models()->persist($attribute);
             Shopware()->Models()->flush();
         }
+    }
+
+    /**
+     * Return a free customer group name. It will only check 5 groups - if all are used, probably the detection
+     * of existing bepadoCustomerGroups is broken. Throw an exception then
+     *
+     * @return mixed
+     * @throws \RuntimeException
+     */
+    private function getAvailableCustomerGroupName()
+    {
+        $names = array('BEP', 'bepado', 'BP', 'SW-BEP', 'SW-BEPADO');
+
+        $repo = $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        foreach ($names as $name) {
+            $model = $repo->findOneBy(array('key' => $name));
+            if (is_null($model)) {
+                return $name;
+            }
+        }
+
+        throw new \RuntimeException('Could not find a free group name for the bepado customer group.Probably you need to delete an existing customer group created by bepado (BEP, bepado, BP, SW-BEP or SW-BEPADO). Make sure, you really don\'t need it any more!'
+        );
     }
 
     public function registerCustomModels()

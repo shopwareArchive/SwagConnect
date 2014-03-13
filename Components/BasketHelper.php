@@ -477,6 +477,9 @@ class BasketHelper
             )
         );
 
+        //@todo:stefan Check for better solution
+        $this->basket['AmountWithTaxNumeric'] = $this->basket['sAmountWithTax'];
+        $this->basket['AmountNumeric'] = $this->basket['sAmount'];
     }
 
     /**

@@ -260,7 +260,9 @@ class BasketHelper
         foreach ($this->basket['content'] as  $product) {
             $removeItems['ids'][] = $product['id'];
             $removeItems['price'] += $product['price'] * $product['quantity'];
+            $removeItems['amountWithTax'] += $product['amountWithTax'] * $product['quantity'];
             $removeItems['netprice'] += $product['netprice'] * $product['quantity'];
+            $removeItems['tax'] += str_replace(',', '.', $product['tax']) * $product['quantity'];
             $removeItems['sessionId'] = $product['sessionID'];
         }
 
@@ -271,10 +273,19 @@ class BasketHelper
         // Fix basket prices
         $this->basket['AmountNumeric'] -= $removeItems['price'];
         $this->basket['AmountNetNumeric'] -= $removeItems['netprice'];
-        $this->basket['sAmount'] -= $removeItems['price'];
+        $this->basket['sAmount'] -= $removeItems['netprice'];
         $this->basket['Amount'] = str_replace(',', '.', $this->basket['Amount']) - $removeItems['price'];
+
+        $this->basket['sAmountTax'] -= $removeItems['tax'];
         if(!empty($this->basket['sAmountWithTax'])) {
-            $this->basket['sAmountWithTax'] -= $removeItems['price'];
+            if ($this->hasTax()) {
+                $this->basket['sAmountWithTax'] -= $removeItems['price'];
+            } else {
+                $this->basket['sAmountWithTax'] -= $removeItems['amountWithTax'];
+                $this->basket['AmountWithTaxNumeric'] -= $removeItems['amountWithTax'];
+                $this->basket['AmountWithTax'] = $this->basket['AmountWithTaxNumeric'];
+                $this->basket['amountnet'] = $this->basket['amount'];
+            }
         }
 
         // Remove items from basket
@@ -285,7 +296,6 @@ class BasketHelper
                 implode(',', $removeItems['ids'])
             )
         );
-        
     }
 
     /**

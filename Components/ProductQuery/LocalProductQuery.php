@@ -117,15 +117,12 @@ class LocalProductQuery extends BaseProductQuery
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
         }
 
-
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);
         unset($row['localId']);
 
-        $product = new Product(
-            $row
-        );
+        $product = new Product($row);
         return $product;
     }
 
@@ -141,28 +138,46 @@ class LocalProductQuery extends BaseProductQuery
     {
         // When the price attribute is used, we need two joins to get it
         if ($exportPriceColumn == 'bepadoPrice') {
-            $builder->leftJoin('d.prices', 'price_join_for_export_price', 'with', "price_join_for_export_price.from = 1 AND price_join_for_export_price.customerGroupKey = :priceCustomerGroup");
+            $builder->leftJoin(
+                'd.prices',
+                'price_join_for_export_price',
+                'with',
+                "price_join_for_export_price.from = 1 AND price_join_for_export_price.customerGroupKey = :priceCustomerGroup"
+            );
             $builder->leftJoin('price_join_for_export_price.attribute', 'exportPrice');
         } else {
-            $builder->leftJoin('d.prices', 'exportPrice', 'with', "exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup");
+            $builder->leftJoin(
+                'd.prices',
+                'exportPrice',
+                'with',
+                "exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup"
+            );
         }
 
         // When the price attribute is used, we need two joins to get it
         if ($exportPurchasePriceColumn == 'bepadoPrice') {
-            $builder->leftJoin('d.prices', 'price_join_for_export_purchase_price', 'with', "price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup");
+            $builder->leftJoin(
+                'd.prices',
+                'price_join_for_export_purchase_price',
+                'with',
+                "price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup"
+            );
             $builder->leftJoin('price_join_for_export_purchase_price.attribute', 'exportPurchasePrice');
         } else {
-            $builder->leftJoin('d.prices', 'exportPurchasePrice', 'with', "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup");
+            $builder->leftJoin(
+                'd.prices',
+                'exportPurchasePrice',
+                'with',
+                "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup"
+            );
         }
-
 
         return $builder;
     }
 
     public function getUrlForProduct($productId)
     {
-        return $this->baseProductUrl  . $productId;
+        return $this->baseProductUrl . $productId;
     }
-
 }
 

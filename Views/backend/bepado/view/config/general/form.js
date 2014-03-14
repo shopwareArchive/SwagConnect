@@ -373,6 +373,11 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     populateForm: function() {
         var me = this,
             record = me.generalConfigStore.getById(me.shopId);
+
+        if (!record) {
+            record = Ext.create('Shopware.apps.Bepado.model.config.General');
+        }
+
         if (record.get('bepadoAttribute') < 1) {
             record.set('bepadoAttribute', 19);
         }

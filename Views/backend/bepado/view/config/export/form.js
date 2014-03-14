@@ -160,8 +160,20 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                 xtype: 'bepado-config-export-description'
             },
             container,
-            me.createPriceField('price'),
-            me.createPriceField('purchasePrice'),
+            {
+                xtype: 'fieldset',
+                title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
+                items: [
+                    {
+                        xtype: 'label',
+                        html: '{s name=config/export/label/priceDescription}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
+                    },
+                    me.createPriceField('price'),
+                    me.createPriceField('purchasePrice'),
+                ]
+
+            }
+
         ];
     },
 
@@ -204,7 +216,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     allowBlank: false,
                     displayField: 'name',
                     valueField: 'key',
-                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load()
+                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load(),
+                    supportText: '{s name=config/export/support/customer}customer group{/s}'
                 },
                 {
                     xtype: 'combobox',
@@ -218,7 +231,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     allowBlank: false,
                     displayField: 'field',
                     valueField: 'field',
-                    helpText: helpText
+                    helpText: helpText,
+                    supportText: '{s name=config/export/support/price}price field{/s}'
+
                 }
             ]
         };

@@ -142,7 +142,7 @@ class Update
             return;
         }
 
-            try {
+        try {
             $sql = 'ALTER TABLE `s_plugin_bepado_items` change `categories` `category` text;';
             Shopware()->Db()->exec($sql);
         } catch (\Exception $e) {

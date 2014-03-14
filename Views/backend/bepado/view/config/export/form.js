@@ -262,6 +262,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         var me = this,
             record = me.exportConfigStore.getAt(0);
 
+        if (!record) {
+            record = Ext.create('Shopware.apps.Bepado.model.config.Export');
+        }
         me.loadRecord(record);
     }
 });

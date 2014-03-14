@@ -7,6 +7,10 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
 
     //border: false,
     layout: 'border',
+
+    snippets: {
+        emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}'
+    },
     
     initComponent: function() {
         var me = this;
@@ -35,6 +39,13 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
                         store: 'mapping.BepadoCategoriesImport'
+                    },
+                    renderer: function (value) {
+                        if (!value) {
+                            return me.snippets.emptyMappingMessage;
+                        }
+
+                        return value;
                     }
                 },{
                     xtype: 'treecolumn',

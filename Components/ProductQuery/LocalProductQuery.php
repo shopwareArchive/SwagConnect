@@ -81,7 +81,8 @@ class LocalProductQuery extends BaseProductQuery
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
             'at.category as category',
-            'at.fixedPrice as fixedPrice'
+            'at.fixedPrice as fixedPrice',
+            'd.shippingTime as deliveryWorkDays',
         ));
 
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);
@@ -120,6 +121,13 @@ class LocalProductQuery extends BaseProductQuery
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);
+
+        if ($row['deliveryWorkDays']) {
+            $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
+        } else {
+            $row['deliveryWorkDays'] = null;
+        }
+
         unset($row['localId']);
 
         $product = new Product($row);

@@ -273,15 +273,16 @@ class ProductToShop implements ProductToShopBase
         if($model === null) {
             return;
         }
-        //$model->getDetails()->clear();
-        //$this->manager->remove($model);
-        $model->setActive(false);
+        $model->getDetails()->clear();
+        $this->manager->remove($model);
+
+//        $model->setActive(false);
 
         // Not sure why, but the Attribute can be NULL
-        $attribute = $this->helper->getBepadoAttributeByModel($model);
-        if ($attribute) {
-            $attribute->setExportStatus('delete');
-        }
+//        $attribute = $this->helper->getBepadoAttributeByModel($model);
+//        if ($attribute) {
+//            $attribute->setExportStatus('delete');
+//        }
         $this->manager->flush($model);
     }
 

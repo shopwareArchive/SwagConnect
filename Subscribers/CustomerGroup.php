@@ -34,6 +34,10 @@ class CustomerGroup extends BaseSubscriber
         $controller = $args->get('subject');
         $request = $controller->Request();
 
+        if ($request->getActionName() != 'getCustomerGroups') {
+            return;
+        }
+
         if ($request->getParam('showBepado', false)) {
             return;
         }

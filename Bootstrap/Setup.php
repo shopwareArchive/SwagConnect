@@ -73,9 +73,13 @@ class Setup
             'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
             array('name' => 'SwagBepado', 'action' => 'importImages')
         );
+        Shopware()->Db()->query(
+            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
+            array('name' => 'SwagBepado', 'action' => 'Shopware_CronJob_ImportImages')
+        );
         $this->bootstrap->createCronJob(
             'SwagBepado',
-            'importImages',
+            'Shopware_CronJob_ImportImages',
             60 * 30,
             true
         );

@@ -718,16 +718,16 @@ class BasketHelper
      */
     public function getBepadoGrossShippingCosts()
     {
-        return array_map(
-            function (ShippingCost $cost) {
-                if ($this->hasTax()) {
-                    return $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
-                } else {
-                    return $cost->shippingCosts;
-                }
-            },
-            $this->totalShippingCosts->shops
-        );
+        $result = array();
+        foreach($this->totalShippingCosts->shops as $cost) {
+            if ($this->hasTax()) {
+                $result[$cost->shopId] = $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
+            } else {
+                $result[$cost->shopId] = $cost->shippingCosts;
+            }
+        }
+
+        return $result;
     }
 
     /**

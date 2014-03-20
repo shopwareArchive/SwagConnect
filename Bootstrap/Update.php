@@ -72,6 +72,10 @@ class Update
             'pluginId' => $this->bootstrap->getId()
         ));
 
+        if (!$form) {
+            return;
+        }
+        
         Shopware()->Models()->remove($form);
         Shopware()->Models()->flush();
     }

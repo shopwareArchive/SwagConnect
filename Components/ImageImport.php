@@ -202,7 +202,7 @@ class ImageImport
                 $manager = Shopware()->Container()->get('thumbnail_manager');
                 $manager->createMediaThumbnail(
                     $media,
-                    $media->getDefaultThumbnails(),
+                    $this->getThumbnailSize($album),
                     true
                 );
             }
@@ -211,6 +211,27 @@ class ImageImport
 
         $this->manager->flush();
         $this->manager->clear();
+    }
+
+    /**
+     * Returns thumbnails size by album
+     * @param $album \Shopware\Models\Media\Album
+     * @return array
+     */
+    protected function getThumbnailSize($album)
+    {
+        if (!$album->getId()) {
+            return;
+        }
+
+        $thumbnailSizes = $album->getSettings()->getThumbnailSize();
+        $sizesArray = array();
+        foreach ($thumbnailSizes as $size) {
+            $sizes = explode('x', $size);
+            $sizesArray[] = $sizes;
+        }
+
+        return $sizesArray;
     }
 
 }

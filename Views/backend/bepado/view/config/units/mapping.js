@@ -32,9 +32,12 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
                         ,
                         editor: {
                             xtype: 'combo',
-                            store: []
+                            store: 'config.BepadoUnits',
+                            displayField: 'name',
+                            valueField: 'key'
                         }
-                    }]
+                    }],
+                    dockedItems: [ me.getButtons() ]
                 }
             ]
         });
@@ -51,6 +54,20 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
         });
 
         return me.cellEditor;
+    },
+
+    getButtons: function() {
+        var me = this;
+
+        return {
+            dock: 'bottom',
+            xtype: 'toolbar',
+            items: ['->', {
+                text: '{s name=mapping/options/save}Save{/s}',
+                cls: 'primary',
+                action: 'save'
+            }]
+        };
     }
 });
 //{/block}

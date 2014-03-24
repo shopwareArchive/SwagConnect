@@ -23,6 +23,7 @@
  */
 
 use Shopware\Bepado\Components\Config;
+use Bepado\SDK\Units;
 
 /**
  * @category  Shopware
@@ -153,12 +154,14 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
         $units = $repository->findAll();
 
+        $bepadoUnits = new Units();
+
         $unitsMappingArray = array();
         foreach ($units as $unit) {
             $unitsMappingArray[] = array(
                 'shopwareUnitName' => $unit->getName(),
                 'shopwareUnitKey' => $unit->getUnit(),
-                'bepadoUnit' => ''
+                'bepadoUnit' => $this->getConfigComponent()->getConfig($unit->getUnit())
             );
         }
 
@@ -169,6 +172,52 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
             )
         );
 
+    }
+
+    /**
+     * The saveUnitsMappingAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to save units store data.
+     * @return string
+     */
+    public function saveUnitsMappingAction()
+    {
+        $data = $this->Request()->getParam('data');
+        $data = !isset($data[0]) ? array($data) : $data;
+
+        $this->getConfigComponent()->setUnitsMapping($data);
+
+        $this->View()->assign(
+            array(
+                'success' => true
+            )
+        );
+    }
+
+    /**
+     * The getBepadoUnitsAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the units mapping.
+     * @return string
+     */
+    public function getBepadoUnitsAction()
+    {
+        $bepadoUnits = new Units();
+
+        $unitsArray = array();
+
+        foreach ($bepadoUnits->getLocalizedUnits() as $key => $bepadoUnit) {
+            $unitsArray[] = array(
+                'key' => $key,
+                'name' => $bepadoUnit
+            );
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $unitsArray
+            )
+        );
     }
 
     /**

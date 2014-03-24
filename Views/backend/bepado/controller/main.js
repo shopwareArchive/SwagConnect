@@ -16,14 +16,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
-        'config.Units'
+        'config.Units', 'config.BepadoUnits'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
         'log.List',
-        'config.General', 'config.Import', 'config.Units'
+        'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit'
     ],
 
     refs: [
@@ -39,7 +39,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'changedList', selector: 'bepado-changed-products-list' },
         { ref: 'logList', selector: 'bepado-log-list' },
         { ref: 'logFilter', selector: 'bepado-log-filter' },
-        { ref: 'logTabs', selector: 'bepado-log-tabs' }
+        { ref: 'logTabs', selector: 'bepado-log-tabs' },
+        { ref: 'unitsMapping', selector: 'bepado-config-units' }
     ],
 
     messages: {
@@ -346,6 +347,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
                         }
                     );
+                }
+            },
+            'bepado-units-mapping button[action=save]': {
+                click: function () {
+                    me.saveUnitsMapping();
                 }
             }
         });
@@ -982,6 +988,28 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 }
             }
         );
+    },
+
+    saveUnitsMapping: function() {
+        var me = this,
+            panel = me.getUnitsMapping();
+
+        panel.setLoading();
+        console.log(me.getStore('config.Units'));
+        me.getStore('config.Units').sync({
+            success :function (records, operation) {
+                console.log(records);
+                panel.setLoading(false);
+
+                me.createGrowlMessage('Success', 'saved');
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+
+
+                me.createGrowlMessage('Error', 'wrong message');
+            }
+        });
     }
 });
 //{/block}

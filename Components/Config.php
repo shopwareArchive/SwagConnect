@@ -325,6 +325,34 @@ class Config
     }
 
     /**
+     * Stores units mapping
+     * data into database.
+     * @param $units
+     */
+    public function setUnitsMapping($units)
+    {
+        foreach ($units as $unit) {
+            /** @var \Shopware\CustomModels\Bepado\Config $model */
+            $model = $this->getConfigRepository()->findOneBy(array(
+                    'name' => $unit['shopwareUnitKey'],
+                    'shopId' => null,
+                    'groupName' => 'units'
+                ));
+            if (is_null($model)) {
+                $model = new ConfigModel();
+                $model->setName($unit['shopwareUnitKey']);
+                $model->setGroupName('units');
+                $model->setShopId(null);
+            }
+
+            $model->setValue($unit['bepadoUnit']);
+            $this->manager->persist($model);
+        }
+
+        $this->manager->flush();
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

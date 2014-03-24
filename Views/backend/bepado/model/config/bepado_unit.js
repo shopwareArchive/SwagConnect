@@ -27,32 +27,14 @@
  * @package Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/store/config/units"}
-Ext.define('Shopware.apps.Bepado.store.config.Units', {
-    extend: 'Ext.data.Store',
+//{block name="backend/bepado/model/config/bepado_unit"}
+Ext.define('Shopware.apps.Bepado.model.config.BepadoUnit', {
+    extend: 'Ext.data.Model',
 
-    autoLoad: true,
-    model: 'Shopware.apps.Bepado.model.config.Units',
-    remoteSort: false,
-    remoteFilter: false,
-    proxy: {
-        type: 'ajax',
-        url: '{url controller="BepadoConfig" action="getUnits"}',
-        api: {
-            create: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            update: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            read: '{url controller="BepadoConfig" action="getUnits"}'
-        },
-        reader: {
-            type: 'json',
-            root: 'data'
-        },
-        writer: {
-            type: 'json',
-            root: 'data'
-        }
-    }
+    fields: [
+        //{block name="backend/bepado/model/config/bepado_unit/fields"}{/block}
+        { name: 'key',  type: 'string' },
+        { name: 'name',  type: 'string' }
+    ]
 });
 //{/block}
-
-

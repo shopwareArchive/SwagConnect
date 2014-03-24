@@ -27,52 +27,23 @@
  * @package Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/units"}
-Ext.define('Shopware.apps.Bepado.model.config.Units', {
-    extend: 'Ext.data.Model',
+//{block name="backend/bepado/store/config/bepado_units"}
+Ext.define('Shopware.apps.Bepado.store.config.BepadoUnits', {
+    extend: 'Ext.data.Store',
 
-    fields: [
-        //{block name="backend/bepado/model/config/units/fields"}{/block}
-        { name: 'shopwareUnitName',  type: 'string' },
-        { name: 'shopwareUnitKey',  type: 'string' },
-        { name: 'bepadoUnit',  type: 'string' }
-    ],
+    autoLoad: true,
+    model: 'Shopware.apps.Bepado.model.config.BepadoUnit',
+    remoteSort: false,
+    remoteFilter: false,
     proxy: {
-        /**
-         * Set proxy type to ajax
-         * @string
-         */
         type: 'ajax',
-
-        /**
-         * Configure the url mapping for the different
-         * store operations based on
-         * @object
-         */
-        api: {
-            create: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            update: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            read: '{url controller="BepadoConfig" action="getUnits"}'
-        },
-
-        /**
-         * Configure the data reader
-         * @object
-         */
+        url: '{url controller="BepadoConfig" action="getBepadoUnits"}',
         reader: {
-            type: 'json',
-            root: 'data',
-            totalProperty: 'total'
-        },
-
-        /**
-         * Configure the data writer
-         * @object
-         */
-        writer: {
             type: 'json',
             root: 'data'
         }
     }
 });
 //{/block}
+
+

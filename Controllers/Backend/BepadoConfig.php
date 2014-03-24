@@ -143,6 +143,35 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * The getUnitsAction function is an ExtJs event listener method of the
+     * bepado module. The function is used to load store
+     * required in the units mapping.
+     * @return string
+     */
+    public function getUnitsAction()
+    {
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
+        $units = $repository->findAll();
+
+        $unitsMappingArray = array();
+        foreach ($units as $unit) {
+            $unitsMappingArray[] = array(
+                'shopwareUnitName' => $unit->getName(),
+                'shopwareUnitKey' => $unit->getUnit(),
+                'bepadoUnit' => ''
+            );
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $unitsMappingArray
+            )
+        );
+
+    }
+
+    /**
      * Helper function to get access on the Config component
      *
      * @return \Shopware\Bepado\Components\Config

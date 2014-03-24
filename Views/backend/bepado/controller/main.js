@@ -15,14 +15,15 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'log.List',
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
-		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup'
+		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
+        'config.Units'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
         'log.List',
-        'config.General', 'config.Import'
+        'config.General', 'config.Import', 'config.Units'
     ],
 
     refs: [

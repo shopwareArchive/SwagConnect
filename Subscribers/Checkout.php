@@ -2,11 +2,14 @@
 
 namespace Shopware\Bepado\Subscribers;
 use Bepado\SDK\Struct\Message;
+use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Utils\CountryCodeResolver;
+use Shopware\Bepado\Components\Utils\OrderPaymentMapper;
+use Shopware\Plugin\Debug\Components\Utils;
 
 /**
  * Handles the whole checkout manipulation, which is required for the bepado checkout
@@ -211,6 +214,8 @@ class Checkout extends BaseSubscriber
 		}
 
         if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+            // reset bepado reserved products in session
+            Shopware()->Session()->BepadoReservation = null;
             return;
         }
 
@@ -221,6 +226,11 @@ class Checkout extends BaseSubscriber
         $userData = $session['sOrderVariables']['sUserData'];
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
         $basket = $session['sOrderVariables']['sBasket'];
+
+        /** @var \Shopware\Bepado\Components\Utils\OrderPaymentMapper $orderPaymentMapper */
+        $orderPaymentMapper = new OrderPaymentMapper();
+        $orderPaymentName = $userData['additional']['payment']['name'];
+        $order->paymentType = $orderPaymentMapper->mapShopwareOrderPaymentToBepado($orderPaymentName);
 
         foreach ($basket['content'] as $row) {
             if(!empty($row['mode'])) {

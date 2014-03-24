@@ -338,11 +338,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     editable: false,
                     valueField: 'id',
                     displayField: 'name',
-                    value: 19,
                     fieldLabel: me.snippets.bepadoAttributeLabel,
                     store: attributeStore,
                     labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}',
+                    helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}'
                 }, {
                     xtype: 'textfield',
                     name: 'bepadoDebugHost',
@@ -411,6 +410,13 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         var me = this,
             record = me.generalConfigStore.getById(me.shopId);
 
+        if (!record) {
+            record = Ext.create('Shopware.apps.Bepado.model.config.General');
+        }
+
+        if (record.get('bepadoAttribute') < 1) {
+            record.set('bepadoAttribute', 19);
+        }
         me.loadRecord(record);
     }
 });

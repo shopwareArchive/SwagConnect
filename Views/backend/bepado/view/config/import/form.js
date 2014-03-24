@@ -211,6 +211,9 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         var me = this,
             record = me.importConfigStore.getAt(0);
 
+        if (!record) {
+            record = Ext.create('Shopware.apps.Bepado.model.config.Import');
+        }
         me.loadRecord(record);
     }
 });

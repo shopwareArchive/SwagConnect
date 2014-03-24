@@ -224,7 +224,7 @@ class BasketHelper
             unset($this->bepadoContent[$shopId]);
 
             // Remove original shop's shipping costs
-            $shippingCostsOrg = $this->basket['sShippingcosts'];
+            $shippingCostsOrg = $this->basket['sShippingcostsWithTax'];
             $shippingCostsOrgNet = $this->basket['sShippingcostsNet'];
             $this->basket['sShippingcosts'] = 0;
             $this->basket['sShippingcostsWithTax'] = 0;
@@ -233,6 +233,7 @@ class BasketHelper
             $this->basket['AmountNetNumeric'] -= $shippingCostsOrgNet;
             $this->basket['sAmount'] -= $shippingCostsOrg;
             $rate = number_format($this->basket['sShippingcostsTax'], 2, '.', '');
+
             $this->basket['sTaxRates'][$rate] -= $shippingCostsOrg - $shippingCostsOrgNet;
             if(!empty($this->basket['sAmountWithTax'])) {
                 $this->basket['sAmountWithTax'] -= $shippingCostsOrg;
@@ -260,7 +261,9 @@ class BasketHelper
         foreach ($this->basket['content'] as  $product) {
             $removeItems['ids'][] = $product['id'];
             $removeItems['price'] += $product['price'] * $product['quantity'];
+            $removeItems['amountWithTax'] += $product['amountWithTax'] * $product['quantity'];
             $removeItems['netprice'] += $product['netprice'] * $product['quantity'];
+            $removeItems['tax'] += str_replace(',', '.', $product['tax']) * $product['quantity'];
             $removeItems['sessionId'] = $product['sessionID'];
         }
 
@@ -271,10 +274,19 @@ class BasketHelper
         // Fix basket prices
         $this->basket['AmountNumeric'] -= $removeItems['price'];
         $this->basket['AmountNetNumeric'] -= $removeItems['netprice'];
-        $this->basket['sAmount'] -= $removeItems['price'];
+        $this->basket['sAmount'] -= $removeItems['netprice'];
         $this->basket['Amount'] = str_replace(',', '.', $this->basket['Amount']) - $removeItems['price'];
+
+        $this->basket['sAmountTax'] -= $removeItems['tax'];
         if(!empty($this->basket['sAmountWithTax'])) {
-            $this->basket['sAmountWithTax'] -= $removeItems['price'];
+            if ($this->hasTax()) {
+                $this->basket['sAmountWithTax'] -= $removeItems['price'];
+            } else {
+                $this->basket['sAmountWithTax'] -= $removeItems['amountWithTax'];
+                $this->basket['AmountWithTaxNumeric'] -= $removeItems['amountWithTax'];
+                $this->basket['AmountWithTax'] = $this->basket['AmountWithTaxNumeric'];
+                $this->basket['amountnet'] = $this->basket['amount'];
+            }
         }
 
         // Remove items from basket
@@ -285,7 +297,6 @@ class BasketHelper
                 implode(',', $removeItems['ids'])
             )
         );
-        
     }
 
     /**
@@ -376,7 +387,12 @@ class BasketHelper
                 if (!isset($taxes[$vat])) {
                     $taxes[$vat] = 0;
                 }
-                $taxes[$vat] += $product['priceNumeric'] - $product['netprice'];
+
+                if ($this->hasTax()) {
+                    $taxes[$vat] += $product['priceNumeric'] - $product['netprice'];
+                } else {
+                    $taxes[$vat] += $product['amountWithTax'] - ($product['netprice'] * $product['quantity']);
+                }
             }
         }
         return $taxes;
@@ -413,29 +429,49 @@ class BasketHelper
     {
         $this->calculateShippingCosts($country);
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
-        $shippingCosts = $this->totalShippingCosts->grossShippingCosts;
+        $shippingCosts = $shippingCostsNet;
+        $shippingCostsWithTax = $shippingCosts * (1+$this->getMaxTaxRate()/100);
+
+        $basketHasTax = $this->hasTax();
 
         // Set the shipping cost tax rate for shopware
 
         $this->setOriginalShippingCosts($this->basket['sShippingcosts']);
 
         // Update shipping costs
-        $this->basket['sShippingcosts'] += $shippingCosts;
+        if ($basketHasTax) {
+            $this->basket['sShippingcosts'] += $shippingCostsWithTax;
+        } else {
+            $this->basket['sShippingcosts'] += $shippingCosts;
+        }
         $this->basket['sShippingcostsNet'] += $shippingCostsNet;
-        $this->basket['sShippingcostsWithTax'] += $shippingCosts;
+        $this->basket['sShippingcostsWithTax'] += $shippingCostsWithTax;
 
         // Update total amount
         $this->basket['AmountNumeric'] += $shippingCosts;
         $this->basket['AmountNetNumeric'] += $shippingCostsNet;
+
         if(!empty($this->basket['sAmountWithTax'])) {
-            $this->basket['sAmountWithTax'] += $shippingCosts;
+            if ($basketHasTax) {
+                $this->basket['sAmountWithTax'] += $this->basket['sShippingcostsWithTax'];
+            } else {
+                $this->basket['sAmountWithTax'] += $shippingCostsWithTax;
+            }
         }
-        $this->basket['sAmount'] += $shippingCosts;
+
+        if ($basketHasTax) {
+            $this->basket['sAmount'] += $shippingCostsWithTax;
+        } else {
+            $this->basket['sAmount'] += $shippingCosts;
+        }
+
+        $this->basket['sAmountTax'] += $this->basket['sShippingcostsWithTax'] - $shippingCosts;
 
         // Core workaround: Shopware tries to re-calculate the shipping tax rate from the net price
         // \Shopware_Models_Document_Order::processOrder
         // Therefore we need to round the net price
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
+
 
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(
@@ -445,6 +481,10 @@ class BasketHelper
                 $this->getShippingCostsTaxRates()
             )
         );
+
+        //@todo:stefan Check for better solution
+        $this->basket['AmountWithTaxNumeric'] = $this->basket['sAmountWithTax'];
+        $this->basket['AmountNumeric'] = $this->basket['sAmount'];
     }
 
     /**
@@ -452,10 +492,10 @@ class BasketHelper
      */
     public function getShippingCostsTaxRates()
     {
-        $taxAmount = $this->basket['sShippingcosts'] - $this->basket['sShippingcostsNet'];
+        $taxAmount = $this->basket['sShippingcostsWithTax'] - $this->basket['sShippingcostsNet'];
 
         $taxRate = number_format($this->getMaxTaxRate(), 2, '.', '');
-        $this->basket['sShippingcostsNet'] = $this->basket['sShippingcosts'] / (($taxRate/100)+1);
+        $this->basket['sShippingcostsNet'] = $this->basket['sShippingcostsWithTax'] / (($taxRate/100)+1);
 
         return array(
             (string) $taxRate => $taxAmount
@@ -678,12 +718,16 @@ class BasketHelper
      */
     public function getBepadoGrossShippingCosts()
     {
-        return array_map(
-            function (ShippingCost $cost) {
-                return $cost->grossShippingCosts;
-            },
-            $this->totalShippingCosts->shops
-        );
+        $result = array();
+        foreach($this->totalShippingCosts->shops as $cost) {
+            if ($this->hasTax()) {
+                $result[$cost->shopId] = $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
+            } else {
+                $result[$cost->shopId] = $cost->shippingCosts;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -753,7 +797,25 @@ class BasketHelper
                  'product' => $product,
              ));
          }
+         
      }
         return $dummyOrder;
+    }
+
+    /**
+     * Returns "Gross price displayed in frontend" value
+     * @return boolean
+     */
+    protected function hasTax()
+    {
+        $customerGroup = Shopware()->Session()->sUserGroup;
+        if (!$customerGroup) {
+            $customerGroup = 'EK';
+        }
+
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        $groupModel = $repository->findOneBy(array('key' => $customerGroup));
+
+        return $groupModel->getTax();
     }
 }

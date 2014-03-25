@@ -145,7 +145,7 @@ abstract class BaseProductQuery
     {
         if (!empty($row['width']) && !empty($row['height']) && !empty($row['length'])) {
             $dimension = array(
-                $row['length'], $row['width'], $row['height']
+                round($row['length']), round($row['width']), round($row['height'])
             );
             $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
         }

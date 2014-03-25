@@ -22,15 +22,19 @@
         <div class="error bold center">
             {s name="DetailBuyInfoNotAvailable" namespace="frontend/detail/buy"}{/s}
         </div>
-	{elseif $bepadoShopInfo && $bepadoProduct}
+	{elseif $bepadoProduct}
 		{* Include the basket button *}
 		<div class="bepado-detail-product">
 			{$smarty.block.parent}
 
-			<strong class="bepado-detail-product-headline">{s name=bepado/detail/marketplace_article}Marktplatz-Artikel von {$bepadoShop->name}{/s}</strong>
-			<p class="bepado-detail-product-desc">
-				{s name=bepado/detail/dispatch_info}Die Versandkosten für diesen Artikel werden separat berechnet.{/s}
-			</p>
+            {if $bepadoShopInfo}
+                <strong class="bepado-detail-product-headline">{s namespace="frontend/detail/bepado" name=bepado_detail_marketplace_article}Marktplatz-Artikel von {$bepadoShop->name}{/s}</strong>
+            {else}
+                <strong class="bepado-detail-product-headline">{s namespace="frontend/detail/bepado" name=bepado_detail_marketplace_article_implicit}Marktplatz-Artikel von {$bepadoShop->id}{/s}</strong>
+            {/if}
+			{*<p class="bepado-detail-product-desc">*}
+				{*{s name=bepado/detail/dispatch_info}Die Versandkosten für diesen Artikel werden separat berechnet.{/s}*}
+			{*</p>*}
 		</div>
 	{else}
 		{$smarty.block.parent}

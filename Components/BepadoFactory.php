@@ -168,7 +168,7 @@ class BepadoFactory
             Shopware()->Db(),
             $this->getSDK(),
             $this->getHelper(),
-            $this->getConfigComponent()->getConfig('SwagBepado', 'checkoutShopInfo')
+            $this->getConfigComponent()->getConfig('checkoutShopInfo', 0)
         );
     }
 

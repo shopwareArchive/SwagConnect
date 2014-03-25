@@ -87,4 +87,33 @@ class BepadoExport
 
         return $errors;
     }
+
+    /**
+     * Helper function to return export product ids
+     * @return array
+     */
+    public function getExportArticlesIds()
+    {
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->join('at.article', 'a');
+        $builder->join('a.mainDetail', 'd');
+        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->leftJoin('a.supplier', 's');
+        $builder->leftJoin('a.tax', 't');
+
+        $builder->select(array('a.id'));
+
+        $builder->andWhere('at.shopId IS NULL');
+
+        $query = $builder->getQuery();
+        $articles = $query->getArrayResult();
+
+        $ids = array();
+        foreach ($articles as $article) {
+            $ids[] = $article['id'];
+        }
+
+        return $ids;
+    }
 }

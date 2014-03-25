@@ -992,22 +992,22 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     saveUnitsMapping: function() {
         var me = this,
-            panel = me.getUnitsMapping();
+            panel = me.getUnitsMapping(),
+            unitsStore = me.getAsdf().unitsStore;
+
+        if (unitsStore.getUpdatedRecords().length < 1) {
+            return;
+        }
 
         panel.setLoading();
-        console.log(me.getStore('config.Units'));
-        me.getStore('config.Units').sync({
+        unitsStore.sync({
             success :function (records, operation) {
-                console.log(records);
                 panel.setLoading(false);
-
-                me.createGrowlMessage('Success', 'saved');
+                me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/units/success_save_message}{/s}');
             },
             failure:function (batch) {
                 panel.setLoading(false);
-
-
-                me.createGrowlMessage('Error', 'wrong message');
+                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Units mapping could not be saved.{/s}');
             }
         });
     }

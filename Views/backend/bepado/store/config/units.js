@@ -31,7 +31,7 @@
 Ext.define('Shopware.apps.Bepado.store.config.Units', {
     extend: 'Ext.data.Store',
 
-    autoLoad: true,
+    autoLoad: false,
     model: 'Shopware.apps.Bepado.model.config.Units',
     remoteSort: false,
     remoteFilter: false,

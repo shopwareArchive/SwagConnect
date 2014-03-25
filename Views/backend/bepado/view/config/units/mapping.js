@@ -13,12 +13,16 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
 
     initComponent: function() {
         var me = this;
+        me.unitsStore = Ext.create('Shopware.apps.Bepado.store.config.Units').load();
+        me.bepadoUnitsStore = Ext.create('Shopware.apps.Bepado.store.config.BepadoUnits').load();
+
+
 
         Ext.applyIf(me, {
             items: [
-                {
-                    xtype: 'gridpanel',
-                    store: 'config.Units',
+                Ext.create('Ext.grid.Panel', {
+                    alias: 'widget.bepado-units-mapping-list',
+                    store: me.unitsStore,
                     selModel: 'cellmodel',
                     plugins: [ me.createCellEditor() ],
                     columns: [{
@@ -28,17 +32,24 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
                     }, {
                         header: '{s name=config/units/bepado_unit_header}bepado unit{/s}',
                         dataIndex: 'bepadoUnit',
-                        flex: 1
-                        ,
+                        flex: 1,
                         editor: {
                             xtype: 'combo',
-                            store: 'config.BepadoUnits',
+                            store: me.bepadoUnitsStore,
                             displayField: 'name',
                             valueField: 'key'
+                        },
+                        renderer: function (value) {
+                            var index = me.bepadoUnitsStore.findExact('key', value);
+                            if (index > -1) {
+                                return me.bepadoUnitsStore.getAt(index).get('name');
+                            }
+
+                            return value;
                         }
                     }],
                     dockedItems: [ me.getButtons() ]
-                }
+                })
             ]
         });
 

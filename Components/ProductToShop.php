@@ -30,6 +30,7 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Bepado\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
@@ -191,6 +192,23 @@ class ProductToShop implements ProductToShopBase
         $detail->setInStock($product->availability);
         $model->setLastStock(true);
 
+        // if bepado product has unit
+        // find local unit with units mapping
+        // and add to detail model
+        if ($product->attributes['unit']) {
+            $configComponent = new Config($this->manager);
+            $unitMapper = new UnitMapper($configComponent, $this->manager);
+            $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
+
+            /** @var \Shopware\Models\Article\Unit $unit */
+            $unit = $this->helper->getUnit($shopwareUnit);
+            if ($unit) {
+                $detail->setUnit($unit);
+            }
+        } else {
+            $detail->setUnit(null);
+        }
+
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
         $bepadoAttribute->setLastUpdate(json_encode(array(
@@ -248,6 +266,7 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
+
     }
 
 

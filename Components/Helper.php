@@ -302,4 +302,33 @@ class Helper
         return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport');
     }
 
+    /**
+     * Clear shop cache
+     */
+    public function clearCache()
+    {
+        // If local file-based proxy is used delete cache files from filesystem
+        $cacheOptions = Shopware()->getOption('HttpCache');
+
+        if (isset($cacheOptions['cache_dir']) && is_dir($cacheOptions['cache_dir'])) {
+            $cacheDir = $cacheOptions['cache_dir'];
+            $counter = 0;
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($cacheDir),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+
+            foreach ($iterator as $path) {
+
+                if ($path->isDir()) {
+                    rmdir($path->__toString());
+                } else {
+                    $counter++;
+                    unlink($path->__toString());
+                }
+            }
+        }
+    }
+
 }

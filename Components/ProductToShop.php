@@ -100,6 +100,8 @@ class ProductToShop implements ProductToShopBase
     public function commit()
     {
        $this->manager->getConnection()->commit();
+
+       $this->helper->clearCache();
     }
 
     /**
@@ -403,4 +405,5 @@ class ProductToShop implements ProductToShopBase
 
         return $attributeValue == 'overwrite';
     }
+
 }

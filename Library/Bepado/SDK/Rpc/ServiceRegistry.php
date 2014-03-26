@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Rpc;
@@ -12,7 +12,7 @@ use Bepado\SDK\Struct;
 /**
  * RPC service registry
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class ServiceRegistry
 {

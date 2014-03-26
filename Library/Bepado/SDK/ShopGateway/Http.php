@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ShopGateway;
@@ -19,7 +19,7 @@ use Bepado\SDK\Struct\RpcCall;
  *
  * Gateway to interact with other shops
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Http extends ShopGateway
 {

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK;
@@ -22,7 +22,7 @@ use Bepado\SDK\Struct\Shop;
  * The constructor may change in the future, using the SDKBuilder is
  * required to implement a supported plugin.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  * @api
  */
 final class SDK
@@ -58,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.1.142';
+    const VERSION = '1.2.156';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -316,7 +316,10 @@ final class SDK
             $this->dependencies->getVerificator()->verify($orderItem);
         }
 
-        return $this->dependencies->getShoppingService()->calculateShippingCosts($order);
+        return $this->dependencies->getShoppingService()->calculateShippingCosts(
+            $order,
+            Gateway\ShippingCosts::SHIPPING_COSTS_CUSTOMER
+        );
     }
 
     /**

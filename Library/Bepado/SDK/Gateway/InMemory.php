@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Gateway;
@@ -19,7 +19,7 @@ use Bepado\SDK\ShippingCosts\Rules;
  * You may create custom extensions of this class, if the default data stores
  * do not work for you.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  * @api
  */
 class InMemory extends Gateway
@@ -436,13 +436,15 @@ class InMemory extends Gateway
      * @param string $fromShop
      * @param string $toShop
      * @param string $revision
-     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $intershopCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $customerCosts
      * @return void
      */
-    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts)
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $intershopCosts, Rules $customerCosts)
     {
         $this->shippingCostsRevision = max($this->shippingCostsRevision, $revision);
-        $this->shippingCosts[$fromShop][$toShop] = $shippingCosts;
+        $this->shippingCosts[$fromShop][$toShop][self::SHIPPING_COSTS_INTERSHOP] = $intershopCosts;
+        $this->shippingCosts[$fromShop][$toShop][self::SHIPPING_COSTS_CUSTOMER] = $customerCosts;
     }
 
     /**
@@ -452,7 +454,7 @@ class InMemory extends Gateway
      * @param string $toShop
      * @return \Bepado\SDK\ShippingCosts\Rules
      */
-    public function getShippingCosts($fromShop, $toShop)
+    public function getShippingCosts($fromShop, $toShop, $type = self::SHIPPING_COSTS_INTERSHOP)
     {
         if (!isset($this->shippingCosts[$fromShop][$toShop])) {
             $pairs = array_map(function ($fromShop) {
@@ -462,7 +464,7 @@ class InMemory extends Gateway
             throw new \RuntimeException("Unknown shops $fromShop-$toShop, knowing " . implode(', ', $pairs));
         }
 
-        return $this->shippingCosts[$fromShop][$toShop];
+        return $this->shippingCosts[$fromShop][$toShop][$type];
     }
 
     /**

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Service;
@@ -17,7 +17,7 @@ use Bepado\SDK\RevisionProvider;
 /**
  * Service to sync product database with changes feed
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Syncer
 {

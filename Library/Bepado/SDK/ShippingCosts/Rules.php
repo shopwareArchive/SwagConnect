@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado Common Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ShippingCosts;
@@ -51,5 +51,16 @@ class Rules extends Struct implements IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this->rules);
+    }
+
+    /**
+     * Restores Rules from a previously stored state array.
+     *
+     * @param array $state
+     * @return \Bepado\SDK\ShippingCosts\Rules
+     */
+    public static function __set_state(array $state)
+    {
+        return new Rules($state);
     }
 }

@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Gateway;
@@ -14,7 +14,7 @@ use Bepado\SDK\ShippingCosts\Rules;
 /**
  * Default MySQLi implementation of the storage gateway
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class MySQLi extends Gateway
 {
@@ -702,10 +702,11 @@ class MySQLi extends Gateway
      * @param string $fromShop
      * @param string $toShop
      * @param string $revision
-     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $intershopCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $customerCosts
      * @return void
      */
-    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts)
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $intershopCosts, Rules $customerCosts)
     {
         $this->connection->query(
             'INSERT INTO
@@ -713,17 +714,19 @@ class MySQLi extends Gateway
                     `sc_from_shop`,
                     `sc_to_shop`,
                     `sc_revision`,
-                    `sc_shipping_costs`
+                    `sc_customer_costs`
                 )
             VALUES (
                "' . $this->connection->real_escape_string($fromShop) . '",
                "' . $this->connection->real_escape_string($toShop) . '",
                "' . $this->connection->real_escape_string($revision) . '",
-               "' . $this->connection->real_escape_string(serialize($shippingCosts)) . '"
+               "' . $this->connection->real_escape_string(serialize($intershopCosts)) . '"
+               "' . $this->connection->real_escape_string(serialize($customerCosts)) . '"
             )
             ON DUPLICATE KEY UPDATE
                 `sc_revision` = "' . $this->connection->real_escape_string($revision) . '",
-                `sc_shipping_costs` = "' . $this->connection->real_escape_string(serialize($shippingCosts)) . '"
+                `sc_shipping_costs` = "' . $this->connection->real_escape_string(serialize($intershopCosts)) . '",
+                `sc_customer_costs` = "' . $this->connection->real_escape_string(serialize($customerCosts)) . '"
             ;'
         );
     }
@@ -735,11 +738,14 @@ class MySQLi extends Gateway
      * @param string $toShop
      * @return \Bepado\SDK\ShippingCosts\Rules
      */
-    public function getShippingCosts($fromShop, $toShop)
+    public function getShippingCosts($fromShop, $toShop, $type = self::SHIPPING_COSTS_INTERSHOP)
     {
+        $column = ($type === self::SHIPPING_COSTS_CUSTOMER)
+            ? 'sc_customer_costs'
+            : 'sc_shipping_costs';
+
         $result = $this->connection->query(
-            'SELECT
-                `sc_shipping_costs`
+            'SELECT `' . $column . '`
             FROM
                 `bepado_shipping_costs`
             WHERE

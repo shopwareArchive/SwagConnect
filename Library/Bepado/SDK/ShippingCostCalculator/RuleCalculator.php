@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ShippingCostCalculator;
@@ -35,11 +35,13 @@ class RuleCalculator implements ShippingCostCalculator
      * Get shipping costs for order
      *
      * @param \Bepado\SDK\Struct\Order $order
+     * @param string $type
+     *
      * @return \Bepado\SDK\Struct\Order
      */
-    public function calculateShippingCosts(Order $order)
+    public function calculateShippingCosts(Order $order, $type)
     {
-        $shippingCostRules = $this->getShippingCostRules($order);
+        $shippingCostRules = $this->getShippingCostRules($order, $type);
         $vat = $this->calculateVat($order, $shippingCostRules);
         $netShippingCosts = 0;
         $isShippable = false;
@@ -68,7 +70,7 @@ class RuleCalculator implements ShippingCostCalculator
      * @param \Bepado\SDK\Struct\Order $order
      * @return Rule[]
      */
-    protected function getShippingCostRules(Order $order)
+    protected function getShippingCostRules(Order $order, $type)
     {
         if (empty($order->providerShop) || empty($order->orderShop)) {
             throw new \InvalidArgumentException(
@@ -86,7 +88,7 @@ class RuleCalculator implements ShippingCostCalculator
             }
         }
 
-        return $this->shippingCosts->getShippingCosts($order->providerShop, $order->orderShop);
+        return $this->shippingCosts->getShippingCosts($order->providerShop, $order->orderShop, $type);
     }
 
     /**

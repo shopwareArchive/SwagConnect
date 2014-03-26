@@ -49,9 +49,6 @@ class Update
 
         $this->removePluginConfiguration();
 
-        // Create shipping costs page for bepado products
-        $this->createShippingCostsPage();
-
         return true;
     }
 
@@ -321,29 +318,4 @@ class Update
         }
 
     }
-
-    /**
-     * Create default shipping costs page
-     * for bepado products
-     */
-    public function createShippingCostsPage()
-    {
-        if (version_compare($this->version, '1.4.31', '>')) {
-            return;
-        }
-
-        $sql = "INSERT INTO `s_cms_static`(`description`, `html`, `grouping`, `parentID`)
-        VALUES ('Bepado shipping costs page', '<p>Lorem ipsum</p>', 'gLeft|gBottom', 0)";
-        Shopware()->Db()->exec($sql);
-
-        $sql = "SELECT `id` from `s_cms_static` WHERE `description` = 'Bepado shipping costs page'";
-        $id = Shopware()->Db()->fetchOne($sql);
-
-        if ($id > 0) {
-            $configComponent = $this->bootstrap->getConfigComponents();
-
-            $configComponent->setConfig('shippingCostsPage', $id, null, 'general');
-        }
-    }
-
 }

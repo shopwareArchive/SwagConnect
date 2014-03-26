@@ -7,6 +7,7 @@ use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
+use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
@@ -269,5 +270,15 @@ class BepadoFactory
         }
 
         return $this->configComponent;
+    }
+
+    public function getCountryCodeResolver()
+    {
+        $customer = null;
+        if (Shopware()->Session()->sUserId) {
+            $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
+        }
+
+        return new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
     }
 }

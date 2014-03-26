@@ -314,4 +314,15 @@ class Helper
         return $repository->findOneBy(array('unit' => $unitKey));
     }
 
+    /**
+     * Clear article cache
+     */
+    public function clearArticleCache($articleId)
+    {
+        Shopware()->Events()->notify(
+            'Shopware_Plugins_HttpCache_InvalidateCacheId',
+            array('cacheId' => 'a' . $articleId)
+        );
+    }
+
 }

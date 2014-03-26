@@ -303,6 +303,18 @@ class Helper
     }
 
     /**
+     * Retruns shopware unit entity
+     * @param $unitKey
+     * @return \Shopware\Models\Article\Unit
+     */
+    public function getUnit($unitKey)
+    {
+        $repository = $this->manager->getRepository('Shopware\Models\Article\Unit');
+
+        return $repository->findOneBy(array('unit' => $unitKey));
+    }
+
+    /**
      * Clear article cache
      */
     public function clearArticleCache($articleId)

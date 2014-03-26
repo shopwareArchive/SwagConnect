@@ -375,6 +375,18 @@ class Config
     }
 
     /**
+     * Returns config entity by value
+     * @param $value
+     * @return \Shopware\CustomModels\Bepado\Config
+     */
+    public function getConfigByValue($value)
+    {
+        $model = $this->getConfigRepository()->findOneBy(array('value' => $value, 'groupName' => 'units'));
+
+        return $model;
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

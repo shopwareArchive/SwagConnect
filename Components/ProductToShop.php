@@ -196,8 +196,11 @@ class ProductToShop implements ProductToShopBase
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
+            /** @var \Shopware\Bepado\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
+            /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
+
             $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
 
             /** @var \Shopware\Models\Article\Unit $unit */

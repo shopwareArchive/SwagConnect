@@ -40,7 +40,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'logList', selector: 'bepado-log-list' },
         { ref: 'logFilter', selector: 'bepado-log-filter' },
         { ref: 'logTabs', selector: 'bepado-log-tabs' },
-        { ref: 'unitsMapping', selector: 'bepado-config-units' }
+        { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
+        { ref: 'unitsMapping', selector: 'bepado-units-mapping' }
     ],
 
     messages: {
@@ -992,8 +993,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     saveUnitsMapping: function() {
         var me = this,
-            panel = me.getUnitsMapping(),
-            unitsStore = me.getAsdf().unitsStore;
+            panel = me.getUnitsMappingPanel(),
+            unitsStore = me.getUnitsMapping().unitsStore;
 
         if (unitsStore.getUpdatedRecords().length < 1) {
             return;

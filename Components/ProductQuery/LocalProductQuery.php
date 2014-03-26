@@ -7,6 +7,7 @@ use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Utils\UnitMapper;
 
 /**
  * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
@@ -129,6 +130,16 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         unset($row['localId']);
+
+        //Map local unit to bepado unit
+        if ($row['attributes']['unit']) {
+            $unitMapper = new UnitMapper($this->configComponent, $this->manager);
+            $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
+        }
+
+        //@todo:stefan Discuss with Daniel about product quantities
+        $row['attributes']['quantity'] = (int)$row['attributes']['quantity'];
+        $row['attributes']['ref_quantity'] = (int)$row['attributes']['ref_quantity'];
 
         $product = new Product($row);
         return $product;

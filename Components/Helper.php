@@ -302,4 +302,27 @@ class Helper
         return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport');
     }
 
+    /**
+     * Retruns shopware unit entity
+     * @param $unitKey
+     * @return \Shopware\Models\Article\Unit
+     */
+    public function getUnit($unitKey)
+    {
+        $repository = $this->manager->getRepository('Shopware\Models\Article\Unit');
+
+        return $repository->findOneBy(array('unit' => $unitKey));
+    }
+
+    /**
+     * Clear article cache
+     */
+    public function clearArticleCache($articleId)
+    {
+        Shopware()->Events()->notify(
+            'Shopware_Plugins_HttpCache_InvalidateCacheId',
+            array('cacheId' => 'a' . $articleId)
+        );
+    }
+
 }

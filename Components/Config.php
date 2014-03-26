@@ -326,6 +326,56 @@ class Config
     }
 
     /**
+     * Stores units mapping
+     * data into database.
+     * @param $units
+     */
+    public function setUnitsMapping($units)
+    {
+        foreach ($units as $unit) {
+            /** @var \Shopware\CustomModels\Bepado\Config $model */
+            $model = $this->getConfigRepository()->findOneBy(array(
+                    'name' => $unit['shopwareUnitKey'],
+                    'shopId' => null,
+                    'groupName' => 'units'
+                ));
+            if (is_null($model)) {
+                $model = new ConfigModel();
+                $model->setName($unit['shopwareUnitKey']);
+                $model->setGroupName('units');
+                $model->setShopId(null);
+            }
+
+            $model->setValue($unit['bepadoUnit']);
+            $this->manager->persist($model);
+        }
+
+        $this->manager->flush();
+    }
+
+	/**
+     * Compare given export price configuration
+     * and current export price configuration
+     * @param $data
+     * @return bool
+     */
+    public function compareExportConfiguration($data)
+    {
+        foreach ($data as $config) {
+            $currentConfig = $this->getExportConfig();
+            if ($currentConfig['priceGroupForPriceExport'] != $config['priceGroupForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPriceExport'] != $config['priceFieldForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceGroupForPurchasePriceExport'] != $config['priceGroupForPurchasePriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport'])
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

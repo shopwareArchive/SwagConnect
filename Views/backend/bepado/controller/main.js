@@ -15,14 +15,15 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'log.List',
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
-		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup'
+		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
+        'config.Units', 'config.BepadoUnits'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
         'log.List',
-        'config.General', 'config.Import', 'config.Pages'
+        'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit', 'config.Pages'
     ],
 
     refs: [
@@ -38,7 +39,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'changedList', selector: 'bepado-changed-products-list' },
         { ref: 'logList', selector: 'bepado-log-list' },
         { ref: 'logFilter', selector: 'bepado-log-filter' },
-        { ref: 'logTabs', selector: 'bepado-log-tabs' }
+        { ref: 'logTabs', selector: 'bepado-log-tabs' },
+        { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
+        { ref: 'unitsMapping', selector: 'bepado-units-mapping' }
     ],
 
     messages: {
@@ -345,6 +348,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
                         }
                     );
+                }
+            },
+            'bepado-units-mapping button[action=save]': {
+                click: function () {
+                    me.saveUnitsMapping();
                 }
             }
         });
@@ -981,6 +989,28 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 }
             }
         );
+    },
+
+    saveUnitsMapping: function() {
+        var me = this,
+            panel = me.getUnitsMappingPanel(),
+            unitsStore = me.getUnitsMapping().unitsStore;
+
+        if (unitsStore.getUpdatedRecords().length < 1) {
+            return;
+        }
+
+        panel.setLoading();
+        unitsStore.sync({
+            success :function (records, operation) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/units/success_save_message}{/s}');
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Units mapping could not be saved.{/s}');
+            }
+        });
     }
 });
 //{/block}

@@ -13,9 +13,7 @@ class Article extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            'Shopware_Controllers_Backend_Article::getPrices::after' => 'onEnforcePriceAttributes',
-            'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'fixTaxRatesWhenSaving',
-            'Shopware_Controllers_Backend_Article::formatPricesFromNetToGross::after' => 'fixTaxRatesWhenLoading',
+            'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceBepadoPriceWhenSaving',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle'
         );
     }
@@ -33,30 +31,6 @@ class Article extends BaseSubscriber
         }
         return $this->customerGroupRepository;
     }
-
-    /**
-     * Make sure, that any price has a price attribute array, even if it is not in the database, yet
-     *
-     * @param \Enlight_Hook_HookArgs $args
-     */
-    public function onEnforcePriceAttributes(\Enlight_Hook_HookArgs $args)
-    {
-        if (!$this->bepadoPricePossible()) {
-            return;
-        }
-
-        $prices = $args->getReturn();
-
-        foreach ($prices as &$price) {
-            if ($price['attribute'] == null) {
-                $model = new ArticlePrice();
-                $price['attribute'] = Shopware()->Models()->toArray($model);
-            }
-        }
-
-        $args->setReturn($prices);
-    }
-
 
     /**
      * @event Enlight_Controller_Action_PostDispatch_Backend_Article
@@ -112,77 +86,62 @@ class Article extends BaseSubscriber
      *
      * @param \Enlight_Hook_HookArgs $args
      */
-    public function fixTaxRatesWhenSaving(\Enlight_Hook_HookArgs $args)
+    public function enforceBepadoPriceWhenSaving(\Enlight_Hook_HookArgs $args)
     {
-        if (!$this->bepadoPricePossible()) {
-            return;
-        }
 
         /** @var array $prices */
         $prices = $args->getReturn();
         /** @var \Shopware\Models\Article\Article $article */
         $article = $args->get('article');
-        /** @var \Shopware\Models\Tax\Tax $tax */
-        $tax = $args->get('tax');
 
-        foreach ($prices as $key => &$priceData) {
+        $bepadoCustomerGroup = $this->getBepadoCustomerGroup();
+        $bepadoCustomerGroupKey = $bepadoCustomerGroup->getKey();
+        $defaultPrices = array();
 
-            if (!isset($priceData['attribute'])) {
-                continue;
-            }
-
-            /** @var \Shopware\Models\Customer\Group $customerGroup */
-            $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $priceData['customerGroupKey']));
-
-            if ($customerGroup->getTaxInput()) {
-                $priceData['attribute']['bepadoPrice'] = $priceData['attribute']['bepadoPrice'] / (100 + $tax->getTax()) * 100;
-            }
-        }
-
-        $args->setReturn($prices);
-    }
-
-    /**
-     * When loading prices make sure, that the tax rate is added
-     *
-     * @param \Enlight_Hook_HookArgs $args
-     */
-    public function fixTaxRatesWhenLoading(\Enlight_Hook_HookArgs $args)
-    {
-        if (!$this->bepadoPricePossible()) {
+        if (!$bepadoCustomerGroup) {
             return;
         }
 
-        /** @var array $prices */
-        $prices = $args->getReturn();
-        $tax = $args->get('tax');
-
-        foreach ($prices as $key => $price) {
-            if (!isset($price['attribute'])) {
-                continue;
+        foreach ($prices as $key => $priceData) {
+            if ($priceData['customerGroupKey'] == $bepadoCustomerGroupKey) {
+                return;
             }
-
-            $customerGroup = $price['customerGroup'];
-            if ($customerGroup['taxInput']) {
-                $price['attribute']['bepadoPrice'] = $price['attribute']['bepadoPrice'] / 100 * (100 + $tax['tax']) ;
+            if ($priceData['customerGroupKey'] == 'EK') {
+                $defaultPrices[] = $priceData;
             }
-            $prices[$key] = $price;
         }
 
+        foreach ($defaultPrices as $price) {
+            $prices[] = array(
+                'from' => $price['from'],
+                'to' => $price['to'],
+                'price' => $price['price'],
+                'pseudoPrice' => $price['pseudoPrice'],
+                'basePrice' => $price['basePrice'],
+                'percent' => $price['percent'],
+                'customerGroup' => $bepadoCustomerGroup,
+                'article' => $price['article'],
+                'articleDetail' => $price['articleDetail'],
+            );
+        }
 
         $args->setReturn($prices);
     }
 
     /**
-     * Check if the current shopware version allows price attributes without problems
-     *
-     * @return bool
+     * @return int|null
      */
-    public function bepadoPricePossible()
+    public function getBepadoCustomerGroup()
     {
-        return false;
+        $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        /** @var \Shopware\Models\Attribute\CustomerGroup $model */
+        $model = $repo->findOneBy(array('bepadoGroup' => true));
 
-        return version_compare(\Shopware::VERSION, '4.2.2', '>=')
-                || \Shopware::VERSION == '__VERSION__';
+        $customerGroup = null;
+        if ($model && $model->getCustomerGroup()) {
+            return $model->getCustomerGroup();
+        }
+
+        return null;
     }
 }

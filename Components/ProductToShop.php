@@ -100,8 +100,6 @@ class ProductToShop implements ProductToShopBase
     public function commit()
     {
        $this->manager->getConnection()->commit();
-
-       $this->helper->clearCache();
     }
 
     /**
@@ -244,6 +242,9 @@ class ProductToShop implements ProductToShopBase
 
         $this->manager->flush();
         $this->manager->clear();
+
+        //clear cache for that article
+        $this->helper->clearArticleCache($model->getId());
 
         if ($updateFields['image']) {
             // Reload the model in order to not to work an the already flushed model

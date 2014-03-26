@@ -303,32 +303,14 @@ class Helper
     }
 
     /**
-     * Clear shop cache
+     * Clear article cache
      */
-    public function clearCache()
+    public function clearArticleCache($articleId)
     {
-        // If local file-based proxy is used delete cache files from filesystem
-        $cacheOptions = Shopware()->getOption('HttpCache');
-
-        if (isset($cacheOptions['cache_dir']) && is_dir($cacheOptions['cache_dir'])) {
-            $cacheDir = $cacheOptions['cache_dir'];
-            $counter = 0;
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($cacheDir),
-                \RecursiveIteratorIterator::CHILD_FIRST
-            );
-
-            foreach ($iterator as $path) {
-
-                if ($path->isDir()) {
-                    rmdir($path->__toString());
-                } else {
-                    $counter++;
-                    unlink($path->__toString());
-                }
-            }
-        }
+        Shopware()->Events()->notify(
+            'Shopware_Plugins_HttpCache_InvalidateCacheId',
+            array('cacheId' => 'a' . $articleId)
+        );
     }
 
 }

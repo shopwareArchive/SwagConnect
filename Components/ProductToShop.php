@@ -205,9 +205,7 @@ class ProductToShop implements ProductToShopBase
 
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $this->helper->getUnit($shopwareUnit);
-            if ($unit) {
-                $detail->setUnit($unit);
-            }
+            $detail->setUnit($unit);
         } else {
             $detail->setUnit(null);
         }

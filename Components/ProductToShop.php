@@ -209,6 +209,18 @@ class ProductToShop implements ProductToShopBase
             $detail->setUnit(null);
         }
 
+        // set dimension
+        if ($product->attributes['dimension']) {
+            $dimension = explode('x', $product->attributes['dimension']);
+            $detail->setLen($dimension[0]);
+            $detail->setWidth($dimension[1]);
+            $detail->setHeight($dimension[2]);
+        } else {
+            $detail->setLen(null);
+            $detail->setWidth(null);
+            $detail->setHeight(null);
+        }
+
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
         $bepadoAttribute->setLastUpdate(json_encode(array(

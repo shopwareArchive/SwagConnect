@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Service;
@@ -13,7 +13,7 @@ use Bepado\SDK\ShippingCostCalculator;
 /**
  * Service to maintain transactions
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class ShippingCosts
 {
@@ -69,7 +69,8 @@ class ShippingCosts
                 $change['from_shop_id'],
                 $change['to_shop_id'],
                 $change['revision'],
-                $change['shippingCosts']
+                $change['shippingCosts'],
+                isset($change['customerCosts']) ? $change['customerCosts'] : $change['shippingCosts']
             );
         }
     }

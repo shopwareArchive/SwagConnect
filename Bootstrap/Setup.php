@@ -139,6 +139,7 @@ class Setup
               `sc_to_shop` VARCHAR(32) NOT NULL,
               `sc_revision` VARCHAR(32) NOT NULL,
               `sc_shipping_costs` LONGBLOB NOT NULL,
+              `sc_customer_costs` LONGBLOB NOT NULL,
               `changed` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`sc_from_shop`, `sc_to_shop`),
               INDEX (`sc_revision`)

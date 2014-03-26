@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Gateway;
@@ -13,11 +13,14 @@ use Bepado\SDK\ShippingCosts\Rules;
 /**
  * Gateaway interface to maintain shipping costs
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  * @api
  */
 interface ShippingCosts
 {
+    const SHIPPING_COSTS_INTERSHOP = 'intershop';
+    const SHIPPING_COSTS_CUSTOMER = 'customer';
+
     /**
      * Get last revision
      *
@@ -31,17 +34,19 @@ interface ShippingCosts
      * @param string $fromShop
      * @param string $toShop
      * @param string $revision
-     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $intershopCosts
+     * @param \Bepado\SDK\ShippingCosts\Rules $customerCosts
      * @return void
      */
-    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $shippingCosts);
+    public function storeShippingCosts($fromShop, $toShop, $revision, Rules $intershopCosts, Rules $customerCosts);
 
     /**
      * Get shop shipping costs
      *
      * @param string $fromShop
      * @param string $toShop
+     * @param string $type
      * @return \Bepado\SDK\ShippingCosts\Rules
      */
-    public function getShippingCosts($fromShop, $toShop);
+    public function getShippingCosts($fromShop, $toShop, $type = self::SHIPPING_COSTS_INTERSHOP);
 }

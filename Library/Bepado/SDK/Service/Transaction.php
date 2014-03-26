@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Service;
@@ -17,7 +17,7 @@ use Bepado\SDK\ShippingCostCalculator;
 /**
  * Service to maintain transactions
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Transaction
 {
@@ -236,7 +236,10 @@ class Transaction
             $order->orderShop
         );
 
-        $myShippingCosts = $this->calculator->calculateShippingCosts($order);
+        $myShippingCosts = $this->calculator->calculateShippingCosts(
+            $order,
+            Gateway\ShippingCosts::SHIPPING_COSTS_INTERSHOP
+        );
 
         if (!$myShippingCosts->isShippable) {
             return new Struct\Message(array(

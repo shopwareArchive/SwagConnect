@@ -37,6 +37,13 @@ class Update
         if (version_compare($this->version, '1.2.70', '<=')) {
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
+        if (version_compare($this->version, '1.4.43', '<=')) {
+            Shopware()->Db()->exec(
+                'ALTER TABLE `bepado_shipping_costs`
+                    ADD COLUMN `sc_customer_costs` LONGBLOB NOT NULL AFTER `sc_shipping_costs`
+                ;'
+            );
+        }
 
         // Split category mapping into mapping for import and export
         $this->removeOldCategoryMapping();

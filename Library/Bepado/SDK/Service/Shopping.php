@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\Service;
@@ -21,7 +21,7 @@ use Bepado\SDK\Gateway\ShopConfiguration;
 /**
  * Shopping service
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Shopping
 {
@@ -95,16 +95,18 @@ class Shopping
      * Calculate shipping costs for the given set of products.
      *
      * @param Struct\Order $order
+     * @param string $type
+     *
      * @return Struct\Order
      */
-    public function calculateShippingCosts(Struct\Order $order)
+    public function calculateShippingCosts(Struct\Order $order, $type)
     {
         $shops = array();
         $order->orderShop = $this->config->getShopId();
         $orders = $this->splitShopOrders($order);
 
         foreach ($orders as $shopId => $shopOrder) {
-            $shops[$shopId] = $this->calculator->calculateShippingCosts($shopOrder);
+            $shops[$shopId] = $this->calculator->calculateShippingCosts($shopOrder, $type);
             $shops[$shopId]->shopId = $shopId;
         }
 
@@ -235,7 +237,7 @@ class Shopping
         $responses = array();
         $orders = $this->splitShopOrders($order);
 
-        $shippingCosts = $this->calculateShippingCosts($order);
+        $shippingCosts = $this->calculateShippingCosts($order, Gateway\ShippingCosts::SHIPPING_COSTS_INTERSHOP);
 
         if (!$shippingCosts->isShippable) {
             return $this->failedReservationNotShippable($orders, $shippingCosts);

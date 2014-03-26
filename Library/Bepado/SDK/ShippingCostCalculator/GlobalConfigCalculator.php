@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ShippingCostCalculator;
@@ -31,9 +31,11 @@ class GlobalConfigCalculator implements ShippingCostCalculator
      * Get shipping costs for order
      *
      * @param \Bepado\SDK\Struct\Order $order
+     * @param string $type
+     *
      * @return \Bepado\SDK\Struct\TotalShippingCosts
      */
-    public function calculateShippingCosts(Order $order)
+    public function calculateShippingCosts(Order $order, $type)
     {
         return $this->getShippingCosts(
             array_map(function (OrderItem $item) {

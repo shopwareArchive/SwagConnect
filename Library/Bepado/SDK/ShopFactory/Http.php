@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ShopFactory;
@@ -18,7 +18,7 @@ use Bepado\SDK\ShopGateway\ShopRequestSigner;
  *
  * Constructs gateways to interact with other shops
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Http extends ShopFactory
 {

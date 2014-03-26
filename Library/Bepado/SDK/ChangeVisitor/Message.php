@@ -2,7 +2,7 @@
 /**
  * This file is part of the Bepado SDK Component.
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
 namespace Bepado\SDK\ChangeVisitor;
@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 /**
  * Visits intershop changes ito messages
  *
- * @version 1.1.142
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Message extends ChangeVisitor
 {

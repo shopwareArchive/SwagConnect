@@ -196,17 +196,30 @@ class ProductToShop implements ProductToShopBase
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
+            /** @var \Shopware\Bepado\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
+            /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
+
             $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
 
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $this->helper->getUnit($shopwareUnit);
-            if ($unit) {
-                $detail->setUnit($unit);
-            }
+            $detail->setUnit($unit);
         } else {
             $detail->setUnit(null);
+        }
+
+        // set dimension
+        if ($product->attributes['dimension']) {
+            $dimension = explode('x', $product->attributes['dimension']);
+            $detail->setLen($dimension[0]);
+            $detail->setWidth($dimension[1]);
+            $detail->setHeight($dimension[2]);
+        } else {
+            $detail->setLen(null);
+            $detail->setWidth(null);
+            $detail->setHeight(null);
         }
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally

@@ -24,6 +24,12 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                         text: "{s name=navigation/config_export}Export{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
+                    },
+                    {
+                        id: 'config-units',
+                        text: "{s name=navigation/config_units}Units{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-inbox-upload'
                     }
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: false,

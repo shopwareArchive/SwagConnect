@@ -325,6 +325,28 @@ class Config
     }
 
     /**
+     * Compare given export price configuration
+     * and current export price configuration
+     * @param $data
+     * @return bool
+     */
+    public function compareExportConfiguration($data)
+    {
+        foreach ($data as $config) {
+            $currentConfig = $this->getExportConfig();
+            if ($currentConfig['priceGroupForPriceExport'] != $config['priceGroupForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPriceExport'] != $config['priceFieldForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceGroupForPurchasePriceExport'] != $config['priceGroupForPurchasePriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport'])
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

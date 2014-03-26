@@ -96,18 +96,6 @@ class Config
     }
 
     /**
-     * Returns config entity by value
-     * @param $value
-     * @return \Shopware\CustomModels\Bepado\Config
-     */
-    public function getConfigByValue($value)
-    {
-        $model = $this->getConfigRepository()->findOneBy(array('value' => $value, 'groupName' => 'units'));
-
-        return $model;
-    }
-
-    /**
      * @param $name
      * @param null $default
      * @return null
@@ -362,6 +350,28 @@ class Config
         }
 
         $this->manager->flush();
+    }
+
+	/**
+     * Compare given export price configuration
+     * and current export price configuration
+     * @param $data
+     * @return bool
+     */
+    public function compareExportConfiguration($data)
+    {
+        foreach ($data as $config) {
+            $currentConfig = $this->getExportConfig();
+            if ($currentConfig['priceGroupForPriceExport'] != $config['priceGroupForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPriceExport'] != $config['priceFieldForPriceExport'])
+                return true;
+            elseif ($currentConfig['priceGroupForPurchasePriceExport'] != $config['priceGroupForPurchasePriceExport'])
+                return true;
+            elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport'])
+                return true;
+        }
+        return false;
     }
 
     /**

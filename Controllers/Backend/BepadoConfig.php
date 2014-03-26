@@ -24,6 +24,7 @@
 
 use Shopware\Bepado\Components\Config;
 use Bepado\SDK\Units;
+use Shopware\Bepado\Components\BepadoExport;
 
 /**
  * @category  Shopware
@@ -35,6 +36,11 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /** @var  \Shopware\Bepado\Components\Config */
     private $configComponent;
+
+    /**
+     * @var \Shopware\Bepado\Components\BepadoFactory
+     */
+    private $factory;
 
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
@@ -134,7 +140,30 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $data = $this->Request()->getParam('data');
         $data = !isset($data[0]) ? array($data) : $data;
 
+        $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
         $this->getConfigComponent()->setExportConfigs($data);
+
+        if ($isModified === true) {
+            $bepadoExport = $this->getBepadoExport();
+            try {
+                $ids = $bepadoExport->getExportArticlesIds();
+                $errors = $bepadoExport->export($ids);
+            }catch (\RuntimeException $e) {
+                $this->View()->assign(array(
+                        'success' => false,
+                        'message' => $e->getMessage()
+                    ));
+                return;
+            }
+
+            if (!empty($errors)) {
+                $this->View()->assign(array(
+                        'success' => false,
+                        'message' => implode("<br>\n", $errors)
+                    ));
+                return;
+            }
+        }
 
         $this->View()->assign(
             array(
@@ -144,6 +173,61 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * @return BepadoExport
+     */
+    public function getBepadoExport()
+    {
+        return new BepadoExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            $this->getModelManager()
+        );
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\Helper
+     */
+    public function getHelper()
+    {
+        if ($this->factory === null) {
+            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+        }
+
+        return $this->factory->getHelper();
+    }
+
+    /**
+     * @return \Bepado\SDK\SDK
+     */
+    public function getSDK()
+    {
+        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+    }
+
+    /**
+     * @return Shopware\Components\Model\ModelManager
+     */
+    public function getModelManager()
+    {
+        return Shopware()->Models();
+    }
+
+    /**
+     * Helper function to get access on the Config component
+     *
+     * @return \Shopware\Bepado\Components\Config
+     */
+    private function getConfigComponent()
+    {
+        if ($this->configComponent === null) {
+            $modelsManager = Shopware()->Models();
+            $this->configComponent = new Config($modelsManager);
+        }
+
+        return $this->configComponent;
+    }
+
+	/**
      * The getUnitsAction function is an ExtJs event listener method of the
      * bepado module. The function is used to load store
      * required in the units mapping.
@@ -218,21 +302,6 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
                 'data' => $unitsArray
             )
         );
-    }
-
-    /**
-     * Helper function to get access on the Config component
-     *
-     * @return \Shopware\Bepado\Components\Config
-     */
-    private function getConfigComponent()
-    {
-        if ($this->configComponent === null) {
-            $modelsManager = Shopware()->Models();
-            $this->configComponent = new Config($modelsManager);
-        }
-
-        return $this->configComponent;
     }
 
 } 

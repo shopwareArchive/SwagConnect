@@ -120,6 +120,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
             shippingField, inStockField,
             isPriceLocked;
 
+        me.getArticleDetailWindow().unitComboBox.setReadOnly(me.record.get('sourceId') > 0);
         bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
 
         if (settingsFieldSet) {

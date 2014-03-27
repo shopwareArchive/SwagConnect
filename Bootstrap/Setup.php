@@ -397,7 +397,7 @@ class Setup
      */
     private function getAvailableCustomerGroupName()
     {
-        $names = array('BEP', 'bepado', 'BP', 'SW-BEP', 'SW-BEPADO');
+        $names = array('BEP', 'BP', 'SWBEP', 'BEPA', 'BEP-1');
 
         $repo = $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {

@@ -8,6 +8,7 @@ use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
@@ -117,6 +118,14 @@ class LocalProductQuery extends BaseProductQuery
 
         if (!empty($row['shopId'])) {
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
+        }
+
+        // add default export category
+        if (empty($row['categories'])) {
+            $defaultExportCategory = $this->configComponent->getConfig('defaultExportCategory');
+            if ($defaultExportCategory) {
+                $row['categories'][] = $this->configComponent->getConfig('defaultExportCategory');
+            }
         }
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);

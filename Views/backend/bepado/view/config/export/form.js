@@ -137,8 +137,16 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     valueField: 'value',
                     editable: false,
                     labelWidth: me.defaults.labelWidth
-                },
-                {
+                }, {
+                    xtype: 'base-element-selecttree',
+                    allowBlank: true,
+                    store: 'mapping.BepadoCategoriesExport',
+                    name: 'defaultExportCategory',
+                    labelWidth: me.defaults.labelWidth,
+                    fieldLabel: 'Default Export category',
+                    displayField: 'name',
+                    valueField: 'id'
+                }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: me.snippets.autoProductSync,
                     defaultType: 'checkboxfield',
@@ -265,6 +273,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         if (!record) {
             record = Ext.create('Shopware.apps.Bepado.model.config.Export');
         }
+
         me.loadRecord(record);
     }
 });

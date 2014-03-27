@@ -38,7 +38,8 @@ Ext.define('Shopware.apps.Bepado.model.config.Import', {
         { name: 'overwriteProductImage', type: 'int' },
         { name: 'overwriteProductShortDescription', type: 'int' },
         { name: 'overwriteProductLongDescription', type: 'int' },
-        { name: 'importImagesOnFirstImport', type: 'int' }
+        { name: 'importImagesOnFirstImport', type: 'int' },
+        { name: 'defaultImportCategory', type: 'string' }
     ],
 
     proxy: {

@@ -149,6 +149,8 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     createElements: function () {
         var me = this;
 
+        var categoriesStore = Ext.create('Shopware.apps.Base.store.CategoryTree').load();
+
         var container = Ext.create('Ext.container.Container', {
             padding: '0 20 0 0',
             flex: 1,
@@ -187,14 +189,41 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             uncheckedValue: 0
                         }
                     ]
-                }, {
-                xtype: 'checkbox',
-                name: 'importImagesOnFirstImport',
-                fieldLabel: me.snippets.importPicturesLabel,
-                inputValue: 1,
-                uncheckedValue: 0,
-                labelWidth: me.defaults.labelWidth
-            }]
+                },
+
+                {
+                    xtype      : 'fieldcontainer',
+                    defaultType: 'checkboxfield',
+                    labelWidth: me.defaults.labelWidth,
+                    items: [
+                        {
+                            xtype: 'checkbox',
+                            name: 'importImagesOnFirstImport',
+                            fieldLabel: me.snippets.importPicturesLabel,
+                            inputValue: 1,
+                            uncheckedValue: 0,
+                            labelWidth: me.defaults.labelWidth
+                        }, {
+                            xtype: 'base-element-combotree',
+                            name: 'defaultImportCategory',
+                            allowBlank: true,
+                            editable: true,
+                            fieldLabel: 'Default import category',
+                            labelWidth: 80,
+                            store: categoriesStore,
+                            displayField: 'name',
+                            valueField: 'id',
+                            listeners:{
+                                select: function(thisTree, record, index, obj ){
+                                    console.log(thisTree.treePanel.getStore(), categoriesStore);
+//                                    var categoryStore = thisTree.treePanel.getStore();
+                                }
+                            }
+                        }
+                    ]
+                }
+
+                ]
         });
 
         return [ {

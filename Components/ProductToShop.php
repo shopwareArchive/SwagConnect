@@ -127,9 +127,22 @@ class ProductToShop implements ProductToShopBase
             $detail->setActive(false);
             $this->manager->persist($model);
             $detail->setArticle($model);
-            $model->setCategories(
-                $this->helper->getCategoriesByProduct($product)
-            );
+
+            $categories = $this->helper->getCategoriesByProduct($product);
+
+            if (empty($categories)) {
+                //add default import category
+                $defaultCategoryId = $this->config->getConfig('defaultImportCategory');
+                if ($defaultCategoryId) {
+                    /** @var \Shopware\Models\Category\Category $defaultCategory */
+                    $defaultCategory = $this->manager->getRepository('Shopware\Models\Category\Category')->find($defaultCategoryId);
+                    if ($defaultCategory) {
+                        $categories[] = $defaultCategory;
+                    }
+                }
+            }
+
+            $model->setCategories($categories);
         } else {
             $detail = $model->getMainDetail();
         }

@@ -52,7 +52,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                         return value;
                     }
                 }, me.getActionColumn()],
-                dockedItems: [ me.getButtons() ]
+                dockedItems: [ me.getButtons(), me.getToolbar() ]
             }]
         });
 
@@ -109,6 +109,26 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                 action: 'save'
             }]
         };
+    },
+
+    getToolbar:function () {
+        var me = this;
+
+        me.searchField = Ext.create('Ext.form.field.Text', {
+            name:'searchExportMapping',
+            cls:'searchExportMapping',
+            width:170,
+            emptyText: '{s name=search/empty_text}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500
+        });
+
+        return Ext.create('Ext.toolbar.Toolbar', {
+            dock:'top',
+            ui: 'shopware-ui',
+            cls: 'shopware-toolbar',
+            items:[ me.searchField ]
+        });
     }
 });
 //{/block}

@@ -350,6 +350,46 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     );
                 }
             },
+            'bepado-mapping-import textfield[name=searchImportMapping]': {
+                change: function(field, value) {
+                    var tree = me.getImportMapping(),
+                        store = tree.getStore();
+                    store.filters.removeAtKey('searchImportShopwareCategory');
+                    store.filters.removeAtKey('searchBepadoCategory');
+                    if (value.length > 0 ) {
+                        store.filters.clear();
+                        store.filters.add('searchImportShopwareCategory', new Ext.util.Filter({
+                            property: 'name',
+                            value: '%' + value + '%'
+                        }));
+                        store.filters.add('searchBepadoCategory', new Ext.util.Filter({
+                            property: 'mapping',
+                            value: '%' + value + '%'
+                        }));
+                    }
+                    store.load();
+                }
+            },
+            'bepado-mapping-export textfield[name=searchExportMapping]': {
+                change: function(field, value) {
+                    var tree = me.getExportMapping(),
+                        store = tree.getStore();
+                    store.filters.removeAtKey('searchExportShopwareCategory');
+                    store.filters.removeAtKey('searchBepadoCategory');
+                    if (value.length > 0 ) {
+                        store.filters.clear();
+                        store.filters.add('searchExportShopwareCategory', new Ext.util.Filter({
+                            property: 'name',
+                            value: '%' + value + '%'
+                        }));
+                        store.filters.add('searchBepadoCategory', new Ext.util.Filter({
+                            property: 'mapping',
+                            value: '%' + value + '%'
+                        }));
+                    }
+                    store.load();
+                }
+            },
             'bepado-units-mapping button[action=save]': {
                 click: function () {
                     me.saveUnitsMapping();

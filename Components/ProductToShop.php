@@ -35,6 +35,7 @@ use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * The interface for products imported *from* bepado *to* the local shop
@@ -113,6 +114,8 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        $logger = new Logger(Shopware()->Db());
+        $logger->write(true, 'import-product', 'start');
         // todo@dn: Set dummy values and make product inactive
         if(empty($product->title) || empty($product->vendor)) {
             return;

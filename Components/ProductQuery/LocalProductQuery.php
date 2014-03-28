@@ -8,7 +8,6 @@ use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
-use Shopware\Bepado\Components\Logger;
 
 /**
  * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product

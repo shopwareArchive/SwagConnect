@@ -38,7 +38,8 @@ Ext.define('Shopware.apps.Bepado.model.config.Export', {
         { name: 'priceGroupForPriceExport', type: 'string' },
         { name: 'priceFieldForPriceExport', type: 'string' },
         { name: 'priceGroupForPurchasePriceExport', type: 'string' },
-        { name: 'priceFieldForPurchasePriceExport', type: 'string' }
+        { name: 'priceFieldForPurchasePriceExport', type: 'string' },
+        { name: 'defaultExportCategory', type: 'string' }
     ],
 
     proxy: {

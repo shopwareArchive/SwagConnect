@@ -119,6 +119,14 @@ class LocalProductQuery extends BaseProductQuery
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
         }
 
+        // add default export category
+        if (empty($row['categories'])) {
+            $defaultExportCategory = $this->configComponent->getConfig('defaultExportCategory');
+            if ($defaultExportCategory) {
+                $row['categories'][] = $this->configComponent->getConfig('defaultExportCategory');
+            }
+        }
+
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);

@@ -515,7 +515,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
             Ext.each(Object.keys(flags), function(key) {
-                var fieldName = flags[key] == 'imageInitialImport' ? 'image' : flags[key],
+                var fieldName = flags[key],
                     container = changeView.fields[fieldName];
 
                 if (container) {

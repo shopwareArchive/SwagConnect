@@ -19,13 +19,27 @@ class ProductQueryTest extends BepadoTestHelper
             $configComponent = new Config(Shopware()->Models());
 
             $this->productQuery = new ProductQuery(
-                new LocalProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField')),
+                new LocalProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'), $this->getProductBaseUrl(), $configComponent),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );
         }
         return $this->productQuery;
     }
 
+    public function getProductBaseUrl()
+    {
+        if (!Shopware()->Front()->Router()) {
+            return null;
+        }
+
+        return Shopware()->Front()->Router()->assemble(array(
+                'module' => 'frontend',
+                'controller' => 'bepado_product_gateway',
+                'action' => 'product',
+                'id' => '',
+                'fullPath' => true
+            ));
+    }
 
     public function testGetLocal()
     {

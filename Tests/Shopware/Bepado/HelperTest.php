@@ -3,6 +3,7 @@
 namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Product;
+use Doctrine\Common\Util\Debug;
 
 class HelperTest extends BepadoTestHelper
 {
@@ -96,15 +97,9 @@ class HelperTest extends BepadoTestHelper
         $this->assertArrayCount(13, count($images));
     }
 
-    public function testGetRowProductCategoriesById()
-    {
-        $mappings = $this->getHelper()->getRowProductCategoriesById(14);
-        $this->assertNotEmpty($mappings);
-    }
-
     public function testGetCategoriesByProduct()
     {
-        $products = $this->getHelper()->getLocalProduct(array(2));
+        $products = $this->getHelper()->getRemoteProducts(array(284));
         $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
 
         $this->assertNotEmpty($categories);

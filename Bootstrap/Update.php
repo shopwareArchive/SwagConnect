@@ -38,11 +38,16 @@ class Update
             Shopware()->Db()->exec('ALTER TABLE `bepado_shop_config` CHANGE `s_config` `s_config` LONGBLOB NOT NULL;');
         }
         if (version_compare($this->version, '1.4.43', '<=')) {
-            Shopware()->Db()->exec(
-                'ALTER TABLE `bepado_shipping_costs`
-                    ADD COLUMN `sc_customer_costs` LONGBLOB NOT NULL AFTER `sc_shipping_costs`
-                ;'
-            );
+            try {
+                Shopware()->Db()->exec(
+                    'ALTER TABLE `bepado_shipping_costs`
+                        ADD COLUMN `sc_customer_costs` LONGBLOB NOT NULL AFTER `sc_shipping_costs`
+                    ;'
+                );
+            } catch(\Exception $e) {
+                // if table was already altered, ignore
+            }
+
         }
         if (version_compare($this->version, '1.4.45', '<=')) {
             Shopware()->Db()->exec(

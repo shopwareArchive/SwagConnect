@@ -232,7 +232,7 @@ class Setup
             's_premium_dispatch_attributes',
             'bepado', 'allowed',
             'int(1)',
-            false,
+            true,
             1
         );
 

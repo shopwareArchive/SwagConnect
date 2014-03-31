@@ -74,12 +74,19 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
                 };
                 break;
             case 'image':
+                config = {
+                    xtype: 'shopware-images-field',
+                    title: me.getTranslatedTitle('image'),
+                    margin: 10
+                };
+                break;
             case 'imageInitialImport':
                 config = {
                     xtype: 'shopware-images-field',
                     title: me.getTranslatedTitle('image'),
                     margin: 10
                 };
+                break;
         }
 
         // Define some default options for the local / remote field

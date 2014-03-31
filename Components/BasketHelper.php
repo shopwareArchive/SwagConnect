@@ -472,7 +472,7 @@ class BasketHelper
         // Therefore we need to round the net price
         $this->basket['sShippingcostsNet'] = round($this->basket['sShippingcostsNet'], 2);
 
-
+        
         // Recalculate the tax rates
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(
             array(
@@ -789,6 +789,7 @@ class BasketHelper
      ));
 
      foreach ($this->bepadoProducts as $shopId => $products) {
+         $products = $this->getHelper()->prepareBepadoUnit($products);
          // todo@dn: Remove this workaround
          $dummyOrder->providerShop = $shopId;
          foreach ($products as $product) {

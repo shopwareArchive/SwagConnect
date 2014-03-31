@@ -37,6 +37,7 @@ use Shopware\Models\Article\Detail as ProductDetail;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
+use Shopware\Bepado\Components\Utils\UnitMapper;
 
 /**
  * @category  Shopware
@@ -323,6 +324,36 @@ class Helper
             'Shopware_Plugins_HttpCache_InvalidateCacheId',
             array('cacheId' => 'a' . $articleId)
         );
+    }
+
+    /**
+     * Replace unit and ref quantity
+     * @param $products
+     * @return mixed
+     */
+    public function prepareBepadoUnit($products)
+    {
+        foreach ($products as &$p) {
+            if ($p->attributes['unit']) {
+                $configComponent = new Config($this->manager);
+                /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
+                $unitMapper = new UnitMapper(
+                    $configComponent,
+                    $this->manager
+                );
+
+                $p->attributes['unit'] = $unitMapper->getBepadoUnit($p->attributes['unit']);
+            }
+
+            if ($p->attributes['ref_quantity']) {
+                $intRefQuantity = (int)$p->attributes['ref_quantity'];
+                if ($p->attributes['ref_quantity'] - $intRefQuantity <= 0.0001) {
+                    $p->attributes['ref_quantity'] = $intRefQuantity;
+                }
+            }
+        }
+
+        return $products;
     }
 
 }

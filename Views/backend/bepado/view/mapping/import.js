@@ -9,7 +9,8 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
     layout: 'border',
 
     snippets: {
-        emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}'
+        emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}',
+        categoryWithoutMapping: '{s name=mapping/message/category_without_mapping}* In dieser Kategorie befinden sich abonnierte Produkte die noch keiner lokalen Kategorie zugeordnet sind{/s}'
     },
     
     initComponent: function() {
@@ -127,7 +128,12 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
             dock:'top',
             ui: 'shopware-ui',
             cls: 'shopware-toolbar',
-            items:[ me.searchField ]
+            items:[ me.searchField,
+                '->', {
+                    xtype : 'tbtext',
+                    text : '<span style="color: red;">' + me.snippets.categoryWithoutMapping + '</span>'
+                }
+            ]
         });
     }
 });

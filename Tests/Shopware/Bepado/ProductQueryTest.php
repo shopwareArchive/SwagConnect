@@ -85,4 +85,26 @@ class ProductQueryTest extends BepadoTestHelper
         $this->assertEquals($newProduct->purchasePrice, $product->purchasePrice);
 
     }
+
+    public function testGetBepadoProduct()
+    {
+        $result = $this->getProductQuery()->getLocal(array(2));
+        /** @var \Bepado\SDK\Struct\Product $product */
+        $product = $result[0];
+
+        $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
+        $this->assertEquals('l', $product->attributes['unit']);
+        $this->assertEquals('0.5000', $product->attributes['quantity']);
+        $this->assertEquals('1.000', $product->attributes['ref_quantity']);
+
+
+        $result = $this->getProductQuery()->getLocal(array(11));
+        /** @var \Bepado\SDK\Struct\Product $product */
+        $product = $result[0];
+
+        $this->assertEquals('Münsterländer Aperitif Präsent Box', $product->title);
+        $this->assertEmpty($product->attributes['unit']);
+        $this->assertNull($product->attributes['quantity']);
+        $this->assertNull($product->attributes['ref_quantity']);
+    }
 }

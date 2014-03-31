@@ -124,9 +124,9 @@ class Product extends Verificator
             );
         }
 
-        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_QUANTITY])) {
+        if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_QUANTITY])) {
             throw new \RuntimeException(
-                "Product Quantity Attribute has to be an integer."
+                "Product Quantity Attribute has to be a number."
             );
         }
 

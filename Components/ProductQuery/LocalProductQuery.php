@@ -5,6 +5,7 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
+use Shopware\Bepado\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -145,9 +146,10 @@ class LocalProductQuery extends BaseProductQuery
             $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
         }
 
-        //@todo:stefan Discuss with Daniel about product quantities
-        $row['attributes']['quantity'] = (int)$row['attributes']['quantity'];
-        $row['attributes']['ref_quantity'] = (int)$row['attributes']['ref_quantity'];
+        $intRefQuantity = (int)$row['attributes']['ref_quantity'];
+        if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
+            $row['attributes']['ref_quantity'] = $intRefQuantity;
+        }
 
         $product = new Product($row);
         return $product;

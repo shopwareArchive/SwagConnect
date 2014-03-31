@@ -120,7 +120,16 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
             shippingField, inStockField,
             isPriceLocked;
 
+
+        // Unit fields
+        var contentLabel = me.getArticleDetailWindow().snippets.basePrice.content;
+        var contentField = me.getArticleDetailWindow().down('numberfield[fieldLabel=' + contentLabel + ']');
+        var basicUnitLabel = me.getArticleDetailWindow().snippets.basePrice.basicUnit;
+        var basicField = me.getArticleDetailWindow().down('numberfield[fieldLabel=' + basicUnitLabel + ']');
         me.getArticleDetailWindow().unitComboBox.setReadOnly(me.record.get('sourceId') > 0);
+        contentField.setReadOnly(me.record.get('sourceId') > 0);
+        basicField.setReadOnly(me.record.get('sourceId') > 0);
+
         bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
 
         if (settingsFieldSet) {

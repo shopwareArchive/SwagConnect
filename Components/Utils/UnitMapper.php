@@ -66,6 +66,14 @@ class UnitMapper
                     return $key;
                 }
             }
+
+            // search in "de" bepado units
+            $deBepadoUnits = $this->getSdkLocalizedUnits('de');
+            foreach ($deBepadoUnits as $key => $bepadoUnit) {
+                if ($bepadoUnit == $unitName) {
+                    return $key;
+                }
+            }
         }
 
         return $shopwareUnit;
@@ -103,6 +111,16 @@ class UnitMapper
             }
         }
 
+        // search for same label in "de" Shopware units
+        $deBepadoUnits = $this->getSdkLocalizedUnits('de');
+        if ($deBepadoUnits[$bepadoUnit]) {
+            $unitModel = $repository->findOneBy(array('name' => $deBepadoUnits[$bepadoUnit]));
+
+            if ($unitModel) {
+                return $unitModel->getUnit();
+            }
+        }
+
         return $bepadoUnit;
     }
 
@@ -119,16 +137,17 @@ class UnitMapper
     }
 
     /**
-     * Returns bepado units in array
-     * @return array
+     * Returns bepado units
+     * @param string $locale
+     * @return array\
      */
-    private function getSdkLocalizedUnits()
+    private function getSdkLocalizedUnits($locale = 'en')
     {
-        return $this->getSdkUnits()->getLocalizedUnits();
+            return $this->getSdkUnits()->getLocalizedUnits($locale);
     }
 
     /**
-     * Returns shopware units repository instance
+     * Returns Shopware units repository instance
      * @return mixed
      */
     private function getUnitRepository()

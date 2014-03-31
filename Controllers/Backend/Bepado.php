@@ -159,6 +159,19 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
               || substr_count($id, '/') != $count) {
                 continue;
             }
+
+            //todo@sb: Find better solution
+            $categories = Shopware()->Db()->fetchPairs(
+                'SELECT `id`,`category` FROM s_plugin_bepado_items
+                WHERE `source_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
+                WHERE  `bepado_import_mapping` = `category`) = 0)
+                GROUP BY `category`'
+            );
+
+            if (in_array($id, $categories)) {
+                $name = $name . '<span style="color: red;">*</span>';
+            }
+
             $data[] = array(
                 'id' => $id,
                 'name' => $name

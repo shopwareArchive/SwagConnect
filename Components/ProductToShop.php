@@ -211,6 +211,7 @@ class ProductToShop implements ProductToShopBase
         if ($product->attributes['unit']) {
             /** @var \Shopware\Bepado\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
+
             /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
 
@@ -219,8 +220,12 @@ class ProductToShop implements ProductToShopBase
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $this->helper->getUnit($shopwareUnit);
             $detail->setUnit($unit);
+            $detail->setPurchaseUnit($product->attributes['quantity']);
+            $detail->setReferenceUnit($product->attributes['ref_quantity']);
         } else {
             $detail->setUnit(null);
+            $detail->setPurchaseUnit(null);
+            $detail->setReferenceUnit(null);
         }
 
         // set dimension

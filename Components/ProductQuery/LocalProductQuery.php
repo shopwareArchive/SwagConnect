@@ -140,15 +140,22 @@ class LocalProductQuery extends BaseProductQuery
 
         unset($row['localId']);
 
-        //Map local unit to bepado unit
-        if ($row['attributes']['unit']) {
-            $unitMapper = new UnitMapper($this->configComponent, $this->manager);
-            $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
-        }
+        if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
+        {
+            //Map local unit to bepado unit
+            if ($row['attributes']['unit']) {
+                $unitMapper = new UnitMapper($this->configComponent, $this->manager);
+                $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
+            }
 
-        $intRefQuantity = (int)$row['attributes']['ref_quantity'];
-        if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
-            $row['attributes']['ref_quantity'] = $intRefQuantity;
+            $intRefQuantity = (int)$row['attributes']['ref_quantity'];
+            if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
+                $row['attributes']['ref_quantity'] = $intRefQuantity;
+            }
+        } else {
+            unset($row['attributes']['unit']);
+            $row['attributes']['quantity'] = null;
+            $row['attributes']['ref_quantity'] = null;
         }
 
         $product = new Product($row);

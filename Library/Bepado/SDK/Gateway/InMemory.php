@@ -345,6 +345,16 @@ class InMemory extends Gateway
     }
 
     /**
+     * Get all connected shop ids.
+     *
+     * @return array<string>
+     */
+    public function getConnectedShopIds()
+    {
+        return array_keys($this->shopConfiguration);
+    }
+
+    /**
      * Get last shop verification date as Unix UTC timestamp
      *
      * @return int

@@ -550,6 +550,31 @@ class MySQLi extends Gateway
     }
 
     /**
+     * Get all connected shop ids.
+     *
+     * @return array<string>
+     */
+    public function getConnectedShopIds()
+    {
+        $result = $this->connection->query(
+            'SELECT
+                `s_shop`
+            FROM
+                `bepado_shop_config`'
+        );
+
+        return array_filter(
+            array_map(
+                function ($row) {
+                    return $row['s_shop'];
+                },
+                $result->fetch_all(\MYSQLI_ASSOC)
+            ),
+            'is_numeric'
+        );
+    }
+
+    /**
      * Get last shop verification date as Unix UTC timestamp
      *
      * @return int

@@ -463,6 +463,31 @@ class PDO extends Gateway
     }
 
     /**
+     * Get all connected shop ids.
+     *
+     * @return array<string>
+     */
+    public function getConnectedShopIds()
+    {
+        $stmt = $this->connection->query(
+            'SELECT
+                `s_shop`
+            FROM
+                `' . $this->tableName('shop_config') . '`'
+        );
+
+        $shopIds = array();
+
+        while ($shopId = $stmt->fetchColumn()) {
+            if (is_numeric($shopId)) {
+                $shopIds[] = $shopId;
+            }
+        }
+
+        return $shopIds;
+    }
+
+    /**
      * Get last shop verification date as Unix UTC timestamp
      *
      * @return int

@@ -240,6 +240,7 @@ class Checkout extends BaseSubscriber
             }
 
             $products = $helper->getRemoteProducts(array($row['articleID']));
+            $products = $this->getHelper()->prepareBepadoUnit($products);
 
             if (empty($products)) {
                 continue;

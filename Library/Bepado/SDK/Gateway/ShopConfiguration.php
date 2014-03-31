@@ -88,6 +88,13 @@ interface ShopConfiguration
     public function getShopId();
 
     /**
+     * Get all connected shop ids.
+     *
+     * @return array<string>
+     */
+    public function getConnectedShopIds();
+
+    /**
      * Set all the enabled features.
      *
      * @param array<string>

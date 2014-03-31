@@ -58,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.2.156';
+    const VERSION = 'v1.2.157';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -517,5 +517,32 @@ final class SDK
         $this->verifySdk();
 
         $this->dependencies->getSocialNetworkService()->unsubscribeProducts($productIds);
+    }
+
+    /**
+     * Return all available end customer shipping cost rules.
+     *
+     * Useful to dynamically generate a shipping cost page in the shop.
+     *
+     * @return array<string, \Bepado\SDK\ShippingCosts\Rules>
+     */
+    public function getShippingCostRules()
+    {
+        $gateway = $this->dependencies->getGateway();
+
+        $shopId = $gateway->getShopId();
+        $connectedShopIds = $gateway->getConnectedShopIds();
+
+        $rules = array();
+
+        foreach ($connectedShopIds as $connectedShopId) {
+            $rules[$connectedShopId] = $gateway->getShippingCosts(
+                $connectedShopId,
+                $shopId,
+                Gateway\ShippingCosts::SHIPPING_COSTS_CUSTOMER
+            );
+        }
+
+        return $rules;
     }
 }

@@ -53,7 +53,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         autoProductSync: '{s name=config/export/auto_product_sync_label}Automatically sync changed products to bepado{/s}',
         autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
-        emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}'
+        emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
+        defaultCategory: '{s name=config/export/default_export_category}Default Export category{/s}',
+        edit: '{s name=edit}Edit{/s}'
     },
 
     initComponent: function () {
@@ -113,47 +115,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     createElements: function () {
         var me = this;
 
-        var container = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
-            padding: '0 0 20 0',
-            layout: 'fit',
-            border: false,
-            items: [
-                {
-                    xtype: 'combobox',
-                    fieldLabel: me.snippets.productDescriptionFieldLabel,
-                    emptyText: me.snippets.emptyText,
-                    name: 'alternateDescriptionField',
-                    store: new Ext.data.SimpleStore({
-                        fields: [ 'value', 'text' ],
-                        data: [
-                            ['attribute.bepadoProductDescription', 'attribute.bepadoProductDescription'],
-                            ['a.description', 'Artikel-Kurzbeschreibung'],
-                            ['a.descriptionLong', 'Artikel-Langbeschreibung']
-                        ]
-                    }),
-                    queryMode: 'local',
-                    displayField: 'text',
-                    valueField: 'value',
-                    editable: false,
-                    labelWidth: me.defaults.labelWidth
-                },
-                {
-                    xtype: 'fieldcontainer',
-                    fieldLabel: me.snippets.autoProductSync,
-                    defaultType: 'checkboxfield',
-                    labelWidth: me.defaults.labelWidth,
-                    items: [
-                        {
-                            boxLabel: me.snippets.autoPlayedChanges,
-                            name: 'autoUpdateProducts',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }
-                    ]
-                }
-            ]
-        });
+        var container = me.createProductContainer();
 
         return [
             {
@@ -169,11 +131,10 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                         html: '{s name=config/export/label/priceDescription}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
                     },
                     me.createPriceField('price'),
-                    me.createPriceField('purchasePrice'),
+                    me.createPriceField('purchasePrice')
                 ]
 
             }
-
         ];
     },
 
@@ -259,13 +220,109 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      * Populate export config form
      */
     populateForm: function () {
+        var me = this;
+
+        me.loadRecord(me.getRecord());
+    },
+
+    getRecord: function () {
         var me = this,
             record = me.exportConfigStore.getAt(0);
 
         if (!record) {
             record = Ext.create('Shopware.apps.Bepado.model.config.Export');
         }
-        me.loadRecord(record);
+
+        return record;
+    },
+
+    createProductContainer: function () {
+        var me = this,
+            defaultExportCategory = Ext.create('Ext.form.TextField',{
+                name: 'defaultExportCategory',
+                readOnly: true,
+                flex: 4
+            });
+
+        return Ext.create('Ext.container.Container', {
+            columnWidth: 1,
+            padding: '0 0 20 0',
+            layout: 'fit',
+            border: false,
+            items: [
+                {
+                    xtype: 'combobox',
+                    fieldLabel: me.snippets.productDescriptionFieldLabel,
+                    emptyText: me.snippets.emptyText,
+                    name: 'alternateDescriptionField',
+                    store: new Ext.data.SimpleStore({
+                        fields: [ 'value', 'text' ],
+                        data: [
+                            ['attribute.bepadoProductDescription', 'attribute.bepadoProductDescription'],
+                            ['a.description', 'Artikel-Kurzbeschreibung'],
+                            ['a.descriptionLong', 'Artikel-Langbeschreibung']
+                        ]
+                    }),
+                    queryMode: 'local',
+                    displayField: 'text',
+                    valueField: 'value',
+                    editable: false,
+                    labelWidth: me.defaults.labelWidth
+                },
+                {
+                    xtype: 'fieldcontainer',
+                    layout: 'hbox',
+                    fieldLabel: me.snippets.defaultCategory,
+                    labelWidth: me.defaults.labelWidth,
+                    items:[
+                        defaultExportCategory,
+                        Ext.create('Ext.button.Button', {
+                            text: me.snippets.edit,
+                            height: 27,
+                            minWidth: 100,
+                            bodyPadding: '0 0 0 3',
+                            cls: 'primary',
+                            handler: function (btn) {
+                                Ext.create('Ext.window.Window', {
+                                    title: me.snippets.defaultCategory,
+                                    height: 100,
+                                    width: 400,
+                                    layout: 'fit',
+                                    modal: true,
+                                    items: [
+                                        {
+                                        xtype: 'base-element-selecttree',
+                                        allowBlank: true,
+                                        store: 'mapping.BepadoCategoriesExport',
+                                        name: 'defaultExportCategoryCombo',
+                                        labelWidth: me.defaults.labelWidth,
+                                        listeners: {
+                                            select: function (arg) {
+                                                defaultExportCategory.setValue(arg.getValue());
+                                                arg.up('window').close();
+                                            }
+                                        }
+                                    }]
+                                }).show();
+                            }
+                        })
+                    ]
+                }, {
+                    xtype: 'fieldcontainer',
+                    fieldLabel: me.snippets.autoProductSync,
+                    defaultType: 'checkboxfield',
+                    labelWidth: me.defaults.labelWidth,
+                    items: [
+                        {
+                            boxLabel: me.snippets.autoPlayedChanges,
+                            name: 'autoUpdateProducts',
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }
+                    ]
+                }
+            ]
+        });
     }
 });
 //{/block}

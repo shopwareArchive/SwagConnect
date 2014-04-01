@@ -113,7 +113,9 @@ class Checkout extends BaseSubscriber
         // If no messages are shown, yet, check products from remote shop and build message array
         if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
             $bepadoMessages = array();
+
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
+                $products = $this->getHelper()->prepareBepadoUnit($products);
                 /** @var $response Message */
                 try {
                     $response = $sdk->checkProducts($products);
@@ -239,7 +241,10 @@ class Checkout extends BaseSubscriber
             if(!empty($row['mode'])) {
                 continue;
             }
+
             $products = $helper->getRemoteProducts(array($row['articleID']));
+            $products = $this->getHelper()->prepareBepadoUnit($products);
+
             if (empty($products)) {
                 continue;
             } else {

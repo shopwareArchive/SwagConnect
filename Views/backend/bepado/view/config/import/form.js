@@ -56,7 +56,8 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
-        overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}'
+        overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
+        defaultCategory: '{s name=config/import/default_import_category}Default import category{/s}'
     },
 
     initComponent: function() {
@@ -149,6 +150,9 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     createElements: function () {
         var me = this;
 
+        var categoriesStore = Ext.create('Shopware.apps.Base.store.CategoryTree');
+        categoriesStore.load();
+
         var container = Ext.create('Ext.container.Container', {
             padding: '0 20 0 0',
             flex: 1,
@@ -187,14 +191,41 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             uncheckedValue: 0
                         }
                     ]
-                }, {
-                xtype: 'checkbox',
-                name: 'importImagesOnFirstImport',
-                fieldLabel: me.snippets.importPicturesLabel,
-                inputValue: 1,
-                uncheckedValue: 0,
-                labelWidth: me.defaults.labelWidth
-            }]
+                },
+
+                {
+                    xtype      : 'fieldcontainer',
+                    defaultType: 'checkboxfield',
+                    labelWidth: me.defaults.labelWidth,
+                    items: [
+                        {
+                            xtype: 'checkbox',
+                            name: 'importImagesOnFirstImport',
+                            fieldLabel: me.snippets.importPicturesLabel,
+                            inputValue: 1,
+                            uncheckedValue: 0,
+                            labelWidth: me.defaults.labelWidth
+                        }, {
+                            xtype: 'base-element-combotree',
+                            name: 'defaultImportCategory',
+                            allowBlank: true,
+                            width: 400,
+                            editable: true,
+                            fieldLabel: me.snippets.defaultCategory,
+                            labelWidth: me.defaults.labelWidth,
+                            store: categoriesStore,
+                            displayField: 'name',
+                            valueField: 'id',
+                            listeners:{
+                                select: function(thisTree, record, index, obj ){
+                                    thisTree.createPicker();
+                                }
+                            }
+                        }
+                    ]
+                }
+
+                ]
         });
 
         return [ {

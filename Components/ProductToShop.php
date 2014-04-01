@@ -127,9 +127,22 @@ class ProductToShop implements ProductToShopBase
             $detail->setActive(false);
             $this->manager->persist($model);
             $detail->setArticle($model);
-            $model->setCategories(
-                $this->helper->getCategoriesByProduct($product)
-            );
+
+            $categories = $this->helper->getCategoriesByProduct($product);
+
+            if (empty($categories)) {
+                //add default import category
+                $defaultCategoryId = $this->config->getConfig('defaultImportCategory');
+                if ($defaultCategoryId) {
+                    /** @var \Shopware\Models\Category\Category $defaultCategory */
+                    $defaultCategory = $this->manager->getRepository('Shopware\Models\Category\Category')->find($defaultCategoryId);
+                    if ($defaultCategory) {
+                        $categories[] = $defaultCategory;
+                    }
+                }
+            }
+
+            $model->setCategories($categories);
         } else {
             $detail = $model->getMainDetail();
         }
@@ -198,6 +211,7 @@ class ProductToShop implements ProductToShopBase
         if ($product->attributes['unit']) {
             /** @var \Shopware\Bepado\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
+
             /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
 
@@ -206,8 +220,12 @@ class ProductToShop implements ProductToShopBase
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $this->helper->getUnit($shopwareUnit);
             $detail->setUnit($unit);
+            $detail->setPurchaseUnit($product->attributes['quantity']);
+            $detail->setReferenceUnit($product->attributes['ref_quantity']);
         } else {
             $detail->setUnit(null);
+            $detail->setPurchaseUnit(null);
+            $detail->setReferenceUnit(null);
         }
 
         // set dimension
@@ -308,17 +326,18 @@ class ProductToShop implements ProductToShopBase
         if($model === null) {
             return;
         }
-        $model->getDetails()->clear();
-        $this->manager->remove($model);
-
-//        $model->setActive(false);
 
         // Not sure why, but the Attribute can be NULL
-//        $attribute = $this->helper->getBepadoAttributeByModel($model);
-//        if ($attribute) {
-//            $attribute->setExportStatus('delete');
-//        }
-        $this->manager->flush($model);
+        $attribute = $this->helper->getBepadoAttributeByModel($model);
+        if ($attribute) {
+            $this->manager->remove($attribute);
+        }
+        $model->getDetails()->clear();
+
+        $this->manager->remove($model);
+
+        $this->manager->flush();
+        $this->manager->clear();
     }
 
     /**

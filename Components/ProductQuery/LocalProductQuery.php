@@ -5,6 +5,7 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
+use Shopware\Bepado\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -119,6 +120,14 @@ class LocalProductQuery extends BaseProductQuery
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
         }
 
+        // add default export category
+        if (empty($row['categories'])) {
+            $defaultExportCategory = $this->configComponent->getConfig('defaultExportCategory');
+            if ($defaultExportCategory) {
+                $row['categories'][] = $this->configComponent->getConfig('defaultExportCategory');
+            }
+        }
+
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);
@@ -131,15 +140,23 @@ class LocalProductQuery extends BaseProductQuery
 
         unset($row['localId']);
 
-        //Map local unit to bepado unit
-        if ($row['attributes']['unit']) {
-            $unitMapper = new UnitMapper($this->configComponent, $this->manager);
-            $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
-        }
+        if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
+        {
+            //Map local unit to bepado unit
+            if ($row['attributes']['unit']) {
+                $unitMapper = new UnitMapper($this->configComponent, $this->manager);
+                $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
+            }
 
-        //@todo:stefan Discuss with Daniel about product quantities
-        $row['attributes']['quantity'] = (int)$row['attributes']['quantity'];
-        $row['attributes']['ref_quantity'] = (int)$row['attributes']['ref_quantity'];
+            $intRefQuantity = (int)$row['attributes']['ref_quantity'];
+            if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
+                $row['attributes']['ref_quantity'] = $intRefQuantity;
+            }
+        } else {
+            unset($row['attributes']['unit']);
+            $row['attributes']['quantity'] = null;
+            $row['attributes']['ref_quantity'] = null;
+        }
 
         $product = new Product($row);
         return $product;

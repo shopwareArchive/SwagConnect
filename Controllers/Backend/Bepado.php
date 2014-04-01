@@ -159,6 +159,19 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
               || substr_count($id, '/') != $count) {
                 continue;
             }
+
+            //todo@sb: Find better solution
+            $categories = Shopware()->Db()->fetchPairs(
+                'SELECT `id`,`category` FROM s_plugin_bepado_items
+                WHERE `source_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
+                WHERE  `bepado_import_mapping` = `category`) = 0)
+                GROUP BY `category`'
+            );
+
+            if (in_array($id, $categories)) {
+                $name = $name . '<span style="color: red;">*</span>';
+            }
+
             $data[] = array(
                 'id' => $id,
                 'name' => $name
@@ -330,15 +343,38 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getImportMappingListAction()
     {
         $node = (int)$this->Request()->getParam('node', 1);
-        $repository = $this->getCategoryRepository();
+        $filter = $this->Request()->getParam('filter', array());
+        if ($node != 1) {
+            $filter = array();
+        }
 
-        $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
+        $repository = $this->getCategoryRepository();
+        // remove bepado category filter
+        foreach($filter as $key=>&$f) {
+            if ($f['property'] == 'mapping') {
+                $bepadoCategoryFilter = $f;
+                unset($filter[$key]);
+            }
+        }
+
+        $builder = $repository->getListQueryBuilder($filter, array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
         $builder->add('select', 'ct.bepadoImportMapping as mapping', true);
 
-        $builder->where('c.parentId = :parentId');
-        $query = $builder->getQuery();
-        $query->setParameter('parentId', $node);
+        if (!empty($filter)) {
+            // add bepado category attribute in where clause
+            if ($bepadoCategoryFilter) {
+                $builder->orWhere('ct.bepadoImportMapping LIKE :mapping');
+                $builder->setParameter(':mapping', $bepadoCategoryFilter['value']);
+            }
+
+            $query = $builder->getQuery();
+        } else {
+            $builder->andWhere('c.parentId = :parentId');
+            $query = $builder->getQuery();
+            $query->setParameter('parentId', $node);
+        }
+
         $count = Shopware()->Models()->getQueryCount($query);
 
         $data = $query->getArrayResult();
@@ -381,15 +417,39 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getExportMappingListAction()
     {
         $node = (int)$this->Request()->getParam('node', 1);
+        $filter = $this->Request()->getParam('filter', array());
         $repository = $this->getCategoryRepository();
 
-        $builder = $repository->getListQueryBuilder(array(), array(), null, null, true);
+        if ($node != 1) {
+            $filter = array();
+        }
+
+        // remove bepado category filter
+        foreach($filter as $key=>&$f) {
+            if ($f['property'] == 'mapping') {
+                $bepadoCategoryFilter = $f;
+                unset($filter[$key]);
+            }
+        }
+
+        $builder = $repository->getListQueryBuilder($filter, array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
         $builder->add('select', 'ct.bepadoExportMapping as mapping', true);
 
-        $builder->where('c.parentId = :parentId');
-        $query = $builder->getQuery();
-        $query->setParameter('parentId', $node);
+        if (!empty($filter)) {
+            // add bepado category attribute in where clause
+            if ($bepadoCategoryFilter) {
+                $builder->orWhere('ct.bepadoExportMapping LIKE :mapping');
+                $builder->setParameter(':mapping', $bepadoCategoryFilter['value']);
+            }
+
+            $query = $builder->getQuery();
+        } else {
+            $builder->where('c.parentId = :parentId');
+            $query = $builder->getQuery();
+            $query->setParameter('parentId', $node);
+        }
+
         $count = Shopware()->Models()->getQueryCount($query);
 
         $data = $query->getArrayResult();

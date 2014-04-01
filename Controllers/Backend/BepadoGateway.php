@@ -80,9 +80,8 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
         $loggingEnabled = $this->getConfigComponent()->getConfig('logRequest');
 
-        $logger = $this->getLogger();
-
         $request = file_get_contents('php://input');
+        $logger = $this->getLogger();
 
         try {
             $sdk = $this->getSDK();

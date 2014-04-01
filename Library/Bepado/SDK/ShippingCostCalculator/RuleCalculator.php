@@ -136,7 +136,7 @@ class RuleCalculator implements ShippingCostCalculator
                 return $rules->vat;
 
             default:
-                throw new \RuntimeException("Unknown VAT mode specified.");
+                throw new \RuntimeException("Unknown VAT mode specified: " . $vatMode);
         }
     }
 }

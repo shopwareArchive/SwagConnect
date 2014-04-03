@@ -14,9 +14,12 @@ class Logger
     /** @var  \PDO|\Enlight_Components_Db_Adapter_Pdo_Mysql */
     protected $db;
 
-    public function __construct($db)
+    protected $enabled;
+
+    public function __construct($db, $enabled = true)
     {
         $this->db = $db;
+        $this->enabled = $enabled;
     }
 
     /**
@@ -45,6 +48,10 @@ class Logger
                 $service = $document->service;
                 $command = $document->command;
             }
+        }
+
+        if (!$this->enabled && !in_array($command, array('checkProducts', 'reserveProducts', 'buy'))) {
+            return;
         }
 
         $this->db->query('

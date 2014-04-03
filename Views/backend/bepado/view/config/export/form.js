@@ -119,7 +119,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
             title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
-            disabled: true,
+            disabled: false,
             items: [
                 {
                     xtype: 'label',
@@ -135,14 +135,18 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                 if (!operation.wasSuccessful()) {
                     return;
                 }
-                // if there isn't exported product
+                // if there is exported product
                 // pricing mapping should be disabled
-                if (records.length == 0) {
-                    me.priceMappingsFieldSet.setDisabled(false);
+                for (var i=0;i<records.length;i++) {
+                    var exportStatus = records[i].get('exportStatus');
+                    if ( exportStatus == 'update' || exportStatus == 'insert' || exportStatus == 'error') {
+                        me.priceMappingsFieldSet.setDisabled(true);
+                        console.log('true');
+                    }
+
                 }
             }
         });
-
 
         return [
             {

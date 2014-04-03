@@ -148,6 +148,12 @@ class TemplateExtension extends BaseSubscriber
         if(empty($product->shopId)) {
             return;
         }
+
+        // Fix prices for displaying
+        foreach(array('price', 'purchasePrice', 'vat') as $name) {
+            $product->$name = round($product->$name, 2);
+        }
+
         $shop = $sdk->getShop($product->shopId);
 
         $modelsManager = Shopware()->Models();

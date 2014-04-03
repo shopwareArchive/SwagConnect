@@ -106,11 +106,6 @@ abstract class BaseProductQuery
         }
         unset($row['category']);
 
-        // Fix prices
-        foreach(array('price', 'purchasePrice', 'vat') as $name) {
-            $row[$name] = round($row[$name], 2);
-        }
-
         // The SDK expects the weight to be numeric. So if it is NULL, we unset it here
         if ($row['weight'] === null) {
             unset ($row['weight']);

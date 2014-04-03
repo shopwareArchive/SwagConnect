@@ -117,24 +117,39 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
         var container = me.createProductContainer();
 
+        me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
+            title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
+            disabled: true,
+            items: [
+                {
+                    xtype: 'label',
+                    html: '{s name=config/export/label/priceDescription}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
+                },
+                me.createPriceField('price'),
+                me.createPriceField('purchasePrice')
+            ]
+        });
+
+        Ext.getStore('export.List').load({
+            callback: function(records, operation) {
+                if (!operation.wasSuccessful()) {
+                    return;
+                }
+                // if there isn't exported product
+                // pricing mapping should be disabled
+                if (records.length == 0) {
+                    me.priceMappingsFieldSet.setDisabled(false);
+                }
+            }
+        });
+
+
         return [
             {
                 xtype: 'bepado-config-export-description'
             },
             container,
-            {
-                xtype: 'fieldset',
-                title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
-                items: [
-                    {
-                        xtype: 'label',
-                        html: '{s name=config/export/label/priceDescription}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
-                    },
-                    me.createPriceField('price'),
-                    me.createPriceField('purchasePrice')
-                ]
-
-            }
+            me.priceMappingsFieldSet
         ];
     },
 

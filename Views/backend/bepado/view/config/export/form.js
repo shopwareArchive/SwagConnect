@@ -141,7 +141,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     var exportStatus = records[i].get('exportStatus');
                     if ( exportStatus == 'update' || exportStatus == 'insert' || exportStatus == 'error') {
                         me.priceMappingsFieldSet.setDisabled(true);
-                        console.log('true');
                     }
 
                 }

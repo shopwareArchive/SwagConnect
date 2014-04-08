@@ -22,7 +22,8 @@ class Checkout extends BaseSubscriber
 
     protected $logger;
 
-    private $oldSessionId;
+    /** @var  string */
+    private $newSessionId;
 
     public function getSubscribedEvents()
     {
@@ -36,7 +37,7 @@ class Checkout extends BaseSubscriber
 
     public function updateSessionId(\Enlight_Event_EventArgs $args)
     {
-        $this->oldSessionId = $args->get('oldSessionId');
+        $this->newSessionId = $args->get('newSessionId');
     }
 
 
@@ -86,8 +87,8 @@ class Checkout extends BaseSubscriber
         $userId = Shopware()->Session()->sUserId;
         $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId, $userId);
 
-        if ($hasBepadoProduct === false && $this->oldSessionId) {
-            $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($this->oldSessionId);
+        if ($hasBepadoProduct === false && $this->newSessionId) {
+            $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($this->newSessionId);
         }
 
         $view->hasBepadoProduct = $hasBepadoProduct;

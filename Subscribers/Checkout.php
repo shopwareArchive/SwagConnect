@@ -22,13 +22,21 @@ class Checkout extends BaseSubscriber
 
     protected $logger;
 
+    private $oldSessionId;
+
     public function getSubscribedEvents()
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
             'Shopware_Modules_Order_SaveOrder_FilterSQL' => 'checkoutReservedProducts',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish'
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish',
+            'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
         );
+    }
+
+    public function updateSessionId(\Enlight_Event_EventArgs $args)
+    {
+        $this->oldSessionId = $args->get('oldSessionId');
     }
 
 
@@ -74,8 +82,13 @@ class Checkout extends BaseSubscriber
         $actionName = $request->getActionName();
 
         $sessionId = Shopware()->SessionID();
+
         $userId = Shopware()->Session()->sUserId;
         $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId, $userId);
+
+        if ($hasBepadoProduct === false && $this->oldSessionId) {
+            $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($this->oldSessionId);
+        }
 
         $view->hasBepadoProduct = $hasBepadoProduct;
 

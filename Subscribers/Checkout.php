@@ -73,7 +73,10 @@ class Checkout extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
-        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID());
+        $sessionId = Shopware()->SessionID();
+        $userId = Shopware()->Session()->sUserId;
+        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId, $userId);
+
         $view->hasBepadoProduct = $hasBepadoProduct;
 
         if ($actionName == 'ajax_add_article') {

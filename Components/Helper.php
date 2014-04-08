@@ -183,11 +183,10 @@ class Helper
      * @param $session
      * @return bool
      */
-    public function hasBasketBepadoProducts($session)
+    public function hasBasketBepadoProducts($session, $userId = null)
     {
         $connection = $this->manager->getConnection();
-        $result = $connection->fetchArray(
-            'SELECT ob.articleID
+        $sql = 'SELECT ob.articleID
 
             FROM s_order_basket ob
 
@@ -196,10 +195,17 @@ class Helper
             AND bi.shop_id IS NOT NULL
 
             WHERE ob.sessionID=?
-            LIMIT 1
-            ',
-            array($session)
-        );
+            ';
+        $whereClause = array($session);
+
+        if ($userId > 0) {
+            $sql .= ' OR userID=?';
+            $whereClause[] = $userId;
+        }
+
+        $sql .= ' LIMIT 1';
+
+        $result = $connection->fetchArray($sql, $whereClause);
 
         return !empty($result);
     }

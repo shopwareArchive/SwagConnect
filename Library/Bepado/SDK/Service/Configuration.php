@@ -40,6 +40,7 @@ class Configuration
      *
      * @param array $configurations
      * @param array $features
+     * @param \Bepado\SDK\Struct\Address $billing
      *
      * @return void
      */
@@ -50,6 +51,7 @@ class Configuration
                 $configuration['shopId'],
                 new Struct\ShopConfiguration(
                     array(
+                        'name'             => $configuration['shopId'],
                         'serviceEndpoint'  => $configuration['serviceEndpoint'],
                         'shippingCost'     => $configuration['shippingCost'],
                         'displayName'      => $configuration['shopDisplayName'],
@@ -61,34 +63,27 @@ class Configuration
             );
         }
 
-        if (is_array($features)) {
+        if ($features) {
             $this->configuration->setEnabledFeatures($features);
         }
     }
 
-    /**
-     * Get the categories last revision.
-     *
-     * @return string
-     */
-    public function getCategoriesLastRevision()
+    public function replicate(array $changes)
     {
-        return $this->configuration->getCategoriesLastRevision();
+        foreach ($changes as $change) {
+            $config = $change['configuration'];
+
+            foreach ($config->shops as $shop) {
+                $this->configuration->setShopConfiguration($shop->name, $shop);
+            }
+
+            $this->configuration->setEnabledFeatures($config->features);
+            $this->configuration->setBillingAddress($config->billingAddress);
+        }
     }
 
-    /**
-     * Update the categories in this shop and increment the last revision.
-     *
-     * @param array $categories
-     * @return void
-     */
-    public function updateCategories(array $categories, $revision)
+    public function lastRevision()
     {
-        if (strcmp($this->getCategoriesLastRevision(), $revision) > 0) {
-            return;
-        }
-
-        $this->configuration->setCategories($categories);
-        $this->configuration->setCategoriesLastRevision($revision);
+        return 0; // always replicate
     }
 }

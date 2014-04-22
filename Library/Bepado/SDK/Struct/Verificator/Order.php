@@ -51,6 +51,11 @@ class Order extends Verificator
         }
         $dispatcher->verify($struct->deliveryAddress);
 
+        if (!$struct->billingAddress instanceof Address) {
+            throw new \RuntimeException('Billing address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
+        }
+        $dispatcher->verify($struct->billingAddress);
+
         $paymentTypes = array(
             Struct\Order::PAYMENT_ADVANCE,
             Struct\Order::PAYMENT_INVOICE,

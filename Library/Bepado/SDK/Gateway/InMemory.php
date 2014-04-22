@@ -36,6 +36,7 @@ class InMemory extends Gateway
     protected $shippingCosts = array();
     protected $shippingCostsRevision;
     protected $features = array();
+    protected $billingAddress;
 
     /**
      * Get next changes
@@ -537,5 +538,23 @@ class InMemory extends Gateway
     public function getCategoriesLastRevision()
     {
         return $this->categoriesLastRevision;
+    }
+
+    /**
+     * Set the shops billing address used in orders.
+     *
+     * @param \Bepado\SDK\Struct\Address $address
+     */
+    public function setBillingAddress(Struct\Address $address)
+    {
+        $this->billingAddress = $address;
+    }
+
+    /**
+     * @return \Bepado\SDK\Struct\Address
+     */
+    public function getBillingAddress()
+    {
+        return $this->billingAddress;
     }
 }

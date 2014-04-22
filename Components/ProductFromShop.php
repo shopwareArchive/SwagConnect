@@ -221,8 +221,9 @@ class ProductFromShop implements ProductFromShopBase
         } else {
             $billing = $customer->getBilling();
         }
+
         $billing->fromArray($this->getAddressData(
-            $order->deliveryAddress
+            $order->billingAddress
         ));
         $this->manager->persist($customer);
 
@@ -231,7 +232,7 @@ class ProductFromShop implements ProductFromShopBase
         $billing = new OrderModel\Billing();
         $billing->setCustomer($customer);
         $billing->fromArray($this->getAddressData(
-            $order->deliveryAddress
+                $order->billingAddress
         ));
         $model->setBilling($billing);
 

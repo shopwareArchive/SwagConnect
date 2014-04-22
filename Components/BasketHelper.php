@@ -429,6 +429,7 @@ class BasketHelper
     {
         $this->calculateShippingCosts($country);
         $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
+
         $shippingCosts = $shippingCostsNet;
         $shippingCostsWithTax = $shippingCosts * (1+$this->getMaxTaxRate()/100);
 
@@ -818,5 +819,13 @@ class BasketHelper
         $groupModel = $repository->findOneBy(array('key' => $customerGroup));
 
         return $groupModel->getTax();
+    }
+
+    /**
+     * @return SDK\Struct\TotalShippingCosts
+     */
+    public function getTotalShippingCosts()
+    {
+        return $this->totalShippingCosts;
     }
 }

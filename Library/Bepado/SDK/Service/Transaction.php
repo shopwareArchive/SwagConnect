@@ -132,6 +132,10 @@ class Transaction
 
                 $currentNotAvailable = clone $current;
                 $currentNotAvailable->availability = 0;
+                $currentNotAvailable->purchasePrice = $this->discountedPurchasePrice(
+                    $current,
+                    $buyerShopConfig->priceGroupMargin
+                );
 
                 $changes[] = new Struct\Change\InterShop\Update(
                     array(
@@ -143,6 +147,11 @@ class Transaction
 
             } elseif ($this->priceHasChanged($current, $product) ||
                 $this->availabilityHasChanged($current, $product)) {
+
+                $current->purchasePrice = $this->discountedPurchasePrice(
+                    $current,
+                    $buyerShopConfig->priceGroupMargin
+                );
 
                 // Price or availability changed
                 $changes[] = new Struct\Change\InterShop\Update(
@@ -183,12 +192,18 @@ class Transaction
         return $indexedProducts;
     }
 
-    private function purchasePriceHasChanged($current, $product, $priceGroupMargin)
+    private function discountedPurchasePrice($current, $priceGroupMargin)
     {
         $discount = ($current->purchasePrice * $priceGroupMargin) / 100;
-        $discountedPrice = $current->purchasePrice - $discount;
+        return $current->purchasePrice - $discount;
+    }
 
-        return !$this->floatsEqual($discountedPrice, $product->purchasePrice);
+    private function purchasePriceHasChanged($current, $product, $priceGroupMargin)
+    {
+        return !$this->floatsEqual(
+            $this->discountedPurchasePrice($current, $priceGroupMargin),
+            $product->purchasePrice
+        );
     }
 
     private function floatsEqual($a, $b)

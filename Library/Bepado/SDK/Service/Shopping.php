@@ -71,6 +71,11 @@ class Shopping
      */
     protected $calculator;
 
+    /**
+     * @var ShopConfiguration
+     */
+    protected $config;
+
     public function __construct(
         ShopFactory $shopFactory,
         ChangeVisitor $changeVisitor,
@@ -249,7 +254,7 @@ class Shopping
             $order->shippingRule = $shippingCosts->shops[$shopId]->rule;
 
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
-            $responses[$shopId] = $shopGateway->reserveProducts($order);
+            $responses[$shopId] = $shopGateway->reserveProducts($this->anonymizeCustomerEmail($order));
         }
 
         $reservation = new Struct\Reservation();
@@ -273,6 +278,27 @@ class Shopping
 
         $reservation->success = !count($reservation->messages);
         return $reservation;
+    }
+
+    /**
+     * Anonymize a customer email.
+     *
+     * @return \Bepado\SDK\Struct\Order
+     */
+    private function anonymizeCustomerEmail(Struct\Order $order)
+    {
+        if ($order->deliveryAddress->email
+            && strpos($order->deliveryAddress->email, "@mail.bepado.com") === false) {
+
+            $remoteOrder = clone $order;
+            $remoteOrder->deliveryAddress->email = sprintf(
+                'marketplace-%s-%s@mail.bepado.com',
+                $order->orderShop,
+                md5($remoteOrder->deliveryAddress->email)
+            );
+        }
+
+        return $remoteOrder;
     }
 
     /**

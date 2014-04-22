@@ -9,29 +9,22 @@ namespace Bepado\SDK\ShippingCosts\Rule;
 
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Struct\Order;
+use Bepado\SDK\Struct\Product;
 
 /**
- * Decorator for orders from specific countries.
+ * Only allows the shipping rule to match when its not more heavy than a max weight.
  *
- * Only applys nested rule when from the given countries.
+ * Products without a weight are assumed to weigh next to nothing and are added as 0.
+ * Weights have to be given to every product to make this rule useful.
  */
-class CountryDecorator extends Rule
+class WeightDecorator extends Rule
 {
     /**
-     * ISO-3 Country codes
+     * Maximum weight in kilograms (ex. 4.8).
      *
-     * @var array<string>
+     * @var float
      */
-    public $countries = array();
-
-    /**
-     * Exclude addresses with given zip codes.
-     *
-     * Matches are evaluated from the beginning and case insensitive.
-     *
-     * @var array<string>
-     */
-    public $excludeZipCodes = array();
+    public $maxWeight;
 
     /**
      * @var \Bepado\SDK\ShippingCosts\Rule
@@ -47,30 +40,26 @@ class CountryDecorator extends Rule
     public function isApplicable(Order $order)
     {
         return
-            $this->matchesCountry($order->deliveryAddress->country) &&
-            !$this->matchesExcludedZipCode($order->deliveryAddress->zip) &&
+            $this->lessOrEqualMaximumWeight($order) &&
             $this->delegatee->isApplicable($order)
         ;
     }
 
-    private function matchesCountry($country)
+    private function lessOrEqualMaximumWeight(Order $order)
     {
-        return in_array(
-            $country,
-            $this->countries
-        );
-    }
+        $orderWeight = 0;
 
-    private function matchesExcludedZipCode($zipCode)
-    {
-        return strlen($zipCode) && count(
-            array_filter(
-                $this->excludeZipCodes,
-                function ($excludeZipCode) use ($zipCode) {
-                    return stripos($zipCode, $excludeZipCode) === 0;
-                }
-            )
-        ) > 0;
+        foreach ($order->orderItems as $orderItem) {
+            $product = $orderItem->product;
+
+            if (!array_key_exists(Product::ATTRIBUTE_WEIGHT, $product->attributes)) {
+                continue;
+            }
+
+            $orderWeight += $product->attributes[Product::ATTRIBUTE_WEIGHT] * $orderItem->count;
+        }
+
+        return $orderWeight <= $this->maxWeight;
     }
 
     /**

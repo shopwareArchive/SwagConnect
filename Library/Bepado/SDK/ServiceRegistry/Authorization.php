@@ -74,6 +74,7 @@ class Authorization extends Rpc\ServiceRegistry
     {
         switch ($rpcCall->service) {
             case 'products':
+            case 'categories':
             case 'configuration':
             case 'shippingCosts':
                 if ($this->token->userIdentifier !== "bepado") {
@@ -101,8 +102,10 @@ class Authorization extends Rpc\ServiceRegistry
 
             default:
                 throw new SecurityException(
-                    "No Authorization to call service '%s'.",
-                    $rpcCall->service
+                    sprintf(
+                        "No Authorization to call service '%s'.",
+                        $rpcCall->service
+                    )
                 );
         }
 

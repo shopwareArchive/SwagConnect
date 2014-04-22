@@ -228,6 +228,7 @@ class Checkout extends BaseSubscriber
         if($request->getActionName() != 'finish') {
             return;
         }
+
         if(empty($session['sOrderVariables'])) {
 			return;
 		}
@@ -244,6 +245,7 @@ class Checkout extends BaseSubscriber
         $order->orderItems = array();
         $userData = $session['sOrderVariables']['sUserData'];
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
+
         $basket = $session['sOrderVariables']['sBasket'];
 
         /** @var \Shopware\Bepado\Components\Utils\OrderPaymentMapper $orderPaymentMapper */

@@ -807,4 +807,28 @@ class PDO extends Gateway
 
         return in_array($feature, explode(',', $features));
     }
+
+    /**
+     * Set the shops billing address used in orders.
+     *
+     * @param \Bepado\SDK\Struct\Address $address
+     */
+    public function setBillingAddress(Struct\Address $address)
+    {
+        $this->setConfig('_billing_address_', serialize($address));
+    }
+
+    /**
+     * @return \Bepado\SDK\Struct\Address
+     */
+    public function getBillingAddress()
+    {
+        $address = $this->getConfig('_billing_address_');
+
+        if ($address) {
+            return unserialize($address);
+        }
+
+        return null;
+    }
 }

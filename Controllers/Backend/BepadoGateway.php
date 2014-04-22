@@ -49,7 +49,8 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
      */
     public function getLogger()
     {
-        return new Logger(Shopware()->Db());
+        $loggingEnabled = $this->getConfigComponent()->getConfig('logRequest');
+        return new Logger(Shopware()->Db(), $loggingEnabled);
     }
 
     /**
@@ -78,8 +79,6 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
     {
         $this->Response()->setHeader('Content-Type', 'text/xml; charset=utf-8');
 
-        $loggingEnabled = $this->getConfigComponent()->getConfig('logRequest');
-
         $request = file_get_contents('php://input');
         $logger = $this->getLogger();
 
@@ -95,9 +94,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             throw $e;
         }
 
-        if ($loggingEnabled) {
-            $logger->write(false, $request, $result);
-        }
+        $logger->write(false, $request, $result);
 
         echo $result;
     }

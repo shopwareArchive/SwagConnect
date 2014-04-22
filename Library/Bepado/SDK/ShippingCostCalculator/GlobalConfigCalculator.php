@@ -37,6 +37,17 @@ class GlobalConfigCalculator implements ShippingCostCalculator
      */
     public function calculateShippingCosts(Order $order, $type)
     {
+        // temporary workaround for not having my own global shipping costs
+        if ($order->shippingCosts !== null && $order->grossShippingCosts !== null) {
+            return new ShippingCosts(
+                array(
+                    'shippingCosts' => $order->shippingCosts,
+                    'grossShippingCosts' => $order->grossShippingCosts,
+                    'isShippable' => true,
+                )
+            );
+        }
+
         return $this->getShippingCosts(
             array_map(function (OrderItem $item) {
                 return $item->product;

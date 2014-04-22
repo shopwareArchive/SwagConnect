@@ -152,13 +152,8 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
 
 
         if (basePriceColumn) {
-            if (!me.basePriceEditor) {
-                me.basePriceEditor = basePriceColumn.getEditor();
-            }
             if (me.record.get('shopId') > 0) {
                 basePriceColumn.setEditor(false);
-            } else {
-                basePriceColumn.setEditor(me.basePriceEditor);
             }
         }
 

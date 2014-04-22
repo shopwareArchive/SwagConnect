@@ -22,6 +22,9 @@ class Checkout extends BaseSubscriber
 
     protected $logger;
 
+    /** @var  string */
+    private $newSessionId;
+
     /** @var  \Shopware\Bepado\Components\BepadoFactory */
     protected $factory;
 
@@ -30,8 +33,14 @@ class Checkout extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
             'Shopware_Modules_Order_SaveOrder_FilterSQL' => 'checkoutReservedProducts',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish'
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish',
+            'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
         );
+    }
+
+    public function updateSessionId(\Enlight_Event_EventArgs $args)
+    {
+        $this->newSessionId = $args->get('newSessionId');
     }
 
 
@@ -76,7 +85,15 @@ class Checkout extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
-        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID());
+        $sessionId = Shopware()->SessionID();
+
+        $userId = Shopware()->Session()->sUserId;
+        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId, $userId);
+
+        if ($hasBepadoProduct === false && $this->newSessionId) {
+            $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($this->newSessionId);
+        }
+
         $view->hasBepadoProduct = $hasBepadoProduct;
 
         if ($actionName == 'ajax_add_article') {

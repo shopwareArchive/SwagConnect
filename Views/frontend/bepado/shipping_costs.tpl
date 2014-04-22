@@ -4,18 +4,32 @@
 
 {foreach from=$bepadoShipping item=item}
     {if $bepadoShopInfo}
-    <h2>{s name="bepado_dispatch_shop_name"}Versand von »{$item.shopInfo.name}«{/s}</h2>
+        <h2>{s name="bepado_dispatch_shop_name"}Versand von »{$item.shopInfo.name}«{/s}</h2>
     {else}
-    <h2>{s name="bepado_dispatch_shop_id"}Versand für Lager {$item.shopInfo.id}{/s}</h2>
+        <h2>{s name="bepado_dispatch_shop_id"}Versand für Lager {$item.shopInfo.id}{/s}</h2>
     {/if}
-    {foreach from=$item item=rules}
-        {foreach from=$rules item=rule key=type}
-            {if $type == "country"}
+    {foreach $item.rules as $rule}
+        <strong>Versand nach
+        {if $rule.type == "country"}
+            Land
+        {/if}
+        :</strong>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
                 {foreach from=$rule.values item=ruleValue}
-                    {$ruleValue}: {$rule.price}€
+                    <tr>
+                        <td>{$ruleValue}</td>
+                        <td>{$rule.price} €</td>
+                    </tr>
                 {/foreach}
-            {/if}
-       {/foreach}
+            </tbody>
+        </table>
     {/foreach}
 {/foreach}
 

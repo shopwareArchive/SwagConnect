@@ -3,8 +3,8 @@
 namespace Shopware\Bepado\Subscribers;
 
 use Shopware\Bepado\Components\ShippingCostBridge;
-use Shopware\Bepado\Components\ShippingCostPreprocessor;
-use Shopware\Bepado\Components\Utils\CountryCodeResolver;
+use Shopware\Bepado\Components\ShippingCosts\ShippingCostRuleVisitor;
+use Shopware\Bepado\Components\Translations\TranslationService;
 
 class ShippingCosts extends BaseSubscriber
 {
@@ -50,6 +50,16 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
+     * @return ShippingCostRuleVisitor
+     */
+    public function getShippingCostVisitor()
+    {
+        $shippingCostPreprocessor = new ShippingCostRuleVisitor(new TranslationService(Shopware()->Db(
+        ), $this->getCountryCode()));
+        return $shippingCostPreprocessor;
+    }
+
+    /**
      * If the shown page is the shipping cost page, add the bepado shipping cost information
      *
      * @param \Enlight_Event_EventArgs $args
@@ -68,21 +78,48 @@ class ShippingCosts extends BaseSubscriber
 
         $this->registerMyTemplateDir();
 
-        $shippingCostBridge = new ShippingCostBridge(Shopware()->Db());
-        $shippingCosts = $shippingCostBridge->getShippingCostsForCurrentShop();
-
-        $shippingCostPreprocessor = new ShippingCostPreprocessor($shippingCosts, Shopware()->Db(
-        ), $this->getCountryCode());
-        $result = $shippingCostPreprocessor->prepare();
-
         Shopware()->Template()->assign(
             array(
-                'bepadoShipping' => $result,
+                'bepadoShipping' => $this->getShippingCosts(),
                 'bepadoShopInfo' => $this->getConfigComponent()->getConfig('detailShopInfo')
             )
         );
         $result = Shopware()->Template()->fetch('frontend/bepado/shipping_costs.tpl');
 
         $controller->View()->sContent = $result . $controller->View()->sContent;
+    }
+
+    protected function getShopInfo($shopId)
+    {
+        $info = Shopware()->BepadoSDK()->getShop($shopId);
+
+        return array(
+            'id' => $info->id,
+            'name' => $info->name
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getShippingCosts()
+    {
+        $shippingCosts = array();
+        $shippingCostVisitor = $this->getShippingCostVisitor();
+
+        foreach ($this->getAllShippingCosts() as $shopId => $rules) {
+            $shippingCostVisitor->visit($rules);
+            $shippingCosts[$shopId]['rules'] = $shippingCostVisitor->rules;
+            $shippingCosts[$shopId]['shopInfo'] = $this->getShopInfo($shopId);
+        }
+        return $shippingCosts;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAllShippingCosts()
+    {
+        return Shopware()->BepadoSDK()->getShippingCostRules();
     }
 }

@@ -194,11 +194,6 @@ class ProductFromShop implements ProductFromShopBase
         $email = $order->billingAddress->email;
 
         $password = Random::getAlphanumericString(30);
-        $hash = md5($password);
-        if (!$email) {
-            // todo@dn: Use real mail address here.600
-            $email = substr($hash, 0, 8) . '@bepado.de';
-        }
 
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
         $customer = $repository->findOneBy(array(
@@ -209,7 +204,7 @@ class ProductFromShop implements ProductFromShopBase
             $customer->fromArray(array(
                 'active' => true,
                 'email' => $email,
-                'rawPassword' => $hash,
+                'password' => $password,
                 'accountMode' => 1,
                 'shop' => $shop,
                 'paymentId' => $payment->getId(),

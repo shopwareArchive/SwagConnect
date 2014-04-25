@@ -54,8 +54,11 @@ class ShippingCosts extends BaseSubscriber
      */
     public function getShippingCostVisitor()
     {
-        $shippingCostPreprocessor = new ShippingCostRuleVisitor(new TranslationService(Shopware()->Db(
-        ), $this->getCountryCode()));
+        $shippingCostPreprocessor = new ShippingCostRuleVisitor(
+            new TranslationService(Shopware()->Db(),
+            $this->getCountryCode())
+        );
+
         return $shippingCostPreprocessor;
     }
 
@@ -105,13 +108,14 @@ class ShippingCosts extends BaseSubscriber
     public function getShippingCosts()
     {
         $shippingCosts = array();
-        $shippingCostVisitor = $this->getShippingCostVisitor();
 
         foreach ($this->getAllShippingCosts() as $shopId => $rules) {
+            $shippingCostVisitor = $this->getShippingCostVisitor();
             $shippingCostVisitor->visit($rules);
             $shippingCosts[$shopId]['rules'] = $shippingCostVisitor->rules;
             $shippingCosts[$shopId]['shopInfo'] = $this->getShopInfo($shopId);
         }
+
         return $shippingCosts;
     }
 

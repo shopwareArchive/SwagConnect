@@ -74,5 +74,4 @@ class CountryCodeResolver
     {
         return $this->getShippingCountry()->getIso3();
     }
-
 }

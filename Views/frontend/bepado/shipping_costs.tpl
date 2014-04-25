@@ -2,6 +2,8 @@
 
 <h1>{s name="bepad_storage_dispatch"}Lagerversand{/s}</h1>
 
+Der Steuersatz für die Brutto-Angaben kann ggf. geringer ausfallen.
+
 {foreach from=$bepadoShipping item=item}
     {if $bepadoShopInfo}
         <h2>{s name="bepado_dispatch_shop_name"}Versand von »{$item.shopInfo.name}«{/s}</h2>
@@ -9,23 +11,29 @@
         <h2>{s name="bepado_dispatch_shop_id"}Versand für Lager {$item.shopInfo.id}{/s}</h2>
     {/if}
     {foreach $item.rules as $rule}
-        <strong>Versand nach
         {if $rule.type == "country"}
-            Land
+            <strong>Versandkosten nach Land: </strong><br>
+            {assign var="rule_header" value="Land"}
+        {elseif $rule.type == "weight"}
+            <strong>Versandkosten nach Gewicht: </strong><br>
+            {assign var="rule_header" value="bis Gewicht"}
         {/if}
-        :</strong>
+        <br>
+
         <table>
             <thead>
                 <tr>
-                    <th>Rule</th>
-                    <th>Price</th>
+                    <th>{$rule_header}</th>
+                    <th>Price (net)</th>
+                    <th>Price (gross)</th>
                 </tr>
             </thead>
             <tbody>
                 {foreach from=$rule.values item=ruleValue}
                     <tr>
-                        <td>{$ruleValue}</td>
-                        <td>{$rule.price} €</td>
+                        <td>{$ruleValue.value}</td>
+                        <td>{$ruleValue.netPrice} €</td>
+                        <td>{$ruleValue.grossPrice} €</td>
                     </tr>
                 {/foreach}
             </tbody>

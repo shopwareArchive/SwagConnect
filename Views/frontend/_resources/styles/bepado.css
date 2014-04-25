@@ -85,6 +85,11 @@
     text-align:center;
     float:left;
 }
+.bepado-img img {
+    max-height: 100px;
+    max-width: 100px;
+}
+
 .bepado-article h4 {
     padding:10px 0px 20px 0px;
 }
@@ -140,3 +145,4 @@
 #confirm .bepado-dispatch-row .title {
     top: 0;
 }
+

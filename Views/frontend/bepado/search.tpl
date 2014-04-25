@@ -27,9 +27,9 @@
                         <div class="bepado-article">
                             <div class="bepado-img">
                                 {if $result->images[0]}
-                                    <img src="{$result->images[0]}" width="100" height="100">
+                                    <img src="{$result->images[0]}">
                                 {else}
-                                    <img src="{link file='frontend/_resources/images/no_picture.jpg'}" width="100" height="100">
+                                    <img src="{link file='frontend/_resources/images/no_picture.jpg'}">
                                 {/if}
                             </div>
                             <div class="bepado-info">

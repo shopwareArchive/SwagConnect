@@ -58,7 +58,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.2.167';
+    const VERSION = '1.2.186';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -378,8 +378,12 @@ final class SDK
     public function reserveProducts(Struct\Order $order)
     {
         $this->verifySdk();
-        $this->dependencies->getVerificator()->verify($order);
+
         $order->orderShop = $this->dependencies->getGateway()->getShopId();
+        $order->billingAddress = $this->dependencies->getGateway()->getBillingAddress();
+
+        $this->dependencies->getVerificator()->verify($order);
+
         return $this->dependencies->getShoppingService()->reserveProducts($order);
     }
 

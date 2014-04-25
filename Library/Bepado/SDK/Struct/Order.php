@@ -104,6 +104,13 @@ class Order extends Struct
     public $deliveryAddress;
 
     /**
+     * Billing address
+     *
+     * @var Address
+     */
+    public $billingAddress;
+
+    /**
      * Restores an order from a previously stored state array.
      *
      * @param array $state

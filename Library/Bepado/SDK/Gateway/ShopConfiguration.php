@@ -108,4 +108,16 @@ interface ShopConfiguration
      * @return bool
      */
     public function isFeatureEnabled($feature);
+
+    /**
+     * Set the shops billing address used in orders.
+     *
+     * @param \Bepado\SDK\Struct\Address $address
+     */
+    public function setBillingAddress(Struct\Address $address);
+
+    /**
+     * @return \Bepado\SDK\Struct\Address
+     */
+    public function getBillingAddress();
 }

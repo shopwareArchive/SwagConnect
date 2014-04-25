@@ -132,6 +132,25 @@ class RuleCalculator implements ShippingCostCalculator
 
                 return key($prices);
 
+            case Rules::VAT_PROPORTIONATELY:
+                $totalPrice = 0;
+                $vat = 0;
+
+                if (count($order->orderItems) === 1) {
+                    return $order->orderItems[0]->product->vat;
+                }
+
+                foreach ($order->orderItems as $orderItem) {
+                    $totalPrice += $orderItem->product->purchasePrice * $orderItem->count;
+                }
+
+                foreach ($order->orderItems as $orderItem) {
+                    $productPrice = $orderItem->product->purchasePrice * $orderItem->count;
+                    $vat += ($productPrice / $totalPrice) * $orderItem->product->vat;
+                }
+
+                return $vat;
+
             case Rules::VAT_FIX:
                 return $rules->vat;
 

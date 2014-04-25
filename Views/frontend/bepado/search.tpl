@@ -18,7 +18,13 @@
 {block name='frontend_index_content'}
     <div id="center" class="grid_13">
         {block name='frontend_search_index_headline'}
-            <h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}</h2>
+            <h2>
+                {if $searchResult->results|count gt 0}
+                    {s name='SearchHeading' namespace='frontend/search/bepado'}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}
+                {else}
+                    {s name='SearchHeadingEmpty' namespace='frontend/search/bepado'}Leider wurden zu "{$searchQuery|escape}" keine Artikel gefunden{/s}
+                {/if}
+            </h2>
         {/block}
         {block name='frontend_search_index_result'}
             <div class="bepado-search">

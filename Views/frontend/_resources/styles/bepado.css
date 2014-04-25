@@ -74,7 +74,6 @@
  * by PSC
  */
 .bepado-article {
-    padding:15px;
     margin:0px 20px 10px 0px;
     border:1px solid #DFDFDF;
 }
@@ -95,7 +94,6 @@
 }
 .bepado-article p {
     margin:0px 0px 10px 0px;
-    color:#777777;
     font-size:12px;
 }
 .bepado-article a.bepado-title {
@@ -115,21 +113,6 @@
     margin:0px 0px 20px 0px;
     font-size:16px;
     color:#333333;
-}
-.bepado-article .bepado-meta a.more {
-    display:block;
-    width:148px;
-    height:17px;
-    padding:3px 5px 0px 5px;
-    position:relative;
-    border:0px none;
-    background:url("../images/button_right-small.png") repeat-x scroll right top transparent;
-    text-decoration:none;
-    text-shadow:0 1px 1px #C30000;
-    color:#ffffff;
-}
-.bepado-article .bepado-meta a.more:hover {
-    background-position:0px -20px;
 }
 .bepado-clear {clear:both;}
 .bepado-dispatch-row {

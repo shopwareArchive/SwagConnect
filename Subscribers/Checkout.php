@@ -5,6 +5,7 @@ use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Reservation;
+use Bepado\SDK\Struct\TotalShippingCosts;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Utils\CountryCodeResolver;
@@ -163,6 +164,8 @@ class Checkout extends BaseSubscriber
 
         // Increase amount and shipping costs by the amount of bepado shipping costs
         $basketHelper->recalculate($this->getCountryCode());
+
+        $bepadoMessages = $this->getNotShippableMessages($basketHelper->getTotalShippingCosts(), $bepadoMessages);
 
         $view->assign($basketHelper->getDefaultTemplateVariables());
 
@@ -402,5 +405,29 @@ class Checkout extends BaseSubscriber
         }
 
         return $messages;
+    }
+
+    /**
+     * @param \Bepado\SDK\Struct\TotalShippingCosts $totalShippingCosts
+     * @param array $bepadoMessages
+     * @return array
+     */
+    protected function getNotShippableMessages(TotalShippingCosts $totalShippingCosts, $bepadoMessages)
+    {
+        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
+
+        foreach ($totalShippingCosts->shops as $shop) {
+            if ($shop->isShippable === false) {
+                $bepadoMessages[$shop->shopId][] = new Message(array(
+                    'message' => $namespace->get(
+                            'frontend_checkout_cart_bepado_not_shippable',
+                            'Ihre Bestellung kann nicht geliefert werden',
+                            true
+                        )
+                ));
+            }
+        }
+
+        return $bepadoMessages;
     }
 }

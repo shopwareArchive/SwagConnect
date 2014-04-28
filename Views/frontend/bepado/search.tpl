@@ -18,32 +18,45 @@
 {block name='frontend_index_content'}
     <div id="center" class="grid_13">
         {block name='frontend_search_index_headline'}
-            <h2>{s name='SearchHeadline' force}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}</h2>
+            <h2>
+                {if $searchResult->results|count gt 0}
+                    {s name='SearchHeading' namespace='frontend/search/bepado'}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}
+                {else}
+                    {s name='SearchHeadingEmpty' namespace='frontend/search/bepado'}Leider wurden zu "{$searchQuery|escape}" keine Artikel gefunden{/s}
+                {/if}
+            </h2>
         {/block}
         {block name='frontend_search_index_result'}
-            <div class="bepado-search">
-                <div class="listing" id="listing">
+            <div>
+                <div class="listing" id="listing-1col">
                     {foreach from=$searchResult->results item=result key=key name=list}
-                        <div class="bepado-article">
-                            <div class="bepado-img">
-                                {if $result->images[0]}
-                                    <img src="{$result->images[0]}" width="100" height="100">
-                                {else}
-                                    <img src="{link file='frontend/_resources/images/no_picture.jpg'}" width="100" height="100">
-                                {/if}
+                        <div class="bepado-article artbox">
+                            <div class="inner">
+
+                                <a title="{$result->vendor|escape}" href="{$result->url}" class="bepado-img">
+                                    {if $result->images[0]}
+                                        <img src="{$result->images[0]}">
+                                    {else}
+                                        <img src="{link file='frontend/_resources/images/no_picture.jpg'}">
+                                    {/if}
+                                </a>
+
+                                <a href="{$result->url}" class="title" title="{$result->title|escape}">{$result->title|escape}</a>
+
+                                <p class="desc">
+                                    <strong>Hersteller:</strong> {$result->vendor|escape}<br>
+                                    Bei insgesamt <strong>{$result->shopCount}</strong> Anbietern gefunden.
+                                </p>
+
+                                <p class="price both">
+                                    <span class="price">ab {$result->priceFrom|currency}</span>
+                                </p>
+
+                                <div class="actions">
+                                    <a class="more" href="{$result->url}" title="{$result->title|escape}">Zum Produkt</a>
+                                </div>
+                                <div class="bepado-clear"></div>
                             </div>
-                            <div class="bepado-info">
-                                <h4>
-                                    <a class="bepado-title" href="{$result->url}" title="{$result->title|escape}">{$result->title|escape}</a>
-                                </h4>
-                                <p><strong>Hersteller:</strong> {$result->vendor|escape}</p>
-                                <p>Bei insgesamt <strong>{$result->shopCount}</strong> Anbietern gefunden.</p>
-                            </div>
-                            <div class="bepado-meta">
-                                <p class="bepado-price">ab: <strong>{$result->priceFrom|currency}</strong></p>
-                                <a href="{$result->url}" title="{$result->title|escape}" class="more">Zum Produkt</a>
-                            </div>
-                            <div class="bepado-clear"></div>
                         </div>
                     {/foreach}
                 </div>

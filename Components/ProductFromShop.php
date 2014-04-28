@@ -30,7 +30,8 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Shopware\Models\Order as OrderModel,
     Shopware\Models\Customer as CustomerModel,
     Shopware\Components\Model\ModelManager,
-    Doctrine\ORM\Query;
+    Doctrine\ORM\Query,
+    Shopware\Components\Random;
 
 /**
  * The interface for products exported *to* bepado *from* the local shop
@@ -157,7 +158,7 @@ class ProductFromShop implements ProductFromShopBase
         $model->fromArray(array(
             'number' => $number,
             'invoiceShipping' => $order->grossShippingCosts,
-            'invoiceShippingNet' => $this->getShippingCostsNet($order),
+            'invoiceShippingNet' => $order->shippingCosts,
             'currencyFactor' => 1,
             'orderStatus' => $status,
             'shop' => $shop,
@@ -190,26 +191,20 @@ class ProductFromShop implements ProductFromShopBase
         }
         $model->setDetails($items);
 
-        $email = $order->deliveryAddress->email;
+        $email = $order->billingAddress->email;
 
-        $hash = md5(serialize($order->deliveryAddress));
-        if (!$email) {
-            // todo@dn: Use real mail address here.600
-            $email = substr($hash, 0, 8) . '@bepado.de';
-        }
-
+        $password = Random::getAlphanumericString(30);
 
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
         $customer = $repository->findOneBy(array(
-            'email' => $email,
-            'hashPassword' => $hash
+            'email' => $email
         ));
         if($customer === null) {
             $customer = new CustomerModel\Customer();
             $customer->fromArray(array(
                 'active' => true,
                 'email' => $email,
-                'rawPassword' => $hash,
+                'password' => $password,
                 'accountMode' => 1,
                 'shop' => $shop,
                 'paymentId' => $payment->getId(),
@@ -248,30 +243,6 @@ class ProductFromShop implements ProductFromShopBase
         $this->manager->flush();
 
         return $model->getNumber();
-    }
-
-    public function getShippingCostsNet(Order $order)
-    {
-        $taxRate = $this->getMaxTaxRate($order) + 1;
-        return $order->grossShippingCosts / $taxRate;
-    }
-
-    /**
-     * Returns the highest tax rate of the products
-     *
-     * @param Order $order
-     * @return mixed
-     */
-    public function getMaxTaxRate(Order $order)
-    {
-        return max(
-            array_map(
-                function ($orderItem) {
-                    return $orderItem->product->vat;
-                },
-                $order->products
-            )
-        );
     }
 
     /**

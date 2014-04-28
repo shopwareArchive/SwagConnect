@@ -32,6 +32,11 @@ class Rules extends Struct implements IteratorAggregate
     const VAT_FIX = 'fix';
 
     /**
+     * Calculate VAT proprotionately based on the basket.
+     */
+    const VAT_PROPORTIONATELY = 'proportionately';
+
+    /**
      * How to calculate the VAT for the shipping costs.
      *
      * @var string

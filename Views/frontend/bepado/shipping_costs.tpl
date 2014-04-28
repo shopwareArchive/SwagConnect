@@ -53,7 +53,7 @@
     {/foreach}
 
     {if $freeCarriage}
-        <p class="bepado-shipping-free-info">{s name="bepado_dispatch_free_carriage"}Ab einem Warenkorb-Wert von {$rule.values.0.value|currency} ist die Lieferung versandkostenfrei.{/s}</p>
+        <p class="bepado-shipping-free-info"><strong>{s name="bepado_dispatch_free_carriage"}Ab einem Warenkorb-Wert von {$rule.values.0.value|currency} ist die Lieferung versandkostenfrei.{/s}</strong></p>
         {assign var="freeCarriage" value=""}
     {/if}
 

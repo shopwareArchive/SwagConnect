@@ -131,8 +131,7 @@
 
 /** Shipping costs */
 .bepado-shipping-free-info {
-    font-weight: bold;
-    text-align: center;
+    text-align: left;
 }
 .bepado-shipping-rule th, td, table{
     float:left;

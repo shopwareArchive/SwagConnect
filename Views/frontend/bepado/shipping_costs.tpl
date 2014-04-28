@@ -18,6 +18,9 @@
         {elseif $rule.type == "weight"}
             <strong>{s name="bepado_dispatch_weight_label"}Versandkosten nach Gewicht: {/s}</strong><br>
             {assign var="rule_header" value="{s name="bepado_dispatch_country_column_header"}bis Gewicht{/s}"}
+        {elseif $rule.type == "freeCarriage"}
+            {assign var="freeCarriage" value="{$rule}"}
+            {continue}
         {/if}
         <br>
 
@@ -39,7 +42,12 @@
                 {/foreach}
             </tbody>
         </table>
+
     {/foreach}
+    {if $freeCarriage}
+        {s name="bepado_dispatch_free_carriage"}Ab einem Warenkorb-Wert von {$rule.values.0.value|currency} ist die Lieferung versandkostenfrei.{/s}
+        {assign var="freeCarriage" value=""}
+    {/if}
 {/foreach}
 
 <br>

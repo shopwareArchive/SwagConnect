@@ -6,6 +6,14 @@ use Shopware\Bepado\Components\ShippingCostBridge;
 use Shopware\Bepado\Components\ShippingCosts\ShippingCostRuleVisitor;
 use Shopware\Bepado\Components\Translations\TranslationService;
 
+/**
+ * The ShippingCosts class will prepend an automatically generated shipping cost table to the shop's shipping
+ * cost page.
+ * The actual shipping cost page can be configured in the backend
+ *
+ * Class ShippingCosts
+ * @package Shopware\Bepado\Subscribers
+ */
 class ShippingCosts extends BaseSubscriber
 {
     /** @var  /Shopware\Bepado\Components\Config */
@@ -33,6 +41,11 @@ class ShippingCosts extends BaseSubscriber
     /** @var  \Shopware\Bepado\Components\BepadoFactory */
     protected $factory;
 
+    /**
+     * Returns the bepado factory
+     *
+     * @return \Shopware\Bepado\Components\BepadoFactory
+     */
     protected function getFactory()
     {
         if ($this->factory === null) {
@@ -42,6 +55,11 @@ class ShippingCosts extends BaseSubscriber
         return $this->factory;
     }
 
+    /**
+     * Find the best possible country code for the current user
+     *
+     * @return string
+     */
     protected function getCountryCode()
     {
         $countryCodeUtil = $this->getFactory()->getCountryCodeResolver();
@@ -73,7 +91,7 @@ class ShippingCosts extends BaseSubscriber
         $request = $controller->Request();
 
         $customPage = $request->getParam('sCustom', null);
-        $shippingCostsPage = $this->getConfigComponent()->getConfig('shippingCostsPage', 6);
+        $shippingCostsPage = $this->getConfigComponent()->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId());
 
         if ($customPage != $shippingCostsPage) {
             return;
@@ -92,6 +110,12 @@ class ShippingCosts extends BaseSubscriber
         $controller->View()->sContent = $result . $controller->View()->sContent;
     }
 
+    /**
+     * Get name and ID for a given shopId
+     *
+     * @param $shopId
+     * @return array
+     */
     protected function getShopInfo($shopId)
     {
         $info = Shopware()->BepadoSDK()->getShop($shopId);
@@ -103,6 +127,8 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
+     * Get shipping costs and sort them by shopId and type
+     *
      * @return array
      */
     public function getShippingCosts()
@@ -120,6 +146,8 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
+     * Get all shipping cost rules from the SDK
+     *
      * @return mixed
      */
     public function getAllShippingCosts()

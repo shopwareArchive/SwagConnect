@@ -13,14 +13,22 @@ INSERT INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value
 ('frontend/detail/bepado', 1, 1, 'bepado_detail_marketplace_article', 'Marktplatz-Artikel von {$bepadoShop->name}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/detail/bepado', 1, 1, 'bepado_detail_marketplace_article_implicit', 'Artikel aus Lager {$bepadoShop->id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 
-('frontend/bepado/shipping_costs', 1, 1, 'bepad_storage_dispatch', 'Lagerversand', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/bepado/shipping_costs', 1, 2, 'bepad_storage_dispatch', 'Shipping from storage', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 1, 'bepado_storage_dispatch', 'Lagerversand', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_storage_dispatch', 'Shipping from storage', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 
 ('frontend/bepado/shipping_costs', 1, 1, 'bepado_dispatch_shop_name', 'Versand von »{$item.shopInfo.name}«', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_shop_name', 'Shipping from »{$item.shopInfo.name}«', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 
-('frontend/bepado/shipping_costs', 1, 1, 'bepado_dispatch_shop_id', '}Versand für Lager {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_shop_id', '}Shipping from storage {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48')
+('frontend/bepado/shipping_costs', 1, 1, 'bepado_dispatch_shop_id', 'Versand für Lager {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_shop_id', 'Shipping from storage {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_tax_info', 'Tax rate for gross prices might be smaller', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_country_label', 'Dispatch by country', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_country_column_header', 'Country', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_weight_label', 'Dispatch by weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_country_column_header', 'max weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_net_price', 'net price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:48')
 
 
 ON DUPLICATE KEY UPDATE

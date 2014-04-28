@@ -99,6 +99,8 @@ class ShippingCosts extends BaseSubscriber
 
         $this->registerMyTemplateDir();
 
+        $controller->View()->extendsTemplate('frontend/bepado/header_extension.tpl');
+
         Shopware()->Template()->assign(
             array(
                 'bepadoShipping' => $this->getShippingCosts(),

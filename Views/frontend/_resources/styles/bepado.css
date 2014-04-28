@@ -129,3 +129,14 @@
     top: 0;
 }
 
+/** Shipping costs */
+.bepado-shipping-free-info {
+    font-weight: bold;
+    text-align: center;
+}
+.bepado-shipping-rule th, td, table{
+    float:left;
+    table-layout: fixed;
+    width: 100px;
+
+}

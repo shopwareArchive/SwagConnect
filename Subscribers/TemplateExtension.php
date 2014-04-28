@@ -19,8 +19,19 @@ class TemplateExtension extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addBepadoTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults'
+            'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults',
+            'Enlight_Controller_Action_PostDispatch_Frontend' => 'addBepadoStyle'
         );
+    }
+
+    public function addBepadoStyle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+
+        $this->registerMyTemplateDir();
+        $subject->View()->extendsTemplate('frontend/bepado/index/index.tpl');
+
     }
 
     /**

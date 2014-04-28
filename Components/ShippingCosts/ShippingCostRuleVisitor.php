@@ -136,8 +136,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
             case 'fix':
                 $vat = $this->vat + 1;
                 break;
-            case 'max':
-            case 'dominaiting':
             default:
                 $vat = 1.19;
         }

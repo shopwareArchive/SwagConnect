@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.63';
+        return '1.4.64';
     }
 
     /**
@@ -204,6 +204,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\Voucher(),
             new \Shopware\Bepado\Subscribers\BasketWidget(),
             new \Shopware\Bepado\Subscribers\Dispatches(),
+            new \Shopware\Bepado\Subscribers\ShippingCosts(),
         );
 
         $this->registerMyLibrary();

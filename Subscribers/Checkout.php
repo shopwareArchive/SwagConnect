@@ -26,6 +26,9 @@ class Checkout extends BaseSubscriber
     /** @var  string */
     private $newSessionId;
 
+    /** @var  \Shopware\Bepado\Components\BepadoFactory */
+    protected $factory;
+
     public function getSubscribedEvents()
     {
         return array(
@@ -52,19 +55,19 @@ class Checkout extends BaseSubscriber
     }
 
 
-    /**
-     * Returns the iso3 country id for the current customer.
-     *
-     * @return string
-     */
-    protected function getCountryCode()
+    protected function getFactory()
     {
-        $customer = null;
-        if (Shopware()->Session()->sUserId) {
-            $customer = Shopware()->Models()->find('Shopware\Models\Customer\Customer', Shopware()->Session()->sUserId);
+        if ($this->factory === null) {
+            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
         }
 
-        $countryCodeUtil = new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+        return $this->factory;
+    }
+
+    protected function getCountryCode()
+    {
+        $countryCodeUtil = $this->getFactory()->getCountryCodeResolver();
+
         return $countryCodeUtil->getIso3CountryCode();
     }
 

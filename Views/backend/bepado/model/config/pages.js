@@ -27,25 +27,16 @@
  * @package Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/general"}
-Ext.define('Shopware.apps.Bepado.model.config.General', {
+//{block name="backend/bepado/model/config/pages"}
+Ext.define('Shopware.apps.Bepado.model.config.Pages', {
     extend: 'Ext.data.Model',
 
-    idProperty: 'shopId',
+    idProperty: 'id',
 
     fields: [
-        //{block name="backend/bepado/model/config/general/fields"}{/block}
-        { name: 'shopId', type: 'int', useNull: true },
-        { name: 'isDefaultShop', type: 'boolean' },
-        { name: 'apiKey', type: 'string' },
-        { name: 'bepadoAttribute', type: 'int' },
-        { name: 'bepadoDebugHost', type: 'string' },
-        { name: 'logRequest', type: 'string' },
-        { name: 'cloudSearch', type: 'string' },
-        { name: 'detailShopInfo', type: 'string' },
-        { name: 'detailProductNoIndex', type: 'string' },
-        { name: 'checkoutShopInfo', type: 'string' },
-        { name: 'shippingCostsPage', type: 'int' }
+        //{block name="backend/bepado/model/config/pages/fields"}{/block}
+        { name: 'id', type: 'int' },
+        { name: 'name', type: 'string' }
     ],
 
     proxy: {
@@ -61,9 +52,7 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveGeneral"}',
-            update: '{url controller="BepadoConfig" action="saveGeneral"}',
-            read: '{url controller="BepadoConfig" action="getGeneral"}'
+            read: '{url controller="BepadoConfig" action="getStaticPages"}'
         },
 
         /**
@@ -74,15 +63,6 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
             type: 'json',
             root: 'data',
             totalProperty: 'total'
-        },
-
-        /**
-         * Configure the data writer
-         * @object
-         */
-        writer: {
-            type: 'json',
-            root: 'data'
         }
     }
 });

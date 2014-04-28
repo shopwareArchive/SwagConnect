@@ -19,8 +19,19 @@ class TemplateExtension extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addBepadoTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults'
+            'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults',
+            'Enlight_Controller_Action_PostDispatch_Frontend' => 'addBepadoStyle'
         );
+    }
+
+    public function addBepadoStyle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+
+        $this->registerMyTemplateDir();
+        $subject->View()->extendsTemplate('frontend/bepado/index/index.tpl');
+
     }
 
     /**
@@ -140,6 +151,7 @@ class TemplateExtension extends BaseSubscriber
         }
 
         $products = $helper->getRemoteProducts($articleData['articleID']);
+
         if (empty($products)) {
             return;
         }
@@ -159,12 +171,12 @@ class TemplateExtension extends BaseSubscriber
         $modelsManager = Shopware()->Models();
         /** @var \Shopware\Bepado\Components\Config $configComponent */
         $configComponent = new Config($modelsManager);
-
         $view->assign(array(
             'bepadoProduct' => $product,
             'bepadoShop' => $shop,
             'bepadoShopInfo' => $configComponent->getConfig('detailShopInfo'),
-            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex')
+            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
+            'shippingCostsPage' => $configComponent->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId() , 'general')
         ));
     }
 

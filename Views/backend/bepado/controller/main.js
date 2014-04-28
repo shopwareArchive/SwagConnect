@@ -23,7 +23,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
         'log.List',
-        'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit'
+        'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit', 'config.Pages'
     ],
 
     refs: [

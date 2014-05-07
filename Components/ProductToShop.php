@@ -240,6 +240,9 @@ class ProductToShop implements ProductToShopBase
             $detail->setHeight(null);
         }
 
+        // set weight
+        $detail->setWeight($product->attributes['weight']);
+
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
         $bepadoAttribute->setLastUpdate(json_encode(array(

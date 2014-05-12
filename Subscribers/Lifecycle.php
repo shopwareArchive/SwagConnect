@@ -127,6 +127,12 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
+        // if status is delete,
+        // article should not be updated in bepado
+        if ($status == 'delete') {
+            return;
+        }
+
         // Mark the product for bepado update
         try {
             $this->getBepadoExport()->export(

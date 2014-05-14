@@ -134,12 +134,13 @@ class ShippingCosts extends BaseSubscriber
     public function getShippingCosts()
     {
         $shippingCosts = array();
-
         foreach ($this->getAllShippingCosts() as $shopId => $rules) {
-            $shippingCostVisitor = $this->getShippingCostVisitor();
-            $shippingCostVisitor->visit($rules);
-            $shippingCosts[$shopId]['rules'] = $shippingCostVisitor->rules;
-            $shippingCosts[$shopId]['shopInfo'] = $this->getShopInfo($shopId);
+            if ($this->hasImportedProductsFromShop($shopId)) {
+                $shippingCostVisitor = $this->getShippingCostVisitor();
+                $shippingCostVisitor->visit($rules);
+                $shippingCosts[$shopId]['rules'] = $shippingCostVisitor->rules;
+                $shippingCosts[$shopId]['shopInfo'] = $this->getShopInfo($shopId);
+            }
         }
 
         return $shippingCosts;
@@ -153,5 +154,19 @@ class ShippingCosts extends BaseSubscriber
     public function getAllShippingCosts()
     {
         return Shopware()->BepadoSDK()->getShippingCostRules();
+    }
+
+    /**
+     * Check for imported products from external shop
+     * to the local shop
+     *
+     * @param $shopId
+     * @return bool
+     */
+    private function hasImportedProductsFromShop($shopId)
+    {
+        $sql = 'SELECT COUNT(id) FROM s_plugin_bepado_items WHERE shop_id = ?';
+
+        return  (Shopware()->Db()->fetchOne($sql, array($shopId)) > 0 ? true : false);
     }
 }

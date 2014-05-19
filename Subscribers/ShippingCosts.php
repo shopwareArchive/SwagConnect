@@ -167,6 +167,6 @@ class ShippingCosts extends BaseSubscriber
     {
         $sql = 'SELECT COUNT(id) FROM s_plugin_bepado_items WHERE shop_id = ?';
 
-        return  (Shopware()->Db()->fetchOne($sql, array($shopId)) > 0 ? true : false);
+        return Shopware()->Db()->fetchOne($sql, array($shopId)) > 0;
     }
 }

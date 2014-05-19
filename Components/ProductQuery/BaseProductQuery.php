@@ -128,6 +128,8 @@ abstract class BaseProductQuery
 
         // Fix dimensions
         $row = $this->prepareProductDimensions($row);
+        // Fix availability
+        $row['availability'] = (int)$row['availability'];
 
         return $row;
     }

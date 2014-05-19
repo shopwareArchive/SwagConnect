@@ -385,16 +385,24 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     xtype: 'pagingcombo',
                     name: 'shippingCostsPage',
                     anchor: '100%',
-                    required: false,
-                    editable: false,
                     valueField: 'id',
                     displayField: 'name',
                     fieldLabel: me.snippets.shippingCostsLabel,
                     store: me.staticPagesStore,
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/bepado_shipping_costs_page}Select which page to display in the detail page of the bepado products.{/s}',
+                    allowBlank: true,
                     forceSelection: true,
-                    triggerAction: 'all'
+                    beforeBlur: function(){
+                        var value = this.getRawValue();
+                        if(value == ''){
+                            var model = this.up('form').getRecord();
+                            model.set('shippingCostsPage', '');
+                            this.lastSelection = [];
+                        }
+                        this.doQueryTask.cancel();
+                        this.assertValue();
+                    }
                 }
             ]
         });

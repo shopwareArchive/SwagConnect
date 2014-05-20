@@ -125,16 +125,16 @@ class Helper
         // Insert new articles
         $sql = '
         INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id)
-        SELECT articleID, articledetailsID
+        SELECT a.id, a.main_detail_id
 
-        FROM s_articles_attributes aa
+        FROM s_articles a
 
         LEFT JOIN `s_plugin_bepado_items` bi
-        ON bi.article_detail_id = aa.articledetailsid
-        AND bi.article_id = aa.articleID
+        ON bi.article_detail_id = a.main_detail_id
+        AND bi.article_id = a.id
 
-        WHERE aa.articleID IS NOT NULL
-        AND aa.articledetailsID IS NOT NULL
+        WHERE a.id IS NOT NULL
+        AND a.main_detail_id IS NOT NULL
         AND bi.id IS NULL
         ';
 
@@ -144,10 +144,10 @@ class Helper
         $sql = '
         DELETE bi FROM `s_plugin_bepado_items`  bi
 
-        LEFT JOIN `s_articles_attributes` aa
-        ON aa.articledetailsID = bi.article_detail_id
+        LEFT JOIN `s_articles` a
+        ON a.main_detail_id = bi.article_detail_id
 
-        WHERE aa.articleID IS NULL
+        WHERE a.id IS NULL
         ';
 
         $this->manager->getConnection()->exec($sql);

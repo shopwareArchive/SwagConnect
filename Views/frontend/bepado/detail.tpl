@@ -6,12 +6,6 @@
 {/block}
 
 {* Article price *}
-{block name='frontend_detail_data_price_info'}
-    <p class="tax_attention modal_open">
-        {s name="DetailDataPriceInfo" namespace="frontend/detail/data"}{/s}
-    </p>
-{/block}
-
 {block name='frontend_detail_buy_button'}
     {if $hideBepado}
         <div class="space">&nbsp;</div>

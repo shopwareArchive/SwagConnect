@@ -60,40 +60,45 @@ class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
             'priceFrom' => (float)$request->get('priceFrom'),
             'priceTo' => (float)$request->get('priceTo'),
         ));
-        $searchResult = $sdk->search($search);
         $this->View()->assign('searchQuery', $query);
-        $this->View()->assign('searchResult', $searchResult);
 
-        $perPages = explode('|', Shopware()->Config()->get('fuzzySearchSelectPerPage'));
-        $this->View()->assign('perPages', $perPages);
+        try {
+            $searchResult = $sdk->search($search);
+            $this->View()->assign('searchResult', $searchResult);
 
-        $numberPages = ceil($searchResult->resultCount / $perPage);
-        $pages = array();
-        if ($numberPages > 1) {
-            $start = max(1, $page - 3);
-            $end = min($numberPages, $page + 2);
-            for ($i = $start; $i <= $end; $i++) {
-                $pages['numbers'][$i] = $i;
+            $perPages = explode('|', Shopware()->Config()->get('fuzzySearchSelectPerPage'));
+            $this->View()->assign('perPages', $perPages);
+
+            $numberPages = ceil($searchResult->resultCount / $perPage);
+            $pages = array();
+            if ($numberPages > 1) {
+                $start = max(1, $page - 3);
+                $end = min($numberPages, $page + 2);
+                for ($i = $start; $i <= $end; $i++) {
+                    $pages['numbers'][$i] = $i;
+                }
+                // Previous page
+                if ($page != 1) {
+                    $pages['previous'] = $page - 1;
+                } else {
+                    $pages['previous'] = null;
+                }
+                // Next page
+                if ($page != $numberPages) {
+                    $pages['next'] = $page + 1;
+                } else {
+                    $pages['next'] = null;
+                }
             }
-            // Previous page
-            if ($page != 1) {
-                $pages['previous'] = $page - 1;
-            } else {
-                $pages['previous'] = null;
-            }
-            // Next page
-            if ($page != $numberPages) {
-                $pages['next'] = $page + 1;
-            } else {
-                $pages['next'] = null;
-            }
+            $this->View()->assign(array(
+                'pages' => $pages,
+                'numberPages' => $numberPages,
+                'page' => $page,
+                'perPage' => $perPage,
+                'filterVendor' => $vendor
+            ));
+        } catch (Exception $e) {
+            // ignore error if cloud search is not booked
         }
-        $this->View()->assign(array(
-           'pages' => $pages,
-           'numberPages' => $numberPages,
-           'page' => $page,
-           'perPage' => $perPage,
-           'filterVendor' => $vendor
-        ));
     }
 }

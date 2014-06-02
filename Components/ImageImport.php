@@ -129,8 +129,9 @@ class ImageImport
         /** @var $image Image */
         /** @var $media \Shopware\Models\Media\Media */
         foreach ($model->getImages() as $image) {
+            $image->setMain(2);
             // Build a list of used position fields
-            $position[] = $image->getPosition();
+            $positions[] = $image->getPosition();
 
             $media = $image->getMedia();
             if (!$media || !$media->getAttribute()) {
@@ -142,6 +143,10 @@ class ImageImport
             $bepadoHash = $attribute->getBepadoHash();
             if (!$bepadoHash) {
                 continue;
+            }
+
+            if (isset($images[0]) && $bepadoHash == $images[0]) {
+                $image->setMain(1);
             }
 
             $localImagesFromBepado[$bepadoHash] = array('image' => $image, 'media' => $media);

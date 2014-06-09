@@ -45,7 +45,8 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
         { name: 'detailShopInfo', type: 'string' },
         { name: 'detailProductNoIndex', type: 'string' },
         { name: 'checkoutShopInfo', type: 'string' },
-        { name: 'shippingCostsPage', type: 'int', useNull: true }
+        { name: 'shippingCostsPage', type: 'int', useNull: true },
+        { name: 'shippingCostsPageName', type: 'string' }
     ],
 
     proxy: {

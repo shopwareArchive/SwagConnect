@@ -46,6 +46,9 @@ class Config
     /** @var  \Shopware\Models\Shop\Shop */
     private $shopRepository;
 
+    /** @var  \Shopware\Models\Site\Repository */
+    private $staticPagesRepository;
+
     /**
      * @param ModelManager $manager
      */
@@ -180,6 +183,15 @@ class Config
             }
 
             $result = Shopware()->Db()->fetchPairs($query);
+            // Find shipping costs page name
+            // It is necessary, because page will not be found in paginated store
+            if (isset($result['shippingCostsPage']) && $result['shippingCostsPage'] > 0) {
+                /** @var \Shopware\Models\Site\Site $shippingCostsPage */
+                $shippingCostsPage = $this->getStaticPagesRepository()->find($result['shippingCostsPage']);
+                if ($shippingCostsPage) {
+                    $result['shippingCostsPageName'] = $shippingCostsPage->getDescription();
+                }
+            }
             $configsArray[] = array_merge($shopConfig, $result);
         }
 
@@ -409,5 +421,17 @@ class Config
         }
 
         return $this->shopRepository;
+    }
+
+    /**
+     * @return \Shopware\Models\Site\Repository
+     */
+    private function getStaticPagesRepository()
+    {
+        if (!$this->staticPagesRepository) {
+            $this->staticPagesRepository = $this->manager->getRepository('Shopware\Models\Site\Site');
+        }
+
+        return $this->staticPagesRepository;
     }
 } 

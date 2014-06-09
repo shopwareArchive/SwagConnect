@@ -381,33 +381,43 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             layout: 'anchor',
             border: false,
             items: [
-                {
-                    xtype: 'pagingcombo',
-                    name: 'shippingCostsPage',
-                    anchor: '100%',
-                    valueField: 'id',
-                    displayField: 'name',
-                    fieldLabel: me.snippets.shippingCostsLabel,
-                    store: me.staticPagesStore,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/bepado_shipping_costs_page}Select which page to display in the detail page of the bepado products.{/s}',
-                    allowBlank: true,
-                    forceSelection: true,
-                    beforeBlur: function(){
-                        var value = this.getRawValue();
-                        if(value == ''){
-                            var model = this.up('form').getRecord();
-                            model.set('shippingCostsPage', '');
-                            this.lastSelection = [];
-                        }
-                        this.doQueryTask.cancel();
-                        this.assertValue();
-                    }
-                }
+                me.createShippingCostsCombo()
             ]
         });
 
         return bottomContainer;
+    },
+
+    /**
+     * Creates the shipping costs page combo
+     * @return Ext.container.Container
+     */
+    createShippingCostsCombo: function () {
+        var me = this;
+        me.shippingCostsCombo = Ext.create('Shopware.form.field.PagingComboBox', {
+            name: 'shippingCostsPage',
+            anchor: '100%',
+            valueField: 'id',
+            displayField: 'name',
+            fieldLabel: me.snippets.shippingCostsLabel,
+            store: me.staticPagesStore,
+            labelWidth: me.defaults.labelWidth,
+            helpText: '{s name=config/help/bepado_shipping_costs_page}Select which page to display in the detail page of the bepado products.{/s}',
+            allowBlank: true,
+            forceSelection: true,
+            beforeBlur: function () {
+                var value = this.getRawValue();
+                if (value == '') {
+                    var model = this.up('form').getRecord();
+                    model.set('shippingCostsPage', '');
+                    this.lastSelection = [];
+                }
+                this.doQueryTask.cancel();
+                this.assertValue();
+            }
+        });
+
+        return me.shippingCostsCombo;
     },
 
     /**
@@ -422,10 +432,17 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             record = Ext.create('Shopware.apps.Bepado.model.config.General');
         }
 
+
         if (record.get('bepadoAttribute') < 1) {
             record.set('bepadoAttribute', 19);
         }
+
+        if (record.get('shippingCostsPage') > 0) {
+            me.shippingCostsCombo.valueNotFoundText = record.get('shippingCostsPageName');
+        }
+
         me.loadRecord(record);
+
     }
 });
 //{/block}

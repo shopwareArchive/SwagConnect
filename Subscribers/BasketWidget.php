@@ -54,7 +54,10 @@ class BasketWidget extends BaseSubscriber
         $request = $action->Request();
         $actionName = $request->getActionName();
 
-        if (!in_array($actionName, array('info', 'ajaxAmount', 'ajaxCart'))) {
+        // ajaxCart was removed from array, because when user puts
+        // bepado article it's displayed in ajax cart, but
+        // then puts local article and bepado is missing
+        if (!in_array($actionName, array('info', 'ajaxAmount'))) {
             return;
         }
 
@@ -90,7 +93,7 @@ class BasketWidget extends BaseSubscriber
             $view->sAmountNet = $view->sBasket['AmountNetNumeric'];
         } else {
             // Assign the new amount / quantity
-            $view->sBasketQuantity = count($vars['sBasket']['content']);
+            $view->sBasketQuantity = $vars['sBasket']['Quantity'];
             $view->sBasketAmount = $vars['sBasket']['Amount'];
         }
     }

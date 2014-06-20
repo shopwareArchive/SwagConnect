@@ -251,6 +251,11 @@ class BepadoFactory
             return null;
         }
 
+        $exportDomain = $this->getConfigComponent()->getConfig('exportDomain');
+        if (!empty($exportDomain)) {
+            return $exportDomain;
+        }
+
         return Shopware()->Front()->Router()->assemble(array(
             'module' => 'frontend',
             'controller' => 'bepado_product_gateway',

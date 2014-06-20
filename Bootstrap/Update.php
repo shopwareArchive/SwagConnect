@@ -67,7 +67,19 @@ class Update
 
         $this->removePluginConfiguration();
 
+        $this->addExportUrl();
+
         return true;
+    }
+
+    public function addExportUrl()
+    {
+        if (version_compare($this->version, '1.4.73', '<=')) {
+            $sql = "INSERT IGNORE INTO `s_plugin_bepado_config`
+                      ( `name`, `value`, `groupName`)
+                      VALUES ( 'exportDomain', '', 'general');";
+            Shopware()->Db()->exec($sql);
+        }
     }
 
     /**

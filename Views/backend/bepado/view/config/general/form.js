@@ -61,7 +61,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         alternativeHostLabel: '{s name=config/bepado_alternative_host}Alternate bepado host (for testing purpose){/s}',
         logLabel: '{s name=config/log_label}Log bepado requests{/s}',
         logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}',
-        shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}'
+        shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
+        exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}'
     },
 
     initComponent: function() {
@@ -344,11 +345,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}'
                 }, {
                     xtype: 'textfield',
+                    name: 'exportDomain',
+                    anchor: '100%',
+                    fieldLabel: me.snippets.exportDomainLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/bepado_product_gateway/product/id/{/s}'
+                }, {
+                    xtype: 'textfield',
                     name: 'bepadoDebugHost',
                     anchor: '100%',
                     fieldLabel: me.snippets.alternativeHostLabel,
                     labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}',
+                    helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}'
                 }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: me.snippets.logLabel,

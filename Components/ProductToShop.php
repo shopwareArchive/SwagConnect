@@ -203,6 +203,11 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
         $bepadoAttribute->setLastUpdateFlag($flag);
         $detail->setInStock($product->availability);
+        $detail->setEan($product->ean);
+        $detail->setShippingTime($product->deliveryWorkDays);
+        $releaseDate = new \DateTime();
+        $releaseDate->setTimestamp($product->deliveryDate);
+        $detail->setReleaseDate($releaseDate);
         $model->setLastStock(true);
 
         // if bepado product has unit

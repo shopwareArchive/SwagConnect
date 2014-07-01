@@ -427,6 +427,8 @@ class BasketHelper
      */
     public function recalculate($country=null)
     {
+        $this->basket['sAmount'] = number_format($this->basket['sAmount'], 2, '.', '');
+
         $this->calculateShippingCosts($country);
         $shippingCostsNet = number_format($this->totalShippingCosts->shippingCosts, 2, '.', '');
 

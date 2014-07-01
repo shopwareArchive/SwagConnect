@@ -274,7 +274,7 @@ class BasketHelper
         // Fix basket prices
         $this->basket['AmountNumeric'] -= $removeItems['price'];
         $this->basket['AmountNetNumeric'] -= $removeItems['netprice'];
-        $this->basket['sAmount'] -= $removeItems['netprice'];
+        $this->basket['sAmount'] -= $removeItems['price'];
         $this->basket['Amount'] = str_replace(',', '.', $this->basket['Amount']) - $removeItems['price'];
 
         $this->basket['sAmountTax'] -= $removeItems['tax'];

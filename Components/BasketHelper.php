@@ -428,10 +428,10 @@ class BasketHelper
     public function recalculate($country=null)
     {
         $this->calculateShippingCosts($country);
-        $shippingCostsNet = $this->totalShippingCosts->shippingCosts;
+        $shippingCostsNet = number_format($this->totalShippingCosts->shippingCosts, 2, '.', '');
 
         $shippingCosts = $shippingCostsNet;
-        $shippingCostsWithTax = $shippingCosts * (1+$this->getMaxTaxRate()/100);
+        $shippingCostsWithTax = number_format($shippingCosts * (1+$this->getMaxTaxRate()/100), 2, '.', '');
 
         $basketHasTax = $this->hasTax();
 

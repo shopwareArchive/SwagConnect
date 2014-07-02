@@ -241,7 +241,7 @@ class BasketHelper
 
             return $shopId;
         }
-        
+
         return false;
     }
 
@@ -258,13 +258,18 @@ class BasketHelper
         );
 
         // Build array of ids and amount to fix the basket later
-        foreach ($this->basket['content'] as  $product) {
+        foreach ($this->basket['content'] as  $key => $product) {
             $removeItems['ids'][] = $product['id'];
             $removeItems['price'] += $product['price'] * $product['quantity'];
             $removeItems['amountWithTax'] += $product['amountWithTax'] * $product['quantity'];
             $removeItems['netprice'] += $product['netprice'] * $product['quantity'];
             $removeItems['tax'] += str_replace(',', '.', $product['tax']) * $product['quantity'];
             $removeItems['sessionId'] = $product['sessionID'];
+
+            // Remove surcharge, cannot be deleted with SQL
+            if ($product['modus'] == 4) {
+                unset($this->basket['content'][$key]);
+            }
         }
 
         if (empty($removeItems['ids'])) {
@@ -297,6 +302,16 @@ class BasketHelper
                 implode(',', $removeItems['ids'])
             )
         );
+
+        // Filter out basket items - surcharge
+        $this->basket['contentOrg'] = array_filter($this->basket['contentOrg'], function($item) {
+            switch ((int)$item['modus']) {
+                case 4: // Surcharge
+                    return false;
+                default:
+                    return true;
+            }
+        });
     }
 
     /**

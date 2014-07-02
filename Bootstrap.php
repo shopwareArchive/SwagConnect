@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.77';
+        return '1.4.78';
     }
 
     /**
@@ -232,6 +232,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             new \Shopware\Bepado\Subscribers\ArticleList(),
             new \Shopware\Bepado\Subscribers\Article(),
             new \Shopware\Bepado\Subscribers\Bepado(),
+            new \Shopware\Bepado\Subscribers\Payment(),
         );
     }
 

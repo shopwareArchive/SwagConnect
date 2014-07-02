@@ -69,6 +69,8 @@ class Update
 
         $this->addExportUrl();
 
+        $this->generateBepadoPaymentAttribute();
+
         return true;
     }
 
@@ -347,5 +349,44 @@ class Update
         } catch (\Exception $e) {
         }
 
+    }
+
+    /**
+     * Generates bepado payment attribute
+     */
+    public function generateBepadoPaymentAttribute()
+    {
+        if (version_compare($this->version, '1.4.78', '>')) {
+            return;
+        }
+
+        Shopware()->Models()->addAttribute(
+            's_core_paymentmeans_attributes',
+            'bepado', 'is_allowed',
+            'int(1)',
+            true,
+            1
+        );
+
+        Shopware()->Models()->generateAttributeModels(array(
+            's_core_paymentmeans_attributes'
+        ));
+
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
+        /** @var \Shopware\Models\Payment\Payment $payment */
+        foreach ($repository->findAll() as $payment) {
+            $attribute = $payment->getAttribute();
+            if (!$attribute) {
+                $attribute = new \Shopware\Models\Attribute\Payment();
+            }
+
+            $attribute->setBepadoIsAllowed(true);
+            $payment->setAttribute($attribute);
+
+            Shopware()->Models()->persist($attribute);
+            Shopware()->Models()->persist($payment);
+        }
+
+        Shopware()->Models()->flush();
     }
 }

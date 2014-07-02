@@ -35,6 +35,8 @@ class Setup
         $this->createBepadoCustomerGroup();
 
         $this->populateDispatchAttributes();
+        $this->generateBepadoPaymentAttribute();
+        $this->populateBepadoPaymentAttribute();
     }
 
     /**
@@ -432,6 +434,34 @@ class Setup
         Shopware()->Db()->exec('
             INSERT IGNORE INTO `s_premium_dispatch_attributes` (`dispatchID`)
             SELECT `id` FROM `s_premium_dispatch`
+        ');
+    }
+
+    /**
+     * Generates bepado payment attribute
+     */
+    public function generateBepadoPaymentAttribute()
+    {
+        Shopware()->Models()->addAttribute(
+            's_core_paymentmeans_attributes',
+            'bepado', 'is_allowed',
+            'int(1)',
+            true,
+            1
+        );
+
+        Shopware()->Models()->generateAttributeModels(array(
+            's_core_paymentmeans_attributes'
+        ));
+
+        Shopware()->Models()->regenerateProxies();
+    }
+
+    public function populateBepadoPaymentAttribute()
+    {
+        Shopware()->Db()->exec('
+            INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)
+            SELECT `id` FROM `s_core_paymentmeans`
         ');
     }
 }

@@ -231,6 +231,24 @@ class Checkout extends BaseSubscriber
         $sdk = $this->getSDK();
         $helper = $this->getHelper();
 
+        if($request->getActionName() == 'payment' || $request->getActionName() == 'finish') {
+            $userData = $session['sOrderVariables']['sUserData'];
+            $paymentId = $userData['additional']['payment']['id'];
+            if ($this->isPaymentAllowed($paymentId) === false) {
+                $bepadoMessage = new \stdClass();
+                $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
+
+                $bepadoMessages = array(
+                    0 => array(
+                        'bepadomessage' => $bepadoMessage
+                    )
+                );
+
+                Shopware()->Session()->BepadoMessages = $this->translateBepadoMessages($bepadoMessages);
+                $controller->forward('confirm');
+            }
+        }
+
         if($request->getActionName() != 'finish') {
             return;
         }
@@ -429,5 +447,27 @@ class Checkout extends BaseSubscriber
         }
 
         return $bepadoMessages;
+    }
+
+    /**
+     * Check is allowed payment method with bepado products
+     * @param int $paymentId
+     * @return bool
+     */
+    private function isPaymentAllowed($paymentId)
+    {
+        $paymentRepository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
+        /** @var \Shopware\Models\Payment\Payment $payment */
+        $payment = $paymentRepository->find($paymentId);
+
+        if (!$payment) {
+            return false;
+        }
+
+        if ($payment->getAttribute()->getBepadoIsAllowed() == 0) {
+            return false;
+        }
+
+        return true;
     }
 }

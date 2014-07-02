@@ -2,7 +2,6 @@
 
 
 namespace Shopware\Bepado\Subscribers;
-use Doctrine\Common\Util\Debug;
 
 /**
  * Class Payment

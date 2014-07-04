@@ -249,7 +249,7 @@ class Checkout extends BaseSubscriber
             }
         }
 
-        if($request->getActionName() != 'finish') {
+        if($request->getActionName() != 'finish' && $request->getActionName() != 'payment') {
             return;
         }
 
@@ -325,7 +325,7 @@ class Checkout extends BaseSubscriber
             Shopware()->Session()->BepadoMessages = $messages;
             $controller->forward('confirm');
         } else {
-            Shopware()->Session()->BepadoReservation = $reservation;
+            Shopware()->Session()->BepadoReservation = serialize($reservation);
         }
     }
 
@@ -375,7 +375,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        $reservation = Shopware()->Session()->BepadoReservation;
+        $reservation = unserialize(Shopware()->Session()->BepadoReservation);
         if($reservation !== null) {
             $result = $sdk->checkout($reservation, $orderNumber);
             foreach($result as $shopId => $success) {

@@ -55,7 +55,6 @@ class RemoteProductQuery extends BaseProductQuery
             't.tax / 100 as vat',
             'defaultPrice.price as price',
             'at.purchasePrice as purchasePrice',
-            'at.freeDelivery as freeDelivery',
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',

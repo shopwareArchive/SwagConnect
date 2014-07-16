@@ -133,7 +133,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
 
         if (settingsFieldSet) {
-            shippingField = settingsFieldSet.down('checkboxfield[fieldLabel=' + settingsFieldSet.snippets.shippingFree.field + ']');
+            shippingField = settingsFieldSet.down('textarea[fieldLabel=' + settingsFieldSet.snippets.shippingLabel + ']');
             inStockField = settingsFieldSet.down('numberfield[fieldLabel=' + settingsFieldSet.snippets.stock + ']');
 
             if (shippingField) {
@@ -156,7 +156,6 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
                 basePriceColumn.setEditor(false);
             }
         }
-
     }
 
 

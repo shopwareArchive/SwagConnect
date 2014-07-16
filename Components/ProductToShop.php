@@ -147,12 +147,6 @@ class ProductToShop implements ProductToShopBase
             $detail = $model->getMainDetail();
         }
 
-        /*
-         * We cannot import the freeDelivery property to the default product
-         * as this might switch shopware shipping cost calculation for the local
-         * shop into "shipping free" mode.
-         */
-        // $detail->setShippingFree($product->freeDelivery);
         $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;
         $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
 
@@ -193,13 +187,13 @@ class ProductToShop implements ProductToShopBase
         // Set the configured attribute so users can easily check if a given product is a bepado attribute
         $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
         $detailAttribute->$setter($product->sourceId);
+        $detailAttribute->setBepadoArticleShipping($product->shipping);
 
         $bepadoAttribute->setShopId($product->shopId);
         $bepadoAttribute->setSourceId($product->sourceId);
         $bepadoAttribute->setExportStatus(null);
         $bepadoAttribute->setPurchasePrice($product->purchasePrice);
         $bepadoAttribute->setFixedPrice($product->fixedPrice);
-        $bepadoAttribute->setFreeDelivery($product->freeDelivery);
         $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
         $bepadoAttribute->setLastUpdateFlag($flag);
         $detail->setInStock($product->availability);

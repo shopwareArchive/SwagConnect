@@ -66,7 +66,6 @@ class LocalProductQuery extends BaseProductQuery
             'a.description as shortDescription',
             's.name as vendor',
             't.tax / 100 as vat',
-            'at.freeDelivery as freeDelivery',
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
@@ -85,6 +84,7 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
+            'attribute.bepadoArticleShipping as shipping',
         ));
 
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);

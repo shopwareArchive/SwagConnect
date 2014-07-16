@@ -117,14 +117,6 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var integer $freeDelivery
-     *
-     * @ORM\Column(name="free_delivery", type="integer", nullable=true)
-     */
-     protected $freeDelivery;
-
-
-    /**
      * @var string $updatePrice
      *
      * @ORM\Column(name="update_price", type="string", nullable=true)
@@ -311,22 +303,6 @@ class Attribute extends ModelEntity
     public function getFixedPrice()
     {
         return $this->fixedPrice;
-    }
-
-    /**
-     * @param int $freeDelivery
-     */
-    public function setFreeDelivery($freeDelivery)
-    {
-        $this->freeDelivery = $freeDelivery;
-    }
-
-    /**
-     * @return int
-     */
-    public function getFreeDelivery()
-    {
-        return $this->freeDelivery;
     }
 
     /**

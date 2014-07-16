@@ -258,6 +258,12 @@ class Setup
             'int(1)'
         );
 
+        $modelManager->addAttribute(
+            's_articles_attributes',
+            'bepado', 'article_shipping',
+            'varchar(1000)'
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',

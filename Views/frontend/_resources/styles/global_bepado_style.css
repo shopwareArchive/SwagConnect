@@ -147,3 +147,11 @@
     display: none;
     padding-left: 20px;
 }
+
+.outer-confirm-container .label-separate-dispatch {
+    margin-left: 10px;
+}
+
+.outer-confirm-container .no_image {
+    float: left;
+}

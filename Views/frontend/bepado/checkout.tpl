@@ -11,6 +11,10 @@
     {include file='frontend/bepado/checkout_cart.tpl'}
 {/block}
 
+{block name='frontend_checkout_confirm_premiums' prepend}
+    {include file='frontend/bepado/checkout_cart.tpl'}
+{/block}
+
 {block name='frontend_checkout_cart_item_image' prepend}
     {if $shopId && $bepadoShopInfo}
         <span class="checkout_item_bepado"><span>&nbsp;</span></span>
@@ -62,15 +66,25 @@
 {/block}
 
 {block name='frontend_checkout_confirm_item'}
-	{if $key eq 0 && $bepadoContent}
+	{if counter eq 0 && $bepadoContent}
     	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=true}
 	{/if}
 
-	{if !$sBasketItem.bepadoShopId || !$bepadoContent}
+	{if (!$sBasketItem.bepadoShopId || !$bepadoContent) && !$shopId}
 		{$smarty.block.parent}
 	{/if}
 
-	{if $sBasket.content|count -1 eq $key}
+    {if $shopId}
+        {include file='frontend/checkout/cart_item.tpl'}
+        <div class="bepado-additional-info-checkout">
+            <span class="bepado-label label-separate-dispatch">{s name="frontend_checkout_cart_bepado_dispatch"}Separater Versand{/s}</span>
+            {if $bepadoShopInfo}
+                <span class="bepado-display display-shop-name">Artikel von {$bepadoShops[$shopId]->name}</span>
+            {/if}
+        </div>
+    {/if}
+
+	{if $sBasket.content|count -1 eq counter}
 		{include file='frontend/bepado/checkout_cart.tpl'}
 	{/if}
 {/block}

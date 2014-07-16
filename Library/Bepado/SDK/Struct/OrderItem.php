@@ -28,6 +28,13 @@ class OrderItem extends Struct
     public $product;
 
     /**
+     * Shipping information
+     *
+     * @var Shipping
+     */
+    public $shipping;
+
+    /**
      * Restores an order item from a previously stored state array.
      *
      * @param array $state

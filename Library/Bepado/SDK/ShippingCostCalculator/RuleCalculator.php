@@ -57,7 +57,7 @@ class RuleCalculator implements ShippingCostCalculator
             }
         }
 
-        return new Struct\ShippingCosts(array(
+        return new Struct\Shipping(array(
             'isShippable' => $isShippable,
             'shippingCosts' => $netShippingCosts,
             'grossShippingCosts' => $netShippingCosts * (1 + $vat),

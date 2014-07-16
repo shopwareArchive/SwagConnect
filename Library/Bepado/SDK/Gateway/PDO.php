@@ -125,12 +125,12 @@ class PDO extends Gateway
         }
 
         // Disable cleanup for the first betas for debuggability and easier re-runs.
-        /*$this->connection->exec(
+        $this->connection->exec(
             'DELETE FROM
                 bepado_change
             WHERE
                 c_revision <= ' . $offset
-        );*/
+        );
     }
 
     /**
@@ -441,7 +441,9 @@ class PDO extends Gateway
     /**
      * Get own shop ID
      *
-     * @return string
+     * Returns null if the shop ID is not set, yet.
+     *
+     * @return string|null
      */
     public function getShopId()
     {

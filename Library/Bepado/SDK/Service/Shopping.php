@@ -115,36 +115,11 @@ class Shopping
             $shops[$shopId]->shopId = $shopId;
         }
 
-        $isShippable = array_reduce(
-            $shops,
-            function ($all, $shippingCosts) {
-                return $all && $shippingCosts->isShippable;
-            },
-            true
-        );
+        $aggregator = new ShippingCostCalculator\Aggregator\Sum();
+        $shipping = $aggregator->aggregateShippingCosts($shops, new Struct\TotalShippingCosts());
+        $shipping->shops = $shops;
 
-        $netShippingCosts = array_sum(
-            array_map(function (Struct\ShippingCosts $costs) {
-                    return $costs->shippingCosts;
-                },
-                $shops
-            )
-        );
-
-        $grossShippingCosts = array_sum(
-            array_map(function (Struct\ShippingCosts $costs) {
-                    return $costs->grossShippingCosts;
-                },
-                $shops
-            )
-        );
-
-        return new Struct\TotalShippingCosts(array(
-            'shops' => $shops,
-            'isShippable' => $isShippable,
-            'shippingCosts' => $netShippingCosts,
-            'grossShippingCosts' => $grossShippingCosts,
-        ));
+        return $shipping;
     }
 
     /**
@@ -249,9 +224,7 @@ class Shopping
         }
 
         foreach ($orders as $shopId => $order) {
-            $order->shippingCosts = $shippingCosts->shops[$shopId]->shippingCosts;
-            $order->grossShippingCosts = $shippingCosts->shops[$shopId]->grossShippingCosts;
-            $order->shippingRule = $shippingCosts->shops[$shopId]->rule;
+            $order->shipping = $shippingCosts->shops[$shopId];
 
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($this->anonymizeCustomerEmail($order));
@@ -296,9 +269,11 @@ class Shopping
                 $order->orderShop,
                 md5($remoteOrder->deliveryAddress->email)
             );
+
+            return $remoteOrder;
         }
 
-        return $remoteOrder;
+        return $order;
     }
 
     /**

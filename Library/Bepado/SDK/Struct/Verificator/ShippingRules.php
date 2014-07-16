@@ -10,13 +10,16 @@ namespace Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCosts\Rule;
+
+use Bepado\SDK\Exception\VerificationFailedException;
 
 /**
  * Visitor verifying integrity of struct classes
  *
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
-class Message extends Verificator
+class ShippingRules extends Verificator
 {
     /**
      * Method to verify a structs integrity
@@ -29,12 +32,18 @@ class Message extends Verificator
      */
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        if (!is_string($struct->message)) {
-            throw new \Bepado\SDK\Exception\VerificationFailedException('$message MUST be a string.');
+        if (!is_array($struct->rules)) {
+            throw new VerificationFailedException('Rules MUST be an array.');
         }
 
-        if (!is_array($struct->values)) {
-            throw new \Bepado\SDK\Exception\VerificationFailedException('$values MUST be an array.');
+        foreach ($struct->rules as $product) {
+            if (!$product instanceof Rule\Product) {
+                throw new VerificationFailedException(
+                    'Rules array MUST contain only instances of \\Bepado\\SDK\\ShippingCosts\\Rule\\Product.'
+                );
+            }
+
+            $dispatcher->verify($product);
         }
     }
 }

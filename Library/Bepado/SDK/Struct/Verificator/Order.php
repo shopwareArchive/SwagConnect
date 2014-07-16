@@ -14,6 +14,8 @@ use Bepado\SDK\Struct;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Address;
 
+use Bepado\SDK\Exception\VerificationFailedException;
+
 /**
  * Visitor verifying integrity of struct classes
  *
@@ -33,12 +35,12 @@ class Order extends Verificator
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (!is_array($struct->products)) {
-            throw new \RuntimeException('Products MUST be an array.');
+            throw new VerificationFailedException('Products MUST be an array.');
         }
 
         foreach ($struct->products as $product) {
             if (!$product instanceof OrderItem) {
-                throw new \RuntimeException(
+                throw new VerificationFailedException(
                     'Products array MUST contain only instances of \\Bepado\\SDK\\Struct\\OrderItem.'
                 );
             }
@@ -47,12 +49,12 @@ class Order extends Verificator
         }
 
         if (!$struct->deliveryAddress instanceof Address) {
-            throw new \RuntimeException('Delivery address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
+            throw new VerificationFailedException('Delivery address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
         }
         $dispatcher->verify($struct->deliveryAddress);
 
         if (!$struct->billingAddress instanceof Address) {
-            throw new \RuntimeException('Billing address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
+            throw new VerificationFailedException('Billing address MUST be an instance of \\Bepado\\SDK\\Struct\\Address.');
         }
         $dispatcher->verify($struct->billingAddress);
 
@@ -67,7 +69,7 @@ class Order extends Verificator
         );
 
         if (!in_array($struct->paymentType, $paymentTypes)) {
-            throw new \RuntimeException(
+            throw new VerificationFailedException(
                 sprintf(
                     'Invalid paymentType specified in order, must be one of: %s',
                     implode(", ", $paymentTypes)
@@ -75,8 +77,9 @@ class Order extends Verificator
             );
         }
 
-        if ($struct->shippingRule && !($struct->shipingRule instanceof \Bepado\SDK\ShippingCosts\Rule)) {
-            throw new \RuntimeException('Shipping Rule MUST be an instance of \\Bepado\\SDK\\ShippingCosts\\Rule.');
+        if ($struct->shipping && !($struct->shipping instanceof \Bepado\SDK\Struct\Shipping)) {
+            throw new VerificationFailedException('Shipping MUST be an instance of \\Bepado\\SDK\\Struct\\Shipping.');
         }
+        $dispatcher->verify($struct->shipping);
     }
 }

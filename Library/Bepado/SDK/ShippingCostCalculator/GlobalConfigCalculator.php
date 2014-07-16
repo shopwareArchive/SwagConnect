@@ -11,7 +11,7 @@ use Bepado\SDK\Gateway\ShopConfiguration;
 use Bepado\SDK\ShippingCostCalculator;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
-use Bepado\SDK\Struct\ShippingCosts;
+use Bepado\SDK\Struct\Shipping;
 
 class GlobalConfigCalculator implements ShippingCostCalculator
 {
@@ -39,7 +39,7 @@ class GlobalConfigCalculator implements ShippingCostCalculator
     {
         // temporary workaround for not having my own global shipping costs
         if ($order->shippingCosts !== null && $order->grossShippingCosts !== null) {
-            return new ShippingCosts(
+            return new Shipping(
                 array(
                     'shippingCosts' => $order->shippingCosts,
                     'grossShippingCosts' => $order->grossShippingCosts,
@@ -49,10 +49,12 @@ class GlobalConfigCalculator implements ShippingCostCalculator
         }
 
         return $this->getShippingCosts(
-            array_map(function (OrderItem $item) {
-                return $item->product;
-            },
-            $order->products)
+            array_map(
+                function (OrderItem $item) {
+                    return $item->product;
+                },
+                $order->products
+            )
         );
     }
 
@@ -60,7 +62,7 @@ class GlobalConfigCalculator implements ShippingCostCalculator
      * Get shipping costs
      *
      * @param Struct\Product[] $products
-     * @return Struct\ShippingCosts
+     * @return Struct\Shipping
      */
     protected function getShippingCosts(array $products)
     {
@@ -84,7 +86,7 @@ class GlobalConfigCalculator implements ShippingCostCalculator
         }
 
         if (!$productCount) {
-            return new ShippingCosts(
+            return new Shipping(
                 array(
                     'isShippable' => false,
                 )
@@ -94,7 +96,7 @@ class GlobalConfigCalculator implements ShippingCostCalculator
         $shopConfiguration = $this->configuration->getShopConfiguration($product->shopId);
         $netShippingCost = $shopConfiguration->shippingCost;
 
-        return new ShippingCosts(
+        return new Shipping(
             array(
                 'shippingCosts' => $netShippingCost,
                 'grossShippingCosts' => $netShippingCost * (1 + $maxVat),

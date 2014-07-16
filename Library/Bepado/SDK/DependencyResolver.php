@@ -374,6 +374,12 @@ class DependencyResolver
                         new Struct\Verificator\Tracking(),
                     'Bepado\\SDK\\Struct\\OrderStatus' =>
                         new Struct\Verificator\OrderStatus(),
+                    'Bepado\\SDK\\Struct\\Shipping' =>
+                        new Struct\Verificator\Shipping(),
+                    'Bepado\\SDK\\Struct\\ShippingRules' =>
+                        new Struct\Verificator\ShippingRules(),
+                    'Bepado\\SDK\\ShippingCosts\\Rule\\Product' =>
+                        new Struct\Verificator\ProductRule(),
                 )
             );
         }
@@ -437,8 +443,14 @@ class DependencyResolver
     {
         if ($this->shippingCostCalculator === null) {
             if ($this->gateway->isFeatureEnabled('shipping_rules')) {
-                $this->shippingCostCalculator = new ShippingCostCalculator\RuleCalculator(
-                    $this->gateway
+                $this->shippingCostCalculator = new ShippingCostCalculator\ProductCalculator(
+                    new ShippingCostCalculator\RuleCalculator(
+                        $this->gateway
+                    ),
+                    new ShippingRuleParser\Validator(
+                        new ShippingRuleParser\Google(),
+                        $this->getVerificator()
+                    )
                 );
             } else {
                 $this->shippingCostCalculator = new ShippingCostCalculator\GlobalConfigCalculator(

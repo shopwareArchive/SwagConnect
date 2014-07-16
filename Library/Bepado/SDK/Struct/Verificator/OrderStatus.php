@@ -24,18 +24,18 @@ class OrderStatus extends Verificator
 
         foreach ($requiredStrings as $requiredString) {
             if (!is_string($struct->$requiredString)) {
-                throw new \RuntimeException("OrderStatus#$requiredString must be a string.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("OrderStatus#$requiredString must be a string.");
             }
 
             if (empty($struct->$requiredString)) {
-                throw new \RuntimeException("OrderStatus#$requiredString must be non-empty.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("OrderStatus#$requiredString must be non-empty.");
             }
         }
 
         $allowedStates = array('open', 'in_process', 'delivered', 'canceled', 'error');
 
         if (!in_array($struct->status, $allowedStates)) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 sprintf(
                     'Invalid order state given: %s. Expected one of: %s',
                     $struct->status,
@@ -46,7 +46,7 @@ class OrderStatus extends Verificator
 
         if ($struct->tracking !== null) {
             if (!($struct->tracking instanceof \Bepado\SDK\Struct\Tracking)) {
-                throw new \RuntimeException(
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
                     "OrderStatus#tracking must be an instance of \\Bepado\\SDK\\Struct\\Tracking"
                 );
             }

@@ -16,6 +16,12 @@ abstract class ErrorHandler
 
     public function registerHandlers()
     {
+        if (defined("PHPUNIT")) {
+            // Do not overwrite error handlers in PHPUnit tests. Can cause
+            // silent aborts.
+            return;
+        }
+
         ini_set('display_errors', false);
         $this->oldExceptionHandler = set_exception_handler(array($this, 'handleException'));
 

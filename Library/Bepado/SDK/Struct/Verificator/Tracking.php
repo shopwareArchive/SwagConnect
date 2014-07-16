@@ -28,7 +28,7 @@ class Tracking extends Verificator
             }
 
             if (!is_string($struct->$string)) {
-                throw new \RuntimeException("Tracking#$string must be a string.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Tracking#$string must be a string.");
             }
         }
     }

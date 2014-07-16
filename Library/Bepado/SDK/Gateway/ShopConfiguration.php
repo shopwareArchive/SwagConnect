@@ -83,7 +83,9 @@ interface ShopConfiguration
     /**
      * Get own shop ID
      *
-     * @return string
+     * Returns null if the shop ID is not set, yet.
+     *
+     * @return string|null
      */
     public function getShopId();
 

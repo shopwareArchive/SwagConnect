@@ -44,7 +44,7 @@ class Product extends Verificator
                 'relevance',
             ) as $property) {
             if ($struct->$property === null) {
-                throw new \RuntimeException("Property $property MUST be set in product.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Property $property MUST be set in product.");
             }
         }
 
@@ -55,43 +55,57 @@ class Product extends Verificator
             'vendor',
             ) as $property) {
             if (@iconv('UTF-8', 'UTF-8', $struct->$property) != $struct->$property) {
-                throw new \RuntimeException("Property $property MUST be UTF-8 encoded.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Property $property MUST be UTF-8 encoded.");
+            }
+        }
+
+        foreach (array('title', 'vendor') as $property) {
+            if (trim($struct->$property) === '') {
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Property $property MUST be non-empty.");
             }
         }
 
         if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
-            throw new \RuntimeException("The purchasePrice is not allowed to be 0 or smaller.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("The purchasePrice is not allowed to be 0 or smaller.");
         }
 
         if (!is_numeric($struct->vat) || $struct->vat < 0 || $struct->vat > 1) {
-            throw new \RuntimeException("Value added tax must be a number between 0 and 1.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Value added tax must be a number between 0 and 1.");
         }
 
         if (!is_array($struct->categories)) {
-            throw new \RuntimeException("Invalid Datatype, Product#categories has to be an array.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#categories has to be an array.");
         }
 
         if (!is_array($struct->tags)) {
-            throw new \RuntimeException("Invalid Datatype, Product#tags has to be an array.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#tags has to be an array.");
         }
 
         if ($struct->relevance < -1 || $struct->relevance > 1) {
-            throw new \RuntimeException("Invalid Value, Product#relevance has to be -1,0,1");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Value, Product#relevance has to be -1,0,1");
         }
 
         if ($struct->deliveryWorkDays !== null && !is_numeric($struct->deliveryWorkDays)) {
-            throw new \RuntimeException("Delivery Workdays needs to be either null or a number of days.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Delivery Workdays needs to be either null or a number of days.");
         }
 
         if (!is_array($struct->attributes)) {
-            throw new \RuntimeException("Product#attributes has to be an array.");
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Product#attributes has to be an array.");
+        }
+
+        if (!is_array($struct->images)) {
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Product#images must be an array.");
+        }
+
+        if (is_array($struct->images) && array_values($struct->images) !== $struct->images) {
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Product#images must be numerically indexed starting with 0.");
         }
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {
             $dimensions = explode("x", $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION]);
 
             if (count(array_filter($dimensions, 'is_numeric')) !== 3) {
-                throw new \RuntimeException(
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
                     "Product Dimensions Attribute has to be in format " .
                     "'Length x Width x Height' without spaces, i.e. 20x40x60"
                 );
@@ -100,7 +114,7 @@ class Product extends Verificator
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_WEIGHT, $struct->attributes)) {
             if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_WEIGHT])) {
-                throw new \RuntimeException("Product Weight Attribute has to be a number.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Product Weight Attribute has to be a number.");
             }
         }
 
@@ -112,32 +126,32 @@ class Product extends Verificator
     private function validateUnit($struct)
     {
         if (!Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
-            throw new \RuntimeException(sprintf(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(sprintf(
                 "Unit has to be one value from the available Bepado units, %s given",
                 $struct->attributes[Struct\Product::ATTRIBUTE_UNIT]
             ));
         }
 
         if (!array_key_exists(Struct\Product::ATTRIBUTE_QUANTITY, $struct->attributes)) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "When unit is given for product, specifying the quantity is required."
             );
         }
 
         if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_QUANTITY])) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "Product Quantity Attribute has to be a number."
             );
         }
 
         if (!array_key_exists(Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY, $struct->attributes)) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "When unit is given for product, specifying the reference quantity is required."
             );
         }
 
         if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "Product Quantity Attribute has to be an integer."
             );
         }

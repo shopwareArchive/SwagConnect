@@ -65,10 +65,10 @@ class Address extends Verificator
 
         foreach ($requiredFields as $required) {
             if (!is_string($struct->$required)) {
-                throw new \RuntimeException($required . ' MUST be a string.');
+                throw new \Bepado\SDK\Exception\VerificationFailedException($required . ' MUST be a string.');
             }
             if (@iconv('UTF-8', 'UTF-8', $struct->$required) != $struct->$required) {
-                throw new \RuntimeException("Property $required MUST be UTF-8 encoded.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Property $required MUST be UTF-8 encoded.");
             }
         }
 
@@ -77,15 +77,15 @@ class Address extends Verificator
                 continue;
             }
             if (!is_string($struct->$field)) {
-                throw new \RuntimeException($field . ' MUST be a string.');
+                throw new \Bepado\SDK\Exception\VerificationFailedException($field . ' MUST be a string.');
             }
             if (@iconv('UTF-8', 'UTF-8', $struct->$field) != $struct->$field) {
-                throw new \RuntimeException("Property $field MUST be UTF-8 encoded.");
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Property $field MUST be UTF-8 encoded.");
             }
         }
 
         if (!in_array($struct->country, $this->validCountryCodes)) {
-            throw new \RuntimeException(
+            throw new \Bepado\SDK\Exception\VerificationFailedException(
                 'country MUST be a valid country code according to ISO 3166-1 alpha-3, e.g. "DEU" for Germany.'
             );
         }

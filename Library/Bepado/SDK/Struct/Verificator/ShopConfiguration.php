@@ -30,11 +30,11 @@ class ShopConfiguration extends Verificator
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->name === null) {
-            throw new \RuntimeException('Property $name must be set.');
+            throw new \Bepado\SDK\Exception\VerificationFailedException('Property $name must be set.');
         }
 
         if ($struct->serviceEndpoint === null) {
-            throw new \RuntimeException('Property $serviceEndpoint must be set.');
+            throw new \Bepado\SDK\Exception\VerificationFailedException('Property $serviceEndpoint must be set.');
         }
     }
 }

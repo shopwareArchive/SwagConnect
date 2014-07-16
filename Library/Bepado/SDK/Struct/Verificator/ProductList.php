@@ -17,7 +17,7 @@ class ProductList extends Verificator
     {
         foreach ($struct->products as $product) {
             if (!($product instanceof Struct\Product)) {
-                throw new \RuntimeException(
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
                     "Elements passed to a product list must be instanceof Bepado\SDK\Struct\Product"
                 );
             }

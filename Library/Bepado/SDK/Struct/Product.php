@@ -179,12 +179,11 @@ class Product extends ShopItem
     public $currency = "EUR";
 
     /**
-     * If this property is set to <b>TRUE</b> this product will be shown as
-     * delivery free of charge.
+     * Override for shipping costs based on article.
      *
-     * @var boolean
+     * @var string
      */
-    public $freeDelivery = false;
+    public $shipping;
 
     /**
      * Optional delivery date for this product as a unix timestamp.
@@ -208,6 +207,10 @@ class Product extends ShopItem
 
     /**
      * List of product image URLs
+     *
+     * The order of the images is relevant. The main image of the product
+     * has to be at position 0 and is the only one used for presenting
+     * the product on window-shopping and the product finder inside bepado.
      *
      * @var string[]
      */
@@ -271,5 +274,29 @@ class Product extends ShopItem
     public static function __set_state(array $state)
     {
         return new Product($state);
+    }
+
+    public function &__get($property)
+    {
+        switch ($property) {
+            case 'freeDelivery':
+                $val = false; // return by reference hack
+                return $val;
+
+            default:
+                return parent::__get($property);
+        }
+    }
+
+    public function __set($property, $value)
+    {
+        switch ($property) {
+            case 'freeDelivery':
+                // Ignored as of newest version, use $shipping instead
+                break;
+
+            default:
+                return parent::__set($property, $value);
+        }
     }
 }

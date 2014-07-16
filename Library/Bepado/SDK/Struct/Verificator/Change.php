@@ -30,11 +30,11 @@ class Change extends Verificator
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->sourceId === null) {
-            throw new \RuntimeException('Property $sourceId must be set.');
+            throw new \Bepado\SDK\Exception\VerificationFailedException('Property $sourceId must be set.');
         }
 
         if ($struct->revision === null) {
-            throw new \RuntimeException('Property $revision must be set.');
+            throw new \Bepado\SDK\Exception\VerificationFailedException('Property $revision must be set.');
         }
     }
 }

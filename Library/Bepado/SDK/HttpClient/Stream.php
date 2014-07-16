@@ -40,26 +40,7 @@ class Stream extends HttpClient
      */
     public function __construct($server)
     {
-        $url = parse_url(rtrim($server, '/'));
-        $url += array(
-            'scheme' => 'http',
-            'host'   => null,
-            'port'   => null,
-            'user'   => null,
-            'pass'   => null,
-            'path'   => null,
-        );
-
-        if ($url['user'] || $url['pass']) {
-            $this->headers[] = 'Authorization: Basic ' .
-                base64_encode("{$url['user']}:{$url['pass']}");
-        }
-
-        $this->server = $url['scheme'] . '://' . $url['host'];
-        if ($url['port']) {
-            $this->server .= ':' . $url['port'];
-        }
-        $this->server .= $url['path'];
+        $this->server = $server;
     }
 
     /**

@@ -62,27 +62,11 @@ class Order extends Struct
     public $providerOrderId;
 
     /**
-     * Net shipping costs.
+     * General shipping information
      *
-     * @var float
+     * @var Shipping
      */
-    public $shippingCosts;
-
-    /**
-     * Gross shipping costs with VAT applied.
-     *
-     * @var float
-     */
-    public $grossShippingCosts;
-
-    /**
-     * The delivery type that is used for this order.
-     *
-     * Is calculated internally by the SDK.
-     *
-     * @var \Bepado\SDK\ShippingCosts\Rule
-     */
-    public $shippingRule;
+    public $shipping;
 
     /**
      * The payment type that is used for this order.
@@ -111,6 +95,19 @@ class Order extends Struct
     public $billingAddress;
 
     /**
+     * __construct
+     *
+     * @param array $values
+     * @return void
+     */
+    public function __construct(array $values = array())
+    {
+        $this->shipping = new Shipping();
+
+        parent::__construct($values);
+    }
+
+    /**
      * Restores an order from a previously stored state array.
      *
      * @param array $state
@@ -121,22 +118,56 @@ class Order extends Struct
         return new Order($state);
     }
 
+    /**
+     * Compatibility wrapper for deprecated property names
+     *
+     * @param string $property
+     * @return mixed
+     */
     public function &__get($property)
     {
         switch ($property) {
             case 'products':
                 return $this->orderItems;
 
+            case 'shippingRule':
+                return $this->shipping->rule;
+
+            case 'shippingCosts':
+                return $this->shipping->shippingCosts;
+
+            case 'grossShippingCosts':
+                return $this->shipping->grossShippingCosts;
+
             default:
                 return parent::__get($property);
         }
     }
 
+    /**
+     * Compatibility wrapper for deprecated property names
+     *
+     * @param string $property
+     * @param mixed $value
+     * @return void
+     */
     public function __set($property, $value)
     {
         switch ($property) {
             case 'products':
                 $this->orderItems = $value;
+                break;
+
+            case 'shippingRule':
+                $this->shipping->rule = $value;
+                break;
+
+            case 'shippingCosts':
+                $this->shipping->shippingCosts = $value;
+                break;
+
+            case 'grossShippingCosts':
+                $this->shipping->grossShippingCosts = $value;
                 break;
 
             default:

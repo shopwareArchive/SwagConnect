@@ -42,13 +42,6 @@ final class SDK
     private $apiEndpointUrl;
 
     /**
-     * Indicator if the SDK is verified agianst Bepado
-     *
-     * @var bool
-     */
-    private $verified = false;
-
-    /**
      * Dependency resolver for SDK dependencies
      *
      * @var DependencyResolver
@@ -58,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.2.186';
+    const VERSION = '1.5.42';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -105,8 +98,7 @@ final class SDK
      */
     public function isVerified()
     {
-        return ($this->verified ||
-            $this->dependencies->getVerificationService()->isVerified());
+        return $this->dependencies->getVerificationService()->isVerified();
     }
 
     /**
@@ -120,15 +112,17 @@ final class SDK
      */
     public function verifySdk()
     {
-        if ($this->verified ||
-            $this->dependencies->getVerificationService()->isValid()) {
-            return;
-        }
-
         $this->dependencies->getVerificationService()->verify(
             $this->apiKey,
             $this->apiEndpointUrl
         );
+    }
+
+    private function verifySdkIfNecessary()
+    {
+        if (!$this->isVerified()) {
+            $this->verifySdk();
+        }
     }
 
     /**
@@ -144,7 +138,11 @@ final class SDK
      */
     public function handle($xml, array $headers = null)
     {
-        $this->verifySdk();
+        if ($this->isPingRequest($headers)) {
+            return $this->generatePongResponse();
+        }
+
+        $this->verifySdkIfNecessary();
         $token = $this->verifyRequest($xml, $headers);
 
         $serviceRegistry = $this->dependencies->getServiceRegistry();
@@ -166,6 +164,25 @@ final class SDK
                 )
             )
         );
+    }
+
+    /**
+     * @param array $headers
+     * @return bool
+     */
+    private function isPingRequest(array $headers = null)
+    {
+        return ($headers !== null && isset($headers['HTTP_X_BEPADO_PING'])
+            || $headers === null && isset($_SERVER['HTTP_X_BEPADO_PING']));
+    }
+
+    /**
+     * @return string
+     */
+    private function generatePongResponse()
+    {
+        return '<?xml version="1.0" encoding="utf-8"?>'. "\n"
+            . '<pong/>';
     }
 
     /**
@@ -219,7 +236,7 @@ final class SDK
      */
     public function recreateChangesFeed()
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
         $this->dependencies->getSyncService()->recreateChangesFeed();
     }
 
@@ -234,7 +251,7 @@ final class SDK
      */
     public function recordInsert($productId)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
@@ -259,7 +276,7 @@ final class SDK
      */
     public function recordUpdate($productId)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $product = $this->getProduct($productId);
         $product->shopId = $this->dependencies->getGateway()->getShopId();
@@ -296,7 +313,7 @@ final class SDK
      */
     public function recordDelete($productId)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
         $this->dependencies->getGateway()->recordDelete($productId, $this->dependencies->getRevisionProvider()->next());
     }
 
@@ -310,7 +327,7 @@ final class SDK
      */
     public function calculateShippingCosts(Struct\Order $order)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         foreach ($order->orderItems as $orderItem) {
             $this->dependencies->getVerificator()->verify($orderItem);
@@ -342,7 +359,7 @@ final class SDK
      */
     public function checkProducts(array $products)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $productList = new Struct\ProductList(array('products' => $products));
 
@@ -377,7 +394,7 @@ final class SDK
      */
     public function reserveProducts(Struct\Order $order)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $order->orderShop = $this->dependencies->getGateway()->getShopId();
         $order->billingAddress = $this->dependencies->getGateway()->getBillingAddress();
@@ -405,7 +422,7 @@ final class SDK
      */
     public function checkout(Struct\Reservation $reservation, $orderId)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         if (!$reservation->success ||
             count($reservation->messages) ||
@@ -439,7 +456,7 @@ final class SDK
      */
     public function search(Struct\Search $search)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         return $this->dependencies->getSearchService()->search($search);
     }
@@ -457,7 +474,7 @@ final class SDK
      */
     public function getCategories()
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
         return $this->dependencies->getGateway()->getCategories();
     }
 
@@ -505,7 +522,7 @@ final class SDK
      */
     public function updateOrderStatus(Struct\OrderStatus $status)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $this->dependencies->getSocialNetworkService()->updateOrderStatus($status);
     }
@@ -518,7 +535,7 @@ final class SDK
      */
     public function unsubscribeProducts(array $productIds)
     {
-        $this->verifySdk();
+        $this->verifySdkIfNecessary();
 
         $this->dependencies->getSocialNetworkService()->unsubscribeProducts($productIds);
     }

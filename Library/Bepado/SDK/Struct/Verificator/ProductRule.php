@@ -11,13 +11,22 @@ use Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Struct;
 
+use Bepado\SDK\Exception\VerificationFailedException;
+
 /**
  * Visitor verifying integrity of struct classes
  *
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
-class Message extends Verificator
+class ProductRule extends Verificator
 {
+    /**
+     * Valid currencies
+     *
+     * @var string[]
+     */
+    private $validCurrencies = array('EUR');
+
     /**
      * Method to verify a structs integrity
      *
@@ -29,12 +38,16 @@ class Message extends Verificator
      */
     public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        if (!is_string($struct->message)) {
-            throw new \Bepado\SDK\Exception\VerificationFailedException('$message MUST be a string.');
+        if (!in_array($struct->currency, $this->validCurrencies)) {
+            throw new VerificationFailedException(
+                'Currently supported currencies: ' . implode(', ', $this->validCurrencies)
+            );
         }
 
-        if (!is_array($struct->values)) {
-            throw new \Bepado\SDK\Exception\VerificationFailedException('$values MUST be an array.');
+        if (!($struct->deliveryWorkDays > 0)) {
+            throw new VerificationFailedException(
+                'Delivery work days must be a positive number'
+            );
         }
     }
 }

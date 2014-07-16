@@ -8,8 +8,7 @@
 namespace Bepado\SDK\ShippingCosts\Rule;
 
 use Bepado\SDK\ShippingCosts\Rule;
-use Bepado\SDK\Struct\Order;
-use Bepado\SDK\Struct\Product;
+use Bepado\SDK\Struct;
 
 /**
  * Only allows the shipping rule to match when its not more heavy than a max weight.
@@ -34,10 +33,10 @@ class WeightDecorator extends Rule
     /**
      * Check if shipping cost is applicable to given order
      *
-     * @param Order $order
+     * @param Struct\Order $order
      * @return bool
      */
-    public function isApplicable(Order $order)
+    public function isApplicable(Struct\Order $order)
     {
         return
             $this->lessOrEqualMaximumWeight($order) &&
@@ -45,18 +44,18 @@ class WeightDecorator extends Rule
         ;
     }
 
-    private function lessOrEqualMaximumWeight(Order $order)
+    private function lessOrEqualMaximumWeight(Struct\Order $order)
     {
         $orderWeight = 0;
 
         foreach ($order->orderItems as $orderItem) {
             $product = $orderItem->product;
 
-            if (!array_key_exists(Product::ATTRIBUTE_WEIGHT, $product->attributes)) {
+            if (!array_key_exists(Struct\Product::ATTRIBUTE_WEIGHT, $product->attributes)) {
                 continue;
             }
 
-            $orderWeight += $product->attributes[Product::ATTRIBUTE_WEIGHT] * $orderItem->count;
+            $orderWeight += $product->attributes[Struct\Product::ATTRIBUTE_WEIGHT] * $orderItem->count;
         }
 
         return $orderWeight <= $this->maxWeight;
@@ -67,10 +66,10 @@ class WeightDecorator extends Rule
      *
      * Returns the net shipping costs.
      *
-     * @param Order $order
+     * @param Struct\Order $order
      * @return float
      */
-    public function getShippingCosts(Order $order)
+    public function getShippingCosts(Struct\Order $order)
     {
         return $this->delegatee->getShippingCosts($order);
     }
@@ -78,10 +77,10 @@ class WeightDecorator extends Rule
     /**
      * If processing should stop after this rule
      *
-     * @param Order $order
+     * @param Struct\Order $order
      * @return bool
      */
-    public function shouldStopProcessing(Order $order)
+    public function shouldStopProcessing(Struct\Order $order)
     {
         return $this->delegatee->shouldStopProcessing($order);
     }

@@ -20,7 +20,7 @@
 #content #confirm .table .table_row .main-article-features { padding-left: 15px }
 
 /** Splitting the basket */
-#content .table .table_row + .table_head { margin: 1.4em 0 0 !important }
+#content .table .table_head { margin: 1.4em 0 0 !important }
 .bepado-additional-info-checkout {
     position: absolute;
     margin: -28px 0 0 25px;
@@ -42,4 +42,9 @@
     display: inline-block;
     font-size: 11px;
     color: #888;
+}
+
+#confirm .border-top {
+    margin: 0 10px;
+    border-bottom: 1px solid #dfdfdf;
 }

@@ -4,9 +4,14 @@
         {include file="frontend/checkout/cart_header.tpl"}
     {/block}
 
-    {foreach name=basket from=$bepadoItems item=sBasketItem key=key}
+    {foreach name=bepadoItems from=$bepadoItems item=sBasketItem key=key}
         {block name='frontend_checkout_cart_item'}
             {include file='frontend/checkout/cart_item.tpl'}
         {/block}
     {/foreach}
+
+    {if !$smarty.foreach.basket.last}
+        <div class="border-top">
+        </div>
+    {/if}
 {/foreach}

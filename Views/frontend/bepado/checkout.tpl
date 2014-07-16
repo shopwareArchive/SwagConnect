@@ -60,19 +60,28 @@
 	{/if}
 
     {$smarty.block.parent}
+
 	{if $bepadoShops}
     	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=false}
 	{/if}
 {/block}
 
-{block name='frontend_checkout_confirm_item'}
-	{if counter eq 0 && $bepadoContent}
-    	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=true}
-	{/if}
 
-	{if (!$sBasketItem.bepadoShopId || !$bepadoContent) && !$shopId}
-		{$smarty.block.parent}
-	{/if}
+{block name='frontend_checkout_confirm_item'}
+    {assign var="lastProduct" value=$sBasket.content|@end}
+
+    {if counter eq 0 && $bepadoContent}
+        {include file='frontend/bepado/shop_header.tpl' hideSinglePrice=true}
+    {/if}
+
+    {if (!$sBasketItem.bepadoShopId || !$bepadoContent) && !$shopId}
+        {$smarty.block.parent}
+
+        {if $lastProduct.id eq $sBasketItem.id}
+            <div class="border-top">
+            </div>
+        {/if}
+    {/if}
 
     {if $shopId}
         {include file='frontend/checkout/cart_item.tpl'}
@@ -84,10 +93,13 @@
         </div>
     {/if}
 
-	{if $sBasket.content|count -1 eq counter}
-		{include file='frontend/bepado/checkout_cart.tpl'}
-	{/if}
+    {if $lastProduct.id eq $sBasketItem.id}
+        {include file='frontend/bepado/checkout_cart.tpl'}
+    {/if}
+
 {/block}
+
+
 
 {*
     Hide "buy" button on checkout finish if messages where passed.

@@ -72,9 +72,6 @@ class Article extends BaseSubscriber
                     'backend/article/view/detail/prices_bepado.js'
                 );
                 $subject->View()->extendsTemplate(
-                    'backend/article/view/detail/settings_bepado.js'
-                );
-                $subject->View()->extendsTemplate(
                     'backend/article/controller/detail_bepado.js'
                 );
                 break;

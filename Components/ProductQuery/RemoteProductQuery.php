@@ -32,7 +32,6 @@ class RemoteProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-
         $builder = $this->manager->createQueryBuilder();
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
@@ -68,7 +67,8 @@ class RemoteProductQuery extends BaseProductQuery
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
             'at.category as category',
-            'at.fixedPrice as fixedPrice'
+            'at.fixedPrice as fixedPrice',
+            'attribute.bepadoArticleShipping as shipping'
         ));
 
         return $builder;

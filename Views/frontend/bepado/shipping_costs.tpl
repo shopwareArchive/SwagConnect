@@ -6,9 +6,11 @@
 {/block}
 
 
-<h1>{s name="bepado_storage_dispatch"}Lagerversand{/s}</h1>
+{if $bepadoShipping|count > 0}
+    <h1>{s name="bepado_storage_dispatch"}Lagerversand{/s}</h1>
 
-{s name="bepado_dispatch_tax_info"}Der Steuersatz für die Brutto-Angaben kann ggf. geringer ausfallen.{/s}
+    {s name="bepado_dispatch_tax_info"}Der Steuersatz für die Brutto-Angaben kann ggf. geringer ausfallen.{/s}
+{/if}
 
 {foreach from=$bepadoShipping item=item name=shops}
     <fieldset class="bepado_collapsible">

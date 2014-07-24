@@ -171,6 +171,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         var me = this;
         return {
             xtype: 'toolbar',
+            enableOverflow: true,
             ui: 'shopware-ui',
             dock: 'top',
             border: false,
@@ -215,11 +216,11 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             }
         });
         items.push('->');
-//        items.push({
-//            iconCls:'sprite-minus-circle-frame',
-//            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
-//            action:'unsubscribe'
-//        });
+        items.push({
+            iconCls:'sprite-minus-circle-frame',
+            text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
+            action:'unsubscribe'
+        });
         return items;
     }
 });

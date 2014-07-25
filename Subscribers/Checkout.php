@@ -234,6 +234,7 @@ class Checkout extends BaseSubscriber
         if($request->getActionName() == 'payment' || $request->getActionName() == 'finish') {
             $userData = $session['sOrderVariables']['sUserData'];
             $paymentId = $userData['additional']['payment']['id'];
+
             if ($this->isPaymentAllowed($paymentId) === false) {
                 $bepadoMessage = new \stdClass();
                 $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
@@ -456,6 +457,10 @@ class Checkout extends BaseSubscriber
      */
     private function isPaymentAllowed($paymentId)
     {
+        if ($paymentId < 1) {
+            return false;
+        }
+
         $paymentRepository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
         /** @var \Shopware\Models\Payment\Payment $payment */
         $payment = $paymentRepository->find($paymentId);

@@ -219,7 +219,15 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         items.push({
             iconCls:'sprite-minus-circle-frame',
             text:'{s name=export/options/unsubscribe_delete_text}Unsubscribe and delete products{/s}',
-            action:'unsubscribe'
+            action:'unsubscribe',
+            // do not remove listeners
+            // this button doesn't work with
+            // action when enableOverflow is true
+            listeners: {
+                'click': function() {
+                    me.fireEvent('unsubscribeAndDelete', this);
+                }
+            }
         });
         return items;
     }

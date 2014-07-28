@@ -197,6 +197,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-import-list button[action=deactivate]': {
                 click: me.onImportFilterAction
             },
+            'bepado-import-list': {
+                'unsubscribeAndDelete': me.onImportFilterAction
+            },
             'bepado-import-list button[action=assignCategory]': {
                 click: me.onAssignCategoryAction
             },

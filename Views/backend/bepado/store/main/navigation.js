@@ -30,6 +30,12 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                         text: "{s name=navigation/config_units}Units{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
+                    },
+                    {
+                        id: 'config-shipping-groups',
+                        text: "{s name=navigation/config_shipping_groups}Shipping groups{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-truck'
                     }
                 ]},
             { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: false,

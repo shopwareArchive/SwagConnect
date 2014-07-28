@@ -28,6 +28,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-config-units',
                 itemId: 'config-units'
             }, {
+                xtype: 'bepado-shipping-groups',
+                itemId: 'shipping-groups'
+            }, {
                 xtype: 'bepado-mapping',
                 itemId: 'mapping'
             }, {
@@ -51,6 +54,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
             }, {
                 xtype: 'bepado-log',
                 itemId: 'log'
+            }, {
+                xtype: 'bepado-shipping-groups',
+                itemId: 'config-shipping-groups'
             }]
         });
 

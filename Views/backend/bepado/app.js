@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Bepado', {
         'mapping.General', 'mapping.Export', 'mapping.Import',
 		'config.general.Panel', 'config.general.Form', 'config.general.Description', 'config.import.Panel', 'config.export.Panel', 'config.Tabs',
         'config.import.Description', 'config.import.Form', 'config.export.Description', 'config.export.Form',
-        'config.units.Panel', 'config.units.Mapping'
+        'config.units.Panel', 'config.units.Mapping', 'config.shippingGroups.Panel', 'config.shippingGroups.List'
     ],
     controllers: [ 'Main' ],
 

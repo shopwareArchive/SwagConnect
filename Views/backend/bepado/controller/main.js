@@ -41,7 +41,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'logFilter', selector: 'bepado-log-filter' },
         { ref: 'logTabs', selector: 'bepado-log-tabs' },
         { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
-        { ref: 'unitsMapping', selector: 'bepado-units-mapping' }
+        { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
+        { ref: 'shippingGroupsPanel', selector: 'bepado-shipping-groups' },
+        { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' }
     ],
 
     messages: {

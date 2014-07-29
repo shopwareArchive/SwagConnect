@@ -231,25 +231,6 @@ class Checkout extends BaseSubscriber
         $sdk = $this->getSDK();
         $helper = $this->getHelper();
 
-        if($request->getActionName() == 'payment' || $request->getActionName() == 'finish') {
-            $userData = $session['sOrderVariables']['sUserData'];
-            $paymentId = $userData['additional']['payment']['id'];
-
-            if ($this->isPaymentAllowed($paymentId) === false) {
-                $bepadoMessage = new \stdClass();
-                $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
-
-                $bepadoMessages = array(
-                    0 => array(
-                        'bepadomessage' => $bepadoMessage
-                    )
-                );
-
-                Shopware()->Session()->BepadoMessages = $this->translateBepadoMessages($bepadoMessages);
-                $controller->forward('confirm');
-            }
-        }
-
         if($request->getActionName() != 'finish' && $request->getActionName() != 'payment') {
             return;
         }
@@ -264,11 +245,26 @@ class Checkout extends BaseSubscriber
             return;
         }
 
+        $userData = $session['sOrderVariables']['sUserData'];
+        $paymentId = $userData['additional']['payment']['id'];
+        if ($this->isPaymentAllowed($paymentId) === false) {
+            $bepadoMessage = new \stdClass();
+            $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
+
+            $bepadoMessages = array(
+                0 => array(
+                    'bepadomessage' => $bepadoMessage
+                )
+            );
+
+            Shopware()->Session()->BepadoMessages = $this->translateBepadoMessages($bepadoMessages);
+            $controller->forward('confirm');
+        }
+
         $this->enforcePhoneNumber($view);
 
         $order = new \Bepado\SDK\Struct\Order();
         $order->orderItems = array();
-        $userData = $session['sOrderVariables']['sUserData'];
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
         $basket = $session['sOrderVariables']['sBasket'];
@@ -377,7 +373,7 @@ class Checkout extends BaseSubscriber
         }
 
         $reservation = unserialize(Shopware()->Session()->BepadoReservation);
-        if($reservation !== null) {
+        if($reservation !== null && $reservation !== false) {
             $result = $sdk->checkout($reservation, $orderNumber);
             foreach($result as $shopId => $success) {
                 if (!$success) {

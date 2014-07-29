@@ -25,7 +25,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             columns: me.getColumns()
         });
 
-        me.groupingFeature = me.createGroupingFeature()
+        me.groupingFeature = me.createGroupingFeature();
         me.features =  [ me.groupingFeature ];
 
         me.callParent(arguments);

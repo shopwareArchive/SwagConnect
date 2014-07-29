@@ -39,53 +39,64 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         deliveryTimeHeader: '{s name=config/shipping_groups/delivery_time}Delivery time in days{/s}',
         priceHeader: '{s name=config/shjipping_groups/price}Price{/s}',
         zipPrefixHeader: '{s name=config/shjipping_groups/zip_prefix}Zip prefix{/s}',
-        save: '{s name=config/shipping_groups/save}Save{/s}'
+        save: '{s name=config/shipping_groups/save}Save{/s}',
+        add: '{s name=config/shipping_groups/add}Add{/s}'
     },
 
     initComponent: function() {
         var me = this;
 
-        me.store = [];
-        me.dockedItems = [ me.getButtons() ];
+        me.store = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Groups').load();
+        me.dockedItems = [
+            me.getToolbar(),
+            me.getButtons()
+        ];
 
-        me.columns = me.createColumns();
+        me.columns = me.getColumns();
+
+        me.rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+            clicksToMoveEditor: 1,
+            autoCancel: false
+        });
+        me.plugins = [ me.rowEditing ];
+
+        me.groupingFeature = me.createGroupingFeature();
+        me.features =  [ me.groupingFeature ];
 
         me.callParent(arguments);
     },
 
-    createColumns: function () {
+    getColumns: function () {
         var me = this;
 
         return [{
                 header: me.snippets.contryHeader,
                 dataIndex: 'country',
-                flex: 1
-            }, {
-                header: me.snippets.deliveryTimeHeader,
-                dataIndex: 'deliveryTime',
                 flex: 1,
                 editor: {
-                    xtype: 'combo',
-                    store: me.bepadoUnitsStore,
-                    displayField: 'name',
-                    valueField: 'key'
-                },
-                renderer: function (value) {
-                    var index = me.bepadoUnitsStore.findExact('key', value);
-                    if (index > -1) {
-                        return me.bepadoUnitsStore.getAt(index).get('name');
-                    }
-
-                    return value;
+                    allowBlank: false
+                }
+            }, {
+                header: me.snippets.deliveryTimeHeader,
+                dataIndex: 'deliveryDays',
+                flex: 1,
+                editor: {
+                    allowBlank: false
                 }
             }, {
                 header: me.snippets.priceHeader,
                 dataIndex: 'price',
-                flex: 1
+                flex: 1,
+                editor: {
+                    allowBlank: false
+                }
             }, {
                 header: me.snippets.zipPrefixHeader,
                 dataIndex: 'zipPrefix',
-                flex: 1
+                flex: 1,
+                editor: {
+                    allowBlank: false
+                }
             }];
     },
 
@@ -101,6 +112,47 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 action: 'save'
             }]
         };
-    }
+    },
+
+    getToolbar: function() {
+        var me = this;
+        return {
+            xtype: 'toolbar',
+            enableOverflow: true,
+            ui: 'shopware-ui',
+            dock: 'top',
+            border: false,
+            items: me.getTopBar()
+        };
+    },
+
+    getTopBar:function () {
+        var me = this;
+        var items = [];
+
+        items.push({
+            iconCls: 'sprite-plus-circle-frame',
+            text: me.snippets.add,
+            action: 'addGroup'
+        });
+
+        return items;
+    },
+
+    createGroupingFeature: function() {
+        var me = this;
+
+        return Ext.create('Ext.grid.feature.Grouping', {
+            groupHeaderTpl: Ext.create('Ext.XTemplate',
+                '<span>{ name:this.formatHeader }</span>',
+                '<span>&nbsp;({ rows.length } Rules)</span>',
+                {
+                    formatHeader: function(groupName) {
+                        return groupName;
+                    }
+                }
+            )
+        });
+    },
 });
 //{/block}

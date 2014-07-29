@@ -1271,4 +1271,37 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             )
         );
     }
+
+    public function getShippingGroupsAction()
+    {
+        $builder = $this->getModelManager()->createQueryBuilder();
+
+        $builder->select('sg, sr');
+        $builder->from('Shopware\CustomModels\Bepado\ShippingRule', 'sr');
+        $builder->join('sr.group', 'sg');
+
+        $rules = $builder->getQuery()->getArrayResult();
+        $data = array_map(function($rule) {
+            $rule['groupName'] = $rule['group']['groupName'];
+            unset($rule['group']);
+
+            return $rule;
+        }, $rules);
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $data,
+            )
+        );
+    }
+
+    public function saveShippingGroupsAction()
+    {
+        $this->View()->assign(
+            array(
+                'success' => true,
+            )
+        );
+    }
 }

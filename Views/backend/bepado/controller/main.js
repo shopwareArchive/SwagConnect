@@ -16,13 +16,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
-        'config.Units', 'config.BepadoUnits'
+        'config.Units', 'config.BepadoUnits', 'shippingGroup.Groups'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
-        'log.List',
+        'log.List', 'shippingGroup.Group',
         'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit', 'config.Pages'
     ],
 
@@ -128,6 +128,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-export-filter button[action=category-clear-filter]': {
                 click: me.onExportCategoryFilterClearAction
             },
+            'bepado-shipping-groups button[action=addGroup]': {
+                click: me.onAddShippingGroup
+            },
+            'bepado-shipping-groups button[action=save]': {
+            click: me.onSaveShippingGroup
+        },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
@@ -1056,6 +1062,26 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Units mapping could not be saved.{/s}');
             }
         });
+    },
+
+    onAddShippingGroup: function(btn, arg1,arg2,arg3) {
+        var me = this;
+        var grid = me.getShippingGroupsList();
+        grid.rowEditing.cancelEdit();
+
+        var model = Ext.create('Shopware.apps.Bepado.model.shippingGroup.Group');
+
+        var records = [model];
+        grid.store.insert(0, records);
+        grid.rowEditing.startEdit(0, 0);
+    },
+
+    onSaveShippingGroup: function() {
+        var me = this;
+        var grid = me.getShippingGroupsList();
+
+        grid.store.sync();
+        console.log(grid.store);
     }
 });
 //{/block}

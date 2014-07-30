@@ -35,12 +35,12 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
     alias: 'widget.bepado-shipping-groups-list',
 
     snippets: {
-        contryHeader: '{s name=config/shjipping_groups/country_header}Country{/s}',
+        countryHeader: '{s name=config/shipping_groups/country_header}Country{/s}',
         deliveryTimeHeader: '{s name=config/shipping_groups/delivery_time}Delivery time in days{/s}',
-        priceHeader: '{s name=config/shjipping_groups/price}Price{/s}',
-        zipPrefixHeader: '{s name=config/shjipping_groups/zip_prefix}Zip prefix{/s}',
+        priceHeader: '{s name=config/shipping_groups/price}Price{/s}',
+        zipPrefixHeader: '{s name=config/shipping_groups/zip_prefix}Zip prefix{/s}',
         save: '{s name=config/shipping_groups/save}Save{/s}',
-        add: '{s name=config/shipping_groups/add}Add{/s}'
+        add: '{s name=config/shipping_groups/add_group}Add group{/s}'
     },
 
     initComponent: function() {
@@ -70,7 +70,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         var me = this;
 
         return [{
-                header: me.snippets.contryHeader,
+                header: me.snippets.countryHeader,
                 dataIndex: 'country',
                 flex: 1,
                 editor: {

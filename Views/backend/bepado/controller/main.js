@@ -43,7 +43,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
         { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
         { ref: 'shippingGroupsPanel', selector: 'bepado-shipping-groups' },
-        { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' }
+        { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' },
+        { ref: 'addShippingGroupWindow', selector: 'bepado-shipping-add-group' }
     ],
 
     messages: {
@@ -131,7 +132,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-shipping-groups button[action=addGroup]': {
                 click: me.onAddShippingGroup
             },
-            'bepado-shipping-groups button[action=save]': {
+            'bepado-shipping-add-group button[action=save]': {
             click: me.onSaveShippingGroup
         },
             'bepado-export-filter textfield[name=searchfield]': {
@@ -1065,23 +1066,24 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     onAddShippingGroup: function(btn, arg1,arg2,arg3) {
-        var me = this;
-        var grid = me.getShippingGroupsList();
-        grid.rowEditing.cancelEdit();
-
-        var model = Ext.create('Shopware.apps.Bepado.model.shippingGroup.Group');
-
-        var records = [model];
-        grid.store.insert(0, records);
-        grid.rowEditing.startEdit(0, 0);
+        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup').show();
     },
 
-    onSaveShippingGroup: function() {
+    onSaveShippingGroup: function(btn) {
         var me = this;
-        var grid = me.getShippingGroupsList();
-
-        grid.store.sync();
-        console.log(grid.store);
+        var form = btn.up('form').getForm();
+        if (form.isValid()) {
+            console.log(form.getValues());
+            form.submit({
+                success: function(form, action) {
+                    me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_group}Group has been created.{/s}');
+                    me.getAddShippingGroupWindow().close();
+                },
+                failure: function(form, action) {
+                    me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
+                }
+            });
+        }
     }
 });
 //{/block}

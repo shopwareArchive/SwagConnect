@@ -1304,4 +1304,28 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             )
         );
     }
+
+    public function createShippingGroupAction()
+    {
+        if ($this->Request()->getMethod() === 'POST') {
+            $groupName = $this->Request()->getParam('groupName');
+
+            try {
+                $shippingGroupsComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
+                $shippingGroupsComponent->create($groupName);
+
+                $this->View()->assign(
+                    array(
+                        'success' => true,
+                    )
+                );
+            } catch (\Exception $e) {
+                $this->View()->assign(
+                    array(
+                        'success' => false
+                    )
+                );
+            }
+        }
+    }
 }

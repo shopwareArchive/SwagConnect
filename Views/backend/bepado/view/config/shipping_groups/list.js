@@ -48,6 +48,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
     initComponent: function() {
         var me = this;
 
+        me.countryStore = Ext.create('Shopware.apps.Base.store.Country').load();
         me.store = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Rules').load();
         me.dockedItems = [
             me.getToolbar(),
@@ -76,7 +77,20 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 header: me.snippets.countryHeader,
                 dataIndex: 'country',
                 flex: 1,
+                renderer: function(value) {
+                  var recordIndex = me.countryStore.findExact('iso', value);
+                    if (recordIndex === -1) {
+                        return '';
+                    }
+
+                    var model = me.countryStore.getAt(recordIndex);
+                    return model.get('name');
+                },
                 editor: {
+                    xtype: 'combobox',
+                    store: me.countryStore,
+                    displayField: 'name',
+                    valueField: 'iso',
                     allowBlank: false
                 }
             }, {
@@ -84,6 +98,10 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 dataIndex: 'deliveryDays',
                 flex: 1,
                 editor: {
+                    xtype: 'numberfield',
+                    maxValue: 99,
+                    minValue: 1,
+                    step: 1,
                     allowBlank: false
                 }
             }, {
@@ -91,7 +109,11 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 dataIndex: 'price',
                 flex: 1,
                 editor: {
-                    allowBlank: false
+                    xtype: 'numberfield',
+                    allowBlank: false,
+                    forcePrecision: true,
+                    minValue: 0.00,
+                    step: 0.01
                 }
             }, {
                 header: me.snippets.zipPrefixHeader,

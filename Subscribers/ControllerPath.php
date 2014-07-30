@@ -17,7 +17,8 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Bepado' => 'onGetControllerPathFrontend',
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_BepadoProductGateway' => 'onGetControllerPathFrontendBepadoControllerGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado' => 'onGetControllerPathBackend',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoConfig' => 'onGetControllerPathBepadoConfig'
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoConfig' => 'onGetControllerPathBepadoConfig',
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
         );
     }
 
@@ -83,5 +84,12 @@ class ControllerPath extends BaseSubscriber
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
         return $this->Path() . 'Controllers/Backend/BepadoConfig.php';
+    }
+
+    public function onGetControllerPathShippingGroups(\Enlight_Event_EventArgs $args)
+    {
+        $this->registerMyTemplateDir();
+        $this->registerMySnippets();
+        return $this->Path() . 'Controllers/Backend/ShippingGroups.php';
     }
 }

@@ -55,7 +55,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup', {
 
         return {
             xtype: 'form',
-            url: '{url controller=Bepado action=createShippingGroup}',
+            url: '{url controller=ShippingGroups action=createShippingGroup}',
             layout: 'anchor',
             bodyPadding: 10,
             defaults: {

@@ -39,9 +39,9 @@ Ext.define('Shopware.apps.Bepado.store.shippingGroup.Groups', {
     remoteFilter: false,
     proxy: {
         type: 'ajax',
-        url: '{url controller="Bepado" action="getShippingGroups"}',
+        url: '{url controller="ShippingGroups" action="getShippingGroups"}',
         api: {
-            read: '{url controller="Bepado" action="getShippingGroups"}'
+            read: '{url controller="ShippingGroups" action="getShippingGroups"}'
         },
         reader: {
             type: 'json',

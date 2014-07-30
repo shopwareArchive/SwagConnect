@@ -2,13 +2,32 @@
 
 namespace Shopware\Bepado\Components\ShippingCosts;
 
-
 use Shopware\CustomModels\Bepado\ShippingGroup;
 use Shopware\CustomModels\Bepado\ShippingRule;
 
 class ShippingGroups
 {
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
     private $em;
+
+    /**
+     * @var \Shopware\Components\Model\ModelRepository
+     */
+    private $groupRepository;
+
+    /**
+     * @var \Shopware\Components\Model\ModelRepository
+     */
+    private $ruleRepository;
+
+    public function __construct()
+    {
+        $this->em = Shopware()->Models();
+        $this->groupRepository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\ShippingGroup');
+        $this->ruleRepository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\ShippingRule');
+    }
 
     /**
      * @param string $name
@@ -19,8 +38,8 @@ class ShippingGroups
         $model = new ShippingGroup();
         $model->setGroupName($name);
 
-        $this->getEntityManager()->persist($model);
-        $this->getEntityManager()->flush();
+        $this->em->persist($model);
+        $this->em->flush();
 
         return true;
     }
@@ -31,7 +50,7 @@ class ShippingGroups
             throw new \Exception("Invalid shipping group id.");
         }
 
-        $group = $this->getEntityManager()->getRepository('Shopware\CustomModels\Bepado\ShippingGroup')->find($params['groupId']);
+        $group = $this->groupRepository->find((int)$params['groupId']);
         if (!$group) {
             throw new \Exception("Shipping group not found.");
         }
@@ -43,16 +62,34 @@ class ShippingGroups
         $model->setPrice($params['price']);
         $model->setZipPrefix($params['zipPrefix']);
 
-        $this->getEntityManager()->persist($model);
-        $this->getEntityManager()->flush();
+        $this->em->persist($model);
+        $this->em->flush();
     }
 
-    private function getEntityManager()
+    public function updateRule(array $rule)
     {
-        if (!$this->em) {
-            $this->em = Shopware()->Models();
+        /** @var \Shopware\CustomModels\Bepado\ShippingRule $model */
+        $model = $this->ruleRepository->find($rule['id']);
+
+        if (!$model) {
+            throw new \Exception('Shipping rule not found.');
         }
 
-        return $this->em;
+        $group = $this->groupRepository->find((int)$rule['groupId']);
+        if (!$group) {
+            throw new \Exception("Shipping group not found.");
+        }
+
+        $model->setCountry($rule['country']);
+        $model->setDeliveryDays($rule['deliveryDays']);
+        $model->setCountry($rule['country']);
+        $model->setPrice($rule['price']);
+        $model->setZipPrefix($rule['zipPrefix']);
+        $model->setGroup($group);
+
+        $this->em->persist($model);
+        $this->em->flush();
+
+        return $model;
     }
 } 

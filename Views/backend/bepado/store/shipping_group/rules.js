@@ -48,7 +48,8 @@ Ext.define('Shopware.apps.Bepado.store.shippingGroup.Rules', {
         api: {
             create: '{url controller="ShippingGroups" action="saveShippingRules"}',
             update: '{url controller="ShippingGroups" action="saveShippingRules"}',
-            read: '{url controller="ShippingGroups" action="getShippingRules"}'
+            read: '{url controller="ShippingGroups" action="getShippingRules"}',
+            destroy: '{url controller="ShippingGroups" action="deleteShippingRule"}'
         },
         reader: {
             type: 'json',

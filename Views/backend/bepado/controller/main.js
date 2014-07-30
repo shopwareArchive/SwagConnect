@@ -142,6 +142,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 click: me.onSaveShippingRule
             },'bepado-shipping-groups-list button[action=save]': {
                 click: me.onSaveShippingRules
+            },'bepado-shipping-groups-list': {
+                'deleteShippingRule': me.onDeleteShippingRule
             },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
@@ -1120,6 +1122,15 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         var grid = me.getShippingGroupsList();
 
         grid.getStore().sync();
+    },
+
+    onDeleteShippingRule: function(record) {
+        var me = this;
+        var grid = me.getShippingGroupsList();
+        var store = grid.getStore();
+
+        store.remove(record);
+        store.sync();
     }
 });
 //{/block}

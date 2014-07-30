@@ -162,6 +162,36 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         );
     }
 
+    public function deleteShippingRuleAction()
+    {
+        if ($this->Request()->getMethod() === 'POST') {
+            $params = $this->Request()->getParam('data');
+
+            if (isset($params['id'])) {
+                $params = array($params);
+            }
+
+            try {
+                $shippingGroupsComponent = $this->getShippingGroupsComponent();
+                foreach ($params as $record) {
+                    $shippingGroupsComponent->deleteRule($record['id']);
+                }
+
+                $this->View()->assign(
+                    array(
+                        'success' => true,
+                    )
+                );
+            } catch (\Exception $e) {
+                $this->View()->assign(
+                    array(
+                        'success' => false
+                    )
+                );
+            }
+        }
+    }
+
     private function getShippingGroupsComponent()
     {
         if (!$this->shippingGroupsComponent) {

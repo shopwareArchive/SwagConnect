@@ -72,6 +72,14 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
 
     getColumns: function () {
         var me = this;
+        var actionColumItems = [];
+        actionColumItems.push({
+            iconCls:'sprite-minus-circle-frame',
+            action:'delete',
+            handler: function (view, rowIndex, colIndex, item, opts, record) {
+                me.fireEvent('deleteShippingRule', record);
+            }
+        });
 
         return [{
                 header: me.snippets.countryHeader,
@@ -122,7 +130,15 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 editor: {
                     allowBlank: false
                 }
-            }];
+            }, {
+            /**
+             * Special column type which provides
+             * clickable icons in each row
+             */
+            xtype: 'actioncolumn',
+            width: 26 * actionColumItems.length,
+            items: actionColumItems
+        }];
     },
 
     getButtons: function() {

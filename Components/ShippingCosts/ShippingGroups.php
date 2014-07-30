@@ -92,4 +92,16 @@ class ShippingGroups
 
         return $model;
     }
+
+    public function deleteRule($id)
+    {
+        /** @var \Shopware\CustomModels\Bepado\ShippingRule $model */
+        $model = $this->ruleRepository->find($id);
+        if (!$model) {
+            throw new \Exception('Shipping rule not found.');
+        }
+
+        $this->em->remove($model);
+        $this->em->flush();
+    }
 } 

@@ -52,8 +52,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         me.store = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Rules').load();
         me.dockedItems = [
             me.getToolbar(),
-            me.getPagingToolbar(),
-            me.getButtons()
+            me.getBottomToolbar()
         ];
 
         me.columns = me.getColumns();
@@ -202,7 +201,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         });
     },
 
-    getPagingToolbar: function() {
+    getBottomToolbar: function() {
         var me = this;
         var pageSize = Ext.create('Ext.form.field.ComboBox', {
             labelWidth: 120,
@@ -245,7 +244,20 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
             displayInfo:true
         });
 
+
+
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
+
+        return {
+            dock: 'bottom',
+            xtype: 'toolbar',
+            items: [pagingBar, '->', {
+                text: me.snippets.save,
+                cls: 'primary',
+                action: 'save'
+            }]
+        };
+
         return pagingBar;
     }
 });

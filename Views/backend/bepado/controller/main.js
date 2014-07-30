@@ -16,13 +16,13 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
-        'config.Units', 'config.BepadoUnits', 'shippingGroup.Groups'
+        'config.Units', 'config.BepadoUnits', 'shippingGroup.Groups', 'shippingGroup.Rules'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
-        'log.List', 'shippingGroup.Group',
+        'log.List', 'shippingGroup.Group', 'shippingGroup.Rule',
         'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit', 'config.Pages'
     ],
 
@@ -44,7 +44,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
         { ref: 'shippingGroupsPanel', selector: 'bepado-shipping-groups' },
         { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' },
-        { ref: 'addShippingGroupWindow', selector: 'bepado-shipping-add-group' }
+        { ref: 'addShippingGroupWindow', selector: 'bepado-shipping-add-group' },
+        { ref: 'addShippingRuleWindow', selector: 'bepado-shipping-add-rule' }
     ],
 
     messages: {
@@ -132,9 +133,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-shipping-groups button[action=addGroup]': {
                 click: me.onAddShippingGroup
             },
+            'bepado-shipping-groups button[action=addRule]': {
+                click: me.onAddShippingRule
+            },
             'bepado-shipping-add-group button[action=save]': {
-            click: me.onSaveShippingGroup
-        },
+                click: me.onSaveShippingGroup
+            },'bepado-shipping-add-rule button[action=save]': {
+                click: me.onSaveShippingRule
+            },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
@@ -1073,11 +1079,32 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         var me = this;
         var form = btn.up('form').getForm();
         if (form.isValid()) {
-            console.log(form.getValues());
             form.submit({
                 success: function(form, action) {
                     me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_group}Group has been created.{/s}');
                     me.getAddShippingGroupWindow().close();
+                },
+                failure: function(form, action) {
+                    me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
+                }
+            });
+        }
+    },
+
+    onAddShippingRule: function(btn, arg1,arg2,arg3) {
+        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddRule').show();
+    },
+
+    onSaveShippingRule: function(btn) {
+        var me = this;
+        var form = btn.up('form').getForm();
+        if (form.isValid()) {
+            var grid = me.getShippingGroupsList();
+            form.submit({
+                success: function(form, action) {
+                    me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_rule}Rule has been created.{/s}');
+                    me.getAddShippingRuleWindow().close();
+                    grid.getStore().load();
                 },
                 failure: function(form, action) {
                     me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');

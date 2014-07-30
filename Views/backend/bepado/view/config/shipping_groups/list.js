@@ -33,6 +33,7 @@
 Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.bepado-shipping-groups-list',
+    id: 'bepado-shipping-groups-list',
 
     snippets: {
         countryHeader: '{s name=config/shipping_groups/country_header}Country{/s}',
@@ -40,15 +41,17 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         priceHeader: '{s name=config/shipping_groups/price}Price{/s}',
         zipPrefixHeader: '{s name=config/shipping_groups/zip_prefix}Zip prefix{/s}',
         save: '{s name=config/shipping_groups/save}Save{/s}',
-        add: '{s name=config/shipping_groups/add_group}Add group{/s}'
+        addGroup: '{s name=config/shipping_groups/add_group}Add group{/s}',
+        addRule: '{s name=config/shipping_groups/add_rule}Add rule{/s}'
     },
 
     initComponent: function() {
         var me = this;
 
-        me.store = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Groups').load();
+        me.store = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Rules').load();
         me.dockedItems = [
             me.getToolbar(),
+            me.getPagingToolbar(),
             me.getButtons()
         ];
 
@@ -132,8 +135,14 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
 
         items.push({
             iconCls: 'sprite-plus-circle-frame',
-            text: me.snippets.add,
+            text: me.snippets.addGroup,
             action: 'addGroup'
+        });
+
+        items.push({
+            iconCls: 'sprite-plus-circle-frame',
+            text: me.snippets.addRule,
+            action: 'addRule'
         });
 
         return items;
@@ -154,5 +163,52 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
             )
         });
     },
+
+    getPagingToolbar: function() {
+        var me = this;
+        var pageSize = Ext.create('Ext.form.field.ComboBox', {
+            labelWidth: 120,
+            cls: Ext.baseCSSPrefix + 'page-size',
+            queryMode: 'local',
+            width: 180,
+            listeners: {
+                scope: me,
+                select: function(combo, records) {
+                    var record = records[0],
+                        me = this;
+
+                    me.store.pageSize = record.get('value');
+                    me.store.loadPage(1);
+                }
+            },
+            store: Ext.create('Ext.data.Store', {
+                fields: [ 'value' ],
+                data: [
+                    { value: '10' },
+                    { value: '20' },
+                    { value: '40' },
+                    { value: '60' },
+                    { value: '80' },
+                    { value: '100' },
+                    { value: '250' },
+                    { value: '500' },
+                ]
+            }),
+            displayField: 'value',
+            valueField: 'value',
+            editable: false,
+            emptyText: '20'
+        });
+        pageSize.setValue(me.store.pageSize);
+
+        var pagingBar = Ext.create('Ext.toolbar.Paging', {
+            store: me.store,
+            dock:'bottom',
+            displayInfo:true
+        });
+
+        pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
+        return pagingBar;
+    }
 });
 //{/block}

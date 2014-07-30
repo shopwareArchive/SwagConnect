@@ -17,7 +17,7 @@ Ext.define('Shopware.apps.Bepado', {
 		'config.general.Panel', 'config.general.Form', 'config.general.Description', 'config.import.Panel', 'config.export.Panel', 'config.Tabs',
         'config.import.Description', 'config.import.Form', 'config.export.Description', 'config.export.Form',
         'config.units.Panel', 'config.units.Mapping', 'config.shippingGroups.Panel', 'config.shippingGroups.List',
-        'config.shippingGroups.AddGroup'
+        'config.shippingGroups.AddGroup', 'config.shippingGroups.AddRule'
     ],
     controllers: [ 'Main' ],
 

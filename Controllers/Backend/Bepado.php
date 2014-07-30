@@ -1272,7 +1272,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
     }
 
-    public function getShippingGroupsAction()
+    public function getShippingRulesAction()
     {
         $builder = $this->getModelManager()->createQueryBuilder();
 
@@ -1296,13 +1296,34 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         );
     }
 
-    public function saveShippingGroupsAction()
+    public function saveShippingRulesAction()
     {
-        $this->View()->assign(
-            array(
-                'success' => true,
-            )
-        );
+        if ($this->Request()->getMethod() === 'POST') {
+            $params = $this->Request()->getParam('data');
+
+            if (isset($params['id'])) {
+                $params = array($params);
+            }
+
+            try {
+                $shippingGroupsComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
+                foreach ($params as $record) {
+                    $shippingGroupsComponent->createRule($record);
+                }
+
+                $this->View()->assign(
+                    array(
+                        'success' => true,
+                    )
+                );
+            } catch (\Exception $e) {
+                $this->View()->assign(
+                    array(
+                        'success' => false
+                    )
+                );
+            }
+        }
     }
 
     public function createShippingGroupAction()
@@ -1312,7 +1333,48 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
             try {
                 $shippingGroupsComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
-                $shippingGroupsComponent->create($groupName);
+                $shippingGroupsComponent->createGroup($groupName);
+
+                $this->View()->assign(
+                    array(
+                        'success' => true,
+                    )
+                );
+            } catch (\Exception $e) {
+                $this->View()->assign(
+                    array(
+                        'success' => false
+                    )
+                );
+            }
+        }
+    }
+
+    public function getShippingGroupsAction()
+    {
+        $builder = $this->getModelManager()->createQueryBuilder();
+
+        $builder->select('sg');
+        $builder->from('Shopware\CustomModels\Bepado\ShippingGroup', 'sg');
+
+        $groups = $builder->getQuery()->getArrayResult();
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $groups,
+            )
+        );
+    }
+
+    public function createShippingRuleAction()
+    {
+        if ($this->Request()->getMethod() === 'POST') {
+            $params = $this->Request()->getParams();
+
+            try {
+                $shippingGroupsComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
+                $shippingGroupsComponent->createRule($params);
 
                 $this->View()->assign(
                     array(

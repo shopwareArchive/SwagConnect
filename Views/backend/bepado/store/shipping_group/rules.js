@@ -28,22 +28,30 @@
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
 
-//{block name="backend/bepado/store/shipping_group/groups"}
-Ext.define('Shopware.apps.Bepado.store.shippingGroup.Groups', {
+//{block name="backend/bepado/store/shipping_group/rules"}
+Ext.define('Shopware.apps.Bepado.store.shippingGroup.Rules', {
     extend: 'Ext.data.Store',
 
     autoLoad: false,
-    model: 'Shopware.apps.Bepado.model.shippingGroup.Group',
+    model: 'Shopware.apps.Bepado.model.shippingGroup.Rule',
 
     remoteSort: false,
     remoteFilter: false,
+    groupField: 'groupName',
+    idProperty: 'id',
     proxy: {
         type: 'ajax',
-        url: '{url controller="Bepado" action="getShippingGroups"}',
+        url: '{url controller="Bepado" action="getShippingRules"}',
         api: {
-            read: '{url controller="Bepado" action="getShippingGroups"}'
+            create: '{url controller="Bepado" action="saveShippingRules"}',
+            update: '{url controller="Bepado" action="saveShippingRules"}',
+            read: '{url controller="Bepado" action="getShippingRules"}'
         },
         reader: {
+            type: 'json',
+            root: 'data'
+        },
+        writer: {
             type: 'json',
             root: 'data'
         }

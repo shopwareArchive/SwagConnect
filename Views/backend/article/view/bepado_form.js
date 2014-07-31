@@ -174,7 +174,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         return me.bepadoShippingGroup = Ext.create('Ext.form.ComboBox', {
             labelWidth: 155,
             name: 'shippingGroupName',
-            fieldLabel: '{s name=bepadoShippingGroup}ShippingGroup{/s}',
+            fieldLabel: '{s name=config/shipping_groups/shipping_group}Shipping group{/s}',
             store: me.getShippingGroupStore(),
             displayField: 'groupName',
             valueField: 'groupName',

@@ -42,6 +42,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     /** @var  \Shopware\Bepado\Components\Config */
     private $configComponent;
 
+    /**
+     * @var \Shopware\Bepado\Components\ShippingCosts\ShippingGroups
+     */
+    private $shippingGroupComponent;
 
     /**
      * @return Shopware\Components\Model\ModelManager
@@ -123,7 +127,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         return $this->getModelManager()->getRepository('Shopware\Models\Article\Article')->find($id);
     }
-
 
     /**
      * @return ImageImport
@@ -1035,6 +1038,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
 
         $data = $this->getModelManager()->toArray($data);
+        $shipping = $articleModel->getMainDetail()->getAttribute()->getBepadoArticleShipping();
+        $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
 
         $this->View()->assign(array(
             'success' => true,
@@ -1051,6 +1056,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
         $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
+
+        $attribute = $bepadoAttribute->getArticle()->getMainDetail()->getAttribute();
+        $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
+        $this->getModelManager()->persist($attribute);
 
         if (!$bepadoAttribute) {
             throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
@@ -1240,6 +1249,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
 
         return $this->configComponent;
+    }
+
+    public function getShippingGroupComponent()
+    {
+        if ($this->shippingGroupComponent === null) {
+            $this->shippingGroupComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
+        }
+
+        return $this->shippingGroupComponent;
     }
 
 	/**

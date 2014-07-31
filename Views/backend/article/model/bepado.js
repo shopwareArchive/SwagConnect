@@ -12,6 +12,7 @@ Ext.define('Shopware.apps.Article.model.Bepado', {
         { name: 'updateLongDescription', type: 'string', useNull: true  },
         { name: 'updateShortDescription', type: 'string', useNull: true  },
         { name: 'updateName', type: 'string', useNull: true  },
+        { name: 'shippingGroupName', type: 'string', useNull: true  }
     ],
 
 

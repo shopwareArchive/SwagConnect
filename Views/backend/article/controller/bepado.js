@@ -131,6 +131,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         basicField.setReadOnly(me.record.get('sourceId') > 0);
 
         bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
+        bepadoForm.bepadoShippingGroup.setReadOnly(me.record.get('sourceId') > 0);
 
         if (settingsFieldSet) {
             shippingField = settingsFieldSet.down('checkboxfield[fieldLabel=' + settingsFieldSet.snippets.shippingFree.field + ']');

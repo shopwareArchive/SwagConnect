@@ -84,6 +84,7 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
+            'attribute.bepadoArticleShipping as shipping'
         ));
 
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);

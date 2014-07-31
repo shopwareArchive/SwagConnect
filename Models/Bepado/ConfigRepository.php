@@ -1,7 +1,7 @@
 <?php
 
 namespace   Shopware\CustomModels\Bepado;
-use Doctrine\Common\Util\Debug;
+
 use         \Shopware\Components\Model\ModelRepository;
 
 class ConfigRepository extends ModelRepository

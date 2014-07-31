@@ -25,7 +25,8 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
 
         return [
             me.getFixedPriceFieldSet(),
-            me.getBepadoImportConfigFieldSet()
+            me.getBepadoImportConfigFieldSet(),
+            me.getShippingCostsFieldset()
         ];
 
     },
@@ -88,6 +89,18 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         };
     },
 
+    getShippingCostsFieldset: function() {
+        var me = this;
+
+        return {
+            xtype: 'fieldset',
+            defaults: me.defaults,
+            title: '{s name=shippingCosts}Shipping costs{/s}',
+            items:
+                [ me.getShippingGroupCombo() ]
+        };
+    },
+
     getLeftContainer: function() {
         var me = this;
 
@@ -146,6 +159,29 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             inputValue: true,
             uncheckedValue:false
         })
+    },
+
+    getShippingGroupCombo: function() {
+        var me = this;
+
+        return me.bepadoShippingGroup = Ext.create('Ext.form.ComboBox', {
+            labelWidth: 155,
+            name: 'shippingGroupName',
+            fieldLabel: '{s name=bepadoShippingGroup}ShippingGroup{/s}',
+            store: me.getShippingGroupStore(),
+            displayField: 'groupName',
+            valueField: 'groupName',
+            emptyText: 'bepado default'
+        })
+    },
+
+    getShippingGroupStore: function() {
+        var me = this;
+        if (!me.shippingGroupStore) {
+            me.shippingGroupStore = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Groups').load();
+        }
+
+        return me.shippingGroupStore;
     }
 });
 //{/block}

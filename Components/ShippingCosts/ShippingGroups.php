@@ -104,4 +104,41 @@ class ShippingGroups
         $this->em->remove($model);
         $this->em->flush();
     }
+
+    public function generateShippingString($groupName)
+    {
+        $shipping = '';
+        /** @var \Shopware\CustomModels\Bepado\ShippingGroup $group */
+        $group = $this->groupRepository->findOneBy(array('groupName' => $groupName));
+        if (!$group) {
+            return $shipping;
+        }
+
+        /** @var \Shopware\CustomModels\Bepado\ShippingRule $rule */
+        foreach ($group->getRules() as $rule) {
+            $shipping[] = sprintf('%s:%s:%s (%sD):%s',
+                $rule->getCountry(),
+                $rule->getZipPrefix(),
+                $group->getGroupName(),
+                $rule->getDeliveryDays(),
+                $rule->getPrice()
+            );
+        }
+
+        return implode(',', $shipping);
+    }
+
+    public function extractGroupName($shipping)
+    {
+        $shippingArray = explode(':', $shipping);
+        if (!isset($shippingArray[2])) {
+            return '';
+        }
+        $groupName = explode(' (', $shippingArray[2]);
+        if (!isset($groupName[0])) {
+            return '';
+        }
+
+        return $groupName[0];
+    }
 } 

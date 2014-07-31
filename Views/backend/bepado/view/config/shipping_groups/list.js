@@ -127,7 +127,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 dataIndex: 'zipPrefix',
                 flex: 1,
                 editor: {
-                    allowBlank: false
+                    allowBlank: true
                 }
             }, {
             /**

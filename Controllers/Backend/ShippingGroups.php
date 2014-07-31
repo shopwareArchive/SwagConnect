@@ -29,8 +29,14 @@
  */
 class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_Backend_ExtJs
 {
+    /**
+     * @var \Shopware\Bepado\Components\ShippingCosts\ShippingGroups
+     */
     private $shippingGroupsComponent;
 
+    /**
+     * Creates single shipping rule
+     */
     public function createShippingRuleAction()
     {
         if ($this->Request()->getMethod() === 'POST') {
@@ -55,6 +61,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         }
     }
 
+    /**
+     * Returns shipping groups
+     */
     public function getShippingGroupsAction()
     {
         $builder = $this->getModelManager()->createQueryBuilder();
@@ -72,6 +81,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         );
     }
 
+    /**
+     * Creates shipping group
+     */
     public function createShippingGroupAction()
     {
         if ($this->Request()->getMethod() === 'POST') {
@@ -96,6 +108,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         }
     }
 
+    /**
+     * Saves shipping rules
+     */
     public function saveShippingRulesAction()
     {
         if ($this->Request()->getMethod() === 'POST') {
@@ -126,6 +141,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         }
     }
 
+    /**
+     * Returns shipping rules
+     */
     public function getShippingRulesAction()
     {
         $start = $this->Request()->getParam('start', 0);
@@ -162,6 +180,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         );
     }
 
+    /**
+     * Deletes shipping rule by provided id
+     */
     public function deleteShippingRuleAction()
     {
         if ($this->Request()->getMethod() === 'POST') {
@@ -192,6 +213,11 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         }
     }
 
+    /**
+     * Returns instance of ShippingGroups component
+     *
+     * @return \Shopware\Bepado\Components\ShippingCosts\ShippingGroups
+     */
     private function getShippingGroupsComponent()
     {
         if (!$this->shippingGroupsComponent) {

@@ -69,6 +69,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         me.callParent(arguments);
     },
 
+    /**
+     * Generates grid columns
+     */
     getColumns: function () {
         var me = this;
         var actionColumItems = [];
@@ -140,6 +143,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         }];
     },
 
+    /**
+     * Generates bottom buttons
+     */
     getButtons: function() {
         var me = this;
 
@@ -154,6 +160,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         };
     },
 
+    /**
+     * Generates top toolbar
+     */
     getToolbar: function() {
         var me = this;
         return {
@@ -166,6 +175,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         };
     },
 
+    /**
+     * Generates top toolbar items
+     */
     getTopBar:function () {
         var me = this;
         var items = [];
@@ -185,6 +197,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         return items;
     },
 
+    /**
+     * Creates grid grouping feature
+     */
     createGroupingFeature: function() {
         var me = this;
 
@@ -201,6 +216,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         });
     },
 
+    /**
+     * Generates bottom toolbar
+     */
     getBottomToolbar: function() {
         var me = this;
         var pageSize = Ext.create('Ext.form.field.ComboBox', {

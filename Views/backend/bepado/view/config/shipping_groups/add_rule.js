@@ -50,6 +50,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
         me.callParent(arguments);
     },
 
+    /**
+     * Returns generated shipping rule form
+     */
     getForm: function() {
         var me = this;
         var countryStore = Ext.create('Shopware.apps.Base.store.Country').load();

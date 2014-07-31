@@ -44,6 +44,13 @@ class ShippingGroups
         return true;
     }
 
+    /**
+     * Helper function
+     * Create shipping rule and save it to DB
+     *
+     * @param array $params
+     * @throws \Exception
+     */
     public function createRule(array $params)
     {
         if (!$params['groupId']) {
@@ -66,6 +73,14 @@ class ShippingGroups
         $this->em->flush();
     }
 
+    /**
+     * Helper function
+     * Update already created shipping rule
+     *
+     * @param array $rule
+     * @return ShippingRule
+     * @throws \Exception
+     */
     public function updateRule(array $rule)
     {
         /** @var \Shopware\CustomModels\Bepado\ShippingRule $model */
@@ -93,6 +108,13 @@ class ShippingGroups
         return $model;
     }
 
+    /**
+     * Helper function
+     * Delete shipping rule from DB
+     *
+     * @param $id
+     * @throws \Exception
+     */
     public function deleteRule($id)
     {
         /** @var \Shopware\CustomModels\Bepado\ShippingRule $model */
@@ -105,6 +127,13 @@ class ShippingGroups
         $this->em->flush();
     }
 
+    /**
+     * Helper function
+     * Generate shipping string
+     *
+     * @param $groupName
+     * @return array|string
+     */
     public function generateShippingString($groupName)
     {
         $shipping = '';
@@ -128,6 +157,12 @@ class ShippingGroups
         return implode(',', $shipping);
     }
 
+    /**
+     * Helper function
+     * Extract group name from shipping string
+     * @param $shipping
+     * @return string
+     */
     public function extractGroupName($shipping)
     {
         $shippingArray = explode(':', $shipping);

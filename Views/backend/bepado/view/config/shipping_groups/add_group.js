@@ -50,6 +50,9 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup', {
         me.callParent(arguments);
     },
 
+    /**
+     * Returns generated shipping group form
+     */
     getForm: function() {
         var me = this;
 

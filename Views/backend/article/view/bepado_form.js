@@ -89,6 +89,10 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         };
     },
 
+    /**
+     * Creates shipping group fieldset
+     * in bepado article tab
+     */
     getShippingCostsFieldset: function() {
         var me = this;
 
@@ -161,6 +165,9 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         })
     },
 
+    /**
+     * Creates shipping group combo
+     */
     getShippingGroupCombo: function() {
         var me = this;
 
@@ -175,6 +182,9 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         })
     },
 
+    /**
+     * Returns instance of shipping groups store
+     */
     getShippingGroupStore: function() {
         var me = this;
         if (!me.shippingGroupStore) {

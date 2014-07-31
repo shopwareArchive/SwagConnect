@@ -1075,10 +1075,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
+    /**
+     * Event listener show add shipping group window
+     */
     onAddShippingGroup: function(btn, arg1,arg2,arg3) {
         Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup').show();
     },
 
+    /**
+     * Event listener save shipping group
+     */
     onSaveShippingGroup: function(btn) {
         var me = this;
         var form = btn.up('form').getForm();
@@ -1095,10 +1101,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         }
     },
 
+    /**
+     * Event listener show add shipping rule window
+     */
     onAddShippingRule: function(btn, arg1,arg2,arg3) {
         Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddRule').show();
     },
 
+    /**
+     * Event listener save single shipping rule
+     */
     onSaveShippingRule: function(btn) {
         var me = this;
         var form = btn.up('form').getForm();
@@ -1117,6 +1129,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         }
     },
 
+    /**
+     * Event listener save shipping rules
+     */
     onSaveShippingRules: function(btn) {
         var me = this;
         var grid = me.getShippingGroupsList();
@@ -1124,6 +1139,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         grid.getStore().sync();
     },
 
+    /**
+     * Event listener delete shipping rule
+     */
     onDeleteShippingRule: function(record) {
         var me = this;
         var grid = me.getShippingGroupsList();

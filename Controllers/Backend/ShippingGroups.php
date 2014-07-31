@@ -226,4 +226,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
 
         return $this->shippingGroupsComponent;
     }
+
+    public function getModelManager()
+    {
+        return Shopware()->Models();
+    }
 }

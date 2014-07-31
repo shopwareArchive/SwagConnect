@@ -415,7 +415,7 @@ class Checkout extends BaseSubscriber
         /** \Bepado\SDK\Struct\Product */
         foreach ($products as $product) {
             $messages[] = new Message(array(
-                'message' => 'Availablility of product %product changed to %availability',
+                'message' => 'Availability of product %product changed to %availability',
                 'values' => array(
                     'product' => $product->title,
                     'availability' => 0

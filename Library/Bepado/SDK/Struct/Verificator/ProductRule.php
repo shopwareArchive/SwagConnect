@@ -44,7 +44,8 @@ class ProductRule extends Verificator
             );
         }
 
-        if (!($struct->deliveryWorkDays > 0)) {
+        if (!is_null($struct->deliveryWorkDays) &&
+            !($struct->deliveryWorkDays > 0)) {
             throw new VerificationFailedException(
                 'Delivery work days must be a positive number'
             );

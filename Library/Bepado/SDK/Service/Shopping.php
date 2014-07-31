@@ -65,11 +65,11 @@ class Shopping
     protected $errorHandler;
 
     /**
-     * Shipping cost calculator
+     * Shipping cost service
      *
-     * @var ShippingCostCalculator
+     * @var ShippingCosts
      */
-    protected $calculator;
+    protected $shippingCostsService;
 
     /**
      * @var ShopConfiguration
@@ -82,7 +82,7 @@ class Shopping
         ProductToShop $productToShop,
         Logger $logger,
         ErrorHandler $errorHandler,
-        ShippingCostCalculator $calculator,
+        ShippingCosts $shippingCostsService,
         ShopConfiguration $config
     ) {
         $this->shopFactory = $shopFactory;
@@ -90,7 +90,7 @@ class Shopping
         $this->productToShop = $productToShop;
         $this->logger = $logger;
         $this->errorHandler = $errorHandler;
-        $this->calculator = $calculator;
+        $this->shippingCostsService = $shippingCostsService;
         $this->config = $config;
     }
 
@@ -111,7 +111,7 @@ class Shopping
         $orders = $this->splitShopOrders($order);
 
         foreach ($orders as $shopId => $shopOrder) {
-            $shops[$shopId] = $this->calculator->calculateShippingCosts($shopOrder, $type);
+            $shops[$shopId] = $this->shippingCostsService->calculateShippingCosts($shopOrder, $type);
             $shops[$shopId]->shopId = $shopId;
         }
 

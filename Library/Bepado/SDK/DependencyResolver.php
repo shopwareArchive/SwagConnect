@@ -86,6 +86,13 @@ class DependencyResolver
     protected $shoppingService;
 
     /**
+     * Shipping costs service
+     *
+     * @var Service\ShippingCosts
+     */
+    protected $shippingCostsService;
+
+    /**
      * Verification service
      *
      * @var Service\Verification
@@ -308,7 +315,7 @@ class DependencyResolver
                     $this->gateway,
                     $this->getLogger(),
                     $this->gateway,
-                    $this->getShippingCostCalculator(),
+                    $this->getShippingCostsService(),
                     $this->getVerificator()
                 )
             );
@@ -316,10 +323,7 @@ class DependencyResolver
             $this->registry->registerService(
                 'shippingCosts',
                 array('lastRevision', 'replicate'),
-                new Service\ShippingCosts(
-                    $this->gateway,
-                    $this->getShippingCostCalculator()
-                )
+                $this->getShippingCostsService()
             );
         }
 
@@ -345,7 +349,9 @@ class DependencyResolver
                     'Bepado\\SDK\\Struct\\OrderItem' =>
                         new Struct\Verificator\OrderItem(),
                     'Bepado\\SDK\\Struct\\Product' =>
-                        new Struct\Verificator\Product(),
+                        new Struct\Verificator\Product(
+                            new ShippingRuleParser\Google()
+                        ),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Insert' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Update' =>
@@ -409,7 +415,10 @@ class DependencyResolver
         if ($this->marshaller === null) {
             $this->marshaller = new Rpc\Marshaller\CallMarshaller\XmlCallMarshaller(
                 new \Bepado\SDK\XmlHelper(),
-                new Rpc\Marshaller\Converter\ExceptionToErrorConverter()
+                new Rpc\Marshaller\Converter\ChainingConverter(array(
+                    new Rpc\Marshaller\Converter\ExceptionToErrorConverter(),
+                    new Rpc\Marshaller\Converter\LegacyOrderConverter(),
+                ))
             );
         }
 
@@ -431,7 +440,7 @@ class DependencyResolver
                 $this->toShop,
                 $this->getLogger(),
                 $this->errorHandler,
-                $this->getShippingCostCalculator(),
+                $this->getShippingCostsService(),
                 $this->gateway
             );
         }
@@ -439,14 +448,27 @@ class DependencyResolver
         return $this->shoppingService;
     }
 
+    /**
+     * @return Service\ShippingCosts
+     */
+    public function getShippingCostsService()
+    {
+        if ($this->shippingCostsService === null) {
+            $this->shippingCostsService = new Service\ShippingCosts(
+                $this->gateway,
+                $this->getShippingCostCalculator()
+            );
+        }
+
+        return $this->shippingCostsService;
+    }
+
     public function getShippingCostCalculator()
     {
         if ($this->shippingCostCalculator === null) {
             if ($this->gateway->isFeatureEnabled('shipping_rules')) {
                 $this->shippingCostCalculator = new ShippingCostCalculator\ProductCalculator(
-                    new ShippingCostCalculator\RuleCalculator(
-                        $this->gateway
-                    ),
+                    new ShippingCostCalculator\RuleCalculator(),
                     new ShippingRuleParser\Validator(
                         new ShippingRuleParser\Google(),
                         $this->getVerificator()

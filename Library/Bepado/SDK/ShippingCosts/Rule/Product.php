@@ -11,6 +11,7 @@ use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Shipping;
+use Bepado\SDK\ShippingCosts\VatConfig;
 
 /**
  * Class: FixedPrice
@@ -96,30 +97,21 @@ class Product extends Rule
      * Returns the net shipping costs.
      *
      * @param Order $order
-     * @return float
+     * @param VatConfig $vatConfig
+     * @return Shipping
      */
-    public function getShippingCosts(Order $order)
+    public function getShippingCosts(Order $order, VatConfig $vatConfig)
     {
         return new Shipping(
             array(
                 'rule' => $this,
                 'service' => $this->service,
                 'deliveryWorkDays' => $this->deliveryWorkDays,
-                'isShippable' => true,
-                'shippingCosts' => $this->price * $this->orderItemCount,
-                'grossShippingCosts' => $this->price * $this->orderItemCount * (1 + $this->vat),
+                'shippingCosts' => $this->price * $this->orderItemCount /
+                    ($vatConfig->isNet ? 1 : 1 + $this->vat),
+                'grossShippingCosts' => $this->price * $this->orderItemCount *
+                    (!$vatConfig->isNet ? 1 : 1 + $this->vat),
             )
         );
-    }
-
-    /**
-     * If processing should stop after this rule
-     *
-     * @param Order $order
-     * @return bool
-     */
-    public function shouldStopProcessing(Order $order)
-    {
-        return true;
     }
 }

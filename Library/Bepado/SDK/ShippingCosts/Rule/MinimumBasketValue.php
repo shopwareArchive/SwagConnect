@@ -9,32 +9,25 @@ namespace Bepado\SDK\ShippingCosts\Rule;
 
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Struct\Order;
-use Bepado\SDK\Struct\Shipping;
 use Bepado\SDK\ShippingCosts\VatConfig;
 
 /**
- * Class: FixedPrice
- *
- * Rule for fixed price shipping costs for an order
+ * Rule decorator, which applies the delegatee only if a given basket value is
+ * reached.
  */
-class FixedPrice extends Rule
+class MinimumBasketValue extends Rule
 {
     /**
-     * @var string
-     */
-    public $label;
-
-    /**
+     * Minimum order value to apply delegatee
+     *
      * @var float
      */
-    public $price = 0;
+    public $minimum;
 
     /**
-     * Delivery work days
-     *
-     * @var int
+     * @var \Bepado\SDK\ShippingCosts\Rule
      */
-    public $deliveryWorkDays = 10;
+    public $delegatee;
 
     /**
      * Check if shipping cost is applicable to given order
@@ -44,7 +37,16 @@ class FixedPrice extends Rule
      */
     public function isApplicable(Order $order)
     {
-        return true;
+        $total = 0;
+        foreach ($order->orderItems as $item) {
+            $total += ($item->count * $item->product->purchasePrice * (1 + $item->product->vat));
+        }
+
+        if ($total < $this->minimum) {
+            return false;
+        }
+
+        return $this->delegatee->isApplicable($order);
     }
 
     /**
@@ -58,14 +60,6 @@ class FixedPrice extends Rule
      */
     public function getShippingCosts(Order $order, VatConfig $vatConfig)
     {
-        return new Shipping(
-            array(
-                'rule' => $this,
-                'service' => $this->label,
-                'deliveryWorkDays' => $this->deliveryWorkDays,
-                'shippingCosts' => $this->price / ($vatConfig->isNet ? 1 : 1 + $vatConfig->vat),
-                'grossShippingCosts' => $this->price * (!$vatConfig->isNet ? 1 : 1 + $vatConfig->vat),
-            )
-        );
+        return $this->delegatee->getShippingCosts($order, $vatConfig);
     }
 }

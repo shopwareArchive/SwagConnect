@@ -9,6 +9,7 @@ namespace Bepado\SDK\ShippingCosts;
 
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCosts\VatConfig;
 
 /**
  * Class: Rule
@@ -31,17 +32,10 @@ abstract class Rule extends Struct
      * Returns the net shipping costs.
      *
      * @param Order $order
-     * @return float
+     * @param VatConfig $vatConfig
+     * @return Shipping
      */
-    abstract public function getShippingCosts(Order $order);
-
-    /**
-     * If processing should stop after this rule
-     *
-     * @param Order $order
-     * @return bool
-     */
-    abstract public function shouldStopProcessing(Order $order);
+    abstract public function getShippingCosts(Order $order, VatConfig $vatConfig);
 
     /**
      * Restore rule after var_export

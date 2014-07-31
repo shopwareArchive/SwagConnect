@@ -84,8 +84,13 @@ class XmlValueUnmarshaller implements ValueUnmarshaller
         $marshalledObject = new $marshalledClass();
 
         foreach ($element->childNodes as $child) {
-            if (property_exists($marshalledObject, $child->localName)) {
+            // property_exists() does not work on virtual properties used for
+            // BC. thus we just try to set the property and catch possible
+            // exceptions.
+            try {
                 $marshalledObject->{$child->localName} = $this->unmarshalValue($child->firstChild);
+            } catch (\OutOfRangeException $e) {
+                // Ignore. We ignore unknown properties.
             }
         }
 

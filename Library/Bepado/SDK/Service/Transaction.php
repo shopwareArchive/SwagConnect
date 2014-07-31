@@ -50,11 +50,11 @@ class Transaction
     protected $shopConfiguration;
 
     /**
-     * Shipping cost calculator
+     * Shipping cost service
      *
-     * @var ShippingCostCalculator
+     * @var ShippingCosts
      */
-    protected $calculator;
+    protected $shippingCostsService;
 
     /**
      * @var \Bepado\SDK\Struct\VerificatorDispatcher
@@ -74,14 +74,14 @@ class Transaction
         Gateway\ReservationGateway $reservations,
         Logger $logger,
         Gateway\ShopConfiguration $shopConfiguration,
-        ShippingCostCalculator $calculator,
+        ShippingCosts $shippingCostsService,
         VerificatorDispatcher $verificator
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
         $this->logger = $logger;
         $this->shopConfiguration = $shopConfiguration;
-        $this->calculator = $calculator;
+        $this->shippingCostsService = $shippingCostsService;
         $this->verificator = $verificator;
     }
 
@@ -251,7 +251,7 @@ class Transaction
             $order->orderShop
         );
 
-        $myShippingCosts = $this->calculator->calculateShippingCosts(
+        $myShippingCosts = $this->shippingCostsService->calculateShippingCosts(
             $order,
             Gateway\ShippingCosts::SHIPPING_COSTS_INTERSHOP
         );

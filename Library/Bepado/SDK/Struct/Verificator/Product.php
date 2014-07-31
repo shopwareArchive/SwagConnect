@@ -11,6 +11,7 @@ use Bepado\SDK\Struct\Verificator;
 use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Struct;
 use Bepado\SDK\Units;
+use Bepado\SDK\ShippingRuleParser;
 
 /**
  * Visitor verifying integrity of struct classes
@@ -19,6 +20,24 @@ use Bepado\SDK\Units;
  */
 class Product extends Verificator
 {
+    /**
+     * Shipping rule parser
+     *
+     * @var ShippingRuleParser
+     */
+    private $parser;
+
+    /**
+     * __construct
+     *
+     * @param ShippingRuleParser $parser
+     * @return void
+     */
+    public function __construct(ShippingRuleParser $parser)
+    {
+        $this->parser = $parser;
+    }
+
     /**
      * Method to verify a structs integrity
      *
@@ -63,6 +82,10 @@ class Product extends Verificator
             if (trim($struct->$property) === '') {
                 throw new \Bepado\SDK\Exception\VerificationFailedException("Property $property MUST be non-empty.");
             }
+        }
+
+        if (!empty($struct->shipping)) {
+            $this->parser->parseString($struct->shipping);
         }
 
         if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {

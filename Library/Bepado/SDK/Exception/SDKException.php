@@ -12,7 +12,7 @@ namespace Bepado\SDK\Exception;
  *
  * This is just a marker interface to flag all Bepado SDK exceptions.
  *
- * @version 1.5.42
+ * @version 1.5.46
  */
 interface SDKException
 {

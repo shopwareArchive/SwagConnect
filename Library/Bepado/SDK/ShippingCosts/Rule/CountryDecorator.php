@@ -9,6 +9,8 @@ namespace Bepado\SDK\ShippingCosts\Rule;
 
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Struct\Order;
+use Bepado\SDK\Struct\Shipping;
+use Bepado\SDK\ShippingCosts\VatConfig;
 
 /**
  * Decorator for orders from specific countries.
@@ -79,21 +81,11 @@ class CountryDecorator extends Rule
      * Returns the net shipping costs.
      *
      * @param Order $order
-     * @return float
+     * @param VatConfig $vatConfig
+     * @return Shipping
      */
-    public function getShippingCosts(Order $order)
+    public function getShippingCosts(Order $order, VatConfig $vatConfig)
     {
-        return $this->delegatee->getShippingCosts($order);
-    }
-
-    /**
-     * If processing should stop after this rule
-     *
-     * @param Order $order
-     * @return bool
-     */
-    public function shouldStopProcessing(Order $order)
-    {
-        return $this->delegatee->shouldStopProcessing($order);
+        return $this->delegatee->getShippingCosts($order, $vatConfig);
     }
 }

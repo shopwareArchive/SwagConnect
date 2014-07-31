@@ -9,6 +9,7 @@ namespace Bepado\SDK\ShippingCosts\Rule;
 
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Struct;
+use Bepado\SDK\ShippingCosts\VatConfig;
 
 /**
  * Only allows the shipping rule to match when its not more heavy than a max weight.
@@ -67,21 +68,11 @@ class WeightDecorator extends Rule
      * Returns the net shipping costs.
      *
      * @param Struct\Order $order
-     * @return float
+     * @param VatConfig $vatConfig
+     * @return Shipping
      */
-    public function getShippingCosts(Struct\Order $order)
+    public function getShippingCosts(Struct\Order $order, VatConfig $vatConfig)
     {
-        return $this->delegatee->getShippingCosts($order);
-    }
-
-    /**
-     * If processing should stop after this rule
-     *
-     * @param Struct\Order $order
-     * @return bool
-     */
-    public function shouldStopProcessing(Struct\Order $order)
-    {
-        return $this->delegatee->shouldStopProcessing($order);
+        return $this->delegatee->getShippingCosts($order, $vatConfig);
     }
 }

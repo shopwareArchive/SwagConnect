@@ -34,8 +34,8 @@ abstract class RulesVisitor
             $this->visitCountryDecorator($struct);
 
             $this->visit($struct->delegatee);
-        } else if ($struct instanceof Rule\FreeCarriageLimit) {
-            $this->visitFreeCarriageLimit($struct);
+        } else if ($struct instanceof Rule\MinimumBasketValue) {
+            $this->visitMinimumBasketValue($struct);
 
             $this->visit($struct->delegatee);
         } else if ($struct instanceof Rule\WeightDecorator) {
@@ -61,7 +61,7 @@ abstract class RulesVisitor
 
     abstract public function visitCountryDecorator(Rule\CountryDecorator $rule);
 
-    abstract public function visitFreeCarriageLimit(Rule\FreeCarriageLimit $rule);
+    abstract public function visitMinimumBasketValue(Rule\MinimumBasketValue $rule);
 
     abstract public function visitWeightDecorator(Rule\WeightDecorator $rule);
 }

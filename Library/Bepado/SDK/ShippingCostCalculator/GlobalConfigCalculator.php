@@ -9,6 +9,7 @@ namespace Bepado\SDK\ShippingCostCalculator;
 
 use Bepado\SDK\Gateway\ShopConfiguration;
 use Bepado\SDK\ShippingCostCalculator;
+use Bepado\SDK\ShippingCosts\Rules;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Shipping;
@@ -30,12 +31,12 @@ class GlobalConfigCalculator implements ShippingCostCalculator
     /**
      * Get shipping costs for order
      *
+     * @param \Bepado\SDK\ShippingCosts\Rules $shippingCostRules
      * @param \Bepado\SDK\Struct\Order $order
-     * @param string $type
      *
-     * @return \Bepado\SDK\Struct\TotalShippingCosts
+     * @return \Bepado\SDK\Struct\Shipping
      */
-    public function calculateShippingCosts(Order $order, $type)
+    public function calculateShippingCosts(Rules $shippingCostRules, Order $order)
     {
         // temporary workaround for not having my own global shipping costs
         if ($order->shippingCosts !== null && $order->grossShippingCosts !== null) {

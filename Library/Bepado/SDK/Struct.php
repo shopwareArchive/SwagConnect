@@ -55,4 +55,15 @@ abstract class Struct
             }
         }
     }
+
+    /**
+     * Restores struct from a previously stored state array.
+     *
+     * @param array $state
+     * @return static
+     */
+    public static function __set_state(array $state)
+    {
+        return new static($state);
+    }
 }

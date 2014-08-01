@@ -57,6 +57,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
         var me = this;
         var countryStore = Ext.create('Shopware.apps.Base.store.Country').load();
 
+
         return {
             xtype: 'form',
             url: '{url controller=ShippingGroups action=createShippingRule}',
@@ -115,12 +116,31 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
      * @returns string
      */
     getButtons: function() {
+        var me = this;
         return {
             text: '{s name=config/shipping_groups/save}Save{/s}',
             cls: 'primary',
             formBind: true,
             disabled: true,
-            action: 'save'
+            handler: function() {
+                //cannot catch the event in controller
+                //when Articles overview is open
+                //todo@sb: find better solution
+                var form = this.up('form').getForm();
+                if (form.isValid()) {
+                    var grid = Ext.getCmp('bepado-shipping-groups-list');
+                    form.submit({
+                        success: function(form, action) {
+                            Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_rule}Rule has been created.{/s}');
+                            me.close();
+                            grid.getStore().load();
+                        },
+                        failure: function(form, action) {
+                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
+                        }
+                    });
+                }
+            }
         };
     }
 });

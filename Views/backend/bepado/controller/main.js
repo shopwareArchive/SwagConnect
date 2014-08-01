@@ -136,11 +136,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-shipping-groups button[action=addRule]': {
                 click: me.onAddShippingRule
             },
-            'bepado-shipping-add-group button[action=save]': {
-                click: me.onSaveShippingGroup
-            },'bepado-shipping-add-rule button[action=save]': {
-                click: me.onSaveShippingRule
-            },'bepado-shipping-groups-list button[action=save]': {
+            'bepado-shipping-groups-list button[action=save]': {
                 click: me.onSaveShippingRules
             },'bepado-shipping-groups-list': {
                 'deleteShippingRule': me.onDeleteShippingRule
@@ -1083,50 +1079,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     /**
-     * Event listener save shipping group
-     */
-    onSaveShippingGroup: function(btn) {
-        var me = this;
-        var form = btn.up('form').getForm();
-        if (form.isValid()) {
-            form.submit({
-                success: function(form, action) {
-                    me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_group}Group has been created.{/s}');
-                    me.getAddShippingGroupWindow().close();
-                },
-                failure: function(form, action) {
-                    me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
-                }
-            });
-        }
-    },
-
-    /**
      * Event listener show add shipping rule window
      */
     onAddShippingRule: function(btn, arg1,arg2,arg3) {
         Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddRule').show();
-    },
-
-    /**
-     * Event listener save single shipping rule
-     */
-    onSaveShippingRule: function(btn) {
-        var me = this;
-        var form = btn.up('form').getForm();
-        if (form.isValid()) {
-            var grid = me.getShippingGroupsList();
-            form.submit({
-                success: function(form, action) {
-                    me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_rule}Rule has been created.{/s}');
-                    me.getAddShippingRuleWindow().close();
-                    grid.getStore().load();
-                },
-                failure: function(form, action) {
-                    me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
-                }
-            });
-        }
     },
 
     /**

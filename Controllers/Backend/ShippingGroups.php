@@ -44,8 +44,9 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
 
             try {
                 $shippingGroupsComponent = $this->getShippingGroupsComponent();
-                $shippingGroupsComponent->createRule($params);
+                $rule = $shippingGroupsComponent->createRule($params);
 
+                $shippingGroupsComponent->updateAffectedArticles($rule->getGroup()->getGroupName());
                 $this->View()->assign(
                     array(
                         'success' => true,
@@ -126,6 +127,10 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
                     $shippingGroupsComponent->updateRule($record);
                 }
 
+                if (isset($params[0]['groupName'])) {
+                    $shippingGroupsComponent->updateAffectedArticles($params[0]['groupName']);
+                }
+
                 $this->View()->assign(
                     array(
                         'success' => true,
@@ -196,6 +201,10 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
                 $shippingGroupsComponent = $this->getShippingGroupsComponent();
                 foreach ($params as $record) {
                     $shippingGroupsComponent->deleteRule($record['id']);
+                }
+
+                if (isset($params[0]['groupName'])) {
+                    $shippingGroupsComponent->updateAffectedArticles($params[0]['groupName']);
                 }
 
                 $this->View()->assign(

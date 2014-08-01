@@ -49,6 +49,7 @@ class ShippingGroups
      * Create shipping rule and save it to DB
      *
      * @param array $params
+     * @return ShippingRule
      * @throws \Exception
      */
     public function createRule(array $params)
@@ -71,6 +72,8 @@ class ShippingGroups
 
         $this->em->persist($model);
         $this->em->flush();
+
+        return $model;
     }
 
     /**
@@ -145,7 +148,7 @@ class ShippingGroups
 
         /** @var \Shopware\CustomModels\Bepado\ShippingRule $rule */
         foreach ($group->getRules() as $rule) {
-            $shipping[] = sprintf('%s:%s:%s (%sD):%s',
+            $shipping[] = sprintf('%s:%s:%s [%sD]:%s EUR',
                 $rule->getCountry(),
                 $rule->getZipPrefix(),
                 $group->getGroupName(),
@@ -155,6 +158,24 @@ class ShippingGroups
         }
 
         return implode(',', $shipping);
+    }
+
+    /**
+     * Update all products containing group
+     * @param $groupName
+     */
+    public function updateAffectedArticles($groupName)
+    {
+        $articles = $this->getAffectedArticles($groupName);
+        $shipping = $this->generateShippingString($groupName);
+        /** @var \Shopware\Models\Article\Article $article */
+        foreach ($articles as $article) {
+            $attribute = $article->getMainDetail()->getAttribute();
+            $attribute->setBepadoArticleShipping($shipping);
+            $this->em->persist($attribute);
+        }
+
+        $this->em->flush();
     }
 
     /**
@@ -169,11 +190,28 @@ class ShippingGroups
         if (!isset($shippingArray[2])) {
             return '';
         }
-        $groupName = explode(' (', $shippingArray[2]);
+        $groupName = explode(' [', $shippingArray[2]);
         if (!isset($groupName[0])) {
             return '';
         }
 
         return $groupName[0];
+    }
+
+    /**
+     * Find affected articles by shipping group name
+     *
+     * @param $groupName
+     * @return array
+     */
+    public function getAffectedArticles($groupName)
+    {
+        $statement = Shopware()->Db()->prepare("SELECT articleID FROM s_articles_attributes WHERE bepado_article_shipping LIKE :groupName");
+        $statement->bindValue(':groupName', "%$groupName%", \PDO::PARAM_STR);
+
+        $statement->execute();
+        $ids = $statement->fetchAll(\PDO::FETCH_COLUMN);
+
+        return $this->em->getRepository('Shopware\Models\Article\Article')->findBy(array('id' => $ids));
     }
 } 

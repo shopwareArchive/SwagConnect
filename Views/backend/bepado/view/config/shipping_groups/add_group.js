@@ -82,12 +82,29 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup', {
      * @returns string
      */
     getButtons: function() {
+        var me = this;
         return {
             text: '{s name=config/shipping_groups/save}Save{/s}',
             cls: 'primary',
             formBind: true,
             disabled: true,
-            action: 'save'
+            handler: function() {
+                //cannot catch the event in controller
+                //when Articles overview is open
+                //todo@sb: find better solution
+                var form = this.up('form').getForm();
+                if (form.isValid()) {
+                    form.submit({
+                        success: function(form, action) {
+                            Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}','{s name=config/shipping_groups/created_group}Group has been created.{/s}');
+                            me.close();
+                        },
+                        failure: function(form, action) {
+                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
+                        }
+                    });
+                }
+            }
         };
     }
 });

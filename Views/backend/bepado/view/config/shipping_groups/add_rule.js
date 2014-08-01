@@ -136,7 +136,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
                             grid.getStore().load();
                         },
                         failure: function(form, action) {
-                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Group already exists.{/s}');
+                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}','{s name=config/shipping_groups/duplicated_group}Rule could not be created.{/s}');
                         }
                     });
                 }

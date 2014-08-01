@@ -212,6 +212,10 @@ class ShippingGroups
         $statement->execute();
         $ids = $statement->fetchAll(\PDO::FETCH_COLUMN);
 
+        if (empty($ids)) {
+            return array();
+        }
+
         return $this->em->getRepository('Shopware\Models\Article\Article')->findBy(array('id' => $ids));
     }
 } 

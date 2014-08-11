@@ -115,15 +115,16 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                     allowBlank: false
                 }
             }, {
+                xtype: 'numbercolumn',
                 header: me.snippets.priceHeader,
                 dataIndex: 'price',
                 flex: 1,
+
                 editor: {
                     xtype: 'numberfield',
+                    submitLocaleSeparator: false,
                     allowBlank: false,
-                    forcePrecision: true,
-                    minValue: 0.00,
-                    step: 0.01
+                    minValue: 0
                 }
             }, {
                 header: me.snippets.zipPrefixHeader,
@@ -275,8 +276,6 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
                 action: 'save'
             }]
         };
-
-        return pagingBar;
     }
 });
 //{/block}

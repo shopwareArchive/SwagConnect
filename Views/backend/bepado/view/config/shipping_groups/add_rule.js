@@ -96,9 +96,8 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
                     name: 'price',
                     fieldLabel: '{s name=config/shipping_groups/price}Price{/s}',
                     allowBlank: false,
-                    forcePrecision: true,
-                    minValue: 0.00,
-                    step: 0.01
+                    submitLocaleSeparator: false,
+                    minValue: 0
                 }, {
                     xtype: 'textfield',
                     name: 'zipPrefix',

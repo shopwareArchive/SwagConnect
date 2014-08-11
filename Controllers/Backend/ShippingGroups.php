@@ -139,7 +139,8 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
             } catch (\Exception $e) {
                 $this->View()->assign(
                     array(
-                        'success' => false
+                        'success' => false,
+                        'message' => $e->getMessage()
                     )
                 );
             }
@@ -215,7 +216,8 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
             } catch (\Exception $e) {
                 $this->View()->assign(
                     array(
-                        'success' => false
+                        'success' => false,
+                        'message' => $e->getMessage()
                     )
                 );
             }

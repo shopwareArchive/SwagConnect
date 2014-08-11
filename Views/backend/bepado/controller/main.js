@@ -1092,7 +1092,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         var me = this;
         var grid = me.getShippingGroupsList();
 
-        grid.getStore().sync();
+        grid.getStore().sync({
+            success: function() {
+                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+            },
+            failure: function(batch, options) {
+                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
+            }
+        });
     },
 
     /**
@@ -1104,7 +1111,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         var store = grid.getStore();
 
         store.remove(record);
-        store.sync();
+        store.sync({
+            success: function() {
+                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/shipping_groups/remove_rule_message}Shipping rule has been removed.{/s}');
+            },
+            failure: function(batch) {
+                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
+            }
+        });
     }
 });
 //{/block}

@@ -148,7 +148,7 @@ class ShippingGroups
 
         /** @var \Shopware\CustomModels\Bepado\ShippingRule $rule */
         foreach ($group->getRules() as $rule) {
-            $shipping[] = sprintf('%s:%s:%s [%sD]:%s EUR',
+            $shipping[] = sprintf('%s:%s:%s [%sD]:%.2f EUR',
                 $rule->getCountry(),
                 $rule->getZipPrefix(),
                 $group->getGroupName(),

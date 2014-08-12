@@ -224,6 +224,24 @@ class Shopware_Controllers_Backend_ShippingGroups extends Shopware_Controllers_B
         }
     }
 
+    public function deleteShippingGroupAction()
+    {
+        try {
+            $groupName = $this->Request()->getParam('groupName');
+            $this->getShippingGroupsComponent()->deleteGroup($groupName);
+            $this->getShippingGroupsComponent()->updateAffectedArticles($groupName);
+
+            $this->View()->assign(array('success' => true));
+        } catch (\Exception $e) {
+            $this->View()->assign(
+                array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                )
+            );
+        }
+    }
+
     /**
      * Returns instance of ShippingGroups component
      *

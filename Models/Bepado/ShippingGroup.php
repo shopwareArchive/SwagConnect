@@ -51,7 +51,7 @@ class ShippingGroup extends ModelEntity
     protected $groupName;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Bepado\ShippingRule", mappedBy="group")
+     * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Bepado\ShippingRule", mappedBy="group", cascade={"persist", "remove"})
      */
     protected $rules;
 

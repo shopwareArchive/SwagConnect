@@ -42,7 +42,8 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         zipPrefixHeader: '{s name=config/shipping_groups/zip_prefix}Zip prefix{/s}',
         save: '{s name=config/shipping_groups/save}Save{/s}',
         addGroup: '{s name=config/shipping_groups/add_group}Add group{/s}',
-        addRule: '{s name=config/shipping_groups/add_rule}Add rule{/s}'
+        addRule: '{s name=config/shipping_groups/add_rule}Add rule{/s}',
+        deleteGroup: '{s name=config/shipping_groups/delete_group}Delete group{/s}'
     },
 
     initComponent: function() {
@@ -187,6 +188,12 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
             iconCls: 'sprite-plus-circle-frame',
             text: me.snippets.addGroup,
             action: 'addGroup'
+        });
+
+        items.push({
+            iconCls: 'sprite-minus-circle-frame',
+            text: me.snippets.deleteGroup,
+            action: 'deleteGroup'
         });
 
         items.push({

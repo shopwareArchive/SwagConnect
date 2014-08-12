@@ -45,6 +45,24 @@ class ShippingGroups
     }
 
     /**
+     * Delete group by group name
+     * 
+     * @param string $groupName
+     * @throws \Exception
+     */
+    public function deleteGroup($groupName)
+    {
+        /** @var \Shopware\CustomModels\Bepado\ShippingGroup $model */
+        $model = $this->groupRepository->findOneBy(array('groupName' => $groupName));
+        if (!$model) {
+            throw new \Exception('Shipping group not found.');
+        }
+
+        $this->em->remove($model);
+        $this->em->flush();
+    }
+
+    /**
      * Helper function
      * Create shipping rule and save it to DB
      *

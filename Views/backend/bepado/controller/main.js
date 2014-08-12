@@ -133,6 +133,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-shipping-groups button[action=addGroup]': {
                 click: me.onAddShippingGroup
             },
+            'bepado-shipping-groups button[action=deleteGroup]': {
+                click: me.onDeleteShippingGroup
+            },
             'bepado-shipping-groups button[action=addRule]': {
                 click: me.onAddShippingRule
             },
@@ -1074,14 +1077,21 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     /**
      * Event listener show add shipping group window
      */
-    onAddShippingGroup: function(btn, arg1,arg2,arg3) {
+    onAddShippingGroup: function() {
         Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup').show();
+    },
+
+    /**
+     * Event listener show delete shipping group window
+     */
+    onDeleteShippingGroup: function() {
+        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.DeleteGroup').show();
     },
 
     /**
      * Event listener show add shipping rule window
      */
-    onAddShippingRule: function(btn, arg1,arg2,arg3) {
+    onAddShippingRule: function() {
         Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddRule').show();
     },
 

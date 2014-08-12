@@ -21,22 +21,24 @@ class Setup
         $this->bootstrap = $bootstrap;
     }
 
-    public function run()
+    public function run($fullSetup)
     {
-        $this->createMyMenu();
         $this->createMyEvents();
-
         $this->createMyTables();
         $this->createMyAttributes();
         $this->populateConfigTable();
         $this->importSnippets();
+        $this->generateBepadoPaymentAttribute();
+        $this->populateDispatchAttributes();
+        $this->populateBepadoPaymentAttribute();
 
-        $this->createEngineElement();
+
         $this->createBepadoCustomerGroup();
 
-        $this->populateDispatchAttributes();
-        $this->generateBepadoPaymentAttribute();
-        $this->populateBepadoPaymentAttribute();
+        if ($fullSetup) {
+            $this->createMyMenu();
+            $this->createEngineElement();
+        }
     }
 
     /**

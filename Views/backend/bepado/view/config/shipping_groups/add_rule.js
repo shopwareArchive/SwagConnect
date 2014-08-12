@@ -81,7 +81,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddRule', {
                     store: countryStore,
                     displayField: 'name',
                     valueField: 'iso',
-                    fieldLabel: '{s name=config/shipping_groups/country}Country{/s}',
+                    fieldLabel: '{s name=config/shipping_groups/country_header}Country{/s}',
                     allowBlank: false
                 }, {
                     xtype: 'numberfield',

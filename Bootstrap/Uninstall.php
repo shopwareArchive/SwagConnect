@@ -25,6 +25,7 @@ class Uninstall
         // $this->removeMyAttributes();
 
         $this->deactivateBepadoProducts();
+        $this->removeEngineElement();
 
         return true;
     }
@@ -97,5 +98,19 @@ class Uninstall
         SET s_articles.active = false
         ';
         Shopware()->Db()->exec($sql);
+    }
+
+    /**
+     * Remove an engine element so that the bepadoProductDescription is not displayed in the article anymore
+     */
+    public function removeEngineElement()
+    {
+        $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
+        $element = $repo->findOneBy(array('name' => 'bepadoProductDescription'));
+
+        if ($element) {
+            Shopware()->Models()->remove($element);
+            Shopware()->Models()->flush();
+        }
     }
 }

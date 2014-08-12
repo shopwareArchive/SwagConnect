@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.85';
+        return '1.4.86';
     }
 
     /**
@@ -86,7 +86,15 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function update($version)
     {
-        $this->doSetup();
+        // sometimes plugin is not installed before
+        // but could be updated. by this way setup process
+        // is simple and only required structure will be created
+        // e.g. DB and attributes
+        $fullSetup = false;
+        if ($this->isInstalled()) {
+            $fullSetup = true;
+        }
+        $this->doSetup($fullSetup);
 
         return $this->doUpdate($version);
     }
@@ -107,8 +115,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      * Performs the default setup of the system.
      *
      * This can be used by the update as well as by the install method
+     *
+     * @param bool $fullSetup
+     * @throws RuntimeException
      */
-    public function doSetup()
+    public function doSetup($fullSetup = true)
     {
         if (!$this->assertVersionGreaterThen('4.1.0')) {
             throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
@@ -117,7 +128,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $this->registerMyLibrary();
 
         $setup = new Setup($this);
-        $setup->run();
+        $setup->run($fullSetup);
     }
 
     /**
@@ -303,5 +314,27 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function getConfigComponents()
     {
         return $this->getBepadoFactory()->getConfigComponent();
+    }
+
+    /**
+     * @return bool
+     */
+    private function isInstalled()
+    {
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->select(array('plugins'))
+            ->from('Shopware\Models\Plugin\Plugin', 'plugins');
+
+        $builder->where('plugins.label = :label');
+        $builder->setParameter('label', $this->getLabel());
+
+        $query = $builder->getQuery();
+        $plugin = $query->getOneOrNullResult();
+        /** @var $plugin Shopware\Models\Plugin\Plugin */
+        if (!$plugin) {
+            return false;
+        }
+
+        return (bool) $plugin->getInstalled();
     }
 }

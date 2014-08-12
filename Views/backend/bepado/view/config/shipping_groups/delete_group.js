@@ -31,7 +31,7 @@
 //{block name="backend/bepado/view/shipping_groups/delete_group"}
 Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.DeleteGroup', {
     extend: 'Ext.window.Window',
-    alias: 'widget.bepado-shipping-add-group',
+    alias: 'widget.bepado-shipping-delete-group',
 
     layout: 'fit',
     width: 500,

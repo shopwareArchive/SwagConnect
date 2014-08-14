@@ -87,7 +87,7 @@ class ShippingCosts
      */
     public function calculateShippingCosts(Order $order, $type)
     {
-        $rules = $this->getShippingCostRules($order, $type);
+        $rules = $this->getShippingCostRulesByOrder($order, $type);
 
         return $this->calculator->calculateShippingCosts($rules, $order);
     }
@@ -96,9 +96,10 @@ class ShippingCosts
      * Get shipping cost rules for current order
      *
      * @param \Bepado\SDK\Struct\Order $order
-     * @return Rule[]
+     * @param int $type
+     * @return \Bepado\SDK\ShippingCosts\Rules
      */
-    protected function getShippingCostRules(Order $order, $type)
+    protected function getShippingCostRulesByOrder(Order $order, $type)
     {
         if (empty($order->providerShop) || empty($order->orderShop)) {
             throw new \InvalidArgumentException(
@@ -116,7 +117,22 @@ class ShippingCosts
             }
         }
 
-        $rules = $this->shippingCosts->getShippingCosts($order->providerShop, $order->orderShop, $type);
+        return $this->getShippingCostRules($order->providerShop, $order->orderShop, $type);
+    }
+
+    /**
+     * Get shipping cost rules for current order
+     *
+     * @param string $providerShop
+     * @param string $orderShop
+     * @param int $type
+     *
+     * @return \Bepado\SDK\ShippingCosts\Rules
+     */
+    public function getShippingCostRules($providerShop, $orderShop, $type)
+    {
+        $rules = $this->shippingCosts->getShippingCosts($providerShop, $orderShop, $type);
+
         if (is_array($rules)) {
             // This is for legacy shops, where the rules are still just an array
             $rules = new Rules(array('rules' => $rules));

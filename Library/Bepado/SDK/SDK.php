@@ -51,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.5.46';
+    const VERSION = '1.5.51';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -550,6 +550,7 @@ final class SDK
     public function getShippingCostRules()
     {
         $gateway = $this->dependencies->getGateway();
+        $service = $this->dependencies->getShippingCostsService();
 
         $shopId = $gateway->getShopId();
         $connectedShopIds = $gateway->getConnectedShopIds();
@@ -557,7 +558,7 @@ final class SDK
         $rules = array();
 
         foreach ($connectedShopIds as $connectedShopId) {
-            $rules[$connectedShopId] = $gateway->getShippingCosts(
+            $rules[$connectedShopId] = $service->getShippingCostRules(
                 $connectedShopId,
                 $shopId,
                 Gateway\ShippingCosts::SHIPPING_COSTS_CUSTOMER

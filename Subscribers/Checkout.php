@@ -107,6 +107,15 @@ class Checkout extends BaseSubscriber
             $this->checkoutReservedProducts($view->sOrderNumber);
         }
 
+        // clear bepado reserved products
+        // sometimes with external payment methods
+        // $hasBepadoProduct will be false, because order is already finished
+        // and information about bepado products is not available.
+        if (!$hasBepadoProduct) {
+            Shopware()->Session()->BepadoReservation = null;
+            return;
+        }
+
         if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
             return;
         }

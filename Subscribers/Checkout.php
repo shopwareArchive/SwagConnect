@@ -33,7 +33,6 @@ class Checkout extends BaseSubscriber
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
-            'Shopware_Modules_Order_SaveOrder_FilterSQL' => 'checkoutReservedProducts',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish',
             'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
         );
@@ -102,18 +101,21 @@ class Checkout extends BaseSubscriber
             $view->extendsTemplate('frontend/bepado/ajax_add_article.tpl');
         }
 
+        // send order to bepado
+        // this method must be called after external payments (Sofort, Billsafe)
+        if($actionName == 'finish' && !empty($view->sOrderNumber)) {
+            $this->checkoutReservedProducts($view->sOrderNumber);
+        }
+
         if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
             return;
         }
+
         if(empty($view->sBasket) || !$request->isDispatched()) {
             return;
         }
 
         if(!empty($view->sOrderNumber)) {
-            return;
-        }
-
-        if (!$hasBepadoProduct) {
             return;
         }
 
@@ -240,13 +242,12 @@ class Checkout extends BaseSubscriber
 		}
 
         if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
-            // reset bepado reserved products in session
-            Shopware()->Session()->BepadoReservation = null;
             return;
         }
 
         $userData = $session['sOrderVariables']['sUserData'];
         $paymentId = $userData['additional']['payment']['id'];
+
         if ($this->isPaymentAllowed($paymentId) === false) {
             $bepadoMessage = new \stdClass();
             $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
@@ -358,14 +359,11 @@ class Checkout extends BaseSubscriber
     /**
      * Hooks the sSaveOrder frontend method and reserves the bepado products
      *
-     * @event Shopware_Modules_Order_SaveOrder_FilterSQL
-     * @throws CheckoutException
-     * @param \Enlight_Event_EventArgs $args
+     * @param $orderNumber
+     * @throws \Shopware\Bepado\Components\Exceptions\CheckoutException
      */
-    public function checkoutReservedProducts(\Enlight_Event_EventArgs $args)
+    public function checkoutReservedProducts($orderNumber)
     {
-        $orderNumber = $args->getSubject()->sOrderNumber;
-
         $sdk = $this->getSDK();
 
         if (empty($orderNumber)) {

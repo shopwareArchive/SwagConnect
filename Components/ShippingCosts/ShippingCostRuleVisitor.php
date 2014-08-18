@@ -121,6 +121,11 @@ class ShippingCostRuleVisitor extends RulesVisitor
         $this->currentRule['values'] = array(array('value' => $rule->maxWeight));
     }
 
+    public function visitMinimumBasketValue(Rule\MinimumBasketValue $rule)
+    {
+        // TODO: Implement visitMinimumBasketValue() method.
+    }
+
     /**
      * Calculate the gross price for a given net price. Will use the fixed vat rate or 19% as highest tax rate.
      * This might result in a amount which is higher than the actual amount of a basket - but as we don't know

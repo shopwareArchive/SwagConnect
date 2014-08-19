@@ -181,6 +181,8 @@ class BasketHelper
         ) {
 
             return (int) $this->bepadoContent[$product->shopId][$product->sourceId]['quantity'];
+        } else if (isset($this->basket['content'][$product->sourceId])) {
+            return (int) $this->basket['content'][$product->sourceId]['quantity'];
         }
 
         return 1;

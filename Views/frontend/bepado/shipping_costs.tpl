@@ -25,16 +25,17 @@
         {/if}
 
         <div class="{if !$smarty.foreach.shops.first}hidden-content {/if}content">
-            {foreach $item.rules as $rule}
-                {if $rule.type == "country"}
+            {foreach from=$item.rules key=rulesType item=rules}
+                {if $rulesType == "country"}
                     <strong>{s name="bepado_dispatch_country_label"}Versandkosten nach Land: {/s}</strong>
                     <br>
-                    {assign var="rule_header" value="{s name="bepado_dispatch_country_column_header"}Land{/s}"}
-                {elseif $rule.type == "weight"}
+                {elseif $rulesType == "weight"}
                     <strong>{s name="bepado_dispatch_weight_label"}Versandkosten nach Gewicht: {/s}</strong>
                     <br>
-                    {assign var="rule_header" value="{s name="bepado_dispatch_country_column_header"}bis Gewicht{/s}"}
-                {elseif $rule.type == "freeCarriage"}
+                {elseif $rulesType == "minimum"}
+                    <strong>{s name="bepado_dispatch_minimum_value_label"}Versandkosten nach Einkaufswert: {/s}</strong>
+                    <br>
+                {elseif $rulesType == "freeCarriage"}
                     {assign var="freeCarriage" value="{$rule}"}
                     {continue}
                 {/if}
@@ -42,26 +43,31 @@
                 <table class="dispatch-ruletable">
                     <thead>
                     <tr>
-                        <th>{$rule_header}</th>
+                        <th>{s name="bepado_dispatch_country_column_header"}Land{/s}</th>
+                        <th>{s name="bepado_dispatch_max_weight"}max Gewicht{/s}</th>
+                        <th>{s name="bepado_dispatch_minimum_basket_value"}Einkaufswert{/s}</th>
                         <th>{s name="bepado_dispatch_net_price"}Netto{/s}</th>
                         <th>{s name="bepado_dispatch_gross_price"}Brutto{/s}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {foreach from=$rule.values item=ruleValue}
-                        <tr>
-                            <td>{$ruleValue.value}</td>
-                            <td>{$ruleValue.netPrice} €</td>
-                            <td>{$ruleValue.grossPrice} €</td>
-                        </tr>
+                    {foreach $rules as $rule}
+                        {foreach from=$rule.values item=ruleValue}
+                            <tr>
+                                <td>{$ruleValue.value}</td>
+                                <td>{if $rule.maxWeight}{$rule.maxWeight} kg{/if}</td>
+                                <td>{if $rule.minimumBasketValue}{$rule.minimumBasketValue} €{/if}</td>
+                                <td>{$ruleValue.netPrice} €</td>
+                                <td>{$ruleValue.grossPrice} €</td>
+                            </tr>
+                        {/foreach}
                     {/foreach}
                     </tbody>
                 </table>
-                <div class="clear"></div>
                 {foreachelse}
-                <p>Für dieses Lager sind zZt keine Regeln verfügbar.</p>
+                    <p>{s name="bepado_dispatch_no_rules_available"}Für dieses Lager sind zZt keine Regeln verfügbar.{/s}</p>
             {/foreach}
-
+            <div class="clear"></div>
             {if $freeCarriage}
                 <p>
                     <strong>{s name="bepado_dispatch_free_carriage"}Ab einem Warenkorb-Wert von {$rule.values.0.value|currency} ist die Lieferung versandkostenfrei.{/s}</strong>

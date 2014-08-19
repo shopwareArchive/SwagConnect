@@ -57,6 +57,12 @@ class ShippingCostRuleVisitor extends RulesVisitor
             case 'Bepado\SDK\ShippingCosts\Rule\WeightDecorator':
                 $type = 'weight';
                 break;
+            case 'Bepado\SDK\ShippingCosts\Rule\MinimumBasketValue':
+                $type = 'minimum';
+                break;
+            case 'Bepado\SDK\ShippingCosts\Rule\UnitPrice':
+                $type = 'price';
+                break;
             default:
                 $type = null;
         }
@@ -64,6 +70,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
         if (null === $type) {
             return;
         }
+
         $this->currentRule = array('type' => $type);
     }
 
@@ -118,12 +125,12 @@ class ShippingCostRuleVisitor extends RulesVisitor
 
     public function visitWeightDecorator(Rule\WeightDecorator $rule)
     {
-        $this->currentRule['values'] = array(array('value' => $rule->maxWeight));
+        $this->currentRule['maxWeight'] = $rule->maxWeight;
     }
 
     public function visitMinimumBasketValue(Rule\MinimumBasketValue $rule)
     {
-        // TODO: Implement visitMinimumBasketValue() method.
+        $this->currentRule['minimumBasketValue'] = $rule->minimum;
     }
 
     /**
@@ -162,12 +169,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
             return;
         }
 
-        if (!isset($this->rules[$type])) {
-            $this->rules[$type] = $this->currentRule;
-            return;
-        }
-
-        $this->rules[$type]['values'] = array_merge($this->rules[$type]['values'] , $this->currentRule['values']);
-
+        $this->rules[$type][] = $this->currentRule;
     }
 }

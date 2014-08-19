@@ -106,12 +106,12 @@
  *
  */
 .dispatch-ruletable {
-    width: 300px !important;
+    width: 400px !important;
 }
 
 .dispatch-ruletable th,
 .dispatch-ruletable td {
-    width: 100px;
+    width: 80px;
 }
 
 .bepado_collapsible h2 {

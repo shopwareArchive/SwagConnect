@@ -69,6 +69,14 @@ class Update
 
         $this->addExportUrl();
 
+        if (version_compare($this->version, '1.4.87', '<=')) {
+            $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
+            Shopware()->Db()->exec($sql);
+
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearTemplateCache();
+        }
+
         return true;
     }
 

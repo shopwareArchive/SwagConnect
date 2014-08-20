@@ -25,7 +25,7 @@
 
             <li>
                 <strong>Kategoriezuweisung</strong>
-                <p>Weisen Sie Ihren Kategorien eine von den vorgebenen Kategorien auf bepado zu.</p>
+                <p>Weisen Sie Ihren Kategorien eine von den vorgegebenen Kategorien auf bepado zu.</p>
             </li>
 
             <li>

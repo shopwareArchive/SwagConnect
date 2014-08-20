@@ -121,6 +121,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
 
         // If we don't have a mapping, find the first category which belongs to a shop and forward to this shop
         $localCategories = $articleModel->getCategories();
+
         if (!empty($localCategories)) {
             foreach ($localCategories as $category) {
                 $shop = $this->getShopFromCategory($category);
@@ -144,6 +145,9 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
     {
         /** @var Shopware\Models\Shop\Shop $shop */
         $shop = $this->getShopRepository()->getActiveById($shopId);
+        if (!$shop) {
+            $this->forward('index', 'index');
+        }
         $shop->registerResources(Shopware()->Bootstrap());
 
         $this->Response()->setCookie('shop', $shopId, 0, $shop->getBasePath());
@@ -165,8 +169,12 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
     {
         $path = $category->getPath();
         $parts = explode('|', $path);
+
         $mainCategory = array_slice($parts, -2, 1);
-        $category = $this->getCategoryRepository()->find($mainCategory[0]);
+        if ($mainCategory[0] > 0) {
+            $category = $this->getCategoryRepository()->find($mainCategory[0]);
+        }
+
         return $this->getShopRepository()->findOneBy(array('category' => $category));
     }
 

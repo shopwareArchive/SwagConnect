@@ -112,7 +112,7 @@ class Checkout extends BaseSubscriber
         // $hasBepadoProduct will be false, because order is already finished
         // and information about bepado products is not available.
         if (!$hasBepadoProduct) {
-            Shopware()->Session()->BepadoReservation = null;
+            $this->getHelper()->clearBepadoReservation();
             return;
         }
 
@@ -389,6 +389,7 @@ class Checkout extends BaseSubscriber
                     throw $e;
                 }
             }
+            $this->getHelper()->clearBepadoReservation();
         }
     }
 

@@ -362,4 +362,11 @@ class Helper
         return $products;
     }
 
+    /**
+     * Removes bepado reservation from session
+     */
+    public function clearBepadoReservation()
+    {
+        Shopware()->Session()->BepadoReservation = null;
+    }
 }

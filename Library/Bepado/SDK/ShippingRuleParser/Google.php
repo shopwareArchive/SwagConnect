@@ -11,6 +11,7 @@ use Bepado\SDK\ShippingRuleParser;
 use Bepado\SDK\Struct\ShippingRules;
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\Exception\ParserException;
+use Bepado\SDK\Countries;
 
 class Google extends ShippingRuleParser
 {
@@ -66,6 +67,22 @@ class Google extends ShippingRuleParser
         'D' => 1,
         'H' => 24,
     );
+
+    /**
+     * Countries mapping
+     *
+     * @var Countries
+     */
+    private $countries;
+
+    /**
+     * @param Countries $countries
+     * @return void
+     */
+    public function __construct($countries = null)
+    {
+        $this->countries = $countries ?: new Countries();
+    }
 
     /**
      * Parse shipping rules out of string
@@ -153,7 +170,8 @@ class Google extends ShippingRuleParser
     {
         $rule = new Rule\Product();
 
-        $rule->country = $this->read($tokens, array('T_COUNTRY'), true);
+        $country = $this->read($tokens, array('T_COUNTRY'), true);
+        $rule->country = $country ? $this->countries->getISO3($country) : null;
         $this->read($tokens, array('T_ELEMENT_SEPARATOR', 'T_COUNTRY'));
 
         $rule->zipRange = $this->read($tokens, array('T_ZIP'), true);

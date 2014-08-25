@@ -95,16 +95,16 @@ class ProductCalculator implements ShippingCostCalculator
             }
         }
 
-        return $this->aggregator->aggregateShippingCosts(
-            array_merge(
-                array_map(
-                    function (OrderItem $orderItem) {
-                        return $orderItem->shipping;
-                    },
-                    $productOrder->orderItems
-                ),
-                array($this->aggregate->calculateShippingCosts($shippingCostRules, $commonOrder))
-            )
+        $shippingCosts = array_map(
+            function (OrderItem $orderItem) {
+                return $orderItem->shipping;
+            },
+            $productOrder->orderItems
         );
+        if ($commonOrder->orderItems) {
+            $shippingCosts[] = $this->aggregate->calculateShippingCosts($shippingCostRules, $commonOrder);
+        }
+
+        return $this->aggregator->aggregateShippingCosts($shippingCosts);
     }
 }

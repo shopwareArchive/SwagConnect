@@ -41,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getVersion()
     {
-        return '1.4.89';
+        return '1.4.90';
     }
 
     /**
@@ -211,7 +211,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $subscribers = array(
             new \Shopware\Bepado\Subscribers\TemplateExtension(),
-            new \Shopware\Bepado\Subscribers\Checkout(),
+            $this->createCheckoutSubscriber(),
             new \Shopware\Bepado\Subscribers\Voucher(),
             new \Shopware\Bepado\Subscribers\BasketWidget(),
             new \Shopware\Bepado\Subscribers\Dispatches(),
@@ -336,5 +336,22 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         }
 
         return (bool) $plugin->getInstalled();
+    }
+
+    /**
+     * Creates checkout subscriber
+     *
+     * @return \Shopware\Bepado\Subscribers\Checkout
+     */
+    private function createCheckoutSubscriber()
+    {
+        $checkoutSubscriber = new \Shopware\Bepado\Subscribers\Checkout();
+        foreach ($checkoutSubscriber->getListeners() as $listener) {
+            if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
+                $listener->setPosition(-1);
+            }
+        }
+
+        return $checkoutSubscriber;
     }
 }

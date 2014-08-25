@@ -84,7 +84,6 @@ class Checkout extends BaseSubscriber
         $view = $action->View();
         $request = $action->Request();
         $actionName = $request->getActionName();
-
         $sessionId = Shopware()->SessionID();
 
         $userId = Shopware()->Session()->sUserId;
@@ -241,8 +240,11 @@ class Checkout extends BaseSubscriber
         $session = Shopware()->Session();
         $sdk = $this->getSDK();
         $helper = $this->getHelper();
+        $userData = $session['sOrderVariables']['sUserData'];
+        $paymentName = $userData['additional']['payment']['name'];
 
-        if($request->getActionName() != 'finish' && $request->getActionName() != 'payment') {
+        if(($request->getActionName() != 'finish' && $request->getActionName() != 'payment')
+            && ($request->getActionName() != 'confirm' && $paymentName != 'klarna_checkout')) { // BEP-1010 Fix for Klarna checkout
             return;
         }
 

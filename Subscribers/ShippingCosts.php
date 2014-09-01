@@ -2,6 +2,10 @@
 
 namespace Shopware\Bepado\Subscribers;
 
+use Bepado\SDK\ShippingCosts\Rule\CountryDecorator;
+use Bepado\SDK\ShippingCosts\Rule\FixedPrice;
+use Bepado\SDK\ShippingCosts\Rule\Product;
+use Bepado\SDK\ShippingCosts\Rules;
 use Shopware\Bepado\Components\ShippingCostBridge;
 use Shopware\Bepado\Components\ShippingCosts\ShippingCostRuleVisitor;
 use Shopware\Bepado\Components\Translations\TranslationService;
@@ -98,16 +102,62 @@ class ShippingCosts extends BaseSubscriber
         }
 
         $this->registerMyTemplateDir();
+        $sArticleId = $request->getParam('sArticle', null);
+
+        $shippingCosts = array();
+        if ($sArticleId > 0) {
+            $products = $this->getHelper()->getRemoteProducts(array($sArticleId));
+            $rules = $this->getSDK()->getProductShippingCostRules($products[0]);
+            $rules = $this->prepareRules($rules);
+
+            $shippingCostVisitor = $this->getShippingCostVisitor();
+            $shippingCostVisitor->visit($rules);
+            $shippingCosts[$products[0]->shopId]['rules'] = $shippingCostVisitor->rules;
+            $shippingCosts[$products[0]->shopId]['shopInfo'] = $this->getShopInfo($products[0]->shopId);
+        }
+        $shippingCosts = array_merge($shippingCosts, $this->getShippingCosts());
 
         Shopware()->Template()->assign(
             array(
-                'bepadoShipping' => $this->getShippingCosts(),
+                'bepadoShipping' => $shippingCosts,
                 'bepadoShopInfo' => $this->getConfigComponent()->getConfig('detailShopInfo')
             )
         );
         $result = Shopware()->Template()->fetch('frontend/bepado/shipping_costs.tpl');
 
         $controller->View()->sContent = $result . $controller->View()->sContent;
+    }
+
+
+    /**
+     * Create necessary objects to create product based
+     * shipping cost rules
+     *
+     * @param $productRules
+     * @return Rules
+     */
+    protected function prepareRules($productRules)
+    {
+        $rules = array();
+        foreach ($productRules->rules as $rule) {
+            $fixedPrice = new FixedPrice();
+            $fixedPrice->label = $rule->service;
+            $fixedPrice->price = $rule->price;
+            $fixedPrice->deliveryWorkDays = $rule->deliveryWorkDays;
+
+            $countryDecorator = new CountryDecorator();
+            $countryDecorator->countries = array($rule->country);
+            $countryDecorator->delegatee = $fixedPrice;
+
+            $productRule = new Product();
+            $productRule->delegatee = $countryDecorator;
+
+            $rules[] = $productRule;
+        }
+        $ab = new Rules();
+        $ab->rules = $rules;
+
+        return $ab;
     }
 
     /**

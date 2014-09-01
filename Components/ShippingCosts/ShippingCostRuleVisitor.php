@@ -63,6 +63,9 @@ class ShippingCostRuleVisitor extends RulesVisitor
             case 'Bepado\SDK\ShippingCosts\Rule\UnitPrice':
                 $type = 'price';
                 break;
+            case 'Bepado\SDK\ShippingCosts\Rule\Product':
+                $type = 'product';
+                break;
             default:
                 $type = null;
         }
@@ -131,6 +134,11 @@ class ShippingCostRuleVisitor extends RulesVisitor
     public function visitMinimumBasketValue(Rule\MinimumBasketValue $rule)
     {
         $this->currentRule['minimumBasketValue'] = $rule->minimum;
+    }
+
+    public function visitProductDecorator(Rule\Product $rule)
+    {
+
     }
 
     /**

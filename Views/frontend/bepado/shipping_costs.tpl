@@ -35,6 +35,9 @@
                 {elseif $rulesType == "minimum"}
                     <strong>{s name="bepado_dispatch_minimum_value_label"}Versandkosten nach Einkaufswert: {/s}</strong>
                     <br>
+                {elseif $rulesType == "product"}
+                    <strong>{s name="bepado_dispatch_by_product_label"}Versandkosten nach Artikel: {/s}</strong>
+                    <br>
                 {elseif $rulesType == "freeCarriage"}
                     {assign var="freeCarriage" value="{$rule}"}
                     {continue}

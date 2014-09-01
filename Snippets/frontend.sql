@@ -36,8 +36,8 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 ('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_weight_label', 'Dispatch by weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_country_column_header', 'max weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_net_price', 'net price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:48')
-
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:41'),
+('frontend/bepado/shipping_costs', 1, 2, 'bepado_dispatch_by_product_label', 'Dispatch by product', '2014-01-11 18:32:48', '2014-01-11 18:32:48')
 
 ON DUPLICATE KEY UPDATE
   `namespace` = VALUES(`namespace`),
@@ -45,3 +45,7 @@ ON DUPLICATE KEY UPDATE
   `name` = VALUES(`name`),
   `localeID` = VALUES(`localeID`)
 ;
+
+REPLACE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
+('frontend/detail/data', 1, 2, 'DetailDataPriceInfo', 'Prices {if $sOutputNet} plus {else}incl.{/if} VAT <a title="shipping costs" href="{url controller=custom sCustom=6 sArticle=$sArticle.articleID}" style="text-decoration:underline">plus shipping costs</a>', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/detail/data', 1, 1, 'DetailDataPriceInfo', 'Preise {if $sOutputNet}zzgl.{else}inkl.{/if} gesetzlicher MwSt. <a title="Versandkosten" href="{url controller=custom sCustom=6 sArticle=$sArticle.articleID}" style="text-decoration:underline">zzgl. Versandkosten</a>', '2014-01-11 18:32:48', '2014-01-11 18:32:48');

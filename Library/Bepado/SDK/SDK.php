@@ -51,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.5.61';
+    const VERSION = '1.5.68';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -71,7 +71,8 @@ final class SDK
         ProductFromShop $fromShop,
         ErrorHandler $errorHandler = null,
         HttpClient\RequestSigner $requestSigner = null,
-        $pluginSoftwareVersion = null
+        $pluginSoftwareVersion = null,
+        ProductPayments $productPayments = null
     ) {
         $this->apiKey = $apiKey;
         $this->apiEndpointUrl = $apiEndpointUrl;
@@ -87,7 +88,8 @@ final class SDK
             $errorHandler ? $errorHandler : new ErrorHandler\Exception(),
             $apiKey,
             $requestSigner,
-            $pluginSoftwareVersion
+            $pluginSoftwareVersion,
+            $productPayments
         );
     }
 

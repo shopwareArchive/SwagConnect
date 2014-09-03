@@ -184,6 +184,18 @@ class DependencyResolver
     protected $pluginSoftwareVersion;
 
     /**
+     * Payment status service
+     *
+     * @var Service\PaymentStatus
+     */
+    protected $paymentStatusService;
+
+    /**
+     * @var ProductPayments
+     */
+    protected $productPayments;
+
+    /**
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
@@ -196,7 +208,8 @@ class DependencyResolver
         ErrorHandler $errorHandler,
         $apiKey,
         HttpClient\RequestSigner $requestSigner = null,
-        $pluginSoftwareVersion = null
+        $pluginSoftwareVersion = null,
+        ProductPayments $productPayments = null
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
@@ -217,6 +230,7 @@ class DependencyResolver
 
         $this->apiKey = $apiKey;
         $this->pluginSoftwareVersion = $pluginSoftwareVersion;
+        $this->productPayments = $productPayments ?: new NoopProductPayments();
     }
 
     /**
@@ -324,6 +338,12 @@ class DependencyResolver
                 'shippingCosts',
                 array('lastRevision', 'replicate'),
                 $this->getShippingCostsService()
+            );
+
+            $this->registry->registerService(
+                'productPayments',
+                array('lastRevision', 'updatePaymentStatus'),
+                $this->getPaymentStatusService()
             );
         }
 
@@ -651,5 +671,19 @@ class DependencyResolver
         }
 
         return $this->socialNetwork;
+    }
+
+    /**
+     * @return Service\PaymentStatus
+     */
+    public function getPaymentStatusService()
+    {
+        if ($this->paymentStatusService === null) {
+            $this->paymentStatusService = new Service\PaymentStatus(
+                $this->productPayments
+            );
+        }
+
+        return $this->paymentStatusService;
     }
 }

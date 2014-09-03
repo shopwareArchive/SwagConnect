@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Bootstrap;
+use Shopware\Models\Order\Status;
 
 /**
  * Updates existing versions of the plugin
@@ -76,6 +77,8 @@ class Update
             $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
             $cacheManager->clearTemplateCache();
         }
+
+        $this->addOrderPaymentStatus();
 
         return true;
     }
@@ -355,5 +358,48 @@ class Update
         } catch (\Exception $e) {
         }
 
+    }
+
+    public function addOrderPaymentStatus()
+    {
+        if (version_compare($this->version, '1.4.92', '>')) {
+            return;
+        }
+
+        $status = array(
+            'bepado received',
+            'bepado requested',
+            'bepado instructed',
+            'bepado aborted',
+            'bepado timeout',
+            'bepado pending',
+            'bepado refunded',
+            'bepado loss',
+            'bepado error',
+        );
+
+        $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+        $query->select('MAX(s.id)');
+
+        $maxId = $query->getQuery()->getOneOrNullResult();
+        $currentId = 0;
+
+        if (count($maxId) > 0) {
+            foreach ($maxId as $id) {
+                if ($id > $currentId) {
+                    $currentId = $id;
+                }
+            }
+        }
+
+        foreach ($status as $name) {
+            $currentId++;
+
+            Shopware()->Db()->query('
+            INSERT INTO `s_core_states`
+            (`id`, `description`, `position`, `group`, `mail`)
+            VALUES (?, ?, ?, ?, ?)
+        ', array($currentId, $name, $currentId, 'payment', 0));
+        }
     }
 }

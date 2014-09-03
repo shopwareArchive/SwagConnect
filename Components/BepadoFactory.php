@@ -5,6 +5,8 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
+use Shopware\Bepado\Components\Payment\ProductPayments;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
 use Shopware\Bepado\Components\Utils\CountryCodeResolver;
@@ -99,7 +101,10 @@ class BepadoFactory
             ),
             new ShopwareErrorHandler(),
             null,
-            $this->getPluginVersion()
+            $this->getPluginVersion(),
+            new ProductPayments(
+                new RemoteOrderQuery()
+            )
         );
     }
 

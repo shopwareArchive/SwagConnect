@@ -38,6 +38,7 @@ class Setup
         if ($fullSetup) {
             $this->createMyMenu();
             $this->createEngineElement();
+            $this->populatePaymentStates();
         }
     }
 
@@ -487,5 +488,54 @@ class Setup
             INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)
             SELECT `id` FROM `s_core_paymentmeans`
         ');
+    }
+
+    public function populatePaymentStates()
+    {
+        $states = array(
+            'bepado received',
+            'bepado requested',
+            'bepado instructed',
+            'bepado aborted',
+            'bepado timeout',
+            'bepado pending',
+            'bepado refunded',
+            'bepado loss',
+            'bepado error',
+        );
+
+        $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+        $query->select('MAX(s.id)');
+
+        $maxId = $query->getQuery()->getOneOrNullResult();
+        $currentId = 0;
+
+        if (count($maxId) > 0) {
+            foreach ($maxId as $id) {
+                if ($id > $currentId) {
+                    $currentId = $id;
+                }
+            }
+        }
+
+        foreach ($states as $name) {
+            $isExists = Shopware()->Db()->query('
+                SELECT `id` FROM `s_core_states`
+                WHERE `description` = ?
+                ', array($name)
+            )->fetch();
+
+            if ($isExists) {
+                continue;
+            }
+
+            $currentId++;
+            Shopware()->Db()->query('
+                INSERT INTO `s_core_states`
+                (`id`, `description`, `position`, `group`, `mail`)
+                VALUES (?, ?, ?, ?, ?)
+                ', array($currentId, $name, $currentId, 'payment', 0)
+            );
+        }
     }
 }

@@ -50,7 +50,6 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
     public function __construct(RemoteOrderQuery $orderQuery)
     {
         $this->remoteOrderQuery = $orderQuery;
-        $this->logger = new Logger($this->getDb());
     }
 
     /**
@@ -66,10 +65,15 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
             FROM
                 `bepado_data`
             WHERE
-                `d_key` = "revision"'
+                `d_key` = "payment_revision"'
         );
 
-        return $query->fetchColumn();
+        $paymentRevision = $query->fetchColumn();
+        if (!$paymentRevision) {
+            return 0;
+        }
+
+        return $paymentRevision;
     }
 
     /**
@@ -83,7 +87,7 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
     {
         $order = $this->remoteOrderQuery->getBepadoOrder($localOrderId);
         if (!$order) {
-            $this->logger->write(
+            $this->getLogger()->write(
                 true,
                 sprintf(
                     'Order with id "%s" not found',
@@ -100,7 +104,7 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
         );
 
         if (!$orderPaymentStatus) {
-            $this->logger->write(
+            $this->getLogger()->write(
                 true,
                 sprintf(
                     'Payment status "%s" not found',
@@ -118,6 +122,10 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
 
         Shopware()->Models()->persist($order);
         Shopware()->Models()->flush();
+
+        $this->updatePaymentRevision();
+
+        return true;
     }
 
     /**
@@ -159,5 +167,42 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
         }
 
         return $this->db;
+    }
+
+    /**
+     * Helper method
+     * Return instance of Logger class
+     *
+     * @return Logger
+     */
+    private function getLogger()
+    {
+        if (!$this->logger) {
+            $this->logger = new Logger($this->getDb());
+        }
+
+        return $this->logger;
+    }
+
+    /**
+     * Update payment revision in DB
+     */
+    private function updatePaymentRevision()
+    {
+        $query = Shopware()->Db()->prepare(
+            'INSERT INTO
+                bepado_data (
+                    `d_key`,
+                    `d_value`
+                )
+            VALUES (
+                "payment_revision",
+                ?
+            )
+            ON DUPLICATE KEY UPDATE
+                `d_value` = VALUES(`d_value`)
+            ;'
+        );
+        $query->execute(array((string)microtime(true)));
     }
 } 

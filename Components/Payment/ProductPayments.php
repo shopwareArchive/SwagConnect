@@ -25,6 +25,7 @@
 namespace Shopware\Bepado\Components\Payment;
 
 use Bepado\SDK\Struct\PaymentStatus;
+use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 
 /**
@@ -41,9 +42,15 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
 
     private $db;
 
+    /**
+     * @var \Shopware\Bepado\Components\Logger
+     */
+    private $logger;
+
     public function __construct(RemoteOrderQuery $orderQuery)
     {
         $this->remoteOrderQuery = $orderQuery;
+        $this->logger = new Logger($this->getDb());
     }
 
     /**
@@ -76,6 +83,14 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
     {
         $order = $this->remoteOrderQuery->getBepadoOrder($localOrderId);
         if (!$order) {
+            $this->logger->write(
+                true,
+                sprintf(
+                    'Order with id "%s" not found',
+                    $localOrderId
+                ),
+                serialize($paymentStatus)
+            );
             return;
         }
 
@@ -85,6 +100,17 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
         );
 
         if (!$orderPaymentStatus) {
+            $this->logger->write(
+                true,
+                sprintf(
+                    'Payment status "%s" not found',
+                    $paymentStatus->paymentStatus
+                ),
+                sprintf(
+                    'Order with id "%s"',
+                    $localOrderId
+                )
+            );
             return;
         }
 
@@ -123,7 +149,7 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
     /**
      * Helper method
      * Return instance of DB class
-     * 
+     *
      * @return \Enlight_Components_Db_Adapter_Pdo_Mysql
      */
     private function getDb()

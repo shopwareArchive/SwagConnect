@@ -62,7 +62,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         logLabel: '{s name=config/log_label}Log bepado requests{/s}',
         logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}',
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
-        exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}'
+        exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
+        hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}'
     },
 
     initComponent: function() {
@@ -158,7 +159,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                             labelWidth: 100,
                             name: 'apiKey',
                             flex: 5,
-                            padding: '0 20 0 0'
+                            padding: '0 20 10 0'
                         }, {
                             xtype: 'button',
                             flex: 1,
@@ -186,6 +187,14 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                             }
                         }
                     ]
+                }, {
+                    xtype: 'checkbox',
+                    name: 'hasSsl',
+                    fieldLabel: me.snippets.hasSslLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
                 }
             ]
         });

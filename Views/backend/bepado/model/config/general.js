@@ -47,7 +47,8 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
         { name: 'checkoutShopInfo', type: 'string' },
         { name: 'shippingCostsPage', type: 'int', useNull: true },
         { name: 'shippingCostsPageName', type: 'string' },
-        { name: 'exportDomain', type: 'string' }
+        { name: 'exportDomain', type: 'string' },
+        { name: 'hasSsl', type: 'string' }
     ],
 
     proxy: {

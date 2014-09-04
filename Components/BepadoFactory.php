@@ -128,11 +128,17 @@ class BepadoFactory
             return '';
         }
 
-        return $front->Router()->assemble(array(
+        $url = $front->Router()->assemble(array(
             'module' => 'backend',
             'controller' => 'bepado_gateway',
             'fullPath' => true
         ));
+        $hasSSL = $this->getConfigComponent()->getConfig('hasSSL', 0);
+        if ($hasSSL) {
+            $url = str_replace('http://', 'https://', $url);
+        }
+
+        return $url;
     }
 
     /**

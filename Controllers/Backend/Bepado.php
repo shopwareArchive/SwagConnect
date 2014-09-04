@@ -1056,9 +1056,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
         $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
-
         $attribute = $bepadoAttribute->getArticle()->getMainDetail()->getAttribute();
-        $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
+        if (!$data['shopId']) {
+            // it's local product and shipping group can be changed
+            $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
+        }
+
         $this->getModelManager()->persist($attribute);
 
         if (!$bepadoAttribute) {

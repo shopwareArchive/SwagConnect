@@ -126,12 +126,12 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         var contentField = me.getArticleDetailWindow().down('numberfield[fieldLabel=' + contentLabel + ']');
         var basicUnitLabel = me.getArticleDetailWindow().snippets.basePrice.basicUnit;
         var basicField = me.getArticleDetailWindow().down('numberfield[fieldLabel=' + basicUnitLabel + ']');
-        me.getArticleDetailWindow().unitComboBox.setReadOnly(me.record.get('sourceId') > 0);
-        contentField.setReadOnly(me.record.get('sourceId') > 0);
-        basicField.setReadOnly(me.record.get('sourceId') > 0);
+        me.getArticleDetailWindow().unitComboBox.setReadOnly(me.record.get('shopId') > 0);
+        contentField.setReadOnly(me.record.get('shopId') > 0);
+        basicField.setReadOnly(me.record.get('shopId') > 0);
 
-        bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('sourceId') > 0);
-        bepadoForm.bepadoShippingGroup.setReadOnly(me.record.get('sourceId') > 0);
+        bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('shopId') > 0);
+        bepadoForm.bepadoShippingGroup.setReadOnly(me.record.get('shopId') > 0);
 
         if (settingsFieldSet) {
             shippingField = settingsFieldSet.down('checkboxfield[fieldLabel=' + settingsFieldSet.snippets.shippingFree.field + ']');

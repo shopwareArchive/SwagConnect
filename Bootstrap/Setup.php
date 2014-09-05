@@ -283,6 +283,14 @@ class Setup
             'varchar(1000)'
         );
 
+        $modelManager->addAttribute(
+            's_premium_dispatch_attributes',
+            'bepado', 'allowed',
+            'int(1)',
+            true,
+            1
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',

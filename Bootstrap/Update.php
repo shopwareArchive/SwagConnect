@@ -50,12 +50,6 @@ class Update
             }
 
         }
-        if (version_compare($this->version, '1.4.45', '<=')) {
-            Shopware()->Db()->exec(
-                'ALTER TABLE  `s_premium_dispatch_attributes`
-                    CHANGE  `bepado_allowed`  `bepado_allowed` INT( 1 ) NULL DEFAULT  "1";'
-            );
-        }
 
         // Split category mapping into mapping for import and export
         $this->removeOldCategoryMapping();

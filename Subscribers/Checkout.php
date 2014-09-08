@@ -243,9 +243,12 @@ class Checkout extends BaseSubscriber
         $userData = $session['sOrderVariables']['sUserData'];
         $paymentName = $userData['additional']['payment']['name'];
 
-        if(($request->getActionName() != 'finish' && $request->getActionName() != 'payment')
-            && ($request->getActionName() == 'confirm' && $paymentName != 'klarna_checkout')) { // BEP-1010 Fix for Klarna checkout
-            return;
+        if(($request->getActionName() != 'finish' && $request->getActionName() != 'payment')) {
+            if (($request->getActionName() == 'confirm' && $paymentName == 'klarna_checkout')) {
+                // BEP-1010 Fix for Klarna checkout
+            } else {
+                return;
+            }
         }
 
         if(empty($session['sOrderVariables'])) {

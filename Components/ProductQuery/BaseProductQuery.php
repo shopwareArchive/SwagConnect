@@ -5,6 +5,7 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Bepado\SDK\Struct\Product;
 use Shopware\Components\Model\ModelManager;
 
+
 abstract class BaseProductQuery
 {
 
@@ -101,7 +102,7 @@ abstract class BaseProductQuery
         }
 
         // Fix categories
-        if(is_string($row['category']) && strlen($row['category'] > 0)) {
+        if(is_string($row['category']) && strlen($row['category']) > 0) {
             $row['categories'] = array($row['category']);
         }
         unset($row['category']);

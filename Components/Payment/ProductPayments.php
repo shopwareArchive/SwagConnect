@@ -81,11 +81,12 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
      *
      * @param int $localOrderId
      * @param PaymentStatus $paymentStatus
+     * @param int $shopOrder
      * @return mixed|void
      */
-    public function updatePaymentStatus($localOrderId, PaymentStatus $paymentStatus)
+    public function updatePaymentStatus($localOrderId, PaymentStatus $paymentStatus, $orderShop)
     {
-        $order = $this->remoteOrderQuery->getBepadoOrder($localOrderId);
+        $order = $this->remoteOrderQuery->getBepadoOrder($localOrderId, $orderShop);
         if (!$order) {
             $this->getLogger()->write(
                 true,

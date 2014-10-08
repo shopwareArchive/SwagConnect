@@ -202,13 +202,13 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     xtype: 'combobox',
                     name: dataIndexField,
                     store: Ext.create('Ext.data.Store', {
-                        fields: ['field'],
+                        fields: ['field', 'name'],
                         data: me.getPriceData()
                     }),
                     queryMode: 'local',
                     editable: false,
                     allowBlank: false,
-                    displayField: 'field',
+                    displayField: 'name',
                     valueField: 'field',
                     helpText: helpText,
                     supportText: '{s name=config/export/support/price}price field{/s}'
@@ -226,9 +226,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     getPriceData: function () {
         var me = this,
             columns = [
-                { field: 'basePrice' },
-                { field: 'price' },
-                { field: 'pseudoPrice' }
+                { field: 'basePrice', name: '{s namespace=backend/article/view/main name=detail/price/base_price}{/s}' },
+                { field: 'price', name: '{s namespace=backend/article/view/main name=detail/price/price}{/s}' },
+                { field: 'pseudoPrice', name: '{s namespace=backend/article/view/main name=detail/price/pseudo_price}{/s}' }
             ];
 
         return columns;

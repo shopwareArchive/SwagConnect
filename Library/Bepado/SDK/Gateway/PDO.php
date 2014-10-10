@@ -644,7 +644,7 @@ class PDO extends Gateway
      * @param mixed $config
      * @return bool
      */
-    private function setConfig($shopId, $config)
+    public function setConfig($shopId, $config)
     {
         $query = $this->connection->prepare(
             'INSERT INTO
@@ -667,7 +667,7 @@ class PDO extends Gateway
      * @param $shopId
      * @return null|string
      */
-    private function getConfig($shopId)
+    public function getConfig($shopId)
     {
         $query = $this->connection->prepare(
             'SELECT

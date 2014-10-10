@@ -866,7 +866,7 @@ class MySQLi extends Gateway
         return null;
     }
 
-    private function setConfig($name, $value)
+    public function setConfig($name, $value)
     {
         $this->connection->query(
             'INSERT INTO
@@ -884,7 +884,7 @@ class MySQLi extends Gateway
         );
     }
 
-    private function getConfig($name)
+    public function getConfig($name)
     {
         $result = $this->connection->query(
             'SELECT

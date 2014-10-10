@@ -33,11 +33,6 @@ use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
  */
 class ProductPayments implements \Bepado\SDK\ProductPayments
 {
-    /**
-     * @var \Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery
-     */
-    private $remoteOrderQuery;
-
     private $paymentStatusRepository;
 
     private $db;
@@ -47,51 +42,25 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
      */
     private $logger;
 
-    public function __construct(RemoteOrderQuery $orderQuery)
-    {
-        $this->remoteOrderQuery = $orderQuery;
-    }
-
-    /**
-     * Return last revision
-     *
-     * @return string
-     */
-    public function lastRevision()
-    {
-        $query = $this->getDb()->query(
-            'SELECT
-                `d_value`
-            FROM
-                `bepado_data`
-            WHERE
-                `d_key` = "payment_revision"'
-        );
-
-        $paymentRevision = $query->fetchColumn();
-        if (!$paymentRevision) {
-            return 0;
-        }
-
-        return $paymentRevision;
-    }
-
     /**
      * Find order and update payment status
      *
-     * @param int $localOrderId
      * @param PaymentStatus $paymentStatus
      * @return mixed|void
      */
-    public function updatePaymentStatus($localOrderId, PaymentStatus $paymentStatus)
+    public function updatePaymentStatus(PaymentStatus $paymentStatus)
     {
-        $order = $this->remoteOrderQuery->getBepadoOrder($localOrderId);
+        // $paymentStatus->localOrderId is actually ordernumber for this shop
+        // e.g. BP-35-20002
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Order\Order');
+        $order = $repository->findOneBy(array('number' => $paymentStatus->localOrderId));
+
         if (!$order) {
             $this->getLogger()->write(
                 true,
                 sprintf(
                     'Order with id "%s" not found',
-                    $localOrderId
+                    $paymentStatus->localOrderId
                 ),
                 serialize($paymentStatus)
             );
@@ -112,7 +81,7 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
                 ),
                 sprintf(
                     'Order with id "%s"',
-                    $localOrderId
+                    $paymentStatus->localOrderId
                 )
             );
             return;
@@ -123,9 +92,8 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
         Shopware()->Models()->persist($order);
         Shopware()->Models()->flush();
 
-        $this->updatePaymentRevision();
-
         return true;
+
     }
 
     /**
@@ -182,27 +150,5 @@ class ProductPayments implements \Bepado\SDK\ProductPayments
         }
 
         return $this->logger;
-    }
-
-    /**
-     * Update payment revision in DB
-     */
-    private function updatePaymentRevision()
-    {
-        $query = Shopware()->Db()->prepare(
-            'INSERT INTO
-                bepado_data (
-                    `d_key`,
-                    `d_value`
-                )
-            VALUES (
-                "payment_revision",
-                ?
-            )
-            ON DUPLICATE KEY UPDATE
-                `d_value` = VALUES(`d_value`)
-            ;'
-        );
-        $query->execute(array((string)microtime(true)));
     }
 } 

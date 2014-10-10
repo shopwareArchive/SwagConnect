@@ -342,7 +342,7 @@ class DependencyResolver
 
             $this->registry->registerService(
                 'productPayments',
-                array('lastRevision', 'updatePaymentStatus'),
+                array('lastRevision', 'replicate'),
                 $this->getPaymentStatusService()
             );
         }
@@ -680,7 +680,8 @@ class DependencyResolver
     {
         if ($this->paymentStatusService === null) {
             $this->paymentStatusService = new Service\PaymentStatus(
-                $this->productPayments
+                $this->productPayments,
+                $this->getGateway()
             );
         }
 

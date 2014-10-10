@@ -17,18 +17,10 @@ use Bepado\SDK\Struct\PaymentStatus;
 interface ProductPayments
 {
     /**
-     * Get last revision
-     *
-     * @return string
-     */
-    public function lastRevision();
-
-    /**
      * Update payment status
      *
-     * @param int $localOrderId
      * @param PaymentStatus $status
      * @return mixed
      */
-    public function updatePaymentStatus($localOrderId, PaymentStatus $status);
+    public function updatePaymentStatus(PaymentStatus $status);
 } 

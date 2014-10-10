@@ -8,6 +8,7 @@
 namespace Bepado\SDK\Service;
 
 use Bepado\SDK\ProductPayments;
+use Bepado\SDK\Gateway\ShopConfiguration;
 
 /**
  * Service to maintain payments
@@ -17,13 +18,21 @@ use Bepado\SDK\ProductPayments;
 class PaymentStatus
 {
     /**
+     * @var string
+     */
+    const PAYMENT_REVISION = '_payment_revision_';
+
+    /**
      * @var \Bepado\SDK\ProductPayments
      */
     protected $productPayments;
 
-    public function __construct(ProductPayments $productPayments)
+    protected $shopConfiguration;
+
+    public function __construct(ProductPayments $productPayments, ShopConfiguration $shopConfiguration)
     {
         $this->productPayments = $productPayments;
+        $this->shopConfiguration = $shopConfiguration;
     }
 
     /**
@@ -33,18 +42,19 @@ class PaymentStatus
      */
     public function lastRevision()
     {
-        return $this->productPayments->lastRevision();
+        return $this->shopConfiguration->getConfig(self::PAYMENT_REVISION);
     }
 
     /**
      * Update payment status
      *
-     * @param $localOrderId
-     * @param \Bepado\SDK\Struct\PaymentStatus $status
+     * @param array<\Bepado\SDK\Struct\PaymentStatus> $statuses
      */
-    public function updatePaymentStatus($localOrderId, \Bepado\SDK\Struct\PaymentStatus $status)
+    public function replicate(array $statuses)
     {
-        $this->productPayments->updatePaymentStatus($localOrderId, $status);
+        foreach ($statuses as $status) {
+            $this->productPayments->updatePaymentStatus($status);
+            $this->shopConfiguration->setConfig(self::PAYMENT_REVISION, $status->revision);
+        }
     }
-
-} 
+}

@@ -102,9 +102,7 @@ class BepadoFactory
             new ShopwareErrorHandler(),
             null,
             $this->getPluginVersion(),
-            new ProductPayments(
-                new RemoteOrderQuery()
-            )
+            new ProductPayments()
         );
     }
 

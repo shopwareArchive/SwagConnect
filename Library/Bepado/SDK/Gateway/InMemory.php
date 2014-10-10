@@ -36,6 +36,7 @@ class InMemory extends Gateway
     protected $shippingCosts = array();
     protected $shippingCostsRevision;
     protected $features = array();
+    protected $config = array();
     protected $billingAddress;
 
     /**
@@ -556,5 +557,17 @@ class InMemory extends Gateway
     public function getBillingAddress()
     {
         return $this->billingAddress;
+    }
+
+    public function setConfig($shopId, $config)
+    {
+        $this->config[$shopId] = $config;
+    }
+
+    public function getConfig($shopId)
+    {
+        return isset($this->config[$shopId])
+            ? $this->config[$shopId]
+            : null;
     }
 }

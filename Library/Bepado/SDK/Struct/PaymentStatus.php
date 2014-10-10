@@ -14,6 +14,11 @@ class PaymentStatus extends Struct
     /**
      * @var string
      */
+    public $localOrderId;
+
+    /**
+     * @var string
+     */
     public $paymentStatus;
 
     /**
@@ -25,4 +30,9 @@ class PaymentStatus extends Struct
      * @var string
      */
     public $providerTransactionId;
-} 
+
+    /**
+     * @var string
+     */
+    public $revision;
+}

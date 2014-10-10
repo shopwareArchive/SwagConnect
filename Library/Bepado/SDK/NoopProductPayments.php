@@ -17,20 +17,12 @@ use Bepado\SDK\Struct\PaymentStatus;
 class NoopProductPayments implements ProductPayments
 {
     /**
-     * @return string
-     */
-    public function lastRevision()
-    {
-        return (string)microtime(true);
-    }
-
-    /**
-     * @param int $localOrderId
+     * Update payment status
+     *
      * @param PaymentStatus $status
      * @return mixed|void
      */
-    public function updatePaymentStatus($localOrderId, PaymentStatus $status)
+    public function updatePaymentStatus(PaymentStatus $status)
     {
-
     }
-} 
+}

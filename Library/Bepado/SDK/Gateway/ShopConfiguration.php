@@ -122,4 +122,21 @@ interface ShopConfiguration
      * @return \Bepado\SDK\Struct\Address
      */
     public function getBillingAddress();
+
+    /**
+     * Set a configuration value.
+     *
+     * @param mixed $key
+     * @param mixed $config
+     * @return bool
+     */
+    public function setConfig($key, $value);
+
+    /**
+     * Retrieve a configuration value.
+     *
+     * @param $key
+     * @return null|string
+     */
+    public function getConfig($shopId);
 }

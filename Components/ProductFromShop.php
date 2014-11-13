@@ -72,6 +72,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $ids)
     {
+        //todo@sb: check product ids on variant save
         return $this->helper->getLocalProduct($ids);
     }
 

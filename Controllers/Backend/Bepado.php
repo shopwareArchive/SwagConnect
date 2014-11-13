@@ -731,11 +731,45 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * Returns article details ids
+     * by given article ids
+     *
+     * @param array $articleIds
+     * @return array
+     */
+    private function getArticleDetailsId(array $articleIds)
+    {
+        $ids = array();
+        foreach ($articleIds as $articleId) {
+            /** @var \Shopware\Models\Article\Article $article */
+            $article = $this->getArticleModelById($articleId);
+            if (!$article) {
+                continue;
+            }
+
+            $details = $article->getDetails();
+            //todo@sb: check with article without variants
+            if (count($details) == 0) {
+                continue;
+            }
+
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($details as $detail) {
+                $ids[] = $detail->getId();
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * Called when a product was marked for update in the bepado backend module
      */
     public function insertOrUpdateProductAction()
     {
-        $ids = $this->Request()->getPost('ids');
+        //todo@sb: change article id to detail id
+        $articleIds = $this->Request()->getPost('ids');
+        $ids = $this->getArticleDetailsId($articleIds);
 
         $bepadoExport = $this->getBepadoExport();
 

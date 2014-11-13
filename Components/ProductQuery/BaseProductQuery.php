@@ -31,8 +31,9 @@ abstract class BaseProductQuery
     public function get(array $ids)
     {
         $builder = $this->getProductQuery();
-        $builder->where('a.id IN (:id)');
-        $builder->setParameter('id', $ids);
+        $builder->where('d.id IN (:ids)');
+        $builder->setParameter('ids', $ids);
+
         $query = $builder->getQuery();
 
         return $this->getBepadoProducts($query->getArrayResult());

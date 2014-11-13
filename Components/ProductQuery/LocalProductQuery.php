@@ -42,7 +42,6 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-
         $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
         $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
         $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
@@ -52,7 +51,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
         $builder->join('at.article', 'a');
-        $builder->join('a.mainDetail', 'd');
+        $builder->join('a.details', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
@@ -60,7 +59,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->select(array(
             'a.id as localId',
             'at.shopId as shopId',
-            'a.id as sourceId',
+            'd.id as sourceId',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',

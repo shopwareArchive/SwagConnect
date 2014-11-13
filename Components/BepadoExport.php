@@ -22,9 +22,26 @@ class BepadoExport
         $this->manager = $manager;
     }
 
+    /**
+     * Load article entity
+     *
+     * @param $id
+     * @return null|\Shopware\Models\Article\Article
+     */
     public function getArticleModelById($id)
     {
         return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
+    }
+
+    /**
+     * Load article detail entity
+     *
+     * @param $id
+     * @return null|\Shopware\Models\Article\Detail
+     */
+    public function getArticleDetailById($id)
+    {
+        return Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->find($id);
     }
 
     /**
@@ -38,13 +55,19 @@ class BepadoExport
         $errors = array();
 
         foreach($ids as $id) {
-            $model = $this->getArticleModelById($id);
+            /** @var \Shopware\Models\Article\Detail $articleDetail */
+            $articleDetail = $this->getArticleDetailById($id);
+            if($articleDetail === null) {
+                continue;
+            }
+
+            $model = $articleDetail->getArticle();
             $prefix = $model && $model->getName() ? $model->getName() . ': ' : '';
 
             if($model === null) {
                 continue;
             }
-            $bepadoAttribute = $this->helper->getOrCreateBepadoAttributeByModel($model);
+            $bepadoAttribute = $this->helper->getOrCreateBepadoAttributeByModel($articleDetail);
 
             $status = $bepadoAttribute->getExportStatus();
             if(empty($status) || $status == 'delete' || $status == 'error') {

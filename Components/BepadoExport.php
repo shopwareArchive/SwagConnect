@@ -45,7 +45,7 @@ class BepadoExport
     }
 
     /**
-     * Helper function to mark a given array of product ids for bepado update
+     * Helper function to mark a given array of product detail ids for bepado update
      *
      * @param array $ids
      * @return array

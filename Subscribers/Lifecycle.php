@@ -96,19 +96,14 @@ class Lifecycle extends BaseSubscriber
 
         $entity = $eventArgs->get('entity');
 
-        try {
-            if ($entity instanceof \Shopware\Models\Article\Detail) {
-                $entity = $entity->getArticle();
-            }
-        } catch(\Exception $e) {
+        if (!$entity instanceof \Shopware\Models\Article\Article
+            && !$entity instanceof \Shopware\Models\Article\Detail) {
             return;
         }
 
-
         $id = $entity->getId();
-
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
-
+        $className = get_class($entity);
+        $model = Shopware()->Models()->getRepository($className)->find($id);
         // Check if we have a valid model
         if (!$model) {
             return;
@@ -135,9 +130,18 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the product for bepado update
         try {
-            $this->getBepadoExport()->export(
-                array($id)
-            );
+            if ($model instanceof \Shopware\Models\Article\Detail) {
+                $this->getBepadoExport()->export(
+                    array($id)
+                );
+            } else {
+                /** @var \Shopware\Models\Article\Detail $detail */
+                foreach ($model->getDetails() as $detail) {
+                    $this->getBepadoExport()->export(
+                        array($detail->getId())
+                    );
+                }
+            }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

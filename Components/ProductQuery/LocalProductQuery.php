@@ -5,7 +5,6 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
-use Shopware\Bepado\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -60,6 +59,7 @@ class LocalProductQuery extends BaseProductQuery
             'a.id as localId',
             'at.shopId as shopId',
             'd.id as sourceId',
+            'd.kind as detailKind',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',
@@ -110,6 +110,7 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * @param $row
      * @return Product
+     * @throws NoLocalProductException
      */
     public function getBepadoProduct($row)
     {
@@ -127,6 +128,13 @@ class LocalProductQuery extends BaseProductQuery
             }
         }
 
+        // replace sourceId with articleId
+        // when main variant is used
+        // by default variant id is used
+        if ($row['detailKind'] == 1) {
+            $row['sourceId'] = $row['localId'];
+        }
+
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
         $row['images'] = $this->getImagesById($row['localId']);
@@ -138,6 +146,7 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         unset($row['localId']);
+        unset($row['detailKind']);
 
         if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
         {

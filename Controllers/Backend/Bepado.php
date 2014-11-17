@@ -228,6 +228,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'at.category'
         ));
 
+        // show only main variant in export/import lists
+        $builder->groupBy('at.articleId');
+
         foreach($filter as $key => $rule) {
             switch($rule['property']) {
                 case 'search':
@@ -288,7 +291,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $total = Shopware()->Models()->getQueryCount($query);
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $total = array_sum($countResult);
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+//        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
         $this->View()->assign(array(
@@ -330,7 +336,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $total = Shopware()->Models()->getQueryCount($query);
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $total = array_sum($countResult);
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+//        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
         $this->View()->assign(array(

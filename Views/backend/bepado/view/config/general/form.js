@@ -63,7 +63,9 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         logDescription: '{s name=config/log_description}Will write all bepado requests to log{/s}',
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
-        hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}'
+        hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
+        basicHeader: '{s name=config/basic}Basic{/s}',
+        advancedHeader: '{s name=config/advanced}Advanced{/s}'
     },
 
     initComponent: function() {
@@ -94,13 +96,15 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     createElements: function() {
         var me = this;
             apiFieldset = me.getApiKeyFieldset(),
-            configFieldset = me.getConfigFieldset(),
+            basicConfigFieldset = me.getBasicConfigFieldset(),
+            advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
-        if (me.defaultShop) {
+        if (me.isDefaultShop()) {
             elements.push(apiFieldset);
         }
-        elements.push(configFieldset);
+        elements.push(basicConfigFieldset);
+        elements.push(advancedConfigFieldset);
 
         return elements;
     },
@@ -203,10 +207,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set which displayed
+     * Creates basic configuration field set
      * @return Ext.form.FieldSet
      */
-    getConfigFieldset: function() {
+    getBasicConfigFieldset: function() {
         var me = this,
             items = [],
             leftElements = me.createLeftElements(),
@@ -224,7 +228,79 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
             layout: 'column',
+            title: me.snippets.basicHeader,
+            defaults: {
+                labelWidth: 170,
+                anchor: '100%'
+            },
+            items: items
+        });
+
+        return fieldset;
+    },
+
+    /**
+     * Creates advanced configuration field set
+     * @return Ext.form.FieldSet
+     */
+    getAdvancedConfigFieldset: function() {
+        var me = this,
+            items = [];
+
+        var leftContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            layout: 'anchor',
             border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'detailProductNoIndex',
+                    fieldLabel: me.snippets.noIndexLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth
+                }
+            ]
+        });
+        items.push(leftContainer);
+
+        if (me.isDefaultShop()) {
+            var bottomContainer = Ext.create('Ext.container.Container', {
+                columnWidth: 1,
+                layout: 'anchor',
+                border: false,
+                items: [
+                    {
+                        xtype: 'textfield',
+                        name: 'bepadoDebugHost',
+                        anchor: '100%',
+                        fieldLabel: me.snippets.alternativeHostLabel,
+                        labelWidth: me.defaults.labelWidth,
+                        helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}'
+                    }, {
+                        xtype: 'fieldcontainer',
+                        fieldLabel: me.snippets.logLabel,
+                        defaultType: 'checkboxfield',
+                        labelWidth: me.defaults.labelWidth,
+                        items: [
+                            {
+                                boxLabel: me.snippets.logDescription,
+                                name: 'logRequest',
+                                inputValue: 1,
+                                uncheckedValue: 0
+                            }
+                        ]
+                    }
+                ]
+            });
+            items.push(bottomContainer);
+        }
+
+        var fieldset = Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: me.snippets.advancedHeader,
+            collapsible: true,
+            collapsed: true,
             defaults: {
                 labelWidth: 170,
                 anchor: '100%'
@@ -282,13 +358,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             border: false,
             items: [
                 {
-                    xtype: 'checkbox',
-                    name: 'detailProductNoIndex',
-                    fieldLabel: me.snippets.noIndexLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth
-                }, {
                     xtype: 'checkbox',
                     name: 'checkoutShopInfo',
                     fieldLabel: me.snippets.basketHintLabel,
@@ -359,26 +428,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     fieldLabel: me.snippets.exportDomainLabel,
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/bepado_product_gateway/product/id/{/s}'
-                }, {
-                    xtype: 'textfield',
-                    name: 'bepadoDebugHost',
-                    anchor: '100%',
-                    fieldLabel: me.snippets.alternativeHostLabel,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}'
-                }, {
-                    xtype: 'fieldcontainer',
-                    fieldLabel: me.snippets.logLabel,
-                    defaultType: 'checkboxfield',
-                    labelWidth: me.defaults.labelWidth,
-                    items: [
-                        {
-                            boxLabel: me.snippets.logDescription,
-                            name: 'logRequest',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }
-                    ]
                 }
             ]
         });
@@ -460,6 +509,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
         me.loadRecord(record);
 
+    },
+
+    /**
+     * Helper method to check if the current
+     * shop is default one
+     *
+     * @returns boolean
+     */
+    isDefaultShop: function() {
+        var me = this;
+
+        return me.defaultShop;
     }
 });
 //{/block}

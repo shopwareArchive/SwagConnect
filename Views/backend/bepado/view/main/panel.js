@@ -57,7 +57,17 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
             }, {
                 xtype: 'bepado-shipping-groups',
                 itemId: 'config-shipping-groups'
-            }]
+            }, {
+                xtype: 'bepado-settings-main',
+                itemId: 'settings-main'
+            }, {
+                xtype: 'bepado-import-main',
+                itemId: 'import-main'
+            }, {
+                xtype: 'bepado-export-main',
+                itemId: 'export-main'
+            }
+            ]
         });
 
         me.callParent(arguments);

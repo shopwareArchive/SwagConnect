@@ -337,6 +337,7 @@ class Setup
             'overwriteProductLongDescription' => array('1', null, 'import'),
             'logRequest' => array('0', null, 'general'),
             'shippingCostsPage' => array('6', null, 'general'),
+            'articleImagesLimitImport' => array(10, null, 'import'),
         );
 
         foreach ($configs as $name => $values) {

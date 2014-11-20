@@ -72,6 +72,8 @@ class Update
             $cacheManager->clearTemplateCache();
         }
 
+        $this->addImagesImportLimit();
+
         return true;
     }
 
@@ -350,5 +352,18 @@ class Update
         } catch (\Exception $e) {
         }
 
+    }
+
+    /**
+     * Insert config option for
+     * how many products will be used per pass
+     * for image import
+     */
+    public function addImagesImportLimit()
+    {
+        if (version_compare($this->version, '1.5.00', '<=')) {
+            $configComponent = $this->bootstrap->getConfigComponents();
+            $configComponent->setConfig('articleImagesLimitImport', 10, null, 'import');
+        }
     }
 }

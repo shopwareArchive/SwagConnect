@@ -361,7 +361,7 @@ class Update
      */
     public function addImagesImportLimit()
     {
-        if (version_compare($this->version, '1.5.00', '<=')) {
+        if (version_compare($this->version, '1.5.0', '<=')) {
             $configComponent = $this->bootstrap->getConfigComponents();
             $configComponent->setConfig('articleImagesLimitImport', 10, null, 'import');
         }

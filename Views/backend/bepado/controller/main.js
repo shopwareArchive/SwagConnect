@@ -174,21 +174,21 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-
-            'bepado-export-filter base-element-select[name=exportStatus]': {
+            'bepado-export-filter [name=exportStatus]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
-
-                        store.filters.removeAtKey('exportStatus');
-                    if (value) {
+                    if(!value) {
+                        return;
+                    }
+                    store.filters.removeAtKey('exportStatus');
+                    if(field.inputValue != '') {
                         store.filters.add('exportStatus', new Ext.util.Filter({
                             property: field.name,
-                            value: value
+                            value: field.inputValue
                         }));
                     }
                     store.load();
-
                 }
             },
 

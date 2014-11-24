@@ -73,6 +73,7 @@ class Update
         }
 
         $this->addImagesImportLimit();
+        $this->removeApiDescriptionSnippet();
 
         return true;
     }
@@ -364,6 +365,14 @@ class Update
         if (version_compare($this->version, '1.5.0', '<=')) {
             $configComponent = $this->bootstrap->getConfigComponents();
             $configComponent->setConfig('articleImagesLimitImport', 10, null, 'import');
+        }
+    }
+
+    public function removeApiDescriptionSnippet()
+    {
+        if (version_compare($this->version, '1.5.0', '<=')) {
+            $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
+            Shopware()->Db()->exec($sql);
         }
     }
 }

@@ -49,7 +49,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
 
     snippets: {
         apiKeyHeader: '{s name=config/api_key}API-Key{/s}',
-        apiKeyDescription: '{s name=config/api_key_description}Your bepado API key{/s}',
+        apiKeyDescription: '{s name=config/api_key_description_text}Your bepado API key{/s}',
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',

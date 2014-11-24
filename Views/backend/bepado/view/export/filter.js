@@ -70,18 +70,36 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
         return {
             xtype: 'form',
             title: '{s name=export/filter/status_title}Status filter{/s}',
-            height: 65,
-            bodyPadding: 5,
+            //bodyPadding: 5,
             items: [{
-                xtype: 'base-element-select',
-                name: 'exportStatus',
-                anchor: '100%',
-                allowBlank: true,
-                store: [
-                    ['online', 'Online'],
-                    ['error', 'Error'],
-                    ['insert', 'Inserting'],
-                    ['update', 'Updating']
+                xtype: 'fieldcontainer',
+                defaultType: 'radiofield',
+                items: [{
+                    boxLabel  : '{s name=export/filter/status_all}Show all{/s}',
+                    name      : 'exportStatus',
+                    inputValue: ''
+                }, {
+                    boxLabel  : '{s name=export/filter/status_online}Online{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'online'
+                }, {
+                    boxLabel  : '{s name=export/filter/status_error}Error{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'error'
+                }, {
+                    boxLabel  : '{s name=export/filter/status_insert}Inserting{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'insert'
+                }, {
+                    boxLabel  : '{s name=export/filter/status_update}Updating{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'update'
+                }, {
+                    boxLabel  : '{s name=export/filter/status_delete}Delete{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'delete',
+                    checked   : true
+                }
                 ]
             }]
         }

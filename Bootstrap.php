@@ -37,11 +37,18 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * Returns the current version of the plugin.
      *
-     * @return string
+     * @return string|void
+     * @throws Exception
      */
     public function getVersion()
     {
-        return '1.5.0';
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR .'plugin.json'), true);
+
+        if ($info) {
+            return $info['currentVersion'];
+        } else {
+            throw new Exception('The plugin has an invalid version file.');
+        }
     }
 
     /**

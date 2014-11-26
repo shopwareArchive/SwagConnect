@@ -68,8 +68,14 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-            $cacheManager->clearTemplateCache();
+            // check shopware version, because Shopware()->Container()
+            // is available after version 4.2.x
+            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+                Shopware()->Template()->clearAllCache();
+            } else {
+                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+                $cacheManager->clearTemplateCache();
+            }
         }
 
         $this->addImagesImportLimit();
@@ -373,6 +379,15 @@ class Update
         if (version_compare($this->version, '1.5.0', '<=')) {
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
+
+            // check shopware version, because Shopware()->Container()
+            // is available after version 4.2.x
+            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+                Shopware()->Template()->clearAllCache();
+            } else {
+                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+                $cacheManager->clearTemplateCache();
+            }
         }
     }
 }

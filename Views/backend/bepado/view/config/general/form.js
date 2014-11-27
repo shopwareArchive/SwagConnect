@@ -324,6 +324,13 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                         labelWidth: me.defaults.labelWidth,
                         helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}'
                     }, {
+                        xtype: 'textfield',
+                        name: 'exportDomain',
+                        anchor: '100%',
+                        fieldLabel: me.snippets.exportDomainLabel,
+                        labelWidth: me.defaults.labelWidth,
+                        helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/bepado_product_gateway/product/id/{/s}'
+                    }, {
                         xtype: 'fieldcontainer',
                         fieldLabel: me.snippets.logLabel,
                         defaultType: 'checkboxfield',
@@ -467,13 +474,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     store: attributeStore,
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}'
-                }, {
-                    xtype: 'textfield',
-                    name: 'exportDomain',
-                    anchor: '100%',
-                    fieldLabel: me.snippets.exportDomainLabel,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/bepado_product_gateway/product/id/{/s}'
                 }
             ]
         });

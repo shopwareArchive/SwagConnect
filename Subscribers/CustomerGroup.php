@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Hides the bepado customer group for actions other then article
@@ -26,10 +27,6 @@ class CustomerGroup extends BaseSubscriber
      */
     public function filterCustomerGroup(\Enlight_Event_EventArgs $args)
     {
-        if (!$this->getBepadoCustomerGroupId()) {
-            return;
-        }
-        
         /** @var \Enlight_Controller_Action $controller */
         $controller = $args->get('subject');
         $request = $controller->Request();
@@ -38,14 +35,21 @@ class CustomerGroup extends BaseSubscriber
             return;
         }
 
-        if ($request->getParam('showBepado', false)) {
+        try {
+            if (!$this->getBepadoCustomerGroupId()) {
+                return;
+            }
+            if ($request->getParam('showBepado', false)) {
+                return;
+            }
+            $filter = $request->getParam('filter', array());
+            $filter[] = array("property" => "id", "value" => $this->getBepadoCustomerGroupId(), 'expression' => '<>');
+            $request->setParam('filter', $filter);
+        } catch (\Exception $e) {
+            $logger = new Logger(Shopware()->Db());
+            $logger->write(true, 'filterCustomerGroup', $e->getMessage());
             return;
         }
-
-        $filter = $request->getParam('filter', array());
-        $filter[] = array("property" => "id", "value" => $this->getBepadoCustomerGroupId(), 'expression' => '<>');
-
-        $request->setParam('filter', $filter);
     }
 
     /**

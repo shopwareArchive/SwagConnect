@@ -222,7 +222,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         me.progressBar = Ext.create('Ext.ProgressBar', {
             animate: true,
             name: 'progress-name',
-            text: 'text',
+            text: '{s name=config/message/done}Done{/s}',
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',

@@ -1150,26 +1150,34 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     onCalculateFinishTime: function(progressBar) {
         var me = this;
         me.time = 0;
+        me.resetSpentTime();
 
         Ext.TaskManager.start({
-            interval: 900000,
+            interval: 60000,
             run: function() {
                 Ext.Ajax.request({
                     url: '{url controller=BepadoConfig action=calculateFinishTime}',
                     method: 'POST',
                     success: function(response, opts) {
                         var responseObject = Ext.decode(response.responseText);
-                        me.time = responseObject.time;
-                        if (me.time > 0) {
+
+                        if (responseObject.time > 0) {
+                            if ((responseObject.time - (me.time + me.spentTime)) == 0) {
+                                return;
+                            }
+                            me.time = responseObject.time;
+                            me.resetSpentTime();
+
                             var time = me.secondsToTime(me.time);
                             progressBar.wait({
                                 interval: 500,
-                                //duration: 90000,
                                 increment: 15,
                                 scope: this
                             });
                             progressBar.updateText(me.messages.updatePartOneMessage + ' ' + time.h + ' ' + me.messages.hours + ' ' + time.m + ' ' + me.messages.minutes + ' ' + time.s + ' ' + me.messages.seconds + ' ' + me.messages.updatePartTwoMessage);
                         } else {
+                            me.resetSpentTime();
+                            me.resetTime();
                             progressBar.reset();
                             progressBar.updateText(me.messages.doneMessage);
                         }
@@ -1183,8 +1191,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             run: function () {
                 if (me.time >= 5) {
                     me.time = me.time - 5;
+                    me.spentTime = me.spentTime + 5;
                     var time = me.secondsToTime(me.time);
                     progressBar.updateText(me.messages.updatePartOneMessage + ' ' + time.h + ' ' + me.messages.hours + ' ' + time.m + ' ' + me.messages.minutes + ' ' + time.s + ' ' + me.messages.seconds + ' ' + me.messages.updatePartTwoMessage);
+                } else {
+                    progressBar.reset();
+                    progressBar.updateText(me.messages.doneMessage);
                 }
             }
         });
@@ -1208,6 +1220,22 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             "s": seconds
         };
         return obj;
+    },
+
+    /**
+     * Reset spent time used for synchronization bar
+     */
+    resetSpentTime: function() {
+        var me = this;
+        me.spentTime = 0;
+    },
+
+    /**
+     * Reset time used for synchronization bar
+     */
+    resetTime: function() {
+        var me = this;
+        me.time = 0;
     }
 });
 //{/block}

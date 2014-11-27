@@ -331,4 +331,32 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         );
     }
 
+    /**
+     * Ask SocialNetwork what time is need to finish the product update
+     */
+    public function calculateFinishTimeAction()
+    {
+        $changes = $this->getBepadoExport()->getChangesCount();
+        $seconds = 0;
+        if ($changes > 0) {
+            $seconds = $this->getSDK()->calculateFinishTime($changes);
+        }
+
+        try {
+            $this->View()->assign(
+                array(
+                    'success' => true,
+                    'time' => $seconds,
+                )
+            );
+        } catch (\Exception $e) {
+            $this->View()->assign(
+                array(
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                )
+            );
+        }
+    }
+
 } 

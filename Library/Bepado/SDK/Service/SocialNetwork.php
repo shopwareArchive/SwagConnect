@@ -87,6 +87,20 @@ class SocialNetwork
         $this->handleResponse($response, "Unsubscribe products");
     }
 
+    /**
+     * Ask SocialNetwork how long Bepado will synchronize changes
+     *
+     * @param $changesCount
+     */
+    public function calculateFinishTime($changesCount)
+    {
+        $response = $this->request('/sdk/calculate-finish-time', array('count' => $changesCount));
+        $this->handleResponse($response, "Calculate finish time");
+
+        $responseBody = json_decode($response->body);
+        return $responseBody->time;
+    }
+
     private function verifyProductIds(array $productIds)
     {
         foreach ($productIds as $productId) {

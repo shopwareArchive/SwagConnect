@@ -65,6 +65,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
         hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
         basicHeader: '{s name=config/basic}Basic{/s}',
+        synchronization: '{s name=synchronization}Synchronization{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}'
     },
 
@@ -95,12 +96,14 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      */
     createElements: function() {
         var me = this;
+            syncFieldset = me.getSyncFieldset(),
             apiFieldset = me.getApiKeyFieldset(),
             basicConfigFieldset = me.getBasicConfigFieldset(),
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
         if (me.isDefaultShop()) {
+            elements.push(syncFieldset);
             elements.push(apiFieldset);
         }
         elements.push(basicConfigFieldset);
@@ -204,6 +207,49 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         });
 
         return apiFieldset;
+    },
+
+    /**
+     * Returns a new progress bar for a detailed view of the exporting progress status
+     *
+     * @param name
+     * @param text
+     * @returns [object]
+     */
+    createProgressBar: function(name, text, value) {
+        var me = this;
+
+        me.progressBar = Ext.create('Ext.ProgressBar', {
+            animate: true,
+            name: 'progress-name',
+            text: 'text',
+            margin: '0 0 15',
+            border: 1,
+            style: 'border-width: 1px !important;',
+            cls: 'left-align',
+            value: 25
+        });
+
+
+
+        if (me.isDefaultShop()) {
+            me.fireEvent('calculateFinishTime', me.progressBar);
+        }
+
+
+        return me.progressBar;
+    },
+
+    getSyncFieldset: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.synchronization,
+            defaultType: 'textfield',
+            layout: 'anchor',
+            items: [ me.createProgressBar() ]
+        });
     },
 
     /**

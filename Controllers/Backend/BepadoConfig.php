@@ -65,14 +65,21 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function saveGeneralAction()
     {
-        $data = $this->Request()->getParam('data');
-        $data = !isset($data[0]) ? array($data) : $data;
+        try {
+            $data = $this->Request()->getParam('data');
+            $data = !isset($data[0]) ? array($data) : $data;
 
-        $this->getConfigComponent()->setGeneralConfigsArrays($data);
+            $this->getConfigComponent()->setGeneralConfigsArrays($data);
 
-        $this->View()->assign(array(
+            $this->View()->assign(array(
                 'success' => true
-        ));
+            ));
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
     }
 
     /**

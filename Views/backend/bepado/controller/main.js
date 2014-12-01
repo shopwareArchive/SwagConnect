@@ -919,7 +919,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', message);
                 }
             });
         }

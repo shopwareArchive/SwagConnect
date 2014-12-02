@@ -1060,7 +1060,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         if (!$articleId) {
             throw new \Exception("Bepado: ArticleId empty");
-
         }
 
         /** @var Article $articleModel */
@@ -1073,23 +1072,23 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $data = $this->getHelper()->getBepadoAttributeByModel($articleModel);
 
         if (!$data) {
-            $data = new \Shopware\CustomModels\Bepado\Attribute();
-            $data->setArticle($articleModel);
-            $data->setArticleDetail($articleModel->getMainDetail());
-            $data->setSourceId(
-                $this->getHelper()->generateSourceId($articleModel->getMainDetail())
-            );
-            $this->getModelManager()->persist($data);
-            $this->getModelManager()->flush($data);
+            $data = $this->getHelper()->generateBepadoAttributes($articleModel);
         }
 
         $data = $this->getModelManager()->toArray($data);
         $shipping = $articleModel->getMainDetail()->getAttribute()->getBepadoArticleShipping();
-        $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+        if (isset($data['articleId'])) {
+            $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+            $data = array($data);
+        } else {
+            foreach ($data as &$detail) {
+                $detail['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+            }
+        }
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => array($data)
+            'data' => $data
         ));
     }
 

@@ -250,9 +250,15 @@ class Helper
             if ($model instanceof ProductModel) {
                 $attribute->setArticle($model);
                 $attribute->setArticleDetail($model->getMainDetail());
+                $attribute->setSourceId(
+                    $this->generateSourceId($model->getMainDetail())
+                );
             } elseif ($model instanceof ProductDetail) {
                 $attribute->setArticle($model->getArticle());
                 $attribute->setArticleDetail($model);
+                $attribute->setSourceId(
+                    $this->generateSourceId($model)
+                );
             } else {
                 throw new \RuntimeException("Passed model needs to be an article or an article detail");
             }
@@ -261,6 +267,45 @@ class Helper
         }
 
         return $attribute;
+    }
+
+    /**
+     * Generate and store bepado attributes
+     * for all variants by given article
+     *
+     * @param ProductModel $article
+     * @return array
+     */
+    public function generateBepadoAttributes(ProductModel $article)
+    {
+        $attributes = array();
+        /** @var \Shopware\Models\Article\Detail $detail */
+        foreach ($article->getDetails() as $detail) {
+            $attributes[] = $this->getOrCreateBepadoAttributeByModel($detail);
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Generate sourceId
+     *
+     * @param ProductDetail $detail
+     * @return int|string
+     */
+    public function generateSourceId(ProductDetail $detail)
+    {
+        if ($detail->getKind() == 1) {
+            $sourceId = $detail->getArticle()->getId();
+        } else {
+            $sourceId = sprintf(
+                '%s-%s',
+                $detail->getArticle()->getId(),
+                $detail->getId()
+            );
+        }
+
+        return $sourceId;
     }
 
     /**

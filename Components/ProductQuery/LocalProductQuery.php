@@ -50,7 +50,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
         $builder->join('at.article', 'a');
-        $builder->join('a.details', 'd');
+        $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');

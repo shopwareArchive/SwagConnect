@@ -1058,11 +1058,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Could not find model for article with id {$articleId}");
         }
 
-        $data = $this->getHelper()->getBepadoAttributeByModel($articleModel);
-
-        if (!$data) {
-            $data = $this->getHelper()->generateBepadoAttributes($articleModel);
-        }
+        $data = $this->getHelper()->getOrCreateBepadoAttributes($articleModel);
 
         $data = $this->getModelManager()->toArray($data);
         $shipping = $articleModel->getMainDetail()->getAttribute()->getBepadoArticleShipping();

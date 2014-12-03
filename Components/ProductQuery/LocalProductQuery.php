@@ -58,7 +58,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->select(array(
             'a.id as localId',
             'at.shopId as shopId',
-            'd.id as sourceId',
+            'at.sourceId as sourceId',
             'd.kind as detailKind',
             'd.ean',
             'a.name as title',
@@ -126,13 +126,6 @@ class LocalProductQuery extends BaseProductQuery
             if ($defaultExportCategory) {
                 $row['categories'][] = $this->configComponent->getConfig('defaultExportCategory');
             }
-        }
-
-        // replace sourceId with articleId
-        // when main variant is used
-        // by default variant id is used
-        if ($row['detailKind'] == 1) {
-            $row['sourceId'] = $row['localId'];
         }
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);

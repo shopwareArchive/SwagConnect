@@ -138,6 +138,10 @@ class LocalProductQuery extends BaseProductQuery
             $row['deliveryWorkDays'] = null;
         }
 
+        if ($this->hasVariants($row['localId'])) {
+            $row['groupId'] = $row['localId'];
+        }
+
         unset($row['localId']);
         unset($row['detailKind']);
 
@@ -215,6 +219,28 @@ class LocalProductQuery extends BaseProductQuery
     public function getUrlForProduct($productId)
     {
         return $this->baseProductUrl . $productId;
+    }
+
+    /**
+     * Check whether the product contains variants
+     *
+     * @param int $productId
+     * @return bool
+     */
+    public function hasVariants($productId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\Models\Article\Detail', 'd');
+        $builder->select(array(
+            'COUNT(d.id) as detailsCount'
+        ));
+
+        $builder->where("d.articleId = :productId");
+        $builder->setParameter(':productId', $productId);
+        $query = $builder->getQuery();
+
+        return $query->getSingleScalarResult() > 1 ? true : false;
     }
 }
 

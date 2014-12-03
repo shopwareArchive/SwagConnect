@@ -51,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.5.91';
+    const VERSION = '1.6.1';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -568,5 +568,16 @@ final class SDK
         }
 
         return $rules;
+    }
+
+    /**
+     * Return time in seconds needed to finish synchronization
+     *
+     * @param $changesCount
+     * @return int
+     */
+    public function calculateFinishTime($changesCount)
+    {
+        return $this->dependencies->getSocialNetworkService()->calculateFinishTime($changesCount);
     }
 }

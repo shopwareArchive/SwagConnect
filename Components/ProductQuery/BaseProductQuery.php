@@ -28,9 +28,9 @@ abstract class BaseProductQuery
      */
     abstract function getBepadoProducts($rows);
 
-    public function get(array $ids)
+    public function get(array $sourceIds)
     {
-        $implodedIds = "'" . implode("','", $ids) . "'";
+        $implodedIds = "'" . implode("','", $sourceIds) . "'";
         $builder = $this->getProductQuery();
         $builder->where("at.sourceId IN ($implodedIds)");
         $query = $builder->getQuery();

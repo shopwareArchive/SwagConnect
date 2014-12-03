@@ -74,10 +74,9 @@ class Lifecycle extends BaseSubscriber
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-        $id = $entity->getId();
-
+        $attribute = $this->getHelper()->getBepadoAttributeByModel($entity);
         $sdk = $this->getSDK();
-        $sdk->recordDelete($id);
+        $sdk->recordDelete($attribute->getSourceId());
     }
 
     /**

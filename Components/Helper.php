@@ -169,12 +169,12 @@ class Helper
     /**
      * Returns a local bepadoProduct for export
      *
-     * @param array $ids
+     * @param array $sourceIds
      * @return array
      */
-    public function getLocalProduct(array $ids)
+    public function getLocalProduct(array $sourceIds)
     {
-        return $this->bepadoProductQuery->getLocal($ids);
+        return $this->bepadoProductQuery->getLocal($sourceIds);
     }
 
     /**

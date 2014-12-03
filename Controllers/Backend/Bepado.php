@@ -809,7 +809,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 continue;
             }
             $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
-            $sdk->recordDelete($id);
+            $sdk->recordDelete($attribute->getSourceId());
             $attribute->setExportStatus(
                 'delete'
             );

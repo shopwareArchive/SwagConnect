@@ -132,13 +132,14 @@ class Lifecycle extends BaseSubscriber
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
                 $this->getBepadoExport()->export(
-                    array($id)
+                    array($attribute->getSourceId())
                 );
             } else {
                 /** @var \Shopware\Models\Article\Detail $detail */
                 foreach ($model->getDetails() as $detail) {
+                    $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
                     $this->getBepadoExport()->export(
-                        array($detail->getId())
+                        array($bepadoAttribute->getSourceId())
                     );
                 }
             }

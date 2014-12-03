@@ -151,4 +151,17 @@ class BepadoExport
 
         return $ids;
     }
+
+    /**
+     * Helper function to count how many changes
+     * are waiting to be synchronized
+     *
+     * @return int
+     */
+    public function getChangesCount()
+    {
+        $sql = 'SELECT COUNT(*) FROM `bepado_change`';
+
+        return (int)Shopware()->Db()->fetchOne($sql);
+    }
 }

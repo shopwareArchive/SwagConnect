@@ -68,9 +68,18 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-            $cacheManager->clearTemplateCache();
+            // check shopware version, because Shopware()->Container()
+            // is available after version 4.2.x
+            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+                Shopware()->Template()->clearAllCache();
+            } else {
+                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+                $cacheManager->clearTemplateCache();
+            }
         }
+
+        $this->addImagesImportLimit();
+        $this->removeApiDescriptionSnippet();
 
         return true;
     }
@@ -350,5 +359,35 @@ class Update
         } catch (\Exception $e) {
         }
 
+    }
+
+    /**
+     * Insert config option for
+     * how many products will be used per pass
+     * for image import
+     */
+    public function addImagesImportLimit()
+    {
+        if (version_compare($this->version, '1.5.0', '<=')) {
+            $configComponent = $this->bootstrap->getConfigComponents();
+            $configComponent->setConfig('articleImagesLimitImport', 10, null, 'import');
+        }
+    }
+
+    public function removeApiDescriptionSnippet()
+    {
+        if (version_compare($this->version, '1.5.0', '<=')) {
+            $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
+            Shopware()->Db()->exec($sql);
+
+            // check shopware version, because Shopware()->Container()
+            // is available after version 4.2.x
+            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+                Shopware()->Template()->clearAllCache();
+            } else {
+                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+                $cacheManager->clearTemplateCache();
+            }
+        }
     }
 }

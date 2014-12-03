@@ -414,4 +414,41 @@ class Helper
     {
         Shopware()->Session()->BepadoReservation = null;
     }
+
+    /**
+     * Collect sourceIds by given article ids
+     *
+     * @param array $articleIds
+     * @return array
+     */
+    public function getArticleSourceIds(array $articleIds)
+    {
+        $articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
+        $sourceIds = array();
+        foreach ($articleIds as $articleId) {
+
+            /** @var \Shopware\Models\Article\Article $article */
+            $article = $articleRepository->find($articleId);
+            if (!$article) {
+                continue;
+            }
+
+            $details = $article->getDetails();
+            if (count($details) == 0) {
+                continue;
+            }
+
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($details as $detail) {
+                $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
+                if (!$bepadoAttribute) {
+                    continue;
+                }
+
+                $sourceIds[] = $bepadoAttribute->getSourceId();
+            }
+        }
+
+        return $sourceIds;
+    }
 }

@@ -270,13 +270,15 @@ class Helper
     }
 
     /**
-     * Generate and store bepado attributes
-     * for all variants by given article
+     * Returns bepado attributes for article
+     * and all variants.
+     * If bepado attribute does not exist
+     * it will be created.
      *
      * @param ProductModel $article
      * @return array
      */
-    public function generateBepadoAttributes(ProductModel $article)
+    public function getOrCreateBepadoAttributes(ProductModel $article)
     {
         $attributes = array();
         /** @var \Shopware\Models\Article\Detail $detail */

@@ -7,14 +7,16 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.5.0",
+    "currentVersion": "1.5.1",
     "changelog": {
         "de": {
+            "1.5.1": "New: Added link to the API key in Social Network",
             "1.5.0": "Korrektur: Bilder-Importe in älteren SW-Versionen",
             "1.4.97": "Neu: Versandkosten pro Produkt; Korrektur: Kategorie-Zuweisung",
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.5.1": "New: Added link to the API key in Social Network",
             "1.5.0": "Fix: Image imports for old shopware versions",
             "1.4.97": "shipping costs per product; fixed category assignment",
             "1.4.82": "Fixes update issue; Minor bugfix"

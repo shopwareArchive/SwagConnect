@@ -123,20 +123,23 @@ class Helper
     public function updateBepadoProducts()
     {
         // Insert new articles
-        $sql = '
-        INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id)
-        SELECT a.id, a.main_detail_id
+        $sql = "
+        INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id, source_id)
+        SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
 
         FROM s_articles a
 
+        LEFT JOIN `s_articles_details` ad
+        ON a.id = ad.articleId
+
         LEFT JOIN `s_plugin_bepado_items` bi
-        ON bi.article_detail_id = a.main_detail_id
-        AND bi.article_id = a.id
+        ON bi.article_detail_id = ad.id
+
 
         WHERE a.id IS NOT NULL
-        AND a.main_detail_id IS NOT NULL
+        AND ad.id IS NOT NULL
         AND bi.id IS NULL
-        ';
+        ";
 
         $this->manager->getConnection()->exec($sql);
 
@@ -144,14 +147,13 @@ class Helper
         $sql = '
         DELETE bi FROM `s_plugin_bepado_items`  bi
 
-        LEFT JOIN `s_articles` a
-        ON a.main_detail_id = bi.article_detail_id
+        LEFT JOIN `s_articles_details` ad
+        ON ad.id = bi.article_detail_id
 
-        WHERE a.id IS NULL
+        WHERE ad.id IS NULL
         ';
 
         $this->manager->getConnection()->exec($sql);
-
     }
 
 

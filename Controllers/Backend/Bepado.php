@@ -157,7 +157,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             //todo@sb: Find better solution
             $categories = Shopware()->Db()->fetchPairs(
                 'SELECT `id`,`category` FROM s_plugin_bepado_items
-                WHERE `source_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
+                WHERE `source_id` > 0 AND `shop_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
                 WHERE  `bepado_import_mapping` = `category`) = 0)
                 GROUP BY `category`'
             );

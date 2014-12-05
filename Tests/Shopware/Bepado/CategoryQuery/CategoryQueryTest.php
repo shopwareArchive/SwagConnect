@@ -9,7 +9,7 @@ abstract class CategoryQueryTest extends BepadoTestHelper
 {
     abstract protected function createQuery();
 
-    public function testGetRowProductCategoriesById()
+    public function testGetBepadoCategoryForProduct()
     {
         $this->resetBepadoCategoryMappings();
         $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
@@ -17,9 +17,9 @@ abstract class CategoryQueryTest extends BepadoTestHelper
 
         $query = $this->createQuery();
 
-        $categories = $query->getRowProductCategoriesById(21); // 21 = Jasmine Tee im Demoshop
+        $categories = $query->getBepadoCategoryForProduct(21); // 21 = Jasmine Tee im Demoshop
 
-        $this->assertEquals(array('/bücher'), $categories);
+        $this->assertEquals('/bücher', $categories);
     }
 
     public function testGetCategoriesByProduct()
@@ -42,6 +42,6 @@ abstract class CategoryQueryTest extends BepadoTestHelper
     private function resetBepadoCategoryMappings()
     {
         $conn = Shopware()->Db();
-        $conn->exec('UPDATE s_categories_attributes SET bepado_mapping = NULL');
+        $conn->exec('UPDATE s_categories_attributes SET bepado_import_mapping = NULL, bepado_export_mapping = NULL');
     }
 }

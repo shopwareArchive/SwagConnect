@@ -19,11 +19,16 @@ class ProductQueryTest extends BepadoTestHelper
             $configComponent = new Config(Shopware()->Models());
 
             $this->productQuery = new ProductQuery(
-                new LocalProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField')),
+                new LocalProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'), $this->getProductBaseUrl(), $configComponent),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );
         }
         return $this->productQuery;
+    }
+
+    public function getShopProduct($id)
+    {
+        return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
     }
 
 
@@ -35,7 +40,7 @@ class ProductQueryTest extends BepadoTestHelper
 
         $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
         $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
-        $this->assertEquals(16.80, $product->price);
+        $this->assertEquals(16.80, round($product->price, 2));
     }
 
     public function testGetRemoteShouldReturnEmptyArray()
@@ -70,5 +75,42 @@ class ProductQueryTest extends BepadoTestHelper
         $this->assertEquals($newProduct->price, $product->price);
         $this->assertEquals($newProduct->purchasePrice, $product->purchasePrice);
 
+    }
+
+    public function getProductBaseUrl()
+    {
+        if (!Shopware()->Front()->Router()) {
+            return null;
+        }
+
+        return Shopware()->Front()->Router()->assemble(array(
+            'module' => 'frontend',
+            'controller' => 'bepado_product_gateway',
+            'action' => 'product',
+            'id' => '',
+            'fullPath' => true
+        ));
+    }
+
+    public function testGetBepadoProduct()
+    {
+        $result = $this->getProductQuery()->getLocal(array(2));
+        /** @var \Bepado\SDK\Struct\Product $product */
+        $product = $result[0];
+
+        $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
+        $this->assertEquals('l', $product->attributes['unit']);
+        $this->assertEquals('0.5000', $product->attributes['quantity']);
+        $this->assertEquals('1.000', $product->attributes['ref_quantity']);
+
+
+        $result = $this->getProductQuery()->getLocal(array(11));
+        /** @var \Bepado\SDK\Struct\Product $product */
+        $product = $result[0];
+
+        $this->assertEquals('Münsterländer Aperitif Präsent Box', $product->title);
+        $this->assertEmpty($product->attributes['unit']);
+        $this->assertNull($product->attributes['quantity']);
+        $this->assertNull($product->attributes['ref_quantity']);
     }
 }

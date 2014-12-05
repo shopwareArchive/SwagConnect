@@ -8,7 +8,7 @@ use Doctrine\ORM\QueryBuilder;
 class Sw41Query extends SwQuery
 {
     /**
-     * Return local SW categories für a given product
+     * Return local SW categories for a given product
      *
      * @param Product $product
      * @return \Shopware\Models\Category\Category[]

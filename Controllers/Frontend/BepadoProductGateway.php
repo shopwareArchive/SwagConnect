@@ -87,30 +87,44 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
      */
     public function productAction()
     {
-        $detailId = $this->Request()->getParam('id');
+        $sourceId = $this->Request()->getParam('id');
         $attributeRepository = Shopware()->Models()->getRepository('Shopware\Models\Attribute\Category');
 
         // if no id was given, forward to start page
-        if (!$detailId) {
+        if (!$sourceId) {
             $this->forward('index', 'index');
             return;
         }
 
-        /** @var \Shopware\Models\Article\Detail $articleDetailModel */
-        $articleDetailModel = $this->getArticleDetailRepository()->find($detailId);
-        if (!$articleDetailModel){
+        list($articleId, $detailId) = $this->explodeArticleId($sourceId);
+
+        // if no article id was given, forward to start page
+        if (!isset($articleId)) {
             $this->forward('index', 'index');
             return;
         }
 
         /** @var Shopware\Models\Article\Article $articleModel */
-        $articleModel = $articleDetailModel->getArticle();
+        $articleModel = $this->getArticleRepository()->find($articleId);
         if (!$articleModel){
             $this->forward('index', 'index');
             return;
         }
 
-        $product = $this->getProductById($detailId);
+        // if sourceId contains detail id part get detail model
+        // if not use main detail
+        if ($detailId > 0) {
+            /** @var \Shopware\Models\Article\Detail $articleDetailModel */
+            $articleDetailModel = $this->getArticleDetailRepository()->find($detailId);
+            if (!$articleDetailModel){
+                $this->forward('index', 'index');
+                return;
+            }
+        } else {
+            $articleDetailModel = $articleModel->getMainDetail();
+        }
+
+        $product = $this->getProductById($sourceId);
         // if the product does not exist, forward to start page
         if (empty($product)) {
             $this->forward('index', 'index');
@@ -124,14 +138,17 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
                 $attribute = $attributeRepository->findOneBy(array('bepadoExportMapping' => $mapping));
                 if ($attribute) {
                     $category = $attribute->getCategory();
-                    if (!$this->doesArticleBelongToCategory($category, $detailId)) {
+                    if (!$this->doesArticleBelongToCategory($category, $articleId)) {
                         continue;
                     }
+
                     $shop = $this->getShopFromCategory($category);
-                    if ($shop) {
-                        $this->forwardToArticle($shop->getId(), $articleModel->getId(), $detailId);
-                        return;
+                    if (!$shop) {
+                        continue;
                     }
+
+                    $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
+                    return;
                 }
             }
         }
@@ -158,7 +175,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
      * @param $articleId
      * @param $articleDetailId
      */
-    private function forwardToArticle($shopId, $articleId, $articleDetailId)
+    private function forwardToArticle($shopId, $articleId, $articleDetailId = null)
     {
         /** @var Shopware\Models\Shop\Shop $shop */
         $shop = $this->getShopRepository()->getActiveById($shopId);
@@ -228,6 +245,25 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
         ));
 
         return !empty($result);
+    }
+
+    /**
+     * Extract article ID and detail ID
+     * from source ID
+     *
+     * @param $sourceId
+     * @return array
+     */
+    private function explodeArticleId($sourceId)
+    {
+        $articleId = explode('-', $sourceId);
+        if (isset($articleId[1]) && $articleId[1] > 0) {
+            return $articleId;
+        }
+
+        return array(
+            $articleId[0]
+        );
     }
 
 }

@@ -120,15 +120,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @param $id
-     * @return null|Shopware\Models\Article\Article
-     */
-    private function getArticleModelById($id)
-    {
-        return $this->getModelManager()->getRepository('Shopware\Models\Article\Article')->find($id);
-    }
-
-    /**
      * @return ImageImport
      */
     public function getImageImport()
@@ -166,7 +157,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             //todo@sb: Find better solution
             $categories = Shopware()->Db()->fetchPairs(
                 'SELECT `id`,`category` FROM s_plugin_bepado_items
-                WHERE `source_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
+                WHERE `source_id` > 0 AND `shop_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
                 WHERE  `bepado_import_mapping` = `category`) = 0)
                 GROUP BY `category`'
             );
@@ -228,6 +219,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             'at.category'
         ));
 
+        // show only main variant in export/import lists
+        $builder->groupBy('at.articleId');
+
         foreach($filter as $key => $rule) {
             switch($rule['property']) {
                 case 'search':
@@ -288,7 +282,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $total = Shopware()->Models()->getQueryCount($query);
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $total = array_sum($countResult);
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+//        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
         $this->View()->assign(array(
@@ -330,7 +327,10 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $total = Shopware()->Models()->getQueryCount($query);
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $total = array_sum($countResult);
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+//        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
         $this->View()->assign(array(
@@ -731,16 +731,48 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * Returns article details ids
+     * by given article ids
+     *
+     * @param array $articleIds
+     * @return array
+     */
+    private function getArticleDetailsId(array $articleIds)
+    {
+        $ids = array();
+        foreach ($articleIds as $articleId) {
+            /** @var \Shopware\Models\Article\Article $article */
+            $article = $this->getBepadoExport()->getArticleModelById($articleId);
+            if (!$article) {
+                continue;
+            }
+
+            $details = $article->getDetails();
+            //todo@sb: check with article without variants
+            if (count($details) == 0) {
+                continue;
+            }
+
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($details as $detail) {
+                $ids[] = $detail->getId();
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * Called when a product was marked for update in the bepado backend module
      */
     public function insertOrUpdateProductAction()
     {
-        $ids = $this->Request()->getPost('ids');
+        $articleIds = $this->Request()->getPost('ids');
+        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
 
         $bepadoExport = $this->getBepadoExport();
-
         try {
-            $errors = $bepadoExport->export($ids);
+            $errors = $bepadoExport->export($sourceIds);
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
@@ -772,12 +804,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
-            $model = $this->getArticleModelById($id);
+            $model = $this->getBepadoExport()->getArticleModelById($id);
             if($model === null) {
                 continue;
             }
             $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
-            $sdk->recordDelete($id);
+            $sdk->recordDelete($attribute->getSourceId());
             $attribute->setExportStatus(
                 'delete'
             );
@@ -796,7 +828,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         if (!$unsubscribe) {
             foreach ($ids as $id) {
-                $model = $this->getArticleModelById($id);
+                $model = $this->getBepadoExport()->getArticleModelById($id);
                 if ($model === null) {
                     continue;
                 }
@@ -1017,7 +1049,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         if (!$articleId) {
             throw new \Exception("Bepado: ArticleId empty");
-            
         }
 
         /** @var Article $articleModel */
@@ -1027,23 +1058,22 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Could not find model for article with id {$articleId}");
         }
 
-        $data = $this->getHelper()->getBepadoAttributeByModel($articleModel);
-
-        if (!$data) {
-            $data = new \Shopware\CustomModels\Bepado\Attribute();
-            $data->setArticle($articleModel);
-            $data->setArticleDetail($articleModel->getMainDetail());
-            $this->getModelManager()->persist($data);
-            $this->getModelManager()->flush($data);
-        }
+        $data = $this->getHelper()->getOrCreateBepadoAttributes($articleModel);
 
         $data = $this->getModelManager()->toArray($data);
         $shipping = $articleModel->getMainDetail()->getAttribute()->getBepadoArticleShipping();
-        $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+        if (isset($data['articleId'])) {
+            $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+            $data = array($data);
+        } else {
+            foreach ($data as &$detail) {
+                $detail['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
+            }
+        }
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => array($data)
+            'data' => $data
         ));
     }
 
@@ -1056,6 +1086,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
         $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
+
+        if (!$bepadoAttribute) {
+            throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
+        }
+
         $attribute = $bepadoAttribute->getArticle()->getMainDetail()->getAttribute();
         if (!$data['shopId']) {
             // it's local product and shipping group can be changed
@@ -1063,10 +1098,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
 
         $this->getModelManager()->persist($attribute);
-
-        if (!$bepadoAttribute) {
-            throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
-        }
 
         // Only allow changes in the fixedPrice field if this is a local product
         if (!$bepadoAttribute->getShopId()) {
@@ -1276,7 +1307,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         if (!is_null($category)) {
             foreach ($articleIds as $id) {
                 /** @var \Shopware\Models\Article\Article $article */
-                $article = $this->getArticleModelById($id);
+                $article = $this->getBepadoExport()->getArticleModelById($id);
                 if (is_null($article)) {
                     continue;
                 }

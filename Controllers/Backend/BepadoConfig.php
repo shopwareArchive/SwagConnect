@@ -154,7 +154,8 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
             $bepadoExport = $this->getBepadoExport();
             try {
                 $ids = $bepadoExport->getExportArticlesIds();
-                $errors = $bepadoExport->export($ids);
+                $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
+                $errors = $bepadoExport->export($sourceIds);
             }catch (\RuntimeException $e) {
                 $this->View()->assign(array(
                         'success' => false,

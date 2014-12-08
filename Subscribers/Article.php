@@ -14,7 +14,8 @@ class Article extends BaseSubscriber
     {
         return array(
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceBepadoPriceWhenSaving',
-            'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle'
+            'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
         );
     }
 
@@ -143,5 +144,38 @@ class Article extends BaseSubscriber
         }
 
         return null;
+    }
+
+    /**
+     * Load article detail
+     *
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function extendFrontendArticle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var \Enlight_Controller_Request_RequestHttp $request */
+        $request = $args->getSubject()->Request();
+        if ($request->getActionName() != 'index') {
+            return;
+        }
+
+        $detailId = (int) $request->sArticleDetail;
+        if ($detailId === 0) {
+            return;
+        }
+
+        /** @var \Shopware\Models\Article\Detail $detailModel */
+        $detailModel = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->find($detailId);
+        if (!$detailModel) {
+            return;
+        }
+
+        $params = array();
+        /** @var \Shopware\Models\Article\Configurator\Option $option */
+        foreach ($detailModel->getConfiguratorOptions() as $option) {
+            $groupId = $option->getGroup()->getId();
+            $params[$groupId] = $option->getId();
+        }
+        $request->setPost('group', $params);
     }
 }

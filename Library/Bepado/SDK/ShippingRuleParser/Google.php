@@ -27,7 +27,8 @@ class Google extends ShippingRuleParser
         // ISO 3166-1 (23.06.2014)
         'T_COUNTRY' => '(\\A(?P<value>AF|EG|AX|AL|DZ|AS|VI|AD|AO|AI|AQ|AG|GQ|AR|AM|AW|AC|AZ|ET|AU|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BQ|BA|BW|BV|BR|VG|IO|BN|BG|BF|BU|BI|EA|CL|CN|CP|CK|CR|CI|CW|DK|DD|DE|DG|DM|DO|DJ|EC|SV|ER|EE|CE|EU|FK|FO|FJ|FI|FR|FX|GF|PF|TF|GA|GM|GE|GH|GI|GD|GR|GL|GP|GU|GT|GG|GN|GW|GY|HT|HM|HN|HK|IN|ID|IM|IQ|IR|IE|IS|IL|IT|JM|JP|YE|JE|JO|YU|KY|KH|CM|CA|IC|CV|KZ|QA|KE|KG|KI|CC|CO|KM|CD|CG|KP|KR|HR|CU|KW|LA|LS|LV|LB|LR|LY|LI|LT|LU|MO|MG|MW|MY|MV|ML|MT|MA|MH|MQ|MR|MU|YT|MK|MX|FM|MD|MC|MN|ME|MS|MZ|MM|NA|NR|NP|NC|NZ|NT|NI|NL|AN|NE|NG|NU|MP|NF|NO|OM|AT|TL|PK|PS|PW|PA|PG|PY|PE|PH|PN|PL|PT|PR|RE|RW|RO|RU|SB|BL|MF|ZM|WS|SM|ST|SA|SE|CH|SN|RS|CS|SC|SL|ZW|SG|SX|SK|SI|SO|ES|LK|SH|KN|LC|PM|VC|ZA|SD|GS|SS|SR|SJ|SZ|SY|TJ|TW|TZ|TH|TG|TK|TO|TT|TA|TD|CZ|CS|TN|TR|TM|TC|TV|SU|UG|UA|HU|UM|UY|UZ|VU|VA|VE|AE|US|GB|UK|VN|WF|CX|EH|ZR|CF|CY)(?![A-Z]))S',
         'T_PRICE' => '(\\A(?P<value>\\d+\\.\\d+))S',
-        'T_ZIP' => '(\\A(?P<value>\\d{1,5}\\*?))S',
+        'T_ZIP_WILDCARD' => '(\\A(?P<value>\\d{1,5}\\*{1}))S',
+        'T_NUMBER' => '(\\A(?P<value>\\d+))S',
         'T_REGION' => '(\\A(?P<value>[A-Z]{2,3}))S',
         'T_ELEMENT_SEPARATOR' => '(\\A:)S',
         'T_RULE_SEPARATOR' => '(\\A,)S',
@@ -46,7 +47,7 @@ class Google extends ShippingRuleParser
         'T_CURRENCY' => 'Currency code (ISO 4217) (eg. EUR)',
         'T_COUNTRY' => 'Country Code (ISO 3166-1) (eg. DE)',
         'T_PRICE' => 'Price (english locale) (eg. 1.95)',
-        'T_ZIP' => 'Zip code or region (eg. 45886 or 45*)',
+        'T_ZIP_WILDCARD' => 'Zip code or region (eg. 45886 or 45*)',
         'T_REGION' => 'Region identifier (eg. NRW)',
         'T_ELEMENT_SEPARATOR' => 'Element separator ":"',
         'T_RULE_SEPARATOR' => 'Rule separator ","',
@@ -54,6 +55,7 @@ class Google extends ShippingRuleParser
         'T_DELIVERY_TIME' => 'Delivery time (eg. [5D] or [48H])',
         'T_STRING' => 'random text',
         'T_EOF' => 'end of input',
+        'T_NUMBER' => 'number (eg. 1-9)',
     );
 
     /**
@@ -174,15 +176,15 @@ class Google extends ShippingRuleParser
         $rule->country = $country ? $this->countries->getISO3($country) : null;
         $this->read($tokens, array('T_ELEMENT_SEPARATOR', 'T_COUNTRY'));
 
-        $rule->zipRange = $this->read($tokens, array('T_ZIP'), true);
+        $rule->zipRange = $this->read($tokens, array('T_NUMBER', 'T_ZIP_WILDCARD'), true);
         $rule->region = $this->read($tokens, array('T_REGION', 'T_COUNTRY'), true);
-        $this->read($tokens, array('T_ELEMENT_SEPARATOR', 'T_ZIP', 'T_REGION', 'T_COUNTRY'));
+        $this->read($tokens, array('T_ELEMENT_SEPARATOR', 'T_ZIP_WILDCARD', 'T_REGION', 'T_COUNTRY'));
 
         $rule->service = trim($this->read($tokens, array('T_DELIVERY_NAME', 'T_COUNTRY', 'T_REGION'), true));
         $rule->deliveryWorkDays = $this->convertDeliveryTime($this->read($tokens, array('T_DELIVERY_TIME'), true));
         $this->read($tokens, array('T_ELEMENT_SEPARATOR', 'T_DELIVERY_NAME'));
 
-        $rule->price = (float) $this->read($tokens, array('T_PRICE'));
+        $rule->price = (float) $this->read($tokens, array('T_PRICE', 'T_NUMBER'));
         $rule->currency = $this->read($tokens, array('T_CURRENCY'));
         $this->read($tokens, array('T_RULE_SEPARATOR', 'T_EOF'));
 

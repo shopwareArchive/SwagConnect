@@ -5,7 +5,6 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
-use Shopware\Bepado\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -42,7 +41,6 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-
         $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
         $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
         $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
@@ -52,7 +50,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
         $builder->join('at.article', 'a');
-        $builder->join('a.mainDetail', 'd');
+        $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
@@ -60,7 +58,8 @@ class LocalProductQuery extends BaseProductQuery
         $builder->select(array(
             'a.id as localId',
             'at.shopId as shopId',
-            'a.id as sourceId',
+            'at.sourceId as sourceId',
+            'd.kind as detailKind',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',
@@ -111,6 +110,7 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * @param $row
      * @return Product
+     * @throws NoLocalProductException
      */
     public function getBepadoProduct($row)
     {
@@ -138,7 +138,12 @@ class LocalProductQuery extends BaseProductQuery
             $row['deliveryWorkDays'] = null;
         }
 
+        if ($this->hasVariants($row['localId'])) {
+            $row['groupId'] = $row['localId'];
+        }
+
         unset($row['localId']);
+        unset($row['detailKind']);
 
         if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
         {
@@ -214,6 +219,28 @@ class LocalProductQuery extends BaseProductQuery
     public function getUrlForProduct($productId)
     {
         return $this->baseProductUrl . $productId;
+    }
+
+    /**
+     * Check whether the product contains variants
+     *
+     * @param int $productId
+     * @return bool
+     */
+    public function hasVariants($productId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\Models\Article\Detail', 'd');
+        $builder->select(array(
+            'COUNT(d.id) as detailsCount'
+        ));
+
+        $builder->where("d.articleId = :productId");
+        $builder->setParameter(':productId', $productId);
+        $query = $builder->getQuery();
+
+        return $query->getSingleScalarResult() > 1 ? true : false;
     }
 }
 

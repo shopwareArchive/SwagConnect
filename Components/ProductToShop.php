@@ -100,7 +100,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function commit()
     {
-       $this->manager->getConnection()->commit();
+        $this->manager->getConnection()->commit();
     }
 
     /**
@@ -114,12 +114,13 @@ class ProductToShop implements ProductToShopBase
     public function insertOrUpdate(Product $product)
     {
         // todo@dn: Set dummy values and make product inactive
-        if(empty($product->title) || empty($product->vendor)) {
+        if (empty($product->title) || empty($product->vendor)) {
             return;
         }
+
         $model = $this->helper->getArticleModelByProduct($product);
 
-        if($model === null) {
+        if ($model === null) {
             $model = new ProductModel();
             $model->setActive(false);
             $detail = new DetailModel();
@@ -167,17 +168,17 @@ class ProductToShop implements ProductToShopBase
             $model->setDescriptionLong($product->longDescription);
         }
 
-        if($product->vat !== null) {
+        if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
             $tax = round($product->vat * 100, 2);
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
         }
 
-        if($product->vendor !== null) {
+        if ($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
-            if($supplier === null) {
+            if ($supplier === null) {
                 $supplier = new Supplier();
                 $supplier->setName($product->vendor);
             }
@@ -245,13 +246,13 @@ class ProductToShop implements ProductToShopBase
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
         $bepadoAttribute->setLastUpdate(json_encode(array(
-            'shortDescription'  => $product->shortDescription,
-            'longDescription'   => $product->longDescription,
-            'purchasePrice'     => $product->purchasePrice,
-            'image'             => $product->images,
-            'price'             => $product->price * ($product->vat + 1),
-            'name'              => $product->title,
-            'vat'               => $product->vat
+            'shortDescription' => $product->shortDescription,
+            'longDescription' => $product->longDescription,
+            'purchasePrice' => $product->purchasePrice,
+            'image' => $product->images,
+            'price' => $product->price * ($product->vat + 1),
+            'name' => $product->title,
+            'vat' => $product->vat
         )));
 
         // The basePrice (purchasePrice) needs to be updated in any case
@@ -271,18 +272,18 @@ class ProductToShop implements ProductToShopBase
                 'article' => $model
             ));
             $detail->setPrices(array($price));
-        // If the price is not being update, update the basePrice anyway
+            // If the price is not being update, update the basePrice anyway
         } else {
             /** @var \Shopware\Models\Article\Price $price */
             $price = $detail->getPrices()->first();
             $price->setBasePrice($basePrice);
         }
 
-        if($model->getMainDetail() === null) {
+        if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
         }
 
-        if($detail->getAttribute() === null) {
+        if ($detail->getAttribute() === null) {
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
         }
@@ -302,7 +303,6 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
-
     }
 
 
@@ -450,7 +450,7 @@ class ProductToShop implements ProductToShopBase
         $attributeValue = $attribute->$attributeGetter();
 
 
-        
+
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
         // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {

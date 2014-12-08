@@ -28,6 +28,14 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $id;
     }
 
+    public function getExternalProductSourceId()
+    {
+        $sql = 'SELECT source_id FROM s_plugin_bepado_items WHERE shop_id IS NOT NULL';
+        $sourceId = Shopware()->Db()->fetchOne($sql);
+
+        return $sourceId;
+    }
+
     /**
      * @return \Shopware\Bepado\Components\Helper
      */

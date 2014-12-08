@@ -61,12 +61,7 @@ class ProductQueryTest extends BepadoTestHelper
             )
         ));
 
-        $sql = 'SELECT article_id FROM s_plugin_bepado_items WHERE source_id = ?';
-        $id = Shopware()->Db()->fetchOne($sql, array($newProduct->sourceId));
-
-        $this->assertNotEmpty($id);
-
-        $result = $this->getProductQuery()->getRemote(array($id));
+        $result = $this->getProductQuery()->getRemote(array($newProduct->sourceId));
         /** @var \Bepado\SDK\Struct\Product $product */
         $product = $result[0];
 

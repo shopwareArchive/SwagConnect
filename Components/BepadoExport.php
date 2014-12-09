@@ -4,6 +4,8 @@ namespace Shopware\Bepado\Components;
 
 use Bepado\SDK\SDK;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Detail;
 
 class BepadoExport
 {
@@ -163,5 +165,38 @@ class BepadoExport
         $sql = 'SELECT COUNT(*) FROM `bepado_change`';
 
         return (int)Shopware()->Db()->fetchOne($sql);
+    }
+
+    /**
+     * Mark bepado product for delete
+     *
+     * @param \Shopware\Models\Article\Article $article
+     */
+    public function syncDeleteArticle(Article $article)
+    {
+        $details = $article->getDetails();
+
+        /** @var \Shopware\Models\Article\Detail $detail */
+        foreach ($details as $detail) {
+            $attribute = $this->helper->getBepadoAttributeByModel($detail);
+            $this->sdk->recordDelete($attribute->getSourceId());
+            $attribute->setExportStatus('delete');
+            $this->manager->persist($attribute);
+        }
+        $this->manager->flush();
+    }
+
+    /**
+     * Mark single bepado product detail for delete
+     *
+     * @param \Shopware\Models\Article\Detail $detail
+     */
+    public function syncDeleteDetail(Detail $detail)
+    {
+        $attribute = $this->helper->getBepadoAttributeByModel($detail);
+        $this->sdk->recordDelete($attribute->getSourceId());
+        $attribute->setExportStatus('delete');
+        $this->manager->persist($attribute);
+        $this->manager->flush($attribute);
     }
 }

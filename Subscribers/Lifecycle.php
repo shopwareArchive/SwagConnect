@@ -4,8 +4,6 @@ namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils;
 use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Models\Article\Article;
-use Shopware\Models\Article\Detail;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado
@@ -23,7 +21,7 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
-            'Shopware\Models\Article\Detail::preRemove' => 'onDeleteArticle',
+            'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
         );
     }
@@ -71,17 +69,30 @@ class Lifecycle extends BaseSubscriber
     }
 
     /**
-     * Callback function to delete an product or product detail
-     * from bepado after it is going to be deleted locally
+     * Callback function to delete an product from bepado
+     * after it is going to be deleted locally
      *
      * @param \Enlight_Event_EventArgs $eventArgs
      */
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
+        $this->getBepadoExport()->syncDeleteArticle($entity);
+    }
 
-        if ($entity instanceof \Shopware\Models\Article\Article) {
-            $this->getBepadoExport()->syncDeleteArticle($entity);
+    /**
+     * Callback function to delete product detail from bepado
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onDeleteDetail(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Article\Detail $entity */
+        $entity = $eventArgs->get('entity');
+        if ($entity->getKind() == 1) {
+            $article = $entity->getArticle();
+            $this->getBepadoExport()->setDeleteStatusForVariants($article, 'delete');
         } else {
             $this->getBepadoExport()->syncDeleteDetail($entity);
         }
@@ -104,7 +115,8 @@ class Lifecycle extends BaseSubscriber
         $entity = $eventArgs->get('entity');
 
         if (!$entity instanceof \Shopware\Models\Article\Article
-            && !$entity instanceof \Shopware\Models\Article\Detail) {
+            && !$entity instanceof \Shopware\Models\Article\Detail
+        ) {
             return;
         }
 

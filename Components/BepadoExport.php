@@ -175,15 +175,10 @@ class BepadoExport
     public function syncDeleteArticle(Article $article)
     {
         $details = $article->getDetails();
-
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($details as $detail) {
-            $attribute = $this->helper->getBepadoAttributeByModel($detail);
-            $this->sdk->recordDelete($attribute->getSourceId());
-            $attribute->setExportStatus('delete');
-            $this->manager->persist($attribute);
+            $this->syncDeleteDetail($detail);
         }
-        $this->manager->flush();
     }
 
     /**
@@ -198,5 +193,32 @@ class BepadoExport
         $attribute->setExportStatus('delete');
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
+    }
+
+    /**
+     * Mark all product variants for delete
+     *
+     * @param Article $article
+     */
+    public function setDeleteStatusForVariants(Article $article)
+    {
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->select(array('at.sourceId'))
+            ->from('Shopware\CustomModels\Bepado\Attribute', 'at')
+            ->where('at.articleId = :articleId')
+            ->setParameter(':articleId', $article->getId());
+        $bepadoItems = $builder->getQuery()->getArrayResult();
+
+        foreach($bepadoItems as $item) {
+            $this->sdk->recordDelete($item['sourceId']);
+        }
+
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->update('Shopware\CustomModels\Bepado\Attribute', 'at')
+            ->set('at.exportStatus', $builder->expr()->literal('delete'))
+            ->where('at.articleId = :articleId')
+            ->setParameter(':articleId', $article->getId());
+
+        $builder->getQuery()->execute();
     }
 }

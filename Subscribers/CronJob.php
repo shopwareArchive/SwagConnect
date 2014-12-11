@@ -3,6 +3,7 @@
 namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\ImageImport;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Cronjob callback
@@ -31,7 +32,8 @@ class CronJob extends BaseSubscriber
     {
         return new ImageImport(
             Shopware()->Models(),
-            $this->getHelper()
+            $this->getHelper(),
+            new Logger(Shopware()->Db())
         );
     }
 

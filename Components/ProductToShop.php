@@ -65,17 +65,29 @@ class ProductToShop implements ProductToShopBase
     private $imageImport;
 
     /**
+     * @var \Shopware\Bepado\Components\VariantConfigurator
+     */
+    private $variantConfigurator;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
      * @param \Shopware\Bepado\Components\Config $config
      */
-    public function __construct(Helper $helper, ModelManager $manager, ImageImport $imageImport, $config)
+    public function __construct(
+        Helper $helper,
+        ModelManager $manager,
+        ImageImport $imageImport,
+        Config $config,
+        VariantConfigurator $variantConfigurator
+    )
     {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->config = $config;
         $this->imageImport = $imageImport;
+        $this->variantConfigurator = $variantConfigurator;
     }
 
     /**
@@ -121,13 +133,25 @@ class ProductToShop implements ProductToShopBase
         $model = $this->helper->getArticleModelByProduct($product);
 
         if ($model === null) {
-            $model = new ProductModel();
-            $model->setActive(false);
+
+            list($articleId, $detailId) = $this->helper->explodeArticleId($product->sourceId);
+            if (is_null($detailId)) {
+                $model = new ProductModel();
+                $model->setActive(false);
+                $model->setName($product->title);
+                $this->manager->persist($model);
+            } else {
+                $model = $this->helper->getBepadoArticleModel($articleId, $product->shopId);
+            }
+
             $detail = new DetailModel();
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
             $detail->setActive(false);
-            $this->manager->persist($model);
+
             $detail->setArticle($model);
+            if (!empty($product->variant)) {
+                $this->variantConfigurator->configureVariantAttributes($product, $detail);
+            }
 
             $categories = $this->helper->getCategoriesByProduct($product);
 
@@ -292,6 +316,8 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setArticleDetail($detail);
         $this->manager->persist($bepadoAttribute);
 
+        $this->manager->persist($detail);
+
         $this->manager->flush();
         $this->manager->clear();
 
@@ -304,7 +330,6 @@ class ProductToShop implements ProductToShopBase
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
     }
-
 
     /**
      * Delete product with given shopId and sourceId.

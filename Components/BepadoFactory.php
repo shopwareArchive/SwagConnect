@@ -93,7 +93,8 @@ class BepadoFactory
                 $helper,
                 $manager,
                 $this->getImageImport(),
-                $this->getConfigComponent()
+                $this->getConfigComponent(),
+                new VariantConfigurator($manager)
             ),
             new ProductFromShop(
                 $helper,

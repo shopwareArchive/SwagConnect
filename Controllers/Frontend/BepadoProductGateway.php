@@ -96,7 +96,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
             return;
         }
 
-        list($articleId, $detailId) = $this->explodeArticleId($sourceId);
+        list($articleId, $detailId) = $this->getHelper()->explodeArticleId($sourceId);
 
         // if no article id was given, forward to start page
         if (!isset($articleId)) {
@@ -246,24 +246,4 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
 
         return !empty($result);
     }
-
-    /**
-     * Extract article ID and detail ID
-     * from source ID
-     *
-     * @param $sourceId
-     * @return array
-     */
-    private function explodeArticleId($sourceId)
-    {
-        $articleId = explode('-', $sourceId);
-        if (isset($articleId[1]) && $articleId[1] > 0) {
-            return $articleId;
-        }
-
-        return array(
-            $articleId[0]
-        );
-    }
-
 }

@@ -117,6 +117,35 @@ class Helper
         return null;
     }
 
+    public function getBepadoArticleModel($sourceId, $shopId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('ba', 'a'));
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->join('ba.article', 'a');
+        $builder->join('a.mainDetail', 'd');
+        $builder->leftJoin('d.attribute', 'at');
+
+        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
+        $builder->orWhere('d.number = :number');
+        $query = $builder->getQuery();
+
+        $query->setParameter('shopId', $shopId);
+        $query->setParameter('sourceId', $sourceId);
+        $query->setParameter('number', 'BP-' . $shopId . '-' . $sourceId);
+        $result = $query->getResult(
+            $query::HYDRATE_OBJECT,
+            Query::HYDRATE_OBJECT
+        );
+
+        if (isset($result[0])) {
+            $attribute = $result[0];
+            return $attribute->getArticle();
+        }
+
+        return null;
+    }
+
     /**
      * Helper to update the bepado_items table
      */
@@ -454,5 +483,25 @@ class Helper
         }
 
         return $sourceIds;
+    }
+
+    /**
+     * Extract article ID and detail ID
+     * from source ID
+     *
+     * @param $sourceId
+     * @return array
+     */
+    public function explodeArticleId($sourceId)
+    {
+        $articleId = explode('-', $sourceId);
+
+        if (isset($articleId[1]) && isset($articleId[1])) {
+            return $articleId;
+        }
+
+        return array(
+            $articleId[0]
+        );
     }
 }

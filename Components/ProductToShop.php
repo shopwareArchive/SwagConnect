@@ -130,10 +130,9 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
-        $model = $this->helper->getArticleModelByProduct($product);
+        $detail = $this->helper->getArticleDetailModelByProduct($product);
 
-        if ($model === null) {
-
+        if ($detail === null) {
             list($articleId, $detailId) = $this->helper->explodeArticleId($product->sourceId);
             if (is_null($detailId)) {
                 $model = new ProductModel();
@@ -169,7 +168,7 @@ class ProductToShop implements ProductToShopBase
 
             $model->setCategories($categories);
         } else {
-            $detail = $model->getMainDetail();
+            $model = $detail->getArticle();
         }
 
         $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;

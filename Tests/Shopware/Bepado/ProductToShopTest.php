@@ -77,6 +77,46 @@ class ProductToShopTest extends BepadoTestHelper
         }
     }
 
+    public function testUpdateVariant()
+    {
+        $variants = $this->getVariants();
+        // insert variants
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $newTitle = 'Massimport#updateVariant' . rand(1, 10000000);
+        $newPrice = 22.48;
+        $newPurchasePrice = 8.48;
+        $newLongDesc = 'Updated bepado variant - long description';
+        $newShortDesc = 'Updated bepado variant - short description';
+        $newVat = 0.07;
+        $variants[1]->title = $newTitle;
+        $variants[1]->price = $newPrice;
+        $variants[1]->purchasePrice = $newPurchasePrice;
+        $variants[1]->longDescription = $newLongDesc;
+        $variants[1]->shortDescription = $newShortDesc;
+        $variants[1]->images[] = 'http://lorempixel.com/400/200?' . $variants[1]->sourceId;
+        $variants[1]->vat = $newVat;
+
+        $this->productToShop->insertOrUpdate($variants[1]);
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
+        $bepadoAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+            ->findOneBy(array('sourceId' => $variants[1]->sourceId));
+        $this->assertEquals($newTitle, $bepadoAttribute->getArticle()->getName());
+        $this->assertEquals($newLongDesc, $bepadoAttribute->getArticle()->getDescriptionLong());
+        $this->assertEquals($newShortDesc, $bepadoAttribute->getArticle()->getDescription());
+        /** @var \Shopware\Models\Article\Price[] $prices */
+        $prices = $bepadoAttribute->getArticleDetail()->getPrices();
+
+        $this->assertEquals($newPrice, $prices[0]->getPrice());
+        $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
+        $this->assertEquals(2, count($bepadoAttribute->getArticle()->getImages()));
+        $this->assertEquals(7.00, $bepadoAttribute->getArticle()->getTax()->getTax());
+    }
+
     public function testImportWithoutTitle()
     {
         $product = new Product();

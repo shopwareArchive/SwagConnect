@@ -117,6 +117,35 @@ class Helper
         return null;
     }
 
+    public function getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('ba', 'd'));
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->join('ba.articleDetail', 'd');
+        $builder->leftJoin('d.attribute', 'at');
+
+        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
+        $builder->orWhere('d.number = :number');
+        $query = $builder->getQuery();
+
+        $query->setParameter('shopId', $product->shopId);
+        $query->setParameter('sourceId', $product->sourceId);
+        $query->setParameter('number', 'BP-' . $product->shopId . '-' . $product->sourceId);
+        $result = $query->getResult(
+            $query::HYDRATE_OBJECT,
+            $mode
+        );
+
+        if (isset($result[0])) {
+            /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+            $attribute = $result[0];
+            return $attribute->getArticleDetail();
+        }
+
+        return null;
+    }
+
     public function getBepadoArticleModel($sourceId, $shopId)
     {
         $builder = $this->manager->createQueryBuilder();

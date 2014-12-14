@@ -331,7 +331,7 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * Delete product with given shopId and sourceId.
+     * Delete product or product variant with given shopId and sourceId.
      *
      * Only the combination of both identifies a product uniquely. Do NOT
      * delete products just by their sourceId.
@@ -345,12 +345,19 @@ class ProductToShop implements ProductToShopBase
      */
     public function delete($shopId, $sourceId)
     {
-        $model =  $this->helper->getArticleModelByProduct(new Product(array(
+        $detail = $this->helper->getArticleDetailModelByProduct(new Product(array(
             'shopId' => $shopId,
             'sourceId' => $sourceId,
         )));
-        if($model === null) {
+        if($detail === null) {
             return;
+        }
+
+        if ($detail->getKind() == 1) {
+            $model = $detail->getArticle();
+            $model->getDetails()->clear();
+        } else {
+            $model = $detail;
         }
 
         // Not sure why, but the Attribute can be NULL
@@ -358,8 +365,6 @@ class ProductToShop implements ProductToShopBase
         if ($attribute) {
             $this->manager->remove($attribute);
         }
-        $model->getDetails()->clear();
-
         $this->manager->remove($model);
 
         $this->manager->flush();

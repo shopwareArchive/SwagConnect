@@ -128,5 +128,47 @@ class ProductToShopTest extends BepadoTestHelper
         $product = new Product();
         $this->assertEmpty($this->productToShop->insertOrUpdate($product));
     }
+
+    public function testDelete()
+    {
+        $variants = $this->getVariants();
+        // insert variants
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        // test delete only one variant
+        $this->productToShop->delete($variants[1]->shopId, $variants[1]->sourceId);
+
+        $bepadoAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+            ->findOneBy(array('sourceId' => $variants[2]->sourceId));
+
+        $article = $bepadoAttribute->getArticle();
+        // check articles details count
+        $this->assertEquals(3, count($article->getDetails()));
+
+        // test delete article - main article variant
+        $this->productToShop->delete($variants[0]->shopId, $variants[0]->sourceId);
+
+        $articlesCount = Shopware()->Db()->query(
+            'SELECT COUNT(s_articles.id)
+              FROM s_plugin_bepado_items
+              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
+              WHERE s_plugin_bepado_items.source_id = :sourceId',
+            array('sourceId' => $variants[0]->sourceId)
+        )->fetchColumn();
+
+        $this->assertEquals(0, $articlesCount);
+
+        $attributesCount = Shopware()->Db()->query(
+            'SELECT COUNT(s_plugin_bepado_items.id)
+              FROM s_plugin_bepado_items
+              WHERE s_plugin_bepado_items.article_id = :articleId',
+            array('articleId' => $article->getId())
+        )->fetchColumn();
+
+        $this->assertEquals(0, $attributesCount);
+    }
 }
  

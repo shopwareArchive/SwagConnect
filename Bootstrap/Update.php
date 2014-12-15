@@ -80,6 +80,7 @@ class Update
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
+        $this->migrateSourceIds();
 
         return true;
     }
@@ -388,6 +389,41 @@ class Update
                 $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
                 $cacheManager->clearTemplateCache();
             }
+        }
+    }
+
+    /**
+     * Add sourceId for local articles,
+     * add bepado attribute for article variants
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    public function migrateSourceIds()
+    {
+        if (version_compare($this->version, '1.5.2', '<=')) {
+            // insert source ids for local articles
+            $sql = "UPDATE `s_plugin_bepado_items` SET `source_id` = `article_id` WHERE `shop_id` IS NULL";
+            Shopware()->Db()->exec($sql);
+
+            // Insert new records in s_plugin_bepado_items for all article variants
+            $sql = "
+                INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id, source_id)
+                SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
+
+                FROM s_articles a
+
+                LEFT JOIN `s_articles_details` ad
+                ON a.id = ad.articleId
+
+                LEFT JOIN `s_plugin_bepado_items` bi
+                ON bi.article_detail_id = ad.id
+
+
+                WHERE a.id IS NOT NULL
+                AND ad.id IS NOT NULL
+                AND bi.id IS NULL
+            ";
+            Shopware()->Db()->exec($sql);
         }
     }
 }

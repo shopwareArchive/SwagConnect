@@ -1086,30 +1086,32 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
         $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
-
         if (!$bepadoAttribute) {
             throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
         }
 
-        $attribute = $bepadoAttribute->getArticle()->getMainDetail()->getAttribute();
-        if (!$data['shopId']) {
-            // it's local product and shipping group can be changed
-            $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
-        }
-
-        $this->getModelManager()->persist($attribute);
-
-        // Only allow changes in the fixedPrice field if this is a local product
-        if (!$bepadoAttribute->getShopId()) {
-            $bepadoAttribute->setFixedPrice($data['fixedPrice']);
-        }
-
-        // Save the update fields
-        foreach ($data as $key => $datum) {
-            if (strpos($key, 'update') === 0) {
-                $setter = 'set' . ucfirst($key);
-                $bepadoAttribute->$setter($datum);
+        /** @var \Shopware\Models\Article\Detail $detail */
+        foreach ($bepadoAttribute->getArticle()->getDetails() as $detail) {
+            if (!$data['shopId']) {
+                $attribute = $detail->getAttribute();
+                // it's local product and shipping group can be changed
+                $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
+                $this->getModelManager()->persist($attribute);
             }
+
+            $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
+            // Only allow changes in the fixedPrice field if this is a local product
+            if (!$bepadoAttribute->getShopId()) {
+                $bepadoAttribute->setFixedPrice($data['fixedPrice']);
+            }
+            // Save the update fields
+            foreach ($data as $key => $value) {
+                if (strpos($key, 'update') === 0) {
+                    $setter = 'set' . ucfirst($key);
+                    $bepadoAttribute->$setter($value);
+                }
+            }
+            $this->getModelManager()->persist($bepadoAttribute);
         }
 
         $this->getModelManager()->flush();

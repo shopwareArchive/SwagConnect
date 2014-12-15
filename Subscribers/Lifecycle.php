@@ -155,12 +155,13 @@ class Lifecycle extends BaseSubscriber
                 );
             } else {
                 /** @var \Shopware\Models\Article\Detail $detail */
+                $sourceIds = array();
                 foreach ($model->getDetails() as $detail) {
                     $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
-                    $this->getBepadoExport()->export(
-                        array($bepadoAttribute->getSourceId())
-                    );
+                    $sourceIds[] = $bepadoAttribute->getSourceId();
+
                 }
+                $this->getBepadoExport()->export($sourceIds);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements

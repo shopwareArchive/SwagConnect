@@ -72,7 +72,7 @@ class BepadoExport
 
         foreach ($bepadoItems as &$item) {
             $prefix = $item['title'] ? $item['title'] . ': ' : '';
-            if(empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
+            if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
                 $item['exportStatus'] = 'insert';
             } else {
                 $item['exportStatus'] = 'update';
@@ -82,27 +82,27 @@ class BepadoExport
             $category = $this->helper->getBepadoCategoryForProduct($item['articleId']);
             $item['category'] = $category;
 
-        $sql = "UPDATE s_plugin_bepado_items
+            $sql = "UPDATE s_plugin_bepado_items
                 SET export_status = :exportStatus,
                 export_message = :exportMessage,
                 category = :category
                 WHERE source_id = :sourceId;";
 
-        $statement = Shopware()->Db()->prepare($sql);
-        $statement->bindValue(':exportStatus', $item['exportStatus'], \PDO::PARAM_STR);
-        $statement->bindValue(':exportMessage', $item['exportMessage'], \PDO::PARAM_STR);
-        $statement->bindValue(':category', $item['category'], \PDO::PARAM_STR);
-        $statement->bindValue(':sourceId', $item['sourceId'], \PDO::PARAM_STR);
+            $statement = Shopware()->Db()->prepare($sql);
+            $statement->bindValue(':exportStatus', $item['exportStatus'], \PDO::PARAM_STR);
+            $statement->bindValue(':exportMessage', $item['exportMessage'], \PDO::PARAM_STR);
+            $statement->bindValue(':category', $item['category'], \PDO::PARAM_STR);
+            $statement->bindValue(':sourceId', $item['sourceId'], \PDO::PARAM_STR);
 
-        $statement->execute();
+            $statement->execute();
 
             try {
-                if($item['exportStatus'] == 'insert') {
+                if ($item['exportStatus'] == 'insert') {
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $item['exportStatus'] = 'error';
                 $item['exportMessage'] = $e->getMessage() . "\n" . $e->getTraceAsString();
 

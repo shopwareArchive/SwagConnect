@@ -57,6 +57,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->leftJoin('d.unit', 'u');
         $builder->select(array(
             'a.id as localId',
+            'd.id as detailId',
             'at.shopId as shopId',
             'at.sourceId as sourceId',
             'd.kind as detailKind',
@@ -132,6 +133,8 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
+        $row['variant'] = $this->getConfiguratorOptions($row['detailId']);
+
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
         } else {
@@ -143,6 +146,7 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         unset($row['localId']);
+        unset($row['detailId']);
         unset($row['detailKind']);
 
         if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
@@ -241,6 +245,38 @@ class LocalProductQuery extends BaseProductQuery
         $query = $builder->getQuery();
 
         return $query->getSingleScalarResult() > 1 ? true : false;
+    }
+
+    /**
+     * Returns configurator options and groups
+     * by given article detail id
+     *
+     * @param int $detailId
+     * @return array
+     */
+    public function getConfiguratorOptions($detailId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\Models\Article\Detail', 'd');
+        $builder->join('d.configuratorOptions', 'cor');
+        $builder->join('cor.group', 'cg');
+        $builder->select(array(
+            'cor.name as optionName',
+            'cg.name as groupName',
+        ));
+
+        $builder->where("d.id = :detailId");
+        $builder->setParameter(':detailId', $detailId);
+        $query = $builder->getQuery();
+        $configuratorData = array();
+
+        foreach ($query->getArrayResult() as $config) {
+            $groupName = $config['groupName'];
+            $configuratorData[$groupName] = $config['optionName'];
+        }
+
+        return $configuratorData;
     }
 }
 

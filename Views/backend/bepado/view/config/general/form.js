@@ -66,7 +66,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
         basicHeader: '{s name=config/basic}Basic{/s}',
         synchronization: '{s name=synchronization}Synchronization{/s}',
-        advancedHeader: '{s name=config/advanced}Advanced{/s}'
+        advancedHeader: '{s name=config/advanced}Advanced{/s}',
+        synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}'
     },
 
     initComponent: function() {
@@ -248,6 +249,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             title: me.snippets.synchronization,
             defaultType: 'textfield',
             layout: 'anchor',
+            html: me.snippets.synchronizationBarDescription,
             items: [ me.createProgressBar() ]
         });
     },

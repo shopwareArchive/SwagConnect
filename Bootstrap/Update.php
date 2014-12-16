@@ -70,7 +70,7 @@ class Update
 
             // check shopware version, because Shopware()->Container()
             // is available after version 4.2.x
-            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
                 Shopware()->Template()->clearAllCache();
             } else {
                 $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
@@ -382,7 +382,7 @@ class Update
 
             // check shopware version, because Shopware()->Container()
             // is available after version 4.2.x
-            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
                 Shopware()->Template()->clearAllCache();
             } else {
                 $cacheManager = Shopware()->Container()->get('shopware.cache_manager');

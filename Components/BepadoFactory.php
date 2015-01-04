@@ -111,7 +111,11 @@ class BepadoFactory
      */
     public function getImageImport()
     {
-        return new ImageImport($this->getModelManager(), $this->getHelper());
+        return new ImageImport(
+            $this->getModelManager(),
+            $this->getHelper(),
+            new Logger(Shopware()->Db())
+        );
     }
 
     /**

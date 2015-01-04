@@ -15,20 +15,22 @@ class ProductFromShopTest extends BepadoTestHelper
     {
         $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models());
 
+        $address = new Address(array(
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123'
+        ));
         $orderNumber = $fromShop->buy(new Order(array(
             'orderShop' => '3',
             'localOrderId' => rand(0, 99999),
-            'deliveryAddress' => new Address(array(
-                'firstName' => 'John',
-                'surName' => 'Doe',
-                'zip' => '48153',
-                'street' => 'Eggeroderstraße',
-                'streetNumber' => '6',
-                'city' => 'Schöppingen',
-                'country' => 'DEU',
-                'email' => 'info@shopware.com',
-                'phone' => '0000123'
-            )),
+            'deliveryAddress' => $address,
+            'billingAddress' => $address,
             'products' => array(
                 new OrderItem(array(
                     'count' => 1,

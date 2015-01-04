@@ -1,7 +1,9 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\ImageImport;
+use Shopware\Bepado\Components\Logger;
 
 /**
  * Cronjob callback
@@ -11,6 +13,11 @@ use Shopware\Bepado\Components\ImageImport;
  */
 class CronJob extends BaseSubscriber
 {
+    /**
+     * @var \Shopware\Bepado\Components\Config
+     */
+    private $configComponent;
+
     public function getSubscribedEvents()
     {
         return array(
@@ -25,7 +32,8 @@ class CronJob extends BaseSubscriber
     {
         return new ImageImport(
             Shopware()->Models(),
-            $this->getHelper()
+            $this->getHelper(),
+            new Logger(Shopware()->Db())
         );
     }
 
@@ -37,8 +45,18 @@ class CronJob extends BaseSubscriber
      */
     public function importImages(\Shopware_Components_Cron_CronJob $job)
     {
-        $this->getImageImport()->import();
+        $limit = $this->getConfigComponent()->getConfig('articleImagesLimitImport', 10);
+        $this->getImageImport()->import($limit);
 
         return true;
+    }
+
+    private function getConfigComponent()
+    {
+        if (!$this->configComponent) {
+            $this->configComponent = new Config(Shopware()->Models());
+        }
+
+        return $this->configComponent;
     }
 }

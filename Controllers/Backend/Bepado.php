@@ -135,7 +135,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     {
         return new ImageImport(
             Shopware()->Models(),
-            $this->getHelper()
+            $this->getHelper(),
+            new \Shopware\Bepado\Components\Logger(Shopware()->Db())
         );
     }
 

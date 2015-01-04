@@ -70,6 +70,14 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         applyMappingToChildCategoriesTitle: '{s name=mapping/applyConfirmTitle}Apply to child categories?{/s}',
         applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
 
+        updatePartOneMessage: '{s name=config/message/update_part_one}Update will take{/s}',
+        updatePartTwoMessage: '{s name=config/message/update_part_two}to finish{/s}',
+        doneMessage: '{s name=config/message/done}Done{/s}',
+
+        hours: '{s name=hours}Hour(s){/s}',
+        minutes: '{s name=minutes}Minute(s){/s}',
+        seconds: '{s name=seconds}Second(s){/s}',
+
         importBepadoCategoriesTitle: '{s name=mapping/importBepadoCategoriesTitle}Import categories?{/s}',
         importBepadoCategoriesMessage: '{s name=mapping/importBepadoCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
@@ -99,6 +107,9 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             },
             'bepado-config button[action=save-general-config]': {
                 click: me.onSaveConfigForm
+            },
+            'bepado-config-form': {
+                calculateFinishTime: me.onCalculateFinishTime
             },
 			'bepado-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
@@ -174,21 +185,21 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-
-            'bepado-export-filter base-element-select[name=exportStatus]': {
+            'bepado-export-filter [name=exportStatus]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
-
-                        store.filters.removeAtKey('exportStatus');
-                    if (value) {
+                    if(!value) {
+                        return;
+                    }
+                    store.filters.removeAtKey('exportStatus');
+                    if(field.inputValue != '') {
                         store.filters.add('exportStatus', new Ext.util.Filter({
                             property: field.name,
-                            value: value
+                            value: field.inputValue
                         }));
                     }
                     store.load();
-
                 }
             },
 
@@ -908,7 +919,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', message);
                 }
             });
         }
@@ -1129,6 +1140,102 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
             }
         });
+    },
+
+    /**
+     * Calculate needed time to finish synchronization
+     *
+     * @param progressBar
+     */
+    onCalculateFinishTime: function(progressBar) {
+        var me = this;
+        me.time = 0;
+        me.resetSpentTime();
+
+        Ext.TaskManager.start({
+            interval: 60000,
+            run: function() {
+                Ext.Ajax.request({
+                    url: '{url controller=BepadoConfig action=calculateFinishTime}',
+                    method: 'POST',
+                    success: function(response, opts) {
+                        var responseObject = Ext.decode(response.responseText);
+
+                        if (responseObject.time > 0) {
+                            if ((responseObject.time - (me.time + me.spentTime)) == 0) {
+                                return;
+                            }
+                            me.time = responseObject.time;
+                            me.resetSpentTime();
+
+                            var time = me.secondsToTime(me.time);
+                            progressBar.wait({
+                                interval: 500,
+                                increment: 15,
+                                scope: this
+                            });
+                            progressBar.updateText(me.messages.updatePartOneMessage + ' ' + time.h + ' ' + me.messages.hours + ' ' + time.m + ' ' + me.messages.minutes + ' ' + time.s + ' ' + me.messages.seconds + ' ' + me.messages.updatePartTwoMessage);
+                        } else {
+                            me.resetSpentTime();
+                            me.resetTime();
+                            progressBar.reset();
+                            progressBar.updateText(me.messages.doneMessage);
+                        }
+                    }
+                });
+            }
+        });
+
+        Ext.TaskManager.start({
+            interval: 5000,
+            run: function () {
+                if (me.time >= 5) {
+                    me.time = me.time - 5;
+                    me.spentTime = me.spentTime + 5;
+                    var time = me.secondsToTime(me.time);
+                    progressBar.updateText(me.messages.updatePartOneMessage + ' ' + time.h + ' ' + me.messages.hours + ' ' + time.m + ' ' + me.messages.minutes + ' ' + time.s + ' ' + me.messages.seconds + ' ' + me.messages.updatePartTwoMessage);
+                } else {
+                    progressBar.reset();
+                    progressBar.updateText(me.messages.doneMessage);
+                }
+            }
+        });
+
+    },
+
+    /**
+     * Convert number of seconds into time object
+     *
+     * @param integer secs Number of seconds to convert
+     * @return object
+     */
+    secondsToTime: function (secs) {
+        var hours = parseInt( secs / 3600 ) % 24;
+        var minutes = parseInt( secs / 60 ) % 60;
+        var seconds = secs % 60;
+
+        var obj = {
+            "h": hours,
+            "m": minutes,
+            "s": seconds
+        };
+        return obj;
+    },
+
+    /**
+     * Reset spent time used for synchronization bar
+     */
+    resetSpentTime: function() {
+        var me = this;
+        me.spentTime = 0;
+    },
+
+    /**
+     * Reset time used for synchronization bar
+     */
+    resetTime: function() {
+        var me = this;
+        me.time = 0;
     }
 });
 //{/block}

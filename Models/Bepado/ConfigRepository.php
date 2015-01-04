@@ -38,4 +38,9 @@ class ConfigRepository extends ModelRepository
         return $builder;
     }
 
+    public function remove(Config $config)
+    {
+        $this->getEntityManager()->remove($config);
+    }
+
 }

@@ -57,6 +57,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
+        articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         defaultCategory: '{s name=config/import/default_import_category}Default import category{/s}'
     },
 
@@ -153,6 +154,12 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         var categoriesStore = Ext.create('Shopware.apps.Base.store.CategoryTree');
         categoriesStore.load();
 
+        me.imageLimitImportField = Ext.create('Ext.form.field.Number', {
+            name: 'articleImagesLimitImport',
+            fieldLabel: me.snippets.articleImagesLimitImportLabel,
+            labelWidth: me.defaults.labelWidth
+        });
+
         var container = Ext.create('Ext.container.Container', {
             padding: '0 20 0 0',
             flex: 1,
@@ -204,8 +211,16 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             fieldLabel: me.snippets.importPicturesLabel,
                             inputValue: 1,
                             uncheckedValue: 0,
-                            labelWidth: me.defaults.labelWidth
-                        }, {
+                            labelWidth: me.defaults.labelWidth,
+                            listeners:{
+                                change: function(checkbox, newValue, oldValue, opts){
+                                    me.enableImageImportLimit(checkbox);
+                                },
+                                beforeRender: function(checkbox, opts) {
+                                    me.enableImageImportLimit(checkbox);
+                                }
+                            }
+                        }, me.imageLimitImportField, {
                             xtype: 'base-element-combotree',
                             name: 'defaultImportCategory',
                             allowBlank: true,
@@ -246,6 +261,19 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             record = Ext.create('Shopware.apps.Bepado.model.config.Import');
         }
         me.loadRecord(record);
+    },
+
+    /**
+     * Enable / disable number of products which are proceed
+     * by images cron at the same time.
+     * It depends on import images on first import of products
+     *
+     * @param checkbox
+     */
+    enableImageImportLimit: function(checkbox) {
+        var me = this;
+
+        me.imageLimitImportField.setDisabled(checkbox.getValue());
     }
 });
 //{/block}

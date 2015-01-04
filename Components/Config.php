@@ -153,6 +153,23 @@ class Config
         $this->manager->flush();
     }
 
+    public function deleteConfig($name, $shopId = null)
+    {
+        $whereClause = array('name' => $name);
+        if ($shopId > 0) {
+            $whereClause['shopId'] = $shopId;
+        }
+        $model = $this->getConfigRepository()->findOneBy($whereClause);
+        if (!$model) {
+            throw new \Exception(sprintf(
+                'Config entity %s not found!',
+                $name
+            ));
+        }
+
+        $this->getConfigRepository()->remove($model);
+    }
+
     /**
      * Helper function which returns general configuration
      * for each shop.
@@ -213,12 +230,23 @@ class Config
                 // store only config options
                 // which are different for each shop
                 $shopConfig = array(
-                    'cloudSearch' =>$shopConfig['cloudSearch'],
-                    'detailShopInfo' =>$shopConfig['detailShopInfo'],
-                    'detailProductNoIndex' =>$shopConfig['detailProductNoIndex'],
-                    'checkoutShopInfo' =>$shopConfig['checkoutShopInfo'],
-                    'shippingCostsPage' =>$shopConfig['shippingCostsPage'],
+                    'cloudSearch' => $shopConfig['cloudSearch'],
+                    'detailShopInfo' => $shopConfig['detailShopInfo'],
+                    'detailProductNoIndex' => $shopConfig['detailProductNoIndex'],
+                    'checkoutShopInfo' => $shopConfig['checkoutShopInfo'],
+                    'shippingCostsPage' => $shopConfig['shippingCostsPage'],
                 );
+
+
+                try {
+                    if (!$shopConfig['shippingCostsPage']) {
+                        unset($shopConfig['shippingCostsPage']);
+                        $this->deleteConfig('shippingCostsPage', $shopId);
+                    }
+                } catch (\Exception $e) {
+                    // ignore exception when shippingCostsPage
+                    // doesn't exist
+                }
             } else {
                 unset($shopConfig['shopId']);
             }

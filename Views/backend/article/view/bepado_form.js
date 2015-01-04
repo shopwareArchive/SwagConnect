@@ -135,7 +135,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             fieldLabel: text,
             name: dataField,
             editable: false,
-            emptyText: '{s name=inherit}Inherit{/s}'
+            emptyText: '{s name=automatically}Automatic{/s}'
         };
     },
 
@@ -145,7 +145,6 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         return Ext.create('Ext.data.Store', {
             fields: [ { name: 'value', useNull: true }, { name: 'description' } ],
             data: [
-                { value: 'inherit', description: '{s name=inherit}Inherit{/s}' },
                 { value: 'overwrite', description: '{s name=automatically}Automatic{/s}' },
                 { value: 'no-overwrite', description: '{s name=manually}Manual{/s}' }
             ]

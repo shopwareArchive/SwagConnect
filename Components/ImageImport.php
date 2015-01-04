@@ -18,12 +18,14 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
+    /** @var  \Shopware\Bepado\Components\Logger */
+    protected $logger;
 
-    public function __construct(ModelManager $manager, Helper $helper)
+    public function __construct(ModelManager $manager, Helper $helper, Logger $logger)
     {
         $this->manager = $manager;
         $this->helper = $helper;
-
+        $this->logger = $logger;
     }
 
     /**
@@ -169,6 +171,7 @@ class ImageImport
         $hasMainImage = $this->hasArticleMainImage($model->getId());
 
         try {
+            /** @var \Shopware\Models\Media\Album $album */
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);
             $tempDir = Shopware()->DocPath('media_temp');
             foreach ($imagesToCreate as $imageUrl => $key) {
@@ -204,14 +207,23 @@ class ImageImport
 
                 $this->manager->persist($image);
 
-                $manager = Shopware()->Container()->get('thumbnail_manager');
-                $manager->createMediaThumbnail(
-                    $media,
-                    $this->getThumbnailSize($album),
-                    true
-                );
+                // check shopware version, because Shopware()->Container()
+                // is available after version 4.2.x
+                if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+                    $media->createAlbumThumbnails($album);
+                } else {
+                    $manager = Shopware()->Container()->get('thumbnail_manager');
+                    $manager->createMediaThumbnail(
+                        $media,
+                        $this->getThumbnailSize($album),
+                        true
+                    );
+                }
             }
         } catch (\Exception $e) {
+            // log exception message if for some reason
+            // image import fails
+            $this->logger->write(true, 'Import images', $e->getMessage());
         }
 
         $this->manager->flush();

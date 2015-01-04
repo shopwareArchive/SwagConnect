@@ -569,4 +569,15 @@ final class SDK
 
         return $rules;
     }
+
+    /**
+     * Return time in seconds needed to finish synchronization
+     *
+     * @param $changesCount
+     * @return int
+     */
+    public function calculateFinishTime($changesCount)
+    {
+        return $this->dependencies->getSocialNetworkService()->calculateFinishTime($changesCount);
+    }
 }

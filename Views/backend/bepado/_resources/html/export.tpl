@@ -2,23 +2,29 @@
     <div class=bepado-home-page>
         <h3 class=headline>Export</h3>
         <div class=content>
-            <p>
-                Hier können Sie importierte und exportierte Produkte verwalten.
-            </p>
             <ul>
                 <li>
-                    <strong>Export</strong>
-                    <p>Hier können Sie lokale Shopware-Produkte für den Export nach bepado freigeben und bereits freigegebene Produkte
-                        erneut nach bepado synchronisieren lassen oder aus dem Export entfernen.</p>
+                    <strong>Exportprozess</strong>
+                    <p>Wenn Sie die Konfiguration des Plugins und das Kategorie- Mapping erfolgreich vorgenommen haben,
+                        können Sie mit dem Export der Produkte beginnen. Wählen Sie hierfür einfach die gewünschten
+                        Produkte aus und markieren Sie diese, indem Sie den Haken in der Box, links neben dem Artikel
+                        setzen. Haben Sie dies erfolgreich getan, müssen Sie nur noch auf den grünen Button
+                        „Produkte zum Export einfügen/aktualisieren“ drücken, und Ihre Produkte werden automatisch
+                        exportiert und dauerhaft auf dem neusten Stand gehalten. Der Erstexport kann einige
+                        Zeit in Anspruch nehmen, dies hängt von den Einstellungen auf sn.bepado.de im Bereich
+                        [Einstellungen > Synchronisation] ab. Hier wird das Intervall festgelegt, in den Ihre Produkte
+                        über das Plugin aktualisiert werden. Zudem wird hier die Einstellung vorgenommen, wie viele
+                        Produkte pro Intervall zu bepado übertragen werden sollen. Bitte beachten Sie zudem, dass
+                        die Bilder etwas später angezeigt werden als der Artikel, da diese von bepado nachbearbeitet
+                        werden, um die Qualität zu erhöhen.</p>
                 </li>
 
                 <li>
-                    <strong>Kategorie Mapping</strong>
-                    <p>In der linken Spalte wählen Sie eine Shopware-Kategorie aus, für die Sie ein Mapping erzeugen
-                        möchten. In der rechten Spalte wählen Sie dann die bepado-Kategorie aus, der ihre lokalen Produkte
-                        zugeordnet werden sollen.</p>
-                    <p>Beim Export werden Produkte dieser Shopware-Kategorie nun automatisch der gewählten
-                        bepado-Kategorie zugewiesen.</p>
+                    <strong>Kategorie- Mapping</strong>
+                    <p>Diese Funktion gibt bepado die Information, in welche Kategorie Ihre Produkte auf bepado
+                        einsortiert werden müssen. Hierfür müssen Sie die Kategorien, in denen sich die Produkte
+                        in Ihrem Shop befinden, den Kategorien aus bepado so genau es geht zuweisen. Dies erhöht
+                        die Auffindbarkeit Ihrer Produkte für andere Händler.</p>
                 </li>
             </ul>
         </div>

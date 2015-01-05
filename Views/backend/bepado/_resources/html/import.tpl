@@ -2,25 +2,48 @@
     <div class=bepado-home-page>
         <h3 class=headline>Import</h3>
         <div class=content>
+            <p>Verwalten und importieren Sie die von Ihnen auf bepado abonnierten Produkte</p>
             <ul>
                 <li>
-                    <strong>Importprozess</strong>
-                    <p>Wenn Sie die Konfiguration des Plugins und das Kategorie- Mapping erfolgreich vorgenommen haben,
-                        können Sie mit dem Import  der Produkte beginnen. Dies geschieht automatisch,
-                        sobald Sie Produkte anderer Händler auf bepado abonnieren. Sie können die Produkte in
-                        diesem Menü nun aktivieren, deaktivieren und weiter bearbeiten. Der Prozess kann einige
-                        Zeit in Anspruch nehmen, dies hängt von den Einstellungen auf sn.bepado.de im Bereich
-                        [Einstellungen > Synchronisation] ab. Hier wird das Intervall festgelegt, in den Ihre Produkte
-                        über das Plugin aktualisiert werden. Zudem wird hier die Einstellung vorgenommen, wie viele
-                        Produkte pro Intervall exportiert werden.</p>
+                    <strong>Konfiguration</strong>
+                    <p>Hier können Sie den Import von bepado Produkten in Ihr System konfigurieren.</p>
+                    <p>
+                        <span style="text-decoration:underline;">Felder beim Import überschreiben</span>
+                        Die hier ausgewählten Felder werden automatisch überschrieben, wenn der Quellshop diese ändert.
+                        Sie können auf Artikel Ebene Ausnahmen definieren.
+                    </p>
+                    <p>
+                        <span style="text-decoration:underline;">Bilder beim Produkt-Erstimport importieren</span>
+                        Der Import von Bildern kann den Import verlangsamen. Wenn Sie viele Produkte
+                        Importieren möchten, sollten Sie diese Option nicht aktivieren und die Bilder per CronJob oder
+                        über „geänderte Produkte“ importieren.
+                    </p>
                 </li>
 
                 <li>
-                    <strong>Kategorie- Mapping</strong>
-                    <p>Diese Funktion gibt bepado die Information, wo die Artikel in Ihrem Shop gespeichert werden sollen.
-                        Hier weisen Sie die Kategorien, aus denen Ihre Produkte von bepado kommen, Ihren eigenen zu und
-                        bepado überträgt die Artikel dann entsprechend Ihrer Angaben in die Kategorien. Das Mapping
-                        übernimmt somit die Sortierung der Artikel in die verschiedenen Kategorien Ihres Shops.</p>
+                    <strong>Kategorie Mapping</strong>
+                    <p>Legen Sie hier fest in welchen Kategorien Ihres Shops die importierten Produkte angezeigt werden sollen</p>
+                </li>
+
+                <li>
+                    <strong>Produkte</strong>
+                    <p>
+                        Der Produktimport erfolgt automatisch, sobald Sie Produkte anderer Händler auf bepado abonnieren
+                        und eine Verbindung zu bepado hergestellt worden ist. Sie können die Produkte in diesem Menü
+                        nach dem Import aktivieren, deaktivieren oder weiter bearbeiten.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>Letzte Änderungen</strong>
+                    <p>
+                        Hier haben Sie eine Übersicht von Produkten, die durch den Hersteller geändert wurden,
+                        bei denen die Änderungen aber noch nicht durchgeführt wurden – etwa weil Sie konfiguriert haben,
+                        dass Sie die Preise selber verwalten möchten.
+                        <br />
+                        Haben Sie konfiguriert, dass beim Produkt-Erstimport keine Bilder importiert werden sollen,
+                        haben Sie hier die Möglichkeit, den Bilder Import manuell anzustoßen.
+                    </p>
                 </li>
             </ul>
         </div>

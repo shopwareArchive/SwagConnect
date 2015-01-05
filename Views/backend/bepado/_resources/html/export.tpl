@@ -2,29 +2,61 @@
     <div class=bepado-home-page>
         <h3 class=headline>Export</h3>
         <div class=content>
+            <p>Hier können Sie Produkte, die Sie aus Ihrem System zu bepado exportieren möchten, verwalten.</p>
             <ul>
                 <li>
-                    <strong>Exportprozess</strong>
-                    <p>Wenn Sie die Konfiguration des Plugins und das Kategorie- Mapping erfolgreich vorgenommen haben,
-                        können Sie mit dem Export der Produkte beginnen. Wählen Sie hierfür einfach die gewünschten
-                        Produkte aus und markieren Sie diese, indem Sie den Haken in der Box, links neben dem Artikel
-                        setzen. Haben Sie dies erfolgreich getan, müssen Sie nur noch auf den grünen Button
-                        „Produkte zum Export einfügen/aktualisieren“ drücken, und Ihre Produkte werden automatisch
-                        exportiert und dauerhaft auf dem neusten Stand gehalten. Der Erstexport kann einige
-                        Zeit in Anspruch nehmen, dies hängt von den Einstellungen auf sn.bepado.de im Bereich
-                        [Einstellungen > Synchronisation] ab. Hier wird das Intervall festgelegt, in den Ihre Produkte
-                        über das Plugin aktualisiert werden. Zudem wird hier die Einstellung vorgenommen, wie viele
-                        Produkte pro Intervall zu bepado übertragen werden sollen. Bitte beachten Sie zudem, dass
-                        die Bilder etwas später angezeigt werden als der Artikel, da diese von bepado nachbearbeitet
-                        werden, um die Qualität zu erhöhen.</p>
+                    <strong>Konfiguration</strong>
+                    <p>Hier können Sie den Export Ihrer Produkte nach bepado beeinflussen.</p>
+                    <p>
+                        <span style="text-decoration:underline;">Produkt-Beschreibungsfeld</span>
+                        Konfigurieren Sie, welches Feld als Produkt-Langbeschreibung nach bepado exportiert werden soll.
+                        Haben Sie in ihrer Langbeschreibung aufwändige SEO-optimierte Texte gepflegt, möchten Sie
+                        vielleicht eher »attribute.bepadoProductDescription« verwenden, um duplicate content zu vermeiden.
+                        Dieses spezielle bepado-Beschreibungsfeld finden Sie in der Artikel-Eingabemaske unter »Zusatzfeld«
+                    </p>
+                    <p>
+                        <span style="text-decoration:underline;">Geänderte Produkte automatisch synchronisieren</span>
+                        Wenn Sie ein nach bepado exportiertes Produkt ändern (etwa im Preis), wird die Änderung
+                        automatisch nach bepado synchronisiert. So müssen Sie die Aktualisierungen nicht händisch durchführen.
+                    </p>
+                    <p>
+                        <span style="text-decoration:underline;">Preis Konfiguration</span>
+                        bepado-Produkte haben einen  Endkunden-Preis und einen Händler-Preis. Konfigurieren Sie hier,
+                        aus welcher lokalen Kundengruppe und welchem Preisfeld die entsprechenden Preise ausgelesen werden sollen.
+                    </p>
                 </li>
 
                 <li>
-                    <strong>Kategorie- Mapping</strong>
-                    <p>Diese Funktion gibt bepado die Information, in welche Kategorie Ihre Produkte auf bepado
-                        einsortiert werden müssen. Hierfür müssen Sie die Kategorien, in denen sich die Produkte
-                        in Ihrem Shop befinden, den Kategorien aus bepado so genau es geht zuweisen. Dies erhöht
-                        die Auffindbarkeit Ihrer Produkte für andere Händler.</p>
+                    <strong>Kategorie Mapping</strong>
+                    <p>
+                        Hier legen Sie fest in welcher bepado Kategorie Ihre exportieren Produkte angezeigt werden sollen.
+                        <br />
+                        In der linken Spalte wählen Sie eine Shopware-Kategorie aus, für die Sie ein Mapping
+                        erzeugen möchten. In der rechten Spalte wählen Sie dann die bepado Kategorie aus, der Ihre Produkte
+                        zugeordnet werden sollen. Dies erhöht die Auffindbarkeit Ihrer Produkte für andere Händler.
+                        <br />
+                        Beim Export werden Produkte dieser Shopware Kategorie nun automatisch der gewählten bepado
+                        Kategorie zugewiesen.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>Produkte</strong>
+                    <p>
+                        Hier exportieren Sie Ihre Produkte schließlich zu bepado. Dazu markieren Sie die Produkte und
+                        klicken im Anschluss auf den grünen Button „Produkte zum Export einfügen/aktualisieren“.
+                        Ihre Produkte werden automatisch zu bepado exportiert und müssen nur noch freigegeben werden.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>Liefergruppen</strong>
+                    <p>
+                        Hier haben Sie die Möglichkeit, Liefergruppen zu erstellen. In diesen Liefergruppen können Sie
+                        bestimmte Informationen wie beispielsweise Länderinformationen, Lieferzeit in Tagen, Preise und
+                        Postleitzahlen- Präfix hinterlegen. Durch die Zuweisung der Liefergruppen zu bestimmten Artikeln,
+                        übernehmen diese die hinterlegten Eigenschaften auf bepado. Je nachdem entstehen individuelle Versandkosten.
+                    </p>
                 </li>
             </ul>
         </div>

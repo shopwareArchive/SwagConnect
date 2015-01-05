@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.5.2",
+    "currentVersion": "1.5.3",
     "changelog": {
         "de": {
+            "1.5.3": "New: Restruction of the bepado plugin",
             "1.5.2": "New: Added loading bar that gives you information about the duration of the synchronization between bepado and shopware",
             "1.5.1": "New: Added link to the API key in Social Network",
             "1.5.0": "Korrektur: Bilder-Importe in älteren SW-Versionen",
@@ -17,6 +18,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.5.3": "New: Restruction of the bepado plugin",
             "1.5.2": "New: Added loading bar that gives you information about the duration of the synchronization between bepado and shopware",
             "1.5.1": "New: Added link to the API key in Social Network",
             "1.5.0": "Fix: Image imports for old shopware versions",

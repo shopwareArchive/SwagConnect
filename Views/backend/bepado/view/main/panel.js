@@ -31,17 +31,11 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-shipping-groups',
                 itemId: 'shipping-groups'
             }, {
-                xtype: 'bepado-mapping',
-                itemId: 'mapping'
-            }, {
                 xtype: 'bepado-mapping-import',
                 itemId: 'mapping-import'
             }, {
                 xtype: 'bepado-mapping-export',
                 itemId: 'mapping-export'
-            }, {
-                xtype: 'bepado-products-general',
-                itemId: 'products'
             }, {
                 xtype: 'bepado-export',
                 itemId: 'export'
@@ -57,7 +51,17 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
             }, {
                 xtype: 'bepado-shipping-groups',
                 itemId: 'config-shipping-groups'
-            }]
+            }, {
+                xtype: 'bepado-settings-main',
+                itemId: 'settings-main'
+            }, {
+                xtype: 'bepado-import-main',
+                itemId: 'import-main'
+            }, {
+                xtype: 'bepado-export-main',
+                itemId: 'export-main'
+            }
+            ]
         });
 
         me.callParent(arguments);

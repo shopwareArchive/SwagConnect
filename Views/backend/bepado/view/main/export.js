@@ -1,11 +1,11 @@
 //{namespace name=backend/bepado/view/main}
 
-// {include file="backend/bepado/_resources/html/products.tpl" assign="productsContent"}
+// {include file="backend/bepado/_resources/html/export.tpl" assign="exportContent"}
 
-//{block name='backend/bepado/view/main/products'}
-Ext.define('Shopware.apps.Bepado.view.main.Products', {
+//{block name='backend/bepado/view/main/export'}
+Ext.define('Shopware.apps.Bepado.view.main.Export', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.bepado-products-general',
+    alias: 'widget.bepado-export-main',
 
     //border: false,
     layout: 'fit',
@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Products', {
 
     getHTMLContent: function() {
         var me = this;
-        me.htmlTpl = '{$productsContent|replace:"\n":""|replace:"\r":""}';
+        me.htmlTpl = '{$exportContent|replace:"\n":""|replace:"\r":""}';
 
         return me.htmlTpl;
     }

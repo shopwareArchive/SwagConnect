@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
     },
 
     snippets: {
-        save: '{s name=config/save}Sav{/s}',
+        save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
         overwritePropertiesLabel: '{s name=config/import/overwrite_properties_label}Overwrite the following properties during import{/s}',

@@ -1,4 +1,4 @@
-{s name=text/main_settings namespace=backend/bepado/view/main}
+{s name=text/main_settings_desc namespace=backend/bepado/view/main}
     <div class=bepado-home-page>
         <h3 class=headline>Einstellungen (Settings)</h3>
         <div class=content>
@@ -13,8 +13,8 @@
                         Hier verbinden Sie Ihren Shop mit  bepado und konfigurieren die Anzeige der Produkte in Ihrem
                         Warenkorb und auf der Artikeldetailseite für bepado.
                         <br />
-                        <strong>API Schlüssel:</strong>
                         <br />
+                        <span style="text-decoration:underline;">API Schlüssel</span>
                         Bitte hinterlegen Sie an dieser Stelle Ihren API Key, um eine Verbindung zu bepado aufzubauen.
                         Sie finden Ihren API-Key auf sn.bepado.de unterhalb der Einstellungen im Tab-Reiter Synchronisation.
                     </p>

@@ -8,19 +8,19 @@
                     <strong>Konfiguration</strong>
                     <p>Hier können Sie den Export Ihrer Produkte nach bepado beeinflussen.</p>
                     <p>
-                        <span style="text-decoration:underline;">Produkt-Beschreibungsfeld</span>
+                        <span style=text-decoration:underline;>Produkt-Beschreibungsfeld</span>
                         Konfigurieren Sie, welches Feld als Produkt-Langbeschreibung nach bepado exportiert werden soll.
                         Haben Sie in ihrer Langbeschreibung aufwändige SEO-optimierte Texte gepflegt, möchten Sie
                         vielleicht eher »attribute.bepadoProductDescription« verwenden, um duplicate content zu vermeiden.
                         Dieses spezielle bepado-Beschreibungsfeld finden Sie in der Artikel-Eingabemaske unter »Zusatzfeld«
                     </p>
                     <p>
-                        <span style="text-decoration:underline;">Geänderte Produkte automatisch synchronisieren</span>
+                        <span style=text-decoration:underline;>Geänderte Produkte automatisch synchronisieren</span>
                         Wenn Sie ein nach bepado exportiertes Produkt ändern (etwa im Preis), wird die Änderung
                         automatisch nach bepado synchronisiert. So müssen Sie die Aktualisierungen nicht händisch durchführen.
                     </p>
                     <p>
-                        <span style="text-decoration:underline;">Preis Konfiguration</span>
+                        <span style=text-decoration:underline;>Preis Konfiguration</span>
                         bepado-Produkte haben einen  Endkunden-Preis und einen Händler-Preis. Konfigurieren Sie hier,
                         aus welcher lokalen Kundengruppe und welchem Preisfeld die entsprechenden Preise ausgelesen werden sollen.
                     </p>

@@ -14,7 +14,7 @@
                         Warenkorb und auf der Artikeldetailseite für bepado.
                         <br />
                         <br />
-                        <span style="text-decoration:underline;">API Schlüssel</span>
+                        <span style=text-decoration:underline;>API Schlüssel</span>
                         Bitte hinterlegen Sie an dieser Stelle Ihren API Key, um eine Verbindung zu bepado aufzubauen.
                         Sie finden Ihren API-Key auf sn.bepado.de unterhalb der Einstellungen im Tab-Reiter Synchronisation.
                     </p>

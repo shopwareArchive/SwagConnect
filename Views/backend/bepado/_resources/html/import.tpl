@@ -8,12 +8,12 @@
                     <strong>Konfiguration</strong>
                     <p>Hier können Sie den Import von bepado Produkten in Ihr System konfigurieren.</p>
                     <p>
-                        <span style="text-decoration:underline;">Felder beim Import überschreiben</span>
+                        <span style=text-decoration:underline;>Felder beim Import überschreiben</span>
                         Die hier ausgewählten Felder werden automatisch überschrieben, wenn der Quellshop diese ändert.
                         Sie können auf Artikel Ebene Ausnahmen definieren.
                     </p>
                     <p>
-                        <span style="text-decoration:underline;">Bilder beim Produkt-Erstimport importieren</span>
+                        <span style=text-decoration:underline;>Bilder beim Produkt-Erstimport importieren</span>
                         Der Import von Bildern kann den Import verlangsamen. Wenn Sie viele Produkte
                         Importieren möchten, sollten Sie diese Option nicht aktivieren und die Bilder per CronJob oder
                         über „geänderte Produkte“ importieren.

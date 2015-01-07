@@ -10,7 +10,7 @@
         <br>
         <br>
         Sie können viele verschiedene ERP- und Shopsysteme an bepado andocken, wozu Ihnen eine Vielzahl
-        von Schnittstellen zur Verfügung steht - <a href="http://info.bepado.de/schnittstellen" target="_blank">
+        von Schnittstellen zur Verfügung steht - <a href=http://info.bepado.de/schnittstellen target=_blank>
             Mehr Info</a>
     </div>
 </div>

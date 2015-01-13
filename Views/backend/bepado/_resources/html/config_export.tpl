@@ -5,17 +5,17 @@
             <br>
             <br>
             <ul>
-                <li class="question">
+                <li class=question>
                     <p>
                         Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu bepado exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.
                     </p>
                 </li>
-                <li class="question">
+                <li class=question>
                     <p>
                         Hier geben Sie an, in welche bepado Kategorie Ihre Produkte exportiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.
                     </p>
                 </li>
-                <li class="question">
+                <li class=question>
                     <p>
                         Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden.
                         Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen.

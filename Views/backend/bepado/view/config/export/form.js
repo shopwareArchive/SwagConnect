@@ -54,7 +54,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         autoProductSync: '{s name=config/export/auto_product_sync_label}Automatically sync changed products to bepado{/s}',
         autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        defaultCategory: '{s name=config/export/default_export_category}Default Export category{/s}',
+        defaultCategory: '{s name=config/export/default_category}Standard export-Kategorie{/s}',
         synchronization: '{s name=synchronization}Synchronization{/s}',
         synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',

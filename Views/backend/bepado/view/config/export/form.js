@@ -57,6 +57,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         defaultCategory: '{s name=config/export/default_export_category}Default Export category{/s}',
         synchronization: '{s name=synchronization}Synchronization{/s}',
         synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
+        priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
+        priceConfigurationDescription: '{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -120,12 +122,12 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         var container = me.createProductContainer();
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
-            title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
+            title: me.snippets.priceConfiguration ,
             disabled: false,
             items: [
                 {
                     xtype: 'label',
-                    html: '{s name=config/export/label/price_description}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
+                    html: me.snippets.priceConfigurationDescription
                 },
                 me.createPriceField('price'),
                 me.createPriceField('purchasePrice')

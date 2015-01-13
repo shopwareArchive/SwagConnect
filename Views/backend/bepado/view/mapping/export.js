@@ -9,7 +9,8 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
     layout: 'border',
 
     snippets: {
-        emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}'
+        emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}',
+        description: '{s name=mapping/message/export/description}Legen Sie hier fest in welchen Kategorien Ihre Produkte auf bepado angezeigt werden sollen.{/s}'
     },
     
     initComponent: function() {
@@ -52,7 +53,11 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                         return value;
                     }
                 }, me.getActionColumn()],
-                dockedItems: [ me.getButtons(), me.getToolbar() ]
+                dockedItems: [
+                    me.getDescriptionBar(),
+                    me.getButtons(),
+                    me.getToolbar()
+                ]
             }]
         });
 
@@ -65,6 +70,16 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
         );
 
         me.callParent(arguments);
+    },
+
+    getDescriptionBar: function() {
+        var me =this;
+
+        return {
+            xtype: 'container',
+            padding: '10 0 10 10',
+            html: me.snippets.description
+        };
     },
 
     getActionColumn: function() {

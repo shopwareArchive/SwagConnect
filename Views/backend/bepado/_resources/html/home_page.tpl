@@ -1,4 +1,4 @@
-{s name=text/home_page namespace=backend/bepado/view/main}
+{s name=text/home/page namespace=backend/bepado/view/main}
 <div class=bepado-home-page>
     <h3 class=headline>bepado – be part of it!</h3>
     <div class=content>
@@ -24,7 +24,7 @@
             </li>
 
             <li>
-                <strong>Kategoriezuweisung</strong>
+                <strong>Kategorie-Mapping</strong>
                 <p>Weisen Sie Ihren Kategorien eine von den vorgegebenen Kategorien auf bepado zu.</p>
             </li>
 

@@ -11,13 +11,13 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
         children: [
             { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'bepado-icon' },
             {
-                id: 'config', text: "{s name=navigation/settings}Settings{/s}",
+                id: 'config', text: "{s name=navigation/settings/settings}Einstellungen{/s}",
                 leaf: false,
                 expanded: true,
                 children: [
                     {
                         id: 'config-units',
-                        text: "{s name=navigation/config_units}Units{/s}",
+                        text: "{s name=navigation/units}Einheiten{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
                     },

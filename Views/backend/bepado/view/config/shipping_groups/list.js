@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.List', {
         priceHeader: '{s name=config/shipping_groups/price}Price{/s}',
         zipPrefixHeader: '{s name=config/shipping_groups/zip_prefix}Zip prefix{/s}',
         save: '{s name=config/shipping_groups/save}Save{/s}',
-        addGroup: '{s name=config/shipping_groups/add_group}Add group{/s}',
+        addGroup: '{s name=config/shipping_groups/add/group}Gruppe hinzufügen{/s}',
         addRule: '{s name=config/shipping_groups/add_rule}Add rule{/s}',
         deleteGroup: '{s name=config/shipping_groups/delete_group}Delete group{/s}'
     },

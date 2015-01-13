@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup', {
     width: 500,
     height:'30%',
     modal: true,
-    title: '{s name=config/shipping_groups/add_group}Add group{/s}',
+    title: '{s name=config/shipping_groups/add/group}Gruppe hinzufügen{/s}',
 
     initComponent: function() {
         var me = this;

@@ -59,8 +59,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
                 region: 'center',
                 bodyPadding: 10,
                 items: [{
-                    xtype: 'bepado-config-description'
-                }, {
                     xtype: 'bepado-config-tabs'
                 }]
             }

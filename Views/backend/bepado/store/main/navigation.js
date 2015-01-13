@@ -11,16 +11,10 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
         children: [
             { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'bepado-icon' },
             {
-                id: 'settings-main', text: "{s name=navigation/settings}Settings{/s}",
+                id: 'config', text: "{s name=navigation/settings}Settings{/s}",
                 leaf: false,
                 expanded: true,
                 children: [
-                    {
-                        id: 'config',
-                        text: "{s name=navigation/config}Configuration{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-wrench-screwdriver'
-                    },
                     {
                         id: 'config-units',
                         text: "{s name=navigation/config_units}Units{/s}",
@@ -36,16 +30,10 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 ]
             },
             {
-                id: 'import-main', text: "{s name=navigation/config_import}Import{/s}",
+                id: 'config-import', text: "{s name=navigation/config_import}Import{/s}",
                 leaf: false,
                 expanded: true,
                 children: [
-                    {
-                        id: 'config-import',
-                        text: "{s name=navigation/config}Configuration{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-wrench-screwdriver'
-                    },
                     {
                         id: 'mapping-import',
                         text: "{s name=navigation/mapping}Category mapping{/s}",
@@ -67,15 +55,9 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 ]
             },
             {
-                id: 'export-main', text: "{s name=navigation/config_export}Export{/s}", leaf: false,
+                id: 'config-export', text: "{s name=navigation/config_export}Export{/s}", leaf: false,
                 expanded: true,
                 children: [
-                    {
-                        id: 'config-export',
-                        text: "{s name=navigation/config}Configuration{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-wrench-screwdriver'
-                    },
                     {
                         id: 'mapping-export',
                         text: "{s name=navigation/mapping}Category mapping{/s}",

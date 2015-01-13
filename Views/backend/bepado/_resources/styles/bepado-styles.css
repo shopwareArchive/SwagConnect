@@ -28,6 +28,11 @@
     background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
     padding: 0 0 0 25px;
 }
+.bepado-info li.question {
+    margin: 0 0 8px;
+    background: url("../images/icon_list-question.png") no-repeat 0 2px;
+    padding: 0 0 0 25px;
+}
 .bepado-info .content { width: 100% }
 .bepado-info .headline {
     font-size: 21px;

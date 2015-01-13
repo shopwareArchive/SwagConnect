@@ -55,6 +55,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
         defaultCategory: '{s name=config/export/default_export_category}Default Export category{/s}',
+        synchronization: '{s name=synchronization}Synchronization{/s}',
+        synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -114,7 +116,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      */
     createElements: function () {
         var me = this;
-
+        var syncFieldset = me.getSyncFieldset();
         var container = me.createProductContainer();
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
@@ -151,9 +153,48 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             {
                 xtype: 'bepado-config-export-description'
             },
+            syncFieldset,
             container,
             me.priceMappingsFieldSet
         ];
+    },
+
+    getSyncFieldset: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.synchronization,
+            defaultType: 'textfield',
+            layout: 'anchor',
+            html: me.snippets.synchronizationBarDescription,
+            items: [ me.createProgressBar() ]
+        });
+    },
+
+    /**
+     * Returns a new progress bar for a detailed view of the exporting progress status
+     *
+     * @param name
+     * @param text
+     * @returns [object]
+     */
+    createProgressBar: function(name, text, value) {
+        var me = this;
+
+        me.progressBar = Ext.create('Ext.ProgressBar', {
+            animate: true,
+            name: 'progress-name',
+            text: '{s name=config/message/done}Done{/s}',
+            margin: '0 0 15',
+            border: 1,
+            style: 'border-width: 1px !important;',
+            cls: 'left-align',
+            value: 25
+        });
+        me.fireEvent('calculateFinishTime', me.progressBar);
+
+        return me.progressBar;
     },
 
     /**

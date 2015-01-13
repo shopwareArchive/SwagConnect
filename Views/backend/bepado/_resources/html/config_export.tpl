@@ -1,27 +1,26 @@
-{s name=text/config_export namespace=backend/bepado/view/main}
+{s name=text/config_export_description namespace=backend/bepado/view/main}
     <div class=bepado-info>
         <div class=content>
             Hier können Sie den Export von lokalen-Produkten nach bepado beeinflussen.
             <br>
             <br>
             <ul>
-                <li>
-                    <strong>Produkt-Beschreibungsfeld</strong>
-                    <p>Hier konfigurieren Sie, welches Feld Sie als Produkt-Langbeschreibung nach bepado exportieren möchten.
-                    Haben Sie in ihrer Langbeschreibung aufwändige SEO-optimierte Texte gepflegt, möchten Sie vielleicht
-                    eher »attribute.bepadoProductDescription« verwenden, dieses spezielle bepado-Beschreibungsfeld finden
-                    Sie in der Artikel-Eingabemake unter »Zusatzfeld«</p>
+                <li class="question">
+                    <p>
+                        Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu bepado exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.
+                    </p>
                 </li>
-                <li>
-                    <strong>Geänderte Produkte automatisch synchronisieren</strong>
-                    <p>Wenn Sie ein nach bepado exportiertes Produkt ändern (etwa im Preis), wird die Änderung automatisch
-                    nach bepado synchronisiert. So müssen Sie die Aktualisierungen nicht händisch durchführen.</p>
+                <li class="question">
+                    <p>
+                        Hier geben Sie an, in welche bepado Kategorie Ihre Produkte exportiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.
+                    </p>
                 </li>
-                <li>
-                    <strong>Preis Konfiguration</strong>
-                    <p>bepado-Produkte haben einen »price« (Endkunden-Preis) und einen »purchasePrice« (Händler-Preis).
-                        Konfigurieren Sie hier, aus welche lokalen Kundengruppe und welchem Preisfeld die entsprechenden Preise ausgelesen
-                        werden sollen</p>
+                <li class="question">
+                    <p>
+                        Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden.
+                        Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen.
+                        Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.
+                    </p>
                 </li>
             </ul>
         </div>

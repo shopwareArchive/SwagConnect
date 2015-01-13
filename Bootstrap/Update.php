@@ -266,7 +266,7 @@ class Update
         $configComponent->setConfig('overwriteProductImage', $this->bootstrap->Config()->get('overwriteProductImage'), 1, 'import');
         $configComponent->setConfig('overwriteProductShortDescription', $this->bootstrap->Config()->get('overwriteProductShortDescription'), 1, 'import');
         $configComponent->setConfig('overwriteProductLongDescription', $this->bootstrap->Config()->get('overwriteProductLongDescription'), 1, 'import');
-        $configComponent->setConfig('logRequest', $this->bootstrap->Config()->get('logRequest'), 0, 'general');
+        $configComponent->setConfig('logRequest', $this->bootstrap->Config()->get('logRequest', 1), 0, 'general');
     }
 
 

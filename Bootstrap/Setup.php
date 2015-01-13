@@ -335,7 +335,7 @@ class Setup
             'overwriteProductImage' => array('1', null, 'import'),
             'overwriteProductShortDescription' => array('1', null, 'import'),
             'overwriteProductLongDescription' => array('1', null, 'import'),
-            'logRequest' => array('0', null, 'general'),
+            'logRequest' => array('1', null, 'general'),
             'shippingCostsPage' => array('6', null, 'general'),
             'articleImagesLimitImport' => array(10, null, 'import'),
         );

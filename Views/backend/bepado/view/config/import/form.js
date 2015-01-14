@@ -51,13 +51,16 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
-        overwritePropertiesLabel: '{s name=config/import/overwrite_properties_label}Overwrite the following properties during import{/s}',
+        importPicturesHelp: '{s name=config/import/pictures_help}Der Import von Bildern kann den Import verlangsamen. Wenn Sie viele Produkte importieren möchten, sollten Sie diese Option nicht aktivieren und die Bilder über den CronJob oder »Geänderte Produkte« importieren.{/s}',
+        overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Folgende Felder beim Produkt-Aktualisierung überschreiben{/s}',
+        overwritePropertiesHelp: '{s name=config/import/overwrite_properties_help}Die hier ausgewählten Felder werden automatisch überschrieben, wenn der Quellshop diese ändert. Sie können auf Artikel-Ebene Ausnahmen definieren.{/s}',
         overwriteProductName: '{s name=config/import/overwrite_product_name}Product name{/s}',
         overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
+        defaultCategoryHelp: '{s name=config/import/default_import_category_help}Hier geben Sie an, in welche Shop Kategorie Ihre Produkte importiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}',
         defaultCategory: '{s name=config/import/default_import_category}Default import category{/s}'
     },
 
@@ -175,6 +178,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             boxLabel  : me.snippets.overwriteProductName,
                             name      : 'overwriteProductName',
                             inputValue: 1,
+                            helpText: me.snippets.overwritePropertiesHelp,
                             uncheckedValue: 0
                         }, {
                             boxLabel  : me.snippets.overwriteProductPrice,
@@ -203,12 +207,14 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                 {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
+                    margin: '0 0 0 50',
                     labelWidth: me.defaults.labelWidth,
                     items: [
                         {
                             xtype: 'checkbox',
                             name: 'importImagesOnFirstImport',
                             fieldLabel: me.snippets.importPicturesLabel,
+                            helpText: me.snippets.importPicturesHelp,
                             inputValue: 1,
                             uncheckedValue: 0,
                             labelWidth: me.defaults.labelWidth,
@@ -228,6 +234,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                             editable: true,
                             fieldLabel: me.snippets.defaultCategory,
                             labelWidth: me.defaults.labelWidth,
+                            helpText: me.snippets.defaultCategoryHelp,
                             store: categoriesStore,
                             displayField: 'name',
                             valueField: 'id',
@@ -243,11 +250,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
                 ]
         });
 
-        return [ {
-            xtype: 'bepado-config-import-description'
-        },
-            container
-        ];
+        return [ container ];
     },
 
     /**

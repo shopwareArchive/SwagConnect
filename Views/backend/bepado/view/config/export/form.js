@@ -51,10 +51,12 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
+        productDescriptionFieldHelp: '{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu bepado exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',
         autoProductSync: '{s name=config/export/auto_product_sync_label}Automatically sync changed products to bepado{/s}',
         autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
         defaultCategory: '{s name=config/export/default_category}Standard export-Kategorie{/s}',
+        defaultCategryHelp: '{s name=config/export/default_category_help}Hier geben Sie an, in welche bepado Kategorie Ihre Produkte exportiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}',
         synchronization: '{s name=synchronization}Synchronization{/s}',
         synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
@@ -152,9 +154,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         });
 
         return [
-            {
-                xtype: 'bepado-config-export-description'
-            },
             syncFieldset,
             container,
             me.priceMappingsFieldSet
@@ -301,6 +300,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         var me = this,
             defaultExportCategory = Ext.create('Ext.form.TextField',{
                 name: 'defaultExportCategory',
+                helpText: me.snippets.defaultCategryHelp,
                 readOnly: true,
                 flex: 4
             });
@@ -315,6 +315,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     xtype: 'combobox',
                     fieldLabel: me.snippets.productDescriptionFieldLabel,
                     emptyText: me.snippets.emptyText,
+                    helpText: me.snippets.productDescriptionFieldHelp,
                     name: 'alternateDescriptionField',
                     store: new Ext.data.SimpleStore({
                         fields: [ 'value', 'text' ],

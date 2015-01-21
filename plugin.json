@@ -10,9 +10,9 @@
     "currentVersion": "1.5.3",
     "changelog": {
         "de": {
-            "1.5.3": "New: Restruction of the bepado plugin",
-            "1.5.2": "New: Added loading bar that gives you information about the duration of the synchronization between bepado and shopware",
-            "1.5.1": "New: Added link to the API key in Social Network",
+            "1.5.3": "Neu: Restrukturierung des bepado-Plugins",
+            "1.5.2": "Neu: Ladeindikator für die Synchronisation zwischen Bepado und Shopware",
+            "1.5.1": "Neu: Link zum API-Key im SN",
             "1.5.0": "Korrektur: Bilder-Importe in älteren SW-Versionen",
             "1.4.97": "Neu: Versandkosten pro Produkt; Korrektur: Kategorie-Zuweisung",
             "1.4.82": "Fixes update issue; Minor bugfix"

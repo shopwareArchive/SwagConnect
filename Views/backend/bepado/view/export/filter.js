@@ -116,6 +116,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 name: 'supplierId',
                 anchor: '100%',
                 allowBlank: true,
+                pageSize: 25,
                 store: 'base.Supplier'
             }]
         }

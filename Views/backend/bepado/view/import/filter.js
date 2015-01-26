@@ -89,6 +89,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Filter', {
             bodyPadding: 5,
             items: [{
                 xtype: 'base-element-select',
+                pageSize: 25,
                 name: 'supplierId',
                 anchor: '100%',
                 allowBlank: true,

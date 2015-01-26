@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.5.4",
+    "currentVersion": "1.5.5",
     "changelog": {
         "de": {
+            "1.5.5": "New: Link to bepado interfaces page",
             "1.5.4": "Fix: Paginated manufacturer combo in import / export views",
             "1.5.3": "Neu: Restrukturierung des bepado-Plugins",
             "1.5.2": "Neu: Ladeindikator für die Synchronisation zwischen Bepado und Shopware",
@@ -19,6 +20,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.5.5": "New: Link to bepado interfaces page",
             "1.5.4": "Fix: Paginated manufacturer combo in import / export views",
             "1.5.3": "New: Restruction of the bepado plugin",
             "1.5.2": "New: Added loading bar that gives you information about the duration of the synchronization between bepado and shopware",

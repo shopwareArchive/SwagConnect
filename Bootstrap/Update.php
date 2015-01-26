@@ -376,7 +376,7 @@ class Update
 
     public function removeApiDescriptionSnippet()
     {
-        if (version_compare($this->version, '1.5.0', '<=')) {
+        if (version_compare($this->version, '1.5.5', '<=')) {
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 

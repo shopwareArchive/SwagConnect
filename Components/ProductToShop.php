@@ -292,6 +292,17 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($bepadoAttribute);
 
         $this->manager->flush();
+
+        // some articles from bepado have long sourceId
+        // like OXID articles. They use md5 has, but it is not support
+        // in shopware.
+        if (strlen($detail->getNumber()) > 30) {
+            $detail->setNumber('BP-' . $product->shopId . '-' . $detail->getId());
+
+            $this->manager->persist($detail);
+            $this->manager->flush($detail);
+        }
+
         $this->manager->clear();
 
         //clear cache for that article

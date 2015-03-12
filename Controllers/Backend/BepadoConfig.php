@@ -368,18 +368,10 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     public function getMarketplaceAttributesAction()
     {
-        //todo@sb: call SocialNetwork API
-        $marketplaceAttributes = array(
-            'attributes' => array(
-                'foo' => 'Foo',
-                'bar' => 'Bar',
-                'raz' => 'Daz',
-                'gaz' => 'Maz',
-            )
-        );
+        $marketplaceAttributes = $this->getSDK()->getMarketplaceProductAttributes();
 
         $attributes = array();
-        foreach ($marketplaceAttributes['attributes'] as $attributeKey => $attributeLabel) {
+        foreach ($marketplaceAttributes as $attributeKey => $attributeLabel) {
             $attributes[] = array(
                 'attributeKey' => $attributeKey,
                 'attributeLabel' => $attributeLabel,

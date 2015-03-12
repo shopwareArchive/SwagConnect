@@ -257,7 +257,8 @@ class BepadoFactory
             $this->getModelManager(),
             $this->getConfigComponent()->getConfig('alternateDescriptionField'),
             $this->getProductBaseUrl(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            $this->getMarketplaceGateway()
         );
     }
 

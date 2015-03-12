@@ -57,20 +57,29 @@ class MarketplaceGateway
      */
     public function setMarketplaceMapping(array $attributes)
     {
-        foreach ($attributes as $attribute) {
+        array_walk($attributes, function($attribute) {
             $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
                 array(
                     'marketplaceAttribute' => $attribute['attributeKey'],
                 )
             );
+
             if (! $mappingModel) {
-                $mappingModel = new MarketplaceAttribute();
-                $mappingModel->setMarketplaceAttribute($attribute['attributeKey']);
+                $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
+                    array(
+                        'localAttribute' => $attribute['shopwareAttributeKey'],
+                    )
+                );
             }
 
+            if (! $mappingModel) {
+                $mappingModel = new MarketplaceAttribute();
+            }
+
+            $mappingModel->setMarketplaceAttribute($attribute['attributeKey']);
             $mappingModel->setLocalAttribute($attribute['shopwareAttributeKey']);
             $this->manager->persist($mappingModel);
-        }
+        });
 
         $this->manager->flush();
     }
@@ -85,7 +94,7 @@ class MarketplaceGateway
         return array_map(function($mapping) {
             return array(
                 'shopwareAttributeKey' => $mapping->getLocalAttribute(),
-                'shopwareAttributeLabel' => $mapping->getMarketplaceAttribute(),
+                'attributeKey' => $mapping->getMarketplaceAttribute(),
             );
         }, $this->getMarketplaceAttributeRepository()->findAll());
     }

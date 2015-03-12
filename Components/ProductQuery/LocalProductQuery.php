@@ -6,6 +6,7 @@ use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Bepado\Components\Logger;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -29,12 +30,21 @@ class LocalProductQuery extends BaseProductQuery
     /** @var \Shopware\Bepado\Components\Config $configComponent */
     protected $configComponent;
 
-    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl, $configComponent)
+    protected $marketplaceGateway;
+
+    public function __construct(
+        ModelManager $manager,
+        $productDescriptionField,
+        $baseProductUrl,
+        $configComponent,
+        MarketplaceGateway $marketplaceGateway
+    )
     {
         $this->manager = $manager;
         $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
+        $this->marketplaceGateway = $marketplaceGateway;
     }
 
     /**
@@ -42,7 +52,7 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-
+        $articleAttributeAlias = 'attribute';
         $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
         $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
         $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
@@ -84,9 +94,11 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
-            'attribute.bepadoArticleShipping as shipping'
+            "{$articleAttributeAlias}.bepadoArticleShipping as shipping"
         ));
 
+
+        $builder = $this->addMarketplaceAttributeSelect($builder, $articleAttributeAlias);
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);
 
         $builder->setParameter('priceCustomerGroup', $exportPriceCustomerGroup);
@@ -214,6 +226,45 @@ class LocalProductQuery extends BaseProductQuery
     public function getUrlForProduct($productId)
     {
         return $this->baseProductUrl . $productId;
+    }
+
+    /**
+     * Select attributes  which are already mapped to marketplace
+     *
+     * @param QueryBuilder $builder
+     * @param $alias
+     * @return QueryBuilder
+     */
+    private function addMarketplaceAttributeSelect(QueryBuilder $builder, $alias)
+    {
+        array_walk($this->marketplaceGateway->getMappings(), function($mapping) use ($builder, $alias) {
+            if (strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0) {
+                $builder->addSelect("{$alias}.{$mapping['shopwareAttributeKey']}");
+            }
+        });
+
+        return $builder;
+    }
+
+    /**
+     * Returns shopware to martketplace attributes mapping as array
+     *
+     * @return array
+     */
+    public function getAttributeMapping()
+    {
+        $mappings = $this->marketplaceGateway->getMappings();
+
+        return array_merge(
+            array_filter(array_combine(array_map(function($mapping) {
+                return $mapping['shopwareAttributeKey'];
+            }, $mappings), array_map(function($mapping) {
+                return $mapping['attributeKey'];
+            }, $mappings)), function($mapping) {
+                return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
+            }),
+            $this->attributeMapping
+        );
     }
 }
 

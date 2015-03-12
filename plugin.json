@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.5.6",
+    "currentVersion": "1.5.7",
     "changelog": {
         "de": {
+            "1.5.7": "New: Added possibility to export/import custom product attribute",
             "1.5.6": "Fix: Import Oxid articles",
             "1.5.5": "New: Link to bepado interfaces page",
             "1.5.4": "Fix: Paginated manufacturer combo in import / export views",
@@ -21,6 +22,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.5.7": "New: Added possibility to export/import custom product attribute",
             "1.5.6": "Fix: Import Oxid articles",
             "1.5.5": "New: Link to bepado interfaces page",
             "1.5.4": "Fix: Paginated manufacturer combo in import / export views",

@@ -80,6 +80,7 @@ class Update
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
+        $this->createMarketplaceAttributesTable();
 
         return true;
     }
@@ -388,6 +389,19 @@ class Update
                 $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
                 $cacheManager->clearTemplateCache();
             }
+        }
+    }
+
+    public function createMarketplaceAttributesTable()
+    {
+        if (version_compare($this->version, '1.5.6', '<=')) {
+            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `marketplace_attribute` varchar(255) NOT NULL,
+              `local_attribute` varchar(255) NULL DEFAULT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+            Shopware()->Db()->exec($sql);
         }
     }
 }

@@ -14,7 +14,7 @@ Ext.define('Shopware.apps.Bepado', {
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
         'mapping.Export', 'mapping.Import',
 		'config.general.Panel', 'config.general.Form', 'config.import.Panel', 'config.export.Panel', 'config.Tabs',
-        'config.import.Form', 'config.export.Form',
+        'config.import.Form', 'config.export.Form', 'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping',
         'config.units.Panel', 'config.units.Mapping', 'config.shippingGroups.Panel', 'config.shippingGroups.List',
         'config.shippingGroups.AddGroup', 'config.shippingGroups.AddRule', 'config.shippingGroups.DeleteGroup'
     ],

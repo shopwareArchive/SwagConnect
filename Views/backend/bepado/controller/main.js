@@ -16,14 +16,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'mapping.Import', 'mapping.Export',
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup',
-        'config.Units', 'config.BepadoUnits', 'shippingGroup.Groups', 'shippingGroup.Rules'
+        'config.Units', 'config.BepadoUnits', 'config.MarketplaceAttributes',
+        'shippingGroup.Groups', 'shippingGroup.Rules', 'config.LocalProductAttributes'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product',
         'log.List', 'shippingGroup.Group', 'shippingGroup.Rule',
-        'config.General', 'config.Import', 'config.Units', 'config.BepadoUnit', 'config.Pages'
+        'config.General', 'config.Import', 'config.Units', 'config.MarketplaceAttributes',
+        'config.BepadoUnit', 'config.Pages', 'config.LocalProductAttributes'
     ],
 
     refs: [
@@ -41,6 +43,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'logFilter', selector: 'bepado-log-filter' },
         { ref: 'logTabs', selector: 'bepado-log-tabs' },
         { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
+        { ref: 'marketeplaceMappingPanel', selector: 'bepado-config-marketplace-attributes' },
+        { ref: 'marketeplaceMapping', selector: 'bepado-marketplace-attributes-mapping' },
         { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
         { ref: 'shippingGroupsPanel', selector: 'bepado-shipping-groups' },
         { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' },
@@ -425,6 +429,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-units-mapping button[action=save]': {
                 click: function () {
                     me.saveUnitsMapping();
+                }
+            },
+            'bepado-marketplace-attributes-mapping button[action=save]': {
+                click: function () {
+                    me.saveMarketplaceAttributesMapping();
                 }
             }
         });
@@ -1081,6 +1090,24 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             failure:function (batch) {
                 panel.setLoading(false);
                 me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Units mapping could not be saved.{/s}');
+            }
+        });
+    },
+
+    saveMarketplaceAttributesMapping: function() {
+        var me = this,
+            panel = me.getMarketeplaceMappingPanel(),
+            productAttributesStore = me.getMarketeplaceMapping().localProductAttributesStore;
+
+        panel.setLoading();
+        productAttributesStore.sync({
+            success :function (records, operation) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=success}Success{/s}','Success');
+            },
+            failure:function (batch) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=error}Error{/s}','Error');
             }
         });
     },

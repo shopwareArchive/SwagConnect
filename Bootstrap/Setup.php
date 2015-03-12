@@ -159,6 +159,12 @@ class Setup
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `marketplace_attribute` varchar(255) NOT NULL,
+              `local_attribute` varchar(255) NULL DEFAULT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
              `id` int(11) NOT NULL AUTO_INCREMENT,
              `article_id` int(11) unsigned DEFAULT NULL,

@@ -397,8 +397,8 @@ class Update
         if (version_compare($this->version, '1.5.6', '<=')) {
             $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
-              `marketplace_attribute` varchar(255) NOT NULL,
-              `local_attribute` varchar(255) NULL DEFAULT NULL,
+              `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
+              `local_attribute` varchar(255) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
             Shopware()->Db()->exec($sql);

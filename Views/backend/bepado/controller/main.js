@@ -1085,11 +1085,11 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         unitsStore.sync({
             success :function (records, operation) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/units/success_save_message}{/s}');
+                me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
             },
             failure:function (batch) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Units mapping could not be saved.{/s}');
+                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
             }
         });
     },
@@ -1103,11 +1103,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         productAttributesStore.sync({
             success :function (records, operation) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=success}Success{/s}','Success');
+                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
             },
             failure:function (batch) {
+                console.log(batch);
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}','Error');
+                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
             }
         });
     },

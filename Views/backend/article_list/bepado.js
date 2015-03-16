@@ -22,19 +22,21 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
         me.callOverridden(arguments);
 
-        me.editor.on('beforeedit', function(editor, context, eOpts) {
+        me.rowEditing.on('beforeedit', function(editor, context, eOpts) {
             var me = this;
 
             if (!me.columns || !context.record) {
                 return;
             }
 
-            if (!me.priceColumn) {
+            if (me.hasOwnProperty('priceColumn')) {
                 me.getPriceColumn();
             }
 
             // Disable the price column for bepado products
-            me.priceColumn.getEditor().setDisabled(context.record.get('bepado'));
+            if (me.hasOwnProperty('priceColumn')) {
+                me.priceColumn.getEditor().setDisabled(context.record.get('bepado'));
+            }
         }, me);
     },
 

@@ -64,8 +64,8 @@
                     {/foreach}
                     </tbody>
                 </table>
-                {foreachelse}
-                    <p>{s name="bepado_dispatch_no_rules_available"}Für dieses Lager sind zZt keine Regeln verfügbar.{/s}</p>
+			{foreachelse}
+				<p>{s name="bepado_dispatch_no_rules_available"}Für dieses Lager sind zZt keine Regeln verfügbar.{/s}</p>
             {/foreach}
             <div class="clear"></div>
             {if $freeCarriage}

@@ -23,8 +23,8 @@ Ext.define('Shopware.apps.Shipping.model.Attribute', {
 /**
  * This block does not exist before 4.2.0
  */
-//{block name="backend/shipping/model/attribute/fields"}
-//   { name : 'bepadoAllowed', type : 'int' },
+//{block name="backend/shipping/model/attribute/fields" append}
+   { name: 'bepadoAllowed', type: 'int' },
 //{/block}
 
 /**
@@ -42,12 +42,13 @@ Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
         var me = this,
             items = me.callOverridden(arguments);
 
-        items.push({
-            xtype : 'checkbox',
-            name : 'attribute[bepadoAllowed]',
-            internalName: 'bepado',
-            fieldLabel : '{s name=shipping/bepadoAllowed}Allow with bepado{/s}'
-        });
+        // bepadoAllowed is not used during checkout
+        //items.push({
+        //    xtype : 'checkbox',
+        //    name : 'attribute[bepadoAllowed]',
+        //    internalName: 'bepado',
+        //    fieldLabel : '{s name=shipping/bepadoAllowed}Allow with bepado{/s}'
+        //});
 
         return items;
     }

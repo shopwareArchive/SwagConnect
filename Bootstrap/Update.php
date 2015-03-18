@@ -68,18 +68,15 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
         }
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
+
+        if (version_compare($this->version, '1.5.6', '<=')) {
+            $this->clearTemplateCache();
+        }
 
         return true;
     }
@@ -380,14 +377,19 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
+        }
+    }
+
+    private function clearTemplateCache()
+    {
+        // check shopware version, because Shopware()->Container()
+        // is available after version 4.2.x
+        if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+            Shopware()->Template()->clearAllCache();
+        } else {
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearTemplateCache();
         }
     }
 }

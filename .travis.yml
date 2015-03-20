@@ -5,13 +5,15 @@ php:
 sudo: false
 
 before_script:
-    - ls
-    - pwd
     - git clone https://github.com/shopware/shopware.git /tmp/shopware
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
     - cd ..
     - cd /tmp/shopware
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous static-lint
+    - mv -R /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Default/Backend
+    - cd /tmp/shopware
+    - php bin/console sw:plugin:install SwagBepado
+    - php bin/console sw:plugin:activate SwagBepado
     - cd /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
 
 script: phpunit

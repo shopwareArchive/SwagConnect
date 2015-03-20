@@ -1,0 +1,16 @@
+language: php
+php:
+  - 5.3
+
+sudo: false
+
+before_script:
+    - https://github.com/shopware/shopware.git /tmp/shopware
+    - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+    - cd ..
+    - mv . /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+    - cd /tmp/shopware
+    - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous static-lint
+    - cd /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+
+script: phpunit

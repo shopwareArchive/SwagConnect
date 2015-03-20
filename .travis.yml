@@ -12,6 +12,8 @@ before_script:
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous static-lint
     - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Default/Backend
     - cd /tmp/shopware
+    - ls /tmp/shopware/engine/Shopware/Plugins/Default/Backend
+    - ls /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
     - php bin/console sw:plugin:install SwagBepado
     - php bin/console sw:plugin:activate SwagBepado
     - cd /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado

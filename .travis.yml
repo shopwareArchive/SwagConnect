@@ -5,7 +5,7 @@ php:
 sudo: false
 
 before_script:
-    - https://github.com/shopware/shopware.git /tmp/shopware
+    - git clone https://github.com/shopware/shopware.git /tmp/shopware
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
     - cd ..
     - mv . /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado

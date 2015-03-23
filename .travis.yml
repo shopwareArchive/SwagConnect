@@ -5,13 +5,12 @@ php:
 sudo: false
 
 before_script:
-    - git clone https://github.com/shopware/shopware.git /tmp/shopware
+    - cd /tmp
+    - wget http://releases.s3.shopware.com.s3.amazonaws.com/install_4.3.2_e6d1f12c47e61fa1c10893665234cf13b6b3e9f0.zip
+    - unzip install_4.3.2_e6d1f12c47e61fa1c10893665234cf13b6b3e9f0.zip -d shopware
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
-    - cd ..
     - cd /tmp/shopware
-    - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous static-lint
     - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Local/Backend
-    - cd /tmp/shopware
     - ls engine/Shopware/Plugins/Local/Backend
     - php bin/console sw:plugin:list
     - php bin/console sw:plugin:install SwagBepado

@@ -56,11 +56,13 @@ class BepadoExport
     {
         $errors = array();
         if (count($ids) == 0) {
-            return false;
+            return $errors;
         }
+
         $implodedIds = '"' . implode('","', $ids) . '"';
         $bepadoItems = Shopware()->Db()->fetchAll(
             "SELECT bi.article_id as articleId,
+                    bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
@@ -71,54 +73,43 @@ class BepadoExport
         );
 
         foreach ($bepadoItems as &$item) {
+            $model = $this->getArticleDetailById($item['articleDetailId']);
+            if($model === null) {
+                continue;
+            }
+            $bepadoAttribute = $this->helper->getOrCreateBepadoAttributeByModel($model);
+
             $prefix = $item['title'] ? $item['title'] . ': ' : '';
             if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
-                $item['exportStatus'] = 'insert';
+                $status = 'insert';
             } else {
-                $item['exportStatus'] = 'update';
+                $status = 'update';
             }
-            $item['exportMessage'] = null;
+            $bepadoAttribute->setExportStatus($status);
+            $bepadoAttribute->setExportMessage(null);
 
             $category = $this->helper->getBepadoCategoryForProduct($item['articleId']);
-            $item['category'] = $category;
+            $bepadoAttribute->setCategory($category);
 
-            $sql = "UPDATE s_plugin_bepado_items
-                SET export_status = :exportStatus,
-                export_message = :exportMessage,
-                category = :category
-                WHERE source_id = :sourceId;";
-
-            $statement = Shopware()->Db()->prepare($sql);
-            $statement->bindValue(':exportStatus', $item['exportStatus'], \PDO::PARAM_STR);
-            $statement->bindValue(':exportMessage', $item['exportMessage'], \PDO::PARAM_STR);
-            $statement->bindValue(':category', $item['category'], \PDO::PARAM_STR);
-            $statement->bindValue(':sourceId', $item['sourceId'], \PDO::PARAM_STR);
-
-            $statement->execute();
+            if (!$bepadoAttribute->getId()) {
+                $this->manager->persist($bepadoAttribute);
+            }
+            $this->manager->flush($bepadoAttribute);
 
             try {
-                if ($item['exportStatus'] == 'insert') {
+                if ($status == 'insert') {
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
             } catch (\Exception $e) {
-                $item['exportStatus'] = 'error';
-                $item['exportMessage'] = $e->getMessage() . "\n" . $e->getTraceAsString();
-
-                $sql = "UPDATE s_plugin_bepado_items
-                SET export_status = :exportStatus,
-                export_message = :exportMessage
-                WHERE source_id = :sourceId;";
-
-                $statement = Shopware()->Db()->prepare($sql);
-                $statement->bindValue(':exportStatus', $item['exportStatus'], \PDO::PARAM_STR);
-                $statement->bindValue(':exportMessage', $item['exportMessage'], \PDO::PARAM_STR);
-                $statement->bindValue(':sourceId', $item['sourceId'], \PDO::PARAM_STR);
-
-                $statement->execute();
+                $bepadoAttribute->setExportStatus($status);
+                $bepadoAttribute->setExportMessage(
+                    $e->getMessage() . "\n" . $e->getTraceAsString()
+                );
 
                 $errors[] = " &bull; " . $prefix . $e->getMessage();
+                $this->manager->flush($bepadoAttribute);
             }
         }
 

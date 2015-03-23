@@ -7,13 +7,13 @@ sudo: false
 before_script:
     - git clone --branch 4.3.2 https://github.com/shopware/shopware.git /tmp/shopware
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
-    - cd ..
     - cd /tmp/shopware
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware
     - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Local/Backend
     - cd /tmp/shopware
     - ls engine/Shopware/Plugins/Local/Backend
     - ls engine/Shopware/Plugins/Local/Backend/SwagBepado
+    - php bin/console sw:plugin:refresh
     - php bin/console sw:plugin:list
     - php bin/console sw:plugin:install SwagBepado
     - php bin/console sw:plugin:activate SwagBepado

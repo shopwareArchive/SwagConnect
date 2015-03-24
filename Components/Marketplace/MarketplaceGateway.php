@@ -138,7 +138,7 @@ class MarketplaceGateway
             return null;
         }
 
-        return $mappingModel->getMarketplaceAttribute();
+        return $mappingModel->getLocalAttribute();
     }
 
     /**

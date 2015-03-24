@@ -81,7 +81,8 @@ class XmlCallUnmarshaller extends CallUnmarshaller
      */
     private function loadXml($data)
     {
-        if (!is_string($data)) {
+        if (!is_string($data) ||
+            !$data) {
             throw new \UnexpectedValueException("XML string is required for unmarshalling.");
         }
 

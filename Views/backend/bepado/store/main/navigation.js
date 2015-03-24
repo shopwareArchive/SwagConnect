@@ -22,6 +22,12 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                         iconCls: 'sprite-inbox-upload'
                     },
                     {
+                        id: 'marketplace-attributes',
+                        text: "{s name=navigation/marketplace_attribute}Marketplace attributes{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-ui-scroll-pane-detail'
+                    },
+                    {
                         id: 'log',
                         text: "{s name=navigation/log}Log{/s}",
                         leaf: true,

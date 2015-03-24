@@ -238,6 +238,14 @@ class Shopping
             } elseif (is_array($response)) {
                 $this->applyRemoteShopChanges($response);
                 $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
+
+                if (count($reservation->messages[$shopId]) === 0) {
+                    $reservation->messages[$shopId] = array(
+                        new Struct\Message(array(
+                            'message' => 'An error occured on the remote shop during reservation, order is cancelled.'
+                        ))
+                    );
+                }
             } elseif ($response instanceof Struct\Message) {
                 $reservation->messages[$shopId] = array($response);
             } else {

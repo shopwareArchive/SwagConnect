@@ -55,6 +55,26 @@ class Product extends ShopItem
     const ATTRIBUTE_QUANTITY = 'quantity';
 
     /**
+     * Decribes the size of a variant.
+     */
+    const VARIANT_SIZE = 'size';
+
+    /**
+     * Describes the color of a variant.
+     */
+    const VARIANT_COLOR = 'color';
+
+    /**
+     * Describes the material of a variant.
+     */
+    const VARIANT_MATERIAL = 'material';
+
+    /**
+     * Decribes the pattern of a variant.
+     */
+    const VARIANT_PATTERN = 'pattern';
+
+    /**
      * Local ID of the product in your shop.
      *
      * ID should never change for one product or be reused for another product.
@@ -62,6 +82,16 @@ class Product extends ShopItem
      * @var string
      */
     public $sourceId;
+
+    /**
+     * Shared ID for product variants.
+     *
+     * This ID must be identical for all variants of the same product. If the product
+     * has no variants this property can be NULL.
+     *
+     * @var string
+     */
+    public $groupId;
 
     /**
      * The European Article Number (EAN) of the product.
@@ -110,6 +140,13 @@ class Product extends ShopItem
      * @var string
      */
     public $vendor;
+
+    /**
+     * The language of the product title, description etc.
+     *
+     * @var string
+     */
+    public $language = 'de';
 
     /**
      * The value added tax for this product. The property must be set as a numerical
@@ -259,6 +296,20 @@ class Product extends ShopItem
     public $attributes = array();
 
     /**
+     * Variant attributes, represented as key value pairs with data.
+     *
+     * There is a list of predefiend variant keys for common values:
+     *
+     * - "size"
+     * - "color"
+     * - "material"
+     * - "pattern"
+     *
+     * @var array
+     */
+    public $variant = array();
+
+    /**
      * Workdays until this product can be delivered.
      *
      * @var int
@@ -298,5 +349,23 @@ class Product extends ShopItem
             default:
                 return parent::__set($property, $value);
         }
+    }
+
+    /**
+     * Return the variant data as string representation.
+     *
+     * It combines all key-value pairs using a ; sign.
+     *
+     * @return string
+     */
+    public function getVariantString()
+    {
+        $data = array();
+
+        foreach ($this->variant as $key => $value) {
+            $data[] = $key . '=' . $value;
+        }
+
+        return implode(';', $data);
     }
 }

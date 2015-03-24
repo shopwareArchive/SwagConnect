@@ -49,7 +49,9 @@ class SDKBuilder
      */
     private $softwareVersion;
 
-    /** @var  \Bepado\SDK\ProductPayments */
+    /**
+     * @var \Bepado\SDK\ProductPayments
+     */
     private $productPayments;
 
     /**
@@ -189,8 +191,7 @@ class SDKBuilder
             !$this->apiEndpointUrl ||
             !$this->gateway ||
             !$this->productToShop ||
-            !$this->productFromShop ||
-            !$this->productPayments) {
+            !$this->productFromShop) {
 
             throw new \RuntimeException("Missing required argument for building SDK.");
         }

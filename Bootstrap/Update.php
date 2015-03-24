@@ -78,6 +78,8 @@ class Update
             $this->clearTemplateCache();
         }
 
+        $this->removeCloudSearch();
+
         return true;
     }
 
@@ -378,6 +380,14 @@ class Update
             Shopware()->Db()->exec($sql);
 
             $this->clearTemplateCache();
+        }
+    }
+
+    private function removeCloudSearch()
+    {
+        if (version_compare($this->version, '1.5.7', '<=')) {
+            $sql = "DELETE FROM `s_plugin_bepado_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
+            Shopware()->Db()->exec($sql);
         }
     }
 

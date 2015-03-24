@@ -325,7 +325,6 @@ class Setup
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
-            'cloudSearch' => array('0', null, 'general'),
             'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
             'bepadoAttribute' => array('19', null, 'general'),
             'importImagesOnFirstImport' => array('0', null, 'import'),

@@ -68,19 +68,18 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
         }
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
         $this->createMarketplaceAttributesTable();
+
+        if (version_compare($this->version, '1.5.6', '<=')) {
+            $this->clearTemplateCache();
+        }
+
+        $this->removeCloudSearch();
 
         return true;
     }
@@ -381,20 +380,33 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
+        }
+    }
+
+    private function removeCloudSearch()
+    {
+        if (version_compare($this->version, '1.5.7', '<=')) {
+            $sql = "DELETE FROM `s_plugin_bepado_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
+            Shopware()->Db()->exec($sql);
+        }
+    }
+
+    private function clearTemplateCache()
+    {
+        // check shopware version, because Shopware()->Container()
+        // is available after version 4.2.x
+        if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+            Shopware()->Template()->clearAllCache();
+        } else {
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearTemplateCache();
         }
     }
 
     public function createMarketplaceAttributesTable()
     {
-        if (version_compare($this->version, '1.5.6', '<=')) {
+        if (version_compare($this->version, '1.5.8', '<=')) {
             $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,

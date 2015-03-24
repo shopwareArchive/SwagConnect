@@ -37,20 +37,4 @@ class Shopware_Controllers_Widgets_Bepado extends Enlight_Controller_Action
     {
         return Shopware()->Bootstrap()->getResource('BepadoSDK');
     }
-
-    public function cloudSearchAction()
-    {
-        $sdk = $this->getSDK();
-        $request = $this->Request();
-
-        $search = new \Bepado\SDK\Struct\Search(array(
-            'query' => $request->get('query'),
-            'offset' => $request->get('offset', 0),
-            'limit' => min($request->get('limit', 12), 64),
-            'vendor' => $request->get('vendor'),
-            'priceFrom' => (float)$request->get('priceFrom'),
-            'priceTo' => (float)$request->get('priceTo'),
-        ));
-        $result = $sdk->search($search);
-    }
 }

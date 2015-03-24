@@ -54,7 +54,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        cloudSearchLabel: '{s name=config/cloud_search_label}Enable cloud search{/s}',
         detailPageHintLabel: '{s name=config/details_page_hint}Show marketplace hint on article detail page{/s}',
         noIndexLabel: '{s name=config/noindex_label}Set noindex meta tag for bepado products{/s}',
         basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
@@ -333,13 +332,6 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             border: false,
             items: [
                 {
-                    xtype: 'checkbox',
-                    name: 'cloudSearch',
-                    fieldLabel: me.snippets.cloudSearchLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth
-                }, {
                     xtype: 'checkbox',
                     name: 'detailShopInfo',
                     fieldLabel: me.snippets.detailPageHintLabel,

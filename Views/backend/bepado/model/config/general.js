@@ -41,7 +41,6 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
         { name: 'bepadoAttribute', type: 'int' },
         { name: 'bepadoDebugHost', type: 'string' },
         { name: 'logRequest', type: 'string' },
-        { name: 'cloudSearch', type: 'string' },
         { name: 'detailShopInfo', type: 'string' },
         { name: 'detailProductNoIndex', type: 'string' },
         { name: 'checkoutShopInfo', type: 'string' },

@@ -27,29 +27,16 @@
  * @package Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/general"}
-Ext.define('Shopware.apps.Bepado.model.config.General', {
+//{block name="backend/bepado/model/config/local_product_attributes"}
+Ext.define('Shopware.apps.Bepado.model.config.LocalProductAttributes', {
     extend: 'Ext.data.Model',
 
-    idProperty: 'shopId',
-
     fields: [
-        //{block name="backend/bepado/model/config/general/fields"}{/block}
-        { name: 'shopId', type: 'int', useNull: true },
-        { name: 'isDefaultShop', type: 'boolean' },
-        { name: 'apiKey', type: 'string' },
-        { name: 'bepadoAttribute', type: 'int' },
-        { name: 'bepadoDebugHost', type: 'string' },
-        { name: 'logRequest', type: 'string' },
-        { name: 'detailShopInfo', type: 'string' },
-        { name: 'detailProductNoIndex', type: 'string' },
-        { name: 'checkoutShopInfo', type: 'string' },
-        { name: 'shippingCostsPage', type: 'int', useNull: true },
-        { name: 'shippingCostsPageName', type: 'string' },
-        { name: 'exportDomain', type: 'string' },
-        { name: 'hasSsl', type: 'string' }
+        //{block name="backend/bepado/model/config/local_product_attributes/fields"}{/block}
+        { name: 'shopwareAttributeKey',  type: 'string' },
+        { name: 'shopwareAttributeLabel',  type: 'string' },
+        { name: 'attributeKey',  type: 'string' }
     ],
-
     proxy: {
         /**
          * Set proxy type to ajax
@@ -63,9 +50,9 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveGeneral"}',
-            update: '{url controller="BepadoConfig" action="saveGeneral"}',
-            read: '{url controller="BepadoConfig" action="getGeneral"}'
+            create: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
+            update: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
+            read: '{url controller="BepadoConfig" action="getProductAttributesMapping"}'
         },
 
         /**
@@ -89,3 +76,4 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
     }
 });
 //{/block}
+

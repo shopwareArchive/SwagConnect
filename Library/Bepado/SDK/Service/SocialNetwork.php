@@ -101,6 +101,21 @@ class SocialNetwork
         return $responseBody->time;
     }
 
+    /**
+     * Returns array with available marketplace product attributes
+     * as attribute => label pairs
+     *
+     * @return array
+     */
+    public function getMarketplaceProductAttributes()
+    {
+        $response = $this->request('/sdk/marketplace/attributes', array());
+        $this->handleResponse($response, "Marketplace product attributes");
+
+        $responseBody = json_decode($response->body, true);
+        return $responseBody['attributes'];
+    }
+
     private function verifyProductIds(array $productIds)
     {
         foreach ($productIds as $productId) {

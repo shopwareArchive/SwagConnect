@@ -230,7 +230,6 @@ class Config
                 // store only config options
                 // which are different for each shop
                 $shopConfig = array(
-                    'cloudSearch' => $shopConfig['cloudSearch'],
                     'detailShopInfo' => $shopConfig['detailShopInfo'],
                     'detailProductNoIndex' => $shopConfig['detailProductNoIndex'],
                     'checkoutShopInfo' => $shopConfig['checkoutShopInfo'],

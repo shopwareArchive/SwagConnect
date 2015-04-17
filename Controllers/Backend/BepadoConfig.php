@@ -367,4 +367,88 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         }
     }
 
+    public function getMarketplaceAttributesAction()
+    {
+        $marketplaceAttributes = $this->getSDK()->getMarketplaceProductAttributes();
+
+        $attributes = array();
+        foreach ($marketplaceAttributes as $attributeKey => $attributeLabel) {
+            $attributes[] = array(
+                'attributeKey' => $attributeKey,
+                'attributeLabel' => $attributeLabel,
+                'shopwareAttributeKey' => ''
+            );
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $attributes
+            )
+        );
+    }
+
+    public function saveProductAttributesMappingAction()
+    {
+        try {
+            $data = $this->Request()->getParam('data');
+            $data = !isset($data[0]) ? array($data) : $data;
+            $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
+            $marketplaceGateway->setMarketplaceMapping($data);
+
+            $this->View()->assign(
+                array(
+                    'success' => true,
+                )
+            );
+        } catch(\Exception $e) {
+            $this->View()->assign(
+                array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                )
+            );
+        }
+    }
+
+    public function getProductAttributesMappingAction()
+    {
+        $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
+
+        $mappings = array_map(function ($attribute) use ($marketplaceGateway) {
+                return array(
+                    'shopwareAttributeKey' => $attribute->getName(),
+                    'shopwareAttributeLabel' => $attribute->getLabel(),
+                    'attributeKey' => $marketplaceGateway->findMarketplaceMappingFor($attribute->getName()),
+                );
+
+            }, array_values(
+                array_filter(
+                    Shopware()->Models()->getRepository('Shopware\Models\Article\Element')->findAll(),
+                    function ($attribute) {
+                        return $attribute->getName() != 'bepadoProductDescription';
+                    }
+                )
+            )
+        );
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $mappings
+            )
+        );
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\BepadoFactory
+     */
+    public function getFactory()
+    {
+        if ($this->factory === null) {
+            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+        }
+
+        return $this->factory;
+    }
 } 

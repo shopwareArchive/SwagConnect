@@ -159,6 +159,12 @@ class Setup
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
+              `local_attribute` varchar(255) NOT NULL UNIQUE,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
              `id` int(11) NOT NULL AUTO_INCREMENT,
              `article_id` int(11) unsigned DEFAULT NULL,
@@ -325,7 +331,6 @@ class Setup
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
-            'cloudSearch' => array('0', null, 'general'),
             'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
             'bepadoAttribute' => array('19', null, 'general'),
             'importImagesOnFirstImport' => array('0', null, 'import'),
@@ -335,7 +340,7 @@ class Setup
             'overwriteProductImage' => array('1', null, 'import'),
             'overwriteProductShortDescription' => array('1', null, 'import'),
             'overwriteProductLongDescription' => array('1', null, 'import'),
-            'logRequest' => array('0', null, 'general'),
+            'logRequest' => array('1', null, 'general'),
             'shippingCostsPage' => array('6', null, 'general'),
             'articleImagesLimitImport' => array(10, null, 'import'),
         );

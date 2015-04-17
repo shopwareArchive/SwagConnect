@@ -119,7 +119,7 @@ abstract class BaseProductQuery
 
         // Fix attributes
         $row['attributes'] = array();
-        foreach ($this->attributeMapping as $swField => $bepadoField) {
+        foreach ($this->getAttributeMapping() as $swField => $bepadoField) {
             if (!array_key_exists($swField, $row)) {
                 continue;
             }
@@ -151,6 +151,9 @@ abstract class BaseProductQuery
         return $row;
     }
 
-
+    public function getAttributeMapping()
+    {
+        return $this->attributeMapping;
+    }
 }
 

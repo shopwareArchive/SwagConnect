@@ -75,7 +75,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 xtype: 'fieldcontainer',
                 defaultType: 'radiofield',
                 items: [{
-                    boxLabel  : '{s name=export/filter/status_all}Show all{/s}',
+                    boxLabel  : '{s name=export/filter/status_show_all}Alle anzeigen{/s}',
                     name      : 'exportStatus',
                     inputValue: ''
                 }, {
@@ -116,6 +116,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 name: 'supplierId',
                 anchor: '100%',
                 allowBlank: true,
+                pageSize: 25,
                 store: 'base.Supplier'
             }]
         }

@@ -51,10 +51,16 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
+        productDescriptionFieldHelp: '{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu bepado exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',
         autoProductSync: '{s name=config/export/auto_product_sync_label}Automatically sync changed products to bepado{/s}',
         autoPlayedChanges: '{s name=config/export/changes_auto_played_label}Will autmatically sync changed bepado products to the bepado platform{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        defaultCategory: '{s name=config/export/default_export_category}Default Export category{/s}',
+        defaultCategory: '{s name=config/export/default_category}Standard export-Kategorie{/s}',
+        defaultCategryHelp: '{s name=config/export/default_category_help}Hier geben Sie an, in welche bepado Kategorie Ihre Produkte exportiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}',
+        synchronization: '{s name=synchronization}Synchronization{/s}',
+        synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
+        priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
+        priceConfigurationDescription: '{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -114,16 +120,16 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      */
     createElements: function () {
         var me = this;
-
+        var syncFieldset = me.getSyncFieldset();
         var container = me.createProductContainer();
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
-            title: '{s name =config/export/priceConfiguration}Price configuration{/s}',
+            title: me.snippets.priceConfiguration ,
             disabled: false,
             items: [
                 {
                     xtype: 'label',
-                    html: '{s name=config/export/label/priceDescription}Here you can configure the prices that will be exported as your product price. You can configure the  »customer« price and the »merchant« price. Foreach each of these prices you can configure from which price group the value should be read and which price field should be used.<br><br>{/s}'
+                    html: me.snippets.priceConfigurationDescription
                 },
                 me.createPriceField('price'),
                 me.createPriceField('purchasePrice')
@@ -148,12 +154,48 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         });
 
         return [
-            {
-                xtype: 'bepado-config-export-description'
-            },
+            syncFieldset,
             container,
             me.priceMappingsFieldSet
         ];
+    },
+
+    getSyncFieldset: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.synchronization,
+            defaultType: 'textfield',
+            layout: 'anchor',
+            html: me.snippets.synchronizationBarDescription,
+            items: [ me.createProgressBar() ]
+        });
+    },
+
+    /**
+     * Returns a new progress bar for a detailed view of the exporting progress status
+     *
+     * @param name
+     * @param text
+     * @returns [object]
+     */
+    createProgressBar: function(name, text, value) {
+        var me = this;
+
+        me.progressBar = Ext.create('Ext.ProgressBar', {
+            animate: true,
+            name: 'progress-name',
+            text: '{s name=config/message/done}Done{/s}',
+            margin: '0 0 15',
+            border: 1,
+            style: 'border-width: 1px !important;',
+            cls: 'left-align',
+            value: 25
+        });
+        me.fireEvent('calculateFinishTime', me.progressBar);
+
+        return me.progressBar;
     },
 
     /**
@@ -258,6 +300,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         var me = this,
             defaultExportCategory = Ext.create('Ext.form.TextField',{
                 name: 'defaultExportCategory',
+                helpText: me.snippets.defaultCategryHelp,
                 readOnly: true,
                 flex: 4
             });
@@ -272,6 +315,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     xtype: 'combobox',
                     fieldLabel: me.snippets.productDescriptionFieldLabel,
                     emptyText: me.snippets.emptyText,
+                    helpText: me.snippets.productDescriptionFieldHelp,
                     name: 'alternateDescriptionField',
                     store: new Ext.data.SimpleStore({
                         fields: [ 'value', 'text' ],

@@ -173,9 +173,9 @@ class Product extends Verificator
             );
         }
 
-        if (!is_int($struct->attributes[Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
+        if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
             throw new \Bepado\SDK\Exception\VerificationFailedException(
-                "Product Quantity Attribute has to be an integer."
+                "Product Quantity Attribute has to be a numeric."
             );
         }
     }

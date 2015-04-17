@@ -1,7 +1,6 @@
-<?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
+ * Shopware 4
+ * Copyright © shopware AG
  *
  * According to our dual licensing model, this program can be used either
  * under the terms of the GNU Affero General Public License, version 3,
@@ -21,20 +20,31 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-
 /**
- * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
+ * Shopware SwagBepado Plugin
+ *
+ * @category Shopware
+ * @package Shopware\Plugins\SwagBepado
+ * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-class Shopware_Controllers_Widgets_Bepado extends Enlight_Controller_Action
-{
-    /**
-     * @return \Bepado\SDK\SDK
-     */
-    public function getSDK()
-    {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+//{block name="backend/bepado/store/config/marketplace_attributes"}
+Ext.define('Shopware.apps.Bepado.store.config.MarketplaceAttributes', {
+    extend: 'Ext.data.Store',
+
+    autoLoad: false,
+    model: 'Shopware.apps.Bepado.model.config.MarketplaceAttributes',
+    remoteSort: false,
+    remoteFilter: false,
+    proxy: {
+        type: 'ajax',
+        url: '{url controller="BepadoConfig" action="getMarketplaceAttributes"}',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
     }
-}
+});
+//{/block}
+
+
+

@@ -68,19 +68,19 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
         }
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
-        $this->migrateSourceIds();
+		$this->migrateSourceIds();
+        $this->createMarketplaceAttributesTable();
+
+        if (version_compare($this->version, '1.5.6', '<=')) {
+            $this->clearTemplateCache();
+        }
+
+        $this->removeCloudSearch();
 
         return true;
     }
@@ -267,7 +267,7 @@ class Update
         $configComponent->setConfig('overwriteProductImage', $this->bootstrap->Config()->get('overwriteProductImage'), 1, 'import');
         $configComponent->setConfig('overwriteProductShortDescription', $this->bootstrap->Config()->get('overwriteProductShortDescription'), 1, 'import');
         $configComponent->setConfig('overwriteProductLongDescription', $this->bootstrap->Config()->get('overwriteProductLongDescription'), 1, 'import');
-        $configComponent->setConfig('logRequest', $this->bootstrap->Config()->get('logRequest'), 0, 'general');
+        $configComponent->setConfig('logRequest', $this->bootstrap->Config()->get('logRequest', 1), 0, 'general');
     }
 
 
@@ -377,18 +377,44 @@ class Update
 
     public function removeApiDescriptionSnippet()
     {
-        if (version_compare($this->version, '1.5.0', '<=')) {
+        if (version_compare($this->version, '1.5.5', '<=')) {
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
+        }
+    }
+
+    private function removeCloudSearch()
+    {
+        if (version_compare($this->version, '1.5.7', '<=')) {
+            $sql = "DELETE FROM `s_plugin_bepado_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
+            Shopware()->Db()->exec($sql);
+        }
+    }
+
+    private function clearTemplateCache()
+    {
+        // check shopware version, because Shopware()->Container()
+        // is available after version 4.2.x
+        if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+            Shopware()->Template()->clearAllCache();
+        } else {
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearTemplateCache();
+        }
+    }
+
+    public function createMarketplaceAttributesTable()
+    {
+        if (version_compare($this->version, '1.5.8', '<=')) {
+            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
+              `local_attribute` varchar(255) NOT NULL UNIQUE,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+            Shopware()->Db()->exec($sql);
         }
     }
 
@@ -400,7 +426,7 @@ class Update
      */
     public function migrateSourceIds()
     {
-        if (version_compare($this->version, '1.5.2', '<=')) {
+        if (version_compare($this->version, '1.5.9', '<=')) {
             // insert source ids for local articles
             $sql = "UPDATE `s_plugin_bepado_items` SET `source_id` = `article_id` WHERE `shop_id` IS NULL";
             Shopware()->Db()->exec($sql);

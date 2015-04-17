@@ -10,24 +10,69 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
         expanded: true,
         children: [
             { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'bepado-icon' },
-            { id: 'config', text: "{s name=navigation/config}Configuration{/s}", leaf: false,
+            {
+                id: 'config', text: "{s name=navigation/settings/settings}Einstellungen{/s}",
+                leaf: false,
                 expanded: true,
                 children: [
                     {
-                        id: 'config-import',
-                        text: "{s name=navigation/config_import}Import{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-drive-download'
-                    },
-                    {
-                        id: 'config-export',
-                        text: "{s name=navigation/config_export}Export{/s}",
+                        id: 'config-units',
+                        text: "{s name=navigation/units}Einheiten{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
                     },
                     {
-                        id: 'config-units',
-                        text: "{s name=navigation/config_units}Units{/s}",
+                        id: 'marketplace-attributes',
+                        text: "{s name=navigation/marketplace_attribute}Marketplace attributes{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-ui-scroll-pane-detail'
+                    },
+                    {
+                        id: 'log',
+                        text: "{s name=navigation/log}Log{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-database'
+                    }
+                ]
+            },
+            {
+                id: 'config-import', text: "{s name=navigation/config_import}Import{/s}",
+                leaf: false,
+                expanded: true,
+                children: [
+                    {
+                        id: 'mapping-import',
+                        text: "{s name=navigation/mapping}Category mapping{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-sticky-notes-pin'
+                    },
+                    {
+                        id: 'import',
+                        text: "{s name=navigation/products}Products{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-drive-download'
+                    },
+                    {
+                        id: 'changed',
+                        text: "{s name=navigation/changed}Changed{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-clock'
+                    }
+                ]
+            },
+            {
+                id: 'config-export', text: "{s name=navigation/config_export}Export{/s}", leaf: false,
+                expanded: true,
+                children: [
+                    {
+                        id: 'mapping-export',
+                        text: "{s name=navigation/mapping}Category mapping{/s}",
+                        leaf: true,
+                        iconCls: 'sprite-sticky-notes-pin'
+                    },
+                    {
+                        id: 'export',
+                        text: "{s name=navigation/products}Products{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
                     },
@@ -37,48 +82,8 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                         leaf: true,
                         iconCls: 'sprite-truck'
                     }
-                ]},
-            { id: 'mapping', text: "{s name=navigation/mapping}Category mapping{/s}", leaf: false,
-                expanded: true,
-                children: [
-                    {
-                        id: 'mapping-import',
-                        text: "{s name=navigation/mapping/import}Import{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-drive-download'
-                    },
-                    {
-                        id: 'mapping-export',
-                        text: "{s name=navigation/mapping/export}export{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-inbox-upload'
-                    },
                 ]
-            },
-            { id: 'products', text: "{s name=navigation/products}Products{/s}", leaf: false,
-                expanded: true,
-                children: [
-                    {
-                        id: 'import',
-                        text: "{s name=navigation/import}Import{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-drive-download'
-                    },
-                    {
-                        id: 'export',
-                        text: "{s name=navigation/export}Export{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-inbox-upload'
-                    },
-                    {
-                        id: 'changed',
-                        text: "{s name=navigation/changed}Changed{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-clock'
-                    },
-                ]
-            },
-            { id: 'log', text: "{s name=navigation/log}Log{/s}", leaf: true, iconCls: 'sprite-database' }
+            }
         ]
     },
 

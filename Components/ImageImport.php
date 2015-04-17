@@ -18,12 +18,14 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
+    /** @var  \Shopware\Bepado\Components\Logger */
+    protected $logger;
 
-    public function __construct(ModelManager $manager, Helper $helper)
+    public function __construct(ModelManager $manager, Helper $helper, Logger $logger)
     {
         $this->manager = $manager;
         $this->helper = $helper;
-
+        $this->logger = $logger;
     }
 
     /**
@@ -207,7 +209,7 @@ class ImageImport
 
                 // check shopware version, because Shopware()->Container()
                 // is available after version 4.2.x
-                if (version_compare(Shopware()->Application()->Config()->version, '4.2.0', '<')) {
+                if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
                     $media->createAlbumThumbnails($album);
                 } else {
                     $manager = Shopware()->Container()->get('thumbnail_manager');
@@ -219,6 +221,9 @@ class ImageImport
                 }
             }
         } catch (\Exception $e) {
+            // log exception message if for some reason
+            // image import fails
+            $this->logger->write(true, 'Import images', $e->getMessage());
         }
 
         $this->manager->flush();

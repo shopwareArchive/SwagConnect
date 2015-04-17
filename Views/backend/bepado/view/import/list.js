@@ -14,12 +14,17 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         mode: 'MULTI'
     },
 
+    snippets: {
+        description: '{s name=import/products/description}Der Produktimport erfolgt automatisch, sobald Sie Produkte anderer Händler auf bepado abonnieren und eine Verbindung zu bepado hergestellt worden ist. Sie können die Produkte in diesem Menü nach dem Import aktivieren, deaktivieren oder weiter bearbeiten.{/s}'
+    },
+
     initComponent: function() {
         var me = this;
 
         Ext.applyIf(me, {
             dockedItems: [
                 me.getToolbar(),
+                me.getDescriptionBar(),
                 me.getPagingToolbar()
             ],
             columns: me.getColumns()
@@ -31,6 +36,16 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
         me.callParent(arguments);
 
         me.store.load();
+    },
+
+    getDescriptionBar: function() {
+        var me =this;
+
+        return {
+            xtype: 'container',
+            padding: '10 0 10 10',
+            html: me.snippets.description
+        };
     },
 
     createGroupingFeature: function() {

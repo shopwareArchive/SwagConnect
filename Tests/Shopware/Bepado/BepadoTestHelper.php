@@ -4,6 +4,7 @@ namespace Tests\Shopware\Bepado;
 
 use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
+use Shopware\Bepado\Components\Logger;
 
 class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
@@ -76,7 +77,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     {
         return new ImageImport(
             Shopware()->Models(),
-            $this->getHelper()
+            $this->getHelper(),
+            new Logger(Shopware()->Db())
         );
     }
 

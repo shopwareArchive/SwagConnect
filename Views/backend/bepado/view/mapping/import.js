@@ -10,7 +10,8 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
 
     snippets: {
         emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}',
-        categoryWithoutMapping: '{s name=mapping/message/category_without_mapping}* In dieser Kategorie befinden sich abonnierte Produkte die noch keiner lokalen Kategorie zugeordnet sind{/s}'
+        categoryWithoutMapping: '{s name=mapping/message/category_without_mapping}* In dieser Kategorie befinden sich abonnierte Produkte die noch keiner lokalen Kategorie zugeordnet sind{/s}',
+        description: '{s name=mapping/message/import/description}Legen Sie hier fest in welchen Kategorien Ihres Shops die importierten Produkte angezeigt werden sollen.{/s}'
     },
     
     initComponent: function() {
@@ -54,7 +55,11 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
                     dataIndex: 'text',
                     text: '{s name=mapping/columns/shopware-category}Shopware Category{/s}'
                 }, me.getActionColumn()],
-                dockedItems: [ me.getButtons(), me.getToolbar() ]
+                dockedItems: [
+                    me.getDescriptionBar(),
+                    me.getButtons(),
+                    me.getToolbar()
+                ]
             }]
         });
 
@@ -67,6 +72,16 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
         );
 
         me.callParent(arguments);
+    },
+
+    getDescriptionBar: function() {
+        var me =this;
+
+        return {
+            xtype: 'container',
+            padding: '10 0 10 10',
+            html: me.snippets.description + '<br/>' + '<span style="color: red;">' + me.snippets.categoryWithoutMapping + '</span>'
+        };
     },
 
     getActionColumn: function() {
@@ -128,12 +143,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
             dock:'top',
             ui: 'shopware-ui',
             cls: 'shopware-toolbar',
-            items:[ me.searchField,
-                '->', {
-                    xtype : 'tbtext',
-                    text : '<span style="color: red;">' + me.snippets.categoryWithoutMapping + '</span>'
-                }
-            ]
+            items:[ me.searchField ]
         });
     }
 });

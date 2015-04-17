@@ -30,6 +30,7 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Image;
@@ -69,18 +70,22 @@ class ProductToShop implements ProductToShopBase
      */
     private $variantConfigurator;
 
+	private $marketplaceGateway;
+
     /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
      * @param \Shopware\Bepado\Components\Config $config
+     * @param \Shopware\Bepado\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      */
     public function __construct(
         Helper $helper,
         ModelManager $manager,
         ImageImport $imageImport,
         Config $config,
-        VariantConfigurator $variantConfigurator
+        VariantConfigurator $variantConfigurator,
+		MarketplaceGateway $marketplaceGateway
     )
     {
         $this->helper = $helper;
@@ -88,6 +93,7 @@ class ProductToShop implements ProductToShopBase
         $this->config = $config;
         $this->imageImport = $imageImport;
         $this->variantConfigurator = $variantConfigurator;
+		$this->marketplaceGateway = $marketplaceGateway;
     }
 
     /**
@@ -112,7 +118,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function commit()
     {
-        $this->manager->getConnection()->commit();
+       $this->manager->getConnection()->commit();
     }
 
     /**
@@ -208,10 +214,8 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
-        // Set the configured attribute so users can easily check if a given product is a bepado attribute
-        $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
-        $detailAttribute->$setter($product->sourceId);
-        $detailAttribute->setBepadoArticleShipping($product->shipping);
+        // apply marketplace attributes
+        $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
 
         $bepadoAttribute->setShopId($product->shopId);
         $bepadoAttribute->setSourceId($product->sourceId);
@@ -317,7 +321,17 @@ class ProductToShop implements ProductToShopBase
 
         $this->manager->persist($detail);
 
+        // some articles from bepado have long sourceId
+        // like OXID articles. They use md5 has, but it is not supported
+        // in shopware.
+        if (strlen($detail->getNumber()) > 30) {
+            $detail->setNumber('BP-' . $product->shopId . '-' . $detail->getId());
+
+            $this->manager->persist($detail);
+            $this->manager->flush($detail);
+        }
         $this->manager->flush();
+		
         $this->manager->clear();
 
         //clear cache for that article
@@ -328,7 +342,9 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
+
     }
+
 
     /**
      * Delete product or product variant with given shopId and sourceId.
@@ -365,6 +381,8 @@ class ProductToShop implements ProductToShopBase
         if ($attribute) {
             $this->manager->remove($attribute);
         }
+        $model->getDetails()->clear();
+
         $this->manager->remove($model);
 
         $this->manager->flush();
@@ -489,4 +507,28 @@ class ProductToShop implements ProductToShopBase
         return $attributeValue == 'overwrite';
     }
 
+    /**
+     * Read product attributes mapping and set to shopware attribute model
+     * 
+     * @param AttributeModel $detailAttribute
+     * @param Product $product
+     * @return AttributeModel
+     */
+    private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
+    {
+        // Set the configured attribute so users can easily check if a given product is a bepado attribute
+        $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
+        $detailAttribute->$setter($product->sourceId);
+        $detailAttribute->setBepadoArticleShipping($product->shipping);
+        //todo@sb: check if bepadoAttribute matches position of the marketplace attribute
+        array_walk($product->attributes, function($value, $key) use ($detailAttribute) {
+            $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);
+            if (strlen($shopwareAttribute) > 0) {
+                $setter = 'set' . ucfirst($shopwareAttribute);
+                $detailAttribute->$setter($value);
+            }
+        });
+
+        return $detailAttribute;
+    }
 }

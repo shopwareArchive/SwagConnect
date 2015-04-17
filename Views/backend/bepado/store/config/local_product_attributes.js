@@ -27,42 +27,34 @@
  * @package Shopware\Plugins\SwagBepado
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/general/panel"}
-Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
-    extend: 'Ext.container.Container',
-    alias: 'widget.bepado-config',
+//{block name="backend/bepado/store/config/local_product_attributes"}
+Ext.define('Shopware.apps.Bepado.store.config.LocalProductAttributes', {
+    extend: 'Ext.data.Store',
 
-    border: false,
-    layout: 'border',
-
-    initComponent: function() {
-        var me = this;
-
-        Ext.applyIf(me, {
-            items: me.createElements()
-        });
-
-        me.callParent(arguments);
-    },
-
-    /**
-     * Creates the elements for the general configuration panel.
-     * @return [Array]
-     */
-    createElements:function () {
-        return [{
-                xtype: 'form',
-                border: false,
-                layout: 'anchor',
-                autoScroll: true,
-                region: 'center',
-                bodyPadding: 10,
-                items: [{
-                    xtype: 'bepado-config-tabs'
-                }]
-            }
-        ];
+    autoLoad: false,
+    model: 'Shopware.apps.Bepado.model.config.LocalProductAttributes',
+    remoteSort: false,
+    remoteFilter: false,
+    proxy: {
+        type: 'ajax',
+        url: '{url controller="BepadoConfig" action="getProductAttributesMapping"}',
+        api: {
+            create: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
+            update: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
+            read: '{url controller="BepadoConfig" action="getProductAttributesMapping"}'
+        },
+        reader: {
+            type: 'json',
+            root: 'data'
+        },
+        writer: {
+            type: 'json',
+            root: 'data'
+        }
     }
 });
 //{/block}
+
+
+
+

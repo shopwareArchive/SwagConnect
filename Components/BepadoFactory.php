@@ -5,6 +5,7 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 use Shopware\Bepado\Components\Payment\ProductPayments;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
@@ -27,6 +28,8 @@ class BepadoFactory
 
     /** @var  \Shopware\Bepado\Components\Config */
     private $configComponent;
+
+    private $marketplaceGatway;
 
     public function __construct($version='')
     {
@@ -94,7 +97,8 @@ class BepadoFactory
                 $manager,
                 $this->getImageImport(),
                 $this->getConfigComponent(),
-                new VariantConfigurator($manager)
+                new VariantConfigurator($manager),
+				$this->getMarketplaceGateway()
             ),
             new ProductFromShop(
                 $helper,
@@ -112,7 +116,11 @@ class BepadoFactory
      */
     public function getImageImport()
     {
-        return new ImageImport($this->getModelManager(), $this->getHelper());
+        return new ImageImport(
+            $this->getModelManager(),
+            $this->getHelper(),
+            new Logger(Shopware()->Db())
+        );
     }
 
     /**
@@ -251,7 +259,8 @@ class BepadoFactory
             $this->getModelManager(),
             $this->getConfigComponent()->getConfig('alternateDescriptionField'),
             $this->getProductBaseUrl(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            $this->getMarketplaceGateway()
         );
     }
 
@@ -285,6 +294,15 @@ class BepadoFactory
         }
 
         return $this->configComponent;
+    }
+
+    public function getMarketplaceGateway()
+    {
+        if (!$this->marketplaceGatway) {
+            $this->marketplaceGatway = new MarketplaceGateway($this->getModelManager());
+        }
+
+        return $this->marketplaceGatway;
     }
 
     public function getCountryCodeResolver()

@@ -176,14 +176,26 @@ class Http extends ShopGateway
         $marshalledCall = $this->marshaller->marshal($call);
         $signHeaders = $this->shopRequestSigner->signRequest($marshalledCall);
 
-        $httpResponse = $this->httpClient->request(
-            'POST',
-            '',
-            $marshalledCall,
-            $signHeaders
-        );
+        try {
+            $httpResponse = $this->httpClient->request(
+                'POST',
+                '',
+                $marshalledCall,
+                $signHeaders
+            );
 
-        $result = $this->unmarshaller->unmarshal($httpResponse->body);
+            $result = $this->unmarshaller->unmarshal($httpResponse->body);
+            if (!isset($result->arguments[0])) {
+                throw new \UnexpectedValueException("Could not parse response: " . $httpResponse->body);
+            }
+        } catch (\Exception $e) {
+            return new Struct\Error(
+                array(
+                    'message' => $e->getMessage(),
+                    'debugText' => (string) $e,
+                )
+            );
+        }
 
         return $result->arguments[0]->result;
     }

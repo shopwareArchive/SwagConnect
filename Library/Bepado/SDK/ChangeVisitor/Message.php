@@ -64,6 +64,14 @@ class Message extends ChangeVisitor
         return $messages;
     }
 
+    private function detectAvailabilityChange(Struct\Change\InterShop\Update $change)
+    {
+        return
+            ($change->product->availability !== $change->oldProduct->availability) ||
+            ($change->product->availability === 0)
+        ;
+    }
+
     /**
      * Visit update change
      *
@@ -82,7 +90,8 @@ class Message extends ChangeVisitor
     {
         $messages = array();
 
-        if ($change->product->availability !== $change->oldProduct->availability) {
+        if ($change->product->availability !== $change->oldProduct->availability ||
+            $change->product->availability === 0) {
             $messages[] = new Struct\Message(
                 array(
                     'message' => 'Availability of product %product changed to %availability.',

@@ -21,20 +21,11 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+namespace Shopware\CustomModels\Bepado;
 
-/**
- * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
- * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
- * @author    Heiner Lohaus
- */
-class Shopware_Controllers_Widgets_Bepado extends Enlight_Controller_Action
+use Shopware\Components\Model\ModelRepository;
+
+class MarketplaceAttributeRepository extends ModelRepository
 {
-    /**
-     * @return \Bepado\SDK\SDK
-     */
-    public function getSDK()
-    {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
-    }
-}
+
+} 

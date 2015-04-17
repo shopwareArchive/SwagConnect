@@ -28,13 +28,14 @@
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
 //{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/general/panel"}
-Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
+//{block name="backend/bepado/view/config/marketplace_attributes/panel"}
+Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-config',
+    alias: 'widget.bepado-config-marketplace-attributes',
 
     border: false,
-    layout: 'border',
+    layout: 'fit',
+    autoScroll: true,
 
     initComponent: function() {
         var me = this;
@@ -51,17 +52,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
      * @return [Array]
      */
     createElements:function () {
-        return [{
-                xtype: 'form',
-                border: false,
-                layout: 'anchor',
-                autoScroll: true,
-                region: 'center',
-                bodyPadding: 10,
-                items: [{
-                    xtype: 'bepado-config-tabs'
-                }]
-            }
+        return [
+            { xtype: 'bepado-marketplace-attributes-mapping' }
         ];
     }
 });

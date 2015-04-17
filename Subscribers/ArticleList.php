@@ -91,7 +91,12 @@ class ArticleList extends BaseSubscriber
             return $data;
         }
 
-        $sql = 'SELECT article_id FROM s_plugin_bepado_items WHERE article_id IN (' . implode(', ', $articleIds) . ') AND source_id IS NOT NULL';
+        $sql = 'SELECT article_id
+                FROM s_plugin_bepado_items
+                WHERE article_id IN (' . implode(', ', $articleIds) . ')
+                AND source_id IS NOT NULL
+                AND shop_id IS NOT NULL';
+
         $bepadoArticleIds = array_map(function ($row) {
             return $row['article_id'];
         }, Shopware()->Db()->fetchAll($sql));

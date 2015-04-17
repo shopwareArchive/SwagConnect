@@ -64,15 +64,15 @@ class ProductFromShop implements ProductFromShopBase
     /**
      * Get product data
      *
-     * Get product data for all the product IDs specified in the given string
+     * Get product data for all the source IDs specified in the given string
      * array.
      *
-     * @param string[] $ids
+     * @param string[] $sourceIds
      * @return Product[]
      */
-    public function getProducts(array $ids)
+    public function getProducts(array $sourceIds)
     {
-        return $this->helper->getLocalProduct($ids);
+        return $this->helper->getLocalProduct($sourceIds);
     }
 
     /**

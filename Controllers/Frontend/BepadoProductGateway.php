@@ -14,6 +14,8 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
     /** @var  Shopware\Models\Article\Repository */
     private $articleRepository;
 
+    private $articleDetailRepository;
+
     /** @var  Shopware\Bepado\Components\BepadoFactory */
     private $factory;
 
@@ -40,6 +42,15 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
             $this->articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
         }
         return $this->articleRepository;
+    }
+
+    public function getArticleDetailRepository()
+    {
+        if (!$this->articleDetailRepository) {
+            $this->articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        }
+
+        return $this->articleDetailRepository;
     }
 
     /**
@@ -76,24 +87,44 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
      */
     public function productAction()
     {
-        $id = $this->Request()->getParam('id');
+        $sourceId = $this->Request()->getParam('id');
         $attributeRepository = Shopware()->Models()->getRepository('Shopware\Models\Attribute\Category');
 
         // if no id was given, forward to start page
-        if (!$id) {
+        if (!$sourceId) {
+            $this->forward('index', 'index');
+            return;
+        }
+
+        list($articleId, $detailId) = $this->getHelper()->explodeArticleId($sourceId);
+
+        // if no article id was given, forward to start page
+        if (!isset($articleId)) {
             $this->forward('index', 'index');
             return;
         }
 
         /** @var Shopware\Models\Article\Article $articleModel */
-        $articleModel = $this->getArticleRepository()->find($id);
+        $articleModel = $this->getArticleRepository()->find($articleId);
         if (!$articleModel){
             $this->forward('index', 'index');
             return;
         }
 
+        // if sourceId contains detail id part get detail model
+        // if not use main detail
+        if ($detailId > 0) {
+            /** @var \Shopware\Models\Article\Detail $articleDetailModel */
+            $articleDetailModel = $this->getArticleDetailRepository()->find($detailId);
+            if (!$articleDetailModel){
+                $this->forward('index', 'index');
+                return;
+            }
+        } else {
+            $articleDetailModel = $articleModel->getMainDetail();
+        }
 
-        $product = $this->getProductById($id);
+        $product = $this->getProductById($sourceId);
         // if the product does not exist, forward to start page
         if (empty($product)) {
             $this->forward('index', 'index');
@@ -107,26 +138,28 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
                 $attribute = $attributeRepository->findOneBy(array('bepadoExportMapping' => $mapping));
                 if ($attribute) {
                     $category = $attribute->getCategory();
-                    if (!$this->doesArticleBelongToCategory($category, $id)) {
+                    if (!$this->doesArticleBelongToCategory($category, $articleId)) {
                         continue;
                     }
+
                     $shop = $this->getShopFromCategory($category);
-                    if ($shop) {
-                        $this->forwardToArticle($shop->getId(), $id);
-                        return;
+                    if (!$shop) {
+                        continue;
                     }
+
+                    $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
+                    return;
                 }
             }
         }
 
         // If we don't have a mapping, find the first category which belongs to a shop and forward to this shop
         $localCategories = $articleModel->getCategories();
-
         if (!empty($localCategories)) {
             foreach ($localCategories as $category) {
                 $shop = $this->getShopFromCategory($category);
                 if ($shop) {
-                    $this->forwardToArticle($shop->getId(), $id);
+                    $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
                     return;
                 }
             }
@@ -140,8 +173,9 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
      *
      * @param $shopId
      * @param $articleId
+     * @param $articleDetailId
      */
-    private function forwardToArticle($shopId, $articleId)
+    private function forwardToArticle($shopId, $articleId, $articleDetailId = null)
     {
         /** @var Shopware\Models\Shop\Shop $shop */
         $shop = $this->getShopRepository()->getActiveById($shopId);
@@ -154,6 +188,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
 
         $this->redirect(Shopware()->Front()->Router()->assemble(array(
             'sArticle' => $articleId,
+            'sArticleDetail' => $articleDetailId,
             'module' => 'frontend',
             'controller' => 'detail'
         )));
@@ -211,5 +246,4 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
 
         return !empty($result);
     }
-
 }

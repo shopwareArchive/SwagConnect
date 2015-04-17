@@ -65,7 +65,12 @@ class ProductToShop implements ProductToShopBase
      */
     private $imageImport;
 
-    private $marketplaceGateway;
+    /**
+     * @var \Shopware\Bepado\Components\VariantConfigurator
+     */
+    private $variantConfigurator;
+
+	private $marketplaceGateway;
 
     /**
      * @param Helper $helper
@@ -78,15 +83,17 @@ class ProductToShop implements ProductToShopBase
         Helper $helper,
         ModelManager $manager,
         ImageImport $imageImport,
-        $config,
-        MarketplaceGateway $marketplaceGateway
+        Config $config,
+        VariantConfigurator $variantConfigurator,
+		MarketplaceGateway $marketplaceGateway
     )
     {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->config = $config;
         $this->imageImport = $imageImport;
-        $this->marketplaceGateway = $marketplaceGateway;
+        $this->variantConfigurator = $variantConfigurator;
+		$this->marketplaceGateway = $marketplaceGateway;
     }
 
     /**
@@ -125,19 +132,31 @@ class ProductToShop implements ProductToShopBase
     public function insertOrUpdate(Product $product)
     {
         // todo@dn: Set dummy values and make product inactive
-        if(empty($product->title) || empty($product->vendor)) {
+        if (empty($product->title) || empty($product->vendor)) {
             return;
         }
-        $model = $this->helper->getArticleModelByProduct($product);
 
-        if($model === null) {
-            $model = new ProductModel();
-            $model->setActive(false);
+        $detail = $this->helper->getArticleDetailModelByProduct($product);
+
+        if ($detail === null) {
+            list($articleId, $detailId) = $this->helper->explodeArticleId($product->sourceId);
+            if (is_null($detailId)) {
+                $model = new ProductModel();
+                $model->setActive(false);
+                $model->setName($product->title);
+                $this->manager->persist($model);
+            } else {
+                $model = $this->helper->getBepadoArticleModel($articleId, $product->shopId);
+            }
+
             $detail = new DetailModel();
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
             $detail->setActive(false);
-            $this->manager->persist($model);
+
             $detail->setArticle($model);
+            if (!empty($product->variant)) {
+                $this->variantConfigurator->configureVariantAttributes($product, $detail);
+            }
 
             $categories = $this->helper->getCategoriesByProduct($product);
 
@@ -155,7 +174,7 @@ class ProductToShop implements ProductToShopBase
 
             $model->setCategories($categories);
         } else {
-            $detail = $model->getMainDetail();
+            $model = $detail->getArticle();
         }
 
         $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;
@@ -178,17 +197,17 @@ class ProductToShop implements ProductToShopBase
             $model->setDescriptionLong($product->longDescription);
         }
 
-        if($product->vat !== null) {
+        if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
             $tax = round($product->vat * 100, 2);
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
         }
 
-        if($product->vendor !== null) {
+        if ($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
-            if($supplier === null) {
+            if ($supplier === null) {
                 $supplier = new Supplier();
                 $supplier->setName($product->vendor);
             }
@@ -254,13 +273,13 @@ class ProductToShop implements ProductToShopBase
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
         $bepadoAttribute->setLastUpdate(json_encode(array(
-            'shortDescription'  => $product->shortDescription,
-            'longDescription'   => $product->longDescription,
-            'purchasePrice'     => $product->purchasePrice,
-            'image'             => $product->images,
-            'price'             => $product->price * ($product->vat + 1),
-            'name'              => $product->title,
-            'vat'               => $product->vat
+            'shortDescription' => $product->shortDescription,
+            'longDescription' => $product->longDescription,
+            'purchasePrice' => $product->purchasePrice,
+            'image' => $product->images,
+            'price' => $product->price * ($product->vat + 1),
+            'name' => $product->title,
+            'vat' => $product->vat
         )));
 
         // The basePrice (purchasePrice) needs to be updated in any case
@@ -280,18 +299,18 @@ class ProductToShop implements ProductToShopBase
                 'article' => $model
             ));
             $detail->setPrices(array($price));
-        // If the price is not being update, update the basePrice anyway
+            // If the price is not being update, update the basePrice anyway
         } else {
             /** @var \Shopware\Models\Article\Price $price */
             $price = $detail->getPrices()->first();
             $price->setBasePrice($basePrice);
         }
 
-        if($model->getMainDetail() === null) {
+        if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
         }
 
-        if($detail->getAttribute() === null) {
+        if ($detail->getAttribute() === null) {
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
         }
@@ -300,10 +319,10 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setArticleDetail($detail);
         $this->manager->persist($bepadoAttribute);
 
-        $this->manager->flush();
+        $this->manager->persist($detail);
 
         // some articles from bepado have long sourceId
-        // like OXID articles. They use md5 has, but it is not support
+        // like OXID articles. They use md5 has, but it is not supported
         // in shopware.
         if (strlen($detail->getNumber()) > 30) {
             $detail->setNumber('BP-' . $product->shopId . '-' . $detail->getId());
@@ -311,7 +330,8 @@ class ProductToShop implements ProductToShopBase
             $this->manager->persist($detail);
             $this->manager->flush($detail);
         }
-
+        $this->manager->flush();
+		
         $this->manager->clear();
 
         //clear cache for that article
@@ -327,7 +347,7 @@ class ProductToShop implements ProductToShopBase
 
 
     /**
-     * Delete product with given shopId and sourceId.
+     * Delete product or product variant with given shopId and sourceId.
      *
      * Only the combination of both identifies a product uniquely. Do NOT
      * delete products just by their sourceId.
@@ -341,12 +361,19 @@ class ProductToShop implements ProductToShopBase
      */
     public function delete($shopId, $sourceId)
     {
-        $model =  $this->helper->getArticleModelByProduct(new Product(array(
+        $detail = $this->helper->getArticleDetailModelByProduct(new Product(array(
             'shopId' => $shopId,
             'sourceId' => $sourceId,
         )));
-        if($model === null) {
+        if($detail === null) {
             return;
+        }
+
+        if ($detail->getKind() == 1) {
+            $model = $detail->getArticle();
+            $model->getDetails()->clear();
+        } else {
+            $model = $detail;
         }
 
         // Not sure why, but the Attribute can be NULL
@@ -470,7 +497,7 @@ class ProductToShop implements ProductToShopBase
         $attributeValue = $attribute->$attributeGetter();
 
 
-        
+
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
         // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {

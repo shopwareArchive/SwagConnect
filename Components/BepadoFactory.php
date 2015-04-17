@@ -97,7 +97,8 @@ class BepadoFactory
                 $manager,
                 $this->getImageImport(),
                 $this->getConfigComponent(),
-                $this->getMarketplaceGateway()
+                new VariantConfigurator($manager),
+				$this->getMarketplaceGateway()
             ),
             new ProductFromShop(
                 $helper,

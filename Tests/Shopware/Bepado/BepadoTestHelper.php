@@ -29,6 +29,14 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $id;
     }
 
+    public function getExternalProductSourceId()
+    {
+        $sql = 'SELECT source_id FROM s_plugin_bepado_items WHERE shop_id IS NOT NULL';
+        $sourceId = Shopware()->Db()->fetchOne($sql);
+
+        return $sourceId;
+    }
+
     /**
      * @return \Shopware\Bepado\Components\Helper
      */
@@ -138,6 +146,28 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $products[] = $this->getProduct($withImage);
         }
         return $products;
+    }
+
+    protected function getVariants()
+    {
+        $size = array('S', 'M', 'L', 'XL');
+        $variants = array();
+        $mainVariant = $this->getProduct(true);
+        $mainVariant->variant['size'] = array_pop($size);
+        $variants[] = $mainVariant;
+
+        for ($i=0; $i < 4 - 1; $i++) {
+            $variant = $this->getProduct(true);
+            $variantSourceId = $mainVariant->sourceId . '-' . $i;
+            $variant->title = 'MassImport #'. $variantSourceId;
+            $variant->sourceId = $variantSourceId;
+            $variant->ean = $variantSourceId;
+            $variant->variant['size'] = array_pop($size);
+
+            $variants[] = $variant;
+        }
+
+        return $variants;
     }
 
     protected function insertOrUpdateProducts($number, $withImage)

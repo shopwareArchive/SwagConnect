@@ -4,6 +4,7 @@ namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils;
 use Shopware\Bepado\Components\BepadoExport;
+
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado
  *
@@ -20,6 +21,7 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
+            'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
         );
     }
@@ -67,17 +69,33 @@ class Lifecycle extends BaseSubscriber
     }
 
     /**
-     * Callback function to delete an product from bepado after it is going to be deleted locally
+     * Callback function to delete an product from bepado
+     * after it is going to be deleted locally
      *
      * @param \Enlight_Event_EventArgs $eventArgs
      */
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-        $id = $entity->getId();
+        $this->getBepadoExport()->syncDeleteArticle($entity);
+    }
 
-        $sdk = $this->getSDK();
-        $sdk->recordDelete($id);
+    /**
+     * Callback function to delete product detail from bepado
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onDeleteDetail(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Article\Detail $entity */
+        $entity = $eventArgs->get('entity');
+        if ($entity->getKind() == 1) {
+            $article = $entity->getArticle();
+            $this->getBepadoExport()->setDeleteStatusForVariants($article, 'delete');
+        } else {
+            $this->getBepadoExport()->syncDeleteDetail($entity);
+        }
     }
 
     /**
@@ -96,19 +114,15 @@ class Lifecycle extends BaseSubscriber
 
         $entity = $eventArgs->get('entity');
 
-        try {
-            if ($entity instanceof \Shopware\Models\Article\Detail) {
-                $entity = $entity->getArticle();
-            }
-        } catch(\Exception $e) {
+        if (!$entity instanceof \Shopware\Models\Article\Article
+            && !$entity instanceof \Shopware\Models\Article\Detail
+        ) {
             return;
         }
 
-
         $id = $entity->getId();
-
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
-
+        $className = get_class($entity);
+        $model = Shopware()->Models()->getRepository($className)->find($id);
         // Check if we have a valid model
         if (!$model) {
             return;
@@ -135,9 +149,20 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the product for bepado update
         try {
-            $this->getBepadoExport()->export(
-                array($id)
-            );
+            if ($model instanceof \Shopware\Models\Article\Detail) {
+                $this->getBepadoExport()->export(
+                    array($attribute->getSourceId())
+                );
+            } else {
+                /** @var \Shopware\Models\Article\Detail $detail */
+                $sourceIds = array();
+                foreach ($model->getDetails() as $detail) {
+                    $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
+                    $sourceIds[] = $bepadoAttribute->getSourceId();
+
+                }
+                $this->getBepadoExport()->export($sourceIds);
+            }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

@@ -138,6 +138,21 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * ExtJS uses this action to check is price mapping allowed.
+     * If there is at least one exported product to bepado,
+     * price mapping cannot be changed.
+     */
+    public function isPricingMappingAllowedAction()
+    {
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0
+            )
+        );
+    }
+
+    /**
      * The saveExportAction function is an ExtJs event listener method of the
      * bepado module. The function is used to save store data.
      * @return string

@@ -132,6 +132,7 @@ class BepadoExport
 
         $builder->select(array('a.id'));
 
+        $builder->where("at.exportStatus = 'update' OR at.exportStatus = 'insert' OR at.exportStatus = 'error'");
         $builder->andWhere('at.shopId IS NULL');
 
         $query = $builder->getQuery();

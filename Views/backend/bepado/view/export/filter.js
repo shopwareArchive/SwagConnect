@@ -77,7 +77,8 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 items: [{
                     boxLabel  : '{s name=export/filter/status_show_all}Alle anzeigen{/s}',
                     name      : 'exportStatus',
-                    inputValue: ''
+                    inputValue: '',
+                    checked   : true
                 }, {
                     boxLabel  : '{s name=export/filter/status_online}Online{/s}',
                     name      : 'exportStatus',
@@ -97,8 +98,7 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
                 }, {
                     boxLabel  : '{s name=export/filter/status_delete}Delete{/s}',
                     name      : 'exportStatus',
-                    inputValue: 'delete',
-                    checked   : true
+                    inputValue: 'delete'
                 }
                 ]
             }]

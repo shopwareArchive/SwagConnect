@@ -68,18 +68,19 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `name` = 'text/home_page'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
         }
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
+		$this->migrateSourceIds();
+        $this->createMarketplaceAttributesTable();
+
+        if (version_compare($this->version, '1.5.6', '<=')) {
+            $this->clearTemplateCache();
+        }
+
+        $this->removeCloudSearch();
 
         return true;
     }
@@ -380,14 +381,75 @@ class Update
             $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 
-            // check shopware version, because Shopware()->Container()
-            // is available after version 4.2.x
-            if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                Shopware()->Template()->clearAllCache();
-            } else {
-                $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
-                $cacheManager->clearTemplateCache();
-            }
+            $this->clearTemplateCache();
+        }
+    }
+
+    private function removeCloudSearch()
+    {
+        if (version_compare($this->version, '1.5.7', '<=')) {
+            $sql = "DELETE FROM `s_plugin_bepado_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
+            Shopware()->Db()->exec($sql);
+        }
+    }
+
+    private function clearTemplateCache()
+    {
+        // check shopware version, because Shopware()->Container()
+        // is available after version 4.2.x
+        if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+            Shopware()->Template()->clearAllCache();
+        } else {
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearTemplateCache();
+        }
+    }
+
+    public function createMarketplaceAttributesTable()
+    {
+        if (version_compare($this->version, '1.5.8', '<=')) {
+            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
+              `local_attribute` varchar(255) NOT NULL UNIQUE,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+            Shopware()->Db()->exec($sql);
+        }
+    }
+
+    /**
+     * Add sourceId for local articles,
+     * add bepado attribute for article variants
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    public function migrateSourceIds()
+    {
+        if (version_compare($this->version, '1.5.9', '<=')) {
+            // insert source ids for local articles
+            $sql = "UPDATE `s_plugin_bepado_items` SET `source_id` = `article_id` WHERE `shop_id` IS NULL";
+            Shopware()->Db()->exec($sql);
+
+            // Insert new records in s_plugin_bepado_items for all article variants
+            $sql = "
+                INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id, source_id)
+                SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
+
+                FROM s_articles a
+
+                LEFT JOIN `s_articles_details` ad
+                ON a.id = ad.articleId
+
+                LEFT JOIN `s_plugin_bepado_items` bi
+                ON bi.article_detail_id = ad.id
+
+
+                WHERE a.id IS NOT NULL
+                AND ad.id IS NOT NULL
+                AND bi.id IS NULL
+            ";
+            Shopware()->Db()->exec($sql);
         }
     }
 }

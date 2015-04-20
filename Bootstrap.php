@@ -326,6 +326,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         return $this->getBepadoFactory()->getConfigComponent();
     }
 
+    public function getMarketplaceGateway()
+    {
+        return $this->getBepadoFactory()->getMarketplaceGateway();
+    }
+
     /**
      * @return bool
      */

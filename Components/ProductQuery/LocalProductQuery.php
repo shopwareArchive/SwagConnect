@@ -6,6 +6,7 @@ use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Bepado\Components\Logger;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
@@ -29,12 +30,21 @@ class LocalProductQuery extends BaseProductQuery
     /** @var \Shopware\Bepado\Components\Config $configComponent */
     protected $configComponent;
 
-    public function __construct(ModelManager $manager, $productDescriptionField, $baseProductUrl, $configComponent)
+    protected $marketplaceGateway;
+
+    public function __construct(
+        ModelManager $manager,
+        $productDescriptionField,
+        $baseProductUrl,
+        $configComponent,
+        MarketplaceGateway $marketplaceGateway
+    )
     {
         $this->manager = $manager;
         $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
+        $this->marketplaceGateway = $marketplaceGateway;
     }
 
     /**
@@ -42,7 +52,7 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getProductQuery()
     {
-
+        $articleAttributeAlias = 'attribute';
         $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
         $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
         $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
@@ -52,15 +62,17 @@ class LocalProductQuery extends BaseProductQuery
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
         $builder->join('at.article', 'a');
-        $builder->join('a.mainDetail', 'd');
+        $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->select(array(
             'a.id as localId',
+            'd.id as detailId',
             'at.shopId as shopId',
-            'a.id as sourceId',
+            'at.sourceId as sourceId',
+            'd.kind as detailKind',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',
@@ -84,9 +96,11 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
-            'attribute.bepadoArticleShipping as shipping'
+            "{$articleAttributeAlias}.bepadoArticleShipping as shipping"
         ));
 
+
+        $builder = $this->addMarketplaceAttributeSelect($builder, $articleAttributeAlias);
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);
 
         $builder->setParameter('priceCustomerGroup', $exportPriceCustomerGroup);
@@ -111,6 +125,7 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * @param $row
      * @return Product
+     * @throws NoLocalProductException
      */
     public function getBepadoProduct($row)
     {
@@ -132,13 +147,21 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
+        $row['variant'] = $this->getConfiguratorOptions($row['detailId']);
+
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
         } else {
             $row['deliveryWorkDays'] = null;
         }
 
+        if ($this->hasVariants($row['localId'])) {
+            $row['groupId'] = $row['localId'];
+        }
+
         unset($row['localId']);
+        unset($row['detailId']);
+        unset($row['detailKind']);
 
         if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
         {
@@ -214,6 +237,99 @@ class LocalProductQuery extends BaseProductQuery
     public function getUrlForProduct($productId)
     {
         return $this->baseProductUrl . $productId;
+    }
+
+	/**
+     * Select attributes  which are already mapped to marketplace
+     *
+     * @param QueryBuilder $builder
+     * @param $alias
+     * @return QueryBuilder
+     */
+    private function addMarketplaceAttributeSelect(QueryBuilder $builder, $alias)
+    {
+        array_walk($this->marketplaceGateway->getMappings(), function($mapping) use ($builder, $alias) {
+            if (strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0) {
+                $builder->addSelect("{$alias}.{$mapping['shopwareAttributeKey']}");
+            }
+        });
+
+        return $builder;
+    }
+
+    /**
+     * Returns shopware to martketplace attributes mapping as array
+     *
+     * @return array
+     */
+    public function getAttributeMapping()
+    {
+        $mappings = $this->marketplaceGateway->getMappings();
+
+        return array_merge(
+            array_filter(array_combine(array_map(function($mapping) {
+                return $mapping['shopwareAttributeKey'];
+            }, $mappings), array_map(function($mapping) {
+                return $mapping['attributeKey'];
+            }, $mappings)), function($mapping) {
+                return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
+            }),
+            $this->attributeMapping
+        );
+    }
+
+	/**
+     * Check whether the product contains variants
+     *
+     * @param int $productId
+     * @return bool
+     */
+    public function hasVariants($productId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\Models\Article\Detail', 'd');
+        $builder->select(array(
+            'COUNT(d.id) as detailsCount'
+        ));
+
+        $builder->where("d.articleId = :productId");
+        $builder->setParameter(':productId', $productId);
+        $query = $builder->getQuery();
+
+        return $query->getSingleScalarResult() > 1 ? true : false;
+    }
+
+    /**
+     * Returns configurator options and groups
+     * by given article detail id
+     *
+     * @param int $detailId
+     * @return array
+     */
+    public function getConfiguratorOptions($detailId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->from('Shopware\Models\Article\Detail', 'd');
+        $builder->join('d.configuratorOptions', 'cor');
+        $builder->join('cor.group', 'cg');
+        $builder->select(array(
+            'cor.name as optionName',
+            'cg.name as groupName',
+        ));
+
+        $builder->where("d.id = :detailId");
+        $builder->setParameter(':detailId', $detailId);
+        $query = $builder->getQuery();
+        $configuratorData = array();
+
+        foreach ($query->getArrayResult() as $config) {
+            $groupName = $config['groupName'];
+            $configuratorData[$groupName] = $config['optionName'];
+        }
+
+        return $configuratorData;
     }
 }
 

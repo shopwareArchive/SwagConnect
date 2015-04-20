@@ -26,18 +26,9 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
         });
 
         me.callParent(arguments);
-
-        // add default filter to the export store
-        me.store.clearFilter(true);
-        me.store.filters.add('exportStatus', new Ext.util.Filter({
-            property: 'exportStatus',
-            value: 'delete'
-        }));
-        me.store.load();
     },
 
     getColumns: function() {
-        var me = this;
         return [{
             header: '{s name=export/columns/number}Number{/s}',
             dataIndex: 'number',

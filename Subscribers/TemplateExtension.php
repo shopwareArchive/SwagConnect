@@ -19,7 +19,6 @@ class TemplateExtension extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addBepadoTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Search' => 'injectCloudSearchResults',
             'Enlight_Controller_Action_PostDispatch_Frontend' => 'addBepadoStyle'
         );
     }
@@ -183,42 +182,4 @@ class TemplateExtension extends BaseSubscriber
             'shippingCostsPage' => $configComponent->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId() , 'general')
         ));
     }
-
-    /**
-     * Event listener method for frontend searches
-     *
-     * @event Enlight_Controller_Action_PostDispatch_Frontend_Search
-     * @param \Enlight_Event_EventArgs $args
-     */
-    public function injectCloudSearchResults(\Enlight_Event_EventArgs $args)
-    {
-        /** @var $action \Enlight_Controller_Action */
-        $action = $args->getSubject();
-        $request = $action->Request();
-        $view = $action->View();
-
-        if(!$request->isDispatched() || $request->getActionName() != 'defaultSearch') {
-            return;
-        }
-
-        $modelManager = Shopware()->Models();
-        /** @var \Shopware\Bepado\Components\Config $configComponent */
-        $configComponent = new Config($modelManager);
-        if(!$configComponent->getConfig('cloudSearch')) {
-            return;
-        }
-        if(!empty($view->sSearchResults['sArticlesCount'])) {
-            return;
-        }
-        if(empty($view->sRequests['sSearch'])) {
-            return;
-        }
-
-        $action->redirect(array(
-            'controller' => 'bepado',
-            'action' => 'search',
-            'query' => $view->sRequests['sSearch']
-        ));
-    }
-
 }

@@ -28,11 +28,11 @@ abstract class BaseProductQuery
      */
     abstract function getBepadoProducts($rows);
 
-    public function get(array $ids)
+    public function get(array $sourceIds)
     {
+        $implodedIds = "'" . implode("','", $sourceIds) . "'";
         $builder = $this->getProductQuery();
-        $builder->where('a.id IN (:id)');
-        $builder->setParameter('id', $ids);
+        $builder->where("at.sourceId IN ($implodedIds)");
         $query = $builder->getQuery();
 
         return $this->getBepadoProducts($query->getArrayResult());
@@ -119,7 +119,7 @@ abstract class BaseProductQuery
 
         // Fix attributes
         $row['attributes'] = array();
-        foreach ($this->attributeMapping as $swField => $bepadoField) {
+        foreach ($this->getAttributeMapping() as $swField => $bepadoField) {
             if (!array_key_exists($swField, $row)) {
                 continue;
             }
@@ -151,6 +151,9 @@ abstract class BaseProductQuery
         return $row;
     }
 
-
+    public function getAttributeMapping()
+    {
+        return $this->attributeMapping;
+    }
 }
 

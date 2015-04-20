@@ -311,9 +311,17 @@ class Transaction
     {
         try {
             $order = $this->reservations->getOrder($reservationId);
+
+            $orderShop = $order->orderShop;
+            $providerShop = $order->providerShop;
+
             $order->localOrderId = $orderId;
             $order->providerOrderId = $this->fromShop->buy($order);
             $order->reservationId = $reservationId;
+
+            $order->orderShop = $orderShop;
+            $order->providerShop = $providerShop;
+
             $this->reservations->setBought($reservationId, $order);
             return $this->logger->log($order);
         } catch (\Exception $e) {

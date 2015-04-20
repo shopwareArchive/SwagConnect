@@ -17,9 +17,9 @@ class ProductQuery
         $this->remoteProductQuery = $remoteProductQuery;
     }
 
-    public function getLocal(array $ids)
+    public function getLocal(array $sourceIds)
     {
-        return $this->localProductQuery->get($ids);
+        return $this->localProductQuery->get($sourceIds);
     }
 
     public function getRemote(array $ids)

@@ -28,6 +28,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
                 xtype: 'bepado-config-units',
                 itemId: 'config-units'
             }, {
+                xtype: 'bepado-config-marketplace-attributes',
+                itemId: 'marketplace-attributes'
+            }, {
                 xtype: 'bepado-shipping-groups',
                 itemId: 'shipping-groups'
             }, {

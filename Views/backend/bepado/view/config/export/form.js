@@ -136,22 +136,21 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             ]
         });
 
-        Ext.getStore('export.List').load({
-            callback: function(records, operation) {
-                if (!operation.wasSuccessful()) {
-                    return;
+        // if there is exported product
+        // pricing mapping should be disabled
+        Ext.Ajax.request({
+            scope: me,
+            url: '{url controller=BepadoConfig action=isPricingMappingAllowed}',
+            success: function(result, request) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success === false || response.isPricingMappingAllowed === false) {
+                    me.priceMappingsFieldSet.setDisabled(true)
                 }
-                // if there is exported product
-                // pricing mapping should be disabled
-                for (var i=0;i<records.length;i++) {
-                    var exportStatus = records[i].get('exportStatus');
-                    if ( exportStatus == 'update' || exportStatus == 'insert' || exportStatus == 'error') {
-                        me.priceMappingsFieldSet.setDisabled(true);
-                    }
-
-                }
-            }
+            },
+            failure: function() { }
         });
+
+        Ext.getStore('export.List').load();
 
         return [
             syncFieldset,

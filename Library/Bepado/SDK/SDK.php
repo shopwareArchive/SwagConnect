@@ -51,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.5.91';
+    const VERSION = '1.6.5';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -579,5 +579,17 @@ final class SDK
     public function calculateFinishTime($changesCount)
     {
         return $this->dependencies->getSocialNetworkService()->calculateFinishTime($changesCount);
+    }
+
+
+    /**
+     * Returns array with available marketplace product attributes
+     * as attribute => label pairs
+     *
+     * @return array
+     */
+    public function getMarketplaceProductAttributes()
+    {
+        return $this->dependencies->getSocialNetworkService()->getMarketplaceProductAttributes();
     }
 }

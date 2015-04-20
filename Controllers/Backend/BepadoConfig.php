@@ -384,15 +384,28 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     public function getMarketplaceAttributesAction()
     {
-        $marketplaceAttributes = $this->getSDK()->getMarketplaceProductAttributes();
+        try {
+            $verified = $this->getConfigComponent()->getConfig('apiKeyVerified', false);
 
-        $attributes = array();
-        foreach ($marketplaceAttributes as $attributeKey => $attributeLabel) {
-            $attributes[] = array(
-                'attributeKey' => $attributeKey,
-                'attributeLabel' => $attributeLabel,
-                'shopwareAttributeKey' => ''
-            );
+            if ($verified) {
+                $marketplaceAttributes = $this->getSDK()->getMarketplaceProductAttributes();
+
+                $attributes = array();
+                foreach ($marketplaceAttributes as $attributeKey => $attributeLabel) {
+                    $attributes[] = array(
+                        'attributeKey' => $attributeKey,
+                        'attributeLabel' => $attributeLabel,
+                        'shopwareAttributeKey' => ''
+                    );
+                }
+            } else {
+                $attributes = array();
+            }
+        } catch(\Exception $e) {
+            // ignore this exception because sometimes
+            // bepado plugin is not configured and tries to
+            // read marketplace attributes
+            $attributes = array();
         }
 
         $this->View()->assign(

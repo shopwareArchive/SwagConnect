@@ -7,10 +7,11 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.6.0",
+    "currentVersion": "1.6.1",
     "changelog": {
         "de": {
-			"1.6.0": "Neu: Support für Varianten",
+            "1.6.1": "Fix: Export all products",
+            "1.6.0": "Neu: Support für Varianten",
             "1.5.9": "New: Marktplatz Produktattribute",
             "1.5.8": "Removed Cloud Search",
             "1.5.7": "Fix: DHL shipping conflict",
@@ -25,6 +26,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.6.1": "Fix: Export all product",
             "1.6.0": "New: Variant support",
             "1.5.9": "New: Marketplace attributes",
             "1.5.8": "Removed Cloud Search",

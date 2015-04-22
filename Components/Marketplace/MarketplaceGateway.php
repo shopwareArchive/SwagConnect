@@ -76,9 +76,13 @@ class MarketplaceGateway
                 $mappingModel = new MarketplaceAttribute();
             }
 
-            $mappingModel->setMarketplaceAttribute($attribute['attributeKey']);
-            $mappingModel->setLocalAttribute($attribute['shopwareAttributeKey']);
-            $this->manager->persist($mappingModel);
+            if (strlen($attribute['attributeKey']) > 0 && strlen($attribute['shopwareAttributeKey']) > 0) {
+                $mappingModel->setMarketplaceAttribute($attribute['attributeKey']);
+                $mappingModel->setLocalAttribute($attribute['shopwareAttributeKey']);
+                $this->manager->persist($mappingModel);
+            } else {
+                $this->manager->remove($mappingModel);
+            }
         });
 
         $this->manager->flush();

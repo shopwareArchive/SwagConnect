@@ -1094,23 +1094,28 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         });
     },
 
+    /**
+     * Sends marketplace attributes mapping to the PHP
+     */
     saveMarketplaceAttributesMapping: function() {
         var me = this,
             panel = me.getMarketeplaceMappingPanel(),
-            productAttributesStore = me.getMarketeplaceMapping().localProductAttributesStore;
+            store = me.getMarketeplaceMapping().localProductAttributesStore;
 
-        panel.setLoading();
-        productAttributesStore.sync({
-            success :function (records, operation) {
-                panel.setLoading(false);
-                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
-            },
-            failure:function (batch) {
-                console.log(batch);
-                panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
-            }
-        });
+        if (store.getNewRecords().length > 0 || store.getUpdatedRecords().length > 0 || store.getRemovedRecords().length > 0) {
+            panel.setLoading();
+            store.sync({
+                success :function (records, operation) {
+                    panel.setLoading(false);
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
+                },
+                failure:function (batch) {
+                    console.log(batch);
+                    panel.setLoading(false);
+                    me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
+                }
+            });
+        }
     },
 
     /**

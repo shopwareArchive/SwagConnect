@@ -805,15 +805,19 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
+            /** @var \Shopware\Models\Article\Article $model */
             $model = $this->getBepadoExport()->getArticleModelById($id);
             if($model === null) {
                 continue;
             }
-            $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
-            $sdk->recordDelete($attribute->getSourceId());
-            $attribute->setExportStatus(
-                'delete'
-            );
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($model->getDetails() as $detail) {
+                $attribute = $this->getHelper()->getBepadoAttributeByModel($detail);
+                $sdk->recordDelete($attribute->getSourceId());
+                $attribute->setExportStatus(
+                    'delete'
+                );
+            }
         }
         Shopware()->Models()->flush();
     }

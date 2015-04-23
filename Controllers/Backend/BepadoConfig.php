@@ -25,6 +25,7 @@
 use Shopware\Bepado\Components\Config;
 use Bepado\SDK\Units;
 use Shopware\Bepado\Components\BepadoExport;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * @category  Shopware
@@ -203,7 +204,8 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         return new BepadoExport(
             $this->getHelper(),
             $this->getSDK(),
-            $this->getModelManager()
+            $this->getModelManager(),
+            new ProductsAttributesValidator()
         );
     }
 

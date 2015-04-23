@@ -5,6 +5,7 @@ namespace Tests\Shopware\Bepado;
 use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
 use Shopware\Bepado\Components\Logger;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
@@ -65,7 +66,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return new BepadoExport(
             $this->getHelper(),
             $this->getSDK(),
-            Shopware()->Models()
+            Shopware()->Models(),
+            new ProductsAttributesValidator()
         );
     }
 

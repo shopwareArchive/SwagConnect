@@ -3,6 +3,7 @@
 namespace Tests\Shopware\Bepado;
 
 use Shopware\Bepado\Components\BepadoExport;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 class BepadoExportTest extends BepadoTestHelper
 {
@@ -13,7 +14,12 @@ class BepadoExportTest extends BepadoTestHelper
 
     public function setUp()
     {
-        $this->bepadoExport = new BepadoExport($this->getHelper(), $this->getSDK(), Shopware()->Models());
+        $this->bepadoExport = new BepadoExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            Shopware()->Models(),
+            new ProductsAttributesValidator()
+        );
     }
 
     public function testExport()

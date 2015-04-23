@@ -3,25 +3,40 @@
 namespace Shopware\Bepado\Components;
 
 use Bepado\SDK\SDK;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 
 class BepadoExport
 {
-
     /** @var  Helper */
     protected $helper;
+
     /** @var  SDK */
     protected $sdk;
+
     /** @var  ModelManager */
     protected $manager;
 
-    public function __construct(Helper $helper, SDK $sdk, ModelManager $manager)
+    /** @var ProductAttributesValidator  */
+    protected $productAttributesValidator;
+
+    /** @var  MarketplaceGateway */
+    protected $marketplaceGateway;
+
+    public function __construct(
+        Helper $helper,
+        SDK $sdk,
+        ModelManager $manager,
+        ProductAttributesValidator $productAttributesValidator
+    )
     {
         $this->helper = $helper;
         $this->sdk = $sdk;
         $this->manager = $manager;
+        $this->productAttributesValidator = $productAttributesValidator;
     }
 
     /**
@@ -77,6 +92,7 @@ class BepadoExport
             if($model === null) {
                 continue;
             }
+
             $bepadoAttribute = $this->helper->getOrCreateBepadoAttributeByModel($model);
 
             $prefix = $item['title'] ? $item['title'] . ': ' : '';
@@ -97,13 +113,14 @@ class BepadoExport
             $this->manager->flush($bepadoAttribute);
 
             try {
+                $this->productAttributesValidator->validate($this->extractProductAttributes($model));
                 if ($status == 'insert') {
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
             } catch (\Exception $e) {
-                $bepadoAttribute->setExportStatus($status);
+                $bepadoAttribute->setExportStatus('error');
                 $bepadoAttribute->setExportMessage(
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
@@ -212,5 +229,38 @@ class BepadoExport
             ->setParameter(':articleId', $article->getId());
 
         $builder->getQuery()->execute();
+    }
+
+    private function getMarketplaceGateway()
+    {
+        //todo@fixme: Implement better way to get MarketplaceGateway
+        if (!$this->marketplaceGateway) {
+            $this->marketplaceGateway = new MarketplaceGateway($this->manager);
+        }
+
+        return $this->marketplaceGateway;
+    }
+
+    /**
+     * Extracts all marketplaces attributes from product
+     *
+     * @param Detail $detail
+     * @return array
+     */
+    private function extractProductAttributes(Detail $detail)
+    {
+        $marketplaceAttributes = array();
+        foreach ($this->getMarketplaceGateway()->getMappings() as $mapping) {
+            $shopwareAttribute = $mapping['shopwareAttributeKey'];
+            $getter = 'get' . ucfirst($shopwareAttribute);
+
+            if (method_exists($detail->getAttribute(), $getter)) {
+                $marketplaceAttributes[$shopwareAttribute] = $detail->getAttribute()->{$getter}();
+            }
+        }
+        $marketplaceAttributes['purchaseUnit'] = $detail->getPurchaseUnit();
+        $marketplaceAttributes['referenceUnit'] = $detail->getReferenceUnit();
+
+        return $marketplaceAttributes;
     }
 }

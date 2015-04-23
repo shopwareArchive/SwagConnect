@@ -4,6 +4,7 @@ namespace Shopware\Bepado\Subscribers;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils;
 use Shopware\Bepado\Components\BepadoExport;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from bepado
@@ -34,7 +35,8 @@ class Lifecycle extends BaseSubscriber
         return new BepadoExport(
             $this->getHelper(),
             $this->getSDK(),
-            Shopware()->Models()
+            Shopware()->Models(),
+            new ProductsAttributesValidator()
         );
     }
 

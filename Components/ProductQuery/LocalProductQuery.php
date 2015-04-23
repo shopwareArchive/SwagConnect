@@ -163,8 +163,7 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailId']);
         unset($row['detailKind']);
 
-        if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity'])
-        {
+        if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity']) {
             //Map local unit to bepado unit
             if ($row['attributes']['unit']) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);

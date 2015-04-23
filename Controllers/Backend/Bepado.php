@@ -28,6 +28,7 @@ use Shopware\Bepado\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Class Shopware_Controllers_Backend_Bepado
@@ -1276,7 +1277,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return new BepadoExport(
             $this->getHelper(),
             $this->getSDK(),
-            $this->getModelManager()
+            $this->getModelManager(),
+            new ProductsAttributesValidator()
         );
     }
 

@@ -55,52 +55,38 @@ class VariantConfigurator
      */
     public function configureVariantAttributes(Product $product, Detail $detail)
     {
-        $repository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Group');
-        $optionsRepository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Option');
-        foreach ($product->variant as $key => $value) {
-            $group = $repository->findOneBy(array('name' => $key));
-            if (empty($group)) {
-                $group = $this->createConfiguratorGroup($key);
-            }
-
-            $option = $optionsRepository->findOneBy(array('name' => $value, 'groupId' => $group->getId()));
-            $optionPositionsCount = count($group->getOptions());
-            if (empty($option)) {
-                $option = new Option();
-                $option->setName($value);
-                $option->setGroup($group);
-                $optionPositionsCount++;
-                $option->setPosition($optionPositionsCount);
-                $groupOptions = $group->getOptions();
-                $groupOptions->add($option);
-                $group->setOptions($groupOptions);
-                $this->manager->persist($group);
-                $this->manager->persist($option);
-            }
-        }
-
         $article = $detail->getArticle();
+        $detailOptions = $detail->getConfiguratorOptions();
         if (!$article->getConfiguratorSet()) {
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
             $configSet->setArticles(array($article));
             $article->setConfiguratorSet($configSet);
-            $configSet->setGroups(array($group));
-            $configSet->setOptions(array($option));
-            $this->manager->persist($configSet);
-            $this->manager->persist($article);
         } else {
-            $configSetOptions = $article->getConfiguratorSet()->getOptions();
-            $configSetOptions[] = $option;
-            $article->getConfiguratorSet()->setOptions($configSetOptions);
+            $configSet = $article->getConfiguratorSet();
         }
 
-        $detailOptions = $detail->getConfiguratorOptions();
-        $detailOptions[] = $option;
-        $detail->setConfiguratorOptions($detailOptions);
+        foreach ($product->variant as $key => $value) {
+            $group = $this->getGroupByName($configSet, $key);
+            $option = $this->getOrCreateOptionByName($configSet, $group, $value);
 
-        $this->manager->persist($detail);
-        $this->manager->flush();
+            $configSet = $this->addGroupToConfiguratorSet($configSet, $group);
+            $configSet = $this->addOptionToConfiguratorSet($configSet, $option);
+            $this->manager->persist($option);
+            $this->manager->persist($group);
+            $this->manager->persist($configSet);
+
+            $detailOptions[] = $option;
+        }
+
+        if (count($product->variant) > 0) {
+            $detail->setConfiguratorOptions($detailOptions);
+            $this->manager->persist($article);
+            $this->manager->persist($detail);
+            $this->manager->flush();
+        }
+
+
     }
 
     /**
@@ -121,9 +107,97 @@ class VariantConfigurator
         $group->setName($name);
         $group->setPosition($position);
 
-        $this->manager->persist($group);
-        $this->manager->flush();
+        return $group;
+    }
+
+    private function addGroupToConfiguratorSet(Set $set, Group $group)
+    {
+        $configuratorGroups = $set->getGroups();
+        $isExists = false;
+        /** @var \Shopware\Models\Article\Configurator\Group $configuratorGroup */
+        foreach ($configuratorGroups as $configuratorGroup) {
+            if ($configuratorGroup->getName() === $group->getName()) {
+                $isExists = true;
+            }
+        }
+
+        if ($isExists === false) {
+            $configuratorGroups[] = $group;
+            $set->setGroups($configuratorGroups);
+            $this->manager->persist($set);
+        }
+
+        return $set;
+    }
+
+    private function addOptionToConfiguratorSet(Set $set, Option $option)
+    {
+        $configSetOptions = $set->getOptions();
+        $isExists = false;
+        /** @var \Shopware\Models\Article\Configurator\Option $option */
+        foreach($configSetOptions as $configSetOption) {
+            if ($configSetOption->getName() === $option->getName()) {
+                $isExists = true;
+            }
+        }
+
+        if ($isExists === false) {
+            $configSetOptions[] = $option;
+            $set->setOptions($configSetOptions);
+        }
+
+        return $set;
+    }
+
+    private function getGroupByName(Set $set, $groupName)
+    {
+        /** @var \Shopware\Models\Article\Configurator\Group $group */
+        foreach ($set->getGroups() as $group) {
+            if ($group->getName() === $groupName) {
+                return $group;
+            }
+        }
+
+        $repository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Group');
+        $group = $repository->findOneBy(array('name' => $groupName));
+
+        if (empty($group)) {
+            $group = $this->createConfiguratorGroup($groupName);
+        }
 
         return $group;
+    }
+
+    private function getOrCreateOptionByName(Set $set, Group $group, $optionName)
+    {
+        $configSetOptions = $set->getOptions();
+
+        /** @var \Shopware\Models\Article\Configurator\Option $configSetOption */
+        foreach ($configSetOptions as $configSetOption) {
+            if ($configSetOption->getName() === $optionName
+                && $configSetOption->getGroup()->getId() == $group->getId()
+            ) {
+                return $configSetOption;
+            }
+        }
+
+        $optionsRepository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Option');
+        $option = $optionsRepository->findOneBy(array('name' => $optionName, 'group' => $group));
+
+        if (empty($option)) {
+            $option = new Option();
+            $option->setName($option);
+            $option->setGroup($group);
+            $optionPositionsCount = count($group->getOptions());
+            $optionPositionsCount++;
+            $option->setPosition($optionPositionsCount);
+            $groupOptions = $group->getOptions();
+            $groupOptions->add($option);
+            $group->setOptions($groupOptions);
+            $this->manager->persist($group);
+            $this->manager->persist($option);
+        }
+
+        return $option;
     }
 } 

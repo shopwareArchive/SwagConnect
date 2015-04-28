@@ -369,21 +369,38 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
-        if ($detail->getKind() == 1) {
-            $model = $detail->getArticle();
-            $model->getDetails()->clear();
-        } else {
-            $model = $detail;
+        $article = $detail->getArticle();
+        $isOnlyOneVariant = false;
+        if (count($article->getDetails()) === 1) {
+            $isOnlyOneVariant = true;
         }
 
         // Not sure why, but the Attribute can be NULL
-        $attribute = $this->helper->getBepadoAttributeByModel($model);
+        $attribute = $this->helper->getBepadoAttributeByModel($detail);
         if ($attribute) {
             $this->manager->remove($attribute);
         }
-        $model->getDetails()->clear();
 
-        $this->manager->remove($model);
+        // if removed variant is main variant
+        // find first variant which is not main and mark it
+        if ($detail->getKind() === 1) {
+            /** @var \Shopware\Models\Article\Detail $variant */
+            foreach ($article->getDetails() as $variant) {
+                if ($variant->getId() != $detail->getId()) {
+                    $variant->setKind(1);
+                    $article->setMainDetail($variant);
+                    $this->manager->persist($article);
+                    $this->manager->persist($variant);
+                    break;
+                }
+            }
+        }
+
+        $this->manager->remove($detail);
+        if ($isOnlyOneVariant === true) {
+            $article->getDetails()->clear();
+            $this->manager->remove($article);
+        }
 
         $this->manager->flush();
         $this->manager->clear();

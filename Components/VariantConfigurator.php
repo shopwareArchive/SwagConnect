@@ -192,7 +192,7 @@ class VariantConfigurator
     /**
      * Find option in already assigned configurator set options.
      * If it does not exist, then create it.
-     * 
+     *
      * @param Set $set
      * @param Group $group
      * @param $optionName

@@ -75,7 +75,6 @@ class VariantConfigurator
             $this->manager->persist($option);
             $this->manager->persist($group);
             $this->manager->persist($configSet);
-
             $detailOptions[] = $option;
         }
 
@@ -110,6 +109,13 @@ class VariantConfigurator
         return $group;
     }
 
+    /**
+     * Adds group to configurator set if it does not exist
+     *
+     * @param Set $set
+     * @param Group $group
+     * @return Set
+     */
     private function addGroupToConfiguratorSet(Set $set, Group $group)
     {
         $configuratorGroups = $set->getGroups();
@@ -130,6 +136,13 @@ class VariantConfigurator
         return $set;
     }
 
+    /**
+     * Adds option to configurator set if it does not exist
+     *
+     * @param Set $set
+     * @param Option $option
+     * @return Set
+     */
     private function addOptionToConfiguratorSet(Set $set, Option $option)
     {
         $configSetOptions = $set->getOptions();
@@ -149,6 +162,14 @@ class VariantConfigurator
         return $set;
     }
 
+    /**
+     * Finds group in already assigned configurator set groups.
+     * If it does not exist, then create it.
+     *
+     * @param Set $set
+     * @param $groupName
+     * @return Group
+     */
     private function getGroupByName(Set $set, $groupName)
     {
         /** @var \Shopware\Models\Article\Configurator\Group $group */
@@ -168,6 +189,15 @@ class VariantConfigurator
         return $group;
     }
 
+    /**
+     * Find option in already assigned configurator set options.
+     * If it does not exist, then create it.
+     * 
+     * @param Set $set
+     * @param Group $group
+     * @param $optionName
+     * @return null|object|Option
+     */
     private function getOrCreateOptionByName(Set $set, Group $group, $optionName)
     {
         $configSetOptions = $set->getOptions();
@@ -186,7 +216,7 @@ class VariantConfigurator
 
         if (empty($option)) {
             $option = new Option();
-            $option->setName($option);
+            $option->setName($optionName);
             $option->setGroup($group);
             $optionPositionsCount = count($group->getOptions());
             $optionPositionsCount++;

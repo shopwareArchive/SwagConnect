@@ -17,6 +17,6 @@ before_script:
     - php bin/console sw:plugin:list
     - php bin/console sw:plugin:install SwagBepado
     - php bin/console sw:plugin:activate SwagBepado
-    - cd /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
 
 script: phpunit

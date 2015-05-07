@@ -403,8 +403,13 @@ class Setup
     public function createBepadoCustomerGroup()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+
+        $bepadoGroupAttributeId = Shopware()->Db()->fetchOne(
+            'SELECT id FROM s_core_customergroups_attributes WHERE bepado_group = 1'
+        );
+
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->findOneBy(array('bepadoGroup' => true));
+        $model = $repo->find($bepadoGroupAttributeId);
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {

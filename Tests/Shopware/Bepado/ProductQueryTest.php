@@ -41,13 +41,13 @@ class ProductQueryTest extends BepadoTestHelper
 
     public function testGetLocal()
     {
-        $result = $this->getProductQuery()->getLocal(array(2));
+        $result = $this->getProductQuery()->getLocal(array(3));
         /** @var \Bepado\SDK\Struct\Product $product */
         $product = $result[0];
 
         $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
-        $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
-        $this->assertEquals(16.80, round($product->price, 2));
+        $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
+        $this->assertEquals(12.56, round($product->price, 2));
     }
 
     public function testGetRemoteShouldReturnEmptyArray()

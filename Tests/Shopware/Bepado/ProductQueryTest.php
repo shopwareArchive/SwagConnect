@@ -96,13 +96,13 @@ class ProductQueryTest extends BepadoTestHelper
 
     public function testGetBepadoProduct()
     {
-        $result = $this->getProductQuery()->getLocal(array(2));
+        $result = $this->getProductQuery()->getLocal(array(3));
         /** @var \Bepado\SDK\Struct\Product $product */
         $product = $result[0];
 
-        $this->assertEquals('Münsterländer Lagerkorn 32%', $product->title);
+        $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
         $this->assertEquals('l', $product->attributes['unit']);
-        $this->assertEquals('0.5000', $product->attributes['quantity']);
+        $this->assertEquals('0.7000', $product->attributes['quantity']);
         $this->assertEquals('1.000', $product->attributes['ref_quantity']);
 
 

@@ -42,7 +42,7 @@ class BepadoExportTest extends BepadoTestHelper
 
         $this->assertEmpty($errors);
         $sql = 'SELECT export_status, export_message FROM s_plugin_bepado_items WHERE source_id = ?';
-        $row = Shopware()->Db()->fetchRow($sql, array(2));
+        $row = Shopware()->Db()->fetchRow($sql, array(3));
 
         $this->assertEquals('update', $row['export_status']);
         $this->assertNull($row['export_message']);

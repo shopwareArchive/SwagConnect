@@ -98,10 +98,19 @@ class HelperTest extends BepadoTestHelper
 
     public function testGetCategoriesByProduct()
     {
+        $this->resetBepadoCategoryMappings();
+        $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+
         $sourceId = $this->getExternalProductSourceId();
         $products = $this->getHelper()->getRemoteProducts(array($sourceId));
         $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
 
         $this->assertNotEmpty($categories);
+    }
+
+    private function resetBepadoCategoryMappings()
+    {
+        $conn = Shopware()->Db();
+        $conn->exec('UPDATE s_categories_attributes SET bepado_import_mapping = NULL, bepado_export_mapping = NULL');
     }
 }

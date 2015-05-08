@@ -21,7 +21,7 @@ class SDKTest extends BepadoTestHelper
                     'product' => new \Bepado\SDK\Struct\Product(array(
                         'shopId' => 3,
                         'revisionId' => time(),
-                        'sourceId' => 'ABCDEFGH',
+                        'sourceId' => 'ABCDEFGH' . time(),
                         'ean' => '1234',
                         'url' => 'http://shopware.de',
                         'title' => 'Bepado Test-Produkt',

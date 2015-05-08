@@ -26,9 +26,9 @@ class BepadoExportTest extends BepadoTestHelper
     {
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(2);
         $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
-
-        $sql = 'UPDATE s_plugin_bepado_items SET export_status = "insert" WHERE article_id = ?';
-        Shopware()->Db()->executeQuery($sql, array(2));
+        $bepadoAttribute->setExportStatus('insert');
+        Shopware()->Models()->persist($bepadoAttribute);
+        Shopware()->Models()->flush($bepadoAttribute);
 
         $errors = $this->bepadoExport->export(array(2));
 
@@ -43,6 +43,8 @@ class BepadoExportTest extends BepadoTestHelper
 
     public function testExportErrors()
     {
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(4);
+        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
         $errors = $this->bepadoExport->export(array(4));
 
         $this->assertNotEmpty($errors);

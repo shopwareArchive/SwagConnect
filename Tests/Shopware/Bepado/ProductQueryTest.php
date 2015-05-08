@@ -106,6 +106,8 @@ class ProductQueryTest extends BepadoTestHelper
         $this->assertEquals('1.000', $product->attributes['ref_quantity']);
 
 
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(11);
+        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
         $result = $this->getProductQuery()->getLocal(array(11));
         /** @var \Bepado\SDK\Struct\Product $product */
         $product = $result[0];

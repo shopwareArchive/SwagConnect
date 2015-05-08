@@ -24,16 +24,23 @@ class BepadoExportTest extends BepadoTestHelper
 
     public function testExport()
     {
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(2);
+        /** @var \Shopware\Models\Article\Article $model */
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(3);
+        /** @var \Shopware\Models\Article\Price $prices */
+        $prices = $model->getMainDetail()->getPrices();
+        $prices[0]->setBasePrice(9.89);
+        $model->getMainDetail()->setPrices($prices);
+        Shopware()->Models()->persist($model->getMainDetail());
+        Shopware()->Models()->flush($model->getMainDetail());
+
         $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
         $bepadoAttribute->setExportStatus('insert');
         Shopware()->Models()->persist($bepadoAttribute);
-        Shopware()->Models()->flush($bepadoAttribute);
+        Shopware()->Models()->flush();
 
-        $errors = $this->bepadoExport->export(array(2));
+        $errors = $this->bepadoExport->export(array(3));
 
         $this->assertEmpty($errors);
-
         $sql = 'SELECT export_status, export_message FROM s_plugin_bepado_items WHERE source_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(2));
 

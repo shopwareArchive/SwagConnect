@@ -42,10 +42,10 @@ class SDKTest extends BepadoTestHelper
 
     public function testExportProductWithoutPurchasePrice()
     {
-        $this->getBepadoExport()->export(array(3));
+        $this->getBepadoExport()->export(array(14));
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('sourceId' => 14));
         $message = $model->getExportMessage();
 
         $this->assertContains('purchasePrice', $message);

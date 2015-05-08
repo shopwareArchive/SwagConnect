@@ -1,6 +1,6 @@
 language: php
 php:
-  - 5.3
+  - 5.4
 
 sudo: false
 
@@ -13,9 +13,13 @@ before_script:
     - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Local/Backend
     - cd /tmp/shopware
     - ls engine/Shopware/Plugins/Local/Backend
+    - php bin/console sw:plugin:refresh
     - php bin/console sw:plugin:list
     - php bin/console sw:plugin:install SwagBepado
     - php bin/console sw:plugin:activate SwagBepado
-    - cd /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
 
 script: phpunit
+
+notifications:
+    email: false

@@ -159,7 +159,7 @@ class Setup
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attr` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
               `local_attribute` varchar(255) NOT NULL UNIQUE,
@@ -403,8 +403,13 @@ class Setup
     public function createBepadoCustomerGroup()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+
+        $bepadoGroupAttributeId = Shopware()->Db()->fetchOne(
+            'SELECT id FROM s_core_customergroups_attributes WHERE bepado_group = 1'
+        );
+
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->findOneBy(array('bepadoGroup' => true));
+        $model = $repo->find($bepadoGroupAttributeId);
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {

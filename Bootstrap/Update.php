@@ -75,6 +75,7 @@ class Update
         $this->removeApiDescriptionSnippet();
 		$this->migrateSourceIds();
         $this->createMarketplaceAttributesTable();
+        $this->renameMarketplaceAttributesTable();
 
         if (version_compare($this->version, '1.5.6', '<=')) {
             $this->clearTemplateCache();
@@ -408,13 +409,23 @@ class Update
     public function createMarketplaceAttributesTable()
     {
         if (version_compare($this->version, '1.5.8', '<=')) {
-            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attributes` (
+            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attr` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
               `local_attribute` varchar(255) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
             Shopware()->Db()->exec($sql);
+        }
+    }
+
+    public function renameMarketplaceAttributesTable()
+    {
+        if (version_compare($this->version, '1.5.8', '>') && version_compare($this->version, '1.6.1', '<=')) {
+            $sql = "INSERT INTO `s_plugin_bepado_marketplace_attr`(`marketplace_attribute`, `local_attribute`)
+                        SELECT `marketplace_attribute`, `local_attribute` FROM `s_plugin_bepado_marketplace_attributes`";
+            Shopware()->Db()->exec($sql);
+            Shopware()->Db()->exec('DROP TABLE `s_plugin_bepado_marketplace_attributes`');
         }
     }
 

@@ -27,7 +27,7 @@ use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
- * @ORM\Table(name="s_plugin_bepado_marketplace_attributes")
+ * @ORM\Table(name="s_plugin_bepado_marketplace_attr")
  * @ORM\Entity(repositoryClass="MarketplaceAttributeRepository")
  */
 class MarketplaceAttribute extends ModelEntity

@@ -5,6 +5,7 @@ namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\ProductToShop;
 use Shopware\Bepado\Components\VariantConfigurator;
 
@@ -23,7 +24,8 @@ class ProductToShopTest extends BepadoTestHelper
             $this->modelManager,
             $this->getImageImport(),
             new Config($this->modelManager),
-            new VariantConfigurator($this->modelManager)
+            new VariantConfigurator($this->modelManager),
+            new MarketplaceGateway(Shopware()->Models())
         );
     }
 
@@ -168,7 +170,7 @@ class ProductToShopTest extends BepadoTestHelper
             array('articleId' => $article->getId())
         )->fetchColumn();
 
-        $this->assertEquals(0, $attributesCount);
+        $this->assertEquals(2, $attributesCount);
     }
 }
  

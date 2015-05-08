@@ -108,13 +108,11 @@ class Config
         $query = $this->getConfigRepository()->getConfigsQuery($name);
         $query->setMaxResults(1);
         $result = $query->getResult();
-        $model = $result[0];
-
-        if ($model) {
-            return $model->getValue();
+        if (count($result) === 0) {
+            return $default;
         }
 
-        return $default;
+        return $result[0]->getValue();
     }
 
     /**

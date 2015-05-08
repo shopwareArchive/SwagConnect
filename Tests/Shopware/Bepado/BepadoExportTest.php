@@ -24,6 +24,9 @@ class BepadoExportTest extends BepadoTestHelper
 
     public function testExport()
     {
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(2);
+        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
+
         $sql = 'UPDATE s_plugin_bepado_items SET export_status = "insert" WHERE article_id = ?';
         Shopware()->Db()->executeQuery($sql, array(2));
 

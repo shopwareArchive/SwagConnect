@@ -20,3 +20,6 @@ before_script:
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
 
 script: phpunit
+
+notifications:
+    email: false

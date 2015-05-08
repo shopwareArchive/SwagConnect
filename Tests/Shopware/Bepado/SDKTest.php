@@ -56,7 +56,7 @@ class SDKTest extends BepadoTestHelper
     {
         // Set a purchase price
         /** @var \Shopware\Models\Article\Price $price */
-        $price = Shopware()->Models()->getRepository('Shopware\Models\Article\Price')->findOneBy(array('articleDetailsId' => 125, 'from' => 1, 'customerGroup' => 'EK'));
+        $price = Shopware()->Models()->getRepository('Shopware\Models\Article\Price')->findOneBy(array('articleDetailsId' => 3, 'from' => 1, 'customerGroup' => 'EK'));
         $price->setBasePrice($price->getPrice());
         Shopware()->Models()->flush();
 
@@ -64,10 +64,10 @@ class SDKTest extends BepadoTestHelper
         $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
 
         // Insert the product
-        $this->getBepadoExport()->export(array(2));
+        $this->getBepadoExport()->export(array(3));
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 2));
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));
         $message = $model->getExportMessage();
 
         $this->assertNull($message);

@@ -42,7 +42,6 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'logList', selector: 'bepado-log-list' },
         { ref: 'logFilter', selector: 'bepado-log-filter' },
         { ref: 'logTabs', selector: 'bepado-log-tabs' },
-        { ref: 'unitsMappingPanel', selector: 'bepado-config-units' },
         { ref: 'marketeplaceMappingPanel', selector: 'bepado-config-marketplace-attributes' },
         { ref: 'marketeplaceMapping', selector: 'bepado-marketplace-attributes-mapping' },
         { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
@@ -424,11 +423,6 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                         }));
                     }
                     store.load();
-                }
-            },
-            'bepado-units-mapping button[action=save]': {
-                click: function () {
-                    me.saveUnitsMapping();
                 }
             },
             'bepado-marketplace-attributes-mapping button[action=save]': {
@@ -915,6 +909,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             form = btn.up('form');
 
         form.setLoading();
+        me.saveUnitsMapping();
         if (form.getRecord()) {
             var model = form.getRecord();
 
@@ -1074,21 +1069,16 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     saveUnitsMapping: function() {
         var me = this,
-            panel = me.getUnitsMappingPanel(),
             unitsStore = me.getUnitsMapping().unitsStore;
 
         if (unitsStore.getUpdatedRecords().length < 1) {
             return;
         }
 
-        panel.setLoading();
         unitsStore.sync({
             success :function (records, operation) {
-                panel.setLoading(false);
-                me.createGrowlMessage('{s name=success}Success{/s}','{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
             },
             failure:function (batch) {
-                panel.setLoading(false);
                 me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
             }
         });

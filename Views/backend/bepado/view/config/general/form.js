@@ -65,6 +65,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
         hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
         basicHeader: '{s name=config/basic}Basic{/s}',
+        unitsHeader: '{s name=navigation/units}Einheiten{/s}',
+        unitsFieldsetDescription: '{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in bepado zu.{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}'
     },
 
@@ -97,6 +99,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         var me = this;
             apiFieldset = me.getApiKeyFieldset(),
             basicConfigFieldset = me.getBasicConfigFieldset(),
+            unitsFieldset = me.getUnitsFieldset(),
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
@@ -104,6 +107,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             elements.push(apiFieldset);
         }
         elements.push(basicConfigFieldset);
+        elements.push(unitsFieldset);
         elements.push(advancedConfigFieldset);
 
         return elements;
@@ -231,6 +235,34 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             title: me.snippets.basicHeader,
             defaults: {
                 labelWidth: 170,
+                anchor: '100%'
+            },
+            items: items
+        });
+
+        return fieldset;
+    },
+
+    getUnitsFieldset: function() {
+        var me = this,
+            items = [];
+
+        items.push({
+            xtype: 'container',
+            html: me.snippets.unitsFieldsetDescription
+        });
+        items.push({
+            xtype: 'bepado-units-mapping',
+            width: '100%',
+            padding: '10 0 0 0'
+        });
+
+        var fieldset = Ext.create('Ext.form.FieldSet', {
+            layout: 'vbox',
+            title: me.snippets.unitsHeader,
+            collapsible: true,
+            collapsed: false,
+            defaults: {
                 anchor: '100%'
             },
             items: items

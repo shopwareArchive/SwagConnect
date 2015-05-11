@@ -16,12 +16,6 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 expanded: true,
                 children: [
                     {
-                        id: 'config-units',
-                        text: "{s name=navigation/units}Einheiten{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-inbox-upload'
-                    },
-                    {
                         id: 'marketplace-attributes',
                         text: "{s name=navigation/marketplace_attribute}Marketplace attributes{/s}",
                         leaf: true,

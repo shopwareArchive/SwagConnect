@@ -533,4 +533,21 @@ class Helper
             $articleId[0]
         );
     }
+
+    /**
+     * Creates Shopware product model
+     *
+     * @param Product $product
+     * @return ProductModel
+     */
+    public function createProductModel(Product $product)
+    {
+        //todo@sb: Add test
+        $model = new ProductModel();
+        $model->setActive(false);
+        $model->setName($product->title);
+        $this->manager->persist($model);
+
+        return $model;
+    }
 }

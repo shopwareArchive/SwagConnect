@@ -141,12 +141,12 @@ class ProductToShop implements ProductToShopBase
         if ($detail === null) {
             list($articleId, $detailId) = $this->helper->explodeArticleId($product->sourceId);
             if (is_null($detailId)) {
-                $model = new ProductModel();
-                $model->setActive(false);
-                $model->setName($product->title);
-                $this->manager->persist($model);
+                $model = $this->helper->createProductModel($product);
             } else {
                 $model = $this->helper->getBepadoArticleModel($articleId, $product->shopId);
+                if (!$model instanceof \Shopware\Models\Article\Article) {
+                    $model = $this->helper->createProductModel($product);
+                }
             }
 
             $detail = new DetailModel();

@@ -304,6 +304,43 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                 flex: 4
             });
 
+        me.categoryStore = Ext.data.StoreManager.lookup('mapping.GoogleCategories');
+        // create combo with google categories
+        // do not change combo creation to xtype
+        // xtype will reset tree combo state every time when it's showed
+        me.categoryTreeCombo = Ext.create('Shopware.form.field.ComboTree', {
+            valueField: 'id',
+            displayField: 'name',
+            treeField: 'categoryId',
+            store: me.categoryStore,
+            forceSelection: true,
+            emptyText: '{s name=config/export/empty_text_combo}Bitte wählen{/s}',
+            allowBlank: true,
+            name: 'defaultExportCategory',
+            rootVisible: false,
+            enableKeyEvents: true,
+            listeners: {
+                select: function(field, record) {
+                    defaultExportCategory.setValue(field.getValue());
+                    field.up('window').close();
+                }
+            }
+        });
+
+        // create window for default category combo
+        // it's will be shown when hit Edit button
+        me.defaultCategoryWindow = Ext.create('Ext.window.Window', {
+            title: me.snippets.defaultCategory,
+            height: 100,
+            width: 400,
+            layout: 'fit',
+            modal: true,
+            closeAction: 'hide',
+            items: [
+                me.categoryTreeCombo
+            ]
+        });
+
         return Ext.create('Ext.container.Container', {
             columnWidth: 1,
             padding: '0 0 20 0',
@@ -344,27 +381,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                             bodyPadding: '0 0 0 3',
                             cls: 'primary',
                             handler: function (btn) {
-                                Ext.create('Ext.window.Window', {
-                                    title: me.snippets.defaultCategory,
-                                    height: 100,
-                                    width: 400,
-                                    layout: 'fit',
-                                    modal: true,
-                                    items: [
-                                        {
-                                        xtype: 'base-element-selecttree',
-                                        allowBlank: true,
-                                        store: 'mapping.BepadoCategoriesExport',
-                                        name: 'defaultExportCategoryCombo',
-                                        labelWidth: me.defaults.labelWidth,
-                                        listeners: {
-                                            select: function (arg) {
-                                                defaultExportCategory.setValue(arg.getValue());
-                                                arg.up('window').close();
-                                            }
-                                        }
-                                    }]
-                                }).show();
+                                me.defaultCategoryWindow.show();
                             }
                         })
                     ]

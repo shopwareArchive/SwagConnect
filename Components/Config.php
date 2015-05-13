@@ -144,7 +144,13 @@ class Config
         }
 
         $model->setName($name);
-        $model->setValue($value);
+
+        if (is_array($value)) {
+            $model->setValue(json_encode($value));
+        } else {
+            $model->setValue($value);
+        }
+
         $model->setShopId($shopId);
         $model->setGroupName($groupName);
 

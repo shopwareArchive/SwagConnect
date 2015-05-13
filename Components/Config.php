@@ -333,6 +333,13 @@ class Config
 
         $result = Shopware()->Db()->fetchPairs($query);
 
+        foreach ($result as $key => $value) {
+            $decodedString = json_decode($value, true);
+            if ($decodedString !== null) {
+                $result[$key] = $decodedString;
+            }
+        }
+
         return $result;
     }
 
@@ -354,7 +361,12 @@ class Config
                     $model->setShopId(null);
                 }
 
-                $model->setValue($configValue);
+                if (is_array($configValue)) {
+                    $model->setValue(json_encode($configValue));
+                } else {
+                    $model->setValue($configValue);
+                }
+
                 $this->manager->persist($model);
             }
         }

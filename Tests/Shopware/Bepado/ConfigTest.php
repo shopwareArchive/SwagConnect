@@ -103,6 +103,9 @@ class ConfigTest extends BepadoTestHelper
         $result = Shopware()->Db()->fetchPairs($sql, array('export'));
 
         foreach ($result as $name => $value) {
+            if (json_decode($value, true) !== null) {
+                $value = json_decode($value, true);
+            }
             $this->assertEquals($value, $exportConfig[$name]);
         }
     }

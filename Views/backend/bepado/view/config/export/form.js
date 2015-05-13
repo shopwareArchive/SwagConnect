@@ -136,6 +136,17 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             ]
         });
 
+        me.languagesExportFieldset = Ext.create('Ext.form.FieldSet', {
+            title: 'Export languages', // todo@sb: translate it
+            items: [
+                {
+                    xtype: 'label',
+                    html: 'Here you can specify which languages will be exported as product translations. If this field is empty, products will be exported with default language of your shop.' // todo@sb: translate it
+                },
+                me.createLanguagesCombo()
+            ]
+        });
+
         // if there is exported product
         // pricing mapping should be disabled
         Ext.Ajax.request({
@@ -155,8 +166,25 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         return [
             syncFieldset,
             container,
+            me.languagesExportFieldset,
             me.priceMappingsFieldSet
         ];
+    },
+
+    createLanguagesCombo: function() {
+        var me = this;
+
+        me.shopStore = Ext.create('Shopware.apps.Base.store.ShopLanguage').load();
+        return Ext.create('Ext.form.field.ComboBox', {
+            multiSelect: true,
+            displayField: 'name',
+            valueField: 'id',
+            name: 'exportLanguages',
+            allowBlank: true,
+            fieldLabel: 'Languages', // todo@sb: translate it
+            width: 435,
+            store: me.shopStore
+        });
     },
 
     getSyncFieldset: function() {

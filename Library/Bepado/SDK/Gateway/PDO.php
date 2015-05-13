@@ -33,6 +33,7 @@ class PDO extends Gateway
     protected $operationStruct = array(
         'insert' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Insert',
         'update' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Update',
+        'stock' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Availability',
         'delete' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Delete',
     );
 
@@ -106,10 +107,13 @@ class PDO extends Gateway
             );
 
             if ($row['c_product']) {
-                $change->product = unserialize($row['c_product']);
+                if ($row['c_operation'] == 'stock') {
+                    $change->availability = $row['c_product'];
+                } else {
+                    $change->product = unserialize($row['c_product']);
+                }
             }
         }
-
 
         return $changes;
     }
@@ -221,6 +225,44 @@ class PDO extends Gateway
             );'
         );
         $query->execute(array($id, 'update', $revision, serialize($product)));
+
+        $this->updateHash($id, $hash);
+    }
+
+    /**
+     * Record product availability update
+     *
+     * @param string $id
+     * @param string $hash
+     * @param string $revision
+     * @param Struct\Product $product
+     * @return void
+     */
+    public function recordAvailabilityUpdate($id, $hash, $revision, Struct\Product $product)
+    {
+        $stmt = $this->connection
+            ->prepare('SELECT p_hash FROM bepado_product WHERE p_source_id = ?');
+        $stmt->execute(array($id));
+
+        $currentHash = $stmt->fetchColumn();
+
+        if ($currentHash === $hash) {
+            return;
+        }
+
+        $query = $this->connection->prepare(
+            'INSERT INTO
+                bepado_change (
+                    `c_source_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_product`
+                )
+            VALUES (
+                ?, ?, ? ,?
+            );'
+        );
+        $query->execute(array($id, 'stock', $revision, $product->availability));
 
         $this->updateHash($id, $hash);
     }

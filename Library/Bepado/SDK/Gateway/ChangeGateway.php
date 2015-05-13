@@ -83,4 +83,15 @@ interface ChangeGateway
      * @return void
      */
     public function recordDelete($id, $revision);
+
+    /**
+     * Record product availability update
+     *
+     * @param string $id
+     * @param string $hash
+     * @param string $revision
+     * @param Product $product
+     * @return void
+     */
+    public function recordAvailabilityUpdate($id, $hash, $revision, Product $product);
 }

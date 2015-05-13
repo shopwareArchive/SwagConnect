@@ -372,16 +372,22 @@ class DependencyResolver
                         new Struct\Verificator\Product(
                             new ShippingRuleParser\Google()
                         ),
+                    'Bepado\\SDK\\Struct\\Translation' =>
+                        new Struct\Verificator\Translation(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Insert' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Update' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\FromShop\\Delete' =>
                         new Struct\Verificator\Change(),
+                    'Bepado\\SDK\\Struct\\Change\\FromShop\\Availability' =>
+                        new Struct\Verificator\Change\Availability(),
                     'Bepado\\SDK\\Struct\\Change\\ToShop\\InsertOrUpdate' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\ToShop\\Delete' =>
                         new Struct\Verificator\Change\Delete(),
+                    'Bepado\\SDK\\Struct\\Change\\ToShop\\Availability' =>
+                        new Struct\Verificator\Change\Availability(),
                     'Bepado\\SDK\\Struct\\Change\\InterShop\\Update' =>
                         new Struct\Verificator\Change\InterShopUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\InterShop\\Delete' =>

@@ -317,6 +317,15 @@ class Product extends ShopItem
     public $deliveryWorkDays;
 
     /**
+     * Translations, indexed by ISO 639-1 language code (e.g. "de").
+     *
+     * @see https://en.wikipedia.org/wiki/ISO_639-1
+     *
+     * @var \Bepado\SDK\Struct\Translation[string]
+     */
+    public $translations = array();
+
+    /**
      * Restores a product from a previously stored state array.
      *
      * @param array $state

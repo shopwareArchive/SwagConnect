@@ -137,6 +137,11 @@ class InMemory extends Gateway
             case 'update':
                 $class = '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Update';
                 break;
+            case 'stock':
+                $class = '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Availability';
+                $data['availability'] = $data['product']->availability;
+                unset($data['product']);
+                break;
         }
 
         unset($data['type']);
@@ -181,6 +186,28 @@ class InMemory extends Gateway
 
         $this->changes[$revision] = array(
             'type'     => 'update',
+            'sourceId' => $id,
+            'revision' => $revision,
+            'product'  => $product
+        );
+        $this->products[$id] = $hash;
+    }
+
+    /**
+     * Record product availability update
+     *
+     * @param string $id
+     * @param string $hash
+     * @param string $revision
+     * @param \Bepado\SDK\Struct\Product $product
+     * @return void
+     */
+    public function recordAvailabilityUpdate($id, $hash, $revision, Product $product)
+    {
+        $this->checkRevisionExists($revision);
+
+        $this->changes[$revision] = array(
+            'type'     => 'stock',
             'sourceId' => $id,
             'revision' => $revision,
             'product'  => $product

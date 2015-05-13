@@ -12,6 +12,7 @@ use Bepado\SDK\Struct\VerificatorDispatcher;
 use Bepado\SDK\Struct;
 use Bepado\SDK\Units;
 use Bepado\SDK\ShippingRuleParser;
+use Bepado\SDK\Languages;
 
 /**
  * Visitor verifying integrity of struct classes
@@ -124,6 +125,29 @@ class Product extends Verificator
             throw new \Bepado\SDK\Exception\VerificationFailedException("Product#images must be numerically indexed starting with 0.");
         }
 
+        if (!is_array($struct->translations)) {
+            throw new \Bepado\SDK\Exception\VerificationFailedException("Product#translations must be an array.");
+        }
+        foreach ($struct->translations as $language => $translation) {
+            if (!is_string($language)) {
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
+                    "The keys of Product#translations must be strings."
+                );
+            }
+            if (!Languages::isValidLanguageCode($language)) {
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
+                    "The keys of Product#translations must only be valid ISO 639-1 codes (e.g. 'de', 'es', ...)."
+                );
+            }
+            if (!($translation instanceof Struct\Translation)) {
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
+                    "Product#translations must contain only instances of \\Bepado\\SDK\\Struct\\Translation."
+                );
+            }
+
+            $this->dispatcher->verify($translation);
+        }
+
         if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {
             $dimensions = explode("x", $struct->attributes[Struct\Product::ATTRIBUTE_DIMENSION]);
 
@@ -138,6 +162,12 @@ class Product extends Verificator
         if (array_key_exists(Struct\Product::ATTRIBUTE_WEIGHT, $struct->attributes)) {
             if (!is_numeric($struct->attributes[Struct\Product::ATTRIBUTE_WEIGHT])) {
                 throw new \Bepado\SDK\Exception\VerificationFailedException("Product Weight Attribute has to be a number.");
+            }
+        }
+
+        foreach ($struct->attributes as $attributeKey => $attributeValue) {
+            if (!is_null($attributeValue) && is_scalar($attributeValue) === false) {
+                throw new \Bepado\SDK\Exception\VerificationFailedException("Attribute $attributeKey MUST be scalar value.");
             }
         }
 

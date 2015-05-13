@@ -135,6 +135,15 @@ class SharedKeyRequestSigner implements RequestSigner
                 $verificationKey = $this->apiKey;
             } elseif (is_numeric($party)) {
                 $configuration = $this->gateway->getShopConfiguration($party);
+                if (!isset($configuration->key)) {
+                    return new AuthenticationToken(
+                        array(
+                            'authenticated' => false,
+                            'userIdentifier' => $party,
+                            'errorMessage' => 'Missing SharedKey.',
+                        )
+                    );
+                }
                 $verificationKey = $configuration->key;
                 $party = (int)$party;
             } else {

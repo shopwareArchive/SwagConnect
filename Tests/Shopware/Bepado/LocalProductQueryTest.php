@@ -9,18 +9,40 @@ use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTran
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\ProductQuery;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
+use Shopware\Bepado\Components\Translations\ProductTranslator;
 
 class LocalProductQueryTest extends BepadoTestHelper
 {
     protected $localProductQuery;
 
-    protected $productTranslationsGateway;
+    protected $productTranslator;
 
     public function setUp()
     {
-        $this->productTranslationsGateway = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Gateway\\ProductTranslationsGateway\\PdoProductTranslationsGateway')
-        ->disableOriginalConstructor()
-        ->getMock();
+        $this->productTranslator = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Translations\\ProductTranslator')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->productTranslator->expects($this->any())
+            ->method('translate')
+            ->willReturn(array(
+                'en' => new Translation(
+                    array(
+                        'title' => 'Glas -Teetasse 0,25l EN',
+                        'shortDescription' => 'Bepado local product short description EN',
+                        'longDescription' => 'Bepado local product long description EN',
+                        'url' => $this->getProductBaseUrl() . '22&shId=2'
+                    )
+                ),
+                'nl' => new Translation(
+                    array(
+                        'title' => 'Glas -Teetasse 0,25l NL',
+                        'shortDescription' => 'Bepado local product short description NL',
+                        'longDescription' => 'Bepado local product long description NL',
+                        'url' => $this->getProductBaseUrl() . '22&shId=176'
+                    )
+                ),
+            ));
     }
 
     public function getLocalProductQuery()
@@ -35,7 +57,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                 $this->getProductBaseUrl(),
                 $configComponent,
                 new MarketplaceGateway(Shopware()->Models()),
-                $this->productTranslationsGateway
+                $this->productTranslator
             );
         }
         return $this->localProductQuery;
@@ -70,21 +92,6 @@ class LocalProductQueryTest extends BepadoTestHelper
 
     public function testGetBepadoProduct()
     {
-        $this->productTranslationsGateway->expects($this->any())
-            ->method('getTranslations')
-            ->willReturn(array(
-                2 => array(
-                    'title' => 'Glas -Teetasse 0,25l EN',
-                    'shortDescription' => 'Bepado local product short description EN',
-                    'longDescription' => 'Bepado local product long description EN',
-                ),
-                176 => array(
-                    'title' => 'Glas -Teetasse 0,25l NL',
-                    'shortDescription' => 'Bepado local product short description NL',
-                    'longDescription' => 'Bepado local product long description NL',
-                ),
-            ));
-
         $row = array (
             'sourceId' => '22',
             'ean' => NULL,
@@ -108,7 +115,7 @@ class LocalProductQueryTest extends BepadoTestHelper
             'ref_quantity' => NULL,
         );
         $expectedProduct->translations = array(
-            new Translation(
+            'en' => new Translation(
                 array(
                     'title' => 'Glas -Teetasse 0,25l EN',
                     'shortDescription' => 'Bepado local product short description EN',
@@ -116,7 +123,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                     'url' => $this->getProductBaseUrl() . '22&shId=2'
                 )
             ),
-            new Translation(
+            'nl' => new Translation(
                 array(
                     'title' => 'Glas -Teetasse 0,25l NL',
                     'shortDescription' => 'Bepado local product short description NL',

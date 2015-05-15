@@ -11,6 +11,7 @@ use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 use Shopware\Bepado\Components\Payment\ProductPayments;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
+use Shopware\Bepado\Components\Translations\ProductTranslator;
 use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
@@ -262,7 +263,12 @@ class BepadoFactory
             $this->getProductBaseUrl(),
             $this->getConfigComponent(),
             $this->getMarketplaceGateway(),
-            new PdoProductTranslationsGateway(Shopware()->Db())
+            new ProductTranslator(
+                $this->getConfigComponent(),
+                new PdoProductTranslationsGateway(Shopware()->Db()),
+                $this->getModelManager(),
+                $this->getProductBaseUrl()
+            )
         );
     }
 

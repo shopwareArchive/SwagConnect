@@ -4,6 +4,7 @@ namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Verificator\Product;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\ProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
@@ -25,7 +26,8 @@ class ProductQueryTest extends BepadoTestHelper
                     $configComponent->getConfig('alternateDescriptionField'),
                     $this->getProductBaseUrl(),
                     $configComponent,
-                    new MarketplaceGateway(Shopware()->Models())
+                    new MarketplaceGateway(Shopware()->Models()),
+                    new PdoProductTranslationsGateway(Shopware()->Db())
                 ),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );

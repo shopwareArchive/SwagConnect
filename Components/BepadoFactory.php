@@ -5,6 +5,7 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 use Shopware\Bepado\Components\Payment\ProductPayments;
@@ -260,7 +261,8 @@ class BepadoFactory
             $this->getConfigComponent()->getConfig('alternateDescriptionField'),
             $this->getProductBaseUrl(),
             $this->getConfigComponent(),
-            $this->getMarketplaceGateway()
+            $this->getMarketplaceGateway(),
+            new PdoProductTranslationsGateway(Shopware()->Db())
         );
     }
 

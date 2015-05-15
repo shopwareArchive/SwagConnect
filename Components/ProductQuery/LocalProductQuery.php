@@ -5,11 +5,13 @@ namespace Shopware\Bepado\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
+use Bepado\SDK\Struct\Translation;
 
 /**
  * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
@@ -20,7 +22,6 @@ use Shopware\Bepado\Components\Utils\UnitMapper;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-
     protected $manager;
 
     protected $productDescriptionField;
@@ -32,12 +33,18 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $marketplaceGateway;
 
+    /**
+     * @var \Shopware\Bepado\Components\Gateway\ProductTranslationsGateway
+     */
+    protected $productTranslationsGateway;
+
     public function __construct(
         ModelManager $manager,
         $productDescriptionField,
         $baseProductUrl,
         $configComponent,
-        MarketplaceGateway $marketplaceGateway
+        MarketplaceGateway $marketplaceGateway,
+        PdoProductTranslationsGateway $productTranslationsGateway
     )
     {
         $this->manager = $manager;
@@ -45,6 +52,7 @@ class LocalProductQuery extends BaseProductQuery
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
+        $this->productTranslationsGateway = $productTranslationsGateway;
     }
 
     /**
@@ -130,6 +138,7 @@ class LocalProductQuery extends BaseProductQuery
     public function getBepadoProduct($row)
     {
         $row = $this->prepareCommonAttributes($row);
+        $row['translations'] = $this->prepareProductTranslations($row);
 
         if (!empty($row['shopId'])) {
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
@@ -184,6 +193,26 @@ class LocalProductQuery extends BaseProductQuery
         return $product;
     }
 
+    private function prepareProductTranslations($row)
+    {
+        $exportLanguages = $this->configComponent->getConfig('exportLanguages');
+        $translations = $this->productTranslationsGateway->getTranslations($row['localId'], $exportLanguages);
+
+        $result = array();
+        foreach ($translations as $shopId => $translation) {
+            $result[] = new Translation(
+                array(
+                    'title' => $translation['title'],
+                    'shortDescription' => $translation['shortDescription'],
+                    'longDescription' => $translation['longDescription'],
+                    'url' => $this->getUrlForProduct($row['sourceId'], $shopId),
+                )
+            );
+        }
+
+        return $result;
+    }
+
     /**
      * Will add the correct joins depending on the configuration of the price columns
      *
@@ -233,9 +262,15 @@ class LocalProductQuery extends BaseProductQuery
         return $builder;
     }
 
-    public function getUrlForProduct($productId)
+    public function getUrlForProduct($productId, $shopId = null)
     {
-        return $this->baseProductUrl . $productId;
+        $shopId = (int)$shopId;
+        $url = $this->baseProductUrl . $productId;
+        if ($shopId > 0) {
+            $url = $url . '&shId=' . $shopId;
+        }
+
+        return $url;
     }
 
 	/**

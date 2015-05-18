@@ -96,4 +96,118 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         return $result;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfiguratorGroupTranslation($groupId, $languageId)
+    {
+        //todo@sb: add test
+        $sql = 'SELECT objectdata
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage = ?
+        ';
+
+        $translation = $this->db->executeQuery(
+            $sql,
+            array('configuratorgroup', $groupId, $languageId)
+        )->fetchColumn();
+
+        if ($translation === false) {
+            return null;
+        }
+
+        $translation = unserialize($translation);
+
+        return $translation['name'] ?: null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfiguratorGroupTranslations($groupId, $languageIds)
+    {
+        //todo@sb: add test
+        if (is_array($languageIds) === false || count($languageIds) === 0) {
+            return array();
+        }
+
+        $inQuery = implode(',', $languageIds);
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN ($inQuery)
+        ";
+
+        $translations = $this->db->executeQuery(
+            $sql,
+            array('configuratorgroup', $groupId)
+        )->fetchAll();
+
+        $result = array();
+        foreach ($translations as $translation) {
+            $languageId = $translation['objectlanguage'];
+            $data = unserialize($translation['objectdata']);
+            if (isset($data['name']) && strlen($data['name']) > 0) {
+                $result[$languageId] = $data['name'];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfiguratorOptionTranslation($optionId, $shopId)
+    {
+        $sql = 'SELECT objectdata
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage = ?
+        ';
+
+        $translation = $this->db->executeQuery(
+            $sql,
+            array('configuratoroption', $optionId, $shopId)
+        )->fetchColumn();
+
+        if ($translation === false) {
+            return null;
+        }
+
+        $translation = unserialize($translation);
+
+        return $translation['name'] ?: null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfiguratorOptionTranslations($optionId, $shopIds)
+    {
+        if (is_array($shopIds) === false || count($shopIds) === 0) {
+            return array();
+        }
+
+        $inQuery = implode(',', $shopIds);
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN ($inQuery)
+        ";
+
+        $translations = $this->db->executeQuery(
+            $sql,
+            array('configuratoroption', $optionId)
+        )->fetchAll();
+
+        $result = array();
+        foreach ($translations as $translation) {
+            $languageId = $translation['objectlanguage'];
+            $data = unserialize($translation['objectdata']);
+            if (isset($data['name']) && strlen($data['name']) > 0) {
+                $result[$languageId] = $data['name'];
+            }
+        }
+
+        return $result;
+    }
 } 

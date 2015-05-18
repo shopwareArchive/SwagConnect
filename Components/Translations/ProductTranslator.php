@@ -69,12 +69,7 @@ class ProductTranslator implements ProductTranslatorInterface
     }
 
     /**
-     * Returns product translations as array
-     * with sdk translation objects
-     *
-     * @param int $productId
-     * @param string $sourceId
-     * @return array
+     * {@inheritdoc}
      */
     public function translate($productId, $sourceId)
     {
@@ -112,6 +107,83 @@ class ProductTranslator implements ProductTranslatorInterface
         }
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function translateConfiguratorGroup($groupId, $groupName, $translations)
+    {
+        // exportLanguages actually is shop ids
+        $exportLanguages = $this->config->getConfig('exportLanguages');
+        $exportLanguages = $exportLanguages ?: array();
+
+        $groupTranslations = $this->productTranslationsGateway->getConfiguratorGroupTranslations($groupId, $exportLanguages);
+        foreach ($exportLanguages as $shopId) {
+            if ($shopId === 1) {
+                continue;
+            }
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->find($shopId);
+            /** @var \Shopware\Models\Shop\Locale $locale */
+            $locale = $shop->getLocale();
+            if (!$locale) {
+                continue;
+            }
+
+            $localeCode = explode('_', $locale->getLocale());
+            if (count($localeCode) === 0) {
+                continue;
+            }
+
+            $groupTranslation = isset($groupTranslations[$shopId]) ? $groupTranslations[$shopId] : $groupName;
+            $translationStruct = $translations[$localeCode[0]];
+            if (!$translationStruct instanceof Translation) {
+                continue;
+            }
+
+            $translationStruct->variantLabels[$groupName] = $groupTranslation;
+        }
+
+        return $translations;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function translateConfiguratorOption($optionId, $optionName, $translations)
+    {
+        $exportLanguages = $this->config->getConfig('exportLanguages');
+        $exportLanguages = $exportLanguages ?: array();
+
+        $optionTranslations = $this->productTranslationsGateway->getConfiguratorOptionTranslations($optionId, $exportLanguages);
+        foreach ($exportLanguages as $shopId) {
+            if ($shopId === 1) {
+                continue;
+            }
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->find($shopId);
+            /** @var \Shopware\Models\Shop\Locale $locale */
+            $locale = $shop->getLocale();
+            if (!$locale) {
+                continue;
+            }
+
+            $localeCode = explode('_', $locale->getLocale());
+            if (count($localeCode) === 0) {
+                continue;
+            }
+
+            $optionTranslation = isset($optionTranslations[$shopId]) ? $optionTranslations[$shopId] : $optionName;
+            $translationStruct = $translations[$localeCode[0]];
+            if (!$translationStruct instanceof Translation) {
+                continue;
+            }
+
+            $translationStruct->variantValues[$optionName] = $optionTranslation;
+        }
+
+        return $translations;
     }
 
     public function getUrlForProduct($productId, $shopId = null)

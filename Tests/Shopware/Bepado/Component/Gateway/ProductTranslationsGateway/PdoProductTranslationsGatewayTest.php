@@ -170,5 +170,168 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(array(), $this->gateway->getTranslations(111, array(2,3)));
     }
+
+    public function testGetConfiguratorOptionTranslationsWithoutShopIds()
+    {
+        $this->assertEmpty($this->gateway->getConfiguratorOptionTranslations(15, array()));
+    }
+
+    public function testGetConfiguratorOptionTranslationsWithoutSerializedData()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchAll')
+            ->willReturn(array(
+                0 => array(
+                    'objectdata' => 'a:0:{}',
+                    'objectlanguage' => 2,
+                ),
+                1 => array(
+                    'objectdata' => 'a:0:{}',
+                    'objectlanguage' => 3,
+                ),
+            ));
+
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+        ";
+
+        $queryParams = array('configuratoroption', 15);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+        $expected = array();
+
+        $this->assertEquals($expected, $this->gateway->getConfiguratorOptionTranslations(15, array(2,3)));
+    }
+
+    public function testGetConfiguratorOptionTranslations()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchAll')
+            ->willReturn(array(
+                0 => array(
+                    'objectdata' => 'a:1:{s:4:"name";s:3:"red";}',
+                    'objectlanguage' => 2,
+                ),
+                1 => array(
+                    'objectdata' => 'a:1:{s:4:"name";s:3:"rot";}',
+                    'objectlanguage' => 3,
+                ),
+            ));
+
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+        ";
+
+        $queryParams = array('configuratoroption', 15);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+        $expected = array(
+            2 => 'red',
+            3 => 'rot',
+        );
+
+        $this->assertEquals($expected, $this->gateway->getConfiguratorOptionTranslations(15, array(2,3)));
+    }
+
+    public function testGetMissingSingleConfiguratorOptionTranslation()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchColumn')
+            ->willReturn(false);
+
+        $sql = "SELECT objectdata
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage = ?
+        ";
+
+        $queryParams = array('configuratoroption', 15, 2);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+        $this->assertNull($this->gateway->getConfiguratorOptionTranslation(15, 2));
+    }
+
+    public function testGetSingleConfiguratorOptionTranslation()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchColumn')
+            ->willReturn('a:1:{s:4:"name";s:3:"rot";}');
+
+        $sql = "SELECT objectdata
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage = ?
+        ";
+
+        $queryParams = array('configuratoroption', 15, 2);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+
+        $this->assertEquals('rot', $this->gateway->getConfiguratorOptionTranslation(15, 2));
+    }
+
+    public function testGetConfiguratorGroupTranslationsWithoutShopIds()
+    {
+        $this->assertEmpty($this->gateway->getConfiguratorGroupTranslations(15, array()));
+    }
+
+    public function testGetConfiguratorGroupTranslationsWithoutSerializedData()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchAll')
+            ->willReturn(array(
+                0 => array(
+                    'objectdata' => 'a:0:{}',
+                    'objectlanguage' => 2,
+                ),
+                1 => array(
+                    'objectdata' => 'a:0:{}',
+                    'objectlanguage' => 3,
+                ),
+            ));
+
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+        ";
+
+        $queryParams = array('configuratorgroup', 15);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+        $expected = array();
+
+        $this->assertEquals($expected, $this->gateway->getConfiguratorGroupTranslations(15, array(2,3)));
+    }
+
+    public function testGetConfiguratorGroupTranslations()
+    {
+        $this->mockDbStatement->expects($this->any())
+            ->method('fetchAll')
+            ->willReturn(array(
+                0 => array(
+                    'objectdata' => 'a:1:{s:4:"name";s:5:"color";}',
+                    'objectlanguage' => 2,
+                ),
+                1 => array(
+                    'objectdata' => 'a:1:{s:4:"name";s:5:"farbe";}',
+                    'objectlanguage' => 3,
+                ),
+            ));
+
+        $sql = "SELECT objectdata, objectlanguage
+                FROM s_core_translations
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+        ";
+
+        $queryParams = array('configuratorgroup', 15);
+        $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
+
+        $expected = array(
+            2 => 'color',
+            3 => 'farbe',
+        );
+
+        $this->assertEquals($expected, $this->gateway->getConfiguratorGroupTranslations(15, array(2,3)));
+    }
 }
  

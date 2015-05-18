@@ -26,5 +26,29 @@ namespace Shopware\Bepado\Components\Translations;
 
 interface ProductTranslatorInterface
 {
+    /**
+     * Returns product translations as array
+     * with sdk translation objects
+     *
+     * @param int $productId
+     * @param string $sourceId
+     * @return array
+     */
     public function translate($productId, $sourceId);
-} 
+
+    /**
+     * @param int $groupId
+     * @param string $groupName
+     * @param \Bepado\SDK\Struct\Translation[] $translations
+     * @return \Bepado\SDK\Struct\Translation[]
+     */
+    public function translateConfiguratorGroup($groupId, $groupName, $translations);
+
+    /**
+     * @param int $optionId
+     * @param string $optionName
+     * @param \Bepado\SDK\Struct\Translation[] $translations
+     * @return \Bepado\SDK\Struct\Translation[]
+     */
+    public function translateConfiguratorOption($optionId, $optionName, $translations);
+}

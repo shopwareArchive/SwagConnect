@@ -168,6 +168,551 @@ class ProductTranslatorTest extends BepadoTestHelper
         $this->assertEmpty($this->productTranslator->translate(108, 35));
     }
 
+    public function testTranslateConfiguratorGroup()
+    {
+        $groupTranslations = array(
+            2 => 'color',
+            3 => 'kleur',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorGroupTranslations')->with(15, array(2, 3))->willReturn($groupTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $enLocale = new Locale();
+        $enLocale->setLocale('en_GB');
+
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn($enLocale);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'variantLabels' => array(
+                        'farbe' => 'color'
+                    ),
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantLabels' => array(
+                        'farbe' => 'kleur'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorGroup(15, 'farbe', $translations));
+    }
+
+    public function testTranslateConfiguratorGroupWithDefaultShopOnly()
+    {
+        // translate should be the same after group translation
+        // when exportLanguages contains only default shop language
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(1));
+        $this->assertEquals($translations, $this->productTranslator->translateConfiguratorGroup(15, 'farbe', $translations));
+    }
+
+    public function testTranslateConfiguratorGroupWhenLocaleNotFound()
+    {
+        $groupTranslations = array(
+            2 => 'color',
+            3 => 'kleur',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorGroupTranslations')->with(15, array(2, 3))->willReturn($groupTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn(null);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantLabels' => array(
+                        'farbe' => 'kleur'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorGroup(15, 'farbe', $translations));
+    }
+
+    public function testTranslateConfiguratorGroupWithoutStruct()
+    {
+        $groupTranslations = array(
+            2 => 'color',
+            3 => 'kleur',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorGroupTranslations')->with(15, array(2, 3))->willReturn($groupTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn(null);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => array(),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantLabels' => array(
+                        'farbe' => 'kleur'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => array(),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorGroup(15, 'farbe', $translations));
+    }
+
+    public function testTranslateConfiguratorGroupWithInvalidLocaleCode()
+    {
+        $groupTranslations = array(
+            2 => 'color',
+            3 => 'kleur',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorGroupTranslations')->with(15, array(2, 3))->willReturn($groupTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $enLocale = new Locale();
+        $enLocale->setLocale('en-EN');
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn($enLocale);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantLabels' => array(
+                        'farbe' => 'kleur'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorGroup(15, 'farbe', $translations));
+    }
+
+    public function testTranslateConfiguratorOption()
+    {
+        $optionTranslations = array(
+            2 => 'red',
+            3 => 'rood',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorOptionTranslations')->with(15, array(2, 3))->willReturn($optionTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $enLocale = new Locale();
+        $enLocale->setLocale('en_GB');
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn($enLocale);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'variantValues' => array(
+                        'rot' => 'red'
+                    ),
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantValues' => array(
+                        'rot' => 'rood'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorOption(15, 'rot', $translations));
+    }
+
+    public function testTranslateConfiguratorOptionWithDefaultShopOnly()
+    {
+        // translate should be the same after group translation
+        // when exportLanguages contains only default shop language
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(1));
+        $this->assertEquals($translations, $this->productTranslator->translateConfiguratorGroup(15, 'red', $translations));
+    }
+
+    public function testTranslateConfiguratorOptionWhenLocaleNotFound()
+    {
+        $optionTranslations = array(
+            2 => 'red',
+            3 => 'rood',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorOptionTranslations')->with(15, array(2, 3))->willReturn($optionTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn(null);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantValues' => array(
+                        'rot' => 'rood'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product EN',
+                    'shortDescription' => 'Bepado Local Product short description EN',
+                    'longDescription' => 'Bepado Local Product long description EN',
+                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorOption(15, 'rot', $translations));
+    }
+
+    public function testTranslateConfiguratorOptionWithoutStruct()
+    {
+        $optionTranslations = array(
+            2 => 'red',
+            3 => 'rood',
+        );
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 3));
+        $this->translationGateway->expects($this->any())->method('getConfiguratorOptionTranslations')->with(15, array(2, 3))->willReturn($optionTranslations);
+
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $nlLocale = new Locale();
+        $nlLocale->setLocale('nl_NL');
+
+        $enShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $enShop->expects($this->any())->method('getLocale')->willReturn(null);
+
+        $nlShop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $nlShop->expects($this->any())->method('getLocale')->willReturn($nlLocale);
+
+        $this->shopRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enShop);
+        $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
+
+        $expected = array(
+            'en' => array(),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'variantValues' => array(
+                        'rot' => 'rood'
+                    ),
+                )
+            )
+        );
+
+        $translations = array(
+            'en' => array(),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Bepado Local Product NL',
+                    'shortDescription' => 'Bepado Local Product short description NL',
+                    'longDescription' => 'Bepado Local Product long description NL',
+                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                )
+            )
+        );
+
+        $this->assertEquals($expected, $this->productTranslator->translateConfiguratorOption(15, 'rot', $translations));
+    }
 
     public function getProductBaseUrl()
     {

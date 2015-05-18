@@ -156,7 +156,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
-        $row['variant'] = $this->getConfiguratorOptions($row['detailId']);
+        $row = $this->getConfiguratorOptions($row);
 
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
@@ -318,10 +318,10 @@ class LocalProductQuery extends BaseProductQuery
      * Returns configurator options and groups
      * by given article detail id
      *
-     * @param int $detailId
+     * @param array $row
      * @return array
      */
-    public function getConfiguratorOptions($detailId)
+    public function getConfiguratorOptions($row)
     {
         $builder = $this->manager->createQueryBuilder();
 
@@ -330,20 +330,27 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('cor.group', 'cg');
         $builder->select(array(
             'cor.name as optionName',
+            'cor.id as optionId',
             'cg.name as groupName',
+            'cg.id as groupId',
         ));
 
         $builder->where("d.id = :detailId");
-        $builder->setParameter(':detailId', $detailId);
+        $builder->setParameter(':detailId', $row['detailId']);
         $query = $builder->getQuery();
         $configuratorData = array();
 
         foreach ($query->getArrayResult() as $config) {
+            $row['translations'] = $this->productTranslator->translateConfiguratorGroup($config['groupId'], $config['groupName'], $row['translations']);
+            $row['translations'] = $this->productTranslator->translateConfiguratorOption($config['optionId'], $config['optionName'], $row['translations']);
+
             $groupName = $config['groupName'];
             $configuratorData[$groupName] = $config['optionName'];
         }
 
-        return $configuratorData;
+        $row['variant'] = $configuratorData;
+
+        return $row;
     }
 }
 

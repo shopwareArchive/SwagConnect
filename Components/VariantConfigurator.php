@@ -278,10 +278,11 @@ class VariantConfigurator
 
             /** @var \Shopware\Models\Shop\Locale $locale */
             $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
-
+var_dump(LocaleMapper::getShopwareLocale($key));
             /** @var \Shopware\Models\Shop\Shop $shop */
             $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
             if (!$shop) {
+                var_dump('Shop not found');
                 continue;
             }
 

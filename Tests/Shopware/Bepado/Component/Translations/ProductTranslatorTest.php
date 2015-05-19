@@ -714,6 +714,92 @@ class ProductTranslatorTest extends BepadoTestHelper
         $this->assertEquals($expected, $this->productTranslator->translateConfiguratorOption(15, 'rot', $translations));
     }
 
+    public function testValidate()
+    {
+        $translation = new Translation(array(
+            'title' => 'Bepado Local Product EN',
+            'shortDescription' => 'Bepado Local Product short description EN',
+            'longDescription' => 'Bepado Local Product long description EN',
+            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'variantLabels' => array(
+                'größe' => 'size',
+                'farbe' => 'color',
+            ),
+            'variantValues' => array(
+                '52' => 'XL',
+                'blau' => 'blue',
+            ),
+        ));
+
+        $this->assertTrue($this->productTranslator->validate($translation, 2));
+    }
+
+    /**
+     * @expectedException \Exception
+     */
+    public function testValidateMissingTitle()
+    {
+        $translation = new Translation(array(
+            'shortDescription' => 'Bepado Local Product short description EN',
+            'longDescription' => 'Bepado Local Product long description EN',
+            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'variantLabels' => array(
+                'größe' => 'size',
+                'farbe' => 'color',
+            ),
+            'variantValues' => array(
+                '52' => 'XL',
+                'blau' => 'blue',
+            ),
+        ));
+
+        $this->assertTrue($this->productTranslator->validate($translation, 2));
+    }
+
+    /**
+     * @expectedException \Exception
+     */
+    public function testValidateWrongVariantLabels()
+    {
+        $translation = new Translation(array(
+            'title' => 'Bepado Local Product EN',
+            'shortDescription' => 'Bepado Local Product short description EN',
+            'longDescription' => 'Bepado Local Product long description EN',
+            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'variantLabels' => array(
+                'farbe' => 'color',
+            ),
+            'variantValues' => array(
+                '52' => 'XL',
+                'blau' => 'blue',
+            ),
+        ));
+
+        $this->assertTrue($this->productTranslator->validate($translation, 2));
+    }
+
+    /**
+     * @expectedException \Exception
+     */
+    public function testValidateWrongVariantValues()
+    {
+        $translation = new Translation(array(
+            'title' => 'Bepado Local Product EN',
+            'shortDescription' => 'Bepado Local Product short description EN',
+            'longDescription' => 'Bepado Local Product long description EN',
+            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'variantLabels' => array(
+                'größe' => 'size',
+                'farbe' => 'color',
+            ),
+            'variantValues' => array(
+                'blau' => 'blue',
+            ),
+        ));
+
+        $this->assertTrue($this->productTranslator->validate($translation, 2));
+    }
+
     public function getProductBaseUrl()
     {
         if (!Shopware()->Front()->Router()) {

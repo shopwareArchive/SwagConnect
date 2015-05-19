@@ -24,6 +24,8 @@
 
 namespace Shopware\Bepado\Components\Translations;
 
+use Bepado\SDK\Struct\Translation;
+
 interface ProductTranslatorInterface
 {
     /**
@@ -51,4 +53,12 @@ interface ProductTranslatorInterface
      * @return \Bepado\SDK\Struct\Translation[]
      */
     public function translateConfiguratorOption($optionId, $optionName, $translations);
+
+    /**
+     * @param Translation $translation
+     * @param int $optionsCount
+     * @return bool|true
+     * @throws \Exception
+     */
+    public function validate(Translation $translation, $optionsCount);
 }

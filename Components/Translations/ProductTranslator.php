@@ -186,6 +186,30 @@ class ProductTranslator implements ProductTranslatorInterface
         return $translations;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function validate(Translation $translation, $optionsCount)
+    {
+        if (strlen($translation->title) === 0) {
+            throw new \Exception('Translation title cannot be empty string.');
+        }
+
+        if (strlen($translation->url) === 0) {
+            throw new \Exception('Translation title cannot be empty string.');
+        }
+
+        if (count($translation->variantLabels) != $optionsCount) {
+            throw new \Exception('variantLabels property has not correct items count.');
+        }
+
+        if (count($translation->variantValues) != $optionsCount) {
+            throw new \Exception('variantValues property has not correct items count.');
+        }
+
+        return true;
+    }
+
     public function getUrlForProduct($productId, $shopId = null)
     {
         $shopId = (int)$shopId;

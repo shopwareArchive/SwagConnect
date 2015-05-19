@@ -156,7 +156,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
-        $row = $this->getConfiguratorOptions($row);
+        $row = $this->applyConfiguratorOptions($row);
 
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
@@ -315,16 +315,15 @@ class LocalProductQuery extends BaseProductQuery
     }
 
     /**
-     * Returns configurator options and groups
-     * by given article detail id
+     * Applies configurator options and groups
+     * to article array
      *
      * @param array $row
      * @return array
      */
-    public function getConfiguratorOptions($row)
+    private function applyConfiguratorOptions($row)
     {
         $builder = $this->manager->createQueryBuilder();
-
         $builder->from('Shopware\Models\Article\Detail', 'd');
         $builder->join('d.configuratorOptions', 'cor');
         $builder->join('cor.group', 'cg');
@@ -334,13 +333,15 @@ class LocalProductQuery extends BaseProductQuery
             'cg.name as groupName',
             'cg.id as groupId',
         ));
-
         $builder->where("d.id = :detailId");
         $builder->setParameter(':detailId', $row['detailId']);
-        $query = $builder->getQuery();
-        $configuratorData = array();
 
-        foreach ($query->getArrayResult() as $config) {
+        $query = $builder->getQuery();
+
+        $configuratorData = array();
+        $configs = $query->getArrayResult();
+
+        foreach ($configs as $config) {
             $row['translations'] = $this->productTranslator->translateConfiguratorGroup($config['groupId'], $config['groupName'], $row['translations']);
             $row['translations'] = $this->productTranslator->translateConfiguratorOption($config['optionId'], $config['optionName'], $row['translations']);
 
@@ -349,6 +350,15 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $row['variant'] = $configuratorData;
+
+        foreach ($row['translations'] as $key => $translation) {
+            try {
+                // todo@sb: test me
+                $this->productTranslator->validate($translation, count($configs));
+            } catch(\Exception $e) {
+                unset($row['translations'][$key]);
+            }
+        }
 
         return $row;
     }

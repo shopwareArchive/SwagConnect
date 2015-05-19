@@ -282,16 +282,11 @@ class VariantConfigurator
             /** @var \Shopware\Models\Shop\Shop $shop */
             $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
             if (!$shop) {
-                var_dump(LocaleMapper::getShopwareLocale($key));
-                var_dump('Shop not found');
                 continue;
             }
 
             foreach ($translation->variantValues as $optionKey => $optionTranslation) {
                 if ($optionKey === $option->getName()) {
-                    var_dump('Insert option translation');
-                    var_dump($optionTranslation);
-                    var_dump($shop->getId());
                     $this->translationGateway->addOptionTranslation($optionTranslation, $option->getId(), $shop->getId());
                 }
             }

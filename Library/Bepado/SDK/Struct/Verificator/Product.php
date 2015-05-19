@@ -145,7 +145,7 @@ class Product extends Verificator
                 );
             }
 
-            $this->dispatcher->verify($translation);
+            $dispatcher->verify($translation);
         }
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_DIMENSION, $struct->attributes)) {

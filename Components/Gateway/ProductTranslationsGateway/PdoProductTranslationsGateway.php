@@ -24,6 +24,7 @@
 
 namespace Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
 
+use Bepado\SDK\Struct\Translation;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
 
 class PdoProductTranslationsGateway implements ProductTranslationsGateway
@@ -209,5 +210,55 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
         }
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addGroupTranslation($translation, $groupId, $shopId)
+    {
+        $this->db->query('
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ', array('configuratorgroup', serialize(array('name' => $translation)), $groupId, $shopId)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addOptionTranslation($translation, $optionId, $shopId)
+    {
+        $this->db->query('
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ', array('configuratoroption', serialize(array('name' => $translation)), $optionId, $shopId)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addArticleTranslation(Translation $translation, $articleId, $shopId)
+    {
+        $objectData = array('txtArtikel' => $translation->title);
+        if (strlen($translation->longDescription)) {
+            $objectData['txtlangbeschreibung'] = $translation->longDescription;
+        }
+        if (strlen($translation->shortDescription)) {
+            $objectData['txtshortdescription'] = $translation->shortDescription;
+        }
+
+        $this->db->query('
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ', array('article', serialize($objectData), $articleId, $shopId)
+        );
     }
 } 

@@ -33,6 +33,8 @@ class BepadoFactory
 
     private $marketplaceGatway;
 
+    private $productTranslationsGateway;
+
     public function __construct($version='')
     {
         $this->pluginVersion = $version;
@@ -99,8 +101,9 @@ class BepadoFactory
                 $manager,
                 $this->getImageImport(),
                 $this->getConfigComponent(),
-                new VariantConfigurator($manager),
-				$this->getMarketplaceGateway()
+                new VariantConfigurator($manager, $this->getProductTranslationsGateway()),
+                $this->getMarketplaceGateway(),
+                $this->getProductTranslationsGateway()
             ),
             new ProductFromShop(
                 $helper,
@@ -321,5 +324,14 @@ class BepadoFactory
         }
 
         return new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+    }
+
+    public function getProductTranslationsGateway()
+    {
+        if (!$this->productTranslationsGateway) {
+            $this->productTranslationsGateway = new PdoProductTranslationsGateway(Shopware()->Db());
+        }
+
+        return $this->productTranslationsGateway;
     }
 }

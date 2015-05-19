@@ -2,6 +2,8 @@
 
 namespace Shopware\Bepado\Components\Gateway;
 
+use Bepado\SDK\Struct\Translation;
+
 interface ProductTranslationsGateway
 {
     /**
@@ -57,4 +59,34 @@ interface ProductTranslationsGateway
      * @return array
      */
     public function getConfiguratorOptionTranslations($optionId, $shopIds);
+
+    /**
+     * Inserts translation record for given configurator group
+     *
+     * @param $translation
+     * @param $groupId
+     * @param $shopId
+     * @return void
+     */
+    public function addGroupTranslation($translation, $groupId, $shopId);
+
+    /**
+     * Inserts translation record for given configurator option
+     *
+     * @param string $translation
+     * @param int $optionId
+     * @param int $shopId
+     * @return void
+     */
+    public function addOptionTranslation($translation, $optionId, $shopId);
+
+    /**
+     * Inserts translation record for given article
+     *
+     * @param Translation $translation
+     * @param int $articleId
+     * @param int $shopId
+     * @return void
+     */
+    public function addArticleTranslation(Translation $translation, $articleId, $shopId);
 }

@@ -333,5 +333,66 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $this->gateway->getConfiguratorGroupTranslations(15, array(2,3)));
     }
+
+    public function testAddGroupTranslation()
+    {
+        $sql = '
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ';
+        $queryParams = array('configuratorgroup', serialize(array('name' => 'Color')), 14, 2);
+
+        $this->mockDbAdapter->expects($this->once())
+            ->method('query')
+            ->with($sql, $queryParams);
+
+        $this->gateway->addGroupTranslation('Color', 14, 2);
+    }
+
+    public function testAddOptionTranslation()
+    {
+        $sql = '
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ';
+        $queryParams = array('configuratoroption', serialize(array('name' => 'Red')), 42, 2);
+
+        $this->mockDbAdapter->expects($this->once())
+            ->method('query')
+            ->with($sql, $queryParams);
+
+        $this->gateway->addOptionTranslation('Red', 42, 2);
+    }
+
+    public function testAddArticleTranslation()
+    {
+        $translation = new \Bepado\SDK\Struct\Translation(array(
+            'title' => 'Bepado remote article EN',
+            'longDescription' => 'Long description EN',
+            'shortDescription' => 'Short description EN',
+        ));
+        $objectData = array(
+            'txtArtikel' => $translation->title,
+            'txtlangbeschreibung' => $translation->longDescription,
+            'txtshortdescription' => $translation->shortDescription,
+        );
+        $sql = '
+                INSERT IGNORE INTO `s_core_translations`
+                (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
+                ';
+        $queryParams = array('article', serialize($objectData), 103, 2);
+
+        $this->mockDbAdapter->expects($this->once())
+            ->method('query')
+            ->with($sql, $queryParams);
+
+        $this->gateway->addArticleTranslation($translation, 103, 2);
+    }
 }
  

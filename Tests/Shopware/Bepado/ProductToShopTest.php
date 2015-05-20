@@ -100,12 +100,6 @@ class ProductToShopTest extends BepadoTestHelper
                     $this->assertEquals($groupTranslation, $objectData['name']);
                 }
 
-                var_dump(Shopware()->Db()->query(
-                    'SELECT objectkey, objectdata
-                          FROM s_core_translations
-                          WHERE objectlanguage = 2 AND objecttype = :objectType',
-                    array('objectType' => 'configuratoroption')
-                )->fetchAll());
                 foreach ($translation->variantValues as $optionKey => $optionTranslation) {
                     $option =  $optionRepository->findOneBy(array('name' => $optionKey));
                     $objectData = Shopware()->Db()->query(

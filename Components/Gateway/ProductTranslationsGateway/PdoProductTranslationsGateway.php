@@ -231,7 +231,6 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
      */
     public function addOptionTranslation($translation, $optionId, $shopId)
     {
-        var_dump('Insert variant option translation: ' . $translation . ' - ' . $optionId . ' - ' . $shopId);
         $this->db->query('
                 INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)

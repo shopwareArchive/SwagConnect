@@ -161,11 +161,12 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function getVariants()
     {
+        $number = rand(1, 999999999);
         $color = array(
-            array('de' => 'Weiss-Blau', 'en' => 'White-Blue'),
-            array('de' => 'Weiss-Rot', 'en' => 'White-Red'),
-            array('de' => 'Blau-Rot', 'en' => 'Blue-Red'),
-            array('de' => 'Schwarz-Rot', 'en' => 'Black-Red'),
+            array('de' => 'Weiss-Blau' . $number, 'en' => 'White-Blue'),
+            array('de' => 'Weiss-Rot' . $number, 'en' => 'White-Red'),
+            array('de' => 'Blau-Rot' . $number, 'en' => 'Blue-Red'),
+            array('de' => 'Schwarz-Rot' . $number, 'en' => 'Black-Red'),
         );
 
         $variants = array();

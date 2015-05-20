@@ -86,10 +86,6 @@ class VariantConfigurator
             $this->manager->persist($group);
             $this->manager->persist($configSet);
             $detailOptions[] = $option;
-
-            //translate configurator groups and configurator options
-            $this->addGroupTranslation($group, $product);
-            $this->addOptionTranslation($option, $product);
         }
 
         if (count($product->variant) > 0) {
@@ -97,6 +93,16 @@ class VariantConfigurator
             $this->manager->persist($article);
             $this->manager->persist($detail);
             $this->manager->flush();
+        }
+
+
+        foreach ($product->variant as $key => $value) {
+            $group = $this->getGroupByName($configSet, $key);
+            $option = $this->getOrCreateOptionByName($configSet, $group, $value);
+
+            //translate configurator groups and configurator options
+            $this->addGroupTranslation($group, $product);
+            $this->addOptionTranslation($option, $product);
         }
     }
 

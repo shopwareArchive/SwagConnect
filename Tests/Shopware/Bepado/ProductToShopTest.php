@@ -146,18 +146,20 @@ class ProductToShopTest extends BepadoTestHelper
         // check group options
         $groupOptionValues = $articleOptionValues = array('Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot');
         foreach ($group->getOptions() as $option) {
-            $key = array_search($option->getName(), $groupOptionValues);
-            if ($key !== false) {
-                unset($groupOptionValues[$key]);
+            foreach ($articleOptionValues as $key => $articleOptionValue) {
+                if (strpos($option->getName(), $groupOptionValues) == 0) {
+                    unset($groupOptionValues[$key]);
+                }
             }
         }
         $this->assertEmpty($groupOptionValues);
         // check configuration set options
         $this->assertEquals(4, count($article->getConfiguratorSet()->getOptions()));
         foreach ($article->getConfiguratorSet()->getOptions() as $option) {
-            $key = array_search($option->getName(), $articleOptionValues);
-            if ($key !== false) {
-                unset($articleOptionValues[$key]);
+            foreach ($articleOptionValues as $key => $articleOptionValue) {
+                if (strpos($option->getName(), $articleOptionValue) == 0) {
+                    unset($articleOptionValues[$key]);
+                }
             }
         }
         $this->assertEmpty($articleOptionValues);

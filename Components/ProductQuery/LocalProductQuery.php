@@ -247,7 +247,7 @@ class LocalProductQuery extends BaseProductQuery
         $shopId = (int)$shopId;
         $url = $this->baseProductUrl . $productId;
         if ($shopId > 0) {
-            $url = $url . '&shId=' . $shopId;
+            $url = $url . '/shId/' . $shopId;
         }
 
         return $url;

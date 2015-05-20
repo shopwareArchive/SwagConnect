@@ -31,7 +31,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                         'title' => 'Glas -Teetasse 0,25l EN',
                         'shortDescription' => 'Bepado local product short description EN',
                         'longDescription' => 'Bepado local product long description EN',
-                        'url' => $this->getProductBaseUrl() . '22&shId=2'
+                        'url' => $this->getProductBaseUrl() . '22/shId/2'
                     )
                 ),
                 'nl' => new Translation(
@@ -39,7 +39,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                         'title' => 'Glas -Teetasse 0,25l NL',
                         'shortDescription' => 'Bepado local product short description NL',
                         'longDescription' => 'Bepado local product long description NL',
-                        'url' => $this->getProductBaseUrl() . '22&shId=176'
+                        'url' => $this->getProductBaseUrl() . '22/shId/176'
                     )
                 ),
             ));
@@ -86,7 +86,7 @@ class LocalProductQueryTest extends BepadoTestHelper
 
     public function testGetUrlForProductWithShopId()
     {
-        $expectedUrl = $this->getProductBaseUrl() . '1091&shId=3';
+        $expectedUrl = $this->getProductBaseUrl() . '1091/shId/3';
         $this->assertEquals($expectedUrl, $this->getLocalProductQuery()->getUrlForProduct(1091, 3));
     }
 
@@ -120,7 +120,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                     'title' => 'Glas -Teetasse 0,25l EN',
                     'shortDescription' => 'Bepado local product short description EN',
                     'longDescription' => 'Bepado local product long description EN',
-                    'url' => $this->getProductBaseUrl() . '22&shId=2'
+                    'url' => $this->getProductBaseUrl() . '22/shId/2'
                 )
             ),
             'nl' => new Translation(
@@ -128,7 +128,7 @@ class LocalProductQueryTest extends BepadoTestHelper
                     'title' => 'Glas -Teetasse 0,25l NL',
                     'shortDescription' => 'Bepado local product short description NL',
                     'longDescription' => 'Bepado local product long description NL',
-                    'url' => $this->getProductBaseUrl() . '22&shId=176'
+                    'url' => $this->getProductBaseUrl() . '22/shId/176'
                 )
             ),
         );

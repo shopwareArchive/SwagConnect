@@ -60,13 +60,13 @@ class ProductTranslatorTest extends BepadoTestHelper
                 'title' => 'Bepado Local Product EN',
                 'shortDescription' => 'Bepado Local Product short description EN',
                 'longDescription' => 'Bepado Local Product long description EN',
-                'url' => $this->getProductBaseUrl() . '35&shId=2',
+                'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
                 'title' => 'Bepado Local Product NL',
                 'shortDescription' => 'Bepado Local Product short description NL',
                 'longDescription' => 'Bepado Local Product long description NL',
-                'url' => $this->getProductBaseUrl() . '35&shId=3',
+                'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
@@ -95,7 +95,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -103,7 +103,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -118,13 +118,13 @@ class ProductTranslatorTest extends BepadoTestHelper
                 'title' => 'Bepado Local Product EN',
                 'shortDescription' => 'Bepado Local Product short description EN',
                 'longDescription' => 'Bepado Local Product long description EN',
-                'url' => $this->getProductBaseUrl() . '35&shId=2',
+                'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
                 'title' => 'Bepado Local Product NL',
                 'shortDescription' => 'Bepado Local Product short description NL',
                 'longDescription' => 'Bepado Local Product long description NL',
-                'url' => $this->getProductBaseUrl() . '35&shId=3',
+                'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
@@ -142,13 +142,13 @@ class ProductTranslatorTest extends BepadoTestHelper
                 'title' => 'Bepado Local Product EN',
                 'shortDescription' => 'Bepado Local Product short description EN',
                 'longDescription' => 'Bepado Local Product long description EN',
-                'url' => $this->getProductBaseUrl() . '35&shId=2',
+                'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
                 'title' => 'Bepado Local Product NL',
                 'shortDescription' => 'Bepado Local Product short description NL',
                 'longDescription' => 'Bepado Local Product long description NL',
-                'url' => $this->getProductBaseUrl() . '35&shId=3',
+                'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
@@ -206,7 +206,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                     'variantLabels' => array(
                         'farbe' => 'color'
                     ),
@@ -217,7 +217,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
                     ),
@@ -231,7 +231,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -239,7 +239,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -257,7 +257,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -265,7 +265,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -308,7 +308,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -316,7 +316,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
                     ),
@@ -330,7 +330,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -338,7 +338,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -381,7 +381,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
                     ),
@@ -396,7 +396,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -441,7 +441,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -449,7 +449,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
                     ),
@@ -463,7 +463,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -471,7 +471,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -516,7 +516,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                     'variantValues' => array(
                         'rot' => 'red'
                     ),
@@ -527,7 +527,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
                     ),
@@ -541,7 +541,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -549,7 +549,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -567,7 +567,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -575,7 +575,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -618,7 +618,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -626,7 +626,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
                     ),
@@ -640,7 +640,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product EN',
                     'shortDescription' => 'Bepado Local Product short description EN',
                     'longDescription' => 'Bepado Local Product long description EN',
-                    'url' => $this->getProductBaseUrl() . '35&shId=2',
+                    'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
@@ -648,7 +648,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -691,7 +691,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
                     ),
@@ -706,7 +706,7 @@ class ProductTranslatorTest extends BepadoTestHelper
                     'title' => 'Bepado Local Product NL',
                     'shortDescription' => 'Bepado Local Product short description NL',
                     'longDescription' => 'Bepado Local Product long description NL',
-                    'url' => $this->getProductBaseUrl() . '35&shId=3',
+                    'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
         );
@@ -720,7 +720,7 @@ class ProductTranslatorTest extends BepadoTestHelper
             'title' => 'Bepado Local Product EN',
             'shortDescription' => 'Bepado Local Product short description EN',
             'longDescription' => 'Bepado Local Product long description EN',
-            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
                 'farbe' => 'color',
@@ -742,7 +742,7 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translation = new Translation(array(
             'shortDescription' => 'Bepado Local Product short description EN',
             'longDescription' => 'Bepado Local Product long description EN',
-            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
                 'farbe' => 'color',
@@ -765,7 +765,7 @@ class ProductTranslatorTest extends BepadoTestHelper
             'title' => 'Bepado Local Product EN',
             'shortDescription' => 'Bepado Local Product short description EN',
             'longDescription' => 'Bepado Local Product long description EN',
-            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'farbe' => 'color',
             ),
@@ -787,7 +787,7 @@ class ProductTranslatorTest extends BepadoTestHelper
             'title' => 'Bepado Local Product EN',
             'shortDescription' => 'Bepado Local Product short description EN',
             'longDescription' => 'Bepado Local Product long description EN',
-            'url' => $this->getProductBaseUrl() . '35&shId=2',
+            'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
                 'farbe' => 'color',

@@ -174,7 +174,13 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     createLanguagesCombo: function() {
         var me = this;
 
-        me.shopStore = Ext.create('Shopware.apps.Base.store.ShopLanguage').load();
+        me.shopStore = Ext.create('Shopware.apps.Base.store.ShopLanguage').load({
+            filters: [{
+                property: 'default',
+                value: false
+            }]
+        });
+
         return Ext.create('Ext.form.field.ComboBox', {
             multiSelect: true,
             displayField: 'name',
@@ -183,7 +189,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             allowBlank: true,
             fieldLabel: 'Languages', // todo@sb: translate it
             width: 435,
-            store: me.shopStore
+            store: me.shopStore,
+            queryMode: 'local'
         });
     },
 

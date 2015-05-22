@@ -4,7 +4,6 @@ namespace Tests\Shopware\Bepado;
 
 
 use Bepado\SDK\Struct\Product;
-use Doctrine\Common\Util\Debug;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;

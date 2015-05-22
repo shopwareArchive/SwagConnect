@@ -61,6 +61,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
         priceConfigurationDescription: '{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}',
+        exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
+        exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
+        exportLanguagesHelpText: '{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu bepado verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -137,11 +140,11 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         });
 
         me.languagesExportFieldset = Ext.create('Ext.form.FieldSet', {
-            title: 'Export languages', // todo@sb: translate it
+            title: me.snippets.exportLanguagesTitle,
             items: [
                 {
                     xtype: 'label',
-                    html: 'Here you can specify which languages will be exported as product translations. If this field is empty, products will be exported with default language of your shop.' // todo@sb: translate it
+                    html: me.snippets.exportLanguagesHelpText
                 },
                 me.createLanguagesCombo()
             ]
@@ -187,7 +190,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             valueField: 'id',
             name: 'exportLanguages',
             allowBlank: true,
-            fieldLabel: 'Languages', // todo@sb: translate it
+            fieldLabel: me.snippets.exportLanguagesLabel,
             width: 435,
             store: me.shopStore,
             queryMode: 'local'

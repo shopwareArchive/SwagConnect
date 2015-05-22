@@ -4,18 +4,30 @@ namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Verificator\Product;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\ProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
+use Shopware\Bepado\Components\Translations\ProductTranslator;
 
 class ProductQueryTest extends BepadoTestHelper
 {
     protected $productQuery;
 
+    protected $productTranslator;
+
     public function getProductQuery()
     {
         if (!$this->productQuery) {
+            $this->productTranslator = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Translations\\ProductTranslator')
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $this->productTranslator->expects($this->any())
+                ->method('translate')
+                ->willReturn(array());
+
             /** @var \Shopware\Bepado\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
@@ -25,7 +37,8 @@ class ProductQueryTest extends BepadoTestHelper
                     $configComponent->getConfig('alternateDescriptionField'),
                     $this->getProductBaseUrl(),
                     $configComponent,
-                    new MarketplaceGateway(Shopware()->Models())
+                    new MarketplaceGateway(Shopware()->Models()),
+                    $this->productTranslator
                 ),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );

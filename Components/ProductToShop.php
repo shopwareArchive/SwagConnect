@@ -30,6 +30,8 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Bepado\Components\Translations\LocaleMapper;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
@@ -70,14 +72,29 @@ class ProductToShop implements ProductToShopBase
      */
     private $variantConfigurator;
 
+    /**
+     * @var MarketplaceGateway
+     */
 	private $marketplaceGateway;
+
+    /**
+     * @var ProductTranslationsGateway
+     */
+    private $productTranslationsGateway;
+
+    /** @var  \Shopware\Models\Shop\Repository */
+    private $shopRepository;
+
+    private $localeRepository;
 
     /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
      * @param \Shopware\Bepado\Components\Config $config
+     * @param VariantConfigurator $variantConfigurator
      * @param \Shopware\Bepado\Components\Marketplace\MarketplaceGateway $marketplaceGateway
+     * @param ProductTranslationsGateway $productTranslationsGateway
      */
     public function __construct(
         Helper $helper,
@@ -85,7 +102,8 @@ class ProductToShop implements ProductToShopBase
         ImageImport $imageImport,
         Config $config,
         VariantConfigurator $variantConfigurator,
-		MarketplaceGateway $marketplaceGateway
+        MarketplaceGateway $marketplaceGateway,
+        ProductTranslationsGateway $productTranslationsGateway
     )
     {
         $this->helper = $helper;
@@ -93,7 +111,8 @@ class ProductToShop implements ProductToShopBase
         $this->config = $config;
         $this->imageImport = $imageImport;
         $this->variantConfigurator = $variantConfigurator;
-		$this->marketplaceGateway = $marketplaceGateway;
+        $this->marketplaceGateway = $marketplaceGateway;
+        $this->productTranslationsGateway = $productTranslationsGateway;
     }
 
     /**
@@ -184,7 +203,7 @@ class ProductToShop implements ProductToShopBase
         /*
          * Make sure, that the following properties are set for
          * - new products
-         * - products that have been configured to recieve these updates
+         * - products that have been configured to receive these updates
          */
         if ($updateFields['name']) {
             $model->setName($product->title);
@@ -334,6 +353,8 @@ class ProductToShop implements ProductToShopBase
 		
         $this->manager->clear();
 
+        $this->addArticleTranslations($model, $product);
+
         //clear cache for that article
         $this->helper->clearArticleCache($model->getId());
 
@@ -343,6 +364,51 @@ class ProductToShop implements ProductToShopBase
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
 
+    }
+
+    /**
+     * Adds translation record for given article
+     *
+     * @param ProductModel $article
+     * @param Product $sdkProduct
+     */
+    private function addArticleTranslations(ProductModel $article, Product $sdkProduct)
+    {
+        /** @var \Bepado\SDK\Struct\Translation $translation */
+        foreach ($sdkProduct->translations as $key => $translation) {
+            /** @var \Shopware\Models\Shop\Locale $locale */
+
+            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            if (!$shop) {
+                continue;
+            }
+
+            $this->productTranslationsGateway->addArticleTranslation($translation, $article->getId(), $shop->getId());
+        }
+    }
+
+    /**
+     * dsadsa
+     * @return \Shopware\Components\Model\ModelRepository
+     */
+    private function getLocaleRepository()
+    {
+        if (!$this->localeRepository) {
+            $this->localeRepository = $this->manager->getRepository('Shopware\Models\Shop\Locale');
+        }
+
+        return $this->localeRepository;
+    }
+
+    private function getShopRepository()
+    {
+        if (!$this->shopRepository) {
+            $this->shopRepository = $this->manager->getRepository('Shopware\Models\Shop\Shop');
+        }
+
+        return $this->shopRepository;
     }
 
 

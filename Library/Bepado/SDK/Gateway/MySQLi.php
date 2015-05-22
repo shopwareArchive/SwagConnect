@@ -33,6 +33,7 @@ class MySQLi extends Gateway
     protected $operationStruct = array(
         'insert' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Insert',
         'update' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Update',
+        'stock' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Availability',
         'delete' => '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Delete',
     );
 
@@ -94,7 +95,11 @@ class MySQLi extends Gateway
             );
 
             if ($row['c_product']) {
-                $change->product = $this->ensureUtf8(unserialize($row['c_product']));
+                if ($row['c_operation'] == 'stock') {
+                    $change->availability = $row['c_product'];
+                } else {
+                    $change->product = $this->ensureUtf8(unserialize($row['c_product']));
+                }
             }
         }
 
@@ -225,6 +230,48 @@ class MySQLi extends Gateway
                 "update",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string(serialize($product)) . '"
+            );'
+        );
+
+        $this->updateHash($id, $hash);
+    }
+
+    /**
+     * Record product availability update
+     *
+     * @param string $id
+     * @param string $hash
+     * @param string $revision
+     * @param Struct\Product $product
+     * @return void
+     */
+    public function recordAvailabilityUpdate($id, $hash, $revision, Struct\Product $product)
+    {
+        $sql = 'SELECT p_hash FROM bepado_product ' .
+            'WHERE p_source_id = "' . $this->connection->real_escape_string($id) . '"';
+
+        $row = $this->connection
+            ->query($sql)
+            ->fetch_assoc();
+        $currentHash = $row['p_hash'];
+
+        if ($currentHash === $hash) {
+            return;
+        }
+
+        $this->connection->query(
+            'INSERT INTO
+                bepado_change (
+                    `c_source_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_product`
+                )
+            VALUES (
+                "' . $this->connection->real_escape_string($id) . '",
+                "stock",
+                "' . $this->connection->real_escape_string($revision) . '",
+                "' . $this->connection->real_escape_string($product->availability) . '"
             );'
         );
 

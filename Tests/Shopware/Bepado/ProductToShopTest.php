@@ -5,6 +5,7 @@ namespace Tests\Shopware\Bepado;
 
 use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\ProductToShop;
 use Shopware\Bepado\Components\VariantConfigurator;
@@ -24,8 +25,12 @@ class ProductToShopTest extends BepadoTestHelper
             $this->modelManager,
             $this->getImageImport(),
             new Config($this->modelManager),
-            new VariantConfigurator($this->modelManager),
-            new MarketplaceGateway(Shopware()->Models())
+            new VariantConfigurator(
+                $this->modelManager,
+                new PdoProductTranslationsGateway(Shopware()->Db())
+            ),
+            new MarketplaceGateway($this->modelManager),
+            new PdoProductTranslationsGateway(Shopware()->Db())
         );
     }
 
@@ -43,6 +48,71 @@ class ProductToShopTest extends BepadoTestHelper
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
+    }
+
+    public function testInsertArticleTranslations()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+        $productRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
+        /** @var \Shopware\Models\Article\Article $productModel */
+        $productModel = $productRepository->findOneBy(array('name' => $product->title));
+
+        $articleTranslation = Shopware()->Db()->query(
+            'SELECT objectdata
+              FROM s_core_translations
+              WHERE objectkey = :productId AND objectlanguage = 2 AND objecttype = :objectType',
+            array('productId' => $productModel->getId(), 'objectType' => 'article')
+        )->fetchColumn();
+
+        $this->assertNotFalse($articleTranslation);
+        $articleTranslation = unserialize($articleTranslation);
+        $this->assertEquals($product->translations['en']->title, $articleTranslation['txtArtikel']);
+        $this->assertEquals($product->translations['en']->longDescription, $articleTranslation['txtlangbeschreibung']);
+        $this->assertEquals($product->translations['en']->shortDescription, $articleTranslation['txtshortdescription']);
+    }
+
+    public function testInsertVariantOptionsAndGroupsTranslations()
+    {
+        $variants = $this->getVariants();
+        // insert variants
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $groupRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Configurator\Group');
+        $optionRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Configurator\Option');
+        foreach ($variants as $variant) {
+            foreach ($variant->translations as $translation) {
+                // check configurator group translations
+                foreach ($translation->variantLabels as $groupKey => $groupTranslation) {
+                    $group = $groupRepository->findOneBy(array('name' => $groupKey));
+
+                    $objectData = Shopware()->Db()->query(
+                        'SELECT objectdata
+                          FROM s_core_translations
+                          WHERE objectkey = :groupId AND objectlanguage = 2 AND objecttype = :objectType',
+                        array('groupId' => $group->getId(), 'objectType' => 'configuratorgroup')
+                    )->fetchColumn();
+
+                    $objectData = unserialize($objectData);
+                    $this->assertEquals($groupTranslation, $objectData['name']);
+                }
+
+                foreach ($translation->variantValues as $optionKey => $optionTranslation) {
+                    $option =  $optionRepository->findOneBy(array('name' => $optionKey));
+                    $objectData = Shopware()->Db()->query(
+                        'SELECT objectdata
+                          FROM s_core_translations
+                          WHERE objectkey = :optionId AND objectlanguage = 2 AND objecttype = :objectType',
+                        array('optionId' => $option->getId(), 'objectType' => 'configuratoroption')
+                    )->fetchColumn();
+
+                    $objectData = unserialize($objectData);
+                    $this->assertEquals($optionTranslation, $objectData['name']);
+                }
+            }
+        }
     }
 
     public function testInsertVariants()
@@ -64,19 +134,28 @@ class ProductToShopTest extends BepadoTestHelper
         // check configurator group
         $group = $this->modelManager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array('name' => 'size'));
+            ->findOneBy(array('name' => 'Farbe'));
         $this->assertNotNull($group);
         // check group options
-        $optionValues = array('S', 'M', 'L', 'XL');
-        $this->assertEquals(4, count($optionValues));
+        $groupOptionValues = $articleOptionValues = array('Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot');
         foreach ($group->getOptions() as $option) {
-            $this->assertTrue(in_array($option->getName(), $optionValues));
+            foreach ($articleOptionValues as $key => $articleOptionValue) {
+                if (strpos($option->getName(), $groupOptionValues) == 0) {
+                    unset($groupOptionValues[$key]);
+                }
+            }
         }
+        $this->assertEmpty($groupOptionValues);
         // check configuration set options
         $this->assertEquals(4, count($article->getConfiguratorSet()->getOptions()));
         foreach ($article->getConfiguratorSet()->getOptions() as $option) {
-            $this->assertTrue(in_array($option->getName(), $optionValues));
+            foreach ($articleOptionValues as $key => $articleOptionValue) {
+                if (strpos($option->getName(), $articleOptionValue) == 0) {
+                    unset($articleOptionValues[$key]);
+                }
+            }
         }
+        $this->assertEmpty($articleOptionValues);
     }
 
     public function testUpdateVariant()

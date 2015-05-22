@@ -51,7 +51,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '1.6.5';
+    const VERSION = '1.7.1';
 
     /**
      * @param string $apiKey API key assigned to you by Bepado
@@ -285,6 +285,31 @@ final class SDK
 
         $this->dependencies->getVerificator()->verify($product);
         $this->dependencies->getGateway()->recordUpdate(
+            $product->sourceId,
+            $this->dependencies->getProductHasher()->hash($product),
+            $this->dependencies->getRevisionProvider()->next(),
+            $product
+        );
+    }
+
+    /**
+     * Record product availability update
+     *
+     * Establish a hook in your shop and call this method for every update of a
+     * product availability, which is exported to Bepado.
+     *
+     * @param string $productId
+     * @return void
+     */
+    public function recordAvailabilityUpdate($productId)
+    {
+        $this->verifySdkIfNecessary();
+
+        $product = $this->getProduct($productId);
+        $product->shopId = $this->dependencies->getGateway()->getShopId();
+
+        $this->dependencies->getVerificator()->verify($product);
+        $this->dependencies->getGateway()->recordAvailabilityUpdate(
             $product->sourceId,
             $this->dependencies->getProductHasher()->hash($product),
             $this->dependencies->getRevisionProvider()->next(),

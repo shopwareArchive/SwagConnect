@@ -2,6 +2,7 @@
 
 namespace Tests\Shopware\Bepado;
 
+use Bepado\SDK\Struct\Translation;
 use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
 use Shopware\Bepado\Components\Logger;
@@ -132,6 +133,14 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'purchasePrice' => 6.99,
             'availability' => 100,
             'categories' => array('/bücher'),
+            'translations' => array(
+                'en' => new Translation(array(
+                    'title' => 'MassImport #'. $number . ' EN',
+                    'longDescription' => 'Ein Produkt aus Bepado EN',
+                    'shortDescription' => 'Ein Produkt aus Bepado short EN',
+                    'url' => 'http://shopware.de',
+                ))
+            )
         ));
 
         if ($withImage) {
@@ -152,11 +161,27 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function getVariants()
     {
-        $size = array('S', 'M', 'L', 'XL');
+        $number = rand(1, 999999999);
+        $color = array(
+            array('de' => 'Weiss-Blau' . $number, 'en' => 'White-Blue'),
+            array('de' => 'Weiss-Rot' . $number, 'en' => 'White-Red'),
+            array('de' => 'Blau-Rot' . $number, 'en' => 'Blue-Red'),
+            array('de' => 'Schwarz-Rot' . $number, 'en' => 'Black-Red'),
+        );
+
         $variants = array();
         $mainVariant = $this->getProduct(true);
-        $mainVariant->variant['size'] = array_pop($size);
+        $mainVariantColor = array_pop($color);
+        $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
         $variants[] = $mainVariant;
+
+        //add translations
+        $mainVariant->translations['en']->variantLabels = array(
+            'Farbe' => 'Color',
+        );
+        $mainVariant->translations['en']->variantValues = array(
+            $mainVariantColor['de'] => $mainVariantColor['en'],
+        );
 
         for ($i=0; $i < 4 - 1; $i++) {
             $variant = $this->getProduct(true);
@@ -164,7 +189,21 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $variant->title = 'MassImport #'. $variantSourceId;
             $variant->sourceId = $variantSourceId;
             $variant->ean = $variantSourceId;
-            $variant->variant['size'] = array_pop($size);
+            $variantColor = array_pop($color);
+            $variant->variant['Farbe'] = $variantColor['de'];
+            $variant->translations = array(
+                'en' => new Translation(array(
+                   'title' =>  'MassImport #'. $variantSourceId . ' EN',
+                   'longDescription' =>  $mainVariant->longDescription . ' EN',
+                   'shortDescription' =>  $mainVariant->shortDescription . ' EN',
+                    'variantLabels' => array(
+                        'Farbe' => 'Color',
+                    ),
+                    'variantValues' => array(
+                        $variantColor['de'] => $variantColor['en'],
+                    ),
+                )),
+            );
 
             $variants[] = $variant;
         }

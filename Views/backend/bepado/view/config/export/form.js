@@ -61,6 +61,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         synchronizationBarDescription: '{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu bepado an. Es kann etwas länger dauern, bis Ihre Produkte auf bepado erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}',
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
         priceConfigurationDescription: '{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}',
+        exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
+        exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
+        exportLanguagesHelpText: '{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu bepado verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -136,6 +139,17 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             ]
         });
 
+        me.languagesExportFieldset = Ext.create('Ext.form.FieldSet', {
+            title: me.snippets.exportLanguagesTitle,
+            items: [
+                {
+                    xtype: 'label',
+                    html: me.snippets.exportLanguagesHelpText
+                },
+                me.createLanguagesCombo()
+            ]
+        });
+
         // if there is exported product
         // pricing mapping should be disabled
         Ext.Ajax.request({
@@ -155,8 +169,32 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         return [
             syncFieldset,
             container,
+            me.languagesExportFieldset,
             me.priceMappingsFieldSet
         ];
+    },
+
+    createLanguagesCombo: function() {
+        var me = this;
+
+        me.shopStore = Ext.create('Shopware.apps.Base.store.ShopLanguage').load({
+            filters: [{
+                property: 'default',
+                value: false
+            }]
+        });
+
+        return Ext.create('Ext.form.field.ComboBox', {
+            multiSelect: true,
+            displayField: 'name',
+            valueField: 'id',
+            name: 'exportLanguages',
+            allowBlank: true,
+            fieldLabel: me.snippets.exportLanguagesLabel,
+            width: 435,
+            store: me.shopStore,
+            queryMode: 'local'
+        });
     },
 
     getSyncFieldset: function() {

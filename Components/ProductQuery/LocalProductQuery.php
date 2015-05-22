@@ -7,9 +7,11 @@ use Bepado\SDK\Struct\Product;
 use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
+use Shopware\Bepado\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Utils\UnitMapper;
+use Bepado\SDK\Struct\Translation;
 
 /**
  * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
@@ -20,7 +22,6 @@ use Shopware\Bepado\Components\Utils\UnitMapper;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-
     protected $manager;
 
     protected $productDescriptionField;
@@ -32,12 +33,18 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $marketplaceGateway;
 
+    /**
+     * @var \Shopware\Bepado\Components\Translations\ProductTranslatorInterface
+     */
+    protected $productTranslator;
+
     public function __construct(
         ModelManager $manager,
         $productDescriptionField,
         $baseProductUrl,
         $configComponent,
-        MarketplaceGateway $marketplaceGateway
+        MarketplaceGateway $marketplaceGateway,
+        ProductTranslatorInterface $productTranslator
     )
     {
         $this->manager = $manager;
@@ -45,6 +52,7 @@ class LocalProductQuery extends BaseProductQuery
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
+        $this->productTranslator = $productTranslator;
     }
 
     /**
@@ -130,6 +138,7 @@ class LocalProductQuery extends BaseProductQuery
     public function getBepadoProduct($row)
     {
         $row = $this->prepareCommonAttributes($row);
+        $row['translations'] = $this->productTranslator->translate($row['localId'], $row['sourceId']);
 
         if (!empty($row['shopId'])) {
             throw new NoLocalProductException("Product {$row['title']} is not a local product");
@@ -147,7 +156,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
-        $row['variant'] = $this->getConfiguratorOptions($row['detailId']);
+        $row = $this->applyConfiguratorOptions($row);
 
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
@@ -233,9 +242,15 @@ class LocalProductQuery extends BaseProductQuery
         return $builder;
     }
 
-    public function getUrlForProduct($productId)
+    public function getUrlForProduct($productId, $shopId = null)
     {
-        return $this->baseProductUrl . $productId;
+        $shopId = (int)$shopId;
+        $url = $this->baseProductUrl . $productId;
+        if ($shopId > 0) {
+            $url = $url . '/shId/' . $shopId;
+        }
+
+        return $url;
     }
 
 	/**
@@ -300,35 +315,52 @@ class LocalProductQuery extends BaseProductQuery
     }
 
     /**
-     * Returns configurator options and groups
-     * by given article detail id
+     * Applies configurator options and groups
+     * to article array
      *
-     * @param int $detailId
+     * @param array $row
      * @return array
      */
-    public function getConfiguratorOptions($detailId)
+    private function applyConfiguratorOptions($row)
     {
         $builder = $this->manager->createQueryBuilder();
-
         $builder->from('Shopware\Models\Article\Detail', 'd');
         $builder->join('d.configuratorOptions', 'cor');
         $builder->join('cor.group', 'cg');
         $builder->select(array(
             'cor.name as optionName',
+            'cor.id as optionId',
             'cg.name as groupName',
+            'cg.id as groupId',
         ));
-
         $builder->where("d.id = :detailId");
-        $builder->setParameter(':detailId', $detailId);
-        $query = $builder->getQuery();
-        $configuratorData = array();
+        $builder->setParameter(':detailId', $row['detailId']);
 
-        foreach ($query->getArrayResult() as $config) {
+        $query = $builder->getQuery();
+
+        $configuratorData = array();
+        $configs = $query->getArrayResult();
+
+        foreach ($configs as $config) {
+            $row['translations'] = $this->productTranslator->translateConfiguratorGroup($config['groupId'], $config['groupName'], $row['translations']);
+            $row['translations'] = $this->productTranslator->translateConfiguratorOption($config['optionId'], $config['optionName'], $row['translations']);
+
             $groupName = $config['groupName'];
             $configuratorData[$groupName] = $config['optionName'];
         }
 
-        return $configuratorData;
+        $row['variant'] = $configuratorData;
+
+        foreach ($row['translations'] as $key => $translation) {
+            try {
+                // todo@sb: test me
+                $this->productTranslator->validate($translation, count($configs));
+            } catch(\Exception $e) {
+                unset($row['translations'][$key]);
+            }
+        }
+
+        return $row;
     }
 }
 

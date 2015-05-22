@@ -97,12 +97,16 @@ class ConfigTest extends BepadoTestHelper
 
     public function testGetExportConfig()
     {
+        $this->getConfigComponent()->setConfig('testConfigArray', array(0, 1, 'value'));
         $exportConfig = $this->getConfigComponent()->getExportConfig();
 
         $sql = 'SELECT name, value FROM s_plugin_bepado_config WHERE shopId IS NULL AND groupName = ?';
         $result = Shopware()->Db()->fetchPairs($sql, array('export'));
 
         foreach ($result as $name => $value) {
+            if (json_decode($value, true) !== null) {
+                $value = json_decode($value, true);
+            }
             $this->assertEquals($value, $exportConfig[$name]);
         }
     }
@@ -177,6 +181,22 @@ class ConfigTest extends BepadoTestHelper
         $this->assertEquals($configName, $config->getName());
         $this->assertEquals($configValue, $config->getValue());
         $this->assertEquals('units', $config->getGroupName());
+    }
+
+    public function testDeleteConfig()
+    {
+        $this->getConfigComponent()->setConfig('testConfigDelete', 1);
+        $this->getConfigComponent()->deleteConfig('testConfigDelete');
+
+        $this->assertNull($this->getConfigComponent()->getConfig('testConfigDelete'));
+    }
+
+    /**
+     * @expectedException \Exception invalidConfigName
+     */
+    public function testDeleteInvalidConfigRecord()
+    {
+        $this->getConfigComponent()->deleteConfig('invalidConfigName');
     }
 
     public static function tearDownAfterClass()

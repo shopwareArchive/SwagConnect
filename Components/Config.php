@@ -74,6 +74,10 @@ class Config
         $model = $result[0];
 
         if ($model) {
+            $decodedString = json_decode($model->getValue(), true);
+            if ($decodedString !== null) {
+                return $decodedString;
+            }
             return $model->getValue();
         }
 
@@ -91,6 +95,10 @@ class Config
             $model = $result[0];
 
             if ($model) {
+                $decodedString = json_decode($model->getValue(), true);
+                if ($decodedString !== null) {
+                    return $decodedString;
+                }
                 return $model->getValue();
             }
         }
@@ -112,6 +120,10 @@ class Config
             return $default;
         }
 
+        $decodedString = json_decode($result[0]->getValue(), true);
+        if ($decodedString !== null) {
+            return $decodedString;
+        }
         return $result[0]->getValue();
     }
 
@@ -144,7 +156,13 @@ class Config
         }
 
         $model->setName($name);
-        $model->setValue($value);
+
+        if (is_array($value)) {
+            $model->setValue(json_encode($value));
+        } else {
+            $model->setValue($value);
+        }
+
         $model->setShopId($shopId);
         $model->setGroupName($groupName);
 
@@ -266,7 +284,12 @@ class Config
                     $model->setShopId($shopId);
                 }
 
-                $model->setValue($configItem);
+                if (is_array($configItem)) {
+                    $model->setValue(json_encode($configItem));
+                } else {
+                    $model->setValue($configItem);
+                }
+
                 $this->manager->persist($model);
             }
         }
@@ -313,7 +336,11 @@ class Config
                     $model->setShopId(null);
                 }
 
-                $model->setValue($configValue);
+                if (is_array($configValue)) {
+                    $model->setValue(json_encode($configValue));
+                } else {
+                    $model->setValue($configValue);
+                }
                 $this->manager->persist($model);
             }
         }
@@ -332,6 +359,13 @@ class Config
         WHERE `shopId` IS NULL AND `groupName` = 'export'";
 
         $result = Shopware()->Db()->fetchPairs($query);
+
+        foreach ($result as $key => $value) {
+            $decodedString = json_decode($value, true);
+            if ($decodedString !== null) {
+                $result[$key] = $decodedString;
+            }
+        }
 
         return $result;
     }
@@ -354,7 +388,12 @@ class Config
                     $model->setShopId(null);
                 }
 
-                $model->setValue($configValue);
+                if (is_array($configValue)) {
+                    $model->setValue(json_encode($configValue));
+                } else {
+                    $model->setValue($configValue);
+                }
+
                 $this->manager->persist($model);
             }
         }

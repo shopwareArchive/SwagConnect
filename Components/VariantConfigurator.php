@@ -24,6 +24,8 @@
 
 namespace Shopware\Bepado\Components;
 
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
+use Shopware\Bepado\Components\Translations\LocaleMapper;
 use Shopware\Components\Model\ModelManager;
 use Bepado\SDK\Struct\Product;
 use Shopware\Models\Article\Detail;
@@ -42,9 +44,16 @@ class VariantConfigurator
      */
     private $manager;
 
-    public function __construct(ModelManager $manager)
+    private $translationGateway;
+
+    private $localeRepository;
+
+    private $shopRepository;
+
+    public function __construct(ModelManager $manager, ProductTranslationsGateway $translationsGateway)
     {
         $this->manager = $manager;
+        $this->translationGateway = $translationsGateway;
     }
 
     /**
@@ -72,6 +81,7 @@ class VariantConfigurator
 
             $configSet = $this->addGroupToConfiguratorSet($configSet, $group);
             $configSet = $this->addOptionToConfiguratorSet($configSet, $option);
+
             $this->manager->persist($option);
             $this->manager->persist($group);
             $this->manager->persist($configSet);
@@ -86,6 +96,14 @@ class VariantConfigurator
         }
 
 
+        foreach ($product->variant as $key => $value) {
+            $group = $this->getGroupByName($configSet, $key);
+            $option = $this->getOrCreateOptionByName($configSet, $group, $value);
+
+            //translate configurator groups and configurator options
+            $this->addGroupTranslation($group, $product);
+            $this->addOptionTranslation($option, $product);
+        }
     }
 
     /**
@@ -229,5 +247,73 @@ class VariantConfigurator
         }
 
         return $option;
+    }
+
+    private function addGroupTranslation(Group $group, Product $product)
+    {
+        /** @var \Bepado\SDK\Struct\Translation $translation */
+        foreach ($product->translations as $key => $translation) {
+            if (!array_key_exists($group->getName(), $translation->variantLabels)) {
+                continue;
+            }
+
+            /** @var \Shopware\Models\Shop\Locale $locale */
+            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            if (!$shop) {
+                continue;
+            }
+
+            foreach ($translation->variantLabels as $groupKey => $groupTranslation) {
+                if ($groupKey === $group->getName()) {
+                    $this->translationGateway->addGroupTranslation($groupTranslation, $group->getId(), $shop->getId());
+                }
+            }
+        }
+    }
+
+    private function addOptionTranslation(Option $option, Product $product)
+    {
+        /** @var \Bepado\SDK\Struct\Translation $translation */
+        foreach ($product->translations as $key => $translation) {
+            if (!array_key_exists($option->getName(), $translation->variantValues)) {
+                continue;
+            }
+
+            /** @var \Shopware\Models\Shop\Locale $locale */
+            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            if (!$shop) {
+                continue;
+            }
+
+            foreach ($translation->variantValues as $optionKey => $optionTranslation) {
+                if ($optionKey === $option->getName()) {
+                    $this->translationGateway->addOptionTranslation($optionTranslation, $option->getId(), $shop->getId());
+                }
+            }
+        }
+    }
+
+    private function getShopRepository()
+    {
+        if (!$this->shopRepository) {
+            $this->shopRepository = $this->manager->getRepository('Shopware\Models\Shop\Shop');
+        }
+
+        return $this->shopRepository;
+    }
+
+    private function getLocaleRepository()
+    {
+        if (!$this->localeRepository) {
+            $this->localeRepository = $this->manager->getRepository('Shopware\Models\Shop\Locale');
+        }
+
+        return $this->localeRepository;
     }
 } 

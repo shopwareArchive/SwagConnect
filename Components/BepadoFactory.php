@@ -5,11 +5,13 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 use Shopware\Bepado\Components\Payment\ProductPayments;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
+use Shopware\Bepado\Components\Translations\ProductTranslator;
 use Shopware\Bepado\Components\Utils\CountryCodeResolver;
 
 /**
@@ -30,6 +32,8 @@ class BepadoFactory
     private $configComponent;
 
     private $marketplaceGatway;
+
+    private $productTranslationsGateway;
 
     public function __construct($version='')
     {
@@ -97,8 +101,9 @@ class BepadoFactory
                 $manager,
                 $this->getImageImport(),
                 $this->getConfigComponent(),
-                new VariantConfigurator($manager),
-				$this->getMarketplaceGateway()
+                new VariantConfigurator($manager, $this->getProductTranslationsGateway()),
+                $this->getMarketplaceGateway(),
+                $this->getProductTranslationsGateway()
             ),
             new ProductFromShop(
                 $helper,
@@ -260,7 +265,13 @@ class BepadoFactory
             $this->getConfigComponent()->getConfig('alternateDescriptionField'),
             $this->getProductBaseUrl(),
             $this->getConfigComponent(),
-            $this->getMarketplaceGateway()
+            $this->getMarketplaceGateway(),
+            new ProductTranslator(
+                $this->getConfigComponent(),
+                new PdoProductTranslationsGateway(Shopware()->Db()),
+                $this->getModelManager(),
+                $this->getProductBaseUrl()
+            )
         );
     }
 
@@ -313,5 +324,14 @@ class BepadoFactory
         }
 
         return new CountryCodeResolver(Shopware()->Models(), $customer, Shopware()->Session()->sCountry);
+    }
+
+    public function getProductTranslationsGateway()
+    {
+        if (!$this->productTranslationsGateway) {
+            $this->productTranslationsGateway = new PdoProductTranslationsGateway(Shopware()->Db());
+        }
+
+        return $this->productTranslationsGateway;
     }
 }

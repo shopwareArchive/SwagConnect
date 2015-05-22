@@ -131,6 +131,15 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
             return;
         }
 
+        $shopId = (int)$this->Request()->getParam('shId');
+        if ($shopId > 0) {
+            $shop = $this->getShopRepository()->find($shopId);
+            if ($shop instanceof \Shopware\Models\Shop\Shop) {
+                $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
+                return;
+            }
+        }
+
         // If we have a mapping and can resolve it to a local category, forward to the product
         if (!empty($product->categories)) {
             foreach ($product->categories as $mapping) {

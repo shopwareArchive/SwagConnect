@@ -64,6 +64,7 @@ Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Mapping', {
                         editor: {
                             xtype: 'combo',
                             store: me.marketplaceAttributesStore,
+                            editable: false,
                             valueField: 'attributeKey',
                             displayField: 'attributeLabel'
                         },

@@ -33,7 +33,9 @@ class DisableBepadoInFrontend extends BaseSubscriber
 
         if ($this->isBepadoArticle($article['articleID'])) {
             $this->registerMyTemplateDir();
-            $view->extendsTemplate('frontend/bepado/detail.tpl');
+            if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
+                $view->extendsTemplate('frontend/bepado/detail.tpl');
+            }
             $view->assign('hideBepado', true);
         }
     }

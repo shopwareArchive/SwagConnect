@@ -89,8 +89,22 @@ abstract class BaseSubscriber extends SubscribeManager
      */
     public function registerMyTemplateDir()
     {
+        $template = '';
+        if ($this->Application()->Container()->has('shop')) {
+            if($this->Application()
+                    ->Container()
+                    ->get('shop')
+                    ->getTemplate()
+                    ->getVersion() >= 3
+            ) {
+                $template = 'responsive';
+            } else {
+                $template = 'emotion';
+            }
+        }
+
         $this->Application()->Template()->addTemplateDir(
-            $this->Path() . 'Views/', 'bepado'
+            $this->Path() . 'Views/'.$template, 'bepado'
         );
     }
 

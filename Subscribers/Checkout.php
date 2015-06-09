@@ -296,7 +296,8 @@ class Checkout extends BaseSubscriber
                 continue;
             }
 
-            $products = $helper->getRemoteProducts(array($row['articleID']));
+            $sourceIds = $helper->getArticleSourceIds(array($row['articleID']));
+            $products = $helper->getRemoteProducts($sourceIds);
             $products = $this->getHelper()->prepareBepadoUnit($products);
 
             if (empty($products)) {

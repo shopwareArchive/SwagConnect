@@ -851,7 +851,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             }
         } else {
             $unsubscribedProducts = array();
-            $products = $this->getHelper()->getRemoteProducts($ids);
+            $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
+            $products = $this->getHelper()->getRemoteProducts($sourceIds);
 
             /** @var \Bepado\SDK\Struct\Product $product */
             foreach ($products as $product) {

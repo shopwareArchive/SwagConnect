@@ -22,7 +22,14 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
         me.callOverridden(arguments);
 
-        me.rowEditing.on('beforeedit', function(editor, context, eOpts) {
+        var editor;
+        if (me.rowEditing) {
+            editor = me.rowEditing;
+        } else {
+            editor = me.editor;
+        }
+
+        editor.on('beforeedit', function(editor, context, eOpts) {
             var me = this;
 
             if (!me.columns || !context.record) {

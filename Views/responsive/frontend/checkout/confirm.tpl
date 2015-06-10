@@ -1,13 +1,13 @@
 {extends file="parent:frontend/checkout/confirm.tpl"}
 
 {block name="frontend_checkout_confirm_confirm_footer" prepend}
-	{include file="frontend/checkout/checkout_cart.tpl"}
+	{include file="frontend/checkout/checkout_cart.tpl" template="confirm"}
 {/block}
 
 {block name="frontend_checkout_confirm_confirm_head" append}
 	{assign var="lastProduct" value=$sBasket.content|@end}
 	{if counter eq 0 && $bepadoContent}
-		{include file="frontend/checkout/items/dispatch.tpl"}
+		{include file="frontend/checkout/items/dispatch.tpl" hideSinglePrice=true}
 	{/if}
 {/block}
 

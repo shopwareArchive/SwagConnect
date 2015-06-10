@@ -12,7 +12,11 @@
 
 {block name="frontend_checkout_cart_item_voucher_tax_price"}
 	{block name="frontend_checkout_bepado_dispatch_quantity"}
-		<div class="panel--td column--quantity block is--align-right"></div>
+        {if $hideSinglePrice}
+            <div class="panel--td column--tax-price block is--align-right"></div>
+        {else}
+            <div class="panel--td column--quantity block is--align-right"></div>
+        {/if}
 	{/block}
 
 	{block name="frontend_checkout_bepado_dispatch_unit_price"}
@@ -45,7 +49,7 @@
 		{/if}
 	{elseif $bepadoShippingCostsOrg}
 		{$bepadoShippingCostsOrg|currency}
-	{/if}
+    {/if}
 {/block}
 
 {block name="frontend_checkout_cart_item_voucher_details_sku"}{/block}

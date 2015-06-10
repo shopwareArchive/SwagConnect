@@ -1,0 +1,65 @@
+.table--media-outer {
+	position: relative;
+}
+
+.bepado--second-cart {
+	.unitize(20, 16, margin-top);
+}
+
+.bepado--bepado-image-article {
+	.border-radius-multi(2px, 0, 0, 2px);
+	.unitize(13, 16, font-size);
+	.unitize(1, 16, letter-spacing);
+	.unitize(-1, 16, left);
+	.unitize(-1, 16, top);
+	.unitize-width(20);
+	background-color: @bepadoMainColor;
+	border: 1px solid @bepadoMainColor;
+	box-sizing: content-box;
+	color: #fff;
+	display: block;
+	height: 100%;
+	font-family: arial;
+	font-weight: 700;
+	position: absolute;
+	text-align: center;
+
+	z-index: 100;
+
+	.bepado-image-article--text {
+		.transform(translateX(-50%) translateY(-50%) rotate(-90deg));
+		position: absolute;
+		left: 50%; top: 50%;
+	}
+}
+
+.bepado--additional-info {
+	clear: both;
+
+	.bepado--cart-label {
+		.unitize-padding(2, 4);
+		.unitize(10, 16, font-size);
+		.unitize(3, 16, margin-right);
+		.unitize(3, 16, border-radius);
+		background-color: @bepadoMainColor;
+		text-transform: uppercase;
+		color: #FFF;
+	}
+}
+
+.product--table .row--voucher .bepado--dispatch-row {
+	.column--total-price {
+		.unitize(10, 16, padding-top);
+	}
+}
+
+.bepado--dispatch-title {
+	.unitize(16, 16, font-size);
+	font-weight: bold;
+}
+
+@media screen and (min-width: @phoneLandscapeViewportWidth) {
+	.product--table .row--voucher .bepado--dispatch-row .column--total-price {
+		margin-left: 0;
+	}
+}

@@ -130,7 +130,9 @@ class Checkout extends BaseSubscriber
         $this->enforcePhoneNumber($view);
 
         $this->registerMyTemplateDir();
-        $view->extendsTemplate('frontend/bepado/checkout.tpl');
+        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
+            $view->extendsTemplate('frontend/bepado/checkout.tpl');
+        }
 
         $sdk = $this->getSDK();
 

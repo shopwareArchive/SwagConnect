@@ -29,7 +29,9 @@ class TemplateExtension extends BaseSubscriber
         $subject = $args->getSubject();
 
         $this->registerMyTemplateDir();
-        $subject->View()->extendsTemplate('frontend/bepado/index/index.tpl');
+        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
+            $subject->View()->extendsTemplate('frontend/bepado/index/index.tpl');
+        }
 
     }
 
@@ -142,7 +144,9 @@ class TemplateExtension extends BaseSubscriber
         $helper = $this->getHelper();
 
         $this->registerMyTemplateDir();
-        $view->extendsTemplate('frontend/bepado/detail.tpl');
+        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
+            $view->extendsTemplate('frontend/bepado/detail.tpl');
+        }
 
         $articleData = $view->getAssign('sArticle');
         if(empty($articleData['articleID'])) {

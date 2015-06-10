@@ -1,0 +1,81 @@
+.collapsible-dispatch--headline {
+	display: inline-block;
+	cursor: pointer;
+
+	.bepado--raquo {
+		.transform(rotate(90deg));
+		display: inline-block;
+
+		&.collapsible-dispatch--collapsed {
+			.transform(rotate(0deg));
+		}
+	}
+}
+.bepado--column-weight,
+.bepado--column-value,
+.bepado--column-net,
+.bepado--column-gross,
+.bepado--column-country {
+	width: 100%;
+}
+
+.column--label {
+	font-weight: 600;
+}
+
+.column--label,
+.column--value {
+	width: 50%;
+	float: left;
+}
+
+.collapsible-dispatch--body {
+	width: 80%;
+
+	.column--label {
+		display: block
+	}
+
+	.bepado--table {
+		padding: 0;
+	}
+}
+
+.bepado--table-header {
+	display: none;
+}
+
+@media screen and (min-width: @tabletLandscapeViewportWidth) {
+	.collapsible-dispatch--body {
+		.column--label {
+			display: none;
+		}
+
+		.bepado--table {
+			.unitize(10, 16, padding);
+		}
+	}
+
+    .bepado--table-header {
+    	display: block;
+    }
+
+	.bepado--column-weight,
+	.bepado--column-value {
+		width: 20%;
+	}
+
+	.bepado--column-net,
+	.bepado--column-gross {
+		width: 15%;
+	}
+
+	.bepado--column-country {
+		width: 30%;
+	}
+
+	.column--label,
+	.column--value {
+		width: auto;
+	}
+}

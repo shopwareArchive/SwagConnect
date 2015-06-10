@@ -65,7 +65,13 @@ class ArticleList extends BaseSubscriber
                 );
                 break;
             case 'list':
+            case 'filter':
                 $subject->View()->data = $this->markBepadoProducts(
+                    $subject->View()->data
+                );
+                break;
+            case 'columnConfig':
+                $subject->View()->data = $this->addBepadoColumn(
                     $subject->View()->data
                 );
                 break;
@@ -84,6 +90,9 @@ class ArticleList extends BaseSubscriber
     private function markBepadoProducts($data)
     {
         $articleIds = array_map(function ($row) {
+            if ((int)$row['Article_id'] > 0) {
+                return (int)$row['Article_id'];
+            }
             return (int)$row['articleId'];
         }, $data);
 
@@ -102,10 +111,36 @@ class ArticleList extends BaseSubscriber
         }, Shopware()->Db()->fetchAll($sql));
 
         foreach($data as $idx => $row) {
-            $data[$idx]['bepado'] = in_array($row['articleId'], $bepadoArticleIds);
+            if ((int)$row['Article_id'] > 0) {
+                $articleId = $row['Article_id'];
+            } else {
+                $articleId = $row['articleId'];
+            }
+
+            $data[$idx]['bepado'] = in_array($articleId, $bepadoArticleIds);
         }
 
         return $data;
     }
 
+    /**
+     * Adds bepado field to the ExtJS model for article_list
+     * That was changed in SW5, because the model is dynamically created
+     *
+     * @param $data
+     * @return array
+     */
+    private function addBepadoColumn($data)
+    {
+        $data[] = array(
+            'entity' => 'Article',
+            'field' => 'bepado',
+            'type' => 'boolean',
+            'alias' => 'bepado',
+            'allowInGrid' => true,
+            'nullable' => false,
+
+        );
+        return $data;
+    }
 }

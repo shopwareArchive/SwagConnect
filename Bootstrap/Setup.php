@@ -35,6 +35,7 @@ class Setup
 
         $this->createBepadoCustomerGroup();
 
+
         if ($fullSetup) {
             $this->createMyMenu();
             $this->createEngineElement();
@@ -47,15 +48,20 @@ class Setup
      */
     private function createMyMenu()
     {
-        $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Marketing'));
-        $this->bootstrap->createMenuItem(array(
-            'label' => $this->bootstrap->getLabel(),
-            'controller' => 'Bepado',
-            'action' => 'Index',
-            'class' => 'bepado-icon',
-            'active' => 1,
-            'parent' => $parent
-        ));
+        $bepadoItem = $this->bootstrap->Menu()->findOneBy(array('label' => $this->bootstrap->getLabel()));
+        // check if bepado menu item exists
+        if (!$bepadoItem) {
+            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Marketing'));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => $this->bootstrap->getLabel(),
+                'controller' => 'Bepado',
+                'action' => 'Index',
+                'class' => 'bepado-icon',
+                'active' => 1,
+                'parent' => $parent
+            ));
+        }
     }
 
     /**

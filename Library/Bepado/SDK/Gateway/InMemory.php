@@ -139,7 +139,7 @@ class InMemory extends Gateway
                 break;
             case 'stock':
                 $class = '\\Bepado\\SDK\\Struct\\Change\\FromShop\\Availability';
-                $data['availability'] = $data['product']->availability;
+                $data['availability'] = intval($data['product']->availability);
                 unset($data['product']);
                 break;
         }

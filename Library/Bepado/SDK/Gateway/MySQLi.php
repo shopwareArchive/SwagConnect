@@ -94,9 +94,9 @@ class MySQLi extends Gateway
                 )
             );
 
-            if ($row['c_product']) {
+            if ($row['c_product'] !== null) {
                 if ($row['c_operation'] == 'stock') {
-                    $change->availability = $row['c_product'];
+                    $change->availability = intval($row['c_product']);
                 } else {
                     $change->product = $this->ensureUtf8(unserialize($row['c_product']));
                 }

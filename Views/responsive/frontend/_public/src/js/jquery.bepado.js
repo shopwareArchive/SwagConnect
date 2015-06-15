@@ -34,5 +34,5 @@
 		}
 	});
 
-	$('.bepado--collapsible-dispatch').bepado();
+    $('.bepado--store-dispatch').bepado();
 })(jQuery);

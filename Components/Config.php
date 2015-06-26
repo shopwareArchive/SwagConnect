@@ -464,6 +464,18 @@ class Config
     }
 
     /**
+     * Saves array with marketplace settings to config table
+     *
+     * @param array $settings
+     */
+    public function setMarketplaceSettings(array $settings)
+    {
+        foreach ($settings as $settingName => $settingValue) {
+            $this->setConfig($settingName, $settingValue, null, 'marketplace');
+        }
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
      */
     private function getConfigRepository()

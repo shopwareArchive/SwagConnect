@@ -199,6 +199,28 @@ class ConfigTest extends BepadoTestHelper
         $this->getConfigComponent()->deleteConfig('invalidConfigName');
     }
 
+    public function testSetMarketplaceSettings()
+    {
+        $marketplaceSettings = array();
+        for ($i=0; $i < 5; $i++) {
+            $configName = 'testMarketplaceConfig' . $i;
+            $configValue = rand(1, 9999);
+            $marketplaceSettings[$configName] = $configValue;
+        }
+
+        $this->getConfigComponent()->setMarketplaceSettings($marketplaceSettings);
+
+        $sql = 'SELECT * FROM s_plugin_bepado_config WHERE groupName = ?';
+        $result = Shopware()->Db()->fetchAll($sql, array('marketplace'));
+
+        $this->assertEquals(5, count($result));
+
+        foreach ($result as $setting) {
+            $this->assertTrue(isset($marketplaceSettings[$setting['name']]));
+            $this->assertEquals($setting['value'], $marketplaceSettings[$setting['name']]);
+        }
+    }
+
     public static function tearDownAfterClass()
     {
         $sql = 'DELETE FROM s_plugin_bepado_config WHERE name LIKE  "testConfig%"';

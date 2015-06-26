@@ -894,6 +894,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 'success' => true
             ));
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $marketplaceSettings = $sdk->getMarketplaceSettings();
+            $this->getConfigComponent()->setMarketplaceSettings($marketplaceSettings);
         } catch (Exception $e) {
             $this->View()->assign(array(
                 'message' => $e->getMessage(),

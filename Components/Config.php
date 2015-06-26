@@ -24,6 +24,7 @@
 
 namespace Shopware\Bepado\Components;
 
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Bepado\Config as ConfigModel;
 
@@ -466,10 +467,11 @@ class Config
     /**
      * Saves array with marketplace settings to config table
      *
-     * @param array $settings
+     * @param MarketplaceSettings $settings
      */
-    public function setMarketplaceSettings(array $settings)
+    public function setMarketplaceSettings(MarketplaceSettings $settings)
     {
+        $settings = (array) $settings;
         foreach ($settings as $settingName => $settingValue) {
             $this->setConfig($settingName, $settingValue, null, 'marketplace');
         }

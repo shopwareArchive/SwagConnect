@@ -3,6 +3,7 @@
 namespace Tests\Shopware\Bepado;
 
 use Shopware\Bepado\Components\Config;
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
 
 class ConfigTest extends BepadoTestHelper
 {
@@ -201,24 +202,18 @@ class ConfigTest extends BepadoTestHelper
 
     public function testSetMarketplaceSettings()
     {
-        $marketplaceSettings = array();
-        for ($i=0; $i < 5; $i++) {
-            $configName = 'testMarketplaceConfig' . $i;
-            $configValue = rand(1, 9999);
-            $marketplaceSettings[$configName] = $configValue;
-        }
+        $marketplaceSettings = new MarketplaceSettings(array(
+            'marketplaceName' => 'semdemo',
+        ));
 
         $this->getConfigComponent()->setMarketplaceSettings($marketplaceSettings);
 
         $sql = 'SELECT * FROM s_plugin_bepado_config WHERE groupName = ?';
         $result = Shopware()->Db()->fetchAll($sql, array('marketplace'));
 
-        $this->assertEquals(5, count($result));
+        $this->assertEquals(1, count($result));
 
-        foreach ($result as $setting) {
-            $this->assertTrue(isset($marketplaceSettings[$setting['name']]));
-            $this->assertEquals($setting['value'], $marketplaceSettings[$setting['name']]);
-        }
+        $this->assertEquals('semdemo', $result[0]['value']);
     }
 
     public static function tearDownAfterClass()

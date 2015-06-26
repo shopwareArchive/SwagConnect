@@ -29,6 +29,8 @@ use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
+use \Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
 
 /**
  * Class Shopware_Controllers_Backend_Bepado
@@ -47,6 +49,11 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      * @var \Shopware\Bepado\Components\ShippingCosts\ShippingGroups
      */
     private $shippingGroupComponent;
+
+    /**
+     * @var \Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier
+     */
+    private $marketplaceSettingsApplier;
 
     /**
      * @return Shopware\Components\Model\ModelManager
@@ -895,7 +902,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             ));
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $marketplaceSettings = $sdk->getMarketplaceSettings();
-            $this->getConfigComponent()->setMarketplaceSettings($marketplaceSettings);
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (Exception $e) {
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
@@ -1334,5 +1341,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 'success' => true
             )
         );
+    }
+
+    private function getMarketplaceApplier()
+    {
+        if (!$this->marketplaceSettingsApplier) {
+            $this->marketplaceSettingsApplier = new MarketplaceSettingsApplier(
+                $this->getConfigComponent(),
+                Shopware()->Models()
+            );
+        }
+
+        return $this->marketplaceSettingsApplier;
     }
 }

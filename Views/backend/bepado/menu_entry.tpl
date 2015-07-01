@@ -9,3 +9,10 @@
     }
 </style>
 {/block}
+
+{block name="backend/base/header/javascript" append}
+    <script type="text/javascript">
+        var marketplaceName = '{$marketplaceName}';
+        var marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
+    </script>
+{/block}

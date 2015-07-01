@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
     layout: 'fit',
 
     snippets: {
-
+        unitHeader: Ext.String.format('{s name=config/units/bepado_unit_header}[0] Einheit{/s}', marketplaceName)
     },
 
     initComponent: function() {
@@ -30,7 +30,7 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
                         dataIndex: 'shopwareUnitName',
                         flex: 1
                     }, {
-                        header: '{s name=config/units/bepado_unit_header}bepado unit{/s}',
+                        header: me.snippets.unitHeader,
                         dataIndex: 'bepadoUnit',
                         flex: 1,
                         editor: {

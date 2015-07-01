@@ -37,6 +37,10 @@ class Bepado extends BaseSubscriber
             return;
         }
 
+        //TODO: make marketplaceName dynamic
+        $view->marketplaceName = 'semdemo';
+        $view->marketplaceNetworkUrl = 'http://semdemo.stage.bepado.de';
+
         $view->addTemplateDir($this->Path() . 'Views/');
         $view->extendsTemplate('backend/bepado/menu_entry.tpl');
     }

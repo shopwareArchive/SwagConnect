@@ -12,9 +12,9 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
     layout: 'border',
     width: 1100,
     height:'90%',
-    title: '{s name=window/title}bepado{/s}',
+    title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
 
-    titleTemplate: '{s name=window/title_template}bepado - [text]{/s}',
+    titleTemplate: Ext.String.format('{s name=window/title_template}[0] - [text]{/s}', marketplaceName),
 
     /**
      *
@@ -36,7 +36,7 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
     loadTitle: function(record) {
         var me = this, title, data = {};
         if(!record) {
-            title = '{s name=window/title}bepado{/s}';
+            title = Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName);
         } else {
             title = me.titleTemplate;
             data = record.data;

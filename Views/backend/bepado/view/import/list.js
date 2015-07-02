@@ -15,7 +15,7 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
     },
 
     snippets: {
-        description: '{s name=import/products/description}Der Produktimport erfolgt automatisch, sobald Sie Produkte anderer Händler auf bepado abonnieren und eine Verbindung zu bepado hergestellt worden ist. Sie können die Produkte in diesem Menü nach dem Import aktivieren, deaktivieren oder weiter bearbeiten.{/s}'
+        description: Ext.String.format('{s name=import/products/description}Der Produktimport erfolgt automatisch, sobald Sie Produkte anderer Händler auf [0] abonnieren und eine Verbindung zu [0] hergestellt worden ist. Sie können die Produkte in diesem Menü nach dem Import aktivieren, deaktivieren oder weiter bearbeiten.{/s}', marketplaceName)
     },
 
     initComponent: function() {

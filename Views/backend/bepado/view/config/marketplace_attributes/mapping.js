@@ -58,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Mapping', {
                         dataIndex: 'shopwareAttributeKey',
                         flex: 1
                     }, {
-                        header: '{s name=config/marketplace/bepado_attribute_header}bepado attribute{/s}',
+                        header: Ext.String.format('{s name=config/marketplace/bepado_attribute_header}[0]-Attribut{/s}', marketplaceName),
                         dataIndex: 'attributeKey',
                         flex: 1,
                         editor: {

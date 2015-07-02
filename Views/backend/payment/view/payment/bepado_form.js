@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.payment.view.payment.Bepado', {
 
         result.push({
             xtype: 'checkbox',
-            fieldLabel: '{s name=payment/bepadoAllowed}Allow with bepado{/s}',
+            fieldLabel: Ext.String.format('{s name=payment/bepadoAllowed}Freigegeben für [0]{/s}', marketplaceName),
             inputValue: 1,
             uncheckedValue: 0,
             name: 'attribute[bepadoIsAllowed]'

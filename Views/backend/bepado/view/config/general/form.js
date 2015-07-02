@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
         bepadoAttributeLabel: Ext.String.format('{s name=config/bepado_attribute_label}[0]-Attribut{/s}', marketplaceName),
         alternativeHostLabel: Ext.String.format('{s name=config/bepado_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
-        logLabel: '{s name=config/log_label}Log bepado requests{/s}',
+        logLabel: '{s name=config/log_label}Logging aktivieren{/s}',
         logDescription: Ext.String.format('{s name=config/log_description}[0]-Anfragen mitschreiben{/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
@@ -308,7 +308,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                         anchor: '100%',
                         fieldLabel: me.snippets.alternativeHostLabel,
                         labelWidth: me.defaults.labelWidth,
-                        helpText: '{s name=config/help/debug_host}Use the given host instead of the official bepado host - only for development purpose{/s}'
+                        helpText: Ext.String.format('{s name=config/help/debug_host}Nutze den angegebenen Host statt des [0]-Hosts. Nur für Testzweckecke{/s}', marketplaceName)
                     }, {
                         xtype: 'textfield',
                         name: 'exportDomain',
@@ -452,7 +452,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                     fieldLabel: me.snippets.bepadoAttributeLabel,
                     store: attributeStore,
                     labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/bepado_attribute}Write the source id of each bepado product to this attribute. So you can check for bepado products in risk managment or the shipping cost module by using this attribute.{/s}'
+                    helpText: Ext.String.format('{s name=config/help/bepado_attribute}Schreibe die Quell-Id jedes [0]-Produktes in dieses Attribut. Über dieses Attribut kann im Risiko-Managment oder dem Versandkosten-Modul auf [0]-Produkte geprüft werden.{/s}', marketplaceName)
                 }
             ]
         });
@@ -493,7 +493,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             fieldLabel: me.snippets.shippingCostsLabel,
             store: me.staticPagesStore,
             labelWidth: me.defaults.labelWidth,
-            helpText: '{s name=config/help/bepado_shipping_costs_page}Select which page to display in the detail page of the bepado products.{/s}',
+            helpText: Ext.String.format('{s name=config/help/bepado_shipping_costs_page}[0] fügt seine eigenen Versandkosten-Informationen vor ihrer Versandkosten-Seite an. Wählen Sie hier ihre Standard-Versandkostenseite.{/s}', marketplaceName),
             allowBlank: true,
             forceSelection: true,
             beforeBlur: function () {

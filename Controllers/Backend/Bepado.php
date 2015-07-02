@@ -1348,7 +1348,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         if (!$this->marketplaceSettingsApplier) {
             $this->marketplaceSettingsApplier = new MarketplaceSettingsApplier(
                 $this->getConfigComponent(),
-                Shopware()->Models()
+                Shopware()->Models(),
+                Shopware()->Db()
             );
         }
 

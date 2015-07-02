@@ -7,6 +7,7 @@ use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
 use Shopware\Bepado\Components\Payment\ProductPayments;
 use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
@@ -34,6 +35,8 @@ class BepadoFactory
     private $marketplaceGatway;
 
     private $productTranslationsGateway;
+
+    private $marketplaceSettingsApplier;
 
     public function __construct($version='')
     {
@@ -333,5 +336,18 @@ class BepadoFactory
         }
 
         return $this->productTranslationsGateway;
+    }
+
+    public function getMarketplaceApplier()
+    {
+        if (!$this->marketplaceSettingsApplier) {
+            $this->marketplaceSettingsApplier = new MarketplaceSettingsApplier(
+                $this->getConfigComponent(),
+                Shopware()->Models(),
+                Shopware()->Db()
+            );
+        }
+
+        return $this->marketplaceSettingsApplier;
     }
 }

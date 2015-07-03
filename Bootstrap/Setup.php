@@ -190,6 +190,8 @@ class Setup
              `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `last_update` longtext COLLATE utf8_unicode_ci,
              `last_update_flag` int(11) DEFAULT NULL,
+             `group_id` INT(11) NULL DEFAULT NULL,
+             `is_main_variant` TINYINT(1) NULL DEFAULT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)

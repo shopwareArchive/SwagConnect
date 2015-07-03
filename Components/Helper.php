@@ -550,4 +550,38 @@ class Helper
 
         return $model;
     }
+
+    /**
+     * Returns main article detail by given groupId
+     *
+     * @param $groupId
+     * @param int $mode
+     * @return null|ProductModel
+     */
+    public function getArticleByGroupId($groupId, $mode = Query::HYDRATE_OBJECT)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('ba', 'd'));
+        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->join('ba.articleDetail', 'd');
+        $builder->leftJoin('d.attribute', 'at');
+
+        $builder->where('ba.groupId = :groupId AND ba.isMainVariant = 1');
+        $query = $builder->getQuery();
+
+        $query->setParameter('groupId', $groupId);
+        $result = $query->getResult(
+            $query::HYDRATE_OBJECT,
+            $mode
+        );
+
+        if (isset($result[0])) {
+            /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+            $attribute = $result[0];
+            return $attribute->getArticle();
+        }
+
+        return null;
+    }
+
 }

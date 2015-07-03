@@ -156,13 +156,17 @@ class ProductToShop implements ProductToShopBase
         }
 
         $detail = $this->helper->getArticleDetailModelByProduct($product);
+        $isMainVariant = false;
 
         if ($detail === null) {
-            list($articleId, $detailId) = $this->helper->explodeArticleId($product->sourceId);
-            if (is_null($detailId)) {
-                $model = $this->helper->createProductModel($product);
+            if ($product->groupId > 0) {
+                $model = $this->helper->getArticleByGroupId($product->groupId);
+                if (!$model instanceof \Shopware\Models\Article\Article) {
+                    $model = $this->helper->createProductModel($product);
+                    $isMainVariant = true;
+                }
             } else {
-                $model = $this->helper->getBepadoArticleModel($articleId, $product->shopId);
+                $model = $this->helper->getBepadoArticleModel($product->sourceId, $product->shopId);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
                 }
@@ -194,9 +198,21 @@ class ProductToShop implements ProductToShopBase
             $model->setCategories($categories);
         } else {
             $model = $detail->getArticle();
+            // fix for isMainVariant flag
+            // in bepado attribute table
+            $mainDetail = $model->getMainDetail();
+            if ($detail->getId() === $mainDetail->getId()) {
+                $isMainVariant = true;
+            }
         }
 
         $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;
+        // configure main variant and groupId
+        if ($isMainVariant === true) {
+            $bepadoAttribute->setIsMainVariant(true);
+        }
+        $bepadoAttribute->setGroupId($product->groupId);
+
         $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $bepadoAttribute, $product);
@@ -350,7 +366,7 @@ class ProductToShop implements ProductToShopBase
             $this->manager->flush($detail);
         }
         $this->manager->flush();
-		
+
         $this->manager->clear();
 
         $this->addArticleTranslations($model, $product);

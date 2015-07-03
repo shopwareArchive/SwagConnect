@@ -75,24 +75,22 @@ class ProductTranslator implements ProductTranslatorInterface
     {
         $exportLanguages = $this->config->getConfig('exportLanguages');
         $exportLanguages = $exportLanguages ?: array();
+
         $translations = $this->productTranslationsGateway->getTranslations($productId, $exportLanguages);
 
         $result = array();
-        foreach ($translations as $localeId => $translation) {
-            /** @var \Shopware\Models\Shop\Locale $locale */
-            $locale = $this->getLocaleRepository()->find($localeId);
-            if (!$locale) {
+        foreach ($translations as $shopId => $translation) {
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getShopRepository()->find($shopId);
+            if (!$shop) {
                 continue;
             }
+
+            /** @var \Shopware\Models\Shop\Locale $locale */
+            $locale = $shop->getLocale();
 
             $localeCode = explode('_', $locale->getLocale());
             if (count($localeCode) === 0) {
-                continue;
-            }
-
-            /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $localeId));
-            if (!$shop) {
                 continue;
             }
 

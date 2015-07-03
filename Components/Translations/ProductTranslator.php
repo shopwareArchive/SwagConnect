@@ -88,8 +88,12 @@ class ProductTranslator implements ProductTranslatorInterface
 
             /** @var \Shopware\Models\Shop\Locale $locale */
             $locale = $shop->getLocale();
+            if (strlen($locale->getLocale()) === 0) {
+                continue;
+            }
 
             $localeCode = explode('_', $locale->getLocale());
+
             if (count($localeCode) === 0) {
                 continue;
             }

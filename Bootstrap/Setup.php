@@ -140,7 +140,7 @@ class Setup
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_config` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
-              `value` varchar(255) NOT NULL,
+              `value` TEXT NOT NULL,
               `shopId` int(11) NULL,
               `groupName` varchar(255) NULL,
               PRIMARY KEY (`id`)

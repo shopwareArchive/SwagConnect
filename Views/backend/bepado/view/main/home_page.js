@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
 
     getHTMLContent: function() {
         var me = this;
-        me.htmlTpl = '{$homePageContent|replace:"\n":""|replace:"\r":""}';
+        me.htmlTpl = '{$homePageContent|replace:"\n":""|replace:"\r":""|replace:"bepado":"' + marketplaceName + '"}';
 
         return me.htmlTpl;
     }

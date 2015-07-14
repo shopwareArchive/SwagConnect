@@ -1,5 +1,5 @@
 {s name=text/home/page namespace=backend/bepado/view/main}
-<div class=bepado-home-page>
+<div class=bp-home-page>
     <h3 class=headline>bepado – be part of it!</h3>
     <div class=content>
         <p>

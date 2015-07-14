@@ -29,4 +29,12 @@ use Shopware\Bepado\Components\Struct;
 class MarketplaceSettings extends Struct
 {
     public $marketplaceName;
+
+    public $marketplaceNetworkUrl;
+
+    public $marketplaceIcon;
+
+    public $marketplaceIncomingIcon;
+
+    public $marketplaceLogo;
 }

@@ -76,13 +76,17 @@ class Update
 		$this->migrateSourceIds();
         $this->createMarketplaceAttributesTable();
         $this->renameMarketplaceAttributesTable();
-        $this->cleanUpBepadoSnippets();
 
         if (version_compare($this->version, '1.5.6', '<=')) {
             $this->clearTemplateCache();
         }
 
         $this->removeCloudSearch();
+
+        if (version_compare($this->version, '1.6.5', '<=')) {
+            $this->cleanUpBepadoSnippets();
+            Shopware()->Db()->exec('ALTER TABLE `s_plugin_bepado_config` MODIFY `value` TEXT NOT NULL;');
+        }
 
         return true;
     }
@@ -467,10 +471,7 @@ class Update
 
     private function cleanUpBepadoSnippets()
     {
-        if (version_compare($this->version, '1.6.4', '<=')) {
-            $this->bootstrap->getMarketplaceApplier()->cleanUpMarketplaceSnippets();
-
-            $this->clearTemplateCache();
-        }
+        $this->bootstrap->getMarketplaceApplier()->cleanUpMarketplaceSnippets();
+        $this->clearTemplateCache();
     }
 }

@@ -1,17 +1,17 @@
 /** Plugin home page */
-.bepado-home-page {
+.bp-home-page {
     line-height: 18px;
-    background: url("../images/bepado_plugin_logo.png") no-repeat 78% 20%;
+    /*background: url("../images/bepado_plugin_logo.png") no-repeat 78% 20%;*/
 }
-.bepado-home-page strong { font-weight: bold }
-.bepado-home-page p { margin: 0 0 18px; }
-.bepado-home-page li {
+.bp-home-page strong { font-weight: bold }
+.bp-home-page p { margin: 0 0 18px; }
+.bp-home-page li {
     margin: 0 0 8px;
     background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
     padding: 0 0 0 25px;
 }
-.bepado-home-page .content { width: 50% }
-.bepado-home-page .headline {
+.bp-home-page .content { width: 50% }
+.bp-home-page .headline {
     font-size: 21px;
     line-height: 26px;
     margin: 0 0 18px;

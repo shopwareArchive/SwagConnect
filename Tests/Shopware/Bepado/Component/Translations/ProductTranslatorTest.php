@@ -72,22 +72,25 @@ class ProductTranslatorTest extends BepadoTestHelper
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
         $this->translationGateway->expects($this->any())->method('getTranslations')->with(108, array(2, 176))->willReturn($translations);
 
-        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Locale')->willReturn($this->localeRepository);
-        $this->modelManager->expects($this->at(1))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
 
         $enLocale = new Locale();
         $enLocale->setLocale('en_GB');
-        $this->localeRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enLocale);
         $nlLocale = new Locale();
         $nlLocale->setLocale('nl_NL');
-        $this->localeRepository->expects($this->at(1))->method('find')->with(176)->willReturn($nlLocale);
+
 
         $shop = $this->getMockBuilder('\\Shopware\\Models\\Shop\\Shop')
             ->disableOriginalConstructor()
             ->getMock();
-        $shop->expects($this->at(0))->method('getId')->willReturn(2);
-        $shop->expects($this->at(1))->method('getId')->willReturn(3);
-        $this->shopRepository->expects($this->any())->method('findOneBy')->willReturn($shop);
+
+        $shop->method('getId')
+            ->will($this->onConsecutiveCalls(2, 3));
+
+        $shop->method('getLocale')
+            ->will($this->onConsecutiveCalls($enLocale, $nlLocale));
+
+        $this->shopRepository->expects($this->any())->method('find')->willReturn($shop);
 
         $expected = array(
             'en' => new Translation(
@@ -129,8 +132,14 @@ class ProductTranslatorTest extends BepadoTestHelper
         );
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
         $this->translationGateway->expects($this->any())->method('getTranslations')->with(108, array(2, 176))->willReturn($translations);
-        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Locale')->willReturn($this->localeRepository);
-        $this->localeRepository->expects($this->any())->method('find')->willReturn(null);
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+
+        $locale = new Locale();
+        $locale->setLocale(null);
+        $shop = new \Shopware\Models\Shop\Shop();
+        $shop->setLocale($locale);
+
+        $this->shopRepository->expects($this->any())->method('find')->willReturn($shop);
 
         $this->assertEmpty($this->productTranslator->translate(108, 35));
     }
@@ -153,17 +162,8 @@ class ProductTranslatorTest extends BepadoTestHelper
         );
         $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn(array(2, 176));
         $this->translationGateway->expects($this->any())->method('getTranslations')->with(108, array(2, 176))->willReturn($translations);
-        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Locale')->willReturn($this->localeRepository);
-        $this->modelManager->expects($this->at(1))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
-
-        $enLocale = new Locale();
-        $enLocale->setLocale('en_GB');
-        $this->localeRepository->expects($this->at(0))->method('find')->with(2)->willReturn($enLocale);
-        $nlLocale = new Locale();
-        $nlLocale->setLocale('nl_NL');
-        $this->localeRepository->expects($this->at(1))->method('find')->with(176)->willReturn($nlLocale);
-
-        $this->shopRepository->expects($this->any())->method('findOneBy')->willReturn(null);
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+        $this->shopRepository->expects($this->any())->method('find')->willReturn(null);
 
         $this->assertEmpty($this->productTranslator->translate(108, 35));
     }

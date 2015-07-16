@@ -194,6 +194,19 @@ class Attribute extends ModelEntity
     protected $articleDetail;
 
     /**
+    * @var integer
+    * @ORM\Column(name="group_id", type="integer", nullable=true)
+    */
+    protected $groupId;
+
+    /**
+    * @var boolean
+    * @ORM\Column(name="is_main_variant", type="boolean", nullable=true)
+    */
+    protected $isMainVariant;
+
+
+    /**
      * @param \Shopware\Models\Article\Article $article
      */
     public function setArticle($article)
@@ -483,7 +496,35 @@ class Attribute extends ModelEntity
         return $this->updateShortDescription;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getGroupId()
+    {
+        return $this->groupId;
+    }
 
+    /**
+     * @param mixed $groupId
+     */
+    public function setGroupId($groupId)
+    {
+        $this->groupId = $groupId;
+    }
 
+    /**
+     * @return boolean
+     */
+    public function isIsMainVariant()
+    {
+        return $this->isMainVariant;
+    }
 
+    /**
+     * @param boolean $isMainVariant
+     */
+    public function setIsMainVariant($isMainVariant)
+    {
+        $this->isMainVariant = $isMainVariant;
+    }
 }

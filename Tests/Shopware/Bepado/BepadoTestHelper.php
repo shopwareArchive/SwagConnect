@@ -161,7 +161,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function getVariants()
     {
-        $number = rand(1, 999999999);
+        $number = $groupId = rand(1, 999999999);
         $color = array(
             array('de' => 'Weiss-Blau' . $number, 'en' => 'White-Blue'),
             array('de' => 'Weiss-Rot' . $number, 'en' => 'White-Red'),
@@ -173,6 +173,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $mainVariant = $this->getProduct(true);
         $mainVariantColor = array_pop($color);
         $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
+        $mainVariant->groupId = $groupId;
         $variants[] = $mainVariant;
 
         //add translations
@@ -191,6 +192,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $variant->ean = $variantSourceId;
             $variantColor = array_pop($color);
             $variant->variant['Farbe'] = $variantColor['de'];
+            $variant->groupId = $groupId;
             $variant->translations = array(
                 'en' => new Translation(array(
                    'title' =>  'MassImport #'. $variantSourceId . ' EN',

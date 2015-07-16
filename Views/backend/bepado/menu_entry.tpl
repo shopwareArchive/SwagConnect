@@ -7,9 +7,9 @@
     .bepado-icon-green {
         background:url({$marketplaceIncomingIcon}) no-repeat 0 0 !important;
     }
-    .bp-home-page {
-        background: url({$marketplaceLogo}) no-repeat 78% 20% !important;
-    }
+    {*.bp-home-page .logo {*}
+        {*background: url({$marketplaceLogo}) no-repeat 78% 20% !important;*}
+    {*}*}
 </style>
 {/block}
 
@@ -17,5 +17,6 @@
     <script type="text/javascript">
         var marketplaceName = '{$marketplaceName}';
         var marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
+        var marketplaceLogo = '{$marketplaceLogo}';
     </script>
 {/block}

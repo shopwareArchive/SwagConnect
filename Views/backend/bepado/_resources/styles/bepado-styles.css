@@ -1,7 +1,6 @@
 /** Plugin home page */
 .bp-home-page {
     line-height: 18px;
-    /*background: url("../images/bepado_plugin_logo.png") no-repeat 78% 20%;*/
 }
 .bp-home-page strong { font-weight: bold }
 .bp-home-page p { margin: 0 0 18px; }
@@ -15,6 +14,12 @@
     font-size: 21px;
     line-height: 26px;
     margin: 0 0 18px;
+}
+
+.bp-home-page .logo {
+    float: right;
+    max-width: 380px;
+    max-height: 350px;
 }
 
 /** General info text */

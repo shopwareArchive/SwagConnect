@@ -9,7 +9,7 @@ before_script:
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
     - cd ..
     - cd /tmp/shopware
-    - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware
+    - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-continuous
     - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Local/Backend
     - cd /tmp/shopware
     - ls engine/Shopware/Plugins/Local/Backend

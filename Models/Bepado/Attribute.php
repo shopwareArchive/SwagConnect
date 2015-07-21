@@ -205,6 +205,18 @@ class Attribute extends ModelEntity
     */
     protected $isMainVariant;
 
+    /**
+     * @var string $purchasePriceHash
+     *
+     * @ORM\Column(name="purchase_price_hash", type="string", nullable=false)
+     */
+    protected $purchasePriceHash;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="offer_valid_until", type="integer", nullable=false)
+     */
+    protected $offerValidUntil;
 
     /**
      * @param \Shopware\Models\Article\Article $article
@@ -526,5 +538,37 @@ class Attribute extends ModelEntity
     public function setIsMainVariant($isMainVariant)
     {
         $this->isMainVariant = $isMainVariant;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOfferValidUntil()
+    {
+        return $this->offerValidUntil;
+    }
+
+    /**
+     * @param int $offerValidUntil
+     */
+    public function setOfferValidUntil($offerValidUntil)
+    {
+        $this->offerValidUntil = $offerValidUntil;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPurchasePriceHash()
+    {
+        return $this->purchasePriceHash;
+    }
+
+    /**
+     * @param string $purchasePriceHash
+     */
+    public function setPurchasePriceHash($purchasePriceHash)
+    {
+        $this->purchasePriceHash = $purchasePriceHash;
     }
 }

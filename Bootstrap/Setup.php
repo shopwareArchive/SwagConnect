@@ -192,6 +192,8 @@ class Setup
              `last_update_flag` int(11) DEFAULT NULL,
              `group_id` INT(11) NULL DEFAULT NULL,
              `is_main_variant` TINYINT(1) NULL DEFAULT NULL,
+             `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+             `offer_valid_until` int(10) NOT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)

@@ -259,6 +259,10 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setFixedPrice($product->fixedPrice);
         $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
         $bepadoAttribute->setLastUpdateFlag($flag);
+        // store purchasePriceHash and offerValidUntil
+        $bepadoAttribute->setPurchasePriceHash($product->purchasePriceHash);
+        $bepadoAttribute->setOfferValidUntil($product->offerValidUntil);
+
         $detail->setInStock($product->availability);
         $detail->setEan($product->ean);
         $detail->setShippingTime($product->deliveryWorkDays);

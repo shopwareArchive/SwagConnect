@@ -191,11 +191,6 @@ class DependencyResolver
     protected $paymentStatusService;
 
     /**
-     * @var ProductPayments
-     */
-    protected $productPayments;
-
-    /**
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
@@ -208,8 +203,7 @@ class DependencyResolver
         ErrorHandler $errorHandler,
         $apiKey,
         HttpClient\RequestSigner $requestSigner = null,
-        $pluginSoftwareVersion = null,
-        ProductPayments $productPayments = null
+        $pluginSoftwareVersion = null
     ) {
         $this->gateway = $gateway;
         $this->toShop = $toShop;
@@ -230,7 +224,6 @@ class DependencyResolver
 
         $this->apiKey = $apiKey;
         $this->pluginSoftwareVersion = $pluginSoftwareVersion;
-        $this->productPayments = $productPayments ?: new NoopProductPayments();
     }
 
     /**
@@ -330,7 +323,8 @@ class DependencyResolver
                     $this->getLogger(),
                     $this->gateway,
                     $this->getShippingCostsService(),
-                    $this->getVerificator()
+                    $this->getVerificator(),
+                    $this->apiKey
                 )
             );
 
@@ -392,6 +386,8 @@ class DependencyResolver
                         new Struct\Verificator\Change\InterShopUpdate(),
                     'Bepado\\SDK\\Struct\\Change\\InterShop\\Delete' =>
                         new Struct\Verificator\Change\InterShopDelete(),
+                    'Bepado\\SDK\\Struct\\Change\\InterShop\\Unavailable' =>
+                        new Struct\Verificator\Change\InterShopUnavailable(),
                     'Bepado\\SDK\\Struct\\ShopConfiguration' =>
                         new Struct\Verificator\ShopConfiguration(),
                     'Bepado\\SDK\\Struct\\Reservation' =>
@@ -686,7 +682,7 @@ class DependencyResolver
     {
         if ($this->paymentStatusService === null) {
             $this->paymentStatusService = new Service\PaymentStatus(
-                $this->productPayments,
+                $this->fromShop,
                 $this->getGateway()
             );
         }

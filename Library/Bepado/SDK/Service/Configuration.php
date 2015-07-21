@@ -57,7 +57,6 @@ class Configuration
                         'displayName'      => $configuration['shopDisplayName'],
                         'url'              => $configuration['shopUrl'],
                         'key'              => $configuration['key'],
-                        'priceGroupMargin' => $configuration['priceGroupMargin'],
                     )
                 )
             );

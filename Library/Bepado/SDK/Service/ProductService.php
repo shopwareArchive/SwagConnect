@@ -150,12 +150,22 @@ class ProductService
         $this->toShop->startTransaction();
         foreach ($changes as $change) {
             switch (true) {
-                case $change instanceof Change\ToShop\InsertOrUpdate:
+                case ($change instanceof Change\ToShop\InsertOrUpdate):
                     $this->toShop->insertOrUpdate($change->product);
                     break;
-                case $change instanceof Change\ToShop\Delete:
+
+                case ($change instanceof Change\ToShop\Availability):
+                    $this->toShop->changeAvailability($change->shopId, $change->sourceId, (int)$change->availability);
+                    break;
+
+                case ($change instanceof Change\ToShop\Update):
+                    $this->toShop->update($change->shopId, $change->sourceId, $change->product);
+                    break;
+
+                case ($change instanceof Change\ToShop\Delete):
                     $this->toShop->delete($change->shopId, $change->sourceId);
                     break;
+
                 default:
                     throw new \RuntimeException("Invalid change operation: $change");
             }

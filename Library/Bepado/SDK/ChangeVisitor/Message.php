@@ -42,18 +42,27 @@ class Message extends ChangeVisitor
             $this->verificator->verify($change);
 
             switch (true) {
-                case $change instanceof Struct\Change\InterShop\Update:
-                    $messages = array_merge(
-                        $messages,
-                        $this->visitUpdate($change)
-                    );
+                case ($change instanceof Struct\Change\InterShop\Update):
+                case ($change instanceof Struct\Change\InterShop\Unavailable):
+                    $messages[] = new Struct\Message(array(
+                        'message' => 'Availability of product %product changed to %availability.',
+                        'values' => array(
+                            'product' => $change->sourceId,
+                            'availability' => 0,
+                        )
+                    ));
                     break;
-                case $change instanceof Struct\Change\InterShop\Delete:
-                    $messages = array_merge(
-                        $messages,
-                        $this->visitDelete($change)
-                    );
+
+                case ($change instanceof Struct\Change\InterShop\Delete):
+                    $messages[] = new Struct\Message(array(
+                        'message' => 'Product %product does not exist anymore.',
+                        'values' => array(
+                            'product' => $change->sourceId
+                        )
+                    ));
                     break;
+
+
                 default:
                     throw new \RuntimeException(
                         'No visitor found for ' . get_class($change)
@@ -62,79 +71,5 @@ class Message extends ChangeVisitor
         }
 
         return $messages;
-    }
-
-    private function detectAvailabilityChange(Struct\Change\InterShop\Update $change)
-    {
-        return
-            ($change->product->availability !== $change->oldProduct->availability) ||
-            ($change->product->availability === 0)
-        ;
-    }
-
-    /**
-     * Visit update change
-     *
-     * Note: Why no check on purchase price here? The Change\Message visitor
-     * is only used by the buyer shop to translate changes into error messages.
-     * When the seller shop sees a purchase price change, he will reduce
-     * the availability to "0", hence triggering the availability error message.
-     *
-     * With the current setup the purchase price check would be impossible here,
-     * because we don't have access to the price group margin.
-     *
-     * @param Struct\Change\InterShop\Update $change
-     * @return void
-     */
-    protected function visitUpdate(Struct\Change\InterShop\Update $change)
-    {
-        $messages = array();
-
-        if ($change->product->availability !== $change->oldProduct->availability ||
-            $change->product->availability === 0) {
-            $messages[] = new Struct\Message(
-                array(
-                    'message' => 'Availability of product %product changed to %availability.',
-                    'values' => array(
-                        'product' => $change->product->title,
-                        'availability' => $change->product->availability,
-                    ),
-                )
-            );
-        }
-
-        if ($change->product->price !== $change->oldProduct->price) {
-            $messages[] = new Struct\Message(
-                array(
-                    'message' => 'Price of product %product changed to %price.',
-                    'values' => array(
-                        'product' => $change->product->title,
-                        'price' => round($change->product->price * (1 + $change->product->vat), 2),
-                    ),
-                )
-            );
-        }
-
-        return $messages;
-    }
-
-    /**
-     * Visit delete change
-     *
-     * @param Struct\Change\InterShop\Delete $change
-     * @return void
-     */
-    protected function visitDelete(Struct\Change\InterShop\Delete $change)
-    {
-        return array(
-            new Struct\Message(
-                array(
-                    'message' => 'Product %product does not exist anymore.',
-                    'values' => array(
-                        'product' => $change->sourceId
-                    ),
-                )
-            )
-        );
     }
 }

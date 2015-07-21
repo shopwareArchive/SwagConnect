@@ -5,22 +5,17 @@
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 
-namespace Bepado\SDK\Struct\Change\FromShop;
+namespace Bepado\SDK\Struct\Change\InterShop;
 
 use Bepado\SDK\Struct\Change;
+use Bepado\SDK\Struct\Product;
 
 /**
- * Availability change struct
+ * Product unavailable change struct
  *
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  * @api
  */
-class Availability extends Change
+class Unavailable extends Change
 {
-    /**
-     * New availability for product
-     *
-     * @var int
-     */
-    public $availability;
-} 
+}

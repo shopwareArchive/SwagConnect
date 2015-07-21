@@ -215,7 +215,7 @@ class ConfigTest extends BepadoTestHelper
         $sql = 'SELECT * FROM s_plugin_bepado_config WHERE groupName = ?';
         $result = Shopware()->Db()->fetchAll($sql, array('marketplace'));
 
-        $this->assertEquals(4, count($result));
+        $this->assertEquals(5, count($result));
 
         $this->assertEquals('semdemo', $result[0]['value']);
     }

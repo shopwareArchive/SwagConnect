@@ -617,4 +617,15 @@ final class SDK
     {
         return $this->dependencies->getSocialNetworkService()->getMarketplaceProductAttributes();
     }
+
+
+    /**
+     * Returns array with marketplace settings
+     * as key => value
+     * @return array
+     */
+    public function getMarketplaceSettings()
+    {
+        return $this->dependencies->getSocialNetworkService()->getMarketplaceSettings();
+    }
 }

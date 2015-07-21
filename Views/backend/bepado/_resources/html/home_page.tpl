@@ -1,6 +1,7 @@
 {s name=text/home/page namespace=backend/bepado/view/main}
-<div class=bepado-home-page>
+<div class=bp-home-page>
     <h3 class=headline>bepado – be part of it!</h3>
+    <div class="logo"><img style="width: 100%; height: 100%" src="marketplaceLogo" /></div>
     <div class=content>
         <p>
         bepado ist die erste soziale B2B-Handelsplattform der Welt. Ziel des Portals ist die Vernetzung von

@@ -75,14 +75,12 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
      */
     infoColumnRenderer: function(value, metaData, record) {
         var me = this,
-            title,
             result = me.callOverridden(arguments);
 
         var style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
         if (record.get('bepado')) {
-            title = 'bepado';
-            result = result + '<div  title="' + title + '" class="bepado-icon" ' + style + '>&nbsp;</div>';
+            result = result + '<div  title="' + marketplaceName + '" class="bepado-icon" ' + style + '>&nbsp;</div>';
         }
 
         return result;
@@ -109,7 +107,7 @@ Ext.define('Shopware.apps.ArticleList.view.main.Window-Bepado', {
         try {
             radioGroup = panel.items.items[0];
             radioGroup.add(
-                Ext.create('Ext.form.field.Radio', { boxLabel: 'bepado', name: 'filter', inputValue: 'bepado' })
+                Ext.create('Ext.form.field.Radio', { boxLabel: marketplaceName, name: 'filter', inputValue: 'bepado' })
             );
         }catch(e) {
             return panel;

@@ -34,7 +34,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
                     clicksToEdit: 1
                 }],
                 columns: [{
-                    text: '{s name=mapping/columns/bepado-category}bepado Category{/s}',
+                    text: Ext.String.format('{s name=mapping/columns/bepado-category}[0] Kategorie{/s}', marketplaceName),
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
@@ -102,7 +102,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
             }, {
                 iconCls: 'sprite-folder-tree',
                 action: 'importCategories',
-                tooltip: '{s name=mapping/options/importCategories}Import categories from bepado{/s}',
+                tooltip: Ext.String.format('{s name=mapping/options/importCategories}Kategorien aus [0] importieren{/s}', marketplaceName),
                 handler: function (view, rowIndex, colIndex, item, opts, record) {
                     me.fireEvent('importCategories', record);
                 },

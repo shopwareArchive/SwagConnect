@@ -38,8 +38,9 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
 
                 if (value) {
                     if (value == 'remote') {
+                        var orderDescription = Ext.String.format('{s name=order/fromRemote}Diese Bestellung enthält [0]-Produkte eines Fremdshops{/s}', marketplaceName);
                         result = '<div  title="" class="bepado-icon" ' + style + '>&nbsp;</div>';
-                        metaData.tdAttr = 'data-qtip="{s name=order/fromRemote}This order contains remote bepado products{/s}"';
+                        metaData.tdAttr = 'data-qtip="' + orderDescription + '"';
                     } else {
                         result = '<div  title="" class="bepado-icon-green" ' + style + '>&nbsp;</div>';
                         metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('bepadoShop') + '"';

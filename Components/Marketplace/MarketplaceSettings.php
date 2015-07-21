@@ -1,6 +1,7 @@
+<?php
 /**
  * Shopware 4.0
- * Copyright © 2012 shopware AG
+ * Copyright © 2013 shopware AG
  *
  * According to our dual licensing model, this program can be used either
  * under the terms of the GNU Affero General Public License, version 3,
@@ -20,30 +21,20 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+namespace Shopware\Bepado\Components\Marketplace;
 
-//{namespace name="backend/bepado/view/main"}
-//{block name="backend/payment/view/payment/formpanel" append}
-Ext.define('Shopware.apps.payment.view.payment.Bepado', {
-    override: 'Shopware.apps.Payment.view.payment.FormPanel',
 
-    /**
-     * This function creates form items
-     * @return Array
-     */
-    getItems: function(){
-        var me = this, result;
+use Shopware\Bepado\Components\Struct;
 
-        result = me.callParent(arguments);
+class MarketplaceSettings extends Struct
+{
+    public $marketplaceName;
 
-        result.push({
-            xtype: 'checkbox',
-            fieldLabel: Ext.String.format('{s name=payment/bepadoAllowed}Freigegeben für [0]{/s}', marketplaceName),
-            inputValue: 1,
-            uncheckedValue: 0,
-            name: 'attribute[bepadoIsAllowed]'
-        });
+    public $marketplaceNetworkUrl;
 
-        return result;
-    }
-});
-//{/block}
+    public $marketplaceIcon;
+
+    public $marketplaceLogo;
+
+    public $isDefault;
+}

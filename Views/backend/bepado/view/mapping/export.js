@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
 
     snippets: {
         emptyMappingMessage: '{s name=mapping/message/please_assign_category}Bitte Kategorie zuordnen{/s}',
-        description: '{s name=mapping/message/export/description}Legen Sie hier fest in welchen Kategorien Ihre Produkte auf bepado angezeigt werden sollen.{/s}'
+        description: Ext.String.format('{s name=mapping/message/export/description}Legen Sie hier fest in welchen Kategorien Ihre Produkte auf [0] angezeigt werden sollen.{/s}', marketplaceName)
     },
     
     initComponent: function() {
@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                     dataIndex: 'text',
                     text: '{s name=mapping/columns/shopware-category}Shopware Category{/s}'
                 },{
-                    text: '{s name=mapping/columns/bepado-category}bepado Category{/s}',
+                    text: Ext.String.format('{s name=mapping/columns/bepado-category}[0] Kategorie{/s}', marketplaceName),
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {

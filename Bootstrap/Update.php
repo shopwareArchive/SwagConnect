@@ -84,6 +84,11 @@ class Update
         $this->removeCloudSearch();
         $this->createGroupAndMainVariantFlag();
 
+        if (version_compare($this->version, '1.6.5', '<=')) {
+            $this->cleanUpBepadoSnippets();
+            Shopware()->Db()->exec('ALTER TABLE `s_plugin_bepado_config` MODIFY `value` TEXT NOT NULL;');
+        }
+
         return true;
     }
 
@@ -473,5 +478,11 @@ class Update
             ";
             Shopware()->Db()->exec($sql);
         }
+    }
+
+    private function cleanUpBepadoSnippets()
+    {
+        $this->bootstrap->getMarketplaceApplier()->cleanUpMarketplaceSnippets();
+        $this->clearTemplateCache();
     }
 }

@@ -20,10 +20,11 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
         }
 
         style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
+        var fixedPriceMessage = Ext.String.format('{s name="bepadoFixedPriceMessage"}Für dieses [0]-Produkt wurde die Preisbindung vom Anbieter aktiviert. Aus diesem Grund kann der Preis für dieses Produkt nicht verändert werden.{/s}', marketplaceName);
 
         me.bepadoLabel = Ext.create('Ext.form.Label', {
             hidden: true,
-            html: '<div title="" class="bepado-icon" ' + style + '>&nbsp;</div>{s name="bepadoFixedPriceMessage"}The supplier of this product has enabled the fixed price feature. For this reason you will not be able to edit the price.{/s}'
+            html: '<div title="" class="bepado-icon" ' + style + '>&nbsp;</div>' + fixedPriceMessage
         });
 
         return [
@@ -113,7 +114,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
         columns.splice(-1, 0, {
             xtype: 'numbercolumn',
-            header: "{s name=detail/price/bepadoPrice}bepado price{/s}",
+            header: Ext.String.format("{s name=detail/price/bepadoPrice}[0] Preis{/s}", marketplaceName),
             renderer: function (value, arg, record) {
                 if (value != undefined) {
                     return Ext.util.Format.number(value, '0.00');

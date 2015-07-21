@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.6.5",
+    "currentVersion": "1.6.6",
     "changelog": {
         "de": {
+			"1.6.6": "New: Marketplace support",
             "1.6.5": "Fix: Variants import",
             "1.6.4": "New: Responsive design",
             "1.6.3": "New: Export translated products",
@@ -30,7 +31,9 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
-            "1.6.5": "Fix: Variants import",
+			"1.6.6": "New: Marketplace support",
+			"1.6.5": "Fix: Variants import",
+            "1.6.4": "New: Responsive design",
             "1.6.3": "New: Export translated products",
             "1.6.2": "Fix: Marketplace attributes db structure",
             "1.6.1": "Fix: Export all product",

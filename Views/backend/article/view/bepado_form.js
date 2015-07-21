@@ -177,7 +177,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             store: me.getShippingGroupStore(),
             displayField: 'groupName',
             valueField: 'groupName',
-            emptyText: 'bepado default'
+            emptyText: Ext.String.format('{s name=config/shipping_groups/shipping_group_empty_text}[0] default{/s}', marketplaceName)
         })
     },
 

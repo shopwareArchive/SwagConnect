@@ -39,7 +39,7 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
         result = me.callParent(arguments);
 
         me.registerAdditionalTab({
-            title: '{s name=window/bepado_tab}bepado{/s}',
+            title: Ext.String.format('{s name=window/bepado_tab}[0]{/s}', marketplaceName),
             contentFn: me.createBepadoTab,
             articleChangeFn: me.articleChangeBepado,
             tabConfig: {

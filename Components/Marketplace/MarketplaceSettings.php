@@ -35,4 +35,6 @@ class MarketplaceSettings extends Struct
     public $marketplaceIcon;
 
     public $marketplaceLogo;
+
+    public $isDefault;
 }

@@ -63,12 +63,14 @@ class MarketplaceSettingsApplier
      */
     public function apply(MarketplaceSettings $settings)
     {
-        $this->db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
-        $this->db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE name="bepado"', array($settings->marketplaceName));
-        $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Bepado"', array($settings->marketplaceName));
-        $this->db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
-        $this->configComponent->setMarketplaceSettings($settings);
-        $this->cleanUpMarketplaceSnippets();
+        if (!$settings->isDefault) {
+            $this->db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
+            $this->db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE name="bepado"', array($settings->marketplaceName));
+            $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Bepado"', array($settings->marketplaceName));
+            $this->db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
+            $this->configComponent->setMarketplaceSettings($settings);
+            $this->cleanUpMarketplaceSnippets();
+        }
     }
 
     public function cleanUpMarketplaceSnippets()

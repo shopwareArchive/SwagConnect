@@ -323,12 +323,15 @@ class Shopping
         $this->productToShop->startTransaction();
         foreach ($changes as $change) {
             switch (true) {
-                case $change instanceof Struct\Change\InterShop\Update:
-                    $this->productToShop->insertOrUpdate($change->product);
+                case ($change instanceof Struct\Change\InterShop\Update):
+                case ($change instanceof Struct\Change\InterShop\Unavailable):
+                    $this->productToShop->changeAvailability($change->shopId, $change->sourceId, 0);
                     break;
-                case $change instanceof Struct\Change\InterShop\Delete:
+
+                case ($change instanceof Struct\Change\InterShop\Delete):
                     $this->productToShop->delete($change->shopId, $change->sourceId);
                     break;
+
                 default:
                     throw new \RuntimeException(
                         'Invalid change class provided: ' . get_class($change)

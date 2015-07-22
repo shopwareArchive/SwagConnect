@@ -44,6 +44,32 @@ interface ProductToShop
     public function delete($shopId, $sourceId);
 
     /**
+     * Update basic product details.
+     *
+     * @param string $shopId
+     * @param string $sourceId
+     * @param ProductUpdate $product
+     * @return void
+     */
+    public function update($shopId, $sourceId, Struct\ProductUpdate $product);
+
+    /**
+     * Change the availability of a product with a given shopId and sourceId.
+     *
+     * Only the combination of both identifies a product uniquely. Do NOT
+     * update products just by their sourceId.
+     *
+     * You might receive change requests for products, which are not available
+     * in your shop. Just ignore them.
+     *
+     * @param string $shopId
+     * @param string $sourceId
+     * @param int $availability
+     * @return void
+     */
+    public function changeAvailability($shopId, $sourceId, $availability);
+
+    /**
      * Start transaction
      *
      * Starts a transaction, which includes all insertOrUpdate and delete

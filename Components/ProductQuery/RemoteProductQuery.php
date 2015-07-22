@@ -46,6 +46,8 @@ class RemoteProductQuery extends BaseProductQuery
             'a.id as localId',
             'at.shopId as shopId',
             'at.sourceId as sourceId',
+            'at.purchasePriceHash as purchasePriceHash',
+            'at.offerValidUntil as offerValidUntil',
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',

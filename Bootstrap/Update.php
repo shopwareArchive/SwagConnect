@@ -89,6 +89,8 @@ class Update
             Shopware()->Db()->exec('ALTER TABLE `s_plugin_bepado_config` MODIFY `value` TEXT NOT NULL;');
         }
 
+		$this->createPurchasePriceHash();
+
         return true;
     }
 
@@ -484,5 +486,17 @@ class Update
     {
         $this->bootstrap->getMarketplaceApplier()->cleanUpMarketplaceSnippets();
         $this->clearTemplateCache();
+    }
+
+	public function createPurchasePriceHash()
+    {
+        if (version_compare($this->version, '1.6.6', '<=')) {
+            Shopware()->Db()->exec(
+                'ALTER TABLE `s_plugin_bepado_items`
+                    ADD COLUMN `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                    ADD COLUMN `offer_valid_until` int(10) NOT NULL
+                ;'
+            );
+        }
     }
 }

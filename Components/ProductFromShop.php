@@ -32,6 +32,7 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
+use Bepado\SDK\Struct\PaymentStatus;
 
 /**
  * The interface for products exported *to* bepado *from* the local shop
@@ -281,5 +282,10 @@ class ProductFromShop implements ProductFromShopBase
             'phone' => $address->phone,
             'country' => $country
         );
+    }
+
+    public function updatePaymentStatus(PaymentStatus $status)
+    {
+        throw new \Exception('Not implemented yet!');
     }
 }

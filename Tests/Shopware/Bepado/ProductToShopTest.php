@@ -251,5 +251,27 @@ class ProductToShopTest extends BepadoTestHelper
 
         $this->assertEquals(2, $attributesCount);
     }
+
+    public function testInsertPurchasePriceHash()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+
+        $articlesCount = Shopware()->Db()->query(
+            'SELECT COUNT(s_articles.id)
+              FROM s_plugin_bepado_items
+              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
+              WHERE s_plugin_bepado_items.purchase_price_hash = :purchasePriceHash
+              AND s_plugin_bepado_items.offer_valid_until = :offerValidUntil
+              AND s_plugin_bepado_items.source_id = :sourceId',
+            array(
+                'purchasePriceHash' => $product->purchasePriceHash,
+                'offerValidUntil' => $product->offerValidUntil,
+                'sourceId' => $product->sourceId,
+            )
+        )->fetchColumn();
+
+        $this->assertEquals(1, $articlesCount);
+    }
 }
  

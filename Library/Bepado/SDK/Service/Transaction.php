@@ -62,6 +62,11 @@ class Transaction
     protected $verificator;
 
     /**
+     * @var string
+     */
+    protected $apiKey;
+
+    /**
      * COnstruct from gateway
      *
      * @param ProductFromShop $fromShop
@@ -75,7 +80,8 @@ class Transaction
         Logger $logger,
         Gateway\ShopConfiguration $shopConfiguration,
         ShippingCosts $shippingCostsService,
-        VerificatorDispatcher $verificator
+        VerificatorDispatcher $verificator,
+        $apiKey
     ) {
         $this->fromShop = $fromShop;
         $this->reservations = $reservations;
@@ -83,6 +89,7 @@ class Transaction
         $this->shopConfiguration = $shopConfiguration;
         $this->shippingCostsService = $shippingCostsService;
         $this->verificator = $verificator;
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -97,68 +104,55 @@ class Transaction
      * @param Struct\ProductList $products
      * @return mixed
      */
-    public function checkProducts(Struct\ProductList $products, $buyerShopId)
+    public function checkProducts(Struct\ProductList $remoteProducts, $buyerShopId)
     {
-        $this->verificator->verify($products);
+        $this->verificator->verify($remoteProducts);
 
-        if (count($products->products) === 0) {
+        if (count($remoteProducts->products) === 0) {
             throw new \InvalidArgumentException(
                 "ProductList is not allowed to be empty in remote Transaction#checkProducts()"
             );
         }
 
-        $currentProducts = $this->getCurrentProducts($products);
+        $localProducts = $this->getLocalProducts($remoteProducts);
 
         $myShopId = $this->shopConfiguration->getShopId();
-        $buyerShopConfig = $this->shopConfiguration->getShopConfiguration($buyerShopId);
 
         $changes = array();
-        foreach ($products->products as $product) {
-            if (!isset($currentProducts[$product->sourceId])) {
+        foreach ($remoteProducts->products as $remoteProduct) {
+            if (!isset($localProducts[$remoteProduct->sourceId])) {
                 // Product does not exist any more
                 $changes[] = new Struct\Change\InterShop\Delete(
                     array(
-                        'sourceId' => $product->sourceId,
+                        'sourceId' => $remoteProduct->sourceId,
                     )
                 );
 
                 continue;
             }
 
-            $current = $currentProducts[$product->sourceId];
-            $current->shopId = $myShopId;
+            $localProduct = $localProducts[$remoteProduct->sourceId];
+            $localProduct->shopId = $myShopId;
 
-            if ($this->purchasePriceHasChanged($current, $product, $buyerShopConfig->priceGroupMargin)) {
+            if ($this->purchasePriceHashInvalid($remoteProduct)) {
 
-                $currentNotAvailable = clone $current;
+                $currentNotAvailable = clone $localProduct;
                 $currentNotAvailable->availability = 0;
-                $currentNotAvailable->purchasePrice = $this->discountedPurchasePrice(
-                    $current,
-                    $buyerShopConfig->priceGroupMargin
-                );
 
-                $changes[] = new Struct\Change\InterShop\Update(
+                $changes[] = new Struct\Change\InterShop\Unavailable(
                     array(
-                        'sourceId' => $product->sourceId,
-                        'product' => $currentNotAvailable,
-                        'oldProduct' => $product,
+                        'sourceId' => $remoteProduct->sourceId,
+                        'shopId' => $myShopId,
                     )
                 );
 
-            } elseif ($this->priceHasChanged($current, $product) ||
-                $this->availabilityHasChanged($current, $product)) {
-
-                $current->purchasePrice = $this->discountedPurchasePrice(
-                    $current,
-                    $buyerShopConfig->priceGroupMargin
-                );
+            } elseif ($this->fixedPriceChanged($localProduct, $remoteProduct) || $this->productUnavailable($localProduct)) {
 
                 // Price or availability changed
-                $changes[] = new Struct\Change\InterShop\Update(
+                $changes[] = new Struct\Change\InterShop\Unavailable(
                     array(
-                        'sourceId' => $product->sourceId,
-                        'product' => $current,
-                        'oldProduct' => $product,
+                        'sourceId' => $remoteProduct->sourceId,
+                        'shopId' => $myShopId,
                     )
                 );
             }
@@ -172,9 +166,9 @@ class Transaction
      *
      * @return array<string, \Bepado\SDK\Struct\Product>
      */
-    private function getCurrentProducts($products)
+    private function getLocalProducts($products)
     {
-        $currentProducts = $this->fromShop->getProducts(
+        $localProducts = $this->fromShop->getProducts(
             array_map(
                 function ($product) {
                     return $product->sourceId;
@@ -185,40 +179,47 @@ class Transaction
 
         $indexedProducts = array();
 
-        foreach ($currentProducts as $product) {
+        foreach ($localProducts as $product) {
             $indexedProducts[$product->sourceId] = $product;
         }
 
         return $indexedProducts;
     }
 
-    private function discountedPurchasePrice($current, $priceGroupMargin)
+    private function purchasePriceHashInvalid($remoteProduct)
     {
-        $discount = ($current->purchasePrice * $priceGroupMargin) / 100;
-        return $current->purchasePrice - $discount;
+        $acceptableHash = PurchasePriceSecurity::hash(
+            $remoteProduct->purchasePrice,
+            $remoteProduct->offerValidUntil,
+            $this->apiKey
+        );
+
+        // Hash is invalid
+        if ($acceptableHash !== $remoteProduct->purchasePriceHash) {
+            return true;
+        }
+
+        // Offer Is Not Valid Anymore, bepado platform needs to update hashes and validity regularly.
+        if ($remoteProduct->offerValidUntil < time()) {
+            return true;
+        }
+
+        return false;
     }
 
-    private function purchasePriceHasChanged($current, $product, $priceGroupMargin)
+    private function fixedPriceChanged($localProduct, $remoteProduct)
     {
-        return !$this->floatsEqual(
-            $this->discountedPurchasePrice($current, $priceGroupMargin),
-            $product->purchasePrice
-        );
+        return ($localProduct->fixedPrice && ! $this->floatsEqual($localProduct->price, $remoteProduct->price));
+    }
+
+    private function productUnavailable($localProduct)
+    {
+        return $localProduct->availability <= 0;
     }
 
     private function floatsEqual($a, $b)
     {
         return abs($a - $b) < 0.000001;
-    }
-
-    private function priceHasChanged($current, $product)
-    {
-        return ($current->fixedPrice && ! $this->floatsEqual($current->price, $product->price));
-    }
-
-    private function availabilityHasChanged($current, $product)
-    {
-        return $current->availability <= 0;
     }
 
     /**

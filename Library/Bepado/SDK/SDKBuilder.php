@@ -50,11 +50,6 @@ class SDKBuilder
     private $softwareVersion;
 
     /**
-     * @var \Bepado\SDK\ProductPayments
-     */
-    private $productPayments;
-
-    /**
      * @param string $apiKey
      * @return \Bepado\SDK\SDKBuilder
      */
@@ -165,14 +160,6 @@ class SDKBuilder
     }
 
     /**
-     * @param mixed $productPayments
-     */
-    public function setProductPayments(ProductPayments $productPayments)
-    {
-        $this->productPayments = $productPayments;
-    }
-
-    /**
      * @return mixed
      */
     public function getProductPayments()
@@ -204,8 +191,7 @@ class SDKBuilder
             $this->productFromShop,
             $this->errorHandler,
             null,
-            $this->softwareVersion,
-            $this->productPayments
+            $this->softwareVersion
         );
     }
 }

@@ -89,6 +89,8 @@ class ProductQueryTest extends BepadoTestHelper
         $this->assertEquals($newProduct->title, $product->title);
         $this->assertEquals($newProduct->price, $product->price);
         $this->assertEquals($newProduct->purchasePrice, $product->purchasePrice);
+        $this->assertEquals($newProduct->purchasePriceHash, $product->purchasePriceHash);
+        $this->assertEquals($newProduct->offerValidUntil, $product->offerValidUntil);
 
     }
 

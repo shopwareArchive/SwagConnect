@@ -9,6 +9,7 @@ namespace Bepado\SDK\ErrorHandler;
 
 use Bepado\SDK\ErrorHandler;
 use Bepado\SDK\Struct;
+use Bepado\SDK\Exception\RemoteException;
 
 /**
  * Base class for error handler implementations
@@ -25,7 +26,7 @@ class Exception extends ErrorHandler
      */
     public function handleError(Struct\Error $error)
     {
-        throw new \Exception($error->message);
+        throw new RemoteException($error->message);
     }
 
     /**

@@ -7,7 +7,7 @@
 
 namespace Bepado\SDK\Service;
 
-use Bepado\SDK\ProductPayments;
+use Bepado\SDK\ProductFromShop;
 use Bepado\SDK\Gateway\ShopConfiguration;
 
 /**
@@ -23,15 +23,18 @@ class PaymentStatus
     const PAYMENT_REVISION = '_payment_revision_';
 
     /**
-     * @var \Bepado\SDK\ProductPayments
+     * @var \Bepado\SDK\ProductFromShop
      */
-    protected $productPayments;
+    protected $fromShop;
 
+    /**
+     * @var \Bepado\SDK\ShopConfiguration
+     */
     protected $shopConfiguration;
 
-    public function __construct(ProductPayments $productPayments, ShopConfiguration $shopConfiguration)
+    public function __construct(ProductFromShop $fromShop, ShopConfiguration $shopConfiguration)
     {
-        $this->productPayments = $productPayments;
+        $this->fromShop = $fromShop;
         $this->shopConfiguration = $shopConfiguration;
     }
 
@@ -53,8 +56,9 @@ class PaymentStatus
     public function replicate(array $statuses)
     {
         foreach ($statuses as $status) {
-            $this->productPayments->updatePaymentStatus($status);
-            $this->shopConfiguration->setConfig(self::PAYMENT_REVISION, $status->revision);
+            $revision = $status->revision;
+            $this->fromShop->updatePaymentStatus($status);
+            $this->shopConfiguration->setConfig(self::PAYMENT_REVISION, $revision);
         }
     }
 }

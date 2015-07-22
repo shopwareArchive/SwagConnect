@@ -55,4 +55,16 @@ interface ProductFromShop
      *                    Do validation in {@see reserve} instead.
      */
     public function buy(Struct\Order $order);
+
+    /**
+     * Update payment status of an order processed through bepado.
+     *
+     * An order can be identified with PaymentStatus#localOrderId
+     * and the status be updated in your order locally, when
+     * the payment is made in bepado.
+     *
+     * @param Struct\PaymentStatus $status
+     * @return void
+     */
+    public function updatePaymentStatus(Struct\PaymentStatus $status);
 }

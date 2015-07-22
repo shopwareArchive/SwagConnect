@@ -30,6 +30,7 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Bepado\SDK\Struct\ProductUpdate;
 use Shopware\Bepado\Components\Translations\LocaleMapper;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
@@ -633,5 +634,15 @@ class ProductToShop implements ProductToShopBase
         });
 
         return $detailAttribute;
+    }
+
+    public function update($shopId, $sourceId, ProductUpdate $product)
+    {
+        throw new \Exception('Not implemented yet!');
+    }
+
+    public function changeAvailability($shopId, $sourceId, $availability)
+    {
+        throw new \Exception('Not implemented yet!');
     }
 }

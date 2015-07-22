@@ -118,6 +118,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function getProduct($withImage=false)
     {
+        $purchasePrice = 6.99;
+        $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $number = rand(1, 999999999);
         $product =  new \Bepado\SDK\Struct\Product(array(
             'shopId' => 3,
@@ -130,7 +132,12 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'longDescription' => 'Ein Produkt aus Bepado',
             'vendor' => 'Bepado',
             'price' => 9.99,
-            'purchasePrice' => 6.99,
+            'purchasePrice' => $purchasePrice,
+            'purchasePriceHash' => hash_hmac(
+                'sha256',
+                sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+            ),
+            'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
             'categories' => array('/bücher'),
             'translations' => array(

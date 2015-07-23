@@ -672,6 +672,16 @@ class ProductToShop implements ProductToShopBase
 
     public function changeAvailability($shopId, $sourceId, $availability)
     {
-        throw new \Exception('Not implemented yet!');
+        // find article detail id
+        $articleDetailId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_detail_id FROM s_plugin_bepado_items WHERE source_id = ? AND shop_id = ?',
+            array($sourceId, $shopId)
+        );
+
+        // update stock in article detail
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles_details SET instock = ? WHERE id = ?',
+            array($availability, $articleDetailId)
+        );
     }
 }

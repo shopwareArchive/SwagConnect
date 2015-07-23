@@ -320,5 +320,31 @@ class ProductToShopTest extends BepadoTestHelper
         $this->assertEquals($productUpdate->price, $prices[0]->getPrice());
         $this->assertEquals($productUpdate->purchasePrice, $prices[0]->getBasePrice());
     }
+
+    public function testChangeAvailability()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+
+        $articlesCount = Shopware()->Db()->query(
+            'SELECT COUNT(s_articles.id)
+              FROM s_plugin_bepado_items
+              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
+              WHERE s_plugin_bepado_items.source_id = :sourceId',
+            array('sourceId' => $product->sourceId)
+        )->fetchColumn();
+
+        $this->assertEquals(1, $articlesCount);
+
+        $newAvailability = 20;
+        $this->productToShop->changeAvailability($product->shopId, $product->sourceId, $newAvailability);
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
+        $bepadoAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+            ->findOneBy(array('sourceId' => $product->sourceId));
+
+        $this->assertEquals($newAvailability, $bepadoAttribute->getArticleDetail()->getInStock());
+    }
 }
  

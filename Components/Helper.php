@@ -307,6 +307,9 @@ class Helper
 
         if (!$attribute) {
             $attribute = new BepadoAttribute();
+            $attribute->setPurchasePriceHash('');
+            $attribute->setOfferValidUntil('');
+
             if ($model instanceof ProductModel) {
                 $attribute->setArticle($model);
                 $attribute->setArticleDetail($model->getMainDetail());

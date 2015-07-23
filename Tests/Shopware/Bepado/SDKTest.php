@@ -15,6 +15,8 @@ class SDKTest extends BepadoTestHelper
         $conn->insert('bepado_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
         $conn->insert('bepado_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
 
+        $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
+        $purchasePrice = 6.99;
         $this->dispatchRpcCall('products', 'toShop', array(
             array(
                 new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
@@ -29,7 +31,12 @@ class SDKTest extends BepadoTestHelper
                         'longDescription' => 'Ein Produkt aus Bepado',
                         'vendor' => 'Bepado',
                         'price' => 9.99,
-                        'purchasePrice' => 6.99,
+                        'purchasePrice' => $purchasePrice,
+                        'purchasePriceHash' => hash_hmac(
+                            'sha256',
+                            sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+                        ),
+                        'offerValidUntil' => $offerValidUntil,
                         'availability' => 100,
                         'images' => array('http://lorempixel.com/400/200'),
                         'categories' => array('/bücher'),
@@ -42,10 +49,17 @@ class SDKTest extends BepadoTestHelper
 
     public function testExportProductWithoutPurchasePrice()
     {
-        $this->getBepadoExport()->export(array(14));
+        $article = $this->getLocalArticle();
+        $prices = $article->getMainDetail()->getPrices();
+        $prices[0]->setBasePrice(null);
+        Shopware()->Models()->persist($prices[0]);
+        Shopware()->Models()->flush();
+
+        $this->getBepadoExport()->export(array($article->getId()));
+
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('sourceId' => 14));
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('sourceId' => $article->getId()));
         $message = $model->getExportMessage();
 
         $this->assertContains('purchasePrice', $message);
@@ -54,17 +68,12 @@ class SDKTest extends BepadoTestHelper
 
     public function testExportProductWithPurchasePrice()
     {
-        // Set a purchase price
-        /** @var \Shopware\Models\Article\Price $price */
-        $price = Shopware()->Models()->getRepository('Shopware\Models\Article\Price')->findOneBy(array('articleDetailsId' => 3, 'from' => 1, 'customerGroup' => 'EK'));
-        $price->setBasePrice($price->getPrice());
-        Shopware()->Models()->flush();
-
         // Assign a category mapping
-        $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
+//        $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
 
+        $article = $this->getLocalArticle();
         // Insert the product
-        $this->getBepadoExport()->export(array(3));
+        $this->getBepadoExport()->export(array($article->getId()));
 
         /** @var \Shopware\CustomModels\Bepado\Attribute $model */
         $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));

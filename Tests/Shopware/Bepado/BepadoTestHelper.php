@@ -7,6 +7,11 @@ use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\ImageImport;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\CustomModels\Bepado\Attribute;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Detail;
+use Shopware\Models\Article\Price;
+use Shopware\Models\Tax\Tax;
 
 class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
@@ -20,7 +25,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getBepadoProductArticleId($sourceId, $shopId=3)
     {
@@ -218,6 +223,71 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         }
 
         return $variants;
+    }
+
+    public function getLocalArticle()
+    {
+        $number = rand(1, 999999999);
+
+        $article = new Article();
+        $article->fromArray(array(
+            'name' => 'LocalArticle #'. $number,
+            'active' => true,
+        ));
+        $tax = Shopware()->Models()->getRepository('Shopware\Models\Tax\Tax')->find(1);
+        $article->setTax($tax);
+
+        $supplier = Shopware()->Models()->getRepository('Shopware\Models\Article\Supplier')->find(1);
+        $article->setSupplier($supplier);
+
+        Shopware()->Models()->persist($article);
+        Shopware()->Models()->flush();
+
+        $mainDetail = new Detail();
+        $mainDetail->fromArray(array(
+            'number' => $number,
+            'inStock' => 30,
+            'article' => $article
+        ));
+        $article->setMainDetail($mainDetail);
+        $detailAtrribute = new \Shopware\Models\Attribute\Article();
+        $detailAtrribute->fromArray(array(
+            'article' => $article,
+            'articleDetail' => $mainDetail,
+        ));
+
+        $customerGroup = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group')->findOneByKey('EK');
+
+        $price = new Price();
+        $price->fromArray(array(
+            'article' => $article,
+            'detail' => $mainDetail,
+            'customerGroup' => $customerGroup,
+            'from' => 1,
+            'price' => 8.99,
+            'basePrice' => 3.99,
+        ));
+        $mainDetail->setPrices(array($price));
+
+        $bepadoAttribute = new Attribute();
+        $bepadoAttribute->fromArray(array(
+            'isMainVariant' => true,
+            'article' => $article,
+            'articleDetail' => $article->getMainDetail(),
+            'sourceId' => $article->getId(),
+            'category' => '/bücher',
+            'fixedPrice' => false,
+            'purchasePriceHash' => '',
+            'offerValidUntil' => 0,
+        ));
+
+        Shopware()->Models()->persist($mainDetail);
+        Shopware()->Models()->persist($detailAtrribute);
+        Shopware()->Models()->persist($price);
+        Shopware()->Models()->persist($bepadoAttribute);
+        Shopware()->Models()->flush();
+
+        return $article;
     }
 
     protected function insertOrUpdateProducts($number, $withImage)

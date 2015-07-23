@@ -4,6 +4,7 @@ namespace Tests\Shopware\Bepado;
 
 
 use Bepado\SDK\Struct\Product;
+use Bepado\SDK\Struct\ProductUpdate;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
@@ -272,6 +273,52 @@ class ProductToShopTest extends BepadoTestHelper
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
+    }
+
+    public function testUpdate()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+
+        $articlesCount = Shopware()->Db()->query(
+            'SELECT COUNT(s_articles.id)
+              FROM s_plugin_bepado_items
+              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
+              WHERE s_plugin_bepado_items.source_id = :sourceId',
+            array('sourceId' => $product->sourceId)
+        )->fetchColumn();
+
+        $this->assertEquals(1, $articlesCount);
+
+        $purchasePrice = 8.99;
+        $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
+        $productUpdate = new ProductUpdate(array(
+            'price' => 10.99,
+            'purchasePrice' => $purchasePrice,
+            'purchasePriceHash' => hash_hmac(
+                'sha256',
+                sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+            ),
+            'offerValidUntil' => $offerValidUntil,
+            'availability' => 80,
+        ));
+
+        $this->productToShop->update($product->shopId, $product->sourceId, $productUpdate);
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
+        $bepadoAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+            ->findOneBy(array('sourceId' => $product->sourceId));
+
+        $this->assertEquals($productUpdate->purchasePriceHash, $bepadoAttribute->getPurchasePriceHash());
+        $this->assertEquals($productUpdate->offerValidUntil, $bepadoAttribute->getOfferValidUntil());
+        $this->assertEquals($productUpdate->purchasePrice, $bepadoAttribute->getPurchasePrice());
+
+        $this->assertEquals($productUpdate->availability, $bepadoAttribute->getArticleDetail()->getInStock());
+        /** @var \Shopware\Models\Article\Price[] $prices */
+        $prices = $bepadoAttribute->getArticleDetail()->getPrices();
+        $this->assertEquals($productUpdate->price, $prices[0]->getPrice());
+        $this->assertEquals($productUpdate->purchasePrice, $prices[0]->getBasePrice());
     }
 }
  

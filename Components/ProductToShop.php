@@ -638,7 +638,36 @@ class ProductToShop implements ProductToShopBase
 
     public function update($shopId, $sourceId, ProductUpdate $product)
     {
-        throw new \Exception('Not implemented yet!');
+        // find article detail id
+        $articleDetailId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_detail_id FROM s_plugin_bepado_items WHERE source_id = ? AND shop_id = ?',
+            array($sourceId, $shopId)
+        );
+
+        // update purchasePriceHash, offerValidUntil and purchasePrice in bepado attribute
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_plugin_bepado_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
+            WHERE source_id = ? AND shop_id = ?',
+            array(
+                $product->purchasePriceHash,
+                $product->offerValidUntil,
+                $product->purchasePrice,
+                $sourceId,
+                $shopId,
+            )
+        );
+
+        // update stock in article detail
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles_details SET instock = ? WHERE id = ?',
+            array($product->availability, $articleDetailId)
+        );
+
+        // update prices
+        $this->manager->getConnection()->executeUpdate(
+            "UPDATE s_articles_prices SET price = ?, baseprice = ? WHERE articledetailsID = ? AND pricegroup = 'EK'",
+            array($product->price, $product->purchasePrice, $articleDetailId)
+        );
     }
 
     public function changeAvailability($shopId, $sourceId, $availability)

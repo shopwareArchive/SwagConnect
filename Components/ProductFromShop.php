@@ -53,13 +53,19 @@ class ProductFromShop implements ProductFromShopBase
     private $manager;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      */
-    public function __construct(Helper $helper, ModelManager $manager)
+    public function __construct(Helper $helper, ModelManager $manager, Logger $logger)
     {
         $this->helper = $helper;
         $this->manager = $manager;
+        $this->logger = $logger;
     }
 
     /**
@@ -286,6 +292,45 @@ class ProductFromShop implements ProductFromShopBase
 
     public function updatePaymentStatus(PaymentStatus $status)
     {
-        throw new \Exception('Not implemented yet!');
+        // $paymentStatus->localOrderId is actually ordernumber for this shop
+        // e.g. BP-35-20002
+        $repository = $this->manager->getRepository('Shopware\Models\Order\Order');
+        $order = $repository->findOneBy(array('number' => $status->localOrderId));
+
+        if ($order) {
+            $paymentStatusRepository = $this->manager->getRepository('Shopware\Models\Order\Status');
+            /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
+            $orderPaymentStatus = $paymentStatusRepository->findOneBy(
+                array('description' => 'bepado ' . $status->paymentStatus)
+            );
+
+            if ($orderPaymentStatus) {
+                $order->setPaymentStatus($orderPaymentStatus);
+
+                $this->manager->persist($order);
+                $this->manager->flush();
+            } else {
+                $this->logger->write(
+                    true,
+                    sprintf(
+                        'Payment status "%s" not found',
+                        $status->paymentStatus
+                    ),
+                    sprintf(
+                        'Order with id "%s"',
+                        $status->localOrderId
+                    )
+                );
+            }
+        } else {
+            $this->logger->write(
+                true,
+                sprintf(
+                    'Order with id "%s" not found',
+                    $status->localOrderId
+                ),
+                serialize($status)
+            );
+        }
     }
 }

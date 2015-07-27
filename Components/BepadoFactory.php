@@ -110,7 +110,8 @@ class BepadoFactory
             ),
             new ProductFromShop(
                 $helper,
-                $manager
+                $manager,
+                new Logger(Shopware()->Db())
             ),
             new ShopwareErrorHandler(),
             null,

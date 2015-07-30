@@ -73,15 +73,20 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
             return array();
         }
 
-        $inQuery = implode(',', $languageIds);
+        $inQuery = str_repeat('?,', count($languageIds) - 1) . '?';
+
         $sql = "SELECT objectdata, objectlanguage
                 FROM s_core_translations
                 WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN ($inQuery)
         ";
+        $whereClause = array('article', $articleId);
+        foreach ($languageIds as $languageId) {
+            $whereClause[] = $languageId;
+        }
 
         $translations = $this->db->executeQuery(
             $sql,
-            array('article', $articleId)
+            $whereClause
         )->fetchAll();
 
         $result = array();

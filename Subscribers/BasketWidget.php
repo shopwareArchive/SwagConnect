@@ -78,7 +78,6 @@ class BasketWidget extends BaseSubscriber
 
         // Fix the basket for bepado
         $basketHelper->fixBasket();
-        $basketHelper->recalculate($this->getCountryCode());
         $vars = $basketHelper->getDefaultTemplateVariables();
 
         // Fix the basket widget template

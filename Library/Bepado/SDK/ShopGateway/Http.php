@@ -77,18 +77,18 @@ class Http extends ShopGateway
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested products.
      *
-     * @param Struct\ProductList $productList
+     * @param Struct\Order $order
      * @param string $shopId
      * @return mixed
      */
-    public function checkProducts(Struct\ProductList $productList, $shopId)
+    public function checkProducts(Struct\Order $order, $shopId)
     {
         return $this->makeRpcCall(
             new RpcCall(
                 array(
                     'service' => 'transaction',
                     'command' => 'checkProducts',
-                    'arguments' => array($productList, $shopId),
+                    'arguments' => array($order, $shopId),
                 )
             )
         );

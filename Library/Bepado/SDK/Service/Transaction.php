@@ -17,6 +17,9 @@ use Bepado\SDK\ShippingCostCalculator;
 /**
  * Service to maintain transactions
  *
+ * This service is the only one that will be called remotely from other SDK
+ * instances.
+ *
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  */
 class Transaction
@@ -87,7 +90,6 @@ class Transaction
         $this->reservations = $reservations;
         $this->logger = $logger;
         $this->shopConfiguration = $shopConfiguration;
-        $this->shippingCostsService = $shippingCostsService;
         $this->verificator = $verificator;
         $this->apiKey = $apiKey;
     }
@@ -101,28 +103,30 @@ class Transaction
      * Returns true on success, or an array of Struct\Change with updates for
      * the requested orders.
      *
-     * @param Struct\ProductList $products
-     * @return mixed
+     * @param Struct\Order $order
+     * @return Struct\CheckResult
      */
-    public function checkProducts(Struct\ProductList $remoteProducts, $buyerShopId)
+    public function checkProducts(Struct\Order $order, $buyerShopId)
     {
-        $this->verificator->verify($remoteProducts);
+        $this->verificator->verify($order);
 
-        if (count($remoteProducts->products) === 0) {
+        if (count($order->products) === 0) {
             throw new \InvalidArgumentException(
                 "ProductList is not allowed to be empty in remote Transaction#checkProducts()"
             );
         }
 
-        $localProducts = $this->getLocalProducts($remoteProducts);
+
+        $localProducts = $this->getLocalProducts($order);
 
         $myShopId = $this->shopConfiguration->getShopId();
 
-        $changes = array();
-        foreach ($remoteProducts->products as $remoteProduct) {
+        $checkResult = new Struct\CheckResult();
+        foreach ($order->products as $orderItem) {
+            $remoteProduct = $orderItem->product;
             if (!isset($localProducts[$remoteProduct->sourceId])) {
                 // Product does not exist any more
-                $changes[] = new Struct\Change\InterShop\Delete(
+                $checkResult->changes[] = new Struct\Change\InterShop\Delete(
                     array(
                         'sourceId' => $remoteProduct->sourceId,
                     )
@@ -139,7 +143,7 @@ class Transaction
                 $currentNotAvailable = clone $localProduct;
                 $currentNotAvailable->availability = 0;
 
-                $changes[] = new Struct\Change\InterShop\Unavailable(
+                $checkResult->changes[] = new Struct\Change\InterShop\Unavailable(
                     array(
                         'sourceId' => $remoteProduct->sourceId,
                         'shopId' => $myShopId,
@@ -149,7 +153,7 @@ class Transaction
             } elseif ($this->fixedPriceChanged($localProduct, $remoteProduct) || $this->productUnavailable($localProduct)) {
 
                 // Price or availability changed
-                $changes[] = new Struct\Change\InterShop\Unavailable(
+                $checkResult->changes[] = new Struct\Change\InterShop\Unavailable(
                     array(
                         'sourceId' => $remoteProduct->sourceId,
                         'shopId' => $myShopId,
@@ -158,7 +162,12 @@ class Transaction
             }
         }
 
-        return $changes ?: true;
+        if (count($checkResult->changes) === 0) {
+            $checkResult->aggregatedShippingCosts = $this->fromShop->calculateShippingCosts($order);
+            $checkResult->shippingCosts[] = $checkResult->aggregatedShippingCosts;
+        }
+
+        return $checkResult;
     }
 
     /**
@@ -166,14 +175,14 @@ class Transaction
      *
      * @return array<string, \Bepado\SDK\Struct\Product>
      */
-    private function getLocalProducts($products)
+    private function getLocalProducts(Struct\Order $order)
     {
         $localProducts = $this->fromShop->getProducts(
             array_map(
-                function ($product) {
-                    return $product->sourceId;
+                function ($orderItem) {
+                    return $orderItem->product->sourceId;
                 },
-                $products->products
+                $order->products
             )
         );
 
@@ -238,24 +247,11 @@ class Transaction
     {
         $this->verificator->verify($order);
 
-        $products = array();
-        foreach ($order->products as $orderItem) {
-            $products[] = $orderItem->product;
+        $productCheckResult = $this->checkProducts($order, $order->orderShop);
+        if (count($productCheckResult->changes)) {
+            return $productCheckResult;
         }
-
-        $verify = $this->checkProducts(
-            new Struct\ProductList(
-                array(
-                    'products' => $products
-                )
-            ),
-            $order->orderShop
-        );
-
-        $myShippingCosts = $this->shippingCostsService->calculateShippingCosts(
-            $order,
-            Gateway\ShippingCosts::SHIPPING_COSTS_INTERSHOP
-        );
+        $myShippingCosts = $productCheckResult->aggregatedShippingCosts;
 
         if (!$myShippingCosts->isShippable) {
             return new Struct\Message(array(
@@ -264,24 +260,6 @@ class Transaction
                     'country' => $order->deliveryAddress->country
                 )
             ));
-        }
-
-        if (!$this->floatsEqual($order->shipping->shippingCosts, $myShippingCosts->shippingCosts) ||
-            !$this->floatsEqual($order->shipping->grossShippingCosts, $myShippingCosts->grossShippingCosts)) {
-
-            return new Struct\Message(
-                array(
-                    'message' => "Shipping costs have changed from %oldValue to %newValue.",
-                    'values' => array(
-                        'oldValue' => round($order->grossShippingCosts, 2),
-                        'newValue' => round($myShippingCosts->grossShippingCosts, 2),
-                    ),
-                )
-            );
-        }
-
-        if ($verify !== true) {
-            return $verify;
         }
 
         try {
@@ -312,6 +290,9 @@ class Transaction
     {
         try {
             $order = $this->reservations->getOrder($reservationId);
+
+            $productCheckResult = $this->checkProducts($order, $order->orderShop);
+            $myShippingCosts = $productCheckResult->aggregatedShippingCosts;
 
             $orderShop = $order->orderShop;
             $providerShop = $order->providerShop;

@@ -17,6 +17,8 @@ use Bepado\SDK\Logger;
 use Bepado\SDK\ErrorHandler;
 use Bepado\SDK\ShippingCostCalculator;
 use Bepado\SDK\Gateway\ShopConfiguration;
+use Bepado\SDK\Struct\CheckResult;
+use Bepado\SDK\ShippingCostCalculator\Aggregator;
 
 /**
  * Shopping service
@@ -72,6 +74,13 @@ class Shopping
     protected $shippingCostsService;
 
     /**
+     * Shipping cost aggregator
+     *
+     * @var Aggregator
+     */
+    protected $aggregator;
+
+    /**
      * @var ShopConfiguration
      */
     protected $config;
@@ -83,7 +92,8 @@ class Shopping
         Logger $logger,
         ErrorHandler $errorHandler,
         ShippingCosts $shippingCostsService,
-        ShopConfiguration $config
+        ShopConfiguration $config,
+        Aggregator $aggregator = null
     ) {
         $this->shopFactory = $shopFactory;
         $this->changeVisitor = $changeVisitor;
@@ -92,6 +102,7 @@ class Shopping
         $this->errorHandler = $errorHandler;
         $this->shippingCostsService = $shippingCostsService;
         $this->config = $config;
+        $this->aggregator = $aggregator ?: new Aggregator\Sum();
     }
 
     /**
@@ -137,53 +148,63 @@ class Shopping
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\ProductList $productList
-     * @return void
+     * @param Struct\Order $productList
+     * @return Struct\CheckResult
      */
-    public function checkProducts(Struct\ProductList $productList)
+    public function checkProducts(Struct\Order $order)
     {
-        $responses = array();
-        $productLists = $this->zipProductListByShopId($productList);
+        $orders = $this->splitShopOrders($order);
+        return $this->checkSplitOrders($orders);
+    }
+
+    /**
+     * @param Struct\Order[<string>] $orders
+     * @return Struct\CheckResult
+     */
+    private function checkSplitOrders(array $orders)
+    {
         $myShopId = $this->config->getShopId();
 
-        foreach ($productLists as $shopId => $products) {
+        $checkResults = array();
+
+        foreach ($orders as $shopId => $order) {
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
-            $responses[$shopId] = $shopGateway->checkProducts($products, $myShopId);
+            $shopCheckResult = $shopGateway->checkProducts($order, $myShopId);
+
+            if (count($shopCheckResult->changes)) {
+                $this->applyRemoteShopChanges($shopCheckResult->changes);
+            }
+
+            $checkResults[] = $shopCheckResult;
         }
 
-        $result = array();
-        foreach ($responses as $shopId => $changes) {
-            if ($changes !== true) {
-                $this->applyRemoteShopChanges($changes);
-                $result = array_merge(
-                    $result,
-                    $this->changeVisitor->visit($changes)
+        return $this->aggregateCheckResults($checkResults);
+    }
+
+    /**
+     * @param Struct\CheckResult[] $shopCheckResults
+     * @return Struct\CheckResult
+     */
+    private function aggregateCheckResults(array $shopCheckResults)
+    {
+        $checkResult = new CheckResult();
+
+        foreach ($shopCheckResults as $shopCheckResult) {
+            $checkResult->changes = array_merge($checkResult->changes, $shopCheckResult->changes);
+            if ($shopCheckResult->shippingCosts !== null) {
+                $checkResult->shippingCosts = array_merge(
+                    $checkResult->shippingCosts,
+                    $shopCheckResult->shippingCosts
                 );
             }
         }
 
-        return $result ?: true;
-    }
+        $checkResult->errors = $this->changeVisitor->visit($checkResult->changes);
+        $checkResult->aggregatedShippingCosts = $this->aggregator->aggregateShippingCosts(
+            $checkResult->shippingCosts
+        );
 
-    /**
-     * Zip product list by shop Id
-     *
-     * @param Struct\ProductList $productList
-     * @return Struct\ProductList[]
-     */
-    private function zipProductListByShopId(Struct\ProductList $productList)
-    {
-        $productLists = array();
-
-        foreach ($productList->products as $product) {
-            if (!isset($productLists[$product->shopId])) {
-                $productLists[$product->shopId] = new Struct\ProductList();
-            }
-
-            $productLists[$product->shopId]->products[] = $product;
-        }
-
-        return $productLists;
+        return $checkResult;
     }
 
     /**
@@ -205,6 +226,9 @@ class Shopping
      * If data updated are detected, the local product database will be updated
      * accordingly.
      *
+     * During reservation, the remote shops return the shipping costs resulting
+     * from the order. These will be included in the returned Struct\Reservation.
+     *
      * @TODO: How do we want to handle the case that some shop reserve the
      * order as requested, and others complain. Just ignore because it is bound
      * to happen really seldom?
@@ -217,27 +241,29 @@ class Shopping
         $responses = array();
         $orders = $this->splitShopOrders($order);
 
-        $shippingCosts = $this->calculateShippingCosts($order, Gateway\ShippingCosts::SHIPPING_COSTS_INTERSHOP);
+        $checkResult = $this->checkSplitOrders($orders);
+        $aggregatedShippingCosts = $checkResult->aggregatedShippingCosts;
+        $splitShippingCost = $checkResult->shippingCosts;
 
-        if (!$shippingCosts->isShippable) {
-            return $this->failedReservationNotShippable($orders, $shippingCosts);
+        if (!$aggregatedShippingCosts->isShippable) {
+            return $this->failedReservationNotShippable($orders, $aggregatedShippingCosts->shippingCosts);
         }
 
         foreach ($orders as $shopId => $order) {
-            $order->shipping = $shippingCosts->shops[$shopId];
-
             $shopGateway = $this->shopFactory->getShopGateway($shopId);
             $responses[$shopId] = $shopGateway->reserveProducts($this->anonymizeCustomerEmail($order));
         }
 
         $reservation = new Struct\Reservation();
         $reservation->orders = $orders;
+        $reservation->aggregatedShippingCosts = $aggregatedShippingCosts;
+
         foreach ($responses as $shopId => $response) {
             if (is_string($response)) {
                 $reservation->orders[$shopId]->reservationId = $response;
-            } elseif (is_array($response)) {
-                $this->applyRemoteShopChanges($response);
-                $reservation->messages[$shopId] = $this->changeVisitor->visit($response);
+            } elseif ($response instanceof Struct\CheckResult) {
+                $this->applyRemoteShopChanges($response->changes);
+                $reservation->messages[$shopId] = $this->changeVisitor->visit($response->changes);
 
                 if (count($reservation->messages[$shopId]) === 0) {
                     $reservation->messages[$shopId] = array(

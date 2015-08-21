@@ -421,7 +421,7 @@ class InMemory extends Gateway
     public function getOrder($reservationId)
     {
         if (!isset($this->reservations[$reservationId])) {
-            throw new \RuntimeException("Unknown reservation $reservationId");
+            throw new \RuntimeException("Unknown reservation '$reservationId'");
         }
 
         return $this->reservations[$reservationId]['order'];

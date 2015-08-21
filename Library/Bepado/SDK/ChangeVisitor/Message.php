@@ -33,7 +33,7 @@ class Message extends ChangeVisitor
      * Visit changes
      *
      * @param array $changes
-     * @return array
+     * @return Struct\Message[]
      */
     public function visit(array $changes)
     {

@@ -3,11 +3,13 @@
 namespace Tests\Shopware\Bepado;
 
 
+use Behat\SahiClient\Exception\AbstractException;
 use Bepado\SDK\Struct\Address;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\PaymentStatus;
 use Bepado\SDK\Struct\Product;
+use Bepado\SDK\Struct\ShippingCosts;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\ProductFromShop;
 use Symfony\Component\Debug\Debug;
@@ -162,4 +164,75 @@ class ProductFromShopTest extends BepadoTestHelper
 //        return array_keys($commands);
 
     }
+
+    public function testCalculateShippingCosts()
+    {
+        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+
+        $address = new Address(array(
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123'
+        ));
+
+        $localOrderId = rand(0, 99999);
+        $order = new Order(array(
+            'orderShop' => '3',
+            'localOrderId' => $localOrderId,
+            'deliveryAddress' => $address,
+            'billingAddress' => $address,
+            'products' => array(
+                new OrderItem(array(
+                    'count' => 1,
+                    'product' => new Product(array(
+                        'shopId' => '3',
+                        'sourceId' => '2',
+                        'price' => 44.44,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Milchschnitte',
+                        'categories' => array()
+                    ))
+                ))
+            )
+        ));
+
+        $request = new \Enlight_Controller_Request_RequestTestCase();
+        Shopware()->Front()->setRequest($request);
+
+        Shopware()->Session()->offsetSet('sDispatch', 9);
+
+        $result = $fromShop->calculateShippingCosts($order);
+        $this->assertInstanceOf('Bepado\SDK\Struct\ShippingCosts', $result);
+
+        $this->assertTrue($result->shippingCosts > 0);
+        $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
+    }
+
+    /**
+     * @expectedException        \RuntimeException
+     * @expectedExceptionMessage Invalid country. Country code must be ISO-3
+     */
+    public function testCalculateShippingCostsWithoutCountry()
+    {
+        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+
+        $order = new Order();
+        $fromShop->calculateShippingCosts($order);
+    }
+
+    public function testCalculateShippingCostsNotShippable()
+    {
+        // todo@sb: implement not shippable test
+    }
+
+    // todo@sb: implement test without order items
 }

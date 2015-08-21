@@ -32,7 +32,9 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
+use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\PaymentStatus;
+use Bepado\SDK\Struct\ShippingCosts;
 
 /**
  * The interface for products exported *to* bepado *from* the local shop
@@ -332,5 +334,62 @@ class ProductFromShop implements ProductFromShopBase
                 serialize($status)
             );
         }
+    }
+
+    public function calculateShippingCosts(Order $order)
+    {
+        $shippingCosts = new ShippingCosts();
+        $countryIso3 = $order->deliveryAddress->country;
+        $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
+
+        if (!$country) {
+            throw new \RuntimeException('Invalid country. Country code must be ISO-3');
+        }
+
+        /* @var \Shopware\Models\Shop\Shop $shop */
+        $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
+        if (!$shop) {
+            throw new \RuntimeException("Shop couldn't be found");
+        }
+        $shop->registerResources(Shopware()->Bootstrap());
+
+        $sessionId = uniqid('bepado_remote');
+        Shopware()->System()->sSESSION_ID = $sessionId;
+        Shopware()->System()->_SESSION['sDispatch'] = Shopware()->Session()['sDispatch'];
+
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $products = array();
+        /** @var \Bepado\SDK\Struct\OrderItem $orderItem */
+        foreach ($order->orderItems as $orderItem) {
+            $attributes = $repository->findBy(array('sourceId' => array($orderItem->product->sourceId), 'shopId' => null));
+            if (count($attributes) === 0) {
+                continue;
+            }
+
+            $products[] = array(
+                'ordernumber' => $attributes[0]->getArticleDetail()->getNumber(),
+                'quantity' => $orderItem->count,
+            );
+        }
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+        foreach ($products as $product) {
+            Shopware()->Modules()->Basket()->sAddArticle($product['ordernumber'], $product['quantity']);
+        }
+
+        $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
+        if (!is_array($result)) {
+            return new ShippingCosts(array('isShippable' => false));
+        }
+
+        $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';
+        Shopware()->Db()->executeQuery($sql, array(
+            $sessionId,
+        ));
+
+        return new ShippingCosts(array(
+            'shippingCosts' => floatval($result['netto']),
+            'grossShippingCosts' => floatval($result['brutto']),
+        ));
     }
 }

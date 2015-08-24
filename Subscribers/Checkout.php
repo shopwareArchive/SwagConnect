@@ -4,6 +4,7 @@ namespace Shopware\Bepado\Subscribers;
 use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
+use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\Reservation;
 use Bepado\SDK\Struct\TotalShippingCosts;
 use Shopware\Bepado\Components\Exceptions\CheckoutException;
@@ -144,11 +145,28 @@ class Checkout extends BaseSubscriber
         if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
             $bepadoMessages = array();
 
+            $session = Shopware()->Session();
+            $userData = $session['sOrderVariables']['sUserData'];
+            // prepare an order to check products
+            $order = new \Bepado\SDK\Struct\Order();
+            $order->orderItems = array();
+            $order->deliveryAddress = $this->getDeliveryAddress($userData);
+
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
                 $products = $this->getHelper()->prepareBepadoUnit($products);
+
+                // add order items in bepado order
+                $order->orderItems = array_map(function(Product $product) use ($basketHelper) {
+                    return new OrderItem(array(
+                        'product' => $product,
+                        'count' => $basketHelper->getQuantityForProduct($product),
+                    ));
+
+                }, $products);
+
                 /** @var $response Message */
                 try {
-                    $response = $sdk->checkProducts($products);
+                    $response = $sdk->checkProducts($order);
                 } catch (\Exception $e) {
                     $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                     // If the checkout results in an exception because the remote shop is not available

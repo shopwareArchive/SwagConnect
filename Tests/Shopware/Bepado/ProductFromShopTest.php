@@ -12,7 +12,6 @@ use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\ShippingCosts;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\ProductFromShop;
-use Symfony\Component\Debug\Debug;
 
 class ProductFromShopTest extends BepadoTestHelper
 {

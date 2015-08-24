@@ -164,17 +164,18 @@ class Checkout extends BaseSubscriber
 
                 }, $products);
 
-                /** @var $response Message */
+                /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
                 try {
-                    $response = $sdk->checkProducts($order);
+                    $checkResult = $sdk->checkProducts($order);
                 } catch (\Exception $e) {
                     $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                     // If the checkout results in an exception because the remote shop is not available
                     // don't show the exception to the user but tell him to remove the products from that shop
-                    $response = $this->getNotAvailableMessageForProducts($products);
+                    $bepadoMessages = $this->getNotAvailableMessageForProducts($products);
                 }
-                if($response !== true) {
-                    $bepadoMessages[$shopId] = $response;
+
+                if($checkResult && $checkResult->hasErrors()) {
+                    $bepadoMessages[$shopId] = $checkResult->errors;
                 }
             }
         }

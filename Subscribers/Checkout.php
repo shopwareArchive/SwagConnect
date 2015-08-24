@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Bepado\SDK\Struct\CheckResult;
 use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\Order;
 use Bepado\SDK\Struct\OrderItem;
@@ -151,6 +152,7 @@ class Checkout extends BaseSubscriber
             $order = new \Bepado\SDK\Struct\Order();
             $order->orderItems = array();
             $order->deliveryAddress = $this->getDeliveryAddress($userData);
+            $checkResults = array();
 
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
                 $products = $this->getHelper()->prepareBepadoUnit($products);
@@ -167,6 +169,7 @@ class Checkout extends BaseSubscriber
                 /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
                 try {
                     $checkResult = $sdk->checkProducts($order);
+                    $checkResults[] = $checkResult;
                 } catch (\Exception $e) {
                     $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                     // If the checkout results in an exception because the remote shop is not available
@@ -178,6 +181,9 @@ class Checkout extends BaseSubscriber
                     $bepadoMessages[$shopId] = $checkResult->errors;
                 }
             }
+
+            // Increase amount and shipping costs by the amount of bepado shipping costs
+            $basketHelper->recalculate($this->aggregateCheckResults($checkResults));
         }
 
         if ($bepadoMessages) {
@@ -193,10 +199,7 @@ class Checkout extends BaseSubscriber
             $view->shopId = $shopId;
         }
 
-        // Increase amount and shipping costs by the amount of bepado shipping costs
-        $basketHelper->recalculate($this->getCountryCode());
-
-        $bepadoMessages = $this->getNotShippableMessages($basketHelper->getTotalShippingCosts(), $bepadoMessages);
+        $bepadoMessages = $this->getNotShippableMessages($basketHelper->getCheckResult(), $bepadoMessages);
 
         $view->assign($basketHelper->getDefaultTemplateVariables());
 
@@ -211,6 +214,32 @@ class Checkout extends BaseSubscriber
         }
 
         $view->assign($basketHelper->getBepadoTemplateVariables($bepadoMessages));
+    }
+
+    /**
+     * @param \Bepado\SDK\Struct\CheckResult[] $shopCheckResults
+     * @return \Bepado\SDK\Struct\CheckResult
+     */
+    private function aggregateCheckResults(array $shopCheckResults)
+    {
+        $checkResult = new CheckResult();
+
+        foreach ($shopCheckResults as $shopCheckResult) {
+            $checkResult->changes = array_merge($checkResult->changes, $shopCheckResult->changes);
+            if ($shopCheckResult->shippingCosts !== null) {
+                $checkResult->shippingCosts = array_merge(
+                    $checkResult->shippingCosts,
+                    $shopCheckResult->shippingCosts
+                );
+            }
+        }
+
+        $checkResult->errors = $this->changeVisitor->visit($checkResult->changes);
+        $checkResult->aggregatedShippingCosts = $this->aggregator->aggregateShippingCosts(
+            $checkResult->shippingCosts
+        );
+
+        return $checkResult;
     }
 
     /**
@@ -458,17 +487,21 @@ class Checkout extends BaseSubscriber
     }
 
     /**
-     * @param \Bepado\SDK\Struct\TotalShippingCosts $totalShippingCosts
-     * @param array $bepadoMessages
-     * @return array
+     * @param \Bepado\SDK\Struct\CheckResult $checkResult
+     * @param $bepadoMessages
+     * @return mixed
      */
-    protected function getNotShippableMessages(TotalShippingCosts $totalShippingCosts, $bepadoMessages)
+    protected function getNotShippableMessages($checkResult, $bepadoMessages)
     {
+        if (!$checkResult instanceof CheckResult) {
+            return $bepadoMessages;
+        }
+
         $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
 
-        foreach ($totalShippingCosts->shops as $shop) {
-            if ($shop->isShippable === false) {
-                $bepadoMessages[$shop->shopId][] = new Message(array(
+        foreach ($checkResult->shippingCosts as $shipping) {
+            if ($shipping->isShippable === false) {
+                $bepadoMessages[$shipping->shopId][] = new Message(array(
                     'message' => $namespace->get(
                             'frontend_checkout_cart_bepado_not_shippable',
                             'Ihre Bestellung kann nicht geliefert werden',

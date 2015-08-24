@@ -183,16 +183,13 @@ class ProductFromShopTest extends BepadoTestHelper
         $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
     }
 
-    /**
-     * @expectedException        \RuntimeException
-     * @expectedExceptionMessage Invalid country. Country code must be ISO-3
-     */
     public function testCalculateShippingCostsWithoutCountry()
     {
         $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
 
         $order = new Order();
-        $fromShop->calculateShippingCosts($order);
+        $shippingCosts = $fromShop->calculateShippingCosts($order);
+        $this->assertFalse($shippingCosts->isShippable);
     }
 
     /**

@@ -342,7 +342,7 @@ class ProductFromShop implements ProductFromShopBase
         $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
 
         if (!$country) {
-            throw new \RuntimeException('Invalid country. Country code must be ISO-3');
+            return new ShippingCosts(array('isShippable' => false));
         }
 
         if (count($order->orderItems) == 0) {
@@ -354,7 +354,7 @@ class ProductFromShop implements ProductFromShopBase
         /* @var \Shopware\Models\Shop\Shop $shop */
         $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
         if (!$shop) {
-            throw new \RuntimeException("Shop couldn't be found");
+            return new ShippingCosts(array('isShippable' => false));
         }
         $shop->registerResources(Shopware()->Bootstrap());
 

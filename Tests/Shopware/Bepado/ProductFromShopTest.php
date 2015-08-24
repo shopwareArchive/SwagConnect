@@ -169,41 +169,7 @@ class ProductFromShopTest extends BepadoTestHelper
     {
         $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
 
-        $address = new Address(array(
-            'firstName' => 'John',
-            'surName' => 'Doe',
-            'zip' => '48153',
-            'street' => 'Eggeroderstraße',
-            'streetNumber' => '6',
-            'city' => 'Schöppingen',
-            'country' => 'DEU',
-            'email' => 'info@shopware.com',
-            'phone' => '0000123'
-        ));
-
-        $localOrderId = rand(0, 99999);
-        $order = new Order(array(
-            'orderShop' => '3',
-            'localOrderId' => $localOrderId,
-            'deliveryAddress' => $address,
-            'billingAddress' => $address,
-            'products' => array(
-                new OrderItem(array(
-                    'count' => 1,
-                    'product' => new Product(array(
-                        'shopId' => '3',
-                        'sourceId' => '2',
-                        'price' => 44.44,
-                        'purchasePrice' => 33.33,
-                        'fixedPrice' => false,
-                        'currency' => 'EUR',
-                        'availability' => 3,
-                        'title' => 'Milchschnitte',
-                        'categories' => array()
-                    ))
-                ))
-            )
-        ));
+        $order = $this->createOrder();
 
         $request = new \Enlight_Controller_Request_RequestTestCase();
         Shopware()->Front()->setRequest($request);
@@ -229,10 +195,63 @@ class ProductFromShopTest extends BepadoTestHelper
         $fromShop->calculateShippingCosts($order);
     }
 
-    public function testCalculateShippingCostsNotShippable()
+    /**
+     * @expectedException        \InvalidArgumentException
+     * @expectedExceptionMessage ProductList is not allowed to be empty
+     */
+    public function testCalculateShippingCostsWithoutOrderItems()
     {
-        // todo@sb: implement not shippable test
+        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+
+        $order = $this->createOrder();
+        $order->orderItems = array();
+
+        $request = new \Enlight_Controller_Request_RequestTestCase();
+        Shopware()->Front()->setRequest($request);
+
+        Shopware()->Session()->offsetSet('sDispatch', 9);
+
+        $shippingCosts = $fromShop->calculateShippingCosts($order);
+
+        $this->assertFalse($shippingCosts->isShippable);
     }
 
-    // todo@sb: implement test without order items
+    private function createOrder()
+    {
+        $address = new Address(array(
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123'
+        ));
+
+        $localOrderId = rand(0, 99999);
+        return new Order(array(
+            'orderShop' => '3',
+            'localOrderId' => $localOrderId,
+            'deliveryAddress' => $address,
+            'billingAddress' => $address,
+            'products' => array(
+                new OrderItem(array(
+                    'count' => 1,
+                    'product' => new Product(array(
+                        'shopId' => '3',
+                        'sourceId' => '2',
+                        'price' => 44.44,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Milchschnitte',
+                        'categories' => array()
+                    ))
+                ))
+            )
+        ));
+    }
 }

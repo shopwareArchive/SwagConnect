@@ -338,12 +338,17 @@ class ProductFromShop implements ProductFromShopBase
 
     public function calculateShippingCosts(Order $order)
     {
-        $shippingCosts = new ShippingCosts();
         $countryIso3 = $order->deliveryAddress->country;
         $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
 
         if (!$country) {
             throw new \RuntimeException('Invalid country. Country code must be ISO-3');
+        }
+
+        if (count($order->orderItems) == 0) {
+            throw new \InvalidArgumentException(
+                "ProductList is not allowed to be empty"
+            );
         }
 
         /* @var \Shopware\Models\Shop\Shop $shop */

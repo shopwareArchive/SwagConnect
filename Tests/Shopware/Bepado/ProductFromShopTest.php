@@ -125,7 +125,7 @@ class ProductFromShopTest extends BepadoTestHelper
             'providerTransactionId' => 'pp1234567890',
             'revision' => '1431090080.0525200000',
         ));
-
+// todo: disable OrderHistorySubscriber
 //        foreach (Shopware()->Models()->getEventManager()->getListeners('preUpdate') as $listener) {
 ////            if (get_class($listener) == 'Shopware\Models\Order\OrderHistorySubscriber') {
 //                Shopware()->Models()->getEventManager()->removeEventSubscriber($listener);
@@ -159,7 +159,7 @@ class ProductFromShopTest extends BepadoTestHelper
 //        $this->dispatchRpcCall('productPayments', 'replicate', array(
 //            $commands
 //        ));
-//var_dump('sb:das');exit;
+
 //        return array_keys($commands);
 
     }

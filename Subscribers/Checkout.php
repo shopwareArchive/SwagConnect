@@ -152,11 +152,13 @@ class Checkout extends BaseSubscriber
             $order = new \Bepado\SDK\Struct\Order();
             $order->orderItems = array();
             $order->deliveryAddress = $this->getDeliveryAddress($userData);
-            $checkResults = array();
+            $order->billingAddress = $this->getDeliveryAddress($userData); //todo: set correct billing address
+
+            $allProducts = array();
 
             foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
                 $products = $this->getHelper()->prepareBepadoUnit($products);
-
+                $allProducts = array_merge($allProducts, $products);
                 // add order items in bepado order
                 $order->orderItems = array_map(function(Product $product) use ($basketHelper) {
                     return new OrderItem(array(
@@ -165,25 +167,24 @@ class Checkout extends BaseSubscriber
                     ));
 
                 }, $products);
+            }
 
-                /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
-                try {
-                    $checkResult = $sdk->checkProducts($order);
-                    $checkResults[] = $checkResult;
-                } catch (\Exception $e) {
-                    $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
-                    // If the checkout results in an exception because the remote shop is not available
-                    // don't show the exception to the user but tell him to remove the products from that shop
-                    $bepadoMessages = $this->getNotAvailableMessageForProducts($products);
-                }
+            /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
+            try {
+                $checkResult = $sdk->checkProducts($order);
+            } catch (\Exception $e) {
+                $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
+                // If the checkout results in an exception because the remote shop is not available
+                // don't show the exception to the user but tell him to remove the products from that shop
+                $bepadoMessages = $this->getNotAvailableMessageForProducts($allProducts);
+            }
 
-                if($checkResult && $checkResult->hasErrors()) {
-                    $bepadoMessages[$shopId] = $checkResult->errors;
-                }
+            if($checkResult->hasErrors()) {
+                $bepadoMessages = $checkResult->errors;
             }
 
             // Increase amount and shipping costs by the amount of bepado shipping costs
-            $basketHelper->recalculate($this->aggregateCheckResults($checkResults));
+            $basketHelper->recalculate($checkResult);
         }
 
         if ($bepadoMessages) {
@@ -217,32 +218,6 @@ class Checkout extends BaseSubscriber
     }
 
     /**
-     * @param \Bepado\SDK\Struct\CheckResult[] $shopCheckResults
-     * @return \Bepado\SDK\Struct\CheckResult
-     */
-    private function aggregateCheckResults(array $shopCheckResults)
-    {
-        $checkResult = new CheckResult();
-
-        foreach ($shopCheckResults as $shopCheckResult) {
-            $checkResult->changes = array_merge($checkResult->changes, $shopCheckResult->changes);
-            if ($shopCheckResult->shippingCosts !== null) {
-                $checkResult->shippingCosts = array_merge(
-                    $checkResult->shippingCosts,
-                    $shopCheckResult->shippingCosts
-                );
-            }
-        }
-
-        $checkResult->errors = $this->changeVisitor->visit($checkResult->changes);
-        $checkResult->aggregatedShippingCosts = $this->aggregator->aggregateShippingCosts(
-            $checkResult->shippingCosts
-        );
-
-        return $checkResult;
-    }
-
-    /**
      * Helper to translate bepado messages from the SDK. Will use the normalized message itself as namespace key
      *
      * @param $bepadoMessages
@@ -252,23 +227,20 @@ class Checkout extends BaseSubscriber
     {
         $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
 
-        foreach($bepadoMessages as $shopId => &$shopMessages) {
-            foreach ($shopMessages as &$bepadoMessage) {
-                $message = trim($bepadoMessage->message);
-                $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
-                if (empty($normalized) || empty($message)) {
-                    $normalized = "unknown-bepado-error-{$shopId}";
-                    $message = "Unknown error for {$shopId}";
-                }
-                $translation = $namespace->get(
-                    $normalized,
-                    $message,
-                    true
-                );
-
-                $bepadoMessage->message = $translation;
+        foreach ($bepadoMessages as &$bepadoMessage) {
+            $message = trim($bepadoMessage->message);
+            $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
+            if (empty($normalized) || empty($message)) {
+                $normalized = "unknown-bepado-error";
+                $message = "Unknown error";
             }
+            $translation = $namespace->get(
+                $normalized,
+                $message,
+                true
+            );
 
+            $bepadoMessage->message = $translation;
         }
 
         return $bepadoMessages;
@@ -400,11 +372,14 @@ class Checkout extends BaseSubscriber
      */
     private function getDeliveryAddress($userData)
     {
+        if (!$userData) {
+            return $this->createDummyAddres('DEU');
+        }
         $shippingData = $userData['shippingaddress'];
         $address = new \Bepado\SDK\Struct\Address();
         $address->zip = $shippingData['zipcode'];
         $address->city = $shippingData['city'];
-        $address->country = $userData['additional']['countryShipping']['iso3'];
+        $address->country = $userData['additional']['countryShipping']['iso3']; //when the user is not logged in
         $address->phone = $userData['billingaddress']['phone'];
         $address->email = $userData['additional']['user']['email'];
         if(!empty($userData['additional']['stateShipping']['shortcode'])) {
@@ -418,6 +393,20 @@ class Checkout extends BaseSubscriber
         $address->street = $shippingData['street'];
         $address->streetNumber = (string) $shippingData['streetnumber'];
         return $address;
+    }
+
+    private function createDummyAddres($country='DEU')
+    {
+        return new \Bepado\SDK\Struct\Address(array(
+            'country' => $country,
+            'firstName' => 'Shopware',
+            'surName' => 'AG',
+            'street' => 'Eggeroder Str. 6',
+            'zip' => '48624',
+            'city' => 'Schöppingen',
+            'phone' => '+49 (0) 2555 92885-0',
+            'email' => 'info@shopware.com'
+        ));
     }
 
 
@@ -501,7 +490,7 @@ class Checkout extends BaseSubscriber
 
         foreach ($checkResult->shippingCosts as $shipping) {
             if ($shipping->isShippable === false) {
-                $bepadoMessages[$shipping->shopId][] = new Message(array(
+                $bepadoMessages[] = new Message(array(
                     'message' => $namespace->get(
                             'frontend_checkout_cart_bepado_not_shippable',
                             'Ihre Bestellung kann nicht geliefert werden',

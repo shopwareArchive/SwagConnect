@@ -3,6 +3,7 @@
 {block name='frontend_checkout_error_messages_voucher_error' append}
 
 	{block name="frontend_checkout_bepado_error_messages"}
+        {*todo check errors in SW5 (responsive)*}
 		{if $bepadoMessages[$shopId]}
 			{foreach from=$bepadoMessages[$shopId] item=bepadomessage}
 				{$message = $bepadomessage->message}

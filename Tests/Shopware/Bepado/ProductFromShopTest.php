@@ -176,7 +176,7 @@ class ProductFromShopTest extends BepadoTestHelper
         Shopware()->Session()->offsetSet('sDispatch', 9);
 
         $result = $fromShop->calculateShippingCosts($order);
-        $this->assertInstanceOf('Bepado\SDK\Struct\ShippingCosts', $result);
+        $this->assertInstanceOf('Bepado\SDK\Struct\Shipping', $result);
 
         $this->assertTrue($result->shippingCosts > 0);
         $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);

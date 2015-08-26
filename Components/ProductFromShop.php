@@ -32,9 +32,8 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
-use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\PaymentStatus;
-use Bepado\SDK\Struct\ShippingCosts;
+use Bepado\SDK\Struct\Shipping;
 
 /**
  * The interface for products exported *to* bepado *from* the local shop
@@ -342,7 +341,7 @@ class ProductFromShop implements ProductFromShopBase
         $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
 
         if (!$country) {
-            return new ShippingCosts(array('isShippable' => false));
+            return new Shipping(array('isShippable' => false));
         }
 
         if (count($order->orderItems) == 0) {
@@ -354,7 +353,7 @@ class ProductFromShop implements ProductFromShopBase
         /* @var \Shopware\Models\Shop\Shop $shop */
         $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
         if (!$shop) {
-            return new ShippingCosts(array('isShippable' => false));
+            return new Shipping(array('isShippable' => false));
         }
         $shop->registerResources(Shopware()->Bootstrap());
 
@@ -384,7 +383,7 @@ class ProductFromShop implements ProductFromShopBase
 
         $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
         if (!is_array($result)) {
-            return new ShippingCosts(array('isShippable' => false));
+            return new Shipping(array('isShippable' => false));
         }
 
         $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';
@@ -392,7 +391,7 @@ class ProductFromShop implements ProductFromShopBase
             $sessionId,
         ));
 
-        return new ShippingCosts(array(
+        return new Shipping(array(
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));

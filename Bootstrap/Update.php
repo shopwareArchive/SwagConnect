@@ -97,10 +97,14 @@ class Update
     private function createGroupAndMainVariantFlag()
     {
         if (version_compare($this->version, '1.6.4', '<=')) {
-            $sql = 'ALTER TABLE `s_plugin_bepado_items`
-            ADD group_id INT( 11 ) NULL DEFAULT NULL,
-            ADD is_main_variant TINYINT( 1 ) NULL DEFAULT NULL ;';
-            Shopware()->Db()->exec($sql);
+            try {
+                $sql = 'ALTER TABLE `s_plugin_bepado_items`
+                        ADD group_id INT( 11 ) NULL DEFAULT NULL,
+                        ADD is_main_variant TINYINT( 1 ) NULL DEFAULT NULL ;';
+                Shopware()->Db()->exec($sql);
+            } catch (\Exception $e) {
+                // if table was already altered, ignore
+            }
         }
     }
 

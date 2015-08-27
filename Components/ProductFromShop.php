@@ -371,8 +371,19 @@ class ProductFromShop implements ProductFromShopBase
 
         $sessionId = uniqid('bepado_remote');
         Shopware()->System()->sSESSION_ID = $sessionId;
-        //todo get default shipping costs
-        Shopware()->System()->_SESSION['sDispatch'] = Shopware()->Session()['sDispatch'];
+
+        /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
+        $shipping = Shopware()->Models()->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy(array(
+            'type' => 0 // standard shipping
+        ));
+
+        // todo: if products are not shippable with default shipping
+        // todo: do we need to check with other shipping methods
+        if (!$shipping) {
+            return new Shipping(array('isShippable' => false));
+        }
+
+        Shopware()->System()->_SESSION['sDispatch'] = $shipping->getId();
 
         $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
         $products = array();
@@ -406,6 +417,7 @@ class ProductFromShop implements ProductFromShopBase
 
         return new Shipping(array(
             'shopId' => $this->gateway->getShopId(),
+            'service' => $shipping->getName(),
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));

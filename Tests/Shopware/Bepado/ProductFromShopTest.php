@@ -201,6 +201,7 @@ class ProductFromShopTest extends BepadoTestHelper
         $this->assertTrue($result->shippingCosts > 0);
         $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
         $this->assertEquals(25, $result->shopId);
+        $this->assertEquals('Standard Versand', $result->service);
     }
 
     public function testCalculateShippingCostsWithoutCountry()

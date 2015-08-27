@@ -151,8 +151,7 @@ class Checkout extends BaseSubscriber
             // prepare an order to check products
             $order = new \Bepado\SDK\Struct\Order();
             $order->orderItems = array();
-            $order->deliveryAddress = $this->getDeliveryAddress($userData);
-            $order->billingAddress = $this->getDeliveryAddress($userData); //todo: set correct billing address
+            $order->billingAddress = $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
             $allProducts = array();
 
@@ -172,6 +171,7 @@ class Checkout extends BaseSubscriber
             /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
             try {
                 $checkResult = $sdk->checkProducts($order);
+                $basketHelper->setCheckResult($checkResult);
             } catch (\Exception $e) {
                 $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                 // If the checkout results in an exception because the remote shop is not available
@@ -182,9 +182,6 @@ class Checkout extends BaseSubscriber
             if($checkResult->hasErrors()) {
                 $bepadoMessages = $checkResult->errors;
             }
-
-            // Increase amount and shipping costs by the amount of bepado shipping costs
-            $basketHelper->recalculate($checkResult);
         }
 
         if ($bepadoMessages) {
@@ -199,6 +196,8 @@ class Checkout extends BaseSubscriber
         if ($shopId) {
             $view->shopId = $shopId;
         }
+        // Increase amount and shipping costs by the amount of bepado shipping costs
+        $basketHelper->recalculate($basketHelper->getCheckResult());
 
         $bepadoMessages = $this->getNotShippableMessages($basketHelper->getCheckResult(), $bepadoMessages);
 

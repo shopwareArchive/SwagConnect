@@ -791,6 +791,14 @@ class BasketHelper
      */
     public function getCheckResult()
     {
-        $this->checkResult;
+        return $this->checkResult ?: new SDK\Struct\CheckResult();
+    }
+
+    /**
+     * @param SDK\Struct\CheckResult $checkResult
+     */
+    public function setCheckResult(SDK\Struct\CheckResult $checkResult)
+    {
+        $this->checkResult = $checkResult;
     }
 }

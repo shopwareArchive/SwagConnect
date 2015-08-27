@@ -152,6 +152,8 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function doBuy(Order $order)
     {
+        $this->manager->clear();
+
         $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $status = $this->manager->find('Shopware\Models\Order\Status', 0);
         $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);

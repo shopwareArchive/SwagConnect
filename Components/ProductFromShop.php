@@ -23,6 +23,7 @@
  */
 
 namespace Shopware\Bepado\Components;
+use Bepado\SDK\Gateway;
 use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Order,
     Bepado\SDK\Struct\Product,
@@ -54,6 +55,11 @@ class ProductFromShop implements ProductFromShopBase
     private $manager;
 
     /**
+     * @var \Bepado\SDK\Gateway
+     */
+    private $gateway;
+
+    /**
      * @var Logger
      */
     private $logger;
@@ -62,10 +68,16 @@ class ProductFromShop implements ProductFromShopBase
      * @param Helper $helper
      * @param ModelManager $manager
      */
-    public function __construct(Helper $helper, ModelManager $manager, Logger $logger)
+    public function __construct(
+        Helper $helper,
+        ModelManager $manager,
+        Gateway $gateway,
+        Logger $logger
+    )
     {
         $this->helper = $helper;
         $this->manager = $manager;
+        $this->gateway = $gateway;
         $this->logger = $logger;
     }
 
@@ -359,6 +371,7 @@ class ProductFromShop implements ProductFromShopBase
 
         $sessionId = uniqid('bepado_remote');
         Shopware()->System()->sSESSION_ID = $sessionId;
+        //todo get default shipping costs
         Shopware()->System()->_SESSION['sDispatch'] = Shopware()->Session()['sDispatch'];
 
         $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
@@ -392,6 +405,7 @@ class ProductFromShop implements ProductFromShopBase
         ));
 
         return new Shipping(array(
+            'shopId' => $this->gateway->getShopId(),
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));

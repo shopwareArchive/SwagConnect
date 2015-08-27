@@ -17,7 +17,12 @@ class ProductFromShopTest extends BepadoTestHelper
 {
     public function testBuy()
     {
-        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
 
         $address = new Address(array(
             'firstName' => 'John',
@@ -62,7 +67,12 @@ class ProductFromShopTest extends BepadoTestHelper
      */
     public function testByShouldThrowException()
     {
-        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
 
         $fromShop->buy(new Order(array(
         )));
@@ -166,7 +176,17 @@ class ProductFromShopTest extends BepadoTestHelper
 
     public function testCalculateShippingCosts()
     {
-        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+        $mockGateway = $this->getMockBuilder('Bepado\SDK\Gateway\PDO')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockGateway->expects($this->any())->method('getShopId')->willReturn(25);
+
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            $mockGateway,
+            new Logger(Shopware()->Db())
+        );
 
         $order = $this->createOrder();
 
@@ -180,11 +200,17 @@ class ProductFromShopTest extends BepadoTestHelper
 
         $this->assertTrue($result->shippingCosts > 0);
         $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
+        $this->assertEquals(25, $result->shopId);
     }
 
     public function testCalculateShippingCostsWithoutCountry()
     {
-        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
 
         $order = new Order();
         $shippingCosts = $fromShop->calculateShippingCosts($order);
@@ -197,7 +223,12 @@ class ProductFromShopTest extends BepadoTestHelper
      */
     public function testCalculateShippingCostsWithoutOrderItems()
     {
-        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
 
         $order = $this->createOrder();
         $order->orderItems = array();

@@ -247,7 +247,7 @@ class Shopping
 
         /** @var \Bepado\SDK\Struct\Shipping $shipping */
         foreach($checkResult->shippingCosts as $shipping) {
-            if ($orders[$shipping->shopId]) {
+            if (isset($orders[$shipping->shopId])) {
                 $orders[$shipping->shopId]->shipping = $shipping;
             }
         }

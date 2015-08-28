@@ -262,6 +262,14 @@ class ProductFromShop implements ProductFromShopBase
 
         $model->calculateInvoiceAmount();
 
+        $dispatchRepository = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch');
+        $dispatch = $dispatchRepository->findOneBy(array(
+            'name' => $order->shipping->service
+        ));
+        if ($dispatch) {
+            $model->setDispatch($dispatch);
+        }
+
         $this->manager->flush();
 
         return $model->getNumber();

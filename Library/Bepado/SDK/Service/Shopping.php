@@ -245,15 +245,15 @@ class Shopping
         $aggregatedShippingCosts = $checkResult->aggregatedShippingCosts;
         $splitShippingCost = $checkResult->shippingCosts;
 
+        if (!$aggregatedShippingCosts->isShippable) {
+            return $this->failedReservationNotShippable($orders, $aggregatedShippingCosts->shippingCosts);
+        }
+
         /** @var \Bepado\SDK\Struct\Shipping $shipping */
         foreach($checkResult->shippingCosts as $shipping) {
             if (isset($orders[$shipping->shopId])) {
                 $orders[$shipping->shopId]->shipping = $shipping;
             }
-        }
-
-        if (!$aggregatedShippingCosts->isShippable) {
-            return $this->failedReservationNotShippable($orders, $aggregatedShippingCosts->shippingCosts);
         }
 
         foreach ($orders as $shopId => $order) {

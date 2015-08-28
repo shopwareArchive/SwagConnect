@@ -116,6 +116,22 @@ class SocialNetwork
         return $responseBody['attributes'];
     }
 
+    /**
+     * Returns array with available marketplace settings
+     * as key => value pairs
+     *
+     * @return array
+     */
+    public function getMarketplaceSettings()
+    {
+        $response = $this->request('/sdk/marketplace/settings', array());
+        $this->handleResponse($response, "Marketplace settings");
+
+        $responseBody = json_decode($response->body, true);
+        return $responseBody['settings'];
+    }
+
+
     private function verifyProductIds(array $productIds)
     {
         foreach ($productIds as $productId) {

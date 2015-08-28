@@ -121,12 +121,14 @@ class BasketHelper
             if (!empty($row['mode'])) {
                 continue;
             }
-            $sourceIds = $this->helper->getArticleSourceIds(array($row['articleID']));
-            $products = $this->getHelper()->getRemoteProducts($sourceIds);
+
+            $articleDetailId = $row['additional_details']['articleDetailsID'];
+            $sourceId = $this->helper->getArticleDetailSourceId($articleDetailId);
+            $products = $this->getHelper()->getRemoteProducts(array($sourceId));
             if (empty($products)) {
                 continue;
             }
-            $product = $products[0];
+            $product = reset($products);
             if ($product === null || $product->shopId === null) {
                 continue;
             }

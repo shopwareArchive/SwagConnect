@@ -527,6 +527,61 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * Loads all price groups where at least
+     * one product with price greater than 0 exists
+     *
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getExportPriceGroupsAction()
+    {
+        $groups = array();
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE price > 0');
+        $priceCount = $query->fetchColumn();
+        if ($priceCount > 0) {
+            $groups[] = array(
+                'field' => 'price',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/price',
+                    'Preis'
+                )
+            );
+        }
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE baseprice > 0');
+        $purchasePriceCount = $query->fetchColumn();
+        if ($purchasePriceCount > 0) {
+            $groups[] = array(
+                'field' => 'basePrice',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/base_price',
+                    'Einkaufspreis'
+                )
+            );
+        }
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE pseudoprice > 0');
+        $pseudoPriceCount = $query->fetchColumn();
+        if ($pseudoPriceCount > 0) {
+            $groups[] = array(
+                'field' => 'pseudoPrice',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/pseudo_price',
+                    'Pseudopreis'
+                )
+            );
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $groups,
+                'total' => count($groups),
+            )
+        );
+    }
+
+    /**
      * @return \Shopware\Bepado\Components\BepadoFactory
      */
     public function getFactory()

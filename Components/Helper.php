@@ -125,8 +125,8 @@ class Helper
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
-        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId AND ba.exportStatus IS NULL');
-        $builder->orWhere('d.number = :number AND ba.exportStatus IS NULL');
+        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
+        $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $product->shopId);

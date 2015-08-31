@@ -37,4 +37,11 @@ class Reservation extends Struct
      * @var Struct\Order[]
      */
     public $orders = array();
+
+    /**
+     * Overall shipping costs for the reservation
+     *
+     * @var Struct\Shipping
+     */
+    public $aggregatedShippingCosts;
 }

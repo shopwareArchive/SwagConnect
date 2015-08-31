@@ -111,6 +111,7 @@ class BepadoFactory
             new ProductFromShop(
                 $helper,
                 $manager,
+                $gateway,
                 new Logger(Shopware()->Db())
             ),
             new ShopwareErrorHandler(),

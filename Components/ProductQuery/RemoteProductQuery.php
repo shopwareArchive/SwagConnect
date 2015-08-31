@@ -36,7 +36,7 @@ class RemoteProductQuery extends BaseProductQuery
 
         $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
         $builder->join('at.article', 'a');
-        $builder->join('a.mainDetail', 'd');
+        $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('d.prices', 'defaultPrice', 'with', "defaultPrice.from = 1 AND defaultPrice.customerGroupKey = 'EK'");
         $builder->join('a.tax', 't');

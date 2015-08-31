@@ -98,4 +98,51 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
 
         echo $result;
     }
+
+    public function calculateShippingCostsAction()
+    {
+        $sourceIds = $this->Request()->getParam('sourceIds', array());
+        $countryIso3 = $this->Request()->getParam('country', null);
+        $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
+
+        if (!$country) {
+            throw new \RuntimeException('Invalid country. Country code must be iso3');
+        }
+
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $attributes = $repository->findBy(array('sourceId' => $sourceIds, 'shopId' => null));
+
+
+        /* @var \Shopware\Models\Shop\Shop $shop */
+        $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
+        if (!$shop) {
+            throw new \RuntimeException("Shop couldn't be found");
+        }
+        $shop->registerResources(Shopware()->Bootstrap());
+
+        $sessionId = uniqid('bepado_remote');
+        Shopware()->System()->sSESSION_ID = $sessionId;
+        Shopware()->System()->_SESSION['sDispatch'] = Shopware()->Session()['sDispatch'];
+
+        foreach ($attributes as $attribute) {
+            $ordernumber = $attribute->getArticleDetail()->getNumber();
+            $quantity = 1;
+            Shopware()->Modules()->Basket()->sAddArticle($ordernumber, $quantity);
+        }
+        $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
+        if (!is_array($result)) {
+            echo serialize(new \Bepado\SDK\Struct\ShippingCosts(array(
+                'isShippable' => false,
+            )));
+        }
+        $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';
+        Shopware()->Db()->executeQuery($sql, array(
+            $sessionId,
+        ));
+
+        echo serialize(new \Bepado\SDK\Struct\ShippingCosts(array(
+            'shippingCosts' => $result['netto'],
+            'grossShippingCosts' => $result['brutto'],
+        )));
+    }
 }

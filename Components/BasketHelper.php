@@ -42,16 +42,16 @@ class BasketHelper
     protected $bepadoShops = array();
 
     /**
-     * @var \Bepado\SDK\Struct\TotalShippingCosts
+     * @var \Bepado\SDK\Struct\CheckResult
      */
-    protected $totalShippingCosts;
+    protected $checkResult;
 
     /**
      * The original shopware shipping costs
      *
      * @var float
      */
-    protected $originalShippingCosts;
+    protected $originalShippingCosts = 0;
 
     /**
      * Should there be a bepado hint in the template
@@ -121,12 +121,14 @@ class BasketHelper
             if (!empty($row['mode'])) {
                 continue;
             }
-            $sourceIds = $this->helper->getArticleSourceIds(array($row['articleID']));
-            $products = $this->getHelper()->getRemoteProducts($sourceIds);
+
+            $articleDetailId = $row['additional_details']['articleDetailsID'];
+            $sourceId = $this->helper->getArticleDetailSourceId($articleDetailId);
+            $products = $this->getHelper()->getRemoteProducts(array($sourceId));
             if (empty($products)) {
                 continue;
             }
-            $product = $products[0];
+            $product = reset($products);
             if ($product === null || $product->shopId === null) {
                 continue;
             }
@@ -151,22 +153,6 @@ class BasketHelper
         foreach($this->bepadoContent as $shopId => $items) {
             $this->bepadoShops[$shopId] = $this->getSdk()->getShop($shopId);
         }
-    }
-
-    /**
-     * Build array of shipping costs
-     *
-     * @param $country string iso3
-     */
-    protected function calculateShippingCosts($country=null)
-    {
-        $this->bepadoGrossShippingCosts = array();
-        $this->bepadoNetShippingCosts = array();
-        $this->originalShippingCosts = 0;
-
-        $dummyOrder = $this->createDummyOrderForShippingCostCalculation($country);
-
-        $this->totalShippingCosts = $this->getSdk()->calculateShippingCosts($dummyOrder);
     }
 
     /**
@@ -441,17 +427,15 @@ class BasketHelper
     /**
      * Increase the basket's shipping costs and amount by the total value of bepado shipping costs
      *
-     * @param $country string iso3
+     * @param \Bepado\SDK\Struct\CheckResult $checkResult
      */
-    public function recalculate($country=null)
+    public function recalculate(SDK\Struct\CheckResult $checkResult)
     {
+        $this->checkResult = $checkResult;
         $this->basket['sAmount'] = number_format($this->basket['sAmount'], 2, '.', '');
 
-        $this->calculateShippingCosts($country);
-        $shippingCostsNet = number_format($this->totalShippingCosts->shippingCosts, 2, '.', '');
-
-        $shippingCosts = $shippingCostsNet;
-        $shippingCostsWithTax = number_format($shippingCosts * (1+$this->getMaxTaxRate()/100), 2, '.', '');
+        $shippingCostsNet = number_format($this->checkResult->aggregatedShippingCosts->shippingCosts, 2, '.', '');
+        $shippingCostsWithTax = number_format($this->checkResult->aggregatedShippingCosts->grossShippingCosts, 2, '.', '');
 
         $basketHasTax = $this->hasTax();
 
@@ -463,13 +447,13 @@ class BasketHelper
         if ($basketHasTax) {
             $this->basket['sShippingcosts'] += $shippingCostsWithTax;
         } else {
-            $this->basket['sShippingcosts'] += $shippingCosts;
+            $this->basket['sShippingcosts'] += $shippingCostsNet;
         }
         $this->basket['sShippingcostsNet'] += $shippingCostsNet;
         $this->basket['sShippingcostsWithTax'] += $shippingCostsWithTax;
 
         // Update total amount
-        $this->basket['AmountNumeric'] += $shippingCosts;
+        $this->basket['AmountNumeric'] += $shippingCostsNet;
         $this->basket['AmountNetNumeric'] += $shippingCostsNet;
 
         if(!empty($this->basket['sAmountWithTax'])) {
@@ -483,10 +467,10 @@ class BasketHelper
         if ($basketHasTax) {
             $this->basket['sAmount'] += $shippingCostsWithTax;
         } else {
-            $this->basket['sAmount'] += $shippingCosts;
+            $this->basket['sAmount'] += $shippingCostsNet;
         }
 
-        $this->basket['sAmountTax'] += $this->basket['sShippingcostsWithTax'] - $shippingCosts;
+        $this->basket['sAmountTax'] += $this->basket['sShippingcostsWithTax'] - $shippingCostsNet;
 
         // Core workaround: Shopware tries to re-calculate the shipping tax rate from the net price
         // \Shopware_Models_Document_Order::processOrder
@@ -740,11 +724,15 @@ class BasketHelper
     public function getBepadoGrossShippingCosts()
     {
         $result = array();
-        foreach($this->totalShippingCosts->shops as $cost) {
+        if (!$this->checkResult instanceof SDK\Struct\CheckResult) {
+            return $result;
+        }
+
+        foreach($this->checkResult->shippingCosts as $shipping) {
             if ($this->hasTax()) {
-                $result[$cost->shopId] = $cost->shippingCosts * (1+$this->getMaxTaxRate()/100);
+                $result[$shipping->shopId] = $shipping->grossShippingCosts;
             } else {
-                $result[$cost->shopId] = $cost->shippingCosts;
+                $result[$shipping->shopId] = $shipping->shippingCosts;
             }
         }
 
@@ -783,47 +771,6 @@ class BasketHelper
         return $this->database;
     }
 
-
-    /**
-     * Creates a dummy order struct for the SDK's shipping cost calculation
-     *
-     * @param $country string iso3
-     * @return SDK\Struct\Order
-     */
-    protected function createDummyOrderForShippingCostCalculation($country='DEU')
-    {
-        $dummyOrder = new \Bepado\SDK\Struct\Order(array(
-            'deliveryAddress' => new \Bepado\SDK\Struct\Address(array(
-                'country' => $country,
-                'firstName' => 'Shopware',
-                'surName' => 'AG',
-                'street' => 'Eggeroder Str. 6',
-                'zip' => '48624',
-                'city' => 'Schöppingen',
-                'phone' => '+49 (0) 2555 92885-0',
-                'email' => 'info@shopware.com'
-            )),
-        // todo@dn: Remove this workaround
-        'orderShop' => $this->getDatabase()->fetchOne('
-            SELECT s_config FROM bepado_shop_config WHERE s_shop = "_self_"
-            ')
-     ));
-
-     foreach ($this->bepadoProducts as $shopId => $products) {
-         $products = $this->getHelper()->prepareBepadoUnit($products);
-         // todo@dn: Remove this workaround
-         $dummyOrder->providerShop = $shopId;
-         foreach ($products as $product) {
-             $dummyOrder->orderItems[] = new \Bepado\SDK\Struct\OrderItem(array(
-                 'count' => $this->getQuantityForProduct($product),
-                 'product' => $product,
-             ));
-         }
-         
-     }
-        return $dummyOrder;
-    }
-
     /**
      * Returns "Gross price displayed in frontend" value
      * @return boolean
@@ -842,10 +789,18 @@ class BasketHelper
     }
 
     /**
-     * @return SDK\Struct\TotalShippingCosts
+     * @return SDK\Struct\CheckResult
      */
-    public function getTotalShippingCosts()
+    public function getCheckResult()
     {
-        return $this->totalShippingCosts;
+        return $this->checkResult ?: new SDK\Struct\CheckResult();
+    }
+
+    /**
+     * @param SDK\Struct\CheckResult $checkResult
+     */
+    public function setCheckResult(SDK\Struct\CheckResult $checkResult)
+    {
+        $this->checkResult = $checkResult;
     }
 }

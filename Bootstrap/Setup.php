@@ -336,6 +336,7 @@ class Setup
             'priceGroupForPurchasePriceExport' => array('EK', null, 'export'),
             'priceFieldForPriceExport' => array('price', null, 'export'),
             'priceFieldForPurchasePriceExport' => array('basePrice', null, 'export'),
+            'exportPriceMode' => array(array('price'), null, 'export'),
 
             'importCreateCategories' => array('1', null, null),
             'detailProductNoIndex' => array('1', null, 'general'),

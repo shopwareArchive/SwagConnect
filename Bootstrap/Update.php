@@ -91,6 +91,8 @@ class Update
 
 		$this->createPurchasePriceHash();
 
+        $this->insertExportPriceMode();
+
         return true;
     }
 
@@ -505,6 +507,16 @@ class Update
             } catch(\Exception $e) {
                 // if table was already altered, ignore
             }
+        }
+    }
+
+    public function insertExportPriceMode()
+    {
+        if (version_compare($this->version, '1.6.7', '<=')) {
+            $this->bootstrap->registerMyLibrary();
+            $configComponent = $this->bootstrap->getConfigComponents();
+
+            $configComponent->setConfig('exportPriceMode', array('price'), null, 'export');
         }
     }
 }

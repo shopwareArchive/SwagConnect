@@ -61,6 +61,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         synchronizationBarDescription: Ext.String.format('{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu [0] an. Es kann etwas länger dauern, bis Ihre Produkte auf [0] erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}', marketplaceName),
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
         priceConfigurationDescription: Ext.String.format('{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}', marketplaceName),
+        priceMode: '{s name=config/config/price/priceMode}Endkunden-VK{/s}',
+        purchasePriceMode: '{s name=config/price/purchasePriceMode}Listenverkaufspreis-VK{/s}',
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
         exportLanguagesHelpText: Ext.String.format('{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu [0] verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}', marketplaceName),
@@ -134,6 +136,15 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     xtype: 'label',
                     html: me.snippets.priceConfigurationDescription
                 },
+                {
+                    xtype: 'checkboxgroup',
+                    columns: 1,
+                    vertical: true,
+                    items: [
+                        { boxLabel: me.snippets.priceMode, name: 'exportPriceMode', inputValue: 'price' },
+                        { boxLabel: me.snippets.purchasePriceMode, name: 'exportPriceMode', inputValue: 'purchasePrice', margin: '15 0 0 0' }
+                    ]
+                },
                 me.createPriceField('price'),
                 me.createPriceField('purchasePrice')
             ]
@@ -158,7 +169,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false || response.isPricingMappingAllowed === false) {
-                    me.priceMappingsFieldSet.setDisabled(true)
+                    // todo: always allow export price configuration
+                    //me.priceMappingsFieldSet.setDisabled(true)
                 }
             },
             failure: function() { }
@@ -242,18 +254,15 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
      */
     createPriceField: function (type) {
         var me = this,
-            fieldLabel,
             dataIndexCustomerGroup,
             dataIndexField,
             helpText;
 
         if (type == 'price') {
-            fieldLabel = '{s name=config/price/price}Price{/s}';
             dataIndexCustomerGroup = 'priceGroupForPriceExport';
             dataIndexField = 'priceFieldForPriceExport';
             helpText = '{s name=config/export/help/price}Configure, which price field of which customer group should be exported as the product\'s end user price{/s}';
         } else if (type == 'purchasePrice') {
-            fieldLabel = '{s name=config/price/purchasePrice}PurchasePrice{/s}';
             dataIndexCustomerGroup = 'priceGroupForPurchasePriceExport';
             dataIndexField = 'priceFieldForPurchasePriceExport';
             helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
@@ -262,7 +271,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         }
 
         return {
-            fieldLabel: fieldLabel,
             xtype: 'fieldcontainer',
             layout: 'hbox',
             items: [

@@ -276,13 +276,17 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             items: [
                 {
                     xtype: 'combobox',
-                    queryMode: 'remote',
+                    queryMode: 'local',
                     editable: false,
                     name: dataIndexCustomerGroup,
                     allowBlank: false,
                     displayField: 'name',
                     valueField: 'key',
-                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load(),
+                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load({
+                        params:{
+                            priceField: type
+                        }
+                    }),
                     supportText: '{s name=config/export/support/customer}customer group{/s}'
                 },
                 {

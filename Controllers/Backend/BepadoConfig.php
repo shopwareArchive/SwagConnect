@@ -471,6 +471,62 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
+     * Loads all customer groups where at least
+     * one product with price or purchasePrice
+     * greater than 0 exists
+     *
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getExportCustomerGroupsAction()
+    {
+        $priceField = $this->Request()->getParam('priceField', 'price');
+
+        if ($priceField == 'purchasePrice') {
+            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE baseprice > 0 GROUP BY pricegroup');
+            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE price > 0 GROUP BY pricegroup');
+            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+
+        $builder = $repository->createQueryBuilder('groups');
+        $builder->select(array(
+            'groups.id as id',
+            'groups.key as key',
+            'groups.name as name',
+            'groups.tax as tax',
+            'groups.taxInput as taxInput',
+            'groups.mode as mode'
+        ));
+        $builder->andWhere('groups.key IN (:groupKeys)')
+            ->setParameter('groupKeys', $availableGroups);
+        $builder->addFilter($this->Request()->getParam('filter', array()));
+        $builder->addOrderBy($this->Request()->getParam('sort', array()));
+
+        $builder->setFirstResult($this->Request()->getParam('start'))
+            ->setMaxResults($this->Request()->getParam('limit'));
+
+        $query = $builder->getQuery();
+
+        //get total result of the query
+        $total = Shopware()->Models()->getQueryCount($query);
+
+        $data = $query->getArrayResult();
+
+        //return the data and total count
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $data,
+                'total' => $total,
+            )
+        );
+    }
+
+    /**
      * @return \Shopware\Bepado\Components\BepadoFactory
      */
     public function getFactory()

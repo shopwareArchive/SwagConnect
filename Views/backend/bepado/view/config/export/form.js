@@ -141,12 +141,23 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     columns: 1,
                     vertical: true,
                     items: [
-                        { boxLabel: me.snippets.priceMode, name: 'exportPriceMode', inputValue: 'price' },
-                        { boxLabel: me.snippets.purchasePriceMode, name: 'exportPriceMode', inputValue: 'purchasePrice', margin: '15 0 0 0' }
+                        {
+                            boxLabel: me.snippets.priceMode,
+                            name: 'exportPriceMode',
+                            readOnly: true,
+                            inputValue: 'price'
+                        },
+                        {
+                            boxLabel: me.snippets.purchasePriceMode,
+                            name: 'exportPriceMode',
+                            inputValue: 'purchasePrice',
+                            readOnly: true,
+                            margin: '15 0 0 0'
+                        }
                     ]
                 },
-                me.createPriceField('price'),
-                me.createPriceField('purchasePrice')
+                me.exportPriceMode = me.createPriceField('price'),
+                me.exportPurchasePriceMode = me.createPriceField('purchasePrice')
             ]
         });
 
@@ -169,8 +180,13 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false || response.isPricingMappingAllowed === false) {
-                    // todo: always allow export price configuration
-                    //me.priceMappingsFieldSet.setDisabled(true)
+                    me.priceMappingsFieldSet.setDisabled(true);
+                }
+                if (response.success === false || response.isPriceModeEnabled === false) {
+                    me.exportPriceMode.setDisabled(true);
+                }
+                if (response.success === false || response.isPurchasePriceModeEnabled === false) {
+                    me.exportPurchasePriceMode.setDisabled(true);
                 }
             },
             failure: function() { }
@@ -270,8 +286,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             return { };
         }
 
-        return {
-            xtype: 'fieldcontainer',
+        return Ext.create('Ext.form.FieldContainer', {
             layout: 'hbox',
             items: [
                 {
@@ -303,7 +318,8 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
                 }
             ]
-        };
+        });
+
     },
 
     /**

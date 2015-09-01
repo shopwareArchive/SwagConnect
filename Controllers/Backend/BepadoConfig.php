@@ -145,10 +145,14 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function isPricingMappingAllowedAction()
     {
+        $exportPriceMode = $this->getConfigComponent()->getConfig('exportPriceMode', array());
+
         $this->View()->assign(
             array(
                 'success' => true,
-                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0
+                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0,
+                'isPriceModeEnabled' => in_array('price', $exportPriceMode),
+                'isPurchasePriceModeEnabled' => in_array('purchasePrice', $exportPriceMode),
             )
         );
     }

@@ -60,8 +60,9 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         synchronization: '{s name=synchronization}Synchronization{/s}',
         synchronizationBarDescription: Ext.String.format('{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu [0] an. Es kann etwas länger dauern, bis Ihre Produkte auf [0] erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}', marketplaceName),
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
-        priceConfigurationDescription: Ext.String.format('{s name=config/export/label/price_description}Hier können Sie konfigurieren, welche Preise für ihre Produkte exportiert werden. Sie können den »Endkunden-Preis« und den »Händler-Preis« unabhängig voneinander festlegen. Sie geben an, welches „Preisfeld“ aus welcher „Kundengruppe“ aus Ihren Artikeln übernommen wird.<br><br>{/s}', marketplaceName),
+        priceConfigurationDescription: Ext.String.format('{s name=config/export/label/export_price_description}Hier bestimmen Sie die Preise, die Sie zu [0] exportieren möchten. Alle Preise werden netto exportiert und können individuell mit Auf-und Abschlägen bearbeitet werden.<br><br>{/s}', marketplaceName),
         priceMode: '{s name=config/config/price/priceMode}Endkunden-VK{/s}',
+        priceModeDescription: Ext.String.format('{s name=config/export/label/price_mode_description}Preiskalkulation auf [0]: <div class="ul-disc-type-holder"><ul><li>Exportieren Sie zum Beispiel nur einen Endkunden VK, können Sie über einen Abschlag einen Händlereinkaufspreis bestimmen.</li><li>Exportieren Sie einen Listenverkaufspreis, können Sie mit auf oder Abschlägen einen Händlereinkaufspreis definieren und optional eine unverbindliche Preisempfehlung für den Verkaufspreis definieren.</li><li>Exportieren Sie einen Endkunden Verkaufspreis und einen Listenverkaufspreis, können Sie optional Preise auf [0] bearbeiten.gas</li></ul></div>{/s}', marketplaceName),
         purchasePriceMode: '{s name=config/price/purchasePriceMode}Listenverkaufspreis-VK{/s}',
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
@@ -137,27 +138,39 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     html: me.snippets.priceConfigurationDescription
                 },
                 {
-                    xtype: 'checkboxgroup',
-                    columns: 1,
-                    vertical: true,
+                    xtype: 'container',
+                    layout: 'column',
+                    margin: '0 0 30 0',
                     items: [
                         {
-                            boxLabel: me.snippets.priceMode,
-                            name: 'exportPriceMode',
-                            readOnly: true,
-                            inputValue: 'price'
+                            xtype: 'checkboxgroup',
+                            columns: 1,
+                            vertical: true,
+                            columnWidth: .25,
+                            items: [
+                                {
+                                    boxLabel: me.snippets.priceMode,
+                                    name: 'exportPriceMode',
+                                    readOnly: true,
+                                    inputValue: 'price'
+                                },
+                                {
+                                    boxLabel: me.snippets.purchasePriceMode,
+                                    name: 'exportPriceMode',
+                                    inputValue: 'purchasePrice',
+                                    readOnly: true,
+                                    margin: '15 0 0 0'
+                                }
+                            ]
                         },
-                        {
-                            boxLabel: me.snippets.purchasePriceMode,
-                            name: 'exportPriceMode',
-                            inputValue: 'purchasePrice',
-                            readOnly: true,
-                            margin: '15 0 0 0'
-                        }
+                        me.exportPriceMode = me.createPriceField('price'),
+                        me.exportPurchasePriceMode = me.createPriceField('purchasePrice')
                     ]
                 },
-                me.exportPriceMode = me.createPriceField('price'),
-                me.exportPurchasePriceMode = me.createPriceField('purchasePrice')
+                {
+                    xtype: 'label',
+                    html: me.snippets.priceModeDescription
+                }
             ]
         });
 
@@ -195,10 +208,10 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         Ext.getStore('export.List').load();
 
         return [
+            me.priceMappingsFieldSet,
             syncFieldset,
             container,
-            me.languagesExportFieldset,
-            me.priceMappingsFieldSet
+            me.languagesExportFieldset
         ];
     },
 
@@ -288,6 +301,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
 
         return Ext.create('Ext.form.FieldContainer', {
             layout: 'hbox',
+            columnWidth: .75,
             items: [
                 {
                     xtype: 'combobox',

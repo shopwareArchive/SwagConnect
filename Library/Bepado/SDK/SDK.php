@@ -445,23 +445,6 @@ final class SDK
     }
 
     /**
-     * Perform search on Bepado
-     *
-     * Search will return a SearchResult struct, which can be used to display
-     * the search results in your shop. For details on the Search and
-     * SearchResult structs see the respective API documentation.
-     *
-     * @param Struct\Search $search
-     * @return Struct\SearchResult
-     */
-    public function search(Struct\Search $search)
-    {
-        $this->verifySdkIfNecessary();
-
-        return $this->dependencies->getSearchService()->search($search);
-    }
-
-    /**
      * Return array with categories
      *
      * The array is indexed by the category identifiers, which should be used

@@ -100,13 +100,6 @@ class DependencyResolver
     protected $verificationService;
 
     /**
-     * Search service
-     *
-     * @var Service\Search
-     */
-    protected $searchService;
-
-    /**
      * Sync service
      *
      * @var Service\Syncer
@@ -157,11 +150,6 @@ class DependencyResolver
      * @var string
      */
     protected $transactionHost = 'https://transaction.bepado.de';
-
-    /**
-     * @var string
-     */
-    protected $searchHost = 'https://search.bepado.de';
 
     /**
      * @var ChangeVisitor\Message
@@ -217,9 +205,6 @@ class DependencyResolver
         }
         if ($host = getenv('_TRANSACTION_HOST')) {
             $this->transactionHost = "http://{$host}";
-        }
-        if ($host = getenv('_SEARCH_HOST')) {
-            $this->searchHost = "http://{$host}";
         }
 
         $this->apiKey = $apiKey;
@@ -519,22 +504,6 @@ class DependencyResolver
         }
 
         return $this->verificationService;
-    }
-
-    /**
-     * @return Service\Search
-     */
-    public function getSearchService()
-    {
-        if ($this->searchService === null) {
-            $this->searchService = new Service\Search(
-                $this->getHttpClient($this->searchHost),
-                $this->apiKey,
-                $this->gateway->getShopId()
-            );
-        }
-
-        return $this->searchService;
     }
 
     /**

@@ -172,15 +172,15 @@ class Checkout extends BaseSubscriber
             try {
                 $checkResult = $sdk->checkProducts($order);
                 $basketHelper->setCheckResult($checkResult);
+
+                if($checkResult->hasErrors()) {
+                    $bepadoMessages = $checkResult->errors;
+                }
             } catch (\Exception $e) {
                 $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                 // If the checkout results in an exception because the remote shop is not available
                 // don't show the exception to the user but tell him to remove the products from that shop
                 $bepadoMessages = $this->getNotAvailableMessageForProducts($allProducts);
-            }
-
-            if($checkResult->hasErrors()) {
-                $bepadoMessages = $checkResult->errors;
             }
         }
 

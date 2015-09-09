@@ -117,7 +117,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        if(!in_array($actionName, array('confirm', 'cart', 'finish'))) {
+        if(!in_array($actionName, array('confirm', 'shippingPayment', 'cart', 'finish'))) {
             return;
         }
 

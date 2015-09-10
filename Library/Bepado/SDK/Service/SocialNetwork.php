@@ -131,6 +131,7 @@ class SocialNetwork
         return $responseBody['settings'];
     }
 
+
     private function verifyProductIds(array $productIds)
     {
         foreach ($productIds as $productId) {

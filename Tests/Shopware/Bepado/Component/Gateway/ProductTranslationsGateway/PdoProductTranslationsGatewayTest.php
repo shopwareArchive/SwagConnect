@@ -93,10 +93,10 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $sql = "SELECT objectdata, objectlanguage
                 FROM s_core_translations
-                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (?,?)
         ";
 
-        $queryParams = array('article', 103);
+        $queryParams = array('article', 103, 2, 3);
         $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
 
         $expected = array(
@@ -132,10 +132,10 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $sql = "SELECT objectdata, objectlanguage
                 FROM s_core_translations
-                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (?,?)
         ";
 
-        $queryParams = array('article', 103);
+        $queryParams = array('article', 103, 2, 3);
         $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
 
         $expected = array(
@@ -162,10 +162,10 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $sql = "SELECT objectdata, objectlanguage
                 FROM s_core_translations
-                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (2,3)
+                WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN (?,?)
         ";
 
-        $queryParams = array('article', 111);
+        $queryParams = array('article', 111, 2, 3);
         $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
 
         $this->assertEquals(array(), $this->gateway->getTranslations(111, array(2,3)));

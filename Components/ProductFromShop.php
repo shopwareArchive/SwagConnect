@@ -23,6 +23,7 @@
  */
 
 namespace Shopware\Bepado\Components;
+use Bepado\SDK\Gateway;
 use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Order,
     Bepado\SDK\Struct\Product,
@@ -33,6 +34,7 @@ use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
 use Bepado\SDK\Struct\PaymentStatus;
+use Bepado\SDK\Struct\Shipping;
 
 /**
  * The interface for products exported *to* bepado *from* the local shop
@@ -53,6 +55,11 @@ class ProductFromShop implements ProductFromShopBase
     private $manager;
 
     /**
+     * @var \Bepado\SDK\Gateway
+     */
+    private $gateway;
+
+    /**
      * @var Logger
      */
     private $logger;
@@ -61,10 +68,16 @@ class ProductFromShop implements ProductFromShopBase
      * @param Helper $helper
      * @param ModelManager $manager
      */
-    public function __construct(Helper $helper, ModelManager $manager, Logger $logger)
+    public function __construct(
+        Helper $helper,
+        ModelManager $manager,
+        Gateway $gateway,
+        Logger $logger
+    )
     {
         $this->helper = $helper;
         $this->manager = $manager;
+        $this->gateway = $gateway;
         $this->logger = $logger;
     }
 
@@ -139,6 +152,8 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function doBuy(Order $order)
     {
+        $this->manager->clear();
+
         $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $status = $this->manager->find('Shopware\Models\Order\Status', 0);
         $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);
@@ -247,6 +262,14 @@ class ProductFromShop implements ProductFromShopBase
 
         $model->calculateInvoiceAmount();
 
+        $dispatchRepository = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch');
+        $dispatch = $dispatchRepository->findOneBy(array(
+            'name' => $order->shipping->service
+        ));
+        if ($dispatch) {
+            $model->setDispatch($dispatch);
+        }
+
         $this->manager->flush();
 
         return $model->getNumber();
@@ -332,5 +355,81 @@ class ProductFromShop implements ProductFromShopBase
                 serialize($status)
             );
         }
+    }
+
+    public function calculateShippingCosts(Order $order)
+    {
+        $countryIso3 = $order->deliveryAddress->country;
+        $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
+
+        if (!$country) {
+            return new Shipping(array('isShippable' => false));
+        }
+
+        if (count($order->orderItems) == 0) {
+            throw new \InvalidArgumentException(
+                "ProductList is not allowed to be empty"
+            );
+        }
+
+        /* @var \Shopware\Models\Shop\Shop $shop */
+        $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
+        if (!$shop) {
+            return new Shipping(array('isShippable' => false));
+        }
+        $shop->registerResources(Shopware()->Bootstrap());
+
+        $sessionId = uniqid('bepado_remote');
+        Shopware()->System()->sSESSION_ID = $sessionId;
+
+        /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
+        $shipping = Shopware()->Models()->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy(array(
+            'type' => 0 // standard shipping
+        ));
+
+        // todo: if products are not shippable with default shipping
+        // todo: do we need to check with other shipping methods
+        if (!$shipping) {
+            return new Shipping(array('isShippable' => false));
+        }
+
+        Shopware()->System()->_SESSION['sDispatch'] = $shipping->getId();
+
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $products = array();
+        /** @var \Bepado\SDK\Struct\OrderItem $orderItem */
+        foreach ($order->orderItems as $orderItem) {
+            $attributes = $repository->findBy(array('sourceId' => array($orderItem->product->sourceId), 'shopId' => null));
+            if (count($attributes) === 0) {
+                continue;
+            }
+
+            $products[] = array(
+                'ordernumber' => $attributes[0]->getArticleDetail()->getNumber(),
+                'quantity' => $orderItem->count,
+            );
+        }
+
+        /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+        foreach ($products as $product) {
+            Shopware()->Modules()->Basket()->sAddArticle($product['ordernumber'], $product['quantity']);
+        }
+
+        $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
+        if (!is_array($result)) {
+            return new Shipping(array('isShippable' => false));
+        }
+
+        $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';
+        Shopware()->Db()->executeQuery($sql, array(
+            $sessionId,
+        ));
+
+        return new Shipping(array(
+            'shopId' => $this->gateway->getShopId(),
+            'service' => $shipping->getName(),
+            'shippingCosts' => floatval($result['netto']),
+            'grossShippingCosts' => floatval($result['brutto']),
+        ));
     }
 }

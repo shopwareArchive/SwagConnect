@@ -34,6 +34,14 @@ interface ProductFromShop
     public function getExportedProductIDs();
 
     /**
+     * Calculate shipping costs for $order
+     *
+     * @param Struct\Order $order
+     * @return Struct\Shipping
+     */
+    public function calculateShippingCosts(Struct\Order $order);
+
+    /**
      * Reserve a product in shop for purchase
      *
      * @param Struct\Order $order

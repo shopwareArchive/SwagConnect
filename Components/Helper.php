@@ -125,8 +125,8 @@ class Helper
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
-        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId AND ba.exportStatus IS NULL');
-        $builder->orWhere('d.number = :number AND ba.exportStatus IS NULL');
+        $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
+        $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $product->shopId);
@@ -488,6 +488,7 @@ class Helper
      */
     public function getArticleSourceIds(array $articleIds)
     {
+//        todo: check where it's used, sometimes we need article detail sourceId
         $articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
         $sourceIds = array();
         foreach ($articleIds as $articleId) {
@@ -515,6 +516,29 @@ class Helper
         }
 
         return $sourceIds;
+    }
+
+    /**
+     * Get sourceId by given article detail id
+     *
+     * @param int $articleDetailId
+     * @return string
+     */
+    public function getArticleDetailSourceId($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $detail = $articleDetailRepository->find($articleDetailId);
+        if (!$detail) {
+            return null;
+        }
+
+        $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
+        if (!$bepadoAttribute) {
+            return null;
+        }
+
+        return $bepadoAttribute->getSourceId();
     }
 
     /**

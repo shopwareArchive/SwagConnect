@@ -343,28 +343,6 @@ final class SDK
     }
 
     /**
-     * Calculate shipping costs
-     *
-     * Calculate shipping costs for the given set of products.
-     *
-     * @param Struct\Order $order
-     * @return Struct\TotalShippingCosts
-     */
-    public function calculateShippingCosts(Struct\Order $order)
-    {
-        $this->verifySdkIfNecessary();
-
-        foreach ($order->orderItems as $orderItem) {
-            $this->dependencies->getVerificator()->verify($orderItem);
-        }
-
-        return $this->dependencies->getShoppingService()->calculateShippingCosts(
-            $order,
-            Gateway\ShippingCosts::SHIPPING_COSTS_CUSTOMER
-        );
-    }
-
-    /**
      * Check products still are in the state they are stored locally
      *
      * This method will verify with the remote shops that products are still in
@@ -379,18 +357,15 @@ final class SDK
      * remote products. The state will be checked again during
      * reserveProducts().
      *
-     * @param Struct\Product[] $products
-     * @return mixed
+     * @param Struct\Order $order
+     * @return Struct\CheckResult
      */
-    public function checkProducts(array $products)
+    public function checkProducts(Struct\Order $order)
     {
         $this->verifySdkIfNecessary();
+        $this->dependencies->getVerificator()->verify($order);
 
-        $productList = new Struct\ProductList(array('products' => $products));
-
-        $this->dependencies->getVerificator()->verify($productList);
-
-        return $this->dependencies->getShoppingService()->checkProducts($productList);
+        return $this->dependencies->getShoppingService()->checkProducts($order);
     }
 
     /**
@@ -467,23 +442,6 @@ final class SDK
         }
 
         return $this->dependencies->getShoppingService()->checkout($reservation, $orderId);
-    }
-
-    /**
-     * Perform search on Bepado
-     *
-     * Search will return a SearchResult struct, which can be used to display
-     * the search results in your shop. For details on the Search and
-     * SearchResult structs see the respective API documentation.
-     *
-     * @param Struct\Search $search
-     * @return Struct\SearchResult
-     */
-    public function search(Struct\Search $search)
-    {
-        $this->verifySdkIfNecessary();
-
-        return $this->dependencies->getSearchService()->search($search);
     }
 
     /**
@@ -616,7 +574,6 @@ final class SDK
         return $this->dependencies->getSocialNetworkService()->getMarketplaceProductAttributes();
     }
 
-
     /**
      * Returns array with marketplace settings
      * as key => value
@@ -626,4 +583,5 @@ final class SDK
     {
         return $this->dependencies->getSocialNetworkService()->getMarketplaceSettings();
     }
+
 }

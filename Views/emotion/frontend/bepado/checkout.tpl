@@ -42,23 +42,25 @@
 {*
     Show message during checkout, if product price / availability has changed
 *}
-{block name='frontend_checkout_cart_cart_head' append}
-	{if $bepadoMessages[$shopId]}
+{block name='frontend_checkout_cart_error_messages' append}
+    {if $bepadoMessages}
         <div class="doublespace"></div>
-		<div class="error" style="margin:0">
-			{foreach from=$bepadoMessages[$shopId] item=bepadomessage}
-				{$message = $bepadomessage->message}
-				{foreach from=$bepadomessage->values key=key item=value}
-					{$message = "%{$key}"|str_replace:$value:$message}
-				{/foreach}
-				{$message}<br>
-			{/foreach}
+        <div class="error" style="margin:0">
+            {foreach from=$bepadoMessages item=bepadomessage}
+                {$message = $bepadomessage->message}
+                {foreach from=$bepadomessage->values key=key item=value}
+                    {$message = "%{$key}"|str_replace:$value:$message}
+                {/foreach}
+                {$message}<br>
+            {/foreach}
             <br>
             <a href="{url}">{s name="frontend_checkout_cart_bepado_refresh"}Klicken Sie hier um die Seite zu aktualisieren{/s}</a>
-		</div>
+        </div>
         <div class="space"></div>
-	{/if}
+    {/if}
+{/block}
 
+{block name='frontend_checkout_cart_cart_head' append}
     {$smarty.block.parent}
 
 	{if $bepadoShops}

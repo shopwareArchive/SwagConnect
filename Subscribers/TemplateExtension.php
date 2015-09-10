@@ -153,14 +153,14 @@ class TemplateExtension extends BaseSubscriber
             return;
         }
 
-        $sourceIds = $helper->getArticleSourceIds(array($articleData['articleID']));
-        $products = $helper->getRemoteProducts($sourceIds);
+        $sourceId = $helper->getArticleDetailSourceId($articleData['articleDetailsID']);
+        $products = $helper->getRemoteProducts(array($sourceId));
 
         if (empty($products)) {
             return;
         }
 
-        $product = $products[0];
+        $product = reset($products);
         if(empty($product->shopId)) {
             return;
         }

@@ -27,7 +27,7 @@ class Reservation extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (!is_array($struct->messages)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException('$messages MUST be an array.');

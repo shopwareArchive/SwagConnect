@@ -18,7 +18,7 @@ use Bepado\SDK\Struct;
  */
 class Tracking extends Verificator
 {
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         $strings = array('id', 'url', 'vendor');
 

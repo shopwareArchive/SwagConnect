@@ -29,7 +29,7 @@ class Shipping extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->rule && !($struct->rule instanceof \Bepado\SDK\ShippingCosts\Rule)) {
             throw new VerificationFailedException('Rule MUST be an instance of \\Bepado\\SDK\\ShippingCosts\\Rule.');

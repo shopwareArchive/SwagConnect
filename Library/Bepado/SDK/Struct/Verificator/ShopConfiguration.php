@@ -27,7 +27,7 @@ class ShopConfiguration extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->name === null) {
             throw new \Bepado\SDK\Exception\VerificationFailedException('Property $name must be set.');

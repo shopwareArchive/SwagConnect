@@ -13,7 +13,7 @@ use Bepado\SDK\Struct;
 
 class ProductList extends Verificator
 {
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         foreach ($struct->products as $product) {
             if (!($product instanceof Struct\Product)) {

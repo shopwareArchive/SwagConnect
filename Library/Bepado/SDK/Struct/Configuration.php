@@ -22,6 +22,11 @@ class Configuration extends Struct
     public $features = array();
 
     /**
+     * @var int
+     */
+    public $priceType;
+
+    /**
      * @var \Bepado\SDK\Struct\Address
      */
     public $billingAddress;

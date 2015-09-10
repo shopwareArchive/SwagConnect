@@ -27,7 +27,7 @@ class Change extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->sourceId === null) {
             throw new \Bepado\SDK\Exception\VerificationFailedException('Property $sourceId must be set.');

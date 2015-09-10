@@ -10,6 +10,7 @@ namespace Bepado\SDK\Service;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\HttpClient;
 use Bepado\SDK\Struct;
+use Bepado\SDK\SDK;
 
 /**
  * Service to store configuration updates
@@ -78,7 +79,29 @@ class Configuration
 
             $this->configuration->setEnabledFeatures($config->features);
             $this->configuration->setBillingAddress($config->billingAddress);
+
+            $this->updatePriceType($config->priceType);
         }
+    }
+
+    private function updatePriceType($priceType)
+    {
+        if (!$priceType) {
+            return;
+        }
+
+        $disallowChange = array(SDK::PRICE_TYPE_PURCHASE, SDK::PRICE_TYPE_RETAIL, SDK::PRICE_TYPE_BOTH);
+        $validPriceTypes = $disallowChange + array(SDK::PRICE_TYPE_NONE);
+
+        if (!in_array($priceType, $validPriceTypes)) {
+            return;
+        }
+
+        if (in_array($this->configuration->getConfig(SDK::CONFIG_PRICE_TYPE), $disallowChange)) {
+            return;
+        }
+
+        $this->configuration->setConfig(SDK::CONFIG_PRICE_TYPE, $priceType);
     }
 
     public function lastRevision()

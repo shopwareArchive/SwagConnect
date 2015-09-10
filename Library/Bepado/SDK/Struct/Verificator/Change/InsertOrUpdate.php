@@ -29,9 +29,9 @@ class InsertOrUpdate extends Change
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        parent::verify($dispatcher, $struct);
+        parent::verifyDefault($dispatcher, $struct);
 
         if (!$struct->product instanceof Product) {
             throw new \RuntimeException('Property $product must be a Struct\Product.');

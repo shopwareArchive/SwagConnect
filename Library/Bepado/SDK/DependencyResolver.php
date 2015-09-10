@@ -100,6 +100,13 @@ class DependencyResolver
     protected $verificationService;
 
     /**
+     * Search service
+     *
+     * @var Service\Search
+     */
+    protected $searchService;
+
+    /**
      * Sync service
      *
      * @var Service\Syncer
@@ -152,6 +159,11 @@ class DependencyResolver
     protected $transactionHost = 'https://transaction.bepado.de';
 
     /**
+     * @var string
+     */
+    protected $searchHost = 'https://search.bepado.de';
+
+    /**
      * @var ChangeVisitor\Message
      */
     protected $changeVisitor;
@@ -177,6 +189,11 @@ class DependencyResolver
      * @var Service\PaymentStatus
      */
     protected $paymentStatusService;
+
+    /**
+     * @var Service\Export
+     */
+    protected $exportService;
 
     /**
      * @param \Bepado\SDK\Gateway $gateway
@@ -205,6 +222,9 @@ class DependencyResolver
         }
         if ($host = getenv('_TRANSACTION_HOST')) {
             $this->transactionHost = "http://{$host}";
+        }
+        if ($host = getenv('_SEARCH_HOST')) {
+            $this->searchHost = "http://{$host}";
         }
 
         $this->apiKey = $apiKey;
@@ -349,7 +369,8 @@ class DependencyResolver
                         new Struct\Verificator\OrderItem(),
                     'Bepado\\SDK\\Struct\\Product' =>
                         new Struct\Verificator\Product(
-                            new ShippingRuleParser\Google()
+                            new ShippingRuleParser\Google(),
+                            $this->getGateway()->getConfig(SDK::CONFIG_PRICE_TYPE)
                         ),
                     'Bepado\\SDK\\Struct\\Translation' =>
                         new Struct\Verificator\Translation(),
@@ -507,6 +528,22 @@ class DependencyResolver
     }
 
     /**
+     * @return Service\Search
+     */
+    public function getSearchService()
+    {
+        if ($this->searchService === null) {
+            $this->searchService = new Service\Search(
+                $this->getHttpClient($this->searchHost),
+                $this->apiKey,
+                $this->gateway->getShopId()
+            );
+        }
+
+        return $this->searchService;
+    }
+
+    /**
      * @return Service\Syncer
      */
     public function getSyncService()
@@ -657,5 +694,23 @@ class DependencyResolver
         }
 
         return $this->paymentStatusService;
+    }
+
+    /**
+     * @return Service\Export
+     */
+    public function getExportService()
+    {
+        if ($this->exportService === null) {
+            $this->exportService = new Service\Export(
+                $this->getFromShop(),
+                $this->getVerificator(),
+                $this->getGateway(),
+                $this->getProductHasher(),
+                $this->getRevisionProvider()
+            );
+        }
+
+        return $this->exportService;
     }
 }

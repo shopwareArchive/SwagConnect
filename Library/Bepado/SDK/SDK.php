@@ -27,6 +27,12 @@ use Bepado\SDK\Struct\Shop;
  */
 final class SDK
 {
+    const CONFIG_PRICE_TYPE = '_price_type';
+    const PRICE_TYPE_PURCHASE = 1;
+    const PRICE_TYPE_RETAIL = 2;
+    const PRICE_TYPE_BOTH = 3;
+    const PRICE_TYPE_NONE = 4;
+
     /**
      * API key for this SDK
      *
@@ -253,16 +259,7 @@ final class SDK
     {
         $this->verifySdkIfNecessary();
 
-        $product = $this->getProduct($productId);
-        $product->shopId = $this->dependencies->getGateway()->getShopId();
-
-        $this->dependencies->getVerificator()->verify($product);
-        $this->dependencies->getGateway()->recordInsert(
-            $product->sourceId,
-            $this->dependencies->getProductHasher()->hash($product),
-            $this->dependencies->getRevisionProvider()->next(),
-            $product
-        );
+        $this->dependencies->getExportService()->recordInsert($productId);
     }
 
     /**
@@ -278,16 +275,7 @@ final class SDK
     {
         $this->verifySdkIfNecessary();
 
-        $product = $this->getProduct($productId);
-        $product->shopId = $this->dependencies->getGateway()->getShopId();
-
-        $this->dependencies->getVerificator()->verify($product);
-        $this->dependencies->getGateway()->recordUpdate(
-            $product->sourceId,
-            $this->dependencies->getProductHasher()->hash($product),
-            $this->dependencies->getRevisionProvider()->next(),
-            $product
-        );
+        $this->dependencies->getExportService()->recordUpdate($productId);
     }
 
     /**
@@ -303,28 +291,7 @@ final class SDK
     {
         $this->verifySdkIfNecessary();
 
-        $product = $this->getProduct($productId);
-        $product->shopId = $this->dependencies->getGateway()->getShopId();
-
-        $this->dependencies->getVerificator()->verify($product);
-        $this->dependencies->getGateway()->recordAvailabilityUpdate(
-            $product->sourceId,
-            $this->dependencies->getProductHasher()->hash($product),
-            $this->dependencies->getRevisionProvider()->next(),
-            $product
-        );
-    }
-
-    /**
-     * Get single product from gateway
-     *
-     * @param mixed $productId
-     * @return Struct\Product
-     */
-    protected function getProduct($productId)
-    {
-        $products = $this->dependencies->getFromShop()->getProducts(array($productId));
-        return reset($products);
+        $this->dependencies->getExportService()->recordAvailabilityUpdate($productId);
     }
 
     /**
@@ -339,7 +306,8 @@ final class SDK
     public function recordDelete($productId)
     {
         $this->verifySdkIfNecessary();
-        $this->dependencies->getGateway()->recordDelete($productId, $this->dependencies->getRevisionProvider()->next());
+
+        $this->dependencies->getExportService()->recordDelete($productId);
     }
 
     /**
@@ -442,6 +410,23 @@ final class SDK
         }
 
         return $this->dependencies->getShoppingService()->checkout($reservation, $orderId);
+    }
+
+    /**
+     * Perform search on Bepado
+     *
+     * Search will return a SearchResult struct, which can be used to display
+     * the search results in your shop. For details on the Search and
+     * SearchResult structs see the respective API documentation.
+     *
+     * @param Struct\Search $search
+     * @return Struct\SearchResult
+     */
+    public function search(Struct\Search $search)
+    {
+        $this->verifySdkIfNecessary();
+
+        return $this->dependencies->getSearchService()->search($search);
     }
 
     /**
@@ -584,4 +569,30 @@ final class SDK
         return $this->dependencies->getSocialNetworkService()->getMarketplaceSettings();
     }
 
+    /**
+     * The price type determines which prices must be exported to bepado.
+     *
+     * Options are:
+     *
+     * - SDK::PRICE_TYPE_PURCHASE: Only the purchase price of a product is exported.
+     * - SDK::PRICE_TYPE_RETAIL: Only the retail price (Product#price) is exported.
+     * - SDK::PRICE_TYPE_BOTH: Both purchase and retail price are exported.
+     * - SDK::PRICE_TYPE_NONE: No product export, UI can hide all related operations and config screens.
+     *
+     * The SDK handles the price exporting internally, this getter can be used
+     * for plugin authors to improve the User Interface for configuration of the
+     * bepado prices.
+     *
+     * @return int
+     */
+    public function getPriceType()
+    {
+        $priceType = $this->dependencies->getGateway()->getConfig(SDK::CONFIG_PRICE_TYPE);
+
+        if (!$priceType) {
+            return self::PRICE_TYPE_NONE;
+        }
+
+        return (int)$priceType;
+    }
 }

@@ -286,27 +286,10 @@ class Product extends ShopItem
     /**
      * Product categories.
      *
-     * Categories are submitted as an associative array. Each key is the full
-     * path of the category tree, the value corresponds to the label of that
-     * category.
+     * For a full list of currently available product categories call
+     * getCategories() on the SDK class.
      *
-     * <code>
-     * <?php
-     *  array(
-     *      "/Kleidung" => "Kleidung",
-     *      "/Kleidung/Hosen" => "Hosen",
-     *      "/Kleidung/Hosen/Hosentraeger" => "Hosenträger",
-     *      "/Nahrung & Getraenke" => "Nahrung & Getränke",
-     *      "/Nahrung & Getraenke/Alkoholische Getraenke" => "Alkoholische Getränke",
-     *      "/Nahrung & Getraenke/Alkoholische Getraenke/Bier" => "Bier",
-     *  )
-     * ?>
-     * </code>
-     *
-     * Note that you need to specify all parent categories of a deeply nested
-     * category.
-     *
-     * @var string[string]
+     * @var string[]
      */
     public $categories = array();
 

@@ -13,6 +13,7 @@ use Bepado\SDK\Struct;
 use Bepado\SDK\Units;
 use Bepado\SDK\ShippingRuleParser;
 use Bepado\SDK\Languages;
+use Bepado\SDK\SDK;
 
 /**
  * Visitor verifying integrity of struct classes
@@ -29,14 +30,61 @@ class Product extends Verificator
     private $parser;
 
     /**
+     * @var int
+     */
+    private $priceType;
+
+    /**
      * __construct
      *
      * @param ShippingRuleParser $parser
      * @return void
      */
-    public function __construct(ShippingRuleParser $parser)
+    public function __construct(ShippingRuleParser $parser, $priceType)
     {
         $this->parser = $parser;
+        $this->priceType = $priceType;
+    }
+
+    protected function verifyPriceExport(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        switch ($this->priceType) {
+            case SDK::PRICE_TYPE_PURCHASE:
+                $this->verifyPurchasePrice($dispatcher, $struct);
+                break;
+
+            case SDK::PRICE_TYPE_RETAIL:
+                $this->verifyRetailPrice($dispatcher, $struct);
+                break;
+
+            case SDK::PRICE_TYPE_BOTH:
+                $this->verifyPrice($dispatcher, $struct);
+                break;
+
+            default:
+                $this->fail("Exporting products is not allowed without a price type selected.");
+                break;
+        }
+    }
+
+    protected function verifyPrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        $this->verifyPurchasePrice($dispatcher, $struct);
+        $this->verifyRetailPrice($dispatcher, $struct);
+    }
+
+    protected function verifyPurchasePrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
+            $this->fail("The purchasePrice is not allowed to be 0 or smaller.");
+        }
+    }
+
+    protected function verifyRetailPrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        if (empty($struct->price) || $struct->price <= 0) {
+            $this->fail("The price is not allowed to be 0 or smaller.");
+        }
     }
 
     /**
@@ -49,15 +97,13 @@ class Product extends Verificator
      * @return void
      * @throws \RuntimeException
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         /* @var $struct \Bepado\SDK\Struct\Product */
 
         foreach (array(
                 'shopId',
                 'sourceId',
-                'price',
-                'purchasePrice',
                 'currency',
                 'availability',
                 'vat',
@@ -89,10 +135,6 @@ class Product extends Verificator
             $this->parser->parseString($struct->shipping);
         }
 
-        if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
-            throw new \Bepado\SDK\Exception\VerificationFailedException("The purchasePrice is not allowed to be 0 or smaller.");
-        }
-
         if (!is_numeric($struct->vat) || $struct->vat < 0 || $struct->vat > 1) {
             throw new \Bepado\SDK\Exception\VerificationFailedException("Value added tax must be a number between 0 and 1.");
         }
@@ -100,7 +142,6 @@ class Product extends Verificator
         if (!is_array($struct->categories)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#categories has to be an array.");
         }
-        $this->verifyCategories($struct->categories);
 
         if (!is_array($struct->tags)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#tags has to be an array.");
@@ -208,35 +249,6 @@ class Product extends Verificator
             throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "Product Quantity Attribute has to be a numeric."
             );
-        }
-    }
-
-    private function verifyCategories(array $categories)
-    {
-        $parentCategoryMap = array();
-        foreach ($categories as $category => $label) {
-            $categoryParts = array_filter(explode('/', $category));
-
-            $parentCategory = $category;
-            while (count($categoryParts) > 1) {
-                array_pop($categoryParts);
-
-                $currentCategory = '/' . implode('/', $categoryParts);
-
-                $parentCategoryMap[$currentCategory] = $parentCategory;
-                $parentCategory = $currentCategory;
-            }
-        }
-
-        foreach ($parentCategoryMap as $category => $parentCategory) {
-            if (!isset($categories[$category])) {
-                throw new \Bepado\SDK\Exception\VerificationFailedException(
-                    sprintf(
-                        'Product#categories must contain all parent categories. Parent category of "/Kleidung/Hosen" missing.',
-                        $category
-                    )
-                );
-            }
         }
     }
 }

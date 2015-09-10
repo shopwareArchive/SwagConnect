@@ -36,7 +36,7 @@ class ProductRule extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (!in_array($struct->currency, $this->validCurrencies)) {
             throw new VerificationFailedException(

@@ -98,6 +98,7 @@ class Verification
         if ($response->body &&
             $return = json_decode($response->body)) {
             $this->config->setShopId($return->shopId);
+            $this->config->setConfig(SDK::CONFIG_PRICE_TYPE, $return->priceType);
         } else {
             throw new \RuntimeException("Response could not be processed: " . $response->body);
         }

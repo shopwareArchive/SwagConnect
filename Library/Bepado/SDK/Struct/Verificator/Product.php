@@ -142,6 +142,7 @@ class Product extends Verificator
         if (!is_array($struct->categories)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#categories has to be an array.");
         }
+        $this->verifyCategories($struct->categories);
 
         if (!is_array($struct->tags)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException("Invalid Datatype, Product#tags has to be an array.");
@@ -249,6 +250,35 @@ class Product extends Verificator
             throw new \Bepado\SDK\Exception\VerificationFailedException(
                 "Product Quantity Attribute has to be a numeric."
             );
+        }
+    }
+
+    private function verifyCategories(array $categories)
+    {
+        $parentCategoryMap = array();
+        foreach ($categories as $category => $label) {
+            $categoryParts = array_filter(explode('/', $category));
+
+            $parentCategory = $category;
+            while (count($categoryParts) > 1) {
+                array_pop($categoryParts);
+
+                $currentCategory = '/' . implode('/', $categoryParts);
+
+                $parentCategoryMap[$currentCategory] = $parentCategory;
+                $parentCategory = $currentCategory;
+            }
+        }
+
+        foreach ($parentCategoryMap as $category => $parentCategory) {
+            if (!isset($categories[$category])) {
+                throw new \Bepado\SDK\Exception\VerificationFailedException(
+                    sprintf(
+                        'Product#categories must contain all parent categories. Parent category of "/Kleidung/Hosen" missing.',
+                        $category
+                    )
+                );
+            }
         }
     }
 }

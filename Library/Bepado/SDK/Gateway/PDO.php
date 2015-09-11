@@ -443,32 +443,6 @@ class PDO extends Gateway
     }
 
     /**
-     * Set category mapping
-     *
-     * @param array $categories
-     * @return void
-     */
-    public function setCategories(array $categories)
-    {
-        $this->setConfig('_categories_', serialize($categories));
-    }
-
-    /**
-     * Get category mapping
-     *
-     * @return array
-     */
-    public function getCategories()
-    {
-        $result = $this->getConfig('_categories_');
-        if ($result === null) {
-            return null;
-        }
-
-        return unserialize($result);
-    }
-
-    /**
      * Set own shop ID
      *
      * @param string $shopId
@@ -658,27 +632,6 @@ class PDO extends Gateway
         if ($query->rowCount() !== 1) {
             throw new \OutOfBoundsException("Reservation $reservationId not found.");
         }
-    }
-
-    /**
-     * Set the last revision of the category tree that the SDK has seen.
-     *
-     * @param string
-     * @return void
-     */
-    public function setCategoriesLastRevision($revision)
-    {
-        $this->setConfig('_categories_revision_', $revision);
-    }
-
-    /**
-     * Get the last revision of the category tree that the SDK has seen.
-     *
-     * @return string
-     */
-    public function getCategoriesLastRevision()
-    {
-        return $this->getConfig('_categories_revision_');
     }
 
     /**

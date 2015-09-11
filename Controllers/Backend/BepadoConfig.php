@@ -192,6 +192,18 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $data = $this->Request()->getParam('data');
         $data = !isset($data[0]) ? array($data) : $data;
 
+        if ($data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/bepado/view/main')->get(
+                    'config/export/error/same_price_fields',
+                    'Endkunden-VK und Listenverkaufspreis müssen an verschiedene Felder angeschlossen sein',
+                    true
+                )
+            ));
+            return;
+        }
+
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
         $this->getConfigComponent()->setExportConfigs($data);
 

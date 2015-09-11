@@ -7,10 +7,9 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.6.8",
+    "currentVersion": "1.6.7",
     "changelog": {
         "de": {
-            "1.6.8": "New: Export prices configuration",
             "1.6.7": "New: purchasePriceHash",
             "1.6.6": "New: Marketplace support",
             "1.6.5": "Fix: Variants import",
@@ -33,7 +32,6 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
-            "1.6.8": "New: Export prices configuration",
             "1.6.7": "New: purchasePriceHash",
             "1.6.6": "New: Marketplace support",
             "1.6.5": "Fix: Variants import",

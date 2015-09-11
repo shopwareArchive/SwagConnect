@@ -129,6 +129,19 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     public function getExportAction()
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
+        switch ($this->getSDK()->getPriceType()) {
+            case \Bepado\SDK\SDK::PRICE_TYPE_BOTH:
+                $exportConfigArray['exportPriceMode'] = array('price', 'purchasePrice');
+                break;
+            case \Bepado\SDK\SDK::PRICE_TYPE_RETAIL:
+                $exportConfigArray['exportPriceMode'] = array('price');
+                break;
+            case \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE:
+                $exportConfigArray['exportPriceMode'] = array('purchasePrice');
+                break;
+            default:
+                $exportConfigArray['exportPriceMode'] = array();
+        }
 
         $this->View()->assign(
             array(
@@ -145,14 +158,26 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function isPricingMappingAllowedAction()
     {
-        $exportPriceMode = $this->getConfigComponent()->getConfig('exportPriceMode', array());
+        $isPriceModeEnabled = false;
+        $isPurchasePriceModeEnabled = false;
+
+        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_RETAIL) {
+            $isPriceModeEnabled = true;
+        }
+
+        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE)
+        {
+            $isPurchasePriceModeEnabled = true;
+        }
 
         $this->View()->assign(
             array(
                 'success' => true,
                 'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0,
-                'isPriceModeEnabled' => in_array('price', $exportPriceMode),
-                'isPurchasePriceModeEnabled' => in_array('purchasePrice', $exportPriceMode),
+                'isPriceModeEnabled' => $isPriceModeEnabled,
+                'isPurchasePriceModeEnabled' => $isPurchasePriceModeEnabled,
             )
         );
     }

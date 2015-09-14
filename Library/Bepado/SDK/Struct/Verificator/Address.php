@@ -58,7 +58,7 @@ class Address extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         $requiredFields = array('firstName', 'surName', 'street', 'zip', 'city', 'country', 'email', 'phone');
         $optionalStringFields = array('company', 'state', 'streetNumber', 'middleName');

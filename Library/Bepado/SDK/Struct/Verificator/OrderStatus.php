@@ -18,7 +18,7 @@ use Bepado\SDK\Struct;
  */
 class OrderStatus extends Verificator
 {
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         $requiredStrings = array('id', 'status');
 

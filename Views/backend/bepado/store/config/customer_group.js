@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Bepado.store.config.CustomerGroup', {
             showBepado: true
         },
         type:'ajax',
-        url:'{url controller="base" action="getCustomerGroups"}',
+        url:'{url controller="BepadoConfig" action="getExportCustomerGroups"}',
         reader:{
             type:'json',
             root:'data',

@@ -27,9 +27,9 @@ class Delete extends Change
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        parent::verify($dispatcher, $struct);
+        parent::verifyDefault($dispatcher, $struct);
 
         if ($struct->shopId === null) {
             throw new \RuntimeException('Property $shopId must be set.');

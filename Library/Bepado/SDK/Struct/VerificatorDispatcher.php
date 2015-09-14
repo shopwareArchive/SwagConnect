@@ -45,12 +45,16 @@ class VerificatorDispatcher
     /**
      * Method to verify a structs integrity
      *
-     * Throws a RuntimeException if the struct does not verify.
+     * Validates structs in the given verification groups,
+     * if none specified "default" group is used.
+     *
+     * Throws a VerificationFailedException if the struct does not verify.
      *
      * @param Struct $struct
+     * @param array $groups
      * @return void
      */
-    public function verify(Struct $struct)
+    public function verify(Struct $struct, array $groups = null)
     {
         $verificator = $this->getVerificator(get_class($struct));
 
@@ -60,7 +64,7 @@ class VerificatorDispatcher
             );
         }
 
-        $verificator->verify($this, $struct);
+        $verificator->verify($this, $struct, $groups);
     }
 
     /**

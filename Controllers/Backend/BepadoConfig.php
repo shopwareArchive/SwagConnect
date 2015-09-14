@@ -129,6 +129,19 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     public function getExportAction()
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
+        switch ($this->getSDK()->getPriceType()) {
+            case \Bepado\SDK\SDK::PRICE_TYPE_BOTH:
+                $exportConfigArray['exportPriceMode'] = array('price', 'purchasePrice');
+                break;
+            case \Bepado\SDK\SDK::PRICE_TYPE_RETAIL:
+                $exportConfigArray['exportPriceMode'] = array('price');
+                break;
+            case \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE:
+                $exportConfigArray['exportPriceMode'] = array('purchasePrice');
+                break;
+            default:
+                $exportConfigArray['exportPriceMode'] = array();
+        }
 
         $this->View()->assign(
             array(
@@ -145,10 +158,26 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function isPricingMappingAllowedAction()
     {
+        $isPriceModeEnabled = false;
+        $isPurchasePriceModeEnabled = false;
+
+        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_RETAIL) {
+            $isPriceModeEnabled = true;
+        }
+
+        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE)
+        {
+            $isPurchasePriceModeEnabled = true;
+        }
+
         $this->View()->assign(
             array(
                 'success' => true,
-                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0
+                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0,
+                'isPriceModeEnabled' => $isPriceModeEnabled,
+                'isPurchasePriceModeEnabled' => $isPurchasePriceModeEnabled,
             )
         );
     }
@@ -162,6 +191,18 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     {
         $data = $this->Request()->getParam('data');
         $data = !isset($data[0]) ? array($data) : $data;
+
+        if ($data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/bepado/view/main')->get(
+                    'config/export/error/same_price_fields',
+                    'Endkunden-VK und Listenverkaufspreis müssen an verschiedene Felder angeschlossen sein',
+                    true
+                )
+            ));
+            return;
+        }
 
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
         $this->getConfigComponent()->setExportConfigs($data);
@@ -466,6 +507,117 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
             array(
                 'success' => true,
                 'data' => $mappings
+            )
+        );
+    }
+
+    /**
+     * Loads all customer groups where at least
+     * one product with price or purchasePrice
+     * greater than 0 exists
+     *
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getExportCustomerGroupsAction()
+    {
+        $priceField = $this->Request()->getParam('priceField', 'price');
+
+        if ($priceField == 'purchasePrice') {
+            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE baseprice > 0 GROUP BY pricegroup');
+            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE price > 0 GROUP BY pricegroup');
+            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+
+        $builder = $repository->createQueryBuilder('groups');
+        $builder->select(array(
+            'groups.id as id',
+            'groups.key as key',
+            'groups.name as name',
+            'groups.tax as tax',
+            'groups.taxInput as taxInput',
+            'groups.mode as mode'
+        ));
+        $builder->andWhere('groups.key IN (:groupKeys)')
+            ->setParameter('groupKeys', $availableGroups);
+        $builder->addFilter($this->Request()->getParam('filter', array()));
+        $builder->addOrderBy($this->Request()->getParam('sort', array()));
+
+        $builder->setFirstResult($this->Request()->getParam('start'))
+            ->setMaxResults($this->Request()->getParam('limit'));
+
+        $query = $builder->getQuery();
+
+        //get total result of the query
+        $total = Shopware()->Models()->getQueryCount($query);
+
+        $data = $query->getArrayResult();
+
+        //return the data and total count
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $data,
+                'total' => $total,
+            )
+        );
+    }
+
+    /**
+     * Loads all price groups where at least
+     * one product with price greater than 0 exists
+     *
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getExportPriceGroupsAction()
+    {
+        $groups = array();
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE price > 0');
+        $priceCount = $query->fetchColumn();
+        if ($priceCount > 0) {
+            $groups[] = array(
+                'field' => 'price',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/price',
+                    'Preis'
+                )
+            );
+        }
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE baseprice > 0');
+        $purchasePriceCount = $query->fetchColumn();
+        if ($purchasePriceCount > 0) {
+            $groups[] = array(
+                'field' => 'basePrice',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/base_price',
+                    'Einkaufspreis'
+                )
+            );
+        }
+
+        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE pseudoprice > 0');
+        $pseudoPriceCount = $query->fetchColumn();
+        if ($pseudoPriceCount > 0) {
+            $groups[] = array(
+                'field' => 'pseudoPrice',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/pseudo_price',
+                    'Pseudopreis'
+                )
+            );
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $groups,
+                'total' => count($groups),
             )
         );
     }

@@ -179,6 +179,11 @@ class DependencyResolver
     protected $paymentStatusService;
 
     /**
+     * @var Service\Export
+     */
+    protected $exportService;
+
+    /**
      * @param \Bepado\SDK\Gateway $gateway
      * @param \Bepado\SDK\ProductToShop $toShop
      * @param \Bepado\SDK\ProductFromShop $fromShop
@@ -280,14 +285,6 @@ class DependencyResolver
             );
 
             $this->registry->registerService(
-                'categories',
-                array('lastRevision', 'replicate'),
-                new Service\Categories(
-                    $this->gateway
-                )
-            );
-
-            $this->registry->registerService(
                 'products',
                 array('fromShop', 'getChanges', 'peakFromShop', 'peakProducts', 'toShop', 'replicate', 'getLastRevision', 'lastRevision'),
                 new Service\ProductService(
@@ -349,7 +346,8 @@ class DependencyResolver
                         new Struct\Verificator\OrderItem(),
                     'Bepado\\SDK\\Struct\\Product' =>
                         new Struct\Verificator\Product(
-                            new ShippingRuleParser\Google()
+                            new ShippingRuleParser\Google(),
+                            $this->getGateway()->getConfig(SDK::CONFIG_PRICE_TYPE)
                         ),
                     'Bepado\\SDK\\Struct\\Translation' =>
                         new Struct\Verificator\Translation(),
@@ -657,5 +655,23 @@ class DependencyResolver
         }
 
         return $this->paymentStatusService;
+    }
+
+    /**
+     * @return Service\Export
+     */
+    public function getExportService()
+    {
+        if ($this->exportService === null) {
+            $this->exportService = new Service\Export(
+                $this->getFromShop(),
+                $this->getVerificator(),
+                $this->getGateway(),
+                $this->getProductHasher(),
+                $this->getRevisionProvider()
+            );
+        }
+
+        return $this->exportService;
     }
 }

@@ -29,7 +29,7 @@ class InterShopDelete extends Change
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->sourceId === null) {
             throw new \RuntimeException('Property $sourceId must be set.');

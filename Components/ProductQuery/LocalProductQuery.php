@@ -63,8 +63,8 @@ class LocalProductQuery extends BaseProductQuery
         $articleAttributeAlias = 'attribute';
         $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
         $exportPurchasePriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPurchasePriceExport', 'EK');
-        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport', 'price');
-        $exportPurchasePriceColumn = $this->configComponent->getConfig('priceFieldForPurchasePriceExport', 'basePrice');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport');
+        $exportPurchasePriceColumn = $this->configComponent->getConfig('priceFieldForPurchasePriceExport');
 
         $builder = $this->manager->createQueryBuilder();
 
@@ -75,7 +75,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
-        $builder->select(array(
+        $selectColumns = array(
             'a.id as localId',
             'd.id as detailId',
             'at.shopId as shopId',
@@ -89,8 +89,7 @@ class LocalProductQuery extends BaseProductQuery
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
-            "exportPrice.{$exportPriceColumn}  as price",
-            "exportPurchasePrice.{$exportPurchasePriceColumn} as purchasePrice",
+
             $this->productDescriptionField . ' as longDescription',
 
             'd.width',
@@ -105,7 +104,15 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
             "{$articleAttributeAlias}.bepadoArticleShipping as shipping"
-        ));
+        );
+
+        if ($exportPriceColumn) {
+            $selectColumns[] = "exportPrice.{$exportPriceColumn}  as price";
+        }
+        if ($exportPurchasePriceColumn) {
+            $selectColumns[] = "exportPurchasePrice.{$exportPurchasePriceColumn} as purchasePrice";
+        }
+        $builder->select($selectColumns);
 
 
         $builder = $this->addMarketplaceAttributeSelect($builder, $articleAttributeAlias);

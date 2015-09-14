@@ -27,7 +27,7 @@ class Message extends Verificator
      * @param Struct $struct
      * @return void
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (!is_string($struct->message)) {
             throw new \Bepado\SDK\Exception\VerificationFailedException('$message MUST be a string.');

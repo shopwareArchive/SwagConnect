@@ -28,7 +28,7 @@ class Translation extends Verificator
      * @return void
      * @throws \RuntimeException
      */
-    public function verify(VerificatorDispatcher $dispatcher, Struct $struct)
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         /* @var $struct \Bepado\SDK\Struct\Translation */
 

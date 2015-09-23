@@ -4,6 +4,7 @@ namespace Shopware\Bepado\Components\CategoryQuery;
 
 use Bepado\SDK\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
+use Shopware\Models\Category\Category;
 
 class Sw41Query extends SwQuery
 {
@@ -45,23 +46,46 @@ class Sw41Query extends SwQuery
      */
     public function getBepadoCategoryForProduct($id)
     {
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->getArticleRepository()->find($id);
-        if (!$article) {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('categories'))
+            ->from('Shopware\Models\Category\Category', 'categories', 'categories.id')
+            ->andWhere(':articleId MEMBER OF categories.articles')
+            ->setParameters(array('articleId' => $id));
+
+        $result = $builder->getQuery()->getResult();
+        if (empty($result)) {
             return array();
         }
 
         $categories = array();
-        $categoryNames = array();
         /** @var \Shopware\Models\Category\Category $category */
-        foreach ($article->getAllCategories() as $category) {
-            $name = $category->getName();
-            $categoryNames[] = $name;
-            $key = $this->normalizeCategory(implode(' > ', $categoryNames));
+        foreach ($result as $category) {
+            list($key, $name) = $this->extractCategory($category);
             $categories[$key] = $name;
+            $parent = $category;
+            while ($parent = $parent->getParent()) {
+                if (!$parent->getParentId()) {
+                    continue;
+                }
+                list($key, $name) = $this->extractCategory($parent);
+                $categories[$key] = $name;
+            }
         }
 
         return $categories;
+    }
+
+    /**
+     * Returns category path and category name as array
+     * @param Category $category
+     * @return array
+     */
+    private function extractCategory(Category $category)
+    {
+        $path = $this->getCategoryRepository()->getPathById($category->getId(), 'name', ' > ');
+        $key = $this->normalizeCategory($path);
+
+        return array($key, $category->getName());
     }
 
     /**

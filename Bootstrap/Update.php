@@ -91,6 +91,8 @@ class Update
 
 		$this->createPurchasePriceHash();
 
+        $this->migrateCategoryFormat();
+
         return true;
     }
 
@@ -504,6 +506,32 @@ class Update
                 );
             } catch(\Exception $e) {
                 // if table was already altered, ignore
+            }
+        }
+    }
+
+    /**
+     * Migrate to new category format and
+     * store category structure in bepado attribute
+     */
+	public function migrateCategoryFormat()
+    {
+        if (version_compare($this->version, '1.6.7', '<=')) {
+            $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+
+            $batchSize = 10;
+            $current = 1;
+            $helper = $this->bootstrap->getHelper();
+            while ($bepadoAttributes = $repository->findBy(array('shopId' => null), array(), $batchSize, ($current-1) * $batchSize))
+            {
+                /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+                foreach ($bepadoAttributes as $attribute) {
+                    $categories = $helper->getBepadoCategoryForProduct($attribute->getArticleId());
+                    $attribute->setCategory($categories);
+                    Shopware()->Models()->persist($attribute);
+                }
+                Shopware()->Models()->flush();
+                $current++;
             }
         }
     }

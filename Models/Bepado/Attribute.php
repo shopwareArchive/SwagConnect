@@ -267,19 +267,22 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @param string $category
+     * @param array $categories
      */
-    public function setCategory($category)
+    public function setCategory($categories)
     {
-        $this->category = $category;
+        if (is_string($categories)) {
+            $categories = array($categories);
+        }
+        $this->category = json_encode($categories);
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getCategory()
     {
-        return $this->category;
+        return json_decode($this->category, true) ?: array();
     }
 
     /**

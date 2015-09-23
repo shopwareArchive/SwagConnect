@@ -45,27 +45,48 @@ class Sw41Query extends SwQuery
      */
     public function getBepadoCategoryForProduct($id)
     {
-        $sql = 'SELECT ca.bepado_export_mapping FROM s_categories_attributes ca ' .
-               'INNER JOIN s_articles_categories ac ON ca.categoryID = ac.categoryID ' .
-               'WHERE ac.articleID = ?';
-        $rows = Shopware()->Db()->fetchAll($sql, array($id));
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->getArticleRepository()->find($id);
+        if (!$article) {
+            return array();
+        }
 
-        $categories = array_filter(
-            array_map(
-                function ($row) {
-                    // Flatten the array
-                    return $row['bepado_export_mapping'];
-                },
-                $rows
-            ), function($category) {
-                // Don't allow vendor categories for export
-                return strpos($category, '/vendor/') !== 0 && $category != '/vendor';
-            }
+        $categories = array();
+        $categoryNames = array();
+        /** @var \Shopware\Models\Category\Category $category */
+        foreach ($article->getAllCategories() as $category) {
+            $name = $category->getName();
+            $categoryNames[] = $name;
+            $key = $this->normalizeCategory(implode(' > ', $categoryNames));
+            $categories[$key] = $name;
+        }
+
+        return $categories;
+    }
+
+    /**
+     * Normalize category name
+     *
+     * @param string $name
+     * @return string
+     */
+    private function normalizeCategoryName($name)
+    {
+        return preg_replace('(\P{L}+)u', '_', strtolower($name));
+    }
+
+    /**
+     * Convert a clear text category name into normalized format.
+     *
+     * @param string $categoryName
+     * @return string
+     */
+    private function normalizeCategory($categoryName)
+    {
+        $path = preg_split('(\\s+>\\s+)', trim($categoryName));
+        return '/' . implode(
+            '/',
+            array_map(array($this, 'normalizeCategoryName'), $path)
         );
-
-        usort($categories, array($this->relevanceSorter, 'sortBepadoCategoriesByRelevance'));
-
-        return array_pop($categories);
-
     }
 }

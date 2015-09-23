@@ -375,7 +375,7 @@ class Helper
 
     /**
      * @param $id
-     * @return null|array
+     * @return array
      */
     public function getBepadoCategoryForProduct($id)
     {

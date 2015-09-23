@@ -104,8 +104,8 @@ class BepadoExport
             $bepadoAttribute->setExportStatus($status);
             $bepadoAttribute->setExportMessage(null);
 
-            $category = $this->helper->getBepadoCategoryForProduct($item['articleId']);
-            $bepadoAttribute->setCategory($category);
+            $categories = $this->helper->getBepadoCategoryForProduct($item['articleId']);
+            $bepadoAttribute->setCategory($categories);
 
             if (!$bepadoAttribute->getId()) {
                 $this->manager->persist($bepadoAttribute);

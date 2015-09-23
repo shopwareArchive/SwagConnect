@@ -103,7 +103,7 @@ abstract class BaseProductQuery
 
         // Fix categories
         if(is_string($row['category']) && strlen($row['category']) > 0) {
-            $row['categories'] = array($row['category']);
+            $row['categories'] = json_decode($row['category'], true) ?: array();
         }
         unset($row['category']);
 

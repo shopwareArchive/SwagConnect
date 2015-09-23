@@ -182,8 +182,12 @@ class ProductToShop implements ProductToShopBase
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
 
-            $categories = $this->helper->getCategoriesByProduct($product);
+            // just leave empty product categories
+            // if default category is configured it will be assigned.
+            // todo@sb: fix product categories during import
 
+//            $categories = $this->helper->getCategoriesByProduct($product);
+            $categories = array();
             if (empty($categories)) {
                 //add default import category
                 $defaultCategoryId = $this->config->getConfig('defaultImportCategory');
@@ -258,7 +262,10 @@ class ProductToShop implements ProductToShopBase
         $bepadoAttribute->setExportStatus(null);
         $bepadoAttribute->setPurchasePrice($product->purchasePrice);
         $bepadoAttribute->setFixedPrice($product->fixedPrice);
-        $bepadoAttribute->setCategory($this->helper->getMostRelevantBepadoCategory($product->categories));
+
+        // store product categories to bepado attribute
+        $bepadoAttribute->setCategory($product->categories);
+
         $bepadoAttribute->setLastUpdateFlag($flag);
         // store purchasePriceHash and offerValidUntil
         $bepadoAttribute->setPurchasePriceHash($product->purchasePriceHash);

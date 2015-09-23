@@ -19,7 +19,18 @@ abstract class CategoryQueryTest extends BepadoTestHelper
 
         $categories = $query->getBepadoCategoryForProduct(21); // 21 = Jasmine Tee im Demoshop
 
-        $this->assertEquals('/bücher', $categories);
+        $expectedCategories = array(
+            '/deutsch/genusswelten/tees_und_zubehör/tees' => 'Tees',
+            '/deutsch/genusswelten/tees_und_zubehör' => 'Tees und Zubehör',
+            '/deutsch/genusswelten' => 'Genusswelten',
+            '/deutsch' => 'Deutsch',
+            '/english/worlds_of_indulgence/teas_and_accessories/teas' => 'Teas',
+            '/english/worlds_of_indulgence/teas_and_accessories' => 'Teas and Accessories',
+            '/english/worlds_of_indulgence' => 'Worlds of indulgence',
+            '/english' => 'English',
+        );
+
+        $this->assertEquals($expectedCategories, $categories);
     }
 
     public function testGetCategoriesByProduct()

@@ -13,6 +13,13 @@ class BepadoExportTest extends BepadoTestHelper
      */
     private $bepadoExport;
 
+    public static function setUpBeforeClass()
+    {
+        $conn = Shopware()->Db();
+        $conn->delete('bepado_shop_config', array('s_shop = ?' => '_price_type'));
+        $conn->insert('bepado_shop_config', array('s_shop' => '_price_type', 's_config' => 3));
+    }
+
     public function setUp()
     {
         $this->bepadoExport = new BepadoExport(

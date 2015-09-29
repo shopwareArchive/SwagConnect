@@ -25,8 +25,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
 
         return [
             me.getFixedPriceFieldSet(),
-            me.getBepadoImportConfigFieldSet(),
-            me.getShippingCostsFieldset()
+            me.getBepadoImportConfigFieldSet()
         ];
 
     },
@@ -89,22 +88,6 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
         };
     },
 
-    /**
-     * Creates shipping group fieldset
-     * in bepado article tab
-     */
-    getShippingCostsFieldset: function() {
-        var me = this;
-
-        return {
-            xtype: 'fieldset',
-            defaults: me.defaults,
-            title: '{s name=shippingCosts}Shipping costs{/s}',
-            items:
-                [ me.getShippingGroupCombo() ]
-        };
-    },
-
     getLeftContainer: function() {
         var me = this;
 
@@ -162,35 +145,6 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             inputValue: true,
             uncheckedValue:false
         })
-    },
-
-    /**
-     * Creates shipping group combo
-     */
-    getShippingGroupCombo: function() {
-        var me = this;
-
-        return me.bepadoShippingGroup = Ext.create('Ext.form.ComboBox', {
-            labelWidth: 155,
-            name: 'shippingGroupName',
-            fieldLabel: '{s name=config/shipping_groups/shipping_group}Shipping group{/s}',
-            store: me.getShippingGroupStore(),
-            displayField: 'groupName',
-            valueField: 'groupName',
-            emptyText: Ext.String.format('{s name=config/shipping_groups/shipping_group_empty_text}[0] default{/s}', marketplaceName)
-        })
-    },
-
-    /**
-     * Returns instance of shipping groups store
-     */
-    getShippingGroupStore: function() {
-        var me = this;
-        if (!me.shippingGroupStore) {
-            me.shippingGroupStore = Ext.create('Shopware.apps.Bepado.store.shippingGroup.Groups').load();
-        }
-
-        return me.shippingGroupStore;
     }
 });
 //{/block}

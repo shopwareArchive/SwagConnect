@@ -46,11 +46,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     private $configComponent;
 
     /**
-     * @var \Shopware\Bepado\Components\ShippingCosts\ShippingGroups
-     */
-    private $shippingGroupComponent;
-
-    /**
      * @var \Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier
      */
     private $marketplaceSettingsApplier;
@@ -1077,14 +1072,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $data = $this->getHelper()->getOrCreateBepadoAttributes($articleModel);
 
         $data = $this->getModelManager()->toArray($data);
-        $shipping = $articleModel->getMainDetail()->getAttribute()->getBepadoArticleShipping();
         if (isset($data['articleId'])) {
-            $data['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
             $data = array($data);
-        } else {
-            foreach ($data as &$detail) {
-                $detail['shippingGroupName'] = $this->getShippingGroupComponent()->extractGroupName($shipping);
-            }
         }
 
         $this->View()->assign(array(
@@ -1108,13 +1097,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($bepadoAttribute->getArticle()->getDetails() as $detail) {
-            if (!$data['shopId']) {
-                $attribute = $detail->getAttribute();
-                // it's local product and shipping group can be changed
-                $attribute->setBepadoArticleShipping($this->getShippingGroupComponent()->generateShippingString($data['shippingGroupName']));
-                $this->getModelManager()->persist($attribute);
-            }
-
             $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
             // Only allow changes in the fixedPrice field if this is a local product
             if (!$bepadoAttribute->getShopId()) {
@@ -1303,15 +1285,6 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
 
         return $this->configComponent;
-    }
-
-    public function getShippingGroupComponent()
-    {
-        if ($this->shippingGroupComponent === null) {
-            $this->shippingGroupComponent = new \Shopware\Bepado\Components\ShippingCosts\ShippingGroups();
-        }
-
-        return $this->shippingGroupComponent;
     }
 
 	/**

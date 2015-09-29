@@ -103,7 +103,6 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
-            "{$articleAttributeAlias}.bepadoArticleShipping as shipping"
         );
 
         if ($exportPriceColumn) {

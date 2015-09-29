@@ -17,14 +17,12 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
         'mapping.GoogleCategories',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup', 'config.PriceGroup',
-        'config.Units', 'config.BepadoUnits', 'config.MarketplaceAttributes',
-        'shippingGroup.Groups', 'shippingGroup.Rules', 'config.LocalProductAttributes'
+        'config.Units', 'config.BepadoUnits', 'config.MarketplaceAttributes', 'config.LocalProductAttributes'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
-        'changed_products.List', 'changed_products.Product',
-        'log.List', 'shippingGroup.Group', 'shippingGroup.Rule',
+        'changed_products.List', 'changed_products.Product', 'log.List',
         'config.General', 'config.Import', 'config.Units', 'config.MarketplaceAttributes',
         'config.BepadoUnit', 'config.Pages', 'config.LocalProductAttributes', 'config.PriceGroup'
     ],
@@ -45,11 +43,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         { ref: 'logTabs', selector: 'bepado-log-tabs' },
         { ref: 'marketeplaceMappingPanel', selector: 'bepado-config-marketplace-attributes' },
         { ref: 'marketeplaceMapping', selector: 'bepado-marketplace-attributes-mapping' },
-        { ref: 'unitsMapping', selector: 'bepado-units-mapping' },
-        { ref: 'shippingGroupsPanel', selector: 'bepado-shipping-groups' },
-        { ref: 'shippingGroupsList', selector: 'bepado-shipping-groups-list' },
-        { ref: 'addShippingGroupWindow', selector: 'bepado-shipping-add-group' },
-        { ref: 'addShippingRuleWindow', selector: 'bepado-shipping-add-rule' }
+        { ref: 'unitsMapping', selector: 'bepado-units-mapping' }
     ],
 
     messages: {
@@ -144,20 +138,6 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             },
             'bepado-export-filter button[action=category-clear-filter]': {
                 click: me.onExportCategoryFilterClearAction
-            },
-            'bepado-shipping-groups button[action=addGroup]': {
-                click: me.onAddShippingGroup
-            },
-            'bepado-shipping-groups button[action=deleteGroup]': {
-                click: me.onDeleteShippingGroup
-            },
-            'bepado-shipping-groups button[action=addRule]': {
-                click: me.onAddShippingRule
-            },
-            'bepado-shipping-groups-list button[action=save]': {
-                click: me.onSaveShippingRules
-            },'bepado-shipping-groups-list': {
-                'deleteShippingRule': me.onDeleteShippingRule
             },
             'bepado-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
@@ -1107,63 +1087,6 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 }
             });
         }
-    },
-
-    /**
-     * Event listener show add shipping group window
-     */
-    onAddShippingGroup: function() {
-        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddGroup').show();
-    },
-
-    /**
-     * Event listener show delete shipping group window
-     */
-    onDeleteShippingGroup: function() {
-        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.DeleteGroup').show();
-    },
-
-    /**
-     * Event listener show add shipping rule window
-     */
-    onAddShippingRule: function() {
-        Ext.create('Shopware.apps.Bepado.view.config.shippingGroups.AddRule').show();
-    },
-
-    /**
-     * Event listener save shipping rules
-     */
-    onSaveShippingRules: function(btn) {
-        var me = this;
-        var grid = me.getShippingGroupsList();
-
-        grid.getStore().sync({
-            success: function() {
-                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
-            },
-            failure: function(batch, options) {
-                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
-            }
-        });
-    },
-
-    /**
-     * Event listener delete shipping rule
-     */
-    onDeleteShippingRule: function(record) {
-        var me = this;
-        var grid = me.getShippingGroupsList();
-        var store = grid.getStore();
-
-        store.remove(record);
-        store.sync({
-            success: function() {
-                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/shipping_groups/remove_rule_message}Shipping rule has been removed.{/s}');
-            },
-            failure: function(batch) {
-                me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
-            }
-        });
     },
 
     /**

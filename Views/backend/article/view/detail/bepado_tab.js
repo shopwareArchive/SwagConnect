@@ -44,7 +44,7 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
             articleChangeFn: me.articleChangeBepado,
             tabConfig: {
                 layout: {
-                    type: 'vbox',
+                    type: 'fit',
                     align: 'stretch'
                 },
                 listeners: {

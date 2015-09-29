@@ -25,6 +25,4 @@
     //{include file="backend/article/store/bepado.js"}
     //{include file="backend/article/model/bepado.js"}
     //{include file="backend/article/view/bepado_form.js"}
-    //{include file="backend/bepado/model/shipping_group/group.js"}
-    //{include file="backend/bepado/store/shipping_group/groups.js"}
 //{/block}

@@ -16,8 +16,6 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 expanded: true,
                 children: [
                     {
-                        // it will be removed in the constructor
-                        // if shop uses default marketplace
                         id: 'marketplace-attributes',
                         text: "{s name=navigation/marketplace_attribute}Marketplace attributes{/s}",
                         leaf: true,
@@ -71,23 +69,25 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                         text: "{s name=navigation/products}Products{/s}",
                         leaf: true,
                         iconCls: 'sprite-inbox-upload'
-                    },
-                    {
-                        id: 'config-shipping-groups',
-                        text: "{s name=navigation/config_shipping_groups}Shipping groups{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-truck'
                     }
                 ]
             }
         ]
     },
 
-    constructor: function (config) {
-        if (defaultMarketplace == true) {
-            // remove marketplace attributes menu item
-            this.root.children[1].children.splice(0, 1);
+    listeners: {
+        beforeappend: {
+            element: this,
+            fn: function (node, child) {
+                if (defaultMarketplace == true && child) {
+                    return child.data.id  !== 'marketplace-attributes';
+                }
+            return true;
+            }
         }
+    },
+
+    constructor: function (config) {
         config.root = Ext.clone(this.root);
         this.callParent([config]);
     }

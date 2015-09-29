@@ -198,12 +198,6 @@ class Setup
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
-            CREATE TABLE IF NOT EXISTS `bepado_shipping_groups` (
-             `sg_id` int(11) NOT NULL AUTO_INCREMENT,
-             `sg_group_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-             PRIMARY KEY (`sg_id`),
-             UNIQUE KEY `sg_group_name` (`sg_group_name`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
             CREATE TABLE IF NOT EXISTS `bepado_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,
              `sr_group_id` int(11) unsigned DEFAULT NULL,

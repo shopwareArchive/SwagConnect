@@ -1,6 +1,8 @@
 <?php
 
 namespace Shopware\Bepado\Bootstrap;
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
+use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Models\Order\Status;
 
 /**
@@ -92,6 +94,8 @@ class Update
 		$this->createPurchasePriceHash();
 
         $this->migrateCategoryFormat();
+
+        $this->storeMarketplaceSettings();
 
         return true;
     }
@@ -533,6 +537,23 @@ class Update
                 Shopware()->Models()->flush();
                 $current++;
             }
+        }
+    }
+
+    public function storeMarketplaceSettings()
+    {
+        if (version_compare($this->version, '1.6.8', '<=')) {
+
+            $configComponent = $this->bootstrap->getConfigComponents();
+            /** @var \Shopware\Bepado\Components\Marketplace\MarketplaceSettings $settings */
+            $settings = new MarketplaceSettings($this->bootstrap->getSDK()->getMarketplaceSettings());
+            $marketplaceSettingsApplier = new MarketplaceSettingsApplier(
+                $configComponent,
+                Shopware()->Models(),
+                Shopware()->Db()
+            );
+
+            $marketplaceSettingsApplier->apply($settings);
         }
     }
 }

@@ -70,6 +70,8 @@ class MarketplaceSettingsApplier
             $this->db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
             $this->configComponent->setMarketplaceSettings($settings);
             $this->cleanUpMarketplaceSnippets();
+        } else {
+            $this->configComponent->setConfig('isDefault', $settings->isDefault, null, 'marketplace');
         }
     }
 

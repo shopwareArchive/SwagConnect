@@ -36,7 +36,8 @@ class Lifecycle extends BaseSubscriber
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
-            new ProductsAttributesValidator()
+            new ProductsAttributesValidator(),
+            new Config(Shopware()->Models())
         );
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Shopware\Bepado;
 
 use Shopware\Bepado\Components\BepadoExport;
 use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Bepado\Components\Config;
 
 class BepadoExportTest extends BepadoTestHelper
 {
@@ -18,7 +19,8 @@ class BepadoExportTest extends BepadoTestHelper
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
-            new ProductsAttributesValidator()
+            new ProductsAttributesValidator(),
+            new Config(Shopware()->Models())
         );
     }
 
@@ -245,5 +247,7 @@ class BepadoExportTest extends BepadoTestHelper
 
         return $article->getId();
     }
+
+    //todo: test export marketplace attributes
 }
  

@@ -26,17 +26,24 @@ class BepadoExport
     /** @var  MarketplaceGateway */
     protected $marketplaceGateway;
 
+    /**
+     * @var Config
+     */
+    protected $configComponent;
+
     public function __construct(
         Helper $helper,
         SDK $sdk,
         ModelManager $manager,
-        ProductAttributesValidator $productAttributesValidator
+        ProductAttributesValidator $productAttributesValidator,
+        Config $configComponent
     )
     {
         $this->helper = $helper;
         $this->sdk = $sdk;
         $this->manager = $manager;
         $this->productAttributesValidator = $productAttributesValidator;
+        $this->configComponent = $configComponent;
     }
 
     /**
@@ -250,6 +257,14 @@ class BepadoExport
     private function extractProductAttributes(Detail $detail)
     {
         $marketplaceAttributes = array();
+        $marketplaceAttributes['purchaseUnit'] = $detail->getPurchaseUnit();
+        $marketplaceAttributes['referenceUnit'] = $detail->getReferenceUnit();
+
+        // marketplace attributes are available only for SEM shops
+        if ($this->configComponent->getConfig('isDefault', true)) {
+            return $marketplaceAttributes;
+        }
+
         foreach ($this->getMarketplaceGateway()->getMappings() as $mapping) {
             $shopwareAttribute = $mapping['shopwareAttributeKey'];
             $getter = 'get' . ucfirst($shopwareAttribute);
@@ -258,8 +273,6 @@ class BepadoExport
                 $marketplaceAttributes[$shopwareAttribute] = $detail->getAttribute()->{$getter}();
             }
         }
-        $marketplaceAttributes['purchaseUnit'] = $detail->getPurchaseUnit();
-        $marketplaceAttributes['referenceUnit'] = $detail->getReferenceUnit();
 
         return $marketplaceAttributes;
     }

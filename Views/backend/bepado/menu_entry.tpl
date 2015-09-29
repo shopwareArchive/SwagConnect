@@ -18,5 +18,6 @@
         var marketplaceName = '{$marketplaceName}';
         var marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
         var marketplaceLogo = '{$marketplaceLogo}';
+        var defaultMarketplace = '{$defaultMarketplace}';
     </script>
 {/block}

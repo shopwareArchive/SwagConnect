@@ -52,6 +52,8 @@ class Bepado extends BaseSubscriber
         $view->marketplaceName = $marketplaceName;
         $view->marketplaceNetworkUrl = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl', self::MARKETPLACE_SOCIAL_NETWORK_URL);
         $view->marketplaceIcon = $marketplaceIcon;
+        $view->defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
+
         // if the marketplace is bepado we have green icon
         // if not marketplace icon should be used in both places
         $view->marketplaceIncomingIcon = ($marketplaceName == self::MARKETPLACE_NAME ? self::MARKETPLACE_GREEN_ICON : $marketplaceIcon);

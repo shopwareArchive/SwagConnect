@@ -16,6 +16,8 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
                 expanded: true,
                 children: [
                     {
+                        // it will be removed in the constructor
+                        // if shop uses default marketplace
                         id: 'marketplace-attributes',
                         text: "{s name=navigation/marketplace_attribute}Marketplace attributes{/s}",
                         leaf: true,
@@ -82,6 +84,10 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
     },
 
     constructor: function (config) {
+        if (defaultMarketplace == true) {
+            // remove marketplace attributes menu item
+            this.root.children[1].children.splice(0, 1);
+        }
         config.root = Ext.clone(this.root);
         this.callParent([config]);
     }

@@ -246,7 +246,8 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
             $this->getHelper(),
             $this->getSDK(),
             $this->getModelManager(),
-            new ProductsAttributesValidator()
+            new ProductsAttributesValidator(),
+            $this->getConfigComponent()
         );
     }
 

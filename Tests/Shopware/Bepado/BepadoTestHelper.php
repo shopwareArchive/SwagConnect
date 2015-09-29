@@ -8,6 +8,7 @@ use Shopware\Bepado\Components\ImageImport;
 use Shopware\Bepado\Components\Logger;
 use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\CustomModels\Bepado\Attribute;
+use Shopware\Bepado\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Price;
@@ -73,7 +74,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
-            new ProductsAttributesValidator()
+            new ProductsAttributesValidator(),
+            new Config(Shopware()->Models())
         );
     }
 

@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.6.8",
+    "currentVersion": "1.6.9",
     "changelog": {
         "de": {
+            "1.6.9": "New: Disabled features for SC",
             "1.6.8": "New: Changed category format",
             "1.6.7": "New: purchasePriceHash",
             "1.6.6": "New: Marketplace support",
@@ -33,6 +34,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.6.9": "New: Disabled features for SC",
             "1.6.8": "New: Changed category format",
             "1.6.7": "New: purchasePriceHash",
             "1.6.6": "New: Marketplace support",

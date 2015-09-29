@@ -197,7 +197,7 @@ class ProductFromShopTest extends BepadoTestHelper
 
         $result = $fromShop->calculateShippingCosts($order);
         $this->assertInstanceOf('Bepado\SDK\Struct\Shipping', $result);
-
+        $this->assertTrue($result->isShippable);
         $this->assertTrue($result->shippingCosts > 0);
         $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
         $this->assertEquals(25, $result->shopId);

@@ -389,7 +389,7 @@ class Setup
             $element = new Element();
             $element->setName('bepadoProductDescription');
             $element->setType('html');
-            $element->setLabel('bepado Beschreibung');
+            $element->setLabel('SC Beschreibung');
             $element->setTranslatable(1);
             $element->setHelp('Falls Sie die Langbeschreibung ihres Artikels in diesem Attribut-Feld pflegen, wird statt der Langbeschreibung der Inhalt dieses Feldes exportiert');
 
@@ -426,7 +426,7 @@ class Setup
             $customerGroup->setTax(false);
             $customerGroup->setTaxInput(false);
             $customerGroup->setMode(0);
-            $customerGroup->setName('bepado export');
+            $customerGroup->setName('SC export');
 
             $attribute = new \Shopware\Models\Attribute\CustomerGroup();
             $attribute->setBepadoGroup(true);
@@ -516,15 +516,15 @@ class Setup
     public function populatePaymentStates()
     {
         $states = array(
-            'bepado received',
-            'bepado requested',
-            'bepado instructed',
-            'bepado aborted',
-            'bepado timeout',
-            'bepado pending',
-            'bepado refunded',
-            'bepado loss',
-            'bepado error',
+            'SC received',
+            'SC requested',
+            'SC instructed',
+            'SC aborted',
+            'SC timeout',
+            'SC pending',
+            'SC refunded',
+            'SC loss',
+            'SC error',
         );
 
         $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');

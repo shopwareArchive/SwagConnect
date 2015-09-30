@@ -68,7 +68,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         applyMappingToChildCategoriesTitle: '{s name=mapping/applyConfirmTitle}Apply to child categories?{/s}',
         applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
 
-        updatePartOneMessage: '{s name=config/message/update_part_one}Update will take{/s}',
+        updatePartOneMessage: Ext.String.format('{s name=config/message/update_part_one}Update to [0] will take{/s}', marketplaceName),
         updatePartTwoMessage: '{s name=config/message/update_part_two}to finish{/s}',
         doneMessage: '{s name=config/message/done}Done{/s}',
 

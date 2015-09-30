@@ -54,7 +54,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        detailPageHintLabel: '{s name=config/details_page_hint}Show marketplace hint on article detail page{/s}',
+        detailPageHintLabel: '{s name=config/detail_page_hint}Show marketplace hint on article detail page{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
         basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
         bepadoAttributeLabel: Ext.String.format('{s name=config/bepado_attribute_label}[0]-Attribut{/s}', marketplaceName),
@@ -315,7 +315,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                         anchor: '100%',
                         fieldLabel: me.snippets.exportDomainLabel,
                         labelWidth: me.defaults.labelWidth,
-                        helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/bepado_product_gateway/product/id/{/s}'
+                        helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
                     }, {
                         xtype: 'fieldcontainer',
                         fieldLabel: me.snippets.logLabel,

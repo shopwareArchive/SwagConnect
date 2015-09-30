@@ -58,7 +58,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getLabel()
     {
-        return 'bepado';
+        return 'Shopware Connect';
     }
 
     /**

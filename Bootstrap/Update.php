@@ -14,7 +14,7 @@ use Shopware\Models\Order\Status;
 class Update
 {
 
-    /** @var \Shopware_Plugins_Backend_SwagBepado_Bootstrap  */
+    /** @var \Shopware_Plugins_Backend_SwagBepado_Bootstrap */
     protected $bootstrap;
     protected $version;
 
@@ -47,7 +47,7 @@ class Update
                         ADD COLUMN `sc_customer_costs` LONGBLOB NOT NULL AFTER `sc_shipping_costs`
                     ;'
                 );
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 // if table was already altered, ignore
             }
 
@@ -75,7 +75,7 @@ class Update
 
         $this->addImagesImportLimit();
         $this->removeApiDescriptionSnippet();
-		$this->migrateSourceIds();
+        $this->migrateSourceIds();
         $this->createMarketplaceAttributesTable();
         $this->renameMarketplaceAttributesTable();
 
@@ -91,11 +91,13 @@ class Update
             Shopware()->Db()->exec('ALTER TABLE `s_plugin_bepado_config` MODIFY `value` TEXT NOT NULL;');
         }
 
-		$this->createPurchasePriceHash();
+        $this->createPurchasePriceHash();
 
         $this->migrateCategoryFormat();
 
         $this->storeMarketplaceSettings();
+
+        $this->changePluginName();
 
         return true;
     }
@@ -147,7 +149,7 @@ class Update
         if (!$form) {
             return;
         }
-        
+
         Shopware()->Models()->remove($form);
         Shopware()->Models()->flush();
     }
@@ -176,7 +178,7 @@ class Update
             return;
         }
 
-            $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
+        $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
               (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
               `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
               `update_long_description`, `update_short_description`, `update_name`, `last_update`,
@@ -265,7 +267,7 @@ class Update
         try {
             Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `shopId` INT( 11 ) NULL DEFAULT NULL;');
             Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // This may fail if the config table is already updated.
         }
 
@@ -434,6 +436,18 @@ class Update
         }
     }
 
+    private function clearConfigCache()
+    {
+        // check shopware version, because Shopware()->Container()
+        // is available after version 4.2.x
+        if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
+            Shopware()->Template()->clearAllCache();
+        } else {
+            $cacheManager = Shopware()->Container()->get('shopware.cache_manager');
+            $cacheManager->clearConfigCache();
+        }
+    }
+
     public function createMarketplaceAttributesTable()
     {
         if (version_compare($this->version, '1.5.8', '<=')) {
@@ -498,7 +512,7 @@ class Update
         $this->clearTemplateCache();
     }
 
-	public function createPurchasePriceHash()
+    public function createPurchasePriceHash()
     {
         if (version_compare($this->version, '1.6.6', '<=')) {
             try {
@@ -508,7 +522,7 @@ class Update
                     ADD COLUMN `offer_valid_until` int(10) NOT NULL
                 ;'
                 );
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 // if table was already altered, ignore
             }
         }
@@ -518,7 +532,7 @@ class Update
      * Migrate to new category format and
      * store category structure in bepado attribute
      */
-	public function migrateCategoryFormat()
+    public function migrateCategoryFormat()
     {
         if (version_compare($this->version, '1.6.7', '<=')) {
             $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
@@ -526,8 +540,7 @@ class Update
             $batchSize = 10;
             $current = 1;
             $helper = $this->bootstrap->getHelper();
-            while ($bepadoAttributes = $repository->findBy(array('shopId' => null), array(), $batchSize, ($current-1) * $batchSize))
-            {
+            while ($bepadoAttributes = $repository->findBy(array('shopId' => null), array(), $batchSize, ($current - 1) * $batchSize)) {
                 /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
                 foreach ($bepadoAttributes as $attribute) {
                     $categories = $helper->getBepadoCategoryForProduct($attribute->getArticleId());
@@ -554,6 +567,37 @@ class Update
             );
 
             $marketplaceSettingsApplier->apply($settings);
+        }
+    }
+
+    /**
+     * Changes marketplace name from bepado to Shopware Connect
+     */
+    private function changePluginName()
+    {
+        if (version_compare($this->version, '1.6.9', '<=')) {
+            $settings = new MarketplaceSettings($this->bootstrap->getSDK()->getMarketplaceSettings());
+            // SEM projects should not be renamed
+            if (!$settings->isDefault) {
+                return true;
+            }
+
+            $configComponent = $this->bootstrap->getConfigComponents();
+            $db = Shopware()->Db();
+            $marketplaceSettingsApplier = new MarketplaceSettingsApplier(
+                $configComponent,
+                Shopware()->Models(),
+                $db
+            );
+
+            $db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE controller="Bepado"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Bepado"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
+            $marketplaceSettingsApplier->cleanUpMarketplaceSnippets();
+
+            $this->clearTemplateCache();
+            $this->clearConfigCache();
         }
     }
 }

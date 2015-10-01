@@ -39,7 +39,7 @@ class SDKTest extends BepadoTestHelper
                         'offerValidUntil' => $offerValidUntil,
                         'availability' => 100,
                         'images' => array('http://lorempixel.com/400/200'),
-                        'categories' => array('/bücher'),
+                        'categories' => array('/bücher' => 'Bücher'),
                     )),
                     'revision' => time(),
                 ))

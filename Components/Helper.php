@@ -420,7 +420,8 @@ class Helper
     }
 
     /**
-     * Retruns shopware unit entity
+     * Returns shopware unit entity
+     *
      * @param $unitKey
      * @return \Shopware\Models\Article\Unit
      */

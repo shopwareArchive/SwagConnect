@@ -39,6 +39,7 @@ use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
+use Shopware\Models\Category\Category;
 
 /**
  * The interface for products imported *from* bepado *to* the local shop
@@ -87,6 +88,9 @@ class ProductToShop implements ProductToShopBase
     private $shopRepository;
 
     private $localeRepository;
+
+    /** @var  \Shopware\Models\Category\Category */
+    private $categoryRepository;
 
     /**
      * @param Helper $helper
@@ -185,9 +189,19 @@ class ProductToShop implements ProductToShopBase
             // just leave empty product categories
             // if default category is configured it will be assigned.
             // todo@sb: fix product categories during import
-
 //            $categories = $this->helper->getCategoriesByProduct($product);
             $categories = array();
+
+            if ($this->config->getConfig('createCategoriesAutomatically', false) == true) {
+                foreach ($product->categories as $categoryLabel) {
+                    $category = $this->getCategoryRepository()->findOneBy(array('name' => $categoryLabel));
+                    if (!$category) {
+                        $category = $this->createCategory($categoryLabel);
+                    }
+                    $categories[] = $category;
+                }
+            }
+
             if (empty($categories)) {
                 //add default import category
                 $defaultCategoryId = $this->config->getConfig('defaultImportCategory');
@@ -437,6 +451,15 @@ class ProductToShop implements ProductToShopBase
         }
 
         return $this->shopRepository;
+    }
+
+    private function getCategoryRepository()
+    {
+        if (!$this->categoryRepository) {
+            $this->categoryRepository = $this->manager->getRepository('Shopware\Models\Category\Category');
+        }
+
+        return $this->categoryRepository;
     }
 
 
@@ -690,5 +713,25 @@ class ProductToShop implements ProductToShopBase
             'UPDATE s_articles_details SET instock = ? WHERE id = ?',
             array($availability, $articleDetailId)
         );
+    }
+
+    /**
+     * Creates new category
+     *
+     * @param string $categoryName
+     * @return Category
+     */
+    private function createCategory($categoryName)
+    {
+        // create child category of Deutsch
+        $parent = $this->getCategoryRepository()->find(3);
+        $category = new Category();
+        $category->setName($categoryName);
+        $category->setParent($parent);
+
+        Shopware()->Models()->persist($category);
+        Shopware()->Models()->flush();
+
+        return $category;
     }
 }

@@ -30,7 +30,7 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'createCategoriesAutomatically' => '1',
             'createUnitsAutomatically' => '1',
             'exportDomain' => '',
-            'shippingCostsPageName' => 'Versand und Zahlungsbedingungen',
+            'shippingCostsPageName' => 'Versand und Zahlung',
             'shippingCostsPage' => '6',
             'checkoutShopInfo' => '1',
             'detailProductNoIndex' => '1',

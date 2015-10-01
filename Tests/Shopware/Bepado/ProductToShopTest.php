@@ -346,5 +346,32 @@ class ProductToShopTest extends BepadoTestHelper
 
         $this->assertEquals($newAvailability, $bepadoAttribute->getArticleDetail()->getInStock());
     }
+
+    public function testInsertArticleAndAutomaticallyCreateCategories()
+    {
+        $product = $this->getProduct();
+        $category = 'MassImport#' . rand(1, 999999999);
+        // add custom categories
+        $product->categories = array_merge($product->categories, array(
+           strtolower($category) => $category,
+        ));
+
+        $this->productToShop->insertOrUpdate($product);
+
+        foreach ($product->categories as $category) {
+            $articlesCount = Shopware()->Db()->query(
+                'SELECT COUNT(s_articles.id)
+              FROM s_plugin_bepado_items
+              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
+              INNER JOIN s_articles_categories ON (s_plugin_bepado_items.article_id = s_articles_categories.articleID)
+              INNER JOIN s_categories ON (s_articles_categories.categoryID = s_categories.id)
+              WHERE s_plugin_bepado_items.source_id = :sourceId
+              AND s_categories.description = :category',
+                array('sourceId' => $product->sourceId, 'category' => $category)
+            )->fetchColumn();
+
+            $this->assertEquals(1, $articlesCount);
+        }
+    }
 }
  

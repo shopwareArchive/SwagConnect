@@ -146,7 +146,9 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             ),
             'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
-            'categories' => array('/bücher'),
+            'categories' => array(
+                '/bücher' => 'Bücher',
+            ),
             'translations' => array(
                 'en' => new Translation(array(
                     'title' => 'MassImport #'. $number . ' EN',

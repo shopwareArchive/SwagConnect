@@ -44,6 +44,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      */
     defaults: {
         labelWidth: 170,
+        importSettingsLabelWidth: 190,
         anchor: '100%'
     },
 
@@ -67,6 +68,10 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         basicHeader: '{s name=config/basic}Basic{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
         unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}',marketplaceName),
+        importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
+        createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
+        activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
+        createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}'
     },
 
@@ -97,14 +102,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
      */
     createElements: function() {
         var me = this;
-            apiFieldset = me.getApiKeyFieldset(),
             basicConfigFieldset = me.getBasicConfigFieldset(),
             unitsFieldset = me.getUnitsFieldset(),
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
         if (me.isDefaultShop()) {
-            elements.push(apiFieldset);
+            elements.push(me.getApiKeyFieldset());
+            if (defaultMarketplace == false) {
+                // extended import settings are available
+                // only for SEM shops
+                elements.push(me.getImportSettingsFieldset());
+            }
         }
         elements.push(basicConfigFieldset);
         elements.push(unitsFieldset);
@@ -241,6 +250,48 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         });
 
         return fieldset;
+    },
+
+    /**
+     * Returns Import settings field set
+     *
+     * @return Ext.form.FieldSet
+     */
+    getImportSettingsFieldset: function() {
+        var me = this;
+
+        var importSettingsFieldset = Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.importSettingsHeader,
+            defaultType: 'checkbox',
+            layout: 'anchor',
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'createCategoriesAutomatically',
+                    fieldLabel: me.snippets.createCategoriesAutomatically,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.importSettingsLabelWidth
+                }, {
+                    xtype: 'checkbox',
+                    name: 'activateProductsAutomatically',
+                    fieldLabel: me.snippets.activateProductsAutomatically,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.importSettingsLabelWidth
+                }, {
+                    xtype: 'checkbox',
+                    name: 'createUnitsAutomatically',
+                    fieldLabel: me.snippets.createUnitsAutomatically,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.importSettingsLabelWidth
+                }
+            ]
+        });
+
+        return importSettingsFieldset;
     },
 
     getUnitsFieldset: function() {

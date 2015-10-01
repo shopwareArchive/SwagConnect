@@ -47,6 +47,9 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
         { name: 'shippingCostsPage', type: 'int', useNull: true },
         { name: 'shippingCostsPageName', type: 'string' },
         { name: 'exportDomain', type: 'string' },
+        { name: 'createCategoriesAutomatically', type: 'string' },
+        { name: 'activateProductsAutomatically', type: 'string' },
+        { name: 'createUnitsAutomatically', type: 'string' },
         { name: 'hasSsl', type: 'string' }
     ],
 

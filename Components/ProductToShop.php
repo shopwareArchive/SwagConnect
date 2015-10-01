@@ -630,6 +630,7 @@ class ProductToShop implements ProductToShopBase
         // Set the configured attribute so users can easily check if a given product is a bepado attribute
         $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
         $detailAttribute->$setter($product->sourceId);
+        $detailAttribute->setBepadoArticleShipping($product->shipping);
         //todo@sb: check if bepadoAttribute matches position of the marketplace attribute
         array_walk($product->attributes, function($value, $key) use ($detailAttribute) {
             $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);

@@ -70,6 +70,7 @@ class RemoteProductQuery extends BaseProductQuery
             'd.referenceUnit as referenceUnit',
             'at.category as category',
             'at.fixedPrice as fixedPrice',
+            'attribute.bepadoArticleShipping as shipping',
         ));
 
         return $builder;

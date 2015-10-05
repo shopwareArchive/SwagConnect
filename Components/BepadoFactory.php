@@ -5,6 +5,8 @@ namespace Shopware\Bepado\Components;
 use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
 use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
+use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
+use Shopware\Bepado\Components\CategoryResolver\DefaultCategoryResolver;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
@@ -95,6 +97,12 @@ class BepadoFactory
             putenv("_SEARCH_HOST=search.{$debugHost}");
         }
 
+        $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
+            new AutoCategoryResolver(
+                $manager,
+                $manager->getRepository('Shopware\Models\Category\Category')
+            ) :
+            new DefaultCategoryResolver();
         return new SDK\SDK(
             $apiKey,
             $this->getSdkRoute($front),
@@ -106,7 +114,8 @@ class BepadoFactory
                 $this->getConfigComponent(),
                 new VariantConfigurator($manager, $this->getProductTranslationsGateway()),
                 $this->getMarketplaceGateway(),
-                $this->getProductTranslationsGateway()
+                $this->getProductTranslationsGateway(),
+                $categoryResolver
             ),
             new ProductFromShop(
                 $helper,

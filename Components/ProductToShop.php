@@ -93,6 +93,11 @@ class ProductToShop implements ProductToShopBase
     private $categoryRepository;
 
     /**
+     * @var CategoryResolver
+     */
+    private $categoryResolver;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -100,6 +105,7 @@ class ProductToShop implements ProductToShopBase
      * @param VariantConfigurator $variantConfigurator
      * @param \Shopware\Bepado\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
+     * @param \Shopware\Bepado\Components\CategoryResolver
      */
     public function __construct(
         Helper $helper,
@@ -108,7 +114,8 @@ class ProductToShop implements ProductToShopBase
         Config $config,
         VariantConfigurator $variantConfigurator,
         MarketplaceGateway $marketplaceGateway,
-        ProductTranslationsGateway $productTranslationsGateway
+        ProductTranslationsGateway $productTranslationsGateway,
+        CategoryResolver $categoryResolver
     )
     {
         $this->helper = $helper;
@@ -118,6 +125,7 @@ class ProductToShop implements ProductToShopBase
         $this->variantConfigurator = $variantConfigurator;
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslationsGateway = $productTranslationsGateway;
+        $this->categoryResolver = $categoryResolver;
     }
 
     /**
@@ -191,15 +199,8 @@ class ProductToShop implements ProductToShopBase
             // todo@sb: fix product categories during import
 //            $categories = $this->helper->getCategoriesByProduct($product);
             $categories = array();
-
             if ($this->config->getConfig('createCategoriesAutomatically', false) == true) {
-                foreach ($product->categories as $categoryLabel) {
-                    $category = $this->getCategoryRepository()->findOneBy(array('name' => $categoryLabel));
-                    if (!$category) {
-                        $category = $this->createCategory($categoryLabel);
-                    }
-                    $categories[] = $category;
-                }
+                $categories = $this->categoryResolver->resolve($product->categories);
             }
 
             if (empty($categories)) {
@@ -713,25 +714,5 @@ class ProductToShop implements ProductToShopBase
             'UPDATE s_articles_details SET instock = ? WHERE id = ?',
             array($availability, $articleDetailId)
         );
-    }
-
-    /**
-     * Creates new category
-     *
-     * @param string $categoryName
-     * @return Category
-     */
-    private function createCategory($categoryName)
-    {
-        // create child category of Deutsch
-        $parent = $this->getCategoryRepository()->find(3);
-        $category = new Category();
-        $category->setName($categoryName);
-        $category->setParent($parent);
-
-        Shopware()->Models()->persist($category);
-        Shopware()->Models()->flush();
-
-        return $category;
     }
 }

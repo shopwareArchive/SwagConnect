@@ -2,9 +2,10 @@
 
 namespace Tests\Shopware\Bepado;
 
-
 use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\ProductUpdate;
+use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
+use Shopware\Bepado\Components\CategoryResolver\DefaultCategoryResolver;
 use Shopware\Bepado\Components\Config;
 use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
@@ -31,7 +32,8 @@ class ProductToShopTest extends BepadoTestHelper
                 new PdoProductTranslationsGateway(Shopware()->Db())
             ),
             new MarketplaceGateway($this->modelManager),
-            new PdoProductTranslationsGateway(Shopware()->Db())
+            new PdoProductTranslationsGateway(Shopware()->Db()),
+            new DefaultCategoryResolver()
         );
     }
 
@@ -349,16 +351,51 @@ class ProductToShopTest extends BepadoTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
+        $productToShop = new ProductToShop(
+            $this->getHelper(),
+            $this->modelManager,
+            $this->getImageImport(),
+            new Config($this->modelManager),
+            new VariantConfigurator(
+                $this->modelManager,
+                new PdoProductTranslationsGateway(Shopware()->Db())
+            ),
+            new MarketplaceGateway($this->modelManager),
+            new PdoProductTranslationsGateway(Shopware()->Db()),
+            new AutoCategoryResolver(
+                $this->modelManager,
+                $this->modelManager->getRepository('Shopware\Models\Category\Category')
+            )
+        );
+
+
         $product = $this->getProduct();
-        $category = 'MassImport#' . rand(1, 999999999);
+        $parentCategory1 = 'MassImport#' . rand(1, 999999999);
+        $childCategory = 'MassImport#' . rand(1, 999999999);
+        $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
         $product->categories = array_merge($product->categories, array(
-           strtolower($category) => $category,
+            '/' . strtolower($parentCategory1) => $parentCategory1,
+            '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
+            '/' . strtolower($parentCategory2) => $parentCategory2,
         ));
 
-        $this->productToShop->insertOrUpdate($product);
+        $productToShop->insertOrUpdate($product);
+
+        $categoryRepository = Shopware()->Models()->getRepository('Shopware\Models\Category\Category');
+        /** @var \Shopware\Models\Category\Category $childCategoryModel */
+        $childCategoryModel = $categoryRepository->findOneBy(array('name' => $childCategory));
+
+        $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel);
+        $this->assertEquals($childCategoryModel->getParent()->getName(), $parentCategory1);
 
         foreach ($product->categories as $category) {
+            // skip it because this category has child category
+            // and product will be assigned only to child categories
+            if ($category == $parentCategory1) {
+                continue;
+            }
+
             $articlesCount = Shopware()->Db()->query(
                 'SELECT COUNT(s_articles.id)
               FROM s_plugin_bepado_items

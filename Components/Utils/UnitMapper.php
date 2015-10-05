@@ -3,6 +3,10 @@
 namespace Shopware\Bepado\Components\Utils;
 
 use Bepado\SDK\Units;
+use Shopware\Bepado\Components\Config;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Unit;
+
 
 /**
  * Class UnitMapper
@@ -11,7 +15,7 @@ use Bepado\SDK\Units;
 class UnitMapper
 {
 
-    /** @var \Shopware\Bepado\Components\Utils\Config */
+    /** @var \Shopware\Bepado\Components\Config */
     private $configComponent;
 
     private $manager;
@@ -119,6 +123,17 @@ class UnitMapper
             if ($unitModel) {
                 return $unitModel->getUnit();
             }
+        }
+
+        if ($this->configComponent->getConfig('createUnitsAutomatically', false) == true) {
+            // only german units for now
+            $unit = new Unit();
+            $unit->setName($deBepadoUnits[$bepadoUnit]);
+            $unit->setUnit($bepadoUnit);
+            $this->manager->persist($unit);
+            $this->manager->flush();
+
+            return $unit->getUnit();
         }
 
         return $bepadoUnit;

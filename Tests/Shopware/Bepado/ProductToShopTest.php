@@ -410,5 +410,36 @@ class ProductToShopTest extends BepadoTestHelper
             $this->assertEquals(1, $articlesCount);
         }
     }
+
+    public function testAutomaticallyCreateUnits()
+    {
+        $conn = Shopware()->Db();
+        $conn->insert('s_plugin_bepado_config', array(
+            'name' => 'createUnitsAutomatically',
+            'value' => '1'
+        ));
+        $product = $this->getProduct();
+        $unit = 'yd';
+        $product->attributes['unit'] = $unit;
+        $product->attributes['quantity'] = 1;
+        $product->attributes['ref_quantity'] = 5;
+
+        $this->productToShop->insertOrUpdate($product);
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+            'name' => $product->title
+        ));
+        $this->assertInstanceOf('Shopware\Models\Article\Article', $article);
+        $this->assertInstanceOf('Shopware\Models\Article\Unit', $article->getMainDetail()->getUnit());
+        $this->assertEquals('yd', $article->getMainDetail()->getUnit()->getUnit());
+        $this->assertEquals('Yard', $article->getMainDetail()->getUnit()->getName());
+
+        $unitModel = $this->modelManager->getRepository('Shopware\Models\Article\Unit')->findOneBy(array('unit' => $unit));
+        $this->modelManager->remove($unitModel);
+        $this->modelManager->flush();
+
+        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'createUnitsAutomatically'));
+    }
 }
  

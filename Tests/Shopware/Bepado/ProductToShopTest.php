@@ -21,6 +21,10 @@ class ProductToShopTest extends BepadoTestHelper
 
     public function setUp()
     {
+        $conn = Shopware()->Db();
+        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'activateProductsAutomatically'));
+        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'createUnitsAutomatically'));
+
         $this->modelManager = Shopware()->Models();
         $this->productToShop = new ProductToShop(
             $this->getHelper(),
@@ -434,12 +438,26 @@ class ProductToShopTest extends BepadoTestHelper
         $this->assertInstanceOf('Shopware\Models\Article\Unit', $article->getMainDetail()->getUnit());
         $this->assertEquals('yd', $article->getMainDetail()->getUnit()->getUnit());
         $this->assertEquals('Yard', $article->getMainDetail()->getUnit()->getName());
+    }
 
-        $unitModel = $this->modelManager->getRepository('Shopware\Models\Article\Unit')->findOneBy(array('unit' => $unit));
-        $this->modelManager->remove($unitModel);
-        $this->modelManager->flush();
+    public function testAutomaticallyActivateArticles()
+    {
+        $conn = Shopware()->Db();
+        $conn->insert('s_plugin_bepado_config', array(
+            'name' => 'activateProductsAutomatically',
+            'value' => '1'
+        ));
 
-        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'createUnitsAutomatically'));
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+            'name' => $product->title
+        ));
+        $this->assertInstanceOf('Shopware\Models\Article\Article', $article);
+        $this->assertInstanceOf('Shopware\Models\Article\Detail', $article->getMainDetail());
+        $this->assertTrue(boolval($article->getActive()), 'Article is activated');
+        $this->assertTrue(boolval($article->getMainDetail()->getActive()), 'Detail is activated');
     }
 }
  

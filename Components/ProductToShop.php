@@ -188,6 +188,9 @@ class ProductToShop implements ProductToShopBase
             $detail = new DetailModel();
             $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
             $detail->setActive(false);
+            $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
+            $detail->setActive($active);
+            $model->setActive($active);
 
             $detail->setArticle($model);
             if (!empty($product->variant)) {

@@ -65,6 +65,7 @@ class Product extends Verificator
                 $this->fail("Exporting products is not allowed without a price type selected.");
                 break;
         }
+        $this->verifyFixedPrice($dispatcher, $struct);
     }
 
     protected function verifyPrice(VerificatorDispatcher $dispatcher, Struct $struct)
@@ -84,6 +85,13 @@ class Product extends Verificator
     {
         if (empty($struct->price) || $struct->price <= 0) {
             $this->fail("The price is not allowed to be 0 or smaller.");
+        }
+    }
+
+    protected function verifyFixedPrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        if ($struct->fixedPrice === true && $this->priceType == SDK::PRICE_TYPE_PURCHASE) {
+            $this->fail("Fixed price is not allowed when export purchasePrice only");
         }
     }
 

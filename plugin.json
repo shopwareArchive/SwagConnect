@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.7.0",
+    "currentVersion": "1.7.1",
     "changelog": {
         "de": {
+            "1.7.1": "New: Fixed price is not allowed when export only purchasePrice",
             "1.7.0": "New: Shopware Connect",
             "1.6.9": "New: Disabled features for SC",
             "1.6.8": "New: Changed category format",
@@ -35,6 +36,7 @@
             "1.4.82": "Fixes update issue; Minor bugfix"
         },
         "en": {
+            "1.7.1": "New: Fixed price is not allowed when export only purchasePrice",
             "1.7.0": "New: Shopware Connect",
             "1.6.9": "New: Disabled features for SC",
             "1.6.8": "New: Changed category format",

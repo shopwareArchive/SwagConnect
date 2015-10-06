@@ -130,7 +130,11 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         contentField.setReadOnly(me.record.get('shopId') > 0);
         basicField.setReadOnly(me.record.get('shopId') > 0);
 
-        bepadoForm.bepadoFixedPrice.setReadOnly(me.record.get('shopId') > 0);
+        if (me.record.get('shopId') > 0) {
+            bepadoForm.bepadoFixedPrice.setReadOnly(true);
+        } else if (isFixedPriceAllowed == false) {
+            bepadoForm.bepadoFixedPriceFieldset.setVisible(false);
+        }
 
         if (settingsFieldSet) {
             shippingField = settingsFieldSet.down('checkboxfield[fieldLabel=' + settingsFieldSet.snippets.shippingFree.field + ']');

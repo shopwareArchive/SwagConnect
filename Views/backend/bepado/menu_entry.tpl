@@ -19,5 +19,6 @@
         var marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
         var marketplaceLogo = '{$marketplaceLogo}';
         var defaultMarketplace = '{$defaultMarketplace}';
+        var isFixedPriceAllowed = '{$isFixedPriceAllowed}';
     </script>
 {/block}

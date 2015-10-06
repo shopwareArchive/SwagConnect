@@ -33,8 +33,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
     getFixedPriceFieldSet: function() {
         var me = this;
 
-        return {
-            xtype: 'fieldset',
+        me.bepadoFixedPriceFieldset = Ext.create('Ext.form.FieldSet', {
             defaults: me.defaults,
             title: '{s name=fixedPriceConfig}Fixed price configuration{/s}',
             items:
@@ -45,7 +44,9 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
                     },
                     me.getFixedPriceCombo()
                 ]
-        };
+        });
+
+        return me.bepadoFixedPriceFieldset;
     },
 
 

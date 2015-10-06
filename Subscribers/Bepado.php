@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Subscribers;
+use Bepado\SDK\SDK;
 use Shopware\Bepado\Components\Config;
 
 /**
@@ -53,6 +54,13 @@ class Bepado extends BaseSubscriber
         $view->marketplaceNetworkUrl = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl', self::MARKETPLACE_SOCIAL_NETWORK_URL);
         $view->marketplaceIcon = $marketplaceIcon;
         $view->defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
+        $isFixedPriceAllowed = 0;
+        $priceType = Shopware()->Bootstrap()->getResource('BepadoSDK')->getPriceType();
+        if ($priceType === SDK::PRICE_TYPE_BOTH ||
+            $priceType === SDK::PRICE_TYPE_RETAIL) {
+            $isFixedPriceAllowed = 1;
+        }
+        $view->isFixedPriceAllowed = $isFixedPriceAllowed;
 
         // if the marketplace is bepado we have green icon
         // if not marketplace icon should be used in both places

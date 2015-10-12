@@ -456,8 +456,8 @@ class ProductToShopTest extends BepadoTestHelper
         ));
         $this->assertInstanceOf('Shopware\Models\Article\Article', $article);
         $this->assertInstanceOf('Shopware\Models\Article\Detail', $article->getMainDetail());
-        $this->assertTrue(boolval($article->getActive()), 'Article is activated');
-        $this->assertTrue(boolval($article->getMainDetail()->getActive()), 'Detail is activated');
+        $this->assertTrue($article->getActive(), 'Article is activated');
+        $this->assertEquals(1, $article->getMainDetail()->getActive(), 'Detail is activated');
     }
 }
  

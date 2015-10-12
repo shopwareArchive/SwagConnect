@@ -199,8 +199,8 @@ class ProductFromShopTest extends BepadoTestHelper
 
         $this->assertInstanceOf('Bepado\SDK\Struct\Shipping', $result);
         $this->assertTrue($result->isShippable);
-        $this->assertTrue($result->shippingCosts > 0);
-        $this->assertTrue($result->grossShippingCosts > $result->shippingCosts);
+        $this->assertEquals($result->shippingCosts, 3.28);
+        $this->assertEquals($result->grossShippingCosts, 3.9);
         $this->assertEquals(25, $result->shopId);
         $this->assertEquals('Standard Versand', $result->service);
     }

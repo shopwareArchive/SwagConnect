@@ -63,7 +63,7 @@
 {block name='frontend_checkout_cart_cart_head' append}
     {$smarty.block.parent}
 
-	{if $bepadoShops}
+	{if $bepadoShops and $showShippingCostsSeparately}
     	{include file='frontend/bepado/shop_header.tpl' hideSinglePrice=false}
 	{/if}
 {/block}

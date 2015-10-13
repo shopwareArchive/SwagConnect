@@ -72,6 +72,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
         activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
         createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
+        separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}'
     },
 
@@ -376,6 +377,18 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                             {
                                 boxLabel: me.snippets.logDescription,
                                 name: 'logRequest',
+                                inputValue: 1,
+                                uncheckedValue: 0
+                            }
+                        ]
+                    }, {
+                        xtype: 'fieldcontainer',
+                        fieldLabel: me.snippets.separateShippingLabel,
+                        defaultType: 'checkboxfield',
+                        labelWidth: me.defaults.labelWidth,
+                        items: [
+                            {
+                                name: 'showShippingCostsSeparately',
                                 inputValue: 1,
                                 uncheckedValue: 0
                             }

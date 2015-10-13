@@ -572,6 +572,7 @@ class Update
 
     /**
      * Changes marketplace name from bepado to Shopware Connect
+     * @return void
      */
     private function changePluginName()
     {

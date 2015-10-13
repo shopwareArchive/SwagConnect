@@ -4,7 +4,9 @@
 			{block name='frontend_checkout_cart_cart_head'}
                 {if isset($template) && $template == 'confirm'}
                     {include file="frontend/checkout/confirm_header.tpl"}
-                    {include file="frontend/checkout/items/dispatch.tpl" hideSinglePrice=true}
+                    {if $showShippingCostsSeparately}
+                        {include file="frontend/checkout/items/dispatch.tpl" hideSinglePrice=true}
+                    {/if}
                 {else}
                     {include file="frontend/checkout/cart_header.tpl"}
                 {/if}

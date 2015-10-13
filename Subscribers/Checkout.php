@@ -214,6 +214,7 @@ class Checkout extends BaseSubscriber
         }
 
         $view->assign($basketHelper->getBepadoTemplateVariables($bepadoMessages));
+        $view->assign('showShippingCostsSeparately', $this->getFactory()->getConfigComponent()->getConfig('showShippingCostsSeparately', false));
     }
 
     /**

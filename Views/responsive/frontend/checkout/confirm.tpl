@@ -6,7 +6,7 @@
 
 {block name="frontend_checkout_confirm_confirm_head" append}
 	{assign var="lastProduct" value=$sBasket.content|@end}
-	{if counter eq 0 && $bepadoContent}
+	{if counter eq 0 && $bepadoContent && $showShippingCostsSeparately}
 		{include file="frontend/checkout/items/dispatch.tpl" hideSinglePrice=true}
 	{/if}
 {/block}

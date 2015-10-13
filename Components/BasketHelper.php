@@ -548,7 +548,7 @@ class BasketHelper
             'bepadoShippingCosts' => $this->getBepadoGrossShippingCosts(),
             'bepadoShippingCostsOrg' => $this->getOriginalShippingCosts(),
             'bepadoShopInfo' => $this->showCheckoutShopInfo,
-            'addBaseShop' => 1 // merchant shipping costs are always included
+            'addBaseShop' => $this->onlyBepadoProducts ? 0 : 1,
         );
     }
 

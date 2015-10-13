@@ -4,7 +4,7 @@
 	{if $shopId && $bepadoShopInfo}
 		<div class="bepado--bepado-image-article">
 			<span class="bepado-image-article--text">
-				bepado
+				Connect
 			</span>
 		</div>
 	{/if}

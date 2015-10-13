@@ -179,7 +179,6 @@ class BasketHelper
      * This method will check, if any *real* products from the local shop are in the basket. If this is not the
      * case, this method will:
      *
-     * - remove the original shipping costs from the basket
      * - set the first bepado shop as content of the default basket ($basket['content'])
      * - remove any surcharges, vouchers and  discount from the original basket(!)
      *
@@ -211,22 +210,6 @@ class BasketHelper
             $shopId = current(array_keys($bepadoContent));
             $this->basket['content'] = $bepadoContent[$shopId];
             unset($this->bepadoContent[$shopId]);
-
-            // Remove original shop's shipping costs
-            $shippingCostsOrg = $this->basket['sShippingcostsWithTax'];
-            $shippingCostsOrgNet = $this->basket['sShippingcostsNet'];
-            $this->basket['sShippingcosts'] = 0;
-            $this->basket['sShippingcostsWithTax'] = 0;
-            $this->basket['sShippingcostsNet'] = 0;
-            $this->basket['AmountNumeric'] -= $shippingCostsOrg;
-            $this->basket['AmountNetNumeric'] -= $shippingCostsOrgNet;
-            $this->basket['sAmount'] -= $shippingCostsOrg;
-            $rate = number_format($this->basket['sShippingcostsTax'], 2, '.', '');
-
-            $this->basket['sTaxRates'][$rate] -= $shippingCostsOrg - $shippingCostsOrgNet;
-            if(!empty($this->basket['sAmountWithTax'])) {
-                $this->basket['sAmountWithTax'] -= $shippingCostsOrg;
-            }
 
             return $shopId;
         }
@@ -565,7 +548,7 @@ class BasketHelper
             'bepadoShippingCosts' => $this->getBepadoGrossShippingCosts(),
             'bepadoShippingCostsOrg' => $this->getOriginalShippingCosts(),
             'bepadoShopInfo' => $this->showCheckoutShopInfo,
-            'addBaseShop' => $this->onlyBepadoProducts ? 0 : 1
+            'addBaseShop' => 1 // merchant shipping costs are always included
         );
     }
 

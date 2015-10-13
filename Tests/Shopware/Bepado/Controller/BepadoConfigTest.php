@@ -42,6 +42,7 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'isDefaultShop' => '1',
             'shopId' => '15',
             'hasSsl' => '0',
+            'showShippingCostsSeparately' => '0',
         );
 
 

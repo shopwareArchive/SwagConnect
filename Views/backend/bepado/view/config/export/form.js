@@ -55,8 +55,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
         autoPlayedChanges: Ext.String.format('{s name=config/export/changes_auto_played_label}Änderungen automatisch mit [0] synchronsieren{/s}', marketplaceName),
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        defaultCategory: '{s name=config/export/default_category}Standard export-Kategorie{/s}',
-        defaultCategryHelp: Ext.String.format('{s name=config/export/default_category_help}Hier geben Sie an, in welche [0] Kategorie Ihre Produkte exportiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}', marketplaceName),
         synchronization: '{s name=synchronization}Synchronization{/s}',
         synchronizationBarDescription: Ext.String.format('{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu [0] an. Es kann etwas länger dauern, bis Ihre Produkte auf [0] erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}', marketplaceName),
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
@@ -357,50 +355,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
     },
 
     createProductContainer: function () {
-        var me = this,
-            defaultExportCategory = Ext.create('Ext.form.TextField',{
-                name: 'defaultExportCategory',
-                helpText: me.snippets.defaultCategryHelp,
-                readOnly: true,
-                flex: 4
-            });
-
-        me.categoryStore = Ext.data.StoreManager.lookup('mapping.GoogleCategories');
-        // create combo with google categories
-        // do not change combo creation to xtype
-        // xtype will reset tree combo state every time when it's showed
-        me.categoryTreeCombo = Ext.create('Shopware.form.field.ComboTree', {
-            valueField: 'id',
-            displayField: 'name',
-            treeField: 'categoryId',
-            store: me.categoryStore,
-            forceSelection: true,
-            emptyText: '{s name=config/export/empty_text_combo}Bitte wählen{/s}',
-            allowBlank: true,
-            name: 'defaultExportCategory',
-            rootVisible: false,
-            enableKeyEvents: true,
-            listeners: {
-                select: function(field, record) {
-                    defaultExportCategory.setValue(field.getValue());
-                    field.up('window').close();
-                }
-            }
-        });
-
-        // create window for default category combo
-        // it's will be shown when hit Edit button
-        me.defaultCategoryWindow = Ext.create('Ext.window.Window', {
-            title: me.snippets.defaultCategory,
-            height: 100,
-            width: 400,
-            layout: 'fit',
-            modal: true,
-            closeAction: 'hide',
-            items: [
-                me.categoryTreeCombo
-            ]
-        });
+        var me = this;
 
         return Ext.create('Ext.container.Container', {
             columnWidth: 1,
@@ -427,25 +382,6 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     valueField: 'value',
                     editable: false,
                     labelWidth: me.defaults.labelWidth
-                },
-                {
-                    xtype: 'fieldcontainer',
-                    layout: 'hbox',
-                    fieldLabel: me.snippets.defaultCategory,
-                    labelWidth: me.defaults.labelWidth,
-                    items:[
-                        defaultExportCategory,
-                        Ext.create('Ext.button.Button', {
-                            text: me.snippets.edit,
-                            height: 27,
-                            minWidth: 100,
-                            bodyPadding: '0 0 0 3',
-                            cls: 'primary',
-                            handler: function (btn) {
-                                me.defaultCategoryWindow.show();
-                            }
-                        })
-                    ]
                 }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: me.snippets.autoProductSync,

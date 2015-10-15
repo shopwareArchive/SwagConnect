@@ -19,7 +19,6 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
 
         Ext.applyIf(me, {
             dockedItems: [
-                me.getToolbar(),
                 me.getPagingToolbar()
             ],
             columns: me.getColumns()
@@ -145,44 +144,6 @@ Ext.define('Shopware.apps.Bepado.view.export.List', {
 
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
         return pagingBar;
-    },
-
-    getToolbar: function() {
-        var me = this;
-        return {
-            xtype: 'toolbar',
-            ui: 'shopware-ui',
-            dock: 'top',
-            border: false,
-            items: me.getTopBar()
-        };
-    },
-
-    getTopBar:function () {
-        var me = this;
-        var items = [];
-        items.push({
-            iconCls:'sprite-plus-circle-frame',
-            text:'{s name=export/options/insert_text}Insert / update products to the export{/s}',
-            action:'add'
-        });
-        items.push({
-            iconCls:'sprite-minus-circle-frame',
-            text:'{s name=export/options/delete_text}Remove products from the export{/s}',
-            action:'delete'
-        });
-        //items.push('->', {
-        //    xtype:'textfield',
-        //    name:'searchfield',
-        //    cls:'searchfield',
-        //    width:100,
-        //    emptyText:'{s name=search/empty_text}Search...{/s}',
-        //    enableKeyEvents:true,
-        //    checkChangeBuffer:500
-        //}, {
-        //    xtype:'tbspacer', width:6
-        //});
-        return items;
     }
 });
 //{/block}

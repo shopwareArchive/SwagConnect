@@ -18,6 +18,7 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_BepadoProductGateway' => 'onGetControllerPathFrontendBepadoControllerGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado' => 'onGetControllerPathBackend',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoConfig' => 'onGetControllerPathBepadoConfig',
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
         );
     }
@@ -85,6 +86,19 @@ class ControllerPath extends BaseSubscriber
         $this->registerMySnippets();
         return $this->Path() . 'Controllers/Backend/BepadoConfig.php';
     }
+
+    /**
+     * Register the bepado import backend controller
+     *
+     * @param   \Enlight_Event_EventArgs $args
+     * @return  string
+     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Import
+     */
+    public function onGetControllerPathImport(\Enlight_Event_EventArgs $args)
+    {
+        return $this->Path() . 'Controllers/Backend/Import.php';
+    }
+
 
     public function onGetControllerPathShippingGroups(\Enlight_Event_EventArgs $args)
     {

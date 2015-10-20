@@ -74,7 +74,10 @@ class ProductFromShopTest extends BepadoTestHelper
             new Logger(Shopware()->Db())
         );
 
+        $address = new Address(array());
         $fromShop->buy(new Order(array(
+            'billingAddress' => $address,
+            'deliveryAddress' => $address,
         )));
     }
 

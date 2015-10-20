@@ -20,6 +20,7 @@ before_script:
     - php bin/console sw:plugin:activate SwagBepado
     - php bin/console sw:generate:attributes
     - php bin/console orm:generate:proxies
+    - ls cache
 #    - bash cache/clear_cache.sh
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
 

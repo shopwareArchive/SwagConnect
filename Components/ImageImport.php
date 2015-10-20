@@ -166,7 +166,7 @@ class ImageImport
             $this->manager->remove($data['image']);
             $this->manager->remove($data['media']);
         }
-
+        $this->manager->flush();
         // Check if we still have a main image
         $hasMainImage = $this->hasArticleMainImage($model->getId());
 
@@ -243,9 +243,17 @@ class ImageImport
 
         $thumbnailSizes = $album->getSettings()->getThumbnailSize();
         $sizesArray = array();
+        $requiredSizeExists = false;
         foreach ($thumbnailSizes as $size) {
             $sizes = explode('x', $size);
+            if ($sizes[0] == 140 && $sizes[1] == 140) {
+                $requiredSizeExists = true;
+            }
             $sizesArray[] = $sizes;
+        }
+
+        if ($requiredSizeExists === false) {
+            $sizesArray[] = array(140, 140);
         }
 
         return $sizesArray;

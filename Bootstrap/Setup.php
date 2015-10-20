@@ -403,7 +403,7 @@ class Setup
     /**
      * Creates a bepado customer group - this can be used by the shop owner to manage the bepado product prices
      *
-     * Logic is very simple here - if a group with the key 'BEP' already exists, no new group is created
+     * Logic is very simple here - if a group with the key 'SC' already exists, no new group is created
      */
     public function createBepadoCustomerGroup()
     {
@@ -449,7 +449,7 @@ class Setup
      */
     private function getAvailableCustomerGroupName()
     {
-        $names = array('BEP', 'BP', 'SWBEP', 'BEPA', 'BEP-1');
+        $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
 
         $repo = $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
@@ -459,7 +459,7 @@ class Setup
             }
         }
 
-        throw new \RuntimeException('Could not find a free group name for the bepado customer group.Probably you need to delete an existing customer group created by bepado (BEP, bepado, BP, SW-BEP or SW-BEPADO). Make sure, you really don\'t need it any more!'
+        throw new \RuntimeException('Could not find a free group name for the Shopware Connect customer group.Probably you need to delete an existing customer group created by Shopware Connect (SC, SWC, SWCONN, SC-1). Make sure, you really don\'t need it any more!'
         );
     }
 

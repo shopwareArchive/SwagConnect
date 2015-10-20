@@ -89,20 +89,17 @@ class Article extends BaseSubscriber
      */
     public function enforceBepadoPriceWhenSaving(\Enlight_Hook_HookArgs $args)
     {
-
         /** @var array $prices */
         $prices = $args->getReturn();
         /** @var \Shopware\Models\Article\Article $article */
         $article = $args->get('article');
 
         $bepadoCustomerGroup = $this->getBepadoCustomerGroup();
-        $bepadoCustomerGroupKey = $bepadoCustomerGroup->getKey();
-        $defaultPrices = array();
-
         if (!$bepadoCustomerGroup) {
             return;
         }
-
+        $bepadoCustomerGroupKey = $bepadoCustomerGroup->getKey();
+        $defaultPrices = array();
         foreach ($prices as $key => $priceData) {
             if ($priceData['customerGroupKey'] == $bepadoCustomerGroupKey) {
                 return;
@@ -130,7 +127,7 @@ class Article extends BaseSubscriber
     }
 
     /**
-     * @return int|null
+     * @return \Shopware\Models\Customer\Group|null
      */
     public function getBepadoCustomerGroup()
     {

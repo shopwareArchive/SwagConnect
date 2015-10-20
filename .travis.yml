@@ -1,6 +1,8 @@
 language: php
 php:
   - 5.4
+  - 5.5
+  - 5.6
 
 sudo: false
 
@@ -19,7 +21,7 @@ before_script:
     - php bin/console sw:plugin:activate SwagBepado
     - php bin/console sw:generate:attributes
     - php bin/console orm:generate:proxies
-    - bash cache/clear_cache.sh
+#    - bash cache/clear_cache.sh
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
 
 script: phpunit

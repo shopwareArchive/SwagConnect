@@ -41,7 +41,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     {
         if (!$this->categoryExtractor) {
             $this->categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
+                new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+                    Shopware()->Models(),
+                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category')
+                )
             );
         }
 

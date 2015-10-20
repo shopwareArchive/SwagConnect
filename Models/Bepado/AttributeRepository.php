@@ -44,7 +44,7 @@ class AttributeRepository extends ModelRepository
     public function getRemoteArticleAttributesQueryBuilder()
     {
         $builder = $this->createQueryBuilder('a');
-        $builder->select('a.category');
+        $builder->select('a');
         $builder->where('a.shopId IS NOT NULL')
                 ->andWhere('a.category IS NOT NULL');
 

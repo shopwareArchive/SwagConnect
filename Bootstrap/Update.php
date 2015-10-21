@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Bootstrap;
+use Shopware\Bepado\Components\CategoryExtractor;
 use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
 use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Models\Order\Status;
@@ -98,6 +99,8 @@ class Update
         $this->storeMarketplaceSettings();
 
         $this->changePluginName();
+
+        $this->migrateProductCategories();
 
         return true;
     }
@@ -599,6 +602,85 @@ class Update
 
             $this->clearTemplateCache();
             $this->clearConfigCache();
+        }
+    }
+
+    /**
+     * Migrate bepado categories to separate table
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    private function migrateProductCategories()
+    {
+        if (version_compare($this->version, '1.7.2', '<=')) {
+            $sql = 'CREATE TABLE IF NOT EXISTS `s_plugin_bepado_categories` (
+                      `id` int(11) NOT NULL AUTO_INCREMENT,
+                      `category_key` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+                      `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+                      `mapped` tinyint(1) DEFAULT 0,
+                      PRIMARY KEY (`id`),
+                      INDEX (`category_key`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+            Shopware()->Db()->exec($sql);
+
+            $sql = 'CREATE TABLE IF NOT EXISTS `s_plugin_bepado_product_to_categories` (
+                      `id` int(11) NOT NULL AUTO_INCREMENT,
+                      `bpado_category_id` int(11) NOT NULL,
+                      `articleID` int(11) NOT NULL,
+                      PRIMARY KEY (`id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+            Shopware()->Db()->exec($sql);
+
+            Shopware()->Models()->addAttribute(
+                's_categories_attributes',
+                'bepado', 'imported_category',
+                'int(1)',
+                true
+            );
+            Shopware()->Models()->addAttribute(
+                's_articles_attributes',
+                'bepado', 'mapped_category',
+                'int(1)',
+                true
+            );
+            Shopware()->Models()->generateAttributeModels(array(
+                's_categories_attributes',
+                's_articles_attributes',
+            ));
+
+            $categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
+                new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+                    Shopware()->Models(),
+                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category')
+                )
+            );
+
+            $categories = $categoryExtractor->extractImportedCategories();
+
+            Shopware()->Db()->beginTransaction();
+            $this->migrateRemoteCategories($categories);
+            Shopware()->Db()->commit();
+        }
+    }
+
+    /**
+     * Populate s_plugin_bepado_categories table
+     * @param array $categories
+     */
+    private function migrateRemoteCategories(array $categories)
+    {
+        foreach ($categories as $category) {
+            Shopware()->Db()->query('
+                INSERT IGNORE INTO `s_plugin_bepado_categories`
+                (`category_key`, `label`)
+                VALUES (?, ?)
+                ', array($category['id'], $category['text'])
+            );
+
+            if (!empty($category['children'])) {
+                $this->migrateRemoteCategories($category['children']);
+            }
         }
     }
 }

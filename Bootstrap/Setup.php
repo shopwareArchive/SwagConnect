@@ -207,8 +207,22 @@ class Setup
              `sr_zip_prefix` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
              PRIMARY KEY (`sr_id`),
              KEY `sr_group_id` (`sr_group_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-        ");
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci","
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_categories` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `category_key` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+              `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+              `mapped` tinyint(1) DEFAULT 0,
+              PRIMARY KEY (`id`),
+              INDEX (`category_key`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
+            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_product_to_categories` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `bpado_category_id` int(11) NOT NULL,
+              `articleID` int(11) NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            ");
 
         foreach ($queries as $query) {
             Shopware()->Db()->exec($query);
@@ -299,6 +313,20 @@ class Setup
             'int(1)',
             true,
             1
+        );
+
+        $modelManager->addAttribute(
+            's_categories_attributes',
+            'bepado', 'imported_category',
+            'int(1)',
+            true
+        );
+
+        $modelManager->addAttribute(
+            's_articles_attributes',
+            'bepado', 'mapped_category',
+            'int(1)',
+            true
         );
 
         $modelManager->generateAttributeModels(array(

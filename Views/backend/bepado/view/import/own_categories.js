@@ -6,7 +6,6 @@ Ext.define('Shopware.apps.Bepado.view.import.OwnCategories', {
     alias: 'widget.connect-own-categories',
 
     border: false,
-    layout: 'border',
     rootVisible: false,
     width: 200,
     height: 200,

@@ -62,21 +62,48 @@ class CategoryExtractor
     }
 
     /**
+     * Loads remote categories
+     *
+     * @param null $parent
+     * @return array
+     */
+    public function getRemoteCategoriesTree($parent = null)
+    {
+        $sql = 'SELECT category_key, label FROM `s_plugin_bepado_categories`';
+        if ($parent !== null) {
+            $sql .= ' WHERE category_key LIKE ?';
+            // filter only first child categories
+            $rows = Shopware()->Db()->fetchPairs($sql, array($parent . '/%'));
+            $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), false);
+        } else {
+            $rows = Shopware()->Db()->fetchPairs($sql);
+            // filter only main categories
+            $rows = $this->convertTree($this->categoryResolver->generateTree($rows), false);
+        }
+
+        return $rows;
+    }
+
+    /**
      * Converts categories tree structure
      * to be usable in ExtJS tree
      *
      * @param array $tree
      * @return array
      */
-    private function convertTree(array $tree)
+    private function convertTree(array $tree, $includeChildren = true)
     {
         $categories = array();
         foreach ($tree as $id => $category) {
+            $children = array();
+            if ($includeChildren === true && !empty($category['children'])) {
+                $children = $this->convertTree($category['children'], $includeChildren);
+            }
             $categories[] = array(
                 'text' => $category['name'],
                 'id' => $id,
                 'leaf' => empty($category['children']) ? true : false,
-                'children' => empty($category['children']) ? array() : $this->convertTree($category['children']),
+                'children' => $children,
             );
         }
 

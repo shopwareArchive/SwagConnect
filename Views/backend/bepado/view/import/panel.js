@@ -6,25 +6,26 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
     alias: 'widget.bepado-import',
 
     border: false,
-    layout: 'border',
+    layout: 'fit',
     padding: '10px',
 
     initComponent: function() {
         var me = this;
 
         Ext.applyIf(me, {
-            items: [
-                {
-                    xtype: 'connect-remote-categories',
-                    padding: '10px',
-                    columnWidth: .50
-                } ,
-                {
-                    xtype: 'connect-own-categories',
-                    padding: '10px',
-                    columnWidth: .50
-                }
-            ]
+            items: [{
+                    xtype: 'panel',
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'connect-remote-categories',
+                            padding: '10px'
+                        } , {
+                            xtype: 'connect-own-categories',
+                            padding: '10px'
+                        }
+                    ]
+                }]
         });
 
         me.callParent(arguments);

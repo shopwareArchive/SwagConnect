@@ -31,9 +31,14 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getImportedProductCategoriesTreeAction()
     {
+        $parent = $this->request->getParam('id', null);
+        if ($parent == 'root') {
+            $parent = null;
+        }
+
         $this->View()->assign(array(
             'success' => true,
-            'data' => $this->getCategoryExtractor()->extractImportedCategories(),
+            'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent),
         ));
     }
 

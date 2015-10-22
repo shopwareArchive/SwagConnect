@@ -625,7 +625,7 @@ class Update
 
             $sql = 'CREATE TABLE IF NOT EXISTS `s_plugin_bepado_product_to_categories` (
                       `id` int(11) NOT NULL AUTO_INCREMENT,
-                      `bpado_category_id` int(11) NOT NULL,
+                      `bepado_category_id` int(11) NOT NULL,
                       `articleID` int(11) NOT NULL,
                       PRIMARY KEY (`id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';

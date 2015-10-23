@@ -102,7 +102,11 @@ class BepadoFactory
                 $manager,
                 $manager->getRepository('Shopware\Models\Category\Category')
             ) :
-            new DefaultCategoryResolver();
+            new DefaultCategoryResolver(
+                $manager,
+                $manager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory'),
+                $manager->getRepository('Shopware\CustomModels\Bepado\ProductToRemoteCategory')
+            );
         return new SDK\SDK(
             $apiKey,
             $this->getSdkRoute($front),

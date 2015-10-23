@@ -125,4 +125,9 @@ class AutoCategoryResolver implements CategoryResolver
         }
         return $tree;
     }
+
+    public function storeRemoteCategories(array $categories, $articleId)
+    {
+        // Shops connected to SEM projects don't need to store Shopware Connect categories
+    }
 } 

@@ -210,17 +210,19 @@ class Setup
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci","
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
-              `category_key` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `mapped` tinyint(1) DEFAULT 0,
+              `category_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+              `label` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+              `local_category_id` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`),
-              INDEX (`category_key`)
+              INDEX (`category_key`),
+              UNIQUE KEY `scuk_category_key` (`category_key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_bepado_product_to_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
-              `bepado_category_id` int(11) NOT NULL,
+              `connect_category_id` int(11) NOT NULL,
               `articleID` int(11) NOT NULL,
-              PRIMARY KEY (`id`)
+              PRIMARY KEY (`id`),
+              UNIQUE KEY `scuk_connect_category_id` (`connect_category_id`,`articleID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ");
 

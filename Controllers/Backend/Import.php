@@ -34,6 +34,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private $productToRemoteCategoryRepository;
 
+    /**
+     * @var \Shopware\Bepado\Components\ImportService
+     */
+    private $importService;
+
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', null);
@@ -66,6 +71,20 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    public function loadBothArticleTypesAction()
+    {
+        $categoryId = (int)$this->request->getParam('categoryId', 0);
+        $limit = (int)$this->request->getParam('limit', 10);
+        $offset = (int)$this->request->getParam('start', 0);
+        $result = $this->getImportService()->findBothArticlesType($categoryId, $limit, $offset);
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $result['data'],
+            'total' => $result['total'],
+        ));
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
@@ -93,5 +112,20 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         return $this->productToRemoteCategoryRepository;
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\ImportService
+     */
+    private function getImportService()
+    {
+        if (!$this->importService) {
+            $this->importService = new \Shopware\Bepado\Components\ImportService(
+                Shopware()->Models(),
+                $this->container->get('multi_edit.product')
+            );
+        }
+
+        return $this->importService;
     }
 } 

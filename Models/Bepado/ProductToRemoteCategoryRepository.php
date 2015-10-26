@@ -45,6 +45,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('a.tax', 't');
         $builder->where('rc.categoryKey = :categoryKey');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
+        $builder->distinct(true);
         $builder->setFirstResult($offset);
         $builder->setMaxResults($limit);
 

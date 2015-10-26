@@ -32,7 +32,8 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                         xtype: 'panel',
                         layout: 'hbox',
                         items: [
-                            Ext.create('Shopware.apps.Bepado.view.import.RemoteProducts')
+                            Ext.create('Shopware.apps.Bepado.view.import.RemoteProducts'),
+                            Ext.create('Shopware.apps.Bepado.view.import.LocalProducts')
                         ]
                     }]
             }]

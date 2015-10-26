@@ -35,8 +35,13 @@ class ProductToRemoteCategoryRepository extends ModelRepository
     public function findArticlesByRemoteCategory($remoteCategoryKey, $limit = 10, $offset = 0)
     {
         $builder = $this->createQueryBuilder('ptrc');
-        $builder->select(array('a.id', 'a.name', 'md.number', 'p.price', 't.tax'));
-        $builder->addSelect('s.name as supplier');
+        $builder->addSelect('a.id as Article_id');
+        $builder->addSelect('md.number as Detail_number');
+        $builder->addSelect('a.name as Article_name');
+        $builder->addSelect('a.active as Article_active');
+        $builder->addSelect('p.price as Price_basePrice');
+        $builder->addSelect('t.tax as Tax_name');
+        $builder->addSelect('s.name as Supplier_name');
         $builder->leftJoin('ptrc.connectCategory', 'rc');
         $builder->leftJoin('ptrc.article', 'a');
         $builder->leftJoin('a.mainDetail', 'md');

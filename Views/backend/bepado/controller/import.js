@@ -14,7 +14,8 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
 
     refs: [
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
-        { ref: 'localProductsGrid', selector: 'local-products' }
+        { ref: 'localProductsGrid', selector: 'local-products' },
+        { ref: 'localCategoryTree', selector: 'connect-own-categories' }
     ],
 
     /**
@@ -29,6 +30,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
             },
             'connect-own-categories': {
                 itemmousedown: me.onSelectLocalCategory
+            },
+            'local-products dataview': {
+                beforedrop: me.onBeforeDropLocalProduct
             }
         });
 
@@ -47,6 +51,17 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
 
         me.getLocalProductsGrid().getStore().getProxy().extraParams.categoryId = record.get('id');
         me.getLocalProductsGrid().getStore().load();
+    },
+
+    onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers)
+    {
+        var me = this;
+        var selected = me.getLocalCategoryTree().getSelectionModel().getSelection()
+        if (selected.length > 0) {
+            dropHandlers.processDrop();
+        } else {
+            dropHandlers.cancelDrop();
+        }
     }
 });
 //{/block}

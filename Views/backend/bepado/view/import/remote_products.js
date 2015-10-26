@@ -8,6 +8,19 @@ Ext.define('Shopware.apps.Bepado.view.import.RemoteProducts', {
 
     border: false,
 
+    selModel: new Ext.selection.RowModel({
+        mode: "MULTI"
+    }),
+
+    viewConfig: {
+        plugins: {
+            ptype: 'gridviewdragdrop',
+            appendOnly: true,
+            dragGroup: 'local',
+            dropGroup: 'remote'
+        }
+    },
+
     initComponent: function() {
         var me = this;
 
@@ -28,23 +41,23 @@ Ext.define('Shopware.apps.Bepado.view.import.RemoteProducts', {
         return [
             {
                 header: 'Aritkel Nr.',
-                dataIndex: 'number',
+                dataIndex: 'Detail_number',
                 flex: 1
             }, {
                 header: 'Name',
-                dataIndex: 'name',
+                dataIndex: 'Article_name',
                 flex: 4
             }, {
                 header: 'Hersteller',
-                dataIndex: 'supplier',
+                dataIndex: 'Supplier_name',
                 flex: 3
             }, {
                 header: 'Preis (brutto)',
-                dataIndex: 'price',
+                dataIndex: 'Price_basePrice',
                 flex: 3
             }, {
                 header: 'Steuersatz',
-                dataIndex: 'tax',
+                dataIndex: 'Tax_name',
                 flex: 1
             }
         ];

@@ -8,6 +8,14 @@ Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
 
     border: false,
 
+    viewConfig: {
+        plugins: {
+            ptype: 'gridviewdragdrop',
+            appendOnly: true,
+            dropGroup: 'local'
+        }
+    },
+
     initComponent: function() {
         var me = this;
 

@@ -26,9 +26,6 @@ Ext.define('Shopware.apps.Bepado.view.import.RemoteCategories', {
     initComponent: function() {
         var me = this;
 
-        //Ext.applyIf(me, {
-        //});
-
         me.callParent(arguments);
     }
 });

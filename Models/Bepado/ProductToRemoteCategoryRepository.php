@@ -32,5 +32,24 @@ use \Shopware\Components\Model\ModelRepository;
  */
 class ProductToRemoteCategoryRepository extends ModelRepository
 {
+    public function findArticlesByRemoteCategory($remoteCategoryKey, $limit = 10, $offset = 0)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select(array('a.id', 'a.name', 'md.number', 'p.price', 't.tax'));
+        $builder->addSelect('s.name as supplier');
+        $builder->leftJoin('ptrc.connectCategory', 'rc');
+        $builder->leftJoin('ptrc.article', 'a');
+        $builder->leftJoin('a.mainDetail', 'md');
+        $builder->leftJoin('md.prices', 'p');
+        $builder->leftJoin('a.supplier', 's');
+        $builder->leftJoin('a.tax', 't');
+        $builder->where('rc.categoryKey = :categoryKey');
+        $builder->setParameter('categoryKey', $remoteCategoryKey);
+        $builder->setFirstResult($offset);
+        $builder->setMaxResults($limit);
 
+        $query = $builder->getQuery();
+
+        return $query;
+    }
 } 

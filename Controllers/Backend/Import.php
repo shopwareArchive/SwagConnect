@@ -29,6 +29,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 {
     private $categoryExtractor;
 
+    /**
+     * @var \Shopware\CustomModels\Bepado\ProductToRemoteCategory
+     */
+    private $productToRemoteCategoryRepository;
+
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', null);
@@ -39,6 +44,25 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $this->View()->assign(array(
             'success' => true,
             'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent),
+        ));
+    }
+
+    public function loadArticlesByRemoteCategoryAction()
+    {
+        $category = $this->request->getParam('category', null);
+        $limit = (int)$this->request->getParam('limit', 10);
+        $offset = (int)$this->request->getParam('start', 0);
+
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $limit, $offset);
+        $query->setHydrationMode($query::HYDRATE_OBJECT);
+
+        $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
+        $paginator->setUseOutputWalkers(false);
+        $totalCount = $paginator->count();
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $query->getArrayResult(),
+            'total' => $totalCount,
         ));
     }
 
@@ -55,5 +79,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         return $this->categoryExtractor;
+    }
+
+    /**
+     * @return \Shopware\CustomModels\Bepado\ProductToRemoteCategory
+     */
+    private function getProductToRemoteCategoryRepository()
+    {
+        if (!$this->productToRemoteCategoryRepository) {
+            $this->productToRemoteCategoryRepository = Shopware()->Models()->getRepository(
+                'Shopware\CustomModels\Bepado\ProductToRemoteCategory'
+            );
+        }
+
+        return $this->productToRemoteCategoryRepository;
     }
 } 

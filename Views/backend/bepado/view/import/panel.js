@@ -15,17 +15,27 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
         Ext.applyIf(me, {
             items: [{
                     xtype: 'panel',
-                    layout: 'hbox',
-                    items: [
-                        {
-                            xtype: 'connect-remote-categories',
-                            padding: '10px'
-                        } , {
-                            xtype: 'connect-own-categories',
-                            padding: '10px'
-                        }
-                    ]
-                }]
+                    layout: 'vbox',
+                    items: [{
+                        xtype: 'panel',
+                        layout: 'hbox',
+                        items: [
+                            {
+                                xtype: 'connect-remote-categories',
+                                padding: '10px'
+                            } , {
+                                xtype: 'connect-own-categories',
+                                padding: '10px'
+                            }
+                        ]
+                    }, {
+                        xtype: 'panel',
+                        layout: 'hbox',
+                        items: [
+                            Ext.create('Shopware.apps.Bepado.view.import.RemoteProducts')
+                        ]
+                    }]
+            }]
         });
 
         me.callParent(arguments);

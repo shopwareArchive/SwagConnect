@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     stores: [
         'main.Navigation',
-        'export.List', 'import.List', 'import.RemoteCategories',
+        'export.List', 'import.List', 'import.RemoteCategories', 'import.RemoteProducts',
         'changed_products.List',
         'log.List',
         'mapping.Import', 'mapping.Export',

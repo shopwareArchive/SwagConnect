@@ -193,14 +193,7 @@ class ProductToShop implements ProductToShopBase
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
 
-            // just leave empty product categories
-            // if default category is configured it will be assigned.
-            // todo@sb: fix product categories during import
-//            $categories = $this->helper->getCategoriesByProduct($product);
-            $categories = array();
-            if ($this->config->getConfig('createCategoriesAutomatically', false) == true) {
-                $categories = $this->categoryResolver->resolve($product->categories);
-            }
+            $categories = $this->categoryResolver->resolve($product->categories);
 
             if (empty($categories)) {
                 //add default import category

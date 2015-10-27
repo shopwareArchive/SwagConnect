@@ -42,7 +42,15 @@ class DefaultCategoryResolver implements CategoryResolver
      */
     public function resolve(array $categories)
     {
-        return array();
+        $localCategories = array();
+        /** @var \Shopware\CustomModels\Bepado\RemoteCategory[] $remoteCategoriesModels */
+        $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(array('categoryKey' => array_keys($categories)));
+
+        foreach ($remoteCategoriesModels as $remoteCategory) {
+            $localCategories[] = $remoteCategory->getLocalCategory();
+        }
+
+        return $localCategories;
     }
 
     /**

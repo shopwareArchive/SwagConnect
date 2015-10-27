@@ -5,7 +5,7 @@ Ext.define('Shopware.apps.Bepado.store.import.RemoteCategories', {
     autoLoad: false,
     fields: [
         { name: 'id', type: 'string' },
-        { name: 'text',  type: 'string' }
+        { name: 'text',  type: 'string', mapping: 'name' }
     ],
     proxy : {
         type : 'ajax',

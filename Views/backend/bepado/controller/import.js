@@ -32,6 +32,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
             'connect-own-categories': {
                 itemmousedown: me.onSelectLocalCategory
             },
+            'connect-own-categories dataview': {
+                drop: me.onDropToLocalCategory
+            },
             'local-products dataview': {
                 beforedrop: me.onBeforeDropLocalProduct,
                 drop: me.onDropToLocalProducts
@@ -66,7 +69,7 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         }
     },
 
-    onDropToLocalProducts: function( node, data, overModel, dropPosition, eOpts)
+    onDropToLocalProducts: function(node, data, overModel, dropPosition, eOpts)
     {
         var me = this;
         var articleIds = [];
@@ -107,6 +110,47 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
             }
 
+        });
+    },
+
+    onDropToLocalCategory: function(node, data, overModel, dropPosition, eOpts) {
+        var me = this,
+            remoteCategoryKey = data.records[0].get('id'),
+            remoteCategoryLabel = data.records[0].get('text'),
+            localCategoryId = overModel.get('id');
+
+        if (!remoteCategoryKey) {
+            console.log(remoteCategoryKey);
+            //todo: add message
+            return;
+        }
+
+        if (!localCategoryId) {
+            console.log(localCategoryId);
+            //todo: add message
+            return;
+        }
+
+        //todo: show loading animation
+        Ext.Ajax.request({
+            url: '{url controller=Import action=assignRemoteToLocalCategory}',
+            method: 'POST',
+            params: {
+                remoteCategoryKey: remoteCategoryKey,
+                remoteCategoryLabel: remoteCategoryLabel,
+                localCategoryId: localCategoryId
+            },
+            success: function(response, opts) {
+                //todo: change messages
+                if (response.success == true) {
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=error}Error{/s}', 'Changes are not applied');
+                }
+            },
+            failure: function(response, opts) {
+                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
         });
     },
 

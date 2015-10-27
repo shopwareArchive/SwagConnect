@@ -60,4 +60,30 @@ class ProductToRemoteCategoryRepository extends ModelRepository
 
         return $query;
     }
-} 
+
+    /**
+     * Collect article ids by given
+     * remote category key
+     * @param string $remoteCategoryKey
+     * @return array
+     */
+    public function findArticleIdsByRemoteCategory($remoteCategoryKey)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('a.id');
+        $builder->leftJoin('ptrc.connectCategory', 'rc');
+        $builder->leftJoin('ptrc.article', 'a');
+        $builder->leftJoin('a.attribute', 'att');
+        $builder->where('rc.categoryKey = :categoryKey');
+        $builder->andWhere('att.bepadoMappedCategory IS NULL');
+        $builder->setParameter('categoryKey', $remoteCategoryKey);
+
+        $query = $builder->getQuery();
+        $query->setHydrationMode($query::HYDRATE_OBJECT);
+        $result = $query->getArrayResult();
+
+        return array_map(function($resultItem) {
+            return $resultItem['id'];
+        }, $result);
+    }
+}

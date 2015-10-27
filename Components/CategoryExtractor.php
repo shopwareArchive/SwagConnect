@@ -64,21 +64,22 @@ class CategoryExtractor
     /**
      * Loads remote categories
      *
-     * @param null $parent
+     * @param string|null $parent
+     * @param boolean|null $includeChildren
      * @return array
      */
-    public function getRemoteCategoriesTree($parent = null)
+    public function getRemoteCategoriesTree($parent = null, $includeChildren = false)
     {
         $sql = 'SELECT category_key, label FROM `s_plugin_bepado_categories`';
         if ($parent !== null) {
             $sql .= ' WHERE category_key LIKE ?';
             // filter only first child categories
             $rows = Shopware()->Db()->fetchPairs($sql, array($parent . '/%'));
-            $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), false);
+            $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
             $rows = Shopware()->Db()->fetchPairs($sql);
             // filter only main categories
-            $rows = $this->convertTree($this->categoryResolver->generateTree($rows), false);
+            $rows = $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
         }
 
         return $rows;
@@ -100,7 +101,7 @@ class CategoryExtractor
                 $children = $this->convertTree($category['children'], $includeChildren);
             }
             $categories[] = array(
-                'text' => $category['name'],
+                'name' => $category['name'],
                 'id' => $id,
                 'leaf' => empty($category['children']) ? true : false,
                 'children' => $children,

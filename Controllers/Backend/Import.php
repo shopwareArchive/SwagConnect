@@ -39,6 +39,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private $importService;
 
+    private $remoteCategoryRepository;
+
+    private $autoCategoryResolver;
+
+    private $categoryRepository;
+
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', null);
@@ -101,10 +107,39 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getImportService()->assignCategoryToArticles($categoryId, $articleIds);
         } catch (\RuntimeException $e) {
             //todo: log error message
-            var_dump($e->getMessage());exit;
             $this->View()->assign(array(
                 'success' => false,
                 'error' => 'Category could not be assigned to products!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
+    public function assignRemoteToLocalCategoryAction()
+    {
+        $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
+        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', null);
+        $remoteCategoryLabel = $this->request->getParam('remoteCategoryLabel', null);
+
+        if ($localCategoryId == 0 || !$remoteCategoryKey || !$remoteCategoryLabel) {
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Invalid local or remote category',
+            ));
+            return;
+        }
+
+        try {
+            $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
+        } catch (\RuntimeException $e) {
+            //todo: log error message
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Remote category could not be mapped to local category!',
             ));
             return;
         }
@@ -130,7 +165,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\CustomModels\Bepado\ProductToRemoteCategory
+     * @return \Shopware\CustomModels\Bepado\ProductToRemoteCategoryRepository
      */
     private function getProductToRemoteCategoryRepository()
     {
@@ -144,19 +179,64 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
+     * @return \Shopware\CustomModels\Bepado\RemoteCategoryRepository
+     */
+    private function getRemoteCategoryRepository()
+    {
+        if (!$this->remoteCategoryRepository) {
+            $this->remoteCategoryRepository = Shopware()->Models()->getRepository(
+                'Shopware\CustomModels\Bepado\RemoteCategory'
+            );
+        }
+
+        return $this->remoteCategoryRepository;
+    }
+
+    /**
      * @return \Shopware\Bepado\Components\ImportService
      */
     private function getImportService()
     {
         if (!$this->importService) {
             $this->importService = new \Shopware\Bepado\Components\ImportService(
-                Shopware()->Models(),
+                $this->getModelManager(),
                 $this->container->get('multi_edit.product'),
-                Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                Shopware()->Models()->getRepository('Shopware\Models\Article\Article')
+                $this->getCategoryRepository(),
+                $this->getModelManager()->getRepository('Shopware\Models\Article\Article'),
+                $this->getRemoteCategoryRepository(),
+                $this->getProductToRemoteCategoryRepository(),
+                $this->getAutoCategoryResolver(),
+                $this->getCategoryExtractor()
             );
         }
 
         return $this->importService;
+    }
+
+    /**
+     * @return \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver
+     */
+    private function getAutoCategoryResolver()
+    {
+        if (!$this->autoCategoryResolver) {
+            $this->autoCategoryResolver = new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+                $this->getModelManager(),
+                $this->getCategoryRepository()
+            );
+        }
+
+        return $this->autoCategoryResolver;
+    }
+
+    /**
+     * @return \Shopware\Models\Category\Repository
+     */
+    private function getCategoryRepository()
+    {
+        if (!$this->categoryRepository) {
+            $this->categoryRepository = $this->getModelManager()->getRepository('Shopware\Models\Category\Category');
+        }
+
+        return $this->categoryRepository;
     }
 } 

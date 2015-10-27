@@ -48,7 +48,7 @@ class AutoCategoryResolver implements CategoryResolver
      * @param array $categoryNames
      * @return array
      */
-    private function collectOnlyLeafCategories($tree, array $categoryNames)
+    public function collectOnlyLeafCategories($tree, array $categoryNames)
     {
         foreach ($tree as $category) {
             if (empty($category['children'])) {
@@ -66,22 +66,27 @@ class AutoCategoryResolver implements CategoryResolver
      * create same structure with entities
      *
      * @param array $tree
-     * @param null $parent
+     * @param \Shopware\Models\Category\Category|null $parent
      */
-    private function convertTreeToEntities(array $tree, $parent = null)
+    public function convertTreeToEntities(array $tree, $parent = null)
     {
         if (!$parent) {
             $parent = $this->categoryRepository->find(3);
         }
 
-        foreach ($tree as $categoryKey => $category) {
+        foreach ($tree as $category) {
             $categoryModel = $this->categoryRepository->findOneBy(array('name' => $category['name']));
             if (!$categoryModel) {
                 $categoryModel = new Category();
+                $categoryModel->fromArray($this->getCategoryData($category['name']));
                 $categoryModel->setParent($parent);
-                $categoryModel->setName($category['name']);
 
                 $this->manager->persist($categoryModel);
+
+                $categoryAttribute = $categoryModel->getAttribute();
+                $categoryAttribute->setBepadoImportedCategory(true);
+                $this->manager->persist($categoryAttribute);
+
                 $this->manager->flush();
             }
 
@@ -129,5 +134,44 @@ class AutoCategoryResolver implements CategoryResolver
     public function storeRemoteCategories(array $categories, $articleId)
     {
         // Shops connected to SEM projects don't need to store Shopware Connect categories
+    }
+
+    /**
+     * Generate category data array
+     * it's used to create category and
+     * attribute from array
+     *
+     * @param string $name
+     * @return array
+     */
+    private function getCategoryData($name)
+    {
+        return array (
+            'name' => $name,
+            'active' => true,
+            'childrenCount' => 0,
+            'text' => $name,
+            'attribute' =>
+                array (
+                    'id' => 0,
+                    'parent' => 0,
+                    'name' => 'Deutsch',
+                    'position' => 0,
+                    'active' => true,
+                    'childrenCount' => 0,
+                    'text' => '',
+                    'cls' => '',
+                    'leaf' => false,
+                    'allowDrag' => false,
+                    'parentId' => 0,
+                    'categoryId' => NULL,
+                    'attribute1' => NULL,
+                    'attribute2' => NULL,
+                    'attribute3' => NULL,
+                    'attribute4' => NULL,
+                    'attribute5' => NULL,
+                    'attribute6' => NULL,
+                ),
+        );
     }
 } 

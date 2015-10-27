@@ -13,6 +13,7 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
     ],
 
     refs: [
+        { ref: 'window', selector: 'bepado-window' },
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
         { ref: 'localProductsGrid', selector: 'local-products' },
         { ref: 'localCategoryTree', selector: 'connect-own-categories' }
@@ -32,7 +33,8 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 itemmousedown: me.onSelectLocalCategory
             },
             'local-products dataview': {
-                beforedrop: me.onBeforeDropLocalProduct
+                beforedrop: me.onBeforeDropLocalProduct,
+                drop: me.onDropToLocalProducts
             }
         });
 
@@ -56,11 +58,75 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
     onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers)
     {
         var me = this;
-        var selected = me.getLocalCategoryTree().getSelectionModel().getSelection()
+        var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
         if (selected.length > 0) {
             dropHandlers.processDrop();
         } else {
             dropHandlers.cancelDrop();
+        }
+    },
+
+    onDropToLocalProducts: function( node, data, overModel, dropPosition, eOpts)
+    {
+        var me = this;
+        var articleIds = [];
+
+        for (var i = 0; i < data.records.length; i++) {
+            articleIds.push(data.records[i].get('Article_id'));
+        }
+
+        if (articleIds.length == 0) {
+            //todo: add message
+            return;
+        }
+
+        var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
+
+        console.log(selected.length);
+        if (selected.length == 0) {
+            //todo: add message
+            return;
+        }
+
+        Ext.Ajax.request({
+            url: '{url controller=Import action=assignArticlesToCategory}',
+            method: 'POST',
+            params: {
+                categoryId: selected[0].get('id'),
+                'articleIds[]': articleIds
+            },
+            success: function(response, opts) {
+                //todo: change messages
+                if (response.success == true) {
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=error}Error{/s}', 'Changes are not applied');
+                }
+            },
+            failure: function(response, opts) {
+                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
+
+        });
+    },
+
+    /**
+     * Helper to show a growl message
+     *
+     * @param title
+     * @param message
+     */
+    createGrowlMessage: function(title, message, sticky) {
+        var me = this,
+            win = me.getWindow();
+        if (!sticky) {
+            Shopware.Notification.createGrowlMessage(title, message, win.title);
+        } else {
+            Shopware.Notification.createStickyGrowlMessage({
+                title: title,
+                text: message,
+                width: 400
+            });
         }
     }
 });

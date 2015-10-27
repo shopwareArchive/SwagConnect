@@ -4,6 +4,8 @@ namespace Shopware\Bepado\Components;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\Product;
+use Shopware\Models\Article\Repository as ArticleRepository;
+use Shopware\Models\Category\Repository as CategoryRepository;
 
 class ImportService
 {
@@ -17,15 +19,58 @@ class ImportService
      */
     private $productResource;
 
-    public function __construct(ModelManager $manager, Product $productResource)
+    /**
+     * @var \Shopware\Models\Article\Repository
+     */
+    private $categoryRepository;
+
+    private $articleRepository;
+
+    public function __construct(
+        ModelManager $manager,
+        Product $productResource,
+        CategoryRepository $categoryRepository,
+        ArticleRepository$articleRepository
+    )
     {
         $this->manager = $manager;
         $this->productResource = $productResource;
+        $this->categoryRepository = $categoryRepository;
+        $this->articleRepository = $articleRepository;
     }
 
     public function findBothArticlesType($categoryId = null, $limit = 10, $offset = 0)
     {
         return $this->productResource->filter($this->getAst($categoryId), $offset, $limit);
+    }
+
+    public function assignCategoryToArticles($categoryId, array $articleIds)
+    {
+        $articles = $this->articleRepository->findBy(array('id' => $articleIds));
+
+        if (empty($articles)) {
+            throw new \RuntimeException('Invalid article ids');
+        }
+
+        /** @var \Shopware\Models\Category\Category $category */
+        $category = $this->categoryRepository->find($categoryId);
+        if (!$category) {
+            throw new \RuntimeException('Invalid category id');
+        }
+
+        /** @var \Shopware\Models\Article\Article $article */
+        foreach ($articles as $article) {
+            $article->addCategory($category);
+            $this->manager->persist($article);
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($article->getDetails() as $detail) {
+                $attribute = $detail->getAttribute();
+                $attribute->setBepadoMappedCategory(true);
+                $this->manager->persist($attribute);
+            }
+        }
+
+        $this->manager->flush();
     }
 
     private function getAst($categoryId)

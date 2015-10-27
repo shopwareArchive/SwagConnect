@@ -85,6 +85,35 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    public function assignArticlesToCategoryAction()
+    {
+        $categoryId = (int)$this->request->getParam('categoryId', 0);
+        $articleIds = $this->request->getParam('articleIds', array());
+        if ($categoryId == 0 || empty($articleIds)) {
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Invalid category or articles',
+            ));
+            return;
+        }
+
+        try {
+            $this->getImportService()->assignCategoryToArticles($categoryId, $articleIds);
+        } catch (\RuntimeException $e) {
+            //todo: log error message
+            var_dump($e->getMessage());exit;
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Category could not be assigned to products!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
@@ -122,7 +151,9 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         if (!$this->importService) {
             $this->importService = new \Shopware\Bepado\Components\ImportService(
                 Shopware()->Models(),
-                $this->container->get('multi_edit.product')
+                $this->container->get('multi_edit.product'),
+                Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+                Shopware()->Models()->getRepository('Shopware\Models\Article\Article')
             );
         }
 

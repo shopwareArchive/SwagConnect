@@ -42,6 +42,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
             },
             'bepado-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
+            },
+            'bepado-import checkbox[action=filter-only-local-products]': {
+                change: me.onFilterLocalProducts
             }
         });
 
@@ -211,6 +214,23 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 width: 400
             });
         }
+    },
+
+    onFilterLocalProducts: function(checkbox, newValue, oldValue) {
+        var me = this;
+        var store = me.getLocalProductsGrid().getStore();
+
+        if (newValue == true) {
+            Ext.apply(store.getProxy().extraParams, {
+                hideConnectArticles: 1
+            });
+        } else {
+            Ext.apply(store.getProxy().extraParams, {
+                hideConnectArticles: null
+            });
+        }
+        store.loadPage(1);
+        store.load();
     }
 });
 //{/block}

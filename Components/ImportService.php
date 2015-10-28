@@ -73,9 +73,9 @@ class ImportService
         $this->categoryExtractor = $categoryExtractor;
     }
 
-    public function findBothArticlesType($categoryId = null, $limit = 10, $offset = 0)
+    public function findBothArticlesType($categoryId = null, $hideConnectArticle = false, $limit = 10, $offset = 0)
     {
-        return $this->productResource->filter($this->getAst($categoryId), $offset, $limit);
+        return $this->productResource->filter($this->getAst($categoryId, $hideConnectArticle), $offset, $limit);
     }
 
     public function assignCategoryToArticles($categoryId, array $articleIds)
@@ -179,12 +179,13 @@ class ImportService
 
     /**
      * Helper function to create filter values
-     * @param $categoryId
+     * @param int $categoryId
+     * @param boolean $hideConnectArticles
      * @return array
      */
-    private function getAst($categoryId)
+    private function getAst($categoryId, $hideConnectArticles = false)
     {
-        return $ast = array (
+        $ast = array (
             array (
                 'type' => 'nullaryOperators',
                 'token' => 'ISMAIN',
@@ -230,5 +231,24 @@ class ImportService
                 'token' => ')',
             ),
         );
+
+        if ($hideConnectArticles === true) {
+            $ast = array_merge($ast, array(
+                array (
+                    'type' => 'boolOperators',
+                    'token' => 'AND',
+                ),
+                array (
+                    'type' => 'attribute',
+                    'token' => 'ATTRIBUTE.BEPADOMAPPEDCATEGORY',
+                ),
+                array (
+                    'type' => 'unaryOperators',
+                    'token' => 'ISNULL',
+                ),
+            ));
+        }
+
+        return $ast;
     }
 }

@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
     layout: 'vbox',
     padding: '10px',
     width: '100%',
+    autoScroll: true,
 
     initComponent: function() {
         var me = this;
@@ -66,11 +67,24 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                             height: 300,
                             margin: '10px 0 0 0'
                         }),
-                        Ext.create('Shopware.apps.Bepado.view.import.LocalProducts', {
-                            width: 400,
-                            height: 300,
-                            margin: '10px 0 0 50px'
-                        })
+                        {
+                            xtype: 'container',
+                            items: [
+                                Ext.create('Shopware.apps.Bepado.view.import.LocalProducts', {
+                                    width: 400,
+                                    height: 300,
+                                    margin: '10px 0 0 50px'
+                                }),
+                                {
+                                    xtype : 'checkbox',
+                                    name : 'attribute[bepadoAllowed]',
+                                    action: 'filter-only-local-products',
+                                    margin: '15px 0 0 50px',
+                                    boxLabel : 'Show only connect products'
+                                }
+                            ]
+                        }
+
                     ]
                 }
         ]

@@ -156,7 +156,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
                 new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
-                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category')
+                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+                    Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
                 )
             );
         }
@@ -221,7 +222,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         if (!$this->autoCategoryResolver) {
             $this->autoCategoryResolver = new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
                 $this->getModelManager(),
-                $this->getCategoryRepository()
+                $this->getCategoryRepository(),
+                $this->getRemoteCategoryRepository()
             );
         }
 

@@ -372,7 +372,8 @@ class ProductToShopTest extends BepadoTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new AutoCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\Models\Category\Category')
+                $this->modelManager->getRepository('Shopware\Models\Category\Category'),
+                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
             )
         );
 

@@ -617,7 +617,8 @@ class Update
                 Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
                 new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
-                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category')
+                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+                    Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
                 )
             );
 

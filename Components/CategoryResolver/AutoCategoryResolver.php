@@ -3,6 +3,7 @@
 namespace Shopware\Bepado\Components\CategoryResolver;
 
 use Shopware\Bepado\Components\CategoryResolver;
+use Shopware\CustomModels\Bepado\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
@@ -19,10 +20,20 @@ class AutoCategoryResolver implements CategoryResolver
      */
     private $categoryRepository;
 
-    public function __construct(ModelManager $manager, CategoryRepository $categoryRepository)
+    /**
+     * @var \Shopware\CustomModels\Bepado\RemoteCategoryRepository
+     */
+    private $remoteCategoryRepository;
+
+    public function __construct(
+        ModelManager $manager,
+        CategoryRepository $categoryRepository,
+        RemoteCategoryRepository $remoteCategoryRepository
+    )
     {
         $this->manager = $manager;
         $this->categoryRepository = $categoryRepository;
+        $this->remoteCategoryRepository = $remoteCategoryRepository;
     }
 
     /**
@@ -86,6 +97,13 @@ class AutoCategoryResolver implements CategoryResolver
                 $categoryAttribute = $categoryModel->getAttribute();
                 $categoryAttribute->setBepadoImportedCategory(true);
                 $this->manager->persist($categoryAttribute);
+
+                /** @var \Shopware\CustomModels\Bepado\RemoteCategory $remoteCategory */
+                $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $category['id']));
+                if ($remoteCategory) {
+                    $remoteCategory->setLocalCategory($categoryModel);
+                    $this->manager->persist($remoteCategory);
+                }
 
                 $this->manager->flush();
             }

@@ -161,11 +161,6 @@ class ImportService
 
         /** @var \Shopware\Models\Category\Category $category */
         foreach ($categories as $category) {
-            // find remote category and map it local category
-            $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('label' => $category->getName()));
-            $remoteCategory->setLocalCategoryId($category->getId());
-            $this->manager->persist($remoteCategory);
-
             $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey());
             while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
                 $articles = $this->articleRepository->findBy(array('id' => $currentIdBatch));

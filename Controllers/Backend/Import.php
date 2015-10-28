@@ -54,7 +54,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent),
+            'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true),
         ));
     }
 

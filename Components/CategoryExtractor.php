@@ -66,17 +66,25 @@ class CategoryExtractor
      *
      * @param string|null $parent
      * @param boolean|null $includeChildren
+     * @param boolean|null $excludeMapped
      * @return array
      */
-    public function getRemoteCategoriesTree($parent = null, $includeChildren = false)
+    public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false)
     {
         $sql = 'SELECT category_key, label FROM `s_plugin_bepado_categories`';
         if ($parent !== null) {
             $sql .= ' WHERE category_key LIKE ?';
+            $whereParams = array($parent . '/%');
+            if ($excludeMapped === true) {
+                $sql .= ' AND local_category_id IS NULL';
+            }
             // filter only first child categories
-            $rows = Shopware()->Db()->fetchPairs($sql, array($parent . '/%'));
+            $rows = Shopware()->Db()->fetchPairs($sql, $whereParams);
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
+            if ($excludeMapped === true) {
+                $sql .= ' WHERE local_category_id IS NULL';
+            }
             $rows = Shopware()->Db()->fetchPairs($sql);
             // filter only main categories
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);

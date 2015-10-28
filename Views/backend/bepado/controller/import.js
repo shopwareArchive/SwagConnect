@@ -16,7 +16,8 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         { ref: 'window', selector: 'bepado-window' },
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
         { ref: 'localProductsGrid', selector: 'local-products' },
-        { ref: 'localCategoryTree', selector: 'connect-own-categories' }
+        { ref: 'localCategoryTree', selector: 'connect-own-categories' },
+        { ref: 'RemoteCategoryTree', selector: 'connect-remote-categories' }
     ],
 
     /**
@@ -38,6 +39,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
             'local-products dataview': {
                 beforedrop: me.onBeforeDropLocalProduct,
                 drop: me.onDropToLocalProducts
+            },
+            'bepado-import button[action=importRemoteCategory]': {
+                click: me.onImportRemoteCategoryButtonClick
             }
         });
 
@@ -114,22 +118,27 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
     },
 
     onDropToLocalCategory: function(node, data, overModel, dropPosition, eOpts) {
-        var me = this,
-            remoteCategoryKey = data.records[0].get('id'),
+        var me = this;
+
+        if (!data.records) {
+            //todo: add message
+            return;
+        }
+
+        if (!overModel) {
+            //todo: add message
+            return;
+        }
+
+        var remoteCategoryKey = data.records[0].get('id'),
             remoteCategoryLabel = data.records[0].get('text'),
             localCategoryId = overModel.get('id');
 
-        if (!remoteCategoryKey) {
-            console.log(remoteCategoryKey);
-            //todo: add message
-            return;
-        }
+        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+    },
 
-        if (!localCategoryId) {
-            console.log(localCategoryId);
-            //todo: add message
-            return;
-        }
+    importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId) {
+        var me = this;
 
         //todo: show loading animation
         Ext.Ajax.request({
@@ -141,17 +150,47 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 localCategoryId: localCategoryId
             },
             success: function(response, opts) {
+                var data = Ext.JSON.decode(response.responseText);
                 //todo: change messages
-                if (response.success == true) {
+                if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', 'Changes are not applied');
                 }
+
+                me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
+                me.getRemoteCategoryTree().getStore().load();
+                me.getLocalCategoryTree().getStore().getRootNode().removeAll();
+                me.getLocalCategoryTree().getStore().load();
             },
             failure: function(response, opts) {
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
             }
         });
+    },
+
+    onImportRemoteCategoryButtonClick: function() {
+        var me = this;
+
+        var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
+        if (remoteCategoryTreeSelection.length == 0) {
+            console.log('please select remote category');
+            //todo: show message
+            return;
+        }
+
+        var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
+        if (localCategoryTreeSelection.length == 0) {
+            console.log('please select local category');
+            //todo: show message
+            return;
+        }
+
+        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('id');
+        var remoteCategoryLabel = remoteCategoryTreeSelection[0].get('text');
+        var localCategoryId = localCategoryTreeSelection[0].get('id');
+
+        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
     },
 
     /**

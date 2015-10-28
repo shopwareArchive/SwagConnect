@@ -43,8 +43,10 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                             xtype: 'connect-remote-categories'
                         },
                         {
-                            xtype: 'container',
-                            html: '<div class="import-arrow">&nbsp;</div>',
+                            xtype: 'button',
+                            alias: 'widget.arrow-import-categories',
+                            cls: 'import-arrow',
+                            action: 'importRemoteCategory',
                             border: false,
                             padding: '2px',
                             margin: '125px 0 0 0',

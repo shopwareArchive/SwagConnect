@@ -81,3 +81,7 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     background: url("../images/import_arrow.png") no-repeat;
     height: 100%;
 }
+
+.shopware-connect-color {
+    color: #486783 !important;
+}

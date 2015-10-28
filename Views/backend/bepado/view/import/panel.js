@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                     items: [
                         {
                             xtype: 'container',
-                            html: '<h1 style="color: #486783; font-size: large">Shopware Connect Produkte</h1>',
+                            html: '<h1 class="shopware-connect-color" style="font-size: large">Shopware Connect Produkte</h1>',
                             width: 400,
                             height: 30
                         },

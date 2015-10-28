@@ -3,7 +3,7 @@ Ext.define('Shopware.apps.Bepado.store.import.RemoteProducts', {
     extend : 'Ext.data.Store',
 
     autoLoad: false,
-    pageSize: 5,
+    pageSize: 10,
     fields: [
         { name: 'Article_id', type: 'integer' },
         { name: 'Detail_number',  type: 'string' },

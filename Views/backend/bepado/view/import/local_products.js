@@ -13,6 +13,9 @@ Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
             ptype: 'gridviewdragdrop',
             appendOnly: true,
             dropGroup: 'local'
+        },
+        getRowClass: function(rec, rowIdx, params, store) {
+            return rec.get('Attribute_bepadoMappedCategory') == 1 ? 'shopware-connect-color' : '';
         }
     },
 
@@ -49,9 +52,17 @@ Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
             }, {
                 header: 'Aktiv',
                 dataIndex: 'Article_active',
-                flex: 1
+                flex: 1,
+                renderer: function(value, metaData, record) {
+                    var checked = 'sprite-ui-check-box-uncheck';
+                    if (value == true) {
+                        checked = 'sprite-ui-check-box';
+                    }
+                    return '<span style="display:block; margin: 0 auto; height:25px; width:25px;" class="' + checked + '"></span>';
+                }
             }, {
                 header: 'Preis (brutto)',
+                xtype: 'numbercolumn',
                 dataIndex: 'Price_basePrice',
                 flex: 3
             }, {

@@ -19,6 +19,11 @@ Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
         }
     },
 
+    selModel: {
+        selType: 'checkboxmodel',
+        mode: 'MULTI'
+    },
+
     initComponent: function() {
         var me = this;
 

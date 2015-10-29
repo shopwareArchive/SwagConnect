@@ -14,6 +14,7 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
 
     refs: [
         { ref: 'window', selector: 'bepado-window' },
+        { ref: 'importPanel', selector: 'bepado-import' },
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
         { ref: 'localProductsGrid', selector: 'local-products' },
         { ref: 'localCategoryTree', selector: 'connect-own-categories' },
@@ -42,6 +43,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
             },
             'bepado-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
+            },
+            'bepado-import button[action=activateProducts]': {
+                click: me.onActivateProducts
             },
             'bepado-import checkbox[action=filter-only-local-products]': {
                 change: me.onFilterLocalProducts
@@ -86,15 +90,14 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         }
 
         if (articleIds.length == 0) {
-            //todo: add message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
             return;
         }
 
         var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
 
-        console.log(selected.length);
         if (selected.length == 0) {
-            //todo: add message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -106,11 +109,10 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 'articleIds[]': articleIds
             },
             success: function(response, opts) {
-                //todo: change messages
                 if (response.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', 'Changes are not applied');
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
             },
             failure: function(response, opts) {
@@ -124,12 +126,12 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         var me = this;
 
         if (!data.records) {
-            //todo: add message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
             return;
         }
 
         if (!overModel) {
-            //todo: add message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -142,8 +144,9 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
 
     importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId) {
         var me = this;
+        var panel = me.getImportPanel();
 
-        //todo: show loading animation
+        panel.setLoading();
         Ext.Ajax.request({
             url: '{url controller=Import action=assignRemoteToLocalCategory}',
             method: 'POST',
@@ -153,12 +156,12 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 localCategoryId: localCategoryId
             },
             success: function(response, opts) {
+                panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
-                //todo: change messages
-                if (data.success == true) {
+                if (response.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', 'Changes are not applied');
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
                 me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
@@ -167,6 +170,7 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 me.getLocalCategoryTree().getStore().load();
             },
             failure: function(response, opts) {
+                panel.setLoading(false);
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
             }
         });
@@ -177,15 +181,13 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
 
         var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
         if (remoteCategoryTreeSelection.length == 0) {
-            console.log('please select remote category');
-            //todo: show message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
             return;
         }
 
         var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
         if (localCategoryTreeSelection.length == 0) {
-            console.log('please select local category');
-            //todo: show message
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -216,9 +218,28 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         }
     },
 
+    /**
+     * Helper function to check
+     * if at least one category in local
+     * category tree is selected.
+     *
+     * @returns boolean
+     */
+    isLocalCategorySelected: function() {
+        var me = this;
+        var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
+
+        return localCategoryTreeSelection.length > 0;
+    },
+
     onFilterLocalProducts: function(checkbox, newValue, oldValue) {
         var me = this;
         var store = me.getLocalProductsGrid().getStore();
+
+        if (me.isLocalCategorySelected() === false) {
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            return;
+        }
 
         if (newValue == true) {
             Ext.apply(store.getProxy().extraParams, {
@@ -231,6 +252,44 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
         }
         store.loadPage(1);
         store.load();
+    },
+
+    onActivateProducts: function(button, event) {
+        var me = this;
+        var selection = me.getLocalProductsGrid().getSelectionModel().getSelection();
+        var articleIds = [];
+        for (var i = 0;i < selection.length; i++) {
+            articleIds.push(selection[i].get('Article_id'));
+        }
+
+        if (articleIds.length == 0) {
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
+            return;
+        }
+
+        var panel = me.getImportPanel();
+        panel.setLoading();
+        Ext.Ajax.request({
+            url: '{url controller=Import action=activateArticles}',
+            method: 'POST',
+            params: {
+                'ids[]': articleIds
+            },
+            success: function(response, opts) {
+                panel.setLoading(false);
+                var data = Ext.JSON.decode(response.responseText);
+                if (response.success == true) {
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                }
+                me.getLocalProductsGrid().getStore().load();
+            },
+            failure: function(response, opts) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
+        });
     }
 });
 //{/block}

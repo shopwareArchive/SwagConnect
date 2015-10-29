@@ -177,6 +177,18 @@ class ImportService
         }
     }
 
+    public function activateArticles(array $articleIds)
+    {
+        $articles = $this->articleRepository->findBy(array('id' => $articleIds));
+        /** @var \Shopware\Models\Article\Article $article */
+        foreach ($articles as $article) {
+            $article->setActive(true);
+            $this->manager->persist($article);
+        }
+
+        $this->manager->flush();
+    }
+
     /**
      * Helper function to create filter values
      * @param int $categoryId

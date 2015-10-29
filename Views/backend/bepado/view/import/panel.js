@@ -81,6 +81,11 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                                     action: 'filter-only-local-products',
                                     margin: '15px 0 0 50px',
                                     boxLabel : 'Show only connect products'
+                                },{
+                                    xtype: 'button',
+                                    cls: 'primary sc-btn-right',
+                                    action: 'activateProducts',
+                                    text: 'Produkte aktivieren'
                                 }
                             ]
                         }

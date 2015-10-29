@@ -85,3 +85,7 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 .shopware-connect-color {
     color: #486783 !important;
 }
+
+.sc-btn-right {
+    float: right;
+}

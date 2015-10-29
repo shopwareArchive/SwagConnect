@@ -45,6 +45,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $categoryRepository;
 
+    private $logger;
+
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', null);
@@ -112,7 +114,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         try {
             $this->getImportService()->assignCategoryToArticles($categoryId, $articleIds);
         } catch (\RuntimeException $e) {
-            //todo: log error message
+            $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(array(
                 'success' => false,
                 'error' => 'Category could not be assigned to products!',
@@ -142,7 +144,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         try {
             $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
         } catch (\RuntimeException $e) {
-            //todo: log error message
+            $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(array(
                 'success' => false,
                 'error' => 'Remote category could not be mapped to local category!',
@@ -152,6 +154,26 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         $this->View()->assign(array(
             'success' => true
+        ));
+    }
+
+    public function activateArticlesAction()
+    {
+        $articleIds = $this->request->getParam('ids', 0);
+
+        try {
+            $this->getImportService()->activateArticles($articleIds);
+        } catch (\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'There is a problem with products activation!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true,
         ));
     }
 
@@ -246,5 +268,14 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         return $this->categoryRepository;
+    }
+
+    private function getLogger()
+    {
+        if (!$this->logger) {
+            $this->logger = new \Shopware\Bepado\Components\Logger(Shopware()->Db());
+        }
+
+        return $this->logger;
     }
 } 

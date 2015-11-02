@@ -11,6 +11,11 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
     width: '100%',
     autoScroll: true,
 
+    snippets: {
+        connectProductsTitle: '{s name=import/shopware_connect_products}shopware Connect Produkte{/s}',
+        myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
+    },
+
     initComponent: function() {
         var me = this;
 
@@ -23,13 +28,13 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                     items: [
                         {
                             xtype: 'container',
-                            html: '<h1 class="shopware-connect-color" style="font-size: large">Shopware Connect Produkte</h1>',
+                            html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.connectProductsTitle  + '</h1>',
                             width: 400,
                             height: 30
                         },
                         {
                             xtype: 'container',
-                            html: '<h1 style="font-size: large">Meine Produkte</h1>',
+                            html: '<h1 style="font-size: large">' + me.snippets.myProductsTitle + '</h1>',
                             margin: '0 0 0 60px',
                             width: 400
                         }

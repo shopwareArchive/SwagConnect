@@ -153,6 +153,10 @@ class TemplateExtension extends BaseSubscriber
             return;
         }
 
+        if ($helper->isRemoteArticleDetail($articleData['articleDetailsID']) === false) {
+            return;
+        }
+
         $sourceId = $helper->getArticleDetailSourceId($articleData['articleDetailsID']);
         $products = $helper->getRemoteProducts(array($sourceId));
 

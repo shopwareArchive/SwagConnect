@@ -75,6 +75,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
+        $builder->where('at.shopId IS NULL');
         $selectColumns = array(
             'a.id as localId',
             'd.id as detailId',

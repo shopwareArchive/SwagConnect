@@ -317,6 +317,9 @@ class Checkout extends BaseSubscriber
             }
 
             $articleDetailId = $row['additional_details']['articleDetailsID'];
+            if ($helper->isRemoteArticleDetail($articleDetailId) === false) {
+                continue;
+            }
             $sourceId = $helper->getArticleDetailSourceId($articleDetailId);
 
             $products = $helper->getRemoteProducts(array($sourceId));

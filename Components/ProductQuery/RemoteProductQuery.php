@@ -42,6 +42,7 @@ class RemoteProductQuery extends BaseProductQuery
         $builder->join('a.tax', 't');
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
+        $builder->where('at.shopId IS NOT NULL');
         $builder->select(array(
             'a.id as localId',
             'at.shopId as shopId',

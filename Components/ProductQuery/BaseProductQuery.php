@@ -32,7 +32,7 @@ abstract class BaseProductQuery
     {
         $implodedIds = "'" . implode("','", $sourceIds) . "'";
         $builder = $this->getProductQuery();
-        $builder->where("at.sourceId IN ($implodedIds)");
+        $builder->andWhere("at.sourceId IN ($implodedIds)");
         $query = $builder->getQuery();
 
         return $this->getBepadoProducts($query->getArrayResult());

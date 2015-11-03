@@ -123,6 +123,9 @@ class BasketHelper
             }
 
             $articleDetailId = $row['additional_details']['articleDetailsID'];
+            if ($this->helper->isRemoteArticleDetail($articleDetailId) === false) {
+                continue;
+            }
             $sourceId = $this->helper->getArticleDetailSourceId($articleDetailId);
             $products = $this->getHelper()->getRemoteProducts(array($sourceId));
             if (empty($products)) {

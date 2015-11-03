@@ -543,6 +543,29 @@ class Helper
     }
 
     /**
+     * Check if given articleDetailId is remote product
+     *
+     * @param int $articleDetailId
+     * @return bool
+     */
+    public function isRemoteArticleDetail($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $detail = $articleDetailRepository->find($articleDetailId);
+        if (!$detail) {
+            throw new \RuntimeException('Invalid article detail id');
+        }
+
+        $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
+        if (!$bepadoAttribute) {
+            return false;
+        }
+
+        return ($bepadoAttribute->getShopId() != null);
+    }
+
+    /**
      * Extract article ID and detail ID
      * from source ID
      *

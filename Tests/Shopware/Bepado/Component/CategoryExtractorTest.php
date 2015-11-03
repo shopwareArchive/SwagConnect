@@ -53,35 +53,35 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
     {
         $expected = array(
             array(
-                'text' => 'Ski',
+                'name' => 'Ski',
                 'id' => '/Ski',
                 'leaf' => true,
                 'children' => array(),
             ),
             array(
-                'text' => 'Kleidung',
+                'name' => 'Kleidung',
                 'id' => '/Kleidung',
                 'leaf' => false,
                 'children' => array(
                     array(
-                        'text' => 'Hosen',
+                        'name' => 'Hosen',
                         'id' => '/Kleidung/Hosen',
                         'leaf' => true,
                         'children' => array(),
                     ),
                     array(
-                        'text' => 'Hosentraeger',
+                        'name' => 'Hosentraeger',
                         'id' => '/Kleidung/Hosentraeger',
                         'leaf' => true,
                         'children' => array(),
                     ),
                     array(
-                        'text' => 'Nahrung & Getraenke',
+                        'name' => 'Nahrung & Getraenke',
                         'id' => '/Kleidung/Nahrung & Getraenke',
                         'leaf' => false,
                         'children' => array(
                             array(
-                                'text' => 'Alkoholische Getränke',
+                                'name' => 'Alkoholische Getränke',
                                 'id' => '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke',
                                 'leaf' => true,
                                 'children' => array(),

@@ -39,7 +39,6 @@ use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
-use Shopware\Models\Category\Category;
 
 /**
  * The interface for products imported *from* bepado *to* the local shop
@@ -88,9 +87,6 @@ class ProductToShop implements ProductToShopBase
     private $shopRepository;
 
     private $localeRepository;
-
-    /** @var  \Shopware\Models\Category\Category */
-    private $categoryRepository;
 
     /**
      * @var CategoryResolver
@@ -197,14 +193,7 @@ class ProductToShop implements ProductToShopBase
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
 
-            // just leave empty product categories
-            // if default category is configured it will be assigned.
-            // todo@sb: fix product categories during import
-//            $categories = $this->helper->getCategoriesByProduct($product);
-            $categories = array();
-            if ($this->config->getConfig('createCategoriesAutomatically', false) == true) {
-                $categories = $this->categoryResolver->resolve($product->categories);
-            }
+            $categories = $this->categoryResolver->resolve($product->categories);
 
             if (empty($categories)) {
                 //add default import category
@@ -410,6 +399,8 @@ class ProductToShop implements ProductToShopBase
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
 
+        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
+
     }
 
     /**
@@ -456,16 +447,6 @@ class ProductToShop implements ProductToShopBase
 
         return $this->shopRepository;
     }
-
-    private function getCategoryRepository()
-    {
-        if (!$this->categoryRepository) {
-            $this->categoryRepository = $this->manager->getRepository('Shopware\Models\Category\Category');
-        }
-
-        return $this->categoryRepository;
-    }
-
 
     /**
      * Delete product or product variant with given shopId and sourceId.

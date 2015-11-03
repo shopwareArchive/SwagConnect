@@ -13,7 +13,8 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->categoryResolver = new AutoCategoryResolver(
             Shopware()->Models(),
-            Shopware()->Models()->getRepository('Shopware\Models\Category\Category')
+            Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+            Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
         );
     }
 

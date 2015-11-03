@@ -37,7 +37,11 @@ class ProductToShopTest extends BepadoTestHelper
             ),
             new MarketplaceGateway($this->modelManager),
             new PdoProductTranslationsGateway(Shopware()->Db()),
-            new DefaultCategoryResolver()
+            new DefaultCategoryResolver(
+                $this->modelManager,
+                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory'),
+                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\ProductToRemoteCategory')
+            )
         );
     }
 
@@ -368,7 +372,8 @@ class ProductToShopTest extends BepadoTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new AutoCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\Models\Category\Category')
+                $this->modelManager->getRepository('Shopware\Models\Category\Category'),
+                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
             )
         );
 

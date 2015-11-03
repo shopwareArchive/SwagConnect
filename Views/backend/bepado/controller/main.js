@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
     stores: [
         'main.Navigation',
-        'export.List', 'import.List',
+        'export.List', 'import.List', 'import.RemoteCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'changed_products.List',
         'log.List',
         'mapping.Import', 'mapping.Export',
@@ -130,10 +130,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             'bepado-mapping-import': {
                 importCategories: me.onImportCategoriesFromBepado
             },
-            'bepado-export-list button[action=add]': {
+            'bepado-export button[action=add]': {
                click: me.onExportFilterAction
             },
-            'bepado-export-list button[action=delete]': {
+            'bepado-export button[action=delete]': {
                 click: me.onExportFilterAction
             },
             'bepado-export-filter button[action=category-clear-filter]': {

@@ -31,7 +31,7 @@ use \Doctrine\ORM\Mapping as ORM,
  * bepado specific attributes for bepado products
  *
  * @ORM\Table(name="s_plugin_bepado_items")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="AttributeRepository")
  */
 class Attribute extends ModelEntity
 {

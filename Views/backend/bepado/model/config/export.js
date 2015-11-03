@@ -46,8 +46,7 @@ Ext.define('Shopware.apps.Bepado.model.config.Export', {
                 data = ( data && !Ext.isArray(data) ) ? [data] : data;
                 return data;
             }
-        },
-        { name: 'defaultExportCategory', type: 'string' }
+        }
     ],
 
     proxy: {

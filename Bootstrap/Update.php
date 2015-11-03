@@ -1,6 +1,7 @@
 <?php
 
 namespace Shopware\Bepado\Bootstrap;
+use Shopware\Bepado\Components\CategoryExtractor;
 use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
 use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Models\Order\Status;
@@ -98,6 +99,8 @@ class Update
         $this->storeMarketplaceSettings();
 
         $this->changePluginName();
+
+        $this->migrateProductCategories();
 
         return true;
     }
@@ -599,6 +602,51 @@ class Update
 
             $this->clearTemplateCache();
             $this->clearConfigCache();
+        }
+    }
+
+    /**
+     * Migrate bepado categories to separate table
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    private function migrateProductCategories()
+    {
+        if (version_compare($this->version, '1.7.1', '<=')) {
+            $categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
+                new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+                    Shopware()->Models(),
+                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+                    Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                )
+            );
+
+            $categories = $categoryExtractor->extractImportedCategories();
+
+            Shopware()->Db()->beginTransaction();
+            $this->migrateRemoteCategories($categories);
+            Shopware()->Db()->commit();
+        }
+    }
+
+    /**
+     * Populate s_plugin_bepado_categories table
+     * @param array $categories
+     */
+    private function migrateRemoteCategories(array $categories)
+    {
+        foreach ($categories as $category) {
+            Shopware()->Db()->query('
+                INSERT IGNORE INTO `s_plugin_bepado_categories`
+                (`category_key`, `label`)
+                VALUES (?, ?)
+                ', array($category['id'], $category['text'])
+            );
+
+            if (!empty($category['children'])) {
+                $this->migrateRemoteCategories($category['children']);
+            }
         }
     }
 }

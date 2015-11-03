@@ -2,20 +2,11 @@
 
 //{block name="backend/bepado/view/export/filter"}
 Ext.define('Shopware.apps.Bepado.view.export.Filter', {
-    extend: 'Ext.container.Container',
+    extend: 'Ext.panel.Panel',
     alias: 'widget.bepado-export-filter',
 
     width: 200,
-    layout: {
-        type: 'vbox',
-        align : 'stretch',
-        pack  : 'start'
-    },
-    //layout: {
-    //    type: 'accordion',
-    //    animate: Ext.isChrome
-    //},
-    animCollapse: Ext.isChrome,
+    layout: 'accordion',
     border: false,
 
     initComponent: function() {
@@ -28,8 +19,10 @@ Ext.define('Shopware.apps.Bepado.view.export.Filter', {
 
         Ext.applyIf(me, {
             items: [
-                me.statusFilter, me.searchFilter,
-                me.supplierFilter, me.categoryFilter
+                me.categoryFilter,
+                me.statusFilter,
+                me.searchFilter,
+                me.supplierFilter
             ]
         });
 

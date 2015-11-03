@@ -79,8 +79,10 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
         beforeappend: {
             element: this,
             fn: function (node, child) {
+                var semMenuItems = ['marketplace-attributes', 'mapping-import', 'mapping-export'];
+                // hide menu items which depend on marketplace
                 if (defaultMarketplace == true && child) {
-                    return child.data.id  !== 'marketplace-attributes';
+                    return semMenuItems.indexOf(child.data.id) === -1;
                 }
             return true;
             }

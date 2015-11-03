@@ -100,9 +100,14 @@ class BepadoFactory
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
             new AutoCategoryResolver(
                 $manager,
-                $manager->getRepository('Shopware\Models\Category\Category')
+                $manager->getRepository('Shopware\Models\Category\Category'),
+                $manager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
             ) :
-            new DefaultCategoryResolver();
+            new DefaultCategoryResolver(
+                $manager,
+                $manager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory'),
+                $manager->getRepository('Shopware\CustomModels\Bepado\ProductToRemoteCategory')
+            );
         return new SDK\SDK(
             $apiKey,
             $this->getSdkRoute($front),

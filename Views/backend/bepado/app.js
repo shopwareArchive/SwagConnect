@@ -9,7 +9,7 @@ Ext.define('Shopware.apps.Bepado', {
         'main.Panel',
         'export.Panel', 'import.Panel',
         'export.List', 'export.Filter',
-        'import.List', 'import.Filter',
+        'import.List', 'import.Filter', 'import.RemoteCategories', 'import.OwnCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
         'mapping.Export', 'mapping.Import',
@@ -17,7 +17,7 @@ Ext.define('Shopware.apps.Bepado', {
         'config.import.Form', 'config.export.Form', 'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping',
         'config.units.Mapping'
     ],
-    controllers: [ 'Main' ],
+    controllers: [ 'Main', 'Import' ],
 
     //views: [],
 

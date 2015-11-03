@@ -76,3 +76,16 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 .ul-disc-type-holder ul, .ul-disc-type-holder ol {
     padding-left: 2em;
 }
+
+.import-arrow {
+    background: url("../images/import_arrow.png") no-repeat;
+    height: 100%;
+}
+
+.shopware-connect-color {
+    color: #486783 !important;
+}
+
+.sc-btn-right {
+    float: right;
+}

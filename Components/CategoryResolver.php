@@ -22,4 +22,13 @@ interface CategoryResolver
      * @return array
      */
     public function generateTree(array $categories, $idPrefix = '');
+
+    /**
+     * Stores raw Shopware Connect categories
+     *
+     * @param array $categories
+     * @param $articleId
+     * @return void
+     */
+    public function storeRemoteCategories(array $categories, $articleId);
 } 

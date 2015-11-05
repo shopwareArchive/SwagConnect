@@ -1,12 +1,12 @@
 <?php
 
 /**
- * The product gateway controller is used to forward to a product from bepado. It is subshop-aware and will
+ * The product gateway controller is used to forward to a product from connect. It is subshop-aware and will
  * redirect the user to the 'best' subshop available.
  *
- * Class Shopware_Controllers_Frontend_BepadoProductGateway
+ * Class Shopware_Controllers_Frontend_ConnectProductGateway
  */
-class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Controller_Action
+class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Controller_Action
 {
     /** @var  Shopware\Models\Shop\Repository */
     private $shopRepository;
@@ -16,7 +16,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
 
     private $articleDetailRepository;
 
-    /** @var  Shopware\Bepado\Components\BepadoFactory */
+    /** @var  Shopware\Connect\Components\ConnectFactory */
     private $factory;
 
     /** @var  Shopware\Models\Category\Repository */
@@ -65,12 +65,12 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Helper
+     * @return \Shopware\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
@@ -80,7 +80,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
      * Redirect the user to the best subshop with this product
      *
      * - first the subshop of the category mapping is checked, so the user will be redirected to the subshop, the
-     *   bepado article was originally mapped to.
+     *   connect article was originally mapped to.
      * - if the mapping is not available any more, it will redirect to the subshop of the category, the local article is
      *   currently in
      * - in case of any error the user is redirected to the index/index page
@@ -144,7 +144,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
         if (!empty($product->categories)) {
             foreach ($product->categories as $mapping) {
                 /** @var Shopware\Models\Attribute\Category $attribute */
-                $attribute = $attributeRepository->findOneBy(array('bepadoExportMapping' => $mapping));
+                $attribute = $attributeRepository->findOneBy(array('connectExportMapping' => $mapping));
                 if ($attribute) {
                     $category = $attribute->getCategory();
                     if (!$this->doesArticleBelongToCategory($category, $articleId)) {
@@ -223,7 +223,7 @@ class Shopware_Controllers_Frontend_BepadoProductGateway extends Enlight_Control
     }
 
     /**
-     * Return a single bepado product for the given ID
+     * Return a single connect product for the given ID
      *
      * @param $id
      * @return Bepado\SDK\Struct\Product|null

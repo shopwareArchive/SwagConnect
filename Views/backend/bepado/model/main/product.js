@@ -1,9 +1,9 @@
-//{block name="backend/bepado/model/main/product"}
-Ext.define('Shopware.apps.Bepado.model.main.Product', {
+//{block name="backend/connect/model/main/product"}
+Ext.define('Shopware.apps.Connect.model.main.Product', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/main/product/fields"}{/block}
+        //{block name="backend/connect/model/main/product/fields"}{/block}
         { name: 'id', type: 'int' },
         { name: 'name',  type: 'string' },
         { name: 'number',  type: 'string' },

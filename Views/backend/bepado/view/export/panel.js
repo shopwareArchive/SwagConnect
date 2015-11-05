@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/export/panel"}
-Ext.define('Shopware.apps.Bepado.view.export.Panel', {
+//{block name="backend/connect/view/export/panel"}
+Ext.define('Shopware.apps.Connect.view.export.Panel', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.bepado-export',
+    alias: 'widget.connect-export',
 
     border: false,
     layout: 'border',
@@ -13,12 +13,12 @@ Ext.define('Shopware.apps.Bepado.view.export.Panel', {
 
         Ext.applyIf(me, {
             items: [{
-                xtype: 'bepado-export-filter',
+                xtype: 'connect-export-filter',
                 region: 'west',
                 //collapsible: true,
                 split: true
             },{
-                xtype: 'bepado-export-list',
+                xtype: 'connect-export-list',
                 region: 'center'
             }],
             dockedItems: [

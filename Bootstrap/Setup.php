@@ -1,22 +1,22 @@
 <?php
 
-namespace Shopware\Bepado\Bootstrap;
+namespace Shopware\Connect\Bootstrap;
 
 use Shopware\Models\Article\Element;
 use Shopware\Models\Customer\Group;
 
 /**
- * The setup class does the basic setup of the bepado plugin. All operations should be implemented in a way
+ * The setup class does the basic setup of the shopware Connect plugin. All operations should be implemented in a way
  * that they can also be run on update of the plugin
  *
  * Class Setup
- * @package Shopware\Bepado\Bootstrap
+ * @package Shopware\Connect\Bootstrap
  */
 class Setup
 {
     protected $bootstrap;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagBepado_Bootstrap $bootstrap)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
     }
@@ -28,12 +28,12 @@ class Setup
         $this->createMyAttributes();
         $this->populateConfigTable();
         $this->importSnippets();
-        $this->generateBepadoPaymentAttribute();
+        $this->generateConnectPaymentAttribute();
         $this->populateDispatchAttributes();
-        $this->populateBepadoPaymentAttribute();
+        $this->populateConnectPaymentAttribute();
 
 
-        $this->createBepadoCustomerGroup();
+        $this->createConnectCustomerGroup();
 
 
         if ($fullSetup) {
@@ -48,16 +48,16 @@ class Setup
      */
     private function createMyMenu()
     {
-        $bepadoItem = $this->bootstrap->Menu()->findOneBy(array('label' => $this->bootstrap->getLabel()));
-        // check if bepado menu item exists
-        if (!$bepadoItem) {
+        $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => $this->bootstrap->getLabel()));
+        // check if shopware Connect menu item exists
+        if (!$connectItem) {
             $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Marketing'));
 
             $this->bootstrap->createMenuItem(array(
                 'label' => $this->bootstrap->getLabel(),
-                'controller' => 'Bepado',
+                'controller' => 'Connect',
                 'action' => 'Index',
-                'class' => 'bepado-icon',
+                'class' => 'connect-icon',
                 'active' => 1,
                 'parent' => $parent
             ));
@@ -65,13 +65,13 @@ class Setup
     }
 
     /**
-     * Registers the bepado events. As we register all events on the fly, only the early
+     * Registers the shopware Connect events. As we register all events on the fly, only the early
      * Enlight_Controller_Front_StartDispatch-Event is needed.
      */
     public function createMyEvents()
     {
         $this->bootstrap->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_BepadoSDK',
+            'Enlight_Bootstrap_InitResource_ConnectSDK',
             'onInitResourceSDK'
         );
 
@@ -82,14 +82,14 @@ class Setup
 
         Shopware()->Db()->query(
             'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagBepado', 'action' => 'importImages')
+            array('name' => 'SwagConnect', 'action' => 'importImages')
         );
         Shopware()->Db()->query(
             'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagBepado', 'action' => 'Shopware_CronJob_ImportImages')
+            array('name' => 'SwagConnect', 'action' => 'Shopware_CronJob_ImportImages')
         );
         $this->bootstrap->createCronJob(
-            'SwagBepado',
+            'SwagConnect',
             'Shopware_CronJob_ImportImages',
             60 * 30,
             true
@@ -137,7 +137,7 @@ class Setup
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`s_shop`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_config` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_config` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
               `value` TEXT NOT NULL,
@@ -155,7 +155,7 @@ class Setup
               PRIMARY KEY (`sc_from_shop`, `sc_to_shop`),
               INDEX (`sc_revision`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_log` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_log` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `isError` int(1) NOT NULL,
               `service` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -165,13 +165,13 @@ class Setup
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attr` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_marketplace_attr` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
               `local_attribute` varchar(255) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_items` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_items` (
              `id` int(11) NOT NULL AUTO_INCREMENT,
              `article_id` int(11) unsigned DEFAULT NULL,
              `article_detail_id` int(11) unsigned DEFAULT NULL,
@@ -198,7 +198,7 @@ class Setup
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
-            CREATE TABLE IF NOT EXISTS `bepado_shipping_rules` (
+            CREATE TABLE IF NOT EXISTS `connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,
              `sr_group_id` int(11) unsigned DEFAULT NULL,
              `sr_country` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
@@ -208,7 +208,7 @@ class Setup
              PRIMARY KEY (`sr_id`),
              KEY `sr_group_id` (`sr_group_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci","
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_categories` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `category_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
               `label` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -217,7 +217,7 @@ class Setup
               INDEX (`category_key`),
               UNIQUE KEY `scuk_category_key` (`category_key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
-            CREATE TABLE IF NOT EXISTS `s_plugin_bepado_product_to_categories` (
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_product_to_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `connect_category_id` int(11) NOT NULL,
               `articleID` int(11) NOT NULL,
@@ -242,42 +242,42 @@ class Setup
 
         $modelManager->addAttribute(
             's_order_attributes',
-            'bepado', 'shop_id',
+            'connect', 'shop_id',
             'int(11)'
         );
         $modelManager->addAttribute(
             's_order_attributes',
-            'bepado', 'order_id',
+            'connect', 'order_id',
             'int(11)'
         );
 
         $modelManager->addAttribute(
             's_categories_attributes',
-            'bepado', 'import_mapping',
+            'connect', 'import_mapping',
             'text'
         );
 
         $modelManager->addAttribute(
             's_categories_attributes',
-            'bepado', 'export_mapping',
+            'connect', 'export_mapping',
             'text'
         );
 
         $modelManager->addAttribute(
             's_categories_attributes',
-            'bepado', 'imported',
+            'connect', 'imported',
             'text'
         );
 
         $modelManager->addAttribute(
             's_media_attributes',
-            'bepado', 'hash',
+            'connect', 'hash',
             'varchar(255)'
         );
 
         $modelManager->addAttribute(
             's_premium_dispatch_attributes',
-            'bepado', 'allowed',
+            'connect', 'allowed',
             'int(1)',
             true,
             1
@@ -285,13 +285,13 @@ class Setup
 
         $modelManager->addAttribute(
             's_articles_attributes',
-            'bepado', 'product_description',
+            'connect', 'product_description',
             'text'
         );
 
         $modelManager->addAttribute(
             's_articles_prices_attributes',
-            'bepado', 'price',
+            'connect', 'price',
             'double',
             true,
             0
@@ -299,19 +299,19 @@ class Setup
 
         $modelManager->addAttribute(
             's_core_customergroups_attributes',
-            'bepado', 'group',
+            'connect', 'group',
             'int(1)'
         );
 
         $modelManager->addAttribute(
             's_articles_attributes',
-            'bepado', 'article_shipping',
+            'connect', 'article_shipping',
             'varchar(1000)'
         );
 
         $modelManager->addAttribute(
             's_premium_dispatch_attributes',
-            'bepado', 'allowed',
+            'connect', 'allowed',
             'int(1)',
             true,
             1
@@ -319,14 +319,14 @@ class Setup
 
         $modelManager->addAttribute(
             's_categories_attributes',
-            'bepado', 'imported_category',
+            'connect', 'imported_category',
             'int(1)',
             true
         );
 
         $modelManager->addAttribute(
             's_articles_attributes',
-            'bepado', 'mapped_category',
+            'connect', 'mapped_category',
             'int(1)',
             true
         );
@@ -366,7 +366,7 @@ class Setup
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
             'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
-            'bepadoAttribute' => array('19', null, 'general'),
+            'connectAttribute' => array('19', null, 'general'),
             'importImagesOnFirstImport' => array('0', null, 'import'),
             'autoUpdateProducts' => array('1', null, 'export'),
             'overwriteProductName' => array('1', null, 'import'),
@@ -409,16 +409,16 @@ class Setup
 
 
     /**
-     * Creates an engine element so that the bepadoProductDescription is displayed in the article
+     * Creates an engine element so that the connectProductDescription is displayed in the article
      */
     public function createEngineElement()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
-        $element = $repo->findOneBy(array('name' => 'bepadoProductDescription'));
+        $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
 
         if (!$element) {
             $element = new Element();
-            $element->setName('bepadoProductDescription');
+            $element->setName('connectProductDescription');
             $element->setType('html');
             $element->setLabel('SC Beschreibung');
             $element->setTranslatable(1);
@@ -431,20 +431,20 @@ class Setup
 
 
     /**
-     * Creates a bepado customer group - this can be used by the shop owner to manage the bepado product prices
+     * Creates a shopware Connect customer group - this can be used by the shop owner to manage the Connect product prices
      *
      * Logic is very simple here - if a group with the key 'SC' already exists, no new group is created
      */
-    public function createBepadoCustomerGroup()
+    public function createConnectCustomerGroup()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
 
-        $bepadoGroupAttributeId = Shopware()->Db()->fetchOne(
-            'SELECT id FROM s_core_customergroups_attributes WHERE bepado_group = 1'
+        $connectGroupAttributeId = Shopware()->Db()->fetchOne(
+            'SELECT id FROM s_core_customergroups_attributes WHERE connect_group = 1'
         );
 
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->find($bepadoGroupAttributeId);
+        $model = $repo->find($connectGroupAttributeId);
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {
@@ -460,7 +460,7 @@ class Setup
             $customerGroup->setName('SC export');
 
             $attribute = new \Shopware\Models\Attribute\CustomerGroup();
-            $attribute->setBepadoGroup(true);
+            $attribute->setConnectGroup(true);
             $customerGroup->setAttribute($attribute);
 
 
@@ -472,7 +472,7 @@ class Setup
 
     /**
      * Return a free customer group name. It will only check 5 groups - if all are used, probably the detection
-     * of existing bepadoCustomerGroups is broken. Throw an exception then
+     * of existing connectCustomerGroups is broken. Throw an exception then
      *
      * @return mixed
      * @throws \RuntimeException
@@ -506,7 +506,7 @@ class Setup
 
     /**
      * Populates the dispatch attributes with entries for each dispatch type, so that
-     * the bepado attribute can be used
+     * the connect attribute can be used
      */
     public function populateDispatchAttributes()
     {
@@ -517,13 +517,13 @@ class Setup
     }
 
     /**
-     * Generates bepado payment attribute
+     * Generates connect payment attribute
      */
-    public function generateBepadoPaymentAttribute()
+    public function generateConnectPaymentAttribute()
     {
         Shopware()->Models()->addAttribute(
             's_core_paymentmeans_attributes',
-            'bepado', 'is_allowed',
+            'connect', 'is_allowed',
             'int(1)',
             true,
             1
@@ -536,7 +536,7 @@ class Setup
         Shopware()->Models()->regenerateProxies();
     }
 
-    public function populateBepadoPaymentAttribute()
+    public function populateConnectPaymentAttribute()
     {
         Shopware()->Db()->exec('
             INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)

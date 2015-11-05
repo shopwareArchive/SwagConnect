@@ -1,9 +1,9 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace Shopware\Connect\Components\CategoryQuery;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\Bepado\Components\CategoryQuery;
+use Shopware\Connect\Components\CategoryQuery;
 use Doctrine\ORM\QueryBuilder;
 
 abstract class SwQuery implements CategoryQuery

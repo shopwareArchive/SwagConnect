@@ -1,15 +1,15 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
 use Bepado\SDK\SDK;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 
-class BepadoExport
+class ConnectExport
 {
     /** @var  Helper */
     protected $helper;
@@ -69,7 +69,7 @@ class BepadoExport
     }
 
     /**
-     * Helper function to mark a given array of source ids for bepado update
+     * Helper function to mark a given array of source ids for connect update
      *
      * @param array $ids
      * @return array
@@ -82,25 +82,25 @@ class BepadoExport
         }
 
         $implodedIds = '"' . implode('","', $ids) . '"';
-        $bepadoItems = Shopware()->Db()->fetchAll(
+        $connectItems = Shopware()->Db()->fetchAll(
             "SELECT bi.article_id as articleId,
                     bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
                     a.name as title
-            FROM s_plugin_bepado_items bi
+            FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
             WHERE bi.source_id IN ($implodedIds);"
         );
 
-        foreach ($bepadoItems as &$item) {
+        foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
             if($model === null) {
                 continue;
             }
 
-            $bepadoAttribute = $this->helper->getOrCreateBepadoAttributeByModel($model);
+            $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
             $prefix = $item['title'] ? $item['title'] . ': ' : '';
             if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
@@ -108,16 +108,16 @@ class BepadoExport
             } else {
                 $status = 'update';
             }
-            $bepadoAttribute->setExportStatus($status);
-            $bepadoAttribute->setExportMessage(null);
+            $connectAttribute->setExportStatus($status);
+            $connectAttribute->setExportMessage(null);
 
-            $categories = $this->helper->getBepadoCategoryForProduct($item['articleId']);
-            $bepadoAttribute->setCategory($categories);
+            $categories = $this->helper->getConnectCategoryForProduct($item['articleId']);
+            $connectAttribute->setCategory($categories);
 
-            if (!$bepadoAttribute->getId()) {
-                $this->manager->persist($bepadoAttribute);
+            if (!$connectAttribute->getId()) {
+                $this->manager->persist($connectAttribute);
             }
-            $this->manager->flush($bepadoAttribute);
+            $this->manager->flush($connectAttribute);
 
             try {
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
@@ -127,13 +127,13 @@ class BepadoExport
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
             } catch (\Exception $e) {
-                $bepadoAttribute->setExportStatus('error');
-                $bepadoAttribute->setExportMessage(
+                $connectAttribute->setExportStatus('error');
+                $connectAttribute->setExportMessage(
                     $e->getMessage() . "\n" . $e->getTraceAsString()
                 );
 
                 $errors[] = " &bull; " . $prefix . $e->getMessage();
-                $this->manager->flush($bepadoAttribute);
+                $this->manager->flush($connectAttribute);
             }
         }
 
@@ -147,7 +147,7 @@ class BepadoExport
     public function getExportArticlesIds()
     {
         $builder = Shopware()->Models()->createQueryBuilder();
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
@@ -184,7 +184,7 @@ class BepadoExport
     }
 
     /**
-     * Mark bepado product for delete
+     * Mark connect product for delete
      *
      * @param \Shopware\Models\Article\Article $article
      */
@@ -198,13 +198,13 @@ class BepadoExport
     }
 
     /**
-     * Mark single bepado product detail for delete
+     * Mark single connect product detail for delete
      *
      * @param \Shopware\Models\Article\Detail $detail
      */
     public function syncDeleteDetail(Detail $detail)
     {
-        $attribute = $this->helper->getBepadoAttributeByModel($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
         $attribute->setExportStatus('delete');
         $this->manager->persist($attribute);
@@ -220,17 +220,17 @@ class BepadoExport
     {
         $builder = Shopware()->Models()->createQueryBuilder();
         $builder->select(array('at.sourceId'))
-            ->from('Shopware\CustomModels\Bepado\Attribute', 'at')
+            ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());
-        $bepadoItems = $builder->getQuery()->getArrayResult();
+        $connectItems = $builder->getQuery()->getArrayResult();
 
-        foreach($bepadoItems as $item) {
+        foreach($connectItems as $item) {
             $this->sdk->recordDelete($item['sourceId']);
         }
 
         $builder = Shopware()->Models()->createQueryBuilder();
-        $builder->update('Shopware\CustomModels\Bepado\Attribute', 'at')
+        $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
             ->set('at.exportStatus', $builder->expr()->literal('delete'))
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());

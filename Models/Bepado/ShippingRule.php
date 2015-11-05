@@ -23,13 +23,13 @@
  */
 
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use \Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Table(name="bepado_shipping_rules")
+ * @ORM\Table(name="connect_shipping_rules")
  * @ORM\Entity()
  */
 class ShippingRule
@@ -83,7 +83,7 @@ class ShippingRule
      *
      * @var ArrayCollection
      *
-     * @ORM\ManyToOne(targetEntity="Shopware\CustomModels\Bepado\ShippingGroup", inversedBy="rules")
+     * @ORM\ManyToOne(targetEntity="Shopware\CustomModels\Connect\ShippingGroup", inversedBy="rules")
      * @ORM\JoinColumn(name="sr_group_id", referencedColumnName="sg_id")
      */
     protected $group;

@@ -1,10 +1,10 @@
 {block name="backend/base/header/css" append}
-<link rel="stylesheet" href="{link file='backend/bepado/_resources/styles/bepado-styles.css'}" />
+<link rel="stylesheet" href="{link file='backend/connect/_resources/styles/connect-styles.css'}" />
 <style type="text/css">
-    .bepado-icon {
+    .connect-icon {
         background:url({$marketplaceIcon}) no-repeat 0 0 !important;
     }
-    .bepado-icon-green {
+    .connect-icon-green {
         background:url({$marketplaceIncomingIcon}) no-repeat 0 0 !important;
     }
     {*.bp-home-page .logo {*}

@@ -1,23 +1,23 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
  * Register some controllers
  *
  * Class ControllerPath
- * @package Shopware\Bepado\Components\Subscribers
+ * @package Shopware\Connect\Components\Subscribers
  */
 class ControllerPath extends BaseSubscriber
 {
     public function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoGateway' => 'onGetControllerPathGateway',
-            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Bepado' => 'onGetControllerPathFrontend',
-            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_BepadoProductGateway' => 'onGetControllerPathFrontendBepadoControllerGateway',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado' => 'onGetControllerPathBackend',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoConfig' => 'onGetControllerPathBepadoConfig',
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectGateway' => 'onGetControllerPathGateway',
+            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Connect' => 'onGetControllerPathFrontend',
+            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_ConnectProductGateway' => 'onGetControllerPathFrontendConnectControllerGateway',
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_Connect' => 'onGetControllerPathBackend',
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectConfig' => 'onGetControllerPathConnectConfig',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
         );
@@ -25,32 +25,32 @@ class ControllerPath extends BaseSubscriber
 
 
     /**
-     * Register the bepado backend controller
+     * Register the connect backend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string
-     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Bepado
+     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Connect
      */
     public function onGetControllerPathBackend(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
-        return $this->Path() . 'Controllers/Backend/Bepado.php';
+        return $this->Path() . 'Controllers/Backend/Connect.php';
     }
 
     /**
-     * Register the bepadoGateway backend controller
+     * Register the connectGateway backend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string
      */
     public function onGetControllerPathGateway(\Enlight_Event_EventArgs $args)
     {
-        return $this->Path() . 'Controllers/Backend/BepadoGateway.php';
+        return $this->Path() . 'Controllers/Backend/ConnectGateway.php';
     }
 
     /**
-     * Register the bepado frontend controller
+     * Register the connect frontend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string
@@ -58,37 +58,37 @@ class ControllerPath extends BaseSubscriber
     public function onGetControllerPathFrontend(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
-        return $this->Path() . 'Controllers/Frontend/Bepado.php';
+        return $this->Path() . 'Controllers/Frontend/Connect.php';
     }
 
     /**
-     * Register the bepado product frontend controller
+     * Register the connect product frontend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string
      */
-    public function onGetControllerPathFrontendBepadoControllerGateway(\Enlight_Event_EventArgs $args)
+    public function onGetControllerPathFrontendConnectControllerGateway(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
-        return $this->Path() . 'Controllers/Frontend/BepadoProductGateway.php';
+        return $this->Path() . 'Controllers/Frontend/ConnectProductGateway.php';
     }
 
     /**
-     * Register the bepado config backend controller
+     * Register the connect config backend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string
-     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_BepadoConfig
+     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectConfig
      */
-    public function onGetControllerPathBepadoConfig(\Enlight_Event_EventArgs $args)
+    public function onGetControllerPathConnectConfig(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
-        return $this->Path() . 'Controllers/Backend/BepadoConfig.php';
+        return $this->Path() . 'Controllers/Backend/ConnectConfig.php';
     }
 
     /**
-     * Register the bepado import backend controller
+     * Register the connect import backend controller
      *
      * @param   \Enlight_Event_EventArgs $args
      * @return  string

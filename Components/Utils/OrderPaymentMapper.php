@@ -1,21 +1,21 @@
 <?php
 
-namespace Shopware\Bepado\Components\Utils;
+namespace Shopware\Connect\Components\Utils;
 
 use Bepado\SDK\Struct\Order as OrderStruct;
 
 /**
  * Class OrderPaymentMapper
- * @package Shopware\Bepado\Components\Utils
+ * @package Shopware\Connect\Components\Utils
  */
 class OrderPaymentMapper
 {
     private $mapping;
 
     /**
-     * Returns an array of mappings from sw order payment to bepado order states
+     * Returns an array of mappings from sw order payment to connect order states
      *
-     * Can be modified and extended by using the Bepado_OrderPayment_Mapping filter event
+     * Can be modified and extended by using the Connect_OrderPayment_Mapping filter event
      *
      * @return mixed
      */
@@ -31,19 +31,19 @@ class OrderPaymentMapper
                 'paypal' => OrderStruct::PAYMENT_PROVIDER,
             );
 
-            $this->mapping = Enlight()->Events()->filter('Bepado_OrderStatus_Mapping', $this->mapping);
+            $this->mapping = Enlight()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;
     }
 
     /**
-     * Helper to map shopware order payment to bepado order states
+     * Helper to map shopware order payment to connect order states
      *
      * @param $swOrderPayment
      * @return string
      */
-    public function mapShopwareOrderPaymentToBepado($swOrderPayment)
+    public function mapShopwareOrderPaymentToConnect($swOrderPayment)
     {
         $swOrderPayment = (string)$swOrderPayment;
 

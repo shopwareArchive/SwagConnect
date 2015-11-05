@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
  * The base subscriber holds some default methods, which all other subscribers might need.
@@ -9,17 +9,17 @@ namespace Shopware\Bepado\Subscribers;
  * todo: Refactor the subscribers and replace the $bootstrap reference with injected dependencies
  *
  * Class BaseSubscriber
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 abstract class BaseSubscriber extends SubscribeManager
 {
     /**
-     * @var \Shopware_Plugins_Backend_SwagBepado_Bootstrap
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
     protected $bootstrap;
 
     /**
-     * @return \Shopware_Plugins_Backend_SwagBepado_Bootstrap
+     * @return \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
     public function Bootstrap()
     {
@@ -53,7 +53,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @return \Shopware\Bepado\Components\BasketHelper
+     * @return \Shopware\Connect\Components\BasketHelper
      */
     public function getBasketHelper()
     {
@@ -61,7 +61,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @param \Shopware_Plugins_Backend_SwagBepado_Bootstrap $bootstrap
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      */
     public function setBootstrap($bootstrap)
     {
@@ -69,7 +69,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @return \Shopware_Plugins_Backend_SwagBepado_Bootstrap
+     * @return \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
     public function getBootstrap()
     {
@@ -104,7 +104,7 @@ abstract class BaseSubscriber extends SubscribeManager
         }
 
         $this->Application()->Template()->addTemplateDir(
-            $this->Path() . 'Views/'.$template, 'bepado'
+            $this->Path() . 'Views/'.$template, 'connect'
         );
     }
 

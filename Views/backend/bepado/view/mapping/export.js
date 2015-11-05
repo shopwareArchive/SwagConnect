@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name='backend/bepado/view/main/mapping/export'}
-Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
+//{block name='backend/connect/view/main/mapping/export'}
+Ext.define('Shopware.apps.Connect.view.mapping.Export', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-mapping-export',
+    alias: 'widget.connect-mapping-export',
 
     //border: false,
     layout: 'border',
@@ -37,13 +37,13 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Export', {
                     dataIndex: 'text',
                     text: '{s name=mapping/columns/shopware-category}Shopware Category{/s}'
                 },{
-                    text: Ext.String.format('{s name=mapping/columns/bepado-category}[0] Kategorie{/s}', marketplaceName),
+                    text: Ext.String.format('{s name=mapping/columns/connect-category}[0] Kategorie{/s}', marketplaceName),
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
-                        store: 'mapping.BepadoCategoriesExport'
+                        store: 'mapping.ConnectCategoriesExport'
                     },
                     renderer: function (value) {
                         if (!value) {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 include('./../../../../../../tests/Shopware/TestHelper.php');
 
-Shopware()->Loader()->registerNamespace('Tests\Shopware\Bepado', __DIR__  . '/');
+Shopware()->Loader()->registerNamespace('Tests\Shopware\Connect', __DIR__  . '/');
 
-Shopware()->Bootstrap()->getResource('BepadoSDK');
+Shopware()->Bootstrap()->getResource('ConnectSDK');

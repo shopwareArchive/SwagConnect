@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\Gateway;
+namespace Shopware\Connect\Components\Gateway;
 
 use Bepado\SDK\Struct\Translation;
 

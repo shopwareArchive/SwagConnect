@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/mapping/bepado_categories_export"}
-Ext.define('Shopware.apps.Bepado.store.mapping.BepadoCategoriesExport', {
+//{block name="backend/connect/store/mapping/connect_categories_export"}
+Ext.define('Shopware.apps.Connect.store.mapping.ConnectCategoriesExport', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,

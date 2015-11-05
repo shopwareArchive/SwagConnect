@@ -22,8 +22,8 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
-use Bepado\Common\Struct\Product\ShopProduct;
+namespace Shopware\Connect\Components;
+use Connect\Common\Struct\Product\ShopProduct;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Bepado\SDK\SDK;
@@ -32,16 +32,16 @@ use Bepado\SDK\Struct\Product,
     Shopware\Models\Category\Category as CategoryModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
-use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
+use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Detail as ProductDetail;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
-use Shopware\Bepado\Components\Utils\UnitMapper;
+use Shopware\Connect\Components\Utils\UnitMapper;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class Helper
 {
@@ -50,10 +50,10 @@ class Helper
      */
     private $manager;
 
-    private $bepadoCategoryQuery;
+    private $connectCategoryQuery;
 
-    /** @var \Shopware\Bepado\Components\ProductQuery  */
-    private $bepadoProductQuery;
+    /** @var \Shopware\Connect\Components\ProductQuery  */
+    private $connectProductQuery;
 
     /**
      * @param ModelManager $manager
@@ -62,13 +62,13 @@ class Helper
      */
     public function __construct(
         ModelManager $manager,
-        CategoryQuery $bepadoCategoryQuery,
-        ProductQuery $bepadoProductQuery
+        CategoryQuery $connectCategoryQuery,
+        ProductQuery $connectProductQuery
     )
     {
         $this->manager = $manager;
-        $this->bepadoCategoryQuery = $bepadoCategoryQuery;
-        $this->bepadoProductQuery = $bepadoProductQuery;
+        $this->connectCategoryQuery = $connectCategoryQuery;
+        $this->connectProductQuery = $connectProductQuery;
     }
 
     /**
@@ -92,7 +92,7 @@ class Helper
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'a'));
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
@@ -121,7 +121,7 @@ class Helper
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
@@ -138,7 +138,7 @@ class Helper
         );
 
         if (isset($result[0])) {
-            /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+            /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
             $attribute = $result[0];
             return $attribute->getArticleDetail();
         }
@@ -146,11 +146,11 @@ class Helper
         return null;
     }
 
-    public function getBepadoArticleModel($sourceId, $shopId)
+    public function getConnectArticleModel($sourceId, $shopId)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'a'));
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
@@ -176,13 +176,13 @@ class Helper
     }
 
     /**
-     * Helper to update the bepado_items table
+     * Helper to update the connect_items table
      */
-    public function updateBepadoProducts()
+    public function updateConnectProducts()
     {
         // Insert new articles
         $sql = "
-        INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id, source_id)
+        INSERT INTO `s_plugin_connect_items` (article_id, article_detail_id, source_id)
         SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
 
         FROM s_articles a
@@ -190,7 +190,7 @@ class Helper
         LEFT JOIN `s_articles_details` ad
         ON a.id = ad.articleId
 
-        LEFT JOIN `s_plugin_bepado_items` bi
+        LEFT JOIN `s_plugin_connect_items` bi
         ON bi.article_detail_id = ad.id
 
 
@@ -201,9 +201,9 @@ class Helper
 
         $this->manager->getConnection()->exec($sql);
 
-        // Delete removed articles from s_plugin_bepado_items
+        // Delete removed articles from s_plugin_connect_items
         $sql = '
-        DELETE bi FROM `s_plugin_bepado_items`  bi
+        DELETE bi FROM `s_plugin_connect_items`  bi
 
         LEFT JOIN `s_articles_details` ad
         ON ad.id = bi.article_detail_id
@@ -216,41 +216,41 @@ class Helper
 
 
     /**
-     * Returns a remote bepadoProduct e.g. for checkout maniputlations
+     * Returns a remote connectProduct e.g. for checkout maniputlations
      *
      * @param array $ids
      * @return array
      */
     public function getRemoteProducts(array $ids)
     {
-        return $this->bepadoProductQuery->getRemote($ids);
+        return $this->connectProductQuery->getRemote($ids);
     }
 
     /**
-     * Returns a local bepadoProduct for export
+     * Returns a local connectProduct for export
      *
      * @param array $sourceIds
      * @return array
      */
     public function getLocalProduct(array $sourceIds)
     {
-        return $this->bepadoProductQuery->getLocal($sourceIds);
+        return $this->connectProductQuery->getLocal($sourceIds);
     }
 
     /**
-     * Does the current basket contain bepado products?
+     * Does the current basket contain connect products?
      *
      * @param $session
      * @return bool
      */
-    public function hasBasketBepadoProducts($session, $userId = null)
+    public function hasBasketConnectProducts($session, $userId = null)
     {
         $connection = $this->manager->getConnection();
         $sql = 'SELECT ob.articleID
 
             FROM s_order_basket ob
 
-            INNER JOIN s_plugin_bepado_items bi
+            INNER JOIN s_plugin_connect_items bi
             ON bi.article_id = ob.articleID
             AND bi.shop_id IS NOT NULL
 
@@ -271,14 +271,14 @@ class Helper
     }
 
     /**
-     * Will return the bepadoAttribute for a given model. The model can be an Article\Article or Article\Detail
+     * Will return the connectAttribute for a given model. The model can be an Article\Article or Article\Detail
      *
      * @param $model ProductModel|ProductDetail
-     * @return BepadoAttribute
+     * @return ConnectAttribute
      */
-    public function getBepadoAttributeByModel($model)
+    public function getConnectAttributeByModel($model)
     {
-        $repository = $this->manager->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
 
         if (!$model->getId()) {
             return false;
@@ -295,18 +295,18 @@ class Helper
     }
 
     /**
-     * Helper method to create a bepado attribute on the fly
+     * Helper method to create a connect attribute on the fly
      *
      * @param $model
-     * @return BepadoAttribute
+     * @return ConnectAttribute
      * @throws \RuntimeException
      */
-    public function getOrCreateBepadoAttributeByModel($model)
+    public function getOrCreateConnectAttributeByModel($model)
     {
-        $attribute = $this->getBepadoAttributeByModel($model);
+        $attribute = $this->getConnectAttributeByModel($model);
 
         if (!$attribute) {
-            $attribute = new BepadoAttribute();
+            $attribute = new ConnectAttribute();
             $attribute->setPurchasePriceHash('');
             $attribute->setOfferValidUntil('');
 
@@ -333,20 +333,20 @@ class Helper
     }
 
     /**
-     * Returns bepado attributes for article
+     * Returns connect attributes for article
      * and all variants.
-     * If bepado attribute does not exist
+     * If connect attribute does not exist
      * it will be created.
      *
      * @param ProductModel $article
      * @return array
      */
-    public function getOrCreateBepadoAttributes(ProductModel $article)
+    public function getOrCreateConnectAttributes(ProductModel $article)
     {
         $attributes = array();
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($article->getDetails() as $detail) {
-            $attributes[] = $this->getOrCreateBepadoAttributeByModel($detail);
+            $attributes[] = $this->getOrCreateConnectAttributeByModel($detail);
         }
 
         return $attributes;
@@ -377,9 +377,9 @@ class Helper
      * @param $id
      * @return array
      */
-    public function getBepadoCategoryForProduct($id)
+    public function getConnectCategoryForProduct($id)
     {
-        return $this->getCategoryQuery()->getBepadoCategoryForProduct($id);
+        return $this->getCategoryQuery()->getConnectCategoryForProduct($id);
     }
 
     /**
@@ -393,16 +393,16 @@ class Helper
 
     protected function getCategoryQuery()
     {
-        return $this->bepadoCategoryQuery;
+        return $this->connectCategoryQuery;
     }
 
-    public function getMostRelevantBepadoCategory($categories)
+    public function getMostRelevantConnectCategory($categories)
     {
         usort(
             $categories,
             array(
                 $this->getCategoryQuery()->getRelevanceSorter(),
-                'sortBepadoCategoriesByRelevance'
+                'sortConnectCategoriesByRelevance'
             )
         );
 
@@ -448,18 +448,18 @@ class Helper
      * @param $products
      * @return mixed
      */
-    public function prepareBepadoUnit($products)
+    public function prepareConnectUnit($products)
     {
         foreach ($products as &$p) {
             if ($p->attributes['unit']) {
                 $configComponent = new Config($this->manager);
-                /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
+                /** @var \Shopware\Connect\Components\Utils\UnitMapper $unitMapper */
                 $unitMapper = new UnitMapper(
                     $configComponent,
                     $this->manager
                 );
 
-                $p->attributes['unit'] = $unitMapper->getBepadoUnit($p->attributes['unit']);
+                $p->attributes['unit'] = $unitMapper->getConnectUnit($p->attributes['unit']);
             }
 
             if ($p->attributes['ref_quantity']) {
@@ -474,11 +474,11 @@ class Helper
     }
 
     /**
-     * Removes bepado reservation from session
+     * Removes connect reservation from session
      */
-    public function clearBepadoReservation()
+    public function clearConnectReservation()
     {
-        Shopware()->Session()->BepadoReservation = null;
+        Shopware()->Session()->connectReservation = null;
     }
 
     /**
@@ -507,12 +507,12 @@ class Helper
 
             /** @var \Shopware\Models\Article\Detail $detail */
             foreach ($details as $detail) {
-                $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
-                if (!$bepadoAttribute) {
+                $connectAttribute = $this->getConnectAttributeByModel($detail);
+                if (!$connectAttribute) {
                     continue;
                 }
 
-                $sourceIds[] = $bepadoAttribute->getSourceId();
+                $sourceIds[] = $connectAttribute->getSourceId();
             }
         }
 
@@ -534,12 +534,12 @@ class Helper
             return null;
         }
 
-        $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
-        if (!$bepadoAttribute) {
+        $connectAttribute = $this->getConnectAttributeByModel($detail);
+        if (!$connectAttribute) {
             return null;
         }
 
-        return $bepadoAttribute->getSourceId();
+        return $connectAttribute->getSourceId();
     }
 
     /**
@@ -557,12 +557,12 @@ class Helper
             throw new \RuntimeException('Invalid article detail id');
         }
 
-        $bepadoAttribute = $this->getBepadoAttributeByModel($detail);
-        if (!$bepadoAttribute) {
+        $connectAttribute = $this->getConnectAttributeByModel($detail);
+        if (!$connectAttribute) {
             return false;
         }
 
-        return ($bepadoAttribute->getShopId() != null);
+        return ($connectAttribute->getShopId() != null);
     }
 
     /**
@@ -613,7 +613,7 @@ class Helper
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'ba');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
@@ -627,7 +627,7 @@ class Helper
         );
 
         if (isset($result[0])) {
-            /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+            /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
             $attribute = $result[0];
             return $attribute->getArticle();
         }

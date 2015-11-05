@@ -1,3 +1,3 @@
 //{block name="backend/article/model/price_attribute/fields" append}
-        { name: 'bepadoPrice', type: 'float' },
+        { name: 'connectPrice', type: 'float' },
 //{/block}

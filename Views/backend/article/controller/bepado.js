@@ -1,6 +1,6 @@
-//{namespace name="backend/bepado/view/main"}
-//{block name="backend/article/controller/bepado"}
-Ext.define('Shopware.apps.Article.controller.Bepado', {
+//{namespace name="backend/connect/view/main"}
+//{block name="backend/article/controller/connect"}
+Ext.define('Shopware.apps.Article.controller.Connect', {
     /**
      * The parent class that this class extends.
      * @string
@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
     extend:'Ext.app.Controller',
 
     refs: [
-          { ref: 'bepadoForm', selector: 'article-bepado-form' },
+          { ref: 'connectForm', selector: 'article-connect-form' },
           { ref: 'articleDetailWindow', selector: 'article-detail-window' },
       ],
 
@@ -26,8 +26,8 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
 
         me.control({
             'article-detail-window': {
-                bepadoTabActivated: me.onBepadoStoreReloadNeeded,
-                bepadoStoreReloadNeeded: me.onBepadoStoreReloadNeeded,
+                connectTabActivated: me.onConnectStoreReloadNeeded,
+                connectStoreReloadNeeded: me.onConnectStoreReloadNeeded,
                 saveArticle: me.onSaveArticle
             }
         });
@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         var me = this,
             detailWindow = me.getArticleDetailWindow();
 
-        detailWindow.bepadoTab.setDisabled(false);
+        detailWindow.connectTab.setDisabled(false);
     },
 
     onStoresLoaded: function() {
@@ -52,13 +52,13 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
 
     onSaveArticle: function(win, article, options) {
         var me = this,
-            bepadoForm = me.getBepadoForm();
+            connectForm = me.getConnectForm();
 
         if (!me.subApplication.article || !me.subApplication.article.get('id')) {
             return;
         }
 
-        bepadoForm.getForm().updateRecord(me.record);
+        connectForm.getForm().updateRecord(me.record);
 
 
         me.record.save({
@@ -66,39 +66,39 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
 
-                    Shopware.Notification.createGrowlMessage('{s name=error}error{/s}', message, 'bepado');
+                    Shopware.Notification.createGrowlMessage('{s name=error}error{/s}', message, 'connect');
                 }
         });
     },
 
     /**
-     * Callback function for the "bepadoStoreReloadNeeded" event
+     * Callback function for the "connectStoreReloadNeeded" event
      */
-    onBepadoStoreReloadNeeded: function() {
+    onConnectStoreReloadNeeded: function() {
         var me = this;
 
-        me.doReloadBepadoStore();
+        me.doReloadConnectStore();
     },
 
     /**
-     * Actually do reload the bepado store
+     * Actually do reload the connect store
      */
-    doReloadBepadoStore: function() {
+    doReloadConnectStore: function() {
         var me = this,
-            bepadoForm = me.getBepadoForm();
+            connectForm = me.getConnectForm();
 
         if (!me.subApplication.article || !me.subApplication.article.get('id')) {
             return;
         }
 
-        me.bepadoStore.load({
+        me.connectStore.load({
             callback: function(records, operation) {
                 if (!operation.wasSuccessful()) {
                     return;
                 }
                 if (records.length > 0) {
                     me.record = records[0];
-                    bepadoForm.loadRecord(me.record);
+                    connectForm.loadRecord(me.record);
 
                     me.manageFields();
                 }
@@ -113,7 +113,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
      */
     manageFields: function() {
         var me = this,
-            bepadoForm = me.getBepadoForm(),
+            connectForm = me.getConnectForm(),
             settingsFieldSet = me.subApplication.articleWindow.down('article-settings-field-set'),
             pricesFieldSet = me.subApplication.articleWindow.down('article-prices-field-set'),
             basePriceColumn = me.subApplication.articleWindow.down('article-prices-field-set numbercolumn[dataIndex=basePrice]'),
@@ -131,9 +131,9 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         basicField.setReadOnly(me.record.get('shopId') > 0);
 
         if (me.record.get('shopId') > 0) {
-            bepadoForm.bepadoFixedPrice.setReadOnly(true);
+            connectForm.connectFixedPrice.setReadOnly(true);
         } else if (isFixedPriceAllowed == false) {
-            bepadoForm.bepadoFixedPriceFieldset.setVisible(false);
+            connectForm.connectFixedPriceFieldset.setVisible(false);
         }
 
         if (settingsFieldSet) {
@@ -151,7 +151,7 @@ Ext.define('Shopware.apps.Article.controller.Bepado', {
         if (pricesFieldSet) {
             isPriceLocked = me.record.get('fixedPrice') && me.record.get('shopId') > 0;
             pricesFieldSet.tabPanel.setDisabled(isPriceLocked);
-            pricesFieldSet.bepadoLabel.setVisible(isPriceLocked);
+            pricesFieldSet.connectLabel.setVisible(isPriceLocked);
         }
 
 

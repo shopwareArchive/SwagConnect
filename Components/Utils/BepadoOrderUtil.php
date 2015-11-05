@@ -1,53 +1,53 @@
 <?php
 
-namespace Shopware\Bepado\Components\Utils;
+namespace Shopware\Connect\Components\Utils;
 
 /**
- * Util to check orders for bepado products
+ * Util to check orders for connect products
  *
- * Class BepadoOrderUtil
- * @package Shopware\Bepado\Components\Utils
+ * Class ConnectOrderUtil
+ * @package Shopware\Connect\Components\Utils
  */
-class BepadoOrderUtil
+class ConnectOrderUtil
 {
 
     /**
-     * Returns a list of bepado orders, their shop_id and the remote order_id
+     * Returns a list of connect orders, their shop_id and the remote order_id
      * @param $orderIds
      * @return mixed
      */
-    function getRemoteBepadoOrders($orderIds) {
+    function getRemoteConnectOrders($orderIds) {
         // This will apply for the fromShop
-        $sql = 'SELECT orderID, bepado_shop_id, bepado_order_id
+        $sql = 'SELECT orderID, connect_shop_id, connect_order_id
         FROM s_order_attributes
         WHERE orderID IN (' . implode(', ', $orderIds) . ')
-        AND bepado_shop_id IS NOT NULL
+        AND connect_shop_id IS NOT NULL
         ';
         return  Shopware()->Db()->fetchAll($sql);
     }
 
     /**
-     * Does a given order have bepado products?
+     * Does a given order have connect products?
      *
      * @param $orderId
      * @return bool
      */
-    function hasRemoteOrderBepadoProducts($orderId)
+    function hasRemoteOrderConnectProducts($orderId)
     {
-        $orders = $this->getRemoteBepadoOrders(array($orderId));
+        $orders = $this->getRemoteConnectOrders(array($orderId));
         return !empty($orders);
     }
 
     /**
-     * Returns a list of bepado orders and their shop_id
+     * Returns a list of connect orders and their shop_id
      *
      * @param $orderIds
      * @return mixed
      */
-    function getLocalBepadoOrders($orderIds)
+    function getLocalConnectOrders($orderIds)
     {
-        // This will apply for orders with remote bepado products in it
-        $sql = 'SELECT oa.orderID, bi.shop_id as bepado_shop_id,  "remote" as bepado_order_id
+        // This will apply for orders with remote connect products in it
+        $sql = 'SELECT oa.orderID, bi.shop_id as connect_shop_id,  "remote" as connect_order_id
 
         FROM s_order_attributes oa
 
@@ -58,7 +58,7 @@ class BepadoOrderUtil
         ON ad.articleID = od.articleID
         AND ad.kind=1
 
-        INNER JOIN s_plugin_bepado_items bi
+        INNER JOIN s_plugin_connect_items bi
         ON bi.article_detail_id=ad.id
         AND bi.shop_id IS NOT NULL
 
@@ -69,14 +69,14 @@ class BepadoOrderUtil
     }
 
     /**
-     * Does a given order have bepado products?
+     * Does a given order have connect products?
      *
      * @param $orderId
      * @return bool
      */
-    function hasLocalOrderBepadoProducts($orderId)
+    function hasLocalOrderConnectProducts($orderId)
     {
-        $orders = $this->getLocalBepadoOrders(array($orderId));
+        $orders = $this->getLocalConnectOrders(array($orderId));
         return !empty($orders);
     }
 }

@@ -21,18 +21,18 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/import"}
-Ext.define('Shopware.apps.Bepado.model.config.Import', {
+//{block name="backend/connect/model/config/import"}
+Ext.define('Shopware.apps.Connect.model.config.Import', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/config/import/fields"}{/block}
+        //{block name="backend/connect/model/config/import/fields"}{/block}
         { name: 'overwriteProductName', type: 'int' },
         { name: 'overwriteProductPrice', type: 'int' },
         { name: 'overwriteProductImage', type: 'int' },
@@ -56,9 +56,9 @@ Ext.define('Shopware.apps.Bepado.model.config.Import', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveImport"}',
-            update: '{url controller="BepadoConfig" action="saveImport"}',
-            read: '{url controller="BepadoConfig" action="getImport"}'
+            create: '{url controller="ConnectConfig" action="saveImport"}',
+            update: '{url controller="ConnectConfig" action="saveImport"}',
+            read: '{url controller="ConnectConfig" action="getImport"}'
         },
 
         /**

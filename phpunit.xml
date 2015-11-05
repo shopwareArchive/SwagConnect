@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="./Tests/Shopware/Bepado/Bootstrap.php" colors="true">
+<phpunit bootstrap="./Tests/Shopware/Connect/Bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="Shopware Bepado Plugin">
+        <testsuite name="Shopware Connect Plugin">
             <directory>Tests/</directory>
         </testsuite>
     </testsuites>

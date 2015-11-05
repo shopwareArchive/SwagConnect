@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
-class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
+class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 {
     public  function setUp()
     {
@@ -15,7 +15,7 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
 
     public function testGetGeneralAction()
     {
-        $this->dispatch('backend/BepadoConfig/getGeneral');
+        $this->dispatch('backend/ConnectConfig/getGeneral');
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
         $returnData = $this->View()->data;
@@ -36,8 +36,8 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'detailProductNoIndex' => '1',
             'detailShopInfo' => '1',
             'logRequest' => '1',
-            'bepadoDebugHost' => 'stage.bepado.de',
-            'bepadoAttribute' => '18',
+            'connectDebugHost' => 'stage.connect.de',
+            'connectAttribute' => '18',
             'apiKey' => '58dfcc22-0ab7-4bf6-8eff-e0d2c9455019',
             'isDefaultShop' => '1',
             'shopId' => '15',
@@ -49,9 +49,9 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->Request()
             ->setMethod('POST')
             ->setPost('data', $expectations);
-        $this->dispatch('backend/BepadoConfig/saveGeneral');
+        $this->dispatch('backend/ConnectConfig/saveGeneral');
 
-        $sql= "SELECT * from s_plugin_bepado_config WHERE groupName = 'general'";
+        $sql= "SELECT * from s_plugin_connect_config WHERE groupName = 'general'";
         $result = Shopware()->Db()->fetchAll($sql);
 
         foreach ($result as $config) {
@@ -59,7 +59,7 @@ class BepadoConfigTest extends \Enlight_Components_Test_Controller_TestCase
             $this->assertEquals($expectations[$config['name']], $config['value']);
         }
 
-        $sql= "SELECT * from s_plugin_bepado_config WHERE (`name` = 'shopId' OR `name` = 'isDefaultShop') AND groupName = 'general'";
+        $sql= "SELECT * from s_plugin_connect_config WHERE (`name` = 'shopId' OR `name` = 'isDefaultShop') AND groupName = 'general'";
         $result = Shopware()->Db()->fetchAll($sql);
         $this->assertEmpty($result);
     }

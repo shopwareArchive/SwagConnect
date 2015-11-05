@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
- * Implements a 'bepado' filter for the article list
+ * Implements a 'connect' filter for the article list
  *
  * Class ArticleList
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class ArticleList extends BaseSubscriber
 {
@@ -20,7 +20,7 @@ class ArticleList extends BaseSubscriber
 
 
     /**
-     * If the 'bepado' filter is checked, only show products imported from bepado
+     * If the 'connect' filter is checked, only show products imported from connect
      *
      * @param   \Enlight_Event_EventArgs $args
      */
@@ -31,13 +31,13 @@ class ArticleList extends BaseSubscriber
 
         list($sqlParams, $filterSql, $categorySql, $imageSQL, $order) = $args->getReturn();
 
-        if ($filterBy == 'bepado') {
+        if ($filterBy == 'connect') {
             $imageSQL = "
-                LEFT JOIN s_plugin_bepado_items as bepado_items
-                ON bepado_items.article_id = articles.id
+                LEFT JOIN s_plugin_connect_items as connect_items
+                ON connect_items.article_id = articles.id
             ";
 
-            $filterSql .= " AND bepado_items.shop_id > 0 ";
+            $filterSql .= " AND connect_items.shop_id > 0 ";
         }
 
         return array($sqlParams, $filterSql, $categorySql, $imageSQL, $order);
@@ -45,7 +45,7 @@ class ArticleList extends BaseSubscriber
     }
 
     /**
-     * Extends the product list in the backend in order to have a special hint for bepado products
+     * Extends the product list in the backend in order to have a special hint for connect products
      *
      * @event Enlight_Controller_Action_PostDispatch_Backend_ArticleList
      * @param \Enlight_Event_EventArgs $args
@@ -61,17 +61,17 @@ class ArticleList extends BaseSubscriber
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
-                    'backend/article_list/bepado.js'
+                    'backend/article_list/connect.js'
                 );
                 break;
             case 'list':
             case 'filter':
-                $subject->View()->data = $this->markBepadoProducts(
+                $subject->View()->data = $this->markConnectProducts(
                     $subject->View()->data
                 );
                 break;
             case 'columnConfig':
-                $subject->View()->data = $this->addBepadoColumn(
+                $subject->View()->data = $this->addConnectColumn(
                     $subject->View()->data
                 );
                 break;
@@ -81,13 +81,13 @@ class ArticleList extends BaseSubscriber
     }
 
     /**
-     * Helper method which adds an additional 'bepado' field to article objects in order to indicate
-     * if they are bepado articles or not
+     * Helper method which adds an additional 'connect' field to article objects in order to indicate
+     * if they are connect articles or not
      *
      * @param $data
      * @return mixed
      */
-    private function markBepadoProducts($data)
+    private function markConnectProducts($data)
     {
         $articleIds = array_map(function ($row) {
             if ((int)$row['Article_id'] > 0) {
@@ -101,12 +101,12 @@ class ArticleList extends BaseSubscriber
         }
 
         $sql = 'SELECT article_id
-                FROM s_plugin_bepado_items
+                FROM s_plugin_connect_items
                 WHERE article_id IN (' . implode(', ', $articleIds) . ')
                 AND source_id IS NOT NULL
                 AND shop_id IS NOT NULL';
 
-        $bepadoArticleIds = array_map(function ($row) {
+        $connectArticleIds = array_map(function ($row) {
             return $row['article_id'];
         }, Shopware()->Db()->fetchAll($sql));
 
@@ -117,26 +117,26 @@ class ArticleList extends BaseSubscriber
                 $articleId = $row['articleId'];
             }
 
-            $data[$idx]['bepado'] = in_array($articleId, $bepadoArticleIds);
+            $data[$idx]['connect'] = in_array($articleId, $connectArticleIds);
         }
 
         return $data;
     }
 
     /**
-     * Adds bepado field to the ExtJS model for article_list
+     * Adds connect field to the ExtJS model for article_list
      * That was changed in SW5, because the model is dynamically created
      *
      * @param $data
      * @return array
      */
-    private function addBepadoColumn($data)
+    private function addConnectColumn($data)
     {
         $data[] = array(
             'entity' => 'Article',
-            'field' => 'bepado',
+            'field' => 'connect',
             'type' => 'boolean',
-            'alias' => 'bepado',
+            'alias' => 'connect',
             'allowInGrid' => true,
             'nullable' => false,
 

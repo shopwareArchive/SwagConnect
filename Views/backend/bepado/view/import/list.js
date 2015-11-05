@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/list"}
-Ext.define('Shopware.apps.Bepado.view.import.List', {
+//{block name="backend/connect/view/import/list"}
+Ext.define('Shopware.apps.Connect.view.import.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.bepado-import-list',
+    alias: 'widget.connect-import-list',
 
     border: false,
 
@@ -84,8 +84,8 @@ Ext.define('Shopware.apps.Bepado.view.import.List', {
             dataIndex: 'active',
             sortable: false,
             renderer: function(value, metaData, record) {
-                if(record.get('bepadoStatus')) {
-                    return record.get('bepadoStatus');
+                if(record.get('connectStatus')) {
+                    return record.get('connectStatus');
                 }
                 return value ? 'Aktiv' : 'Inaktiv';
             },

@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/import/remote_categories"}
-Ext.define('Shopware.apps.Bepado.store.import.RemoteCategories', {
+//{block name="backend/connect/store/import/remote_categories"}
+Ext.define('Shopware.apps.Connect.store.import.RemoteCategories', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,

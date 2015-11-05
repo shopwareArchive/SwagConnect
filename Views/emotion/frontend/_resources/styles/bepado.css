@@ -1,4 +1,4 @@
-.table .table_row .checkout_item_bepado {
+.table .table_row .checkout_item_connect {
     float: left;
     width: 18px;
     border-right: 1px dashed #DFDFDF;
@@ -7,7 +7,7 @@
     padding-bottom: 9999em;
     margin-bottom: -9999em;
 }
-.table .table_row .checkout_item_bepado span {
+.table .table_row .checkout_item_connect span {
     background:  url('../images/bg_marketplace.png') center center no-repeat;
     width: 20px;
     height: 75px;
@@ -15,13 +15,13 @@
     top: 50%;
     margin-top: -36px
 }
-#content #confirm .table .table_row .checkout_item_bepado { height: 158px }
+#content #confirm .table .table_row .checkout_item_connect { height: 158px }
 #content #confirm .table .table_row { overflow: hidden }
 #content #confirm .table .table_row .main-article-features { padding-left: 15px }
 
 /** Splitting the basket */
 #content .table .table_head { margin: 1.4em 0 0 !important }
-.bepado-additional-info-checkout {
+.connect-additional-info-checkout {
     position: absolute;
     margin: -28px 0 0 25px;
 }

@@ -22,15 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
- * Log bepado requests / answers
+ * Log connect requests / answers
  *
- * @ORM\Table(name="s_plugin_bepado_log")
+ * @ORM\Table(name="s_plugin_connect_log")
  * @ORM\Entity()
  */
 class Log extends ModelEntity

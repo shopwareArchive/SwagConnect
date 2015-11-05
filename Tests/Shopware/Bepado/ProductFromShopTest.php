@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 
 use Behat\SahiClient\Exception\AbstractException;
@@ -10,10 +10,10 @@ use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\PaymentStatus;
 use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\ShippingCosts;
-use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\ProductFromShop;
+use Shopware\Connect\Components\Logger;
+use Shopware\Connect\Components\ProductFromShop;
 
-class ProductFromShopTest extends BepadoTestHelper
+class ProductFromShopTest extends ConnectTestHelper
 {
     public function testBuy()
     {
@@ -265,7 +265,7 @@ class ProductFromShopTest extends BepadoTestHelper
 
         $localOrderId = rand(0, 99999);
 
-        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
         $attribute = $repository->findOneBy(array('articleDetailId' => $localArticle->getMainDetail()->getId(), 'shopId' => null));
 
         return new Order(array(

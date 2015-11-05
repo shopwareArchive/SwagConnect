@@ -22,14 +22,14 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
  *
- * @ORM\Table(name="bepado_shipping_groups")
+ * @ORM\Table(name="connect_shipping_groups")
  * @ORM\Entity()
  */
 class ShippingGroup extends ModelEntity
@@ -51,7 +51,7 @@ class ShippingGroup extends ModelEntity
     protected $groupName;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Bepado\ShippingRule", mappedBy="group", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Connect\ShippingRule", mappedBy="group", cascade={"persist", "remove"})
      */
     protected $rules;
 
@@ -80,7 +80,7 @@ class ShippingGroup extends ModelEntity
     }
 
     /**
-     * @param \Shopware\CustomModels\Bepado\ShippingGroup $rules
+     * @param \Shopware\CustomModels\Connect\ShippingGroup $rules
      */
     public function setRules($rules)
     {
@@ -88,7 +88,7 @@ class ShippingGroup extends ModelEntity
     }
 
     /**
-     * @return \Shopware\CustomModels\Bepado\ShippingGroup
+     * @return \Shopware\CustomModels\Connect\ShippingGroup
      */
     public function getRules()
     {

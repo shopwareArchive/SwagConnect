@@ -1,8 +1,8 @@
-//{block name="backend/bepado/store/log/list"}
-Ext.define('Shopware.apps.Bepado.store.log.List', {
+//{block name="backend/connect/store/log/list"}
+Ext.define('Shopware.apps.Connect.store.log.List', {
     extend: 'Ext.data.Store',
 
-    model:'Shopware.apps.Bepado.model.log.List',
+    model:'Shopware.apps.Connect.model.log.List',
     remoteSort: true,
     remoteFilter: true,
     pageSize: 20,

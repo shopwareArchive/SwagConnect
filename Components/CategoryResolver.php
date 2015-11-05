@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
 
 interface CategoryResolver

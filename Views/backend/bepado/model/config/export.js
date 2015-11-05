@@ -21,18 +21,18 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/import"}
-Ext.define('Shopware.apps.Bepado.model.config.Export', {
+//{block name="backend/connect/model/config/import"}
+Ext.define('Shopware.apps.Connect.model.config.Export', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/config/import/fields"}{/block}
+        //{block name="backend/connect/model/config/import/fields"}{/block}
         { name: 'alternateDescriptionField', type: 'string' },
         { name: 'autoUpdateProducts', type: 'int' },
         { name: 'priceGroupForPriceExport', type: 'string' },
@@ -62,9 +62,9 @@ Ext.define('Shopware.apps.Bepado.model.config.Export', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveExport"}',
-            update: '{url controller="BepadoConfig" action="saveExport"}',
-            read: '{url controller="BepadoConfig" action="getExport"}'
+            create: '{url controller="ConnectConfig" action="saveExport"}',
+            update: '{url controller="ConnectConfig" action="saveExport"}',
+            read: '{url controller="ConnectConfig" action="getExport"}'
         },
 
         /**

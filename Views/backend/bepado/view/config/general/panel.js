@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/general/panel"}
-Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/config/general/panel"}
+Ext.define('Shopware.apps.Connect.view.config.general.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-config',
+    alias: 'widget.connect-config',
 
     border: false,
     layout: 'border',
@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Panel', {
                 region: 'center',
                 bodyPadding: 10,
                 items: [{
-                    xtype: 'bepado-config-tabs'
+                    xtype: 'connect-config-tabs'
                 }]
             }
         ];

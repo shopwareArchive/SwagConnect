@@ -1,27 +1,27 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name='backend/bepado/view/config/units/mapping'}
-Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
+//{block name='backend/connect/view/config/units/mapping'}
+Ext.define('Shopware.apps.Connect.view.config.units.Mapping', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-units-mapping',
+    alias: 'widget.connect-units-mapping',
 
     layout: 'fit',
 
     snippets: {
-        unitHeader: Ext.String.format('{s name=config/units/bepado_unit_header}[0] Einheit{/s}', marketplaceName)
+        unitHeader: Ext.String.format('{s name=config/units/connect_unit_header}[0] Einheit{/s}', marketplaceName)
     },
 
     initComponent: function() {
         var me = this;
-        me.unitsStore = Ext.create('Shopware.apps.Bepado.store.config.Units').load();
-        me.bepadoUnitsStore = Ext.create('Shopware.apps.Bepado.store.config.BepadoUnits').load();
+        me.unitsStore = Ext.create('Shopware.apps.Connect.store.config.Units').load();
+        me.connectUnitsStore = Ext.create('Shopware.apps.Connect.store.config.ConnectUnits').load();
 
 
 
         Ext.applyIf(me, {
             items: [
                 Ext.create('Ext.grid.Panel', {
-                    alias: 'widget.bepado-units-mapping-list',
+                    alias: 'widget.connect-units-mapping-list',
                     store: me.unitsStore,
                     selModel: 'cellmodel',
                     plugins: [ me.createCellEditor() ],
@@ -31,18 +31,18 @@ Ext.define('Shopware.apps.Bepado.view.config.units.Mapping', {
                         flex: 1
                     }, {
                         header: me.snippets.unitHeader,
-                        dataIndex: 'bepadoUnit',
+                        dataIndex: 'connectUnit',
                         flex: 1,
                         editor: {
                             xtype: 'combo',
-                            store: me.bepadoUnitsStore,
+                            store: me.connectUnitsStore,
                             displayField: 'name',
                             valueField: 'key'
                         },
                         renderer: function (value) {
-                            var index = me.bepadoUnitsStore.findExact('key', value);
+                            var index = me.connectUnitsStore.findExact('key', value);
                             if (index > -1) {
-                                return me.bepadoUnitsStore.getAt(index).get('name');
+                                return me.connectUnitsStore.getAt(index).get('name');
                             }
 
                             return value;

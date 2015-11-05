@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/log/tabs"}
-Ext.define('Shopware.apps.Bepado.view.log.Tabs', {
+//{block name="backend/connect/view/log/tabs"}
+Ext.define('Shopware.apps.Connect.view.log.Tabs', {
     extend: 'Ext.tab.Panel',
-    alias: 'widget.bepado-log-tabs',
+    alias: 'widget.connect-log-tabs',
 
     height: 300,
 

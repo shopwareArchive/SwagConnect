@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/export/list"}
-Ext.define('Shopware.apps.Bepado.view.export.List', {
+//{block name="backend/connect/view/export/list"}
+Ext.define('Shopware.apps.Connect.view.export.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.bepado-export-list',
+    alias: 'widget.connect-export-list',
 
     border: false,
 

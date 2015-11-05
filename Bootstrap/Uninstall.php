@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Bootstrap;
+namespace Shopware\Connect\Bootstrap;
 
 /**
  * Uninstaller of the plugin.
@@ -8,13 +8,13 @@ namespace Shopware\Bepado\Bootstrap;
  * shopware supports asking the user, if he wants to remove the plugin permanently or temporarily
  *
  * Class Uninstall
- * @package Shopware\Bepado\Bootstrap
+ * @package Shopware\Connect\Bootstrap
  */
 class Uninstall
 {
     protected $bootstrap;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagBepado_Bootstrap $bootstrap)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
     }
@@ -24,7 +24,7 @@ class Uninstall
         // Currently this should not be done
         // $this->removeMyAttributes();
 
-        $this->deactivateBepadoProducts();
+        $this->deactivateConnectProducts();
         $this->removeEngineElement();
 
         return true;
@@ -41,36 +41,36 @@ class Uninstall
         try {
             $modelManager->removeAttribute(
                 's_order_attributes',
-                'bepado', 'shop_id'
+                'connect', 'shop_id'
             );
             $modelManager->removeAttribute(
                 's_order_attributes',
-                'bepado', 'order_id'
+                'connect', 'order_id'
             );
 
             $modelManager->removeAttribute(
                 's_categories_attributes',
-                'bepado', 'import_mapping'
+                'connect', 'import_mapping'
             );
 
             $modelManager->removeAttribute(
                 's_categories_attributes',
-                'bepado', 'export_mapping'
+                'connect', 'export_mapping'
             );
 
             $modelManager->removeAttribute(
                 's_categories_attributes',
-                'bepado', 'imported'
+                'connect', 'imported'
             );
 
             $modelManager->removeAttribute(
                 's_premium_dispatch_attributes',
-                'bepado', 'allowed'
+                'connect', 'allowed'
             );
 
             $modelManager->removeAttribute(
                 's_media_attributes',
-                'bepado', 'hash'
+                'connect', 'hash'
             );
 
             $modelManager->generateAttributeModels(array(
@@ -86,14 +86,14 @@ class Uninstall
     }
 
     /**
-     * Disabled all products imported from bepado
+     * Disabled all products imported from shopware Connect
      */
-    public function deactivateBepadoProducts()
+    public function deactivateConnectProducts()
     {
         $sql = '
         UPDATE s_articles
-        INNER JOIN s_plugin_bepado_items
-          ON s_plugin_bepado_items.article_id = s_articles.id
+        INNER JOIN s_plugin_connect_items
+          ON s_plugin_connect_items.article_id = s_articles.id
           AND shop_id IS NOT NULL
         SET s_articles.active = false
         ';
@@ -101,12 +101,12 @@ class Uninstall
     }
 
     /**
-     * Remove an engine element so that the bepadoProductDescription is not displayed in the article anymore
+     * Remove an engine element so that the connectProductDescription is not displayed in the article anymore
      */
     public function removeEngineElement()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
-        $element = $repo->findOneBy(array('name' => 'bepadoProductDescription'));
+        $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
 
         if ($element) {
             Shopware()->Models()->remove($element);

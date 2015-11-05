@@ -2,7 +2,7 @@
  * Extend the article's price fieldset in order to disable it if the price was configured as fixedPrice in the source shop
  */
 //{block name="backend/article/view/detail/prices" append}
-Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
+Ext.define('Shopware.apps.Article.view.detail.PricesConnect', {
     override: 'Shopware.apps.Article.view.detail.Prices',
 
     createElements: function() {
@@ -15,20 +15,20 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
         tabPanel =  me.callOverridden(arguments);
 
-        if ('{$disableBepadoPrice}' != 'true') {
+        if ('{$disableConnectPrice}' != 'true') {
             me.registerCellEditListener();
         }
 
         style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
-        var fixedPriceMessage = Ext.String.format('{s name="bepadoFixedPriceMessage"}Für dieses [0]-Produkt wurde die Preisbindung vom Anbieter aktiviert. Aus diesem Grund kann der Preis für dieses Produkt nicht verändert werden.{/s}', marketplaceName);
+        var fixedPriceMessage = Ext.String.format('{s name="connectFixedPriceMessage"}Für dieses [0]-Produkt wurde die Preisbindung vom Anbieter aktiviert. Aus diesem Grund kann der Preis für dieses Produkt nicht verändert werden.{/s}', marketplaceName);
 
-        me.bepadoLabel = Ext.create('Ext.form.Label', {
+        me.connectLabel = Ext.create('Ext.form.Label', {
             hidden: true,
-            html: '<div title="" class="bepado-icon" ' + style + '>&nbsp;</div>' + fixedPriceMessage
+            html: '<div title="" class="connect-icon" ' + style + '>&nbsp;</div>' + fixedPriceMessage
         });
 
         return [
-            me.bepadoLabel,
+            me.connectLabel,
             tabPanel
         ];
 
@@ -47,7 +47,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
                     attributeStore, attribute;
 
                 // Return if another field was edited or we don't have a record
-                if (e.field != 'attribute[bepadoPrice]' || !record) {
+                if (e.field != 'attribute[connectPrice]' || !record) {
                     return;
                 }
 
@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
                 // Update the record
                 if (attributeStore) {
                     attribute = attributeStore.first();
-                    attribute.set('bepadoPrice', value);
+                    attribute.set('connectPrice', value);
                     attributeStore.removeAll();
                     attributeStore.add(attribute);
                 }
@@ -76,7 +76,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
         me.callParent(arguments);
 
-        if ('{$disableBepadoPrice}' == 'true') {
+        if ('{$disableConnectPrice}' == 'true') {
             return;
         }
 
@@ -108,13 +108,13 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
         var me = this,
             columns = me.callParent(arguments);
 
-        if ('{$disableBepadoPrice}' == 'true') {
+        if ('{$disableConnectPrice}' == 'true') {
             return columns;
         }
 
         columns.splice(-1, 0, {
             xtype: 'numbercolumn',
-            header: Ext.String.format("{s name=detail/price/bepadoPrice}[0] Preis{/s}", marketplaceName),
+            header: Ext.String.format("{s name=detail/price/connectPrice}[0] Preis{/s}", marketplaceName),
             renderer: function (value, arg, record) {
                 if (value != undefined) {
                     return Ext.util.Format.number(value, '0.00');
@@ -129,10 +129,10 @@ Ext.define('Shopware.apps.Article.view.detail.PricesBepado', {
 
                 if (attributeStore) {
                     attribute = attributeStore.first();
-                    return Ext.util.Format.number(attribute.get('bepadoPrice'), '0.00');
+                    return Ext.util.Format.number(attribute.get('connectPrice'), '0.00');
                 }
             },
-            dataIndex: 'attribute[bepadoPrice]',
+            dataIndex: 'attribute[connectPrice]',
             editor: {
                 xtype: 'numberfield',
                 decimalPrecision: 2,

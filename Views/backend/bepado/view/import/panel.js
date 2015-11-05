@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/panel"}
-Ext.define('Shopware.apps.Bepado.view.import.Panel', {
+//{block name="backend/connect/view/import/panel"}
+Ext.define('Shopware.apps.Connect.view.import.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-import',
+    alias: 'widget.connect-import',
 
     border: false,
     layout: 'vbox',
@@ -67,7 +67,7 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                     xtype: 'container',
                     layout: 'hbox',
                     items: [
-                        Ext.create('Shopware.apps.Bepado.view.import.RemoteProducts', {
+                        Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
                             width: 400,
                             height: 300,
                             margin: '10px 0 0 0'
@@ -75,14 +75,14 @@ Ext.define('Shopware.apps.Bepado.view.import.Panel', {
                         {
                             xtype: 'container',
                             items: [
-                                Ext.create('Shopware.apps.Bepado.view.import.LocalProducts', {
+                                Ext.create('Shopware.apps.Connect.view.import.LocalProducts', {
                                     width: 400,
                                     height: 300,
                                     margin: '10px 0 0 50px'
                                 }),
                                 {
                                     xtype : 'checkbox',
-                                    name : 'attribute[bepadoAllowed]',
+                                    name : 'attribute[connectAllowed]',
                                     action: 'filter-only-local-products',
                                     margin: '15px 0 0 50px',
                                     boxLabel : 'Show only connect products'

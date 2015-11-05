@@ -1,11 +1,11 @@
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/changed_products/images"}
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/changed_products/images"}
 
 /**
  * A simple image overview component, which shows a given list of images
  * Fore the time being these images needs to be passed pipe separated
  */
-Ext.define('Shopware.apps.Bepado.view.changed_products.Images', {
+Ext.define('Shopware.apps.Connect.view.changed_products.Images', {
 
     extend: 'Ext.form.FieldContainer',
 

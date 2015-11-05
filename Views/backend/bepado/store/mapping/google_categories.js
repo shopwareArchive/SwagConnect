@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/mapping/google_categories"}
-Ext.define('Shopware.apps.Bepado.store.mapping.GoogleCategories', {
+//{block name="backend/connect/store/mapping/google_categories"}
+Ext.define('Shopware.apps.Connect.store.mapping.GoogleCategories', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,

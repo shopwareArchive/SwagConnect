@@ -5,7 +5,7 @@
 {/block}
 
 {block name="frontend_checkout_cart_cart_head" append}
-	{if $bepadoShops and $showShippingCostsSeparately}
+	{if $connectShops and $showShippingCostsSeparately}
 		{include file="frontend/checkout/items/dispatch.tpl"}
 	{/if}
 {/block}

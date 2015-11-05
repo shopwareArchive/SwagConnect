@@ -1,9 +1,9 @@
-//{block name="backend/bepado/store/mapping/import"}
-Ext.define('Shopware.apps.Bepado.store.mapping.Import', {
+//{block name="backend/connect/store/mapping/import"}
+Ext.define('Shopware.apps.Connect.store.mapping.Import', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,
-    model: 'Shopware.apps.Bepado.model.main.Mapping',
+    model: 'Shopware.apps.Connect.model.main.Mapping',
     root: {
         id: 1,
         expanded: true

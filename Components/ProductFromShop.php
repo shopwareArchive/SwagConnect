@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 use Bepado\SDK\Gateway;
 use Bepado\SDK\ProductFromShop as ProductFromShopBase,
     Bepado\SDK\Struct\Order,
@@ -37,10 +37,10 @@ use Bepado\SDK\Struct\PaymentStatus;
 use Bepado\SDK\Struct\Shipping;
 
 /**
- * The interface for products exported *to* bepado *from* the local shop
+ * The interface for products exported *to* connect *from* the local shop
  *
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class ProductFromShop implements ProductFromShopBase
 {
@@ -173,8 +173,8 @@ class ProductFromShop implements ProductFromShopBase
         $model = $this->manager->find('Shopware\Models\Order\Order', $modelId);
 
         $attribute = new \Shopware\Models\Attribute\Order;
-        $attribute->setBepadoOrderId($order->localOrderId);
-        $attribute->setBepadoShopId($order->orderShop);
+        $attribute->setConnectOrderId($order->localOrderId);
+        $attribute->setConnectShopId($order->orderShop);
         $model->setAttribute($attribute);
 
         $model->fromArray(array(
@@ -324,7 +324,7 @@ class ProductFromShop implements ProductFromShopBase
             $paymentStatusRepository = $this->manager->getRepository('Shopware\Models\Order\Status');
             /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
             $orderPaymentStatus = $paymentStatusRepository->findOneBy(
-                array('description' => 'bepado ' . $status->paymentStatus)
+                array('description' => 'connect ' . $status->paymentStatus)
             );
 
             if ($orderPaymentStatus) {
@@ -379,7 +379,7 @@ class ProductFromShop implements ProductFromShopBase
         }
         $shop->registerResources(Shopware()->Bootstrap());
 
-        $sessionId = uniqid('bepado_remote');
+        $sessionId = uniqid('connect_remote');
         Shopware()->System()->sSESSION_ID = $sessionId;
 
         /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
@@ -395,7 +395,7 @@ class ProductFromShop implements ProductFromShopBase
 
         Shopware()->System()->_SESSION['sDispatch'] = $shipping->getId();
 
-        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
         $products = array();
         /** @var \Bepado\SDK\Struct\OrderItem $orderItem */
         foreach ($order->orderItems as $orderItem) {
@@ -410,7 +410,7 @@ class ProductFromShop implements ProductFromShopBase
             );
         }
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+        /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
         foreach ($products as $product) {
             Shopware()->Modules()->Basket()->sAddArticle($product['ordernumber'], $product['quantity']);
         }

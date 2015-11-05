@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/main/navigation"}
-Ext.define('Shopware.apps.Bepado.view.main.Navigation', {
+//{block name="backend/connect/view/main/navigation"}
+Ext.define('Shopware.apps.Connect.view.main.Navigation', {
     extend: 'Ext.tree.Panel',
-    alias: 'widget.bepado-navigation',
+    alias: 'widget.connect-navigation',
 
     rootVisible: false,
 

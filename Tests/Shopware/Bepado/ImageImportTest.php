@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
-class ImageImportTest extends BepadoTestHelper
+class ImageImportTest extends ConnectTestHelper
 {
     public function testGetProductsNeedingImageImport()
     {

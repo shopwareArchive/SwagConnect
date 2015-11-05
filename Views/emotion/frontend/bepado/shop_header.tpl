@@ -1,18 +1,18 @@
-<div class="table_row bepado-dispatch-row">
+<div class="table_row connect-dispatch-row">
 	<div class="grid_6">
 		<span class="title">
-            {if empty($bepadoContent)}
-                {s name=bepado/checkout/dispatch_title_single}Versandkosten für die Lieferung{/s}
+            {if empty($connectContent)}
+                {s name=connect/checkout/dispatch_title_single}Versandkosten für die Lieferung{/s}
             {else}
-                {s name=bepado/checkout/dispatch_title}Versandkosten für die Lieferung {counter name=bepadoIndex} von {$bepadoShops|count + $addBaseShop}{/s}
+                {s name=connect/checkout/dispatch_title}Versandkosten für die Lieferung {counter name=connectIndex} von {$connectShops|count + $addBaseShop}{/s}
             {/if}
 		</span>
 		&nbsp;
 	</div>
 
 	<div class="grid_3">
-        {if isset($bepadoShippingCosts[$shopId])}
-             {if $bepadoShippingCosts[$shopId] eq 0 }
+        {if isset($connectShippingCosts[$shopId])}
+             {if $connectShippingCosts[$shopId] eq 0 }
                  <strong>
                      {se
                          namespace="frontend/plugins/index/delivery_informations"
@@ -29,24 +29,24 @@
 
 	<div class="grid_2 textright">
 		{if !$hideSinglePrice}
-			{if isset($bepadoShippingCosts[$shopId])}
-                {if $bepadoShippingCosts[$shopId] > 0 }
-				    {$bepadoShippingCosts[$shopId]|currency}
+			{if isset($connectShippingCosts[$shopId])}
+                {if $connectShippingCosts[$shopId] > 0 }
+				    {$connectShippingCosts[$shopId]|currency}
                 {/if}
-			{elseif $bepadoShippingCostsOrg}
-				{$bepadoShippingCostsOrg|currency}
+			{elseif $connectShippingCostsOrg}
+				{$connectShippingCostsOrg|currency}
 			{/if}
 		{/if}
 	</div>
 
 	<div class="grid_2 textright">
 		<strong>
-        {if isset($bepadoShippingCosts[$shopId])}
-            {if $bepadoShippingCosts[$shopId] > 0 }
-                {$bepadoShippingCosts[$shopId]|currency}
+        {if isset($connectShippingCosts[$shopId])}
+            {if $connectShippingCosts[$shopId] > 0 }
+                {$connectShippingCosts[$shopId]|currency}
             {/if}
-		{elseif $bepadoShippingCostsOrg}
-			{$bepadoShippingCostsOrg|currency}
+		{elseif $connectShippingCostsOrg}
+			{$connectShippingCostsOrg|currency}
 		{/if}</strong>
 	</div>
 	<div class="clear"></div>

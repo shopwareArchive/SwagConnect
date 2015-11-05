@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\Exceptions;
+namespace Shopware\Connect\Components\Exceptions;
 
 class CheckoutException extends \Exception
 {

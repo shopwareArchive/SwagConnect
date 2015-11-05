@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/import/remote_products"}
-Ext.define('Shopware.apps.Bepado.store.import.RemoteProducts', {
+//{block name="backend/connect/store/import/remote_products"}
+Ext.define('Shopware.apps.Connect.store.import.RemoteProducts', {
     extend : 'Ext.data.Store',
 
     autoLoad: false,

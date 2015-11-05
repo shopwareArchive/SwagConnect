@@ -1,25 +1,25 @@
 <?php
 
-namespace Shopware\Bepado\Bootstrap;
-use Shopware\Bepado\Components\CategoryExtractor;
-use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
-use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
+namespace Shopware\Connect\Bootstrap;
+use Shopware\Connect\Components\CategoryExtractor;
+use Shopware\Connect\Components\Marketplace\MarketplaceSettings;
+use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Models\Order\Status;
 
 /**
  * Updates existing versions of the plugin
  *
  * Class Update
- * @package Shopware\Bepado\Bootstrap
+ * @package Shopware\Connect\Bootstrap
  */
 class Update
 {
 
-    /** @var \Shopware_Plugins_Backend_SwagBepado_Bootstrap */
+    /** @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap */
     protected $bootstrap;
     protected $version;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagBepado_Bootstrap $bootstrap, $version)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $version)
     {
         $this->bootstrap = $bootstrap;
         $this->version = $version;
@@ -35,7 +35,7 @@ class Update
         // Force an SDK re-verify
         $this->reVerifySDK();
 
-        // Migrate old attributes to bepado attributes
+        // Migrate old attributes to connect attributes
         $this->migrateAttributes();
 
         if (version_compare($this->version, '1.2.70', '<=')) {
@@ -57,11 +57,11 @@ class Update
         // Split category mapping into mapping for import and export
         $this->removeOldCategoryMapping();
 
-        // A product does only have one bepado category mapped
+        // A product does only have one connect category mapped
         $this->changeProductsToOnlyHaveOneCategory();
 
         // Migration from shopware config to new config system
-        $this->migrateConfigToBepadoConfig();
+        $this->migrateConfigToConnectConfig();
 
         $this->removePluginConfiguration();
 
@@ -88,8 +88,8 @@ class Update
         $this->createGroupAndMainVariantFlag();
 
         if (version_compare($this->version, '1.6.5', '<=')) {
-            $this->cleanUpBepadoSnippets();
-            Shopware()->Db()->exec('ALTER TABLE `s_plugin_bepado_config` MODIFY `value` TEXT NOT NULL;');
+            $this->cleanUpConnectSnippets();
+            Shopware()->Db()->exec('ALTER TABLE `s_plugin_connect_config` MODIFY `value` TEXT NOT NULL;');
         }
 
         $this->createPurchasePriceHash();
@@ -109,7 +109,7 @@ class Update
     {
         if (version_compare($this->version, '1.6.4', '<=')) {
             try {
-                $sql = 'ALTER TABLE `s_plugin_bepado_items`
+                $sql = 'ALTER TABLE `s_plugin_connect_items`
                         ADD group_id INT( 11 ) NULL DEFAULT NULL,
                         ADD is_main_variant TINYINT( 1 ) NULL DEFAULT NULL ;';
                 Shopware()->Db()->exec($sql);
@@ -122,7 +122,7 @@ class Update
     public function addExportUrl()
     {
         if (version_compare($this->version, '1.4.73', '<=')) {
-            $sql = "INSERT IGNORE INTO `s_plugin_bepado_config`
+            $sql = "INSERT IGNORE INTO `s_plugin_connect_config`
                       ( `name`, `value`, `groupName`)
                       VALUES ( 'exportDomain', '', 'general');";
             Shopware()->Db()->exec($sql);
@@ -130,7 +130,7 @@ class Update
     }
 
     /**
-     * Removes the plugin configuration - all config will now be done in the bepado plugin itself
+     * Removes the plugin configuration - all config will now be done in the connect plugin itself
      */
     public function removePluginConfiguration()
     {
@@ -172,7 +172,7 @@ class Update
     }
 
     /**
-     * Migrates the old product attributes to bepado's own attribute table
+     * Migrates the old product attributes to connect's own attribute table
      * @return string
      */
     public function migrateAttributes()
@@ -181,15 +181,15 @@ class Update
             return;
         }
 
-        $sql = 'INSERT IGNORE INTO `s_plugin_bepado_items`
+        $sql = 'INSERT IGNORE INTO `s_plugin_connect_items`
               (`article_id`, `article_detail_id`, `shop_id`, `source_id`, `export_status`, `export_message`, `categories`,
               `purchase_price`, `fixed_price`, `free_delivery`, `update_price`, `update_image`,
               `update_long_description`, `update_short_description`, `update_name`, `last_update`,
               `last_update_flag`)
-            SELECT `articleID`, `articledetailsID`, `bepado_shop_id`, `bepado_source_id`, `bepado_export_status`,
-            `bepado_export_message`, `bepado_categories`, `bepado_purchase_price`, `bepado_fixed_price`,
-            `bepado_free_delivery`, `bepado_update_price`, `bepado_update_image`, `bepado_update_long_description`,
-             `bepado_update_short_description`, `bepado_update_name`, `bepado_last_update`, `bepado_last_update_flag`
+            SELECT `articleID`, `articledetailsID`, `connect_shop_id`, `connect_source_id`, `connect_export_status`,
+            `connect_export_message`, `connect_categories`, `connect_purchase_price`, `connect_fixed_price`,
+            `connect_free_delivery`, `connect_update_price`, `connect_update_image`, `connect_update_long_description`,
+             `connect_update_short_description`, `connect_update_name`, `connect_last_update`, `connect_last_update_flag`
             FROM `s_articles_attributes`';
         Shopware()->Db()->exec($sql);
 
@@ -197,7 +197,7 @@ class Update
     }
 
     /**
-     * Remove the old bepado category mapping
+     * Remove the old connect category mapping
      */
     public function removeOldCategoryMapping()
     {
@@ -207,7 +207,7 @@ class Update
 
         Shopware()->Models()->removeAttribute(
             's_categories_attributes',
-            'bepado', 'mapping'
+            'connect', 'mapping'
         );
         Shopware()->Models()->generateAttributeModels(array(
             's_categories_attributes'
@@ -224,14 +224,14 @@ class Update
         }
 
         try {
-            $sql = 'ALTER TABLE `s_plugin_bepado_items` change `categories` `category` text;';
+            $sql = 'ALTER TABLE `s_plugin_connect_items` change `categories` `category` text;';
             Shopware()->Db()->exec($sql);
         } catch (\Exception $e) {
             // if table was already altered, ignore
         }
 
         // Get serialized categories -.-
-        $sql = 'SELECT id, category FROM `s_plugin_bepado_items` WHERE `category` LIKE "%{%" OR `category` = "N;"';
+        $sql = 'SELECT id, category FROM `s_plugin_connect_items` WHERE `category` LIKE "%{%" OR `category` = "N;"';
         $rows = Shopware()->Db()->fetchAll($sql);
 
         // Build values array with unserialized categories
@@ -249,7 +249,7 @@ class Update
         // Update the category one by one. This is not optimal, but only affects a few beta testers
         Shopware()->Db()->beginTransaction();
         foreach ($values as $id => $category) {
-            Shopware()->Db()->query('UPDATE `s_plugin_bepado_items` SET `category` = ? WHERE id = ? ',
+            Shopware()->Db()->query('UPDATE `s_plugin_connect_items` SET `category` = ? WHERE id = ? ',
                 array(
                     $category,
                     $id
@@ -261,15 +261,15 @@ class Update
     /**
      * @return mixed
      */
-    public function migrateConfigToBepadoConfig()
+    public function migrateConfigToConnectConfig()
     {
         if (version_compare($this->version, '1.4.24', '>')) {
             return;
         }
 
         try {
-            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `shopId` INT( 11 ) NULL DEFAULT NULL;');
-            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_bepado_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
+            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_connect_config` ADD  `shopId` INT( 11 ) NULL DEFAULT NULL;');
+            Shopware()->Db()->exec('ALTER TABLE  `s_plugin_connect_config` ADD  `groupName` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
         } catch (\Exception $e) {
             // This may fail if the config table is already updated.
         }
@@ -282,9 +282,9 @@ class Update
             $configComponent->setConfig('apiKey', $apiKey, null, 'general');
         }
 
-        $bepadoDebugHost = $this->bootstrap->Config()->get('bepadoDebugHost');
-        if ($bepadoDebugHost) {
-            $configComponent->setConfig('bepadoDebugHost', $bepadoDebugHost, null, 'general');
+        $connectDebugHost = $this->bootstrap->Config()->get('connectDebugHost');
+        if ($connectDebugHost) {
+            $configComponent->setConfig('connectDebugHost', $connectDebugHost, null, 'general');
         }
 
         $configComponent->setConfig('importCreateCategories', $this->bootstrap->Config()->get('importCreateCategories'));
@@ -293,7 +293,7 @@ class Update
         $configComponent->setConfig('checkoutShopInfo', $this->bootstrap->Config()->get('checkoutShopInfo'), 1, 'general');
         $configComponent->setConfig('cloudSearch', $this->bootstrap->Config()->get('cloudSearch'), 0, 'general');
         $configComponent->setConfig('alternateDescriptionField', $this->bootstrap->Config()->get('alternateDescriptionField'), 'a.descriptionLong', 'export');
-        $configComponent->setConfig('bepadoAttribute', $this->bootstrap->Config()->get('bepadoAttribute'), '19', 'general');
+        $configComponent->setConfig('connectAttribute', $this->bootstrap->Config()->get('connectAttribute'), '19', 'general');
         $configComponent->setConfig('importImagesOnFirstImport', $this->bootstrap->Config()->get('importImagesOnFirstImport'), false, 'import');
         $configComponent->setConfig('autoUpdateProducts', $this->bootstrap->Config()->get('autoUpdateProducts'), 1, 'export');
         $configComponent->setConfig('overwriteProductName', $this->bootstrap->Config()->get('overwriteProductName'), 1, 'import');
@@ -317,75 +317,75 @@ class Update
         try {
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'shop_id'
+                'connect', 'shop_id'
             );
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'source_id'
+                'connect', 'source_id'
             );
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'export_status'
+                'connect', 'export_status'
             );
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'export_message'
-            );
-
-            $modelManager->removeAttribute(
-                's_articles_attributes',
-                'bepado', 'categories'
+                'connect', 'export_message'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'purchase_price'
+                'connect', 'categories'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'fixed_price'
+                'connect', 'purchase_price'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'free_delivery'
+                'connect', 'fixed_price'
+            );
+
+            $modelManager->removeAttribute(
+                's_articles_attributes',
+                'connect', 'free_delivery'
             );
 
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'update_price'
+                'connect', 'update_price'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'update_image'
+                'connect', 'update_image'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'update_long_description'
+                'connect', 'update_long_description'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'update_short_description'
+                'connect', 'update_short_description'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'update_name'
+                'connect', 'update_name'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'last_update'
+                'connect', 'last_update'
             );
 
             $modelManager->removeAttribute(
                 's_articles_attributes',
-                'bepado', 'last_update_flag'
+                'connect', 'last_update_flag'
             );
 
             $modelManager->generateAttributeModels(array(
@@ -412,7 +412,7 @@ class Update
     public function removeApiDescriptionSnippet()
     {
         if (version_compare($this->version, '1.5.5', '<=')) {
-            $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/bepado/view/main' AND `name` = 'config/api_key_description'";
+            $sql = "DELETE FROM `s_core_snippets` WHERE `namespace` = 'backend/connect/view/main' AND `name` = 'config/api_key_description'";
             Shopware()->Db()->exec($sql);
 
             $this->clearTemplateCache();
@@ -422,7 +422,7 @@ class Update
     private function removeCloudSearch()
     {
         if (version_compare($this->version, '1.5.7', '<=')) {
-            $sql = "DELETE FROM `s_plugin_bepado_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
+            $sql = "DELETE FROM `s_plugin_connect_config` WHERE `name` = 'cloudSearch' AND `groupName` = 'general'";
             Shopware()->Db()->exec($sql);
         }
     }
@@ -454,7 +454,7 @@ class Update
     public function createMarketplaceAttributesTable()
     {
         if (version_compare($this->version, '1.5.8', '<=')) {
-            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_bepado_marketplace_attr` (
+            $sql = "CREATE TABLE IF NOT EXISTS `s_plugin_connect_marketplace_attr` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
               `local_attribute` varchar(255) NOT NULL UNIQUE,
@@ -467,16 +467,16 @@ class Update
     public function renameMarketplaceAttributesTable()
     {
         if (version_compare($this->version, '1.5.8', '>') && version_compare($this->version, '1.6.1', '<=')) {
-            $sql = "INSERT INTO `s_plugin_bepado_marketplace_attr`(`marketplace_attribute`, `local_attribute`)
-                        SELECT `marketplace_attribute`, `local_attribute` FROM `s_plugin_bepado_marketplace_attributes`";
+            $sql = "INSERT INTO `s_plugin_connect_marketplace_attr`(`marketplace_attribute`, `local_attribute`)
+                        SELECT `marketplace_attribute`, `local_attribute` FROM `s_plugin_connect_marketplace_attributes`";
             Shopware()->Db()->exec($sql);
-            Shopware()->Db()->exec('DROP TABLE `s_plugin_bepado_marketplace_attributes`');
+            Shopware()->Db()->exec('DROP TABLE `s_plugin_connect_marketplace_attributes`');
         }
     }
 
     /**
      * Add sourceId for local articles,
-     * add bepado attribute for article variants
+     * add connect attribute for article variants
      *
      * @throws \Zend_Db_Adapter_Exception
      */
@@ -484,12 +484,12 @@ class Update
     {
         if (version_compare($this->version, '1.5.9', '<=')) {
             // insert source ids for local articles
-            $sql = "UPDATE `s_plugin_bepado_items` SET `source_id` = `article_id` WHERE `shop_id` IS NULL";
+            $sql = "UPDATE `s_plugin_connect_items` SET `source_id` = `article_id` WHERE `shop_id` IS NULL";
             Shopware()->Db()->exec($sql);
 
-            // Insert new records in s_plugin_bepado_items for all article variants
+            // Insert new records in s_plugin_connect_items for all article variants
             $sql = "
-                INSERT INTO `s_plugin_bepado_items` (article_id, article_detail_id, source_id)
+                INSERT INTO `s_plugin_connect_items` (article_id, article_detail_id, source_id)
                 SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
 
                 FROM s_articles a
@@ -497,7 +497,7 @@ class Update
                 LEFT JOIN `s_articles_details` ad
                 ON a.id = ad.articleId
 
-                LEFT JOIN `s_plugin_bepado_items` bi
+                LEFT JOIN `s_plugin_connect_items` bi
                 ON bi.article_detail_id = ad.id
 
 
@@ -509,7 +509,7 @@ class Update
         }
     }
 
-    private function cleanUpBepadoSnippets()
+    private function cleanUpConnectSnippets()
     {
         $this->bootstrap->getMarketplaceApplier()->cleanUpMarketplaceSnippets();
         $this->clearTemplateCache();
@@ -520,7 +520,7 @@ class Update
         if (version_compare($this->version, '1.6.6', '<=')) {
             try {
                 Shopware()->Db()->exec(
-                    'ALTER TABLE `s_plugin_bepado_items`
+                    'ALTER TABLE `s_plugin_connect_items`
                     ADD COLUMN `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
                     ADD COLUMN `offer_valid_until` int(10) NOT NULL
                 ;'
@@ -533,20 +533,20 @@ class Update
 
     /**
      * Migrate to new category format and
-     * store category structure in bepado attribute
+     * store category structure in connect attribute
      */
     public function migrateCategoryFormat()
     {
         if (version_compare($this->version, '1.6.7', '<=')) {
-            $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+            $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
 
             $batchSize = 10;
             $current = 1;
             $helper = $this->bootstrap->getHelper();
-            while ($bepadoAttributes = $repository->findBy(array('shopId' => null), array(), $batchSize, ($current - 1) * $batchSize)) {
-                /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
-                foreach ($bepadoAttributes as $attribute) {
-                    $categories = $helper->getBepadoCategoryForProduct($attribute->getArticleId());
+            while ($connectAttributes = $repository->findBy(array('shopId' => null), array(), $batchSize, ($current - 1) * $batchSize)) {
+                /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
+                foreach ($connectAttributes as $attribute) {
+                    $categories = $helper->getConnectCategoryForProduct($attribute->getArticleId());
                     $attribute->setCategory($categories);
                     Shopware()->Models()->persist($attribute);
                 }
@@ -561,7 +561,7 @@ class Update
         if (version_compare($this->version, '1.6.8', '<=')) {
 
             $configComponent = $this->bootstrap->getConfigComponents();
-            /** @var \Shopware\Bepado\Components\Marketplace\MarketplaceSettings $settings */
+            /** @var \Shopware\Connect\Components\Marketplace\MarketplaceSettings $settings */
             $settings = new MarketplaceSettings($this->bootstrap->getSDK()->getMarketplaceSettings());
             $marketplaceSettingsApplier = new MarketplaceSettingsApplier(
                 $configComponent,
@@ -574,7 +574,7 @@ class Update
     }
 
     /**
-     * Changes marketplace name from bepado to Shopware Connect
+     * Changes marketplace name from connect to Shopware Connect
      * @return void
      */
     private function changePluginName()
@@ -594,10 +594,10 @@ class Update
                 $db
             );
 
-            $db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
-            $db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE controller="Bepado"', array($settings->marketplaceName));
-            $db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Bepado"', array($settings->marketplaceName));
-            $db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagBepado"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagConnect"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE controller="Connect"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Connect"', array($settings->marketplaceName));
+            $db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagConnect"', array($settings->marketplaceName));
             $marketplaceSettingsApplier->cleanUpMarketplaceSnippets();
 
             $this->clearTemplateCache();
@@ -606,19 +606,19 @@ class Update
     }
 
     /**
-     * Migrate bepado categories to separate table
+     * Migrate connect categories to separate table
      *
      * @throws \Zend_Db_Adapter_Exception
      */
     private function migrateProductCategories()
     {
         if (version_compare($this->version, '1.7.1', '<=')) {
-            $categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
-                new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+            $categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute'),
+                new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                    Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                    Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
                 )
             );
 
@@ -631,14 +631,14 @@ class Update
     }
 
     /**
-     * Populate s_plugin_bepado_categories table
+     * Populate s_plugin_connect_categories table
      * @param array $categories
      */
     private function migrateRemoteCategories(array $categories)
     {
         foreach ($categories as $category) {
             Shopware()->Db()->query('
-                INSERT IGNORE INTO `s_plugin_bepado_categories`
+                INSERT IGNORE INTO `s_plugin_connect_categories`
                 (`category_key`, `label`)
                 VALUES (?, ?)
                 ', array($category['id'], $category['text'])

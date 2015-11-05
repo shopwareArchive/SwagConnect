@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
 use Bepado\SDK\Struct\Product;
 
@@ -10,7 +10,7 @@ interface CategoryQuery
      * @param $id
      * @return array
      */
-    public function getBepadoCategoryForProduct($id);
+    public function getConnectCategoryForProduct($id);
 
     /**
      * @param Product $product

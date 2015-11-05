@@ -1,6 +1,6 @@
 <?php
 
-namespace   Shopware\CustomModels\Bepado;
+namespace   Shopware\CustomModels\Connect;
 
 use         \Shopware\Components\Model\ModelRepository;
 

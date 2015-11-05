@@ -21,13 +21,13 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
- * @ORM\Table(name="s_plugin_bepado_marketplace_attr")
+ * @ORM\Table(name="s_plugin_connect_marketplace_attr")
  * @ORM\Entity(repositoryClass="MarketplaceAttributeRepository")
  */
 class MarketplaceAttribute extends ModelEntity

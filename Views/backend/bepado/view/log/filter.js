@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/log/filter"}
-Ext.define('Shopware.apps.Bepado.view.log.Filter', {
+//{block name="backend/connect/view/log/filter"}
+Ext.define('Shopware.apps.Connect.view.log.Filter', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-log-filter',
+    alias: 'widget.connect-log-filter',
 
     width: 200,
     layout: {
@@ -62,7 +62,7 @@ Ext.define('Shopware.apps.Bepado.view.log.Filter', {
     },
 
     /**
-     * Creates the filter for the bepado command
+     * Creates the filter for the connect command
      *
      * @returns Ext.form.Panel
      */

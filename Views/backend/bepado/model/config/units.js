@@ -21,21 +21,21 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/units"}
-Ext.define('Shopware.apps.Bepado.model.config.Units', {
+//{block name="backend/connect/model/config/units"}
+Ext.define('Shopware.apps.Connect.model.config.Units', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/config/units/fields"}{/block}
+        //{block name="backend/connect/model/config/units/fields"}{/block}
         { name: 'shopwareUnitName',  type: 'string' },
         { name: 'shopwareUnitKey',  type: 'string' },
-        { name: 'bepadoUnit',  type: 'string' }
+        { name: 'connectUnit',  type: 'string' }
     ],
     proxy: {
         /**
@@ -50,9 +50,9 @@ Ext.define('Shopware.apps.Bepado.model.config.Units', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            update: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            read: '{url controller="BepadoConfig" action="getUnits"}'
+            create: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            update: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            read: '{url controller="ConnectConfig" action="getUnits"}'
         },
 
         /**

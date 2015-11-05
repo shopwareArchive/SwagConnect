@@ -21,18 +21,18 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/local_product_attributes"}
-Ext.define('Shopware.apps.Bepado.model.config.LocalProductAttributes', {
+//{block name="backend/connect/model/config/local_product_attributes"}
+Ext.define('Shopware.apps.Connect.model.config.LocalProductAttributes', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/config/local_product_attributes/fields"}{/block}
+        //{block name="backend/connect/model/config/local_product_attributes/fields"}{/block}
         { name: 'shopwareAttributeKey',  type: 'string' },
         { name: 'shopwareAttributeLabel',  type: 'string' },
         { name: 'attributeKey',  type: 'string' }
@@ -50,9 +50,9 @@ Ext.define('Shopware.apps.Bepado.model.config.LocalProductAttributes', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
-            update: '{url controller="BepadoConfig" action="saveProductAttributesMapping"}',
-            read: '{url controller="BepadoConfig" action="getProductAttributesMapping"}'
+            create: '{url controller="ConnectConfig" action="saveProductAttributesMapping"}',
+            update: '{url controller="ConnectConfig" action="saveProductAttributesMapping"}',
+            read: '{url controller="ConnectConfig" action="getProductAttributesMapping"}'
         },
 
         /**

@@ -3,19 +3,19 @@
  */
 /*
  {block name="backend/article_list/model/list/fields" append}
- { name: 'bepado', type: 'boolean' },
+ { name: 'connect', type: 'boolean' },
  {/block}
  */
 
 /**
- * Extend the article list in order to show a bepado icon and disable the price field
+ * Extend the article list in order to show a connect icon and disable the price field
  */
 //{block name="backend/article_list/view/main/grid" append}
 Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
     override: 'Shopware.apps.ArticleList.view.main.Grid',
 
     /**
-     * @Override the init method in order to disable the editor for price field of bepado products
+     * @Override the init method in order to disable the editor for price field of connect products
      */
     initComponent: function() {
         var me = this;
@@ -40,9 +40,9 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
                 me.getPriceColumn();
             }
 
-            // Disable the price column for bepado products
+            // Disable the price column for connect products
             if (me.hasOwnProperty('priceColumn')) {
-                me.priceColumn.getEditor().setDisabled(context.record.get('bepado'));
+                me.priceColumn.getEditor().setDisabled(context.record.get('connect'));
             }
         }, me);
     },
@@ -66,7 +66,7 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
     /**
      *
-     * @Override: Show a bepado icon for bepado products
+     * @Override: Show a connect icon for connect products
      *
      * @param value
      * @param metaData
@@ -79,8 +79,8 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 
         var style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
 
-        if (record.get('bepado')) {
-            result = result + '<div  title="' + marketplaceName + '" class="bepado-icon" ' + style + '>&nbsp;</div>';
+        if (record.get('connect')) {
+            result = result + '<div  title="' + marketplaceName + '" class="connect-icon" ' + style + '>&nbsp;</div>';
         }
 
         return result;
@@ -90,10 +90,10 @@ Ext.define('Shopware.apps.ArticleList.view.main.Grid-Customizing', {
 //{/block}
 
 /**
- * Add a bepado to filter to allow the user to only show (imported) bepado products
+ * Add a connect to filter to allow the user to only show (imported) connect products
  */
 //{block name="backend/article_list/view/main/window" append}
-Ext.define('Shopware.apps.ArticleList.view.main.Window-Bepado', {
+Ext.define('Shopware.apps.ArticleList.view.main.Window-Connect', {
     override: 'Shopware.apps.ArticleList.view.main.Window',
 
     /**
@@ -107,7 +107,7 @@ Ext.define('Shopware.apps.ArticleList.view.main.Window-Bepado', {
         try {
             radioGroup = panel.items.items[0];
             radioGroup.add(
-                Ext.create('Ext.form.field.Radio', { boxLabel: marketplaceName, name: 'filter', inputValue: 'bepado' })
+                Ext.create('Ext.form.field.Radio', { boxLabel: marketplaceName, name: 'filter', inputValue: 'connect' })
             );
         }catch(e) {
             return panel;

@@ -1,10 +1,10 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
 /**
  * In old SW versions we need to overwrite the whole shipping attribute module
   */
 //{block name="backend/shipping/model/attribute"}
-//{if $useOldBepadoShippingAttributeExtension}
+//{if $useOldConnectShippingAttributeExtension}
 
 Ext.define('Shopware.apps.Shipping.model.Attribute', {
     extend: 'Ext.data.Model',
@@ -12,7 +12,7 @@ Ext.define('Shopware.apps.Shipping.model.Attribute', {
     fields: [
         { name: 'id', type: 'int' },
         { name: 'dispatchId', type: 'int', useNull: true },
-        { name: 'bepadoAllowed', type: 'int' }
+        { name: 'connectAllowed', type: 'int' }
     ]
 });
 //{else}
@@ -24,14 +24,14 @@ Ext.define('Shopware.apps.Shipping.model.Attribute', {
  * This block does not exist before 4.2.0
  */
 //{block name="backend/shipping/model/attribute/fields" append}
-   { name: 'bepadoAllowed', type: 'int' },
+   { name: 'connectAllowed', type: 'int' },
 //{/block}
 
 /**
- * Show a bepado checkbox in the 'advanced' menu
+ * Show a connect checkbox in the 'advanced' menu
  */
 //{block name="backend/shipping/view/edit/advanced" append}
-Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
+Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Connect', {
     override: 'Shopware.apps.Shipping.view.edit.Advanced',
 
     /**
@@ -42,12 +42,12 @@ Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
         var me = this,
             items = me.callOverridden(arguments);
 
-        // bepadoAllowed is not used during checkout
+        // connectAllowed is not used during checkout
         //items.push({
         //    xtype : 'checkbox',
-        //    name : 'attribute[bepadoAllowed]',
-        //    internalName: 'bepado',
-        //    fieldLabel : '{s name=shipping/bepadoAllowed}Allow with bepado{/s}'
+        //    name : 'attribute[connectAllowed]',
+        //    internalName: 'connect',
+        //    fieldLabel : '{s name=shipping/connectAllowed}Allow with connect{/s}'
         //});
 
         return items;
@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Bepado', {
 //{/block}
 
 //{block name="backend/shipping/controller/default_form" append}
-Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Bepado', {
+Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Connect', {
     override: 'Shopware.apps.Shipping.controller.DefaultForm',
 
     /**
@@ -73,26 +73,26 @@ Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Bepado', {
         var me = this,
             result = me.callOverridden(arguments),
             advancedForm = me.getAdvancedForm(),
-            bepadoAllowed = advancedForm.down('checkbox[internalName=bepado]').getValue();
+            connectAllowed = advancedForm.down('checkbox[internalName=connect]').getValue();
 
-        me.saveBepadoAttribute(advancedForm.record.get('id'), bepadoAllowed);
+        me.saveConnectAttribute(advancedForm.record.get('id'), connectAllowed);
 
         return result;
     },
 
     /**
-     * Save the given bepado value via an Ajax request
+     * Save the given connect value via an Ajax request
      *
      * @param shippingId
      * @param attributeValue
      */
-    saveBepadoAttribute: function(shippingId, attributeValue) {
+    saveConnectAttribute: function(shippingId, attributeValue) {
         Ext.Ajax.request({
-            url: '{url controller=bepado action=saveShippingAttribute}',
+            url: '{url controller=connect action=saveShippingAttribute}',
             method: 'POST',
             params: {
                 shippingId: shippingId,
-                bepadoAllowed: attributeValue ? 1 : 0
+                connectAllowed: attributeValue ? 1 : 0
             },
             failure: function(response, opts) {
                 Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);

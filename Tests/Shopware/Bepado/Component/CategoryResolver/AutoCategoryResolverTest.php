@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Shopware\Bepado\Component\CategoryResolver;
+namespace Tests\Shopware\Connect\Component\CategoryResolver;
 
-use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
+use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
 
 class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var  \Shopware\Bepado\Components\CategoryResolver */
+    /** @var  \Shopware\Connect\Components\CategoryResolver */
     private $categoryResolver;
 
     public function setUp()
@@ -14,7 +14,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->categoryResolver = new AutoCategoryResolver(
             Shopware()->Models(),
             Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-            Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+            Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
         );
     }
 

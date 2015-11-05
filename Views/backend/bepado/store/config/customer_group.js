@@ -1,5 +1,5 @@
 
-Ext.define('Shopware.apps.Bepado.store.config.CustomerGroup', {
+Ext.define('Shopware.apps.Connect.store.config.CustomerGroup', {
     extend: 'Ext.data.Store',
 
     model : 'Shopware.apps.Base.model.CustomerGroup',
@@ -7,10 +7,10 @@ Ext.define('Shopware.apps.Bepado.store.config.CustomerGroup', {
 
     proxy:{
         extraParams: {
-            showBepado: true
+            showConnect: true
         },
         type:'ajax',
-        url:'{url controller="BepadoConfig" action="getExportCustomerGroups"}',
+        url:'{url controller="ConnectConfig" action="getExportCustomerGroups"}',
         reader:{
             type:'json',
             root:'data',

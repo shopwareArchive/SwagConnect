@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/changed_products/panel"}
-Ext.define('Shopware.apps.Bepado.view.changed_products.Panel', {
+//{block name="backend/connect/view/changed_products/panel"}
+Ext.define('Shopware.apps.Connect.view.changed_products.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-changed-products',
+    alias: 'widget.connect-changed-products',
 
     border: false,
     layout: 'border',
@@ -18,14 +18,14 @@ Ext.define('Shopware.apps.Bepado.view.changed_products.Panel', {
 
         Ext.applyIf(me, {
             items: [notice,{
-                xtype: 'bepado-changed-products-tabs',
+                xtype: 'connect-changed-products-tabs',
                 region: 'south',
                 collapsible: true,
                 collapsed: true,
                 split: true,
                 getTranslatedTitle: me.getTranslatedTitle
             },{
-                xtype: 'bepado-changed-products-list',
+                xtype: 'connect-changed-products-list',
                 region: 'center',
                 getTranslatedTitle: me.getTranslatedTitle
             }]

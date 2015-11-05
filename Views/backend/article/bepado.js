@@ -22,7 +22,7 @@
  */
 
 //{block name="backend/article/application" append}
-    //{include file="backend/article/store/bepado.js"}
-    //{include file="backend/article/model/bepado.js"}
-    //{include file="backend/article/view/bepado_form.js"}
+    //{include file="backend/article/store/connect.js"}
+    //{include file="backend/article/model/connect.js"}
+    //{include file="backend/article/view/connect_form.js"}
 //{/block}

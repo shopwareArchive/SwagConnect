@@ -1,8 +1,8 @@
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/tabs"}
-Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/config/tabs"}
+Ext.define('Shopware.apps.Connect.view.config.Tabs', {
     extend: 'Ext.tab.Panel',
-    alias: 'widget.bepado-config-tabs',
+    alias: 'widget.connect-config-tabs',
 
     layout: 'fit',
     autoScroll: true,
@@ -32,12 +32,12 @@ Ext.define('Shopware.apps.Bepado.view.config.Tabs', {
     createItems: function() {
         var me = this,
             tabs = [],
-            staticPagesStore = Ext.create('Shopware.apps.Bepado.store.config.Pages').load();
+            staticPagesStore = Ext.create('Shopware.apps.Connect.store.config.Pages').load();
 
         me.shopStore.each(function() {
             var record = this;
 
-            me.generalForm = Ext.create('Shopware.apps.Bepado.view.config.general.Form', {
+            me.generalForm = Ext.create('Shopware.apps.Connect.view.config.general.Form', {
                 shopId: record.get('id'),
                 defaultShop: record.get('default'),
                 staticPagesStore: staticPagesStore

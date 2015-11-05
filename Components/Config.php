@@ -22,15 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
-use Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
+use Shopware\Connect\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
-use Shopware\CustomModels\Bepado\Config as ConfigModel;
+use Shopware\CustomModels\Connect\Config as ConfigModel;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class Config
 {
@@ -40,7 +40,7 @@ class Config
     private $manager;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\ConfigRepository
+     * @var \Shopware\CustomModels\Connect\ConfigRepository
      */
     private $repository;
 
@@ -205,12 +205,12 @@ class Config
             $shopConfig = array();
 
             if ($shop->getDefault() === false) {
-                $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+                $query = "SELECT `name`, `value` FROM s_plugin_connect_config
                           WHERE `shopId` = $shopId AND `groupName` = 'general'";
                 $shopConfig['shopId'] = $shopId;
                 $shopConfig['isDefaultShop'] = $shop->getDefault();
             } else {
-                $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+                $query = "SELECT `name`, `value` FROM s_plugin_connect_config
                 WHERE `shopId` IS NULL AND `groupName` = 'general'";
                 $shopConfig['shopId'] = $shopId;
                 $shopConfig['isDefaultShop'] = $shop->getDefault();
@@ -271,7 +271,7 @@ class Config
 
             foreach ($shopConfig as $key => $configItem) {
 
-            /** @var \Shopware\CustomModels\Bepado\Config $model */
+            /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
                     'name' => $key,
                     'shopId' => $shopId,
@@ -305,7 +305,7 @@ class Config
      */
     public function getImportConfig()
     {
-        $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+        $query = "SELECT `name`, `value` FROM s_plugin_connect_config
         WHERE `shopId` IS NULL AND `groupName` = 'import'";
 
         $result = Shopware()->Db()->fetchPairs($query);
@@ -324,7 +324,7 @@ class Config
         foreach ($data as $config) {
             unset($config['id']);
             foreach ($config as $key => $configValue) {
-                /** @var \Shopware\CustomModels\Bepado\Config $model */
+                /** @var \Shopware\CustomModels\Connect\Config $model */
                 $model = $this->getConfigRepository()->findOneBy(array(
                         'name' => $key,
                         'shopId' => null,
@@ -356,7 +356,7 @@ class Config
      */
     public function getExportConfig()
     {
-        $query = "SELECT `name`, `value` FROM s_plugin_bepado_config
+        $query = "SELECT `name`, `value` FROM s_plugin_connect_config
         WHERE `shopId` IS NULL AND `groupName` = 'export'";
 
         $result = Shopware()->Db()->fetchPairs($query);
@@ -376,7 +376,7 @@ class Config
         foreach ($data as $config) {
             unset($config['id']);
             foreach ($config as $key => $configValue) {
-                /** @var \Shopware\CustomModels\Bepado\Config $model */
+                /** @var \Shopware\CustomModels\Connect\Config $model */
                 $model = $this->getConfigRepository()->findOneBy(array(
                         'name' => $key,
                         'shopId' => null,
@@ -410,7 +410,7 @@ class Config
     public function setUnitsMapping($units)
     {
         foreach ($units as $unit) {
-            /** @var \Shopware\CustomModels\Bepado\Config $model */
+            /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
                     'name' => $unit['shopwareUnitKey'],
                     'shopId' => null,
@@ -423,7 +423,7 @@ class Config
                 $model->setShopId(null);
             }
 
-            $model->setValue($unit['bepadoUnit']);
+            $model->setValue($unit['connectUnit']);
             $this->manager->persist($model);
         }
 
@@ -455,7 +455,7 @@ class Config
     /**
      * Returns config entity by value
      * @param $value
-     * @return \Shopware\CustomModels\Bepado\Config
+     * @return \Shopware\CustomModels\Connect\Config
      */
     public function getConfigByValue($value)
     {
@@ -478,12 +478,12 @@ class Config
     }
 
     /**
-     * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Bepado\ConfigRepository
+     * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Connect\ConfigRepository
      */
     private function getConfigRepository()
     {
         if (!$this->repository) {
-            $this->repository = $this->manager->getRepository('Shopware\CustomModels\Bepado\Config');
+            $this->repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Config');
         }
 
         return $this->repository;

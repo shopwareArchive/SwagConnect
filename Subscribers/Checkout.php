@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 use Bepado\SDK\Struct\CheckResult;
 use Bepado\SDK\Struct\Message;
 use Bepado\SDK\Struct\Order;
@@ -8,17 +8,17 @@ use Bepado\SDK\Struct\OrderItem;
 use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\Reservation;
 use Bepado\SDK\Struct\TotalShippingCosts;
-use Shopware\Bepado\Components\Exceptions\CheckoutException;
-use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\Utils\CountryCodeResolver;
-use Shopware\Bepado\Components\Utils\OrderPaymentMapper;
+use Shopware\Connect\Components\Exceptions\CheckoutException;
+use Shopware\Connect\Components\Logger;
+use Shopware\Connect\Components\Utils\CountryCodeResolver;
+use Shopware\Connect\Components\Utils\OrderPaymentMapper;
 use Shopware\Plugin\Debug\Components\Utils;
 
 /**
- * Handles the whole checkout manipulation, which is required for the bepado checkout
+ * Handles the whole checkout manipulation, which is required for the connect checkout
  *
  * Class Checkout
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class Checkout extends BaseSubscriber
 {
@@ -28,14 +28,14 @@ class Checkout extends BaseSubscriber
     /** @var  string */
     private $newSessionId;
 
-    /** @var  \Shopware\Bepado\Components\BepadoFactory */
+    /** @var  \Shopware\Connect\Components\ConnectFactory */
     protected $factory;
 
     public function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForBepado',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveBepadoProductsOnCheckoutFinish',
+            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForConnect',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveConnectProductsOnCheckoutFinish',
             'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
         );
     }
@@ -59,7 +59,7 @@ class Checkout extends BaseSubscriber
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;
@@ -79,7 +79,7 @@ class Checkout extends BaseSubscriber
      * @param \Enlight_Event_EventArgs $args
      * @return void
      */
-    public function fixBasketForBepado(\Enlight_Event_EventArgs $args)
+    public function fixBasketForConnect(\Enlight_Event_EventArgs $args)
     {
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
@@ -89,31 +89,31 @@ class Checkout extends BaseSubscriber
         $sessionId = Shopware()->SessionID();
 
         $userId = Shopware()->Session()->sUserId;
-        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId, $userId);
+        $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($sessionId, $userId);
 
-        if ($hasBepadoProduct === false && $this->newSessionId) {
-            $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($this->newSessionId);
+        if ($hasConnectProduct === false && $this->newSessionId) {
+            $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($this->newSessionId);
         }
 
-        $view->hasBepadoProduct = $hasBepadoProduct;
+        $view->hasConnectProduct = $hasConnectProduct;
 
         if ($actionName == 'ajax_add_article') {
             $this->registerMyTemplateDir();
-            $view->extendsTemplate('frontend/bepado/ajax_add_article.tpl');
+            $view->extendsTemplate('frontend/connect/ajax_add_article.tpl');
         }
 
-        // send order to bepado
+        // send order to connect
         // this method must be called after external payments (Sofort, Billsafe)
         if($actionName == 'finish' && !empty($view->sOrderNumber)) {
             $this->checkoutReservedProducts($view->sOrderNumber);
         }
 
-        // clear bepado reserved products
+        // clear connect reserved products
         // sometimes with external payment methods
-        // $hasBepadoProduct will be false, because order is already finished
-        // and information about bepado products is not available.
-        if (!$hasBepadoProduct) {
-            $this->getHelper()->clearBepadoReservation();
+        // $hasConnectProduct will be false, because order is already finished
+        // and information about connect products is not available.
+        if (!$hasConnectProduct) {
+            $this->getHelper()->clearConnectReservation();
             return;
         }
 
@@ -133,7 +133,7 @@ class Checkout extends BaseSubscriber
 
         $this->registerMyTemplateDir();
         if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $view->extendsTemplate('frontend/bepado/checkout.tpl');
+            $view->extendsTemplate('frontend/connect/checkout.tpl');
         }
 
         $sdk = $this->getSDK();
@@ -143,8 +143,8 @@ class Checkout extends BaseSubscriber
         $basketHelper->setBasket($view->sBasket);
 
         // If no messages are shown, yet, check products from remote shop and build message array
-        if(($bepadoMessages = Shopware()->Session()->BepadoMessages) === null) {
-            $bepadoMessages = array();
+        if(($connectMessages = Shopware()->Session()->connectMessages) === null) {
+            $connectMessages = array();
 
             $session = Shopware()->Session();
             $userData = $session['sOrderVariables']['sUserData'];
@@ -155,10 +155,10 @@ class Checkout extends BaseSubscriber
 
             $allProducts = array();
 
-            foreach($basketHelper->getBepadoProducts() as $shopId => $products) {
-                $products = $this->getHelper()->prepareBepadoUnit($products);
+            foreach($basketHelper->getConnectProducts() as $shopId => $products) {
+                $products = $this->getHelper()->prepareConnectUnit($products);
                 $allProducts = array_merge($allProducts, $products);
-                // add order items in bepado order
+                // add order items in connect order
                 $order->orderItems = array_map(function(Product $product) use ($basketHelper) {
                     return new OrderItem(array(
                         'product' => $product,
@@ -174,32 +174,32 @@ class Checkout extends BaseSubscriber
                 $basketHelper->setCheckResult($checkResult);
 
                 if($checkResult->hasErrors()) {
-                    $bepadoMessages = $checkResult->errors;
+                    $connectMessages = $checkResult->errors;
                 }
             } catch (\Exception $e) {
                 $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
                 // If the checkout results in an exception because the remote shop is not available
                 // don't show the exception to the user but tell him to remove the products from that shop
-                $bepadoMessages = $this->getNotAvailableMessageForProducts($allProducts);
+                $connectMessages = $this->getNotAvailableMessageForProducts($allProducts);
             }
         }
 
-        if ($bepadoMessages) {
-            $bepadoMessages = $this->translateBepadoMessages($bepadoMessages);
+        if ($connectMessages) {
+            $connectMessages = $this->translateConnectMessages($connectMessages);
         }
 
-        Shopware()->Session()->BepadoMessages = null;
+        Shopware()->Session()->connectMessages = null;
 
-        // If no products are bought from the local shop, move the first bepado shop into
+        // If no products are bought from the local shop, move the first connect shop into
         // the content section. Also set that shop's id in the template
         $shopId = $basketHelper->fixBasket();
         if ($shopId) {
             $view->shopId = $shopId;
         }
-        // Increase amount and shipping costs by the amount of bepado shipping costs
+        // Increase amount and shipping costs by the amount of connect shipping costs
         $basketHelper->recalculate($basketHelper->getCheckResult());
 
-        $bepadoMessages = $this->getNotShippableMessages($basketHelper->getCheckResult(), $bepadoMessages);
+        $connectMessages = $this->getNotShippableMessages($basketHelper->getCheckResult(), $connectMessages);
 
         $view->assign($basketHelper->getDefaultTemplateVariables());
 
@@ -213,25 +213,25 @@ class Checkout extends BaseSubscriber
             $session->offsetSet('sOrderVariables', $basketHelper->getOrderVariablesForSession($variables));
         }
 
-        $view->assign($basketHelper->getBepadoTemplateVariables($bepadoMessages));
+        $view->assign($basketHelper->getConnectTemplateVariables($connectMessages));
         $view->assign('showShippingCostsSeparately', $this->getFactory()->getConfigComponent()->getConfig('showShippingCostsSeparately', false));
     }
 
     /**
-     * Helper to translate bepado messages from the SDK. Will use the normalized message itself as namespace key
+     * Helper to translate connect messages from the SDK. Will use the normalized message itself as namespace key
      *
-     * @param $bepadoMessages
+     * @param $connectMessages
      * @return mixed
      */
-    private function translateBepadoMessages($bepadoMessages)
+    private function translateConnectMessages($connectMessages)
     {
-        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
+        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/connect');
 
-        foreach ($bepadoMessages as &$bepadoMessage) {
-            $message = trim($bepadoMessage->message);
-            $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $bepadoMessage->message));
+        foreach ($connectMessages as &$connectMessage) {
+            $message = trim($connectMessage->message);
+            $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $connectMessage->message));
             if (empty($normalized) || empty($message)) {
-                $normalized = "unknown-bepado-error";
+                $normalized = "unknown-connect-error";
                 $message = "Unknown error";
             }
             $translation = $namespace->get(
@@ -240,10 +240,10 @@ class Checkout extends BaseSubscriber
                 true
             );
 
-            $bepadoMessage->message = $translation;
+            $connectMessage->message = $translation;
         }
 
-        return $bepadoMessages;
+        return $connectMessages;
     }
 
     /**
@@ -253,7 +253,7 @@ class Checkout extends BaseSubscriber
      * @event Enlight_Controller_Action_PreDispatch_Frontend_Checkout
      * @param \Enlight_Event_EventArgs $args
      */
-    public function reserveBepadoProductsOnCheckoutFinish(\Enlight_Event_EventArgs $args)
+    public function reserveConnectProductsOnCheckoutFinish(\Enlight_Event_EventArgs $args)
     {
         /** @var $controller \Enlight_Controller_Action */
         $controller = $args->getSubject();
@@ -277,7 +277,7 @@ class Checkout extends BaseSubscriber
 			return;
 		}
 
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
@@ -285,16 +285,16 @@ class Checkout extends BaseSubscriber
         $paymentId = $userData['additional']['payment']['id'];
 
         if ($this->isPaymentAllowed($paymentId) === false) {
-            $bepadoMessage = new \stdClass();
-            $bepadoMessage->message = 'frontend_checkout_cart_bepado_payment_not_allowed';
+            $connectMessage = new \stdClass();
+            $connectMessage->message = 'frontend_checkout_cart_connect_payment_not_allowed';
 
-            $bepadoMessages = array(
+            $connectMessages = array(
                 0 => array(
-                    'bepadomessage' => $bepadoMessage
+                    'connectmessage' => $connectMessage
                 )
             );
 
-            Shopware()->Session()->BepadoMessages = $this->translateBepadoMessages($bepadoMessages);
+            Shopware()->Session()->connectMessages = $this->translateConnectMessages($connectMessages);
             $controller->forward('confirm');
         }
 
@@ -306,10 +306,10 @@ class Checkout extends BaseSubscriber
 
         $basket = $session['sOrderVariables']['sBasket'];
 
-        /** @var \Shopware\Bepado\Components\Utils\OrderPaymentMapper $orderPaymentMapper */
+        /** @var \Shopware\Connect\Components\Utils\OrderPaymentMapper $orderPaymentMapper */
         $orderPaymentMapper = new OrderPaymentMapper();
         $orderPaymentName = $userData['additional']['payment']['name'];
-        $order->paymentType = $orderPaymentMapper->mapShopwareOrderPaymentToBepado($orderPaymentName);
+        $order->paymentType = $orderPaymentMapper->mapShopwareOrderPaymentToConnect($orderPaymentName);
 
         foreach ($basket['content'] as $row) {
             if(!empty($row['mode'])) {
@@ -323,7 +323,7 @@ class Checkout extends BaseSubscriber
             $sourceId = $helper->getArticleDetailSourceId($articleDetailId);
 
             $products = $helper->getRemoteProducts(array($sourceId));
-            $products = $this->getHelper()->prepareBepadoUnit($products);
+            $products = $this->getHelper()->prepareConnectUnit($products);
 
             if (empty($products)) {
                 continue;
@@ -362,10 +362,10 @@ class Checkout extends BaseSubscriber
         }
 
         if(!empty($messages)) {
-            Shopware()->Session()->BepadoMessages = $messages;
+            Shopware()->Session()->connectMessages = $messages;
             $controller->forward('confirm');
         } else {
-            Shopware()->Session()->BepadoReservation = serialize($reservation);
+            Shopware()->Session()->connectReservation = serialize($reservation);
         }
     }
 
@@ -416,10 +416,10 @@ class Checkout extends BaseSubscriber
 
 
     /**
-     * Hooks the sSaveOrder frontend method and reserves the bepado products
+     * Hooks the sSaveOrder frontend method and reserves the connect products
      *
      * @param $orderNumber
-     * @throws \Shopware\Bepado\Components\Exceptions\CheckoutException
+     * @throws \Shopware\Connect\Components\Exceptions\CheckoutException
      */
     public function checkoutReservedProducts($orderNumber)
     {
@@ -429,7 +429,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        $reservation = unserialize(Shopware()->Session()->BepadoReservation);
+        $reservation = unserialize(Shopware()->Session()->connectReservation);
         if($reservation !== null && $reservation !== false) {
             $result = $sdk->checkout($reservation, $orderNumber);
             foreach($result as $shopId => $success) {
@@ -439,12 +439,12 @@ class Checkout extends BaseSubscriber
                     throw $e;
                 }
             }
-            $this->getHelper()->clearBepadoReservation();
+            $this->getHelper()->clearConnectReservation();
         }
     }
 
     /**
-     * Asks the user to leave is phone number if bepado products are in the basket and the
+     * Asks the user to leave is phone number if connect products are in the basket and the
      * phone number was not configured, yet.
      *
      * @param $view
@@ -452,7 +452,7 @@ class Checkout extends BaseSubscriber
      */
     public function enforcePhoneNumber($view)
     {
-        if (Shopware()->Session()->sUserId && $this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if (Shopware()->Session()->sUserId && $this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             $id = Shopware()->Session()->sUserId;
 
             $sql = 'SELECT phone FROM s_user_billingaddress WHERE userID = :id';
@@ -482,22 +482,22 @@ class Checkout extends BaseSubscriber
 
     /**
      * @param \Bepado\SDK\Struct\CheckResult $checkResult
-     * @param $bepadoMessages
+     * @param $connectMessages
      * @return mixed
      */
-    protected function getNotShippableMessages($checkResult, $bepadoMessages)
+    protected function getNotShippableMessages($checkResult, $connectMessages)
     {
         if (!$checkResult instanceof CheckResult) {
-            return $bepadoMessages;
+            return $connectMessages;
         }
 
-        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/bepado');
+        $namespace = Shopware()->Snippets()->getNamespace('frontend/checkout/connect');
 
         foreach ($checkResult->shippingCosts as $shipping) {
             if ($shipping->isShippable === false) {
-                $bepadoMessages[] = new Message(array(
+                $connectMessages[] = new Message(array(
                     'message' => $namespace->get(
-                            'frontend_checkout_cart_bepado_not_shippable',
+                            'frontend_checkout_cart_connect_not_shippable',
                             'Ihre Bestellung kann nicht geliefert werden',
                             true
                         )
@@ -505,11 +505,11 @@ class Checkout extends BaseSubscriber
             }
         }
 
-        return $bepadoMessages;
+        return $connectMessages;
     }
 
     /**
-     * Check is allowed payment method with bepado products
+     * Check is allowed payment method with connect products
      * @param int $paymentId
      * @return bool
      */
@@ -527,7 +527,7 @@ class Checkout extends BaseSubscriber
             return false;
         }
 
-        if ($payment->getAttribute()->getBepadoIsAllowed() == 0) {
+        if ($payment->getAttribute()->getConnectIsAllowed() == 0) {
             return false;
         }
 

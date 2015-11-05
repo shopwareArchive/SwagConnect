@@ -1,11 +1,11 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-// {include file="backend/bepado/_resources/html/home_page.tpl" assign="homePageContent"}
+// {include file="backend/connect/_resources/html/home_page.tpl" assign="homePageContent"}
 
-//{block name='backend/bepado/view/main/home_page'}
-Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
+//{block name='backend/connect/view/main/home_page'}
+Ext.define('Shopware.apps.Connect.view.main.HomePage', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.bepado-home-page',
+    alias: 'widget.connect-home-page',
 
     //border: false,
     layout: 'fit',
@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Bepado.view.main.HomePage', {
 
     getHTMLContent: function() {
         var me = this;
-        me.htmlTpl = '{$homePageContent|replace:"\n":""|replace:"\r":""|replace:"bepado":"' + marketplaceName + '"|replace:"marketplaceLogo":"' + marketplaceLogo + '"}';
+        me.htmlTpl = '{$homePageContent|replace:"\n":""|replace:"\r":""|replace:"connect":"' + marketplaceName + '"|replace:"marketplaceLogo":"' + marketplaceLogo + '"}';
 
         return me.htmlTpl;
     }

@@ -21,21 +21,21 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-Ext.define('Shopware.apps.Bepado.store.config.PriceGroup', {
+Ext.define('Shopware.apps.Connect.store.config.PriceGroup', {
     extend: 'Ext.data.Store',
 
-    model : 'Shopware.apps.Bepado.model.config.PriceGroup',
+    model : 'Shopware.apps.Connect.model.config.PriceGroup',
     pageSize: 1000,
 
     proxy:{
         type:'ajax',
-        url:'{url controller="BepadoConfig" action="getExportPriceGroups"}',
+        url:'{url controller="ConnectConfig" action="getExportPriceGroups"}',
         reader:{
             type:'json',
             root:'data',

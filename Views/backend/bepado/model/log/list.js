@@ -1,9 +1,9 @@
-//{block name="backend/bepado/model/log/list"}
-Ext.define('Shopware.apps.Bepado.model.log.List', {
+//{block name="backend/connect/model/log/list"}
+Ext.define('Shopware.apps.Connect.model.log.List', {
     extend:'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/log/list/fields"}{/block}
+        //{block name="backend/connect/model/log/list/fields"}{/block}
         { name: 'id', type: 'integer' },
         { name: 'isError', type: 'boolean' },
         { name: 'request', type: 'string', useNull: true },

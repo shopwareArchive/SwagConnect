@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
 use \Shopware\Models\Article\Image;
@@ -18,7 +18,7 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
-    /** @var  \Shopware\Bepado\Components\Logger */
+    /** @var  \Shopware\Connect\Components\Logger */
     protected $logger;
 
     public function __construct(ModelManager $manager, Helper $helper, Logger $logger)
@@ -64,7 +64,7 @@ class ImageImport
         $initialImportFlag = $updateFlagsByName['imageInitialImport'];
 
         $builder = $this->manager->createQueryBuilder();
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->innerJoin('at.articleDetail', 'detail');
         $builder->select('at.articleId');
         $builder->andWhere('at.shopId IS NOT NULL')
@@ -98,13 +98,13 @@ class ImageImport
         foreach ($ids as $id) {
             /** @var \Shopware\Models\Article\Article $model */
             $model = $articleRepository->find($id);
-            $bepadoAttribute = $this->helper->getBepadoAttributeByModel($model);
+            $connectAttribute = $this->helper->getConnectAttributeByModel($model);
 
-            $lastUpdate = json_decode($bepadoAttribute->getLastUpdate(), true);
+            $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
 
             $this->importImagesForArticle($lastUpdate['image'], $model);
 
-            $bepadoAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+            $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
 
             $this->manager->flush();
         }
@@ -112,11 +112,11 @@ class ImageImport
 
     /**
      * Handles the image import of a product. This will:
-     * - delete all images imported from bepado before and not in the current import list
+     * - delete all images imported from connect before and not in the current import list
      * - create new images which have not already been imported
      * - set the main image, if there is no main image, yet
      *
-     * Images are identified via the URL of the bepado image. So we don't need to md5 the
+     * Images are identified via the URL of the connect image. So we don't need to md5 the
      * actual image content every time.
      *
      * @param array $images
@@ -124,9 +124,9 @@ class ImageImport
      */
     public function importImagesForArticle($images, $model)
     {
-        // Build up an array of images imported from bepado
+        // Build up an array of images imported from connect
         $positions = array(0);
-        $localImagesFromBepado = array();
+        $localImagesFromConnect = array();
 
         /** @var $image Image */
         /** @var $media \Shopware\Models\Media\Media */
@@ -141,27 +141,27 @@ class ImageImport
             }
             $attribute = $media->getAttribute();
 
-            // If the image was not imported from bepado, skip it
-            $bepadoHash = $attribute->getBepadoHash();
-            if (!$bepadoHash) {
+            // If the image was not imported from connect, skip it
+            $connectHash = $attribute->getConnectHash();
+            if (!$connectHash) {
                 continue;
             }
 
-            if (isset($images[0]) && $bepadoHash == $images[0]) {
+            if (isset($images[0]) && $connectHash == $images[0]) {
                 $image->setMain(1);
             }
 
-            $localImagesFromBepado[$bepadoHash] = array('image' => $image, 'media' => $media);
+            $localImagesFromConnect[$connectHash] = array('image' => $image, 'media' => $media);
         }
         $maxPosition = max($positions); // Get the highest position field
 
-        $remoteImagesFromBepado = array_flip($images);
+        $remoteImagesFromConnect = array_flip($images);
 
         // Build up arrays of images to delete and images to create
-        $imagesToDelete = array_diff_key($localImagesFromBepado, $remoteImagesFromBepado);
-        $imagesToCreate = array_diff_key($remoteImagesFromBepado, $localImagesFromBepado);
+        $imagesToDelete = array_diff_key($localImagesFromConnect, $remoteImagesFromConnect);
+        $imagesToCreate = array_diff_key($remoteImagesFromConnect, $localImagesFromConnect);
 
-        // Delete old bepado images and media objects
+        // Delete old connect images and media objects
         foreach ($imagesToDelete as $hash => $data) {
             $this->manager->remove($data['image']);
             $this->manager->remove($data['media']);
@@ -189,7 +189,7 @@ class ImageImport
                 $media->setFile($file);
 
                 $mediaAttribute = $media->getAttribute() ?: new MediaAttribute();
-                $mediaAttribute->setBepadoHash($imageUrl);
+                $mediaAttribute->setConnectHash($imageUrl);
                 $mediaAttribute->setMedia($media);
 
                 $this->manager->persist($media);

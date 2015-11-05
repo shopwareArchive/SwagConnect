@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/general/form"}
-Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/config/general/form"}
+Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     extend: 'Ext.form.Panel',
-    alias: 'widget.bepado-config-form',
+    alias: 'widget.connect-config-form',
 
     border: false,
     layout: 'anchor',
@@ -58,8 +58,8 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
         detailPageHintLabel: '{s name=config/detail_page_hint}Show marketplace hint on article detail page{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
         basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
-        bepadoAttributeLabel: Ext.String.format('{s name=config/bepado_attribute_label}[0]-Attribut{/s}', marketplaceName),
-        alternativeHostLabel: Ext.String.format('{s name=config/bepado_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
+        connectAttributeLabel: Ext.String.format('{s name=config/connect_attribute_label}[0]-Attribut{/s}', marketplaceName),
+        alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
         logLabel: '{s name=config/log_label}Logging aktivieren{/s}',
         logDescription: Ext.String.format('{s name=config/log_description}[0]-Anfragen mitschreiben{/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
@@ -88,7 +88,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 items: me.getFormButtons()
             }];
 
-        me.generalConfigStore = Ext.create('Shopware.apps.Bepado.store.config.General').load({
+        me.generalConfigStore = Ext.create('Shopware.apps.Connect.store.config.General').load({
             callback:function() {
                 me.populateForm();
             }
@@ -188,7 +188,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                                     apiKey = apiField.getValue();
                                 Ext.Ajax.request({
                                     scope: this,
-                                    url: window.location.pathname + 'bepado/verifyApiKey',
+                                    url: window.location.pathname + 'connect/verifyApiKey',
                                     success: function(result, request) {
                                         var response = Ext.JSON.decode(result.responseText);
                                         Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
@@ -304,7 +304,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             html: me.snippets.unitsFieldsetDescription
         });
         items.push({
-            xtype: 'bepado-units-mapping',
+            xtype: 'connect-units-mapping',
             width: '100%',
             padding: '10 0 0 0'
         });
@@ -356,7 +356,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
                 items: [
                     {
                         xtype: 'textfield',
-                        name: 'bepadoDebugHost',
+                        name: 'connectDebugHost',
                         anchor: '100%',
                         fieldLabel: me.snippets.alternativeHostLabel,
                         labelWidth: me.defaults.labelWidth,
@@ -507,16 +507,16 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             items: [
                 {
                     xtype: 'combo',
-                    name: 'bepadoAttribute',
+                    name: 'connectAttribute',
                     anchor: '100%',
                     required: true,
                     editable: false,
                     valueField: 'id',
                     displayField: 'name',
-                    fieldLabel: me.snippets.bepadoAttributeLabel,
+                    fieldLabel: me.snippets.connectAttributeLabel,
                     store: attributeStore,
                     labelWidth: me.defaults.labelWidth,
-                    helpText: Ext.String.format('{s name=config/help/bepado_attribute}Schreibe die Quell-Id jedes [0]-Produktes in dieses Attribut. Über dieses Attribut kann im Risiko-Managment oder dem Versandkosten-Modul auf [0]-Produkte geprüft werden.{/s}', marketplaceName)
+                    helpText: Ext.String.format('{s name=config/help/connect_attribute}Schreibe die Quell-Id jedes [0]-Produktes in dieses Attribut. Über dieses Attribut kann im Risiko-Managment oder dem Versandkosten-Modul auf [0]-Produkte geprüft werden.{/s}', marketplaceName)
                 }
             ]
         });
@@ -557,7 +557,7 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             fieldLabel: me.snippets.shippingCostsLabel,
             store: me.staticPagesStore,
             labelWidth: me.defaults.labelWidth,
-            helpText: Ext.String.format('{s name=config/help/bepado_shipping_costs_page}[0] fügt seine eigenen Versandkosten-Informationen vor ihrer Versandkosten-Seite an. Wählen Sie hier ihre Standard-Versandkostenseite.{/s}', marketplaceName),
+            helpText: Ext.String.format('{s name=config/help/connect_shipping_costs_page}[0] fügt seine eigenen Versandkosten-Informationen vor ihrer Versandkosten-Seite an. Wählen Sie hier ihre Standard-Versandkostenseite.{/s}', marketplaceName),
             allowBlank: true,
             forceSelection: true,
             beforeBlur: function () {
@@ -584,12 +584,12 @@ Ext.define('Shopware.apps.Bepado.view.config.general.Form', {
             record = me.generalConfigStore.getById(me.shopId);
 
         if (!record) {
-            record = Ext.create('Shopware.apps.Bepado.model.config.General');
+            record = Ext.create('Shopware.apps.Connect.model.config.General');
         }
 
 
-        if (record.get('bepadoAttribute') < 1) {
-            record.set('bepadoAttribute', 19);
+        if (record.get('connectAttribute') < 1) {
+            record.set('connectAttribute', 19);
         }
 
         if (record.get('shippingCostsPage') > 0) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace Shopware\Connect\Components\CategoryQuery;
 
 /**
  * The sorter will sort categories by their relevance.
@@ -10,18 +10,18 @@ namespace Shopware\Bepado\Components\CategoryQuery;
  * The sorter returns the category by ascending relevance
  *
  * Class RelevanceSorter
- * @package Shopware\Bepado\Components\CategoryQuery
+ * @package Shopware\Connect\Components\CategoryQuery
  */
 class RelevanceSorter
 {
     /**
-     * Sort a list of bepado
+     * Sort a list of connect
      *
      * @param $a
      * @param $b
      * @return int
      */
-    public function sortBepadoCategoriesByRelevance($a, $b) {
+    public function sortConnectCategoriesByRelevance($a, $b) {
         if ($a == $b) {
             return 0;
         }

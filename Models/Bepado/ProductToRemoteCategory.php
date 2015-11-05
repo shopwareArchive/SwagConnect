@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM;
 use \Shopware\Components\Model\ModelEntity;
@@ -31,7 +31,7 @@ use \Shopware\Components\Model\ModelEntity;
  * Contains oneToMany connection
  * One product belongs to many remote categories
  *
- * @ORM\Table(name="s_plugin_bepado_product_to_categories")
+ * @ORM\Table(name="s_plugin_connect_product_to_categories")
  * @ORM\Entity(repositoryClass="ProductToRemoteCategoryRepository")
  */
 class ProductToRemoteCategory extends ModelEntity
@@ -51,9 +51,9 @@ class ProductToRemoteCategory extends ModelEntity
     protected $connectCategoryId;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\RemoteCategory
+     * @var \Shopware\CustomModels\Connect\RemoteCategory
      *
-     * @ORM\OneToOne(targetEntity="Shopware\CustomModels\Bepado\RemoteCategory")
+     * @ORM\OneToOne(targetEntity="Shopware\CustomModels\Connect\RemoteCategory")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="connect_category_id", referencedColumnName="id")
      * })

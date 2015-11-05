@@ -1,13 +1,13 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
 /**
  * todo@all: Documentation
  */
-//{block name="backend/bepado/view/main/window"}
-Ext.define('Shopware.apps.Bepado.view.main.Window', {
+//{block name="backend/connect/view/main/window"}
+Ext.define('Shopware.apps.Connect.view.main.Window', {
     extend: 'Enlight.app.Window',
-    alias: 'widget.bepado-window',
-    cls: Ext.baseCSSPrefix + 'bepado',
+    alias: 'widget.connect-window',
+    cls: Ext.baseCSSPrefix + 'connect',
 
     layout: 'border',
     width: 1100,
@@ -52,10 +52,10 @@ Ext.define('Shopware.apps.Bepado.view.main.Window', {
     getItems: function() {
         var me = this;
         return [{
-            xtype: 'bepado-navigation',
+            xtype: 'connect-navigation',
             region: 'west'
         }, {
-            xtype: 'bepado-panel',
+            xtype: 'connect-panel',
             region: 'center'
         }];
     }

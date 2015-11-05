@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name='backend/bepado/view/main/mapping/import'}
-Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
+//{block name='backend/connect/view/main/mapping/import'}
+Ext.define('Shopware.apps.Connect.view.mapping.Import', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-mapping-import',
+    alias: 'widget.connect-mapping-import',
 
     //border: false,
     layout: 'border',
@@ -34,13 +34,13 @@ Ext.define('Shopware.apps.Bepado.view.mapping.Import', {
                     clicksToEdit: 1
                 }],
                 columns: [{
-                    text: Ext.String.format('{s name=mapping/columns/bepado-category}[0] Kategorie{/s}', marketplaceName),
+                    text: Ext.String.format('{s name=mapping/columns/connect-category}[0] Kategorie{/s}', marketplaceName),
                     flex: 1,
                     dataIndex: 'mapping',
                     editor: {
                         xtype: 'base-element-selecttree',
                         allowBlank: true,
-                        store: 'mapping.BepadoCategoriesImport'
+                        store: 'mapping.ConnectCategoriesImport'
                     },
                     renderer: function (value) {
                         if (!value) {

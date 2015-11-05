@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/changed_products/list"}
-Ext.define('Shopware.apps.Bepado.view.changed_products.List', {
+//{block name="backend/connect/view/changed_products/list"}
+Ext.define('Shopware.apps.Connect.view.changed_products.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.bepado-changed-products-list',
+    alias: 'widget.connect-changed-products-list',
 
     border: false,
 

@@ -22,15 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
 
 /**
- * bepado specific attributes for bepado products
+ * Connect specific attributes for shopware Connect products
  *
- * @ORM\Table(name="s_plugin_bepado_items")
+ * @ORM\Table(name="s_plugin_connect_items")
  * @ORM\Entity(repositoryClass="AttributeRepository")
  */
 class Attribute extends ModelEntity

@@ -1,23 +1,23 @@
 <?php
 
-namespace Tests\Shopware\Bepado\CategoryQuery;
+namespace Tests\Shopware\Connect\CategoryQuery;
 
 use Bepado\SDK\Struct\Product;
-use Tests\Shopware\Bepado\BepadoTestHelper;
+use Tests\Shopware\Connect\ConnectTestHelper;
 
-abstract class CategoryQueryTest extends BepadoTestHelper
+abstract class CategoryQueryTest extends ConnectTestHelper
 {
     abstract protected function createQuery();
 
-    public function testGetBepadoCategoryForProduct()
+    public function testGetConnectCategoryForProduct()
     {
-        $this->resetBepadoCategoryMappings();
-        $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
-        $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+        $this->resetConnectCategoryMappings();
+        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
 
         $query = $this->createQuery();
 
-        $categories = $query->getBepadoCategoryForProduct(21); // 21 = Jasmine Tee im Demoshop
+        $categories = $query->getConnectCategoryForProduct(21); // 21 = Jasmine Tee im Demoshop
 
         $expectedCategories = array(
             '/deutsch/genusswelten/tees_und_zubehör/tees' => 'Tees',
@@ -35,8 +35,8 @@ abstract class CategoryQueryTest extends BepadoTestHelper
 
     public function testGetCategoriesByProduct()
     {
-        $this->resetBepadoCategoryMappings();
-        $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+        $this->resetConnectCategoryMappings();
+        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
 
         $query = $this->createQuery();
 
@@ -50,9 +50,9 @@ abstract class CategoryQueryTest extends BepadoTestHelper
         $this->assertEquals('Tees', $categories[0]->getName());
     }
 
-    private function resetBepadoCategoryMappings()
+    private function resetConnectCategoryMappings()
     {
         $conn = Shopware()->Db();
-        $conn->exec('UPDATE s_categories_attributes SET bepado_import_mapping = NULL, bepado_export_mapping = NULL');
+        $conn->exec('UPDATE s_categories_attributes SET connect_import_mapping = NULL, connect_export_mapping = NULL');
     }
 }

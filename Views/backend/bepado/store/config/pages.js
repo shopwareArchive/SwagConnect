@@ -21,23 +21,23 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/store/config/pages"}
-Ext.define('Shopware.apps.Bepado.store.config.Pages', {
+//{block name="backend/connect/store/config/pages"}
+Ext.define('Shopware.apps.Connect.store.config.Pages', {
     extend: 'Ext.data.Store',
 
     autoLoad: false,
-    model:'Shopware.apps.Bepado.model.config.Pages',
+    model:'Shopware.apps.Connect.model.config.Pages',
     remoteSort: false,
     remoteFilter: false,
     proxy: {
         type: 'ajax',
-        url: '{url controller="BepadoConfig" action="getStaticPages"}',
+        url: '{url controller="ConnectConfig" action="getStaticPages"}',
         reader: {
             type: 'json',
             root: 'data'

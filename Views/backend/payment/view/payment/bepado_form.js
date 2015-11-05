@@ -21,9 +21,9 @@
  * our trademarks remain entirely with us.
  */
 
-//{namespace name="backend/bepado/view/main"}
+//{namespace name="backend/connect/view/main"}
 //{block name="backend/payment/view/payment/formpanel" append}
-Ext.define('Shopware.apps.payment.view.payment.Bepado', {
+Ext.define('Shopware.apps.payment.view.payment.Connect', {
     override: 'Shopware.apps.Payment.view.payment.FormPanel',
 
     /**
@@ -37,10 +37,10 @@ Ext.define('Shopware.apps.payment.view.payment.Bepado', {
 
         result.push({
             xtype: 'checkbox',
-            fieldLabel: Ext.String.format('{s name=payment/bepadoAllowed}Freigegeben für [0]{/s}', marketplaceName),
+            fieldLabel: Ext.String.format('{s name=payment/connectAllowed}Freigegeben für [0]{/s}', marketplaceName),
             inputValue: 1,
             uncheckedValue: 0,
-            name: 'attribute[bepadoIsAllowed]'
+            name: 'attribute[connectIsAllowed]'
         });
 
         return result;

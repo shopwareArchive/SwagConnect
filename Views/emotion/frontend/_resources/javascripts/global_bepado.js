@@ -2,7 +2,7 @@
 
     $(document).ready(function () {
 
-        $('body').delegate('.bepado_collapsible h2', 'click', function() {
+        $('body').delegate('.connect_collapsible h2', 'click', function() {
         	var $this = $(this);
 
         	$this.children('b').toggleClass('collapsed');

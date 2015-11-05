@@ -21,16 +21,16 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{include file="backend/bepado/_resources/html/config_export.tpl" assign="exportConfigContent"}
-//{block name="backend/bepado/view/config/export/description"}
-Ext.define('Shopware.apps.Bepado.view.config.export.Description', {
+//{namespace name=backend/connect/view/main}
+//{include file="backend/connect/_resources/html/config_export.tpl" assign="exportConfigContent"}
+//{block name="backend/connect/view/config/export/description"}
+Ext.define('Shopware.apps.Connect.view.config.export.Description', {
     /**
      * Define that the description field set is an extension of the Ext.form.FieldSet
      * @string
@@ -47,7 +47,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Description', {
      * List of short aliases for class names. Most useful for defining xtypes for widgets.
      * @string
      */
-    alias:'widget.bepado-config-export-description',
+    alias:'widget.connect-config-export-description',
 
     /**
      * Contains all snippets for the component

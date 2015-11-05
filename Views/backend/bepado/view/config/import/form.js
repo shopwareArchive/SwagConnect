@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/import/form"}
-Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/config/import/form"}
+Ext.define('Shopware.apps.Connect.view.config.import.Form', {
     extend: 'Ext.form.Panel',
-    alias: 'widget.bepado-config-import-form',
+    alias: 'widget.connect-config-import-form',
 
     border: false,
     layout: 'anchor',
@@ -76,7 +76,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             items: me.getFormButtons()
         }];
 
-        me.importConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Import').load({
+        me.importConfigStore = Ext.create('Shopware.apps.Connect.store.config.Import').load({
             callback: function() {
                 me.populateForm();
             }
@@ -261,7 +261,7 @@ Ext.define('Shopware.apps.Bepado.view.config.import.Form', {
             record = me.importConfigStore.getAt(0);
 
         if (!record) {
-            record = Ext.create('Shopware.apps.Bepado.model.config.Import');
+            record = Ext.create('Shopware.apps.Connect.model.config.Import');
         }
         me.loadRecord(record);
     },

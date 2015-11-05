@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Product;
 
-class HelperTest extends BepadoTestHelper
+class HelperTest extends ConnectTestHelper
 {
     public function testGetDefaultCustomerGroup()
     {
@@ -21,13 +21,13 @@ class HelperTest extends BepadoTestHelper
         $this->assertNotEmpty($model->getName());
     }
 
-    public function testHasBasketBepadoProductsIsFalse()
+    public function testHasBasketConnectProductsIsFalse()
     {
-        $result = $this->getHelper()->hasBasketBepadoProducts(333);
+        $result = $this->getHelper()->hasBasketConnectProducts(333);
         $this->assertFalse($result);
     }
 
-    public function testHasBasketBepadoProductsIsTrue()
+    public function testHasBasketConnectProductsIsTrue()
     {
         // Bootstrap a shop object
         /** @var \Shopware\Models\Shop\Repository $repo */
@@ -36,7 +36,7 @@ class HelperTest extends BepadoTestHelper
         $shop->registerResources(Shopware()->Bootstrap());
 
         // todo@sb: Fix unit test
-//        $id = $this->getBepadoProductArticleId();
+//        $id = $this->getConnectProductArticleId();
 //        /** @var \Shopware\Models\Article\Detail $detail */
 //        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('articleId' => $id, 'kind' => 1));
 
@@ -46,17 +46,17 @@ class HelperTest extends BepadoTestHelper
 //        $this->dispatch('/account/login');
 //
 //
-//        // Add bepado product to basket
+//        // Add connect product to basket
 //        $wasSuccessFul = Shopware()->Modules()->Basket()->sAddArticle($detail->getNumber());
 //
 //
-//        $result = $this->getHelper()->hasBasketBepadoProducts(333);
+//        $result = $this->getHelper()->hasBasketConnectProducts(333);
 //        $this->assertFalse($result);
     }
 
-    public function testGetBepadoAttributeByModel()
+    public function testGetConnectAttributeByModel()
     {
-        $attributes = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findBy(array('articleId' => 14));
+        $attributes = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findBy(array('articleId' => 14));
         foreach ($attributes as $attribute) {
             Shopware()->Models()->remove($attribute);
         }
@@ -65,17 +65,17 @@ class HelperTest extends BepadoTestHelper
         /** @var \Shopware\Models\Article\Article $model */
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(14);
 
-        $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($model);
-        $this->assertEmpty($bepadoAttribute);
+        $connectAttribute = $this->getHelper()->getConnectAttributeByModel($model);
+        $this->assertEmpty($connectAttribute);
     }
 
-    public function testGetOrCreateBepadoAttributeByModel()
+    public function testGetOrCreateConnectAttributeByModel()
     {
         /** @var \Shopware\Models\Article\Article $model */
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(14);
 
-        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
-        $this->assertNotEmpty($bepadoAttribute->getId());
+        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
+        $this->assertNotEmpty($connectAttribute->getId());
     }
 
     public function _testGetImagesById()
@@ -100,8 +100,8 @@ class HelperTest extends BepadoTestHelper
     public function testGetCategoriesByProduct()
     {
         $this->markTestSkipped('It fails in travis, but works locally');
-        $this->resetBepadoCategoryMappings();
-        $this->changeCategoryBepadoMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+        $this->resetConnectCategoryMappings();
+        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
 
         $sourceId = $this->getExternalProductSourceId();
         $products = $this->getHelper()->getRemoteProducts(array($sourceId));
@@ -110,9 +110,9 @@ class HelperTest extends BepadoTestHelper
         $this->assertNotEmpty($categories);
     }
 
-    private function resetBepadoCategoryMappings()
+    private function resetConnectCategoryMappings()
     {
         $conn = Shopware()->Db();
-        $conn->exec('UPDATE s_categories_attributes SET bepado_import_mapping = NULL, bepado_export_mapping = NULL');
+        $conn->exec('UPDATE s_categories_attributes SET connect_import_mapping = NULL, connect_export_mapping = NULL');
     }
 }

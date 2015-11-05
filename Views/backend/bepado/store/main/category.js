@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/main/category"}
-Ext.define('Shopware.apps.Bepado.store.main.Category', {
+//{block name="backend/connect/store/main/category"}
+Ext.define('Shopware.apps.Connect.store.main.Category', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,

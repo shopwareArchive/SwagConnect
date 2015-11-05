@@ -1,7 +1,7 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/local_products"}
-Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
+//{block name="backend/connect/view/import/local_products"}
+Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.local-products',
     store: 'import.LocalProducts',
@@ -15,7 +15,7 @@ Ext.define('Shopware.apps.Bepado.view.import.LocalProducts', {
             dropGroup: 'local'
         },
         getRowClass: function(rec, rowIdx, params, store) {
-            return rec.get('Attribute_bepadoMappedCategory') == 1 ? 'shopware-connect-color' : '';
+            return rec.get('Attribute_connectMappedCategory') == 1 ? 'shopware-connect-color' : '';
         }
     },
 

@@ -3,16 +3,16 @@
  */
 /*
  {block name="backend/order/model/order/fields" append}
- { name: 'bepadoOrderId', type: 'auto', useNull : true },
- { name: 'bepadoShopId', type: 'int', useNull : true },
- { name: 'bepadoShop', type: 'string', useNull : true },
+ { name: 'connectOrderId', type: 'auto', useNull : true },
+ { name: 'connectShopId', type: 'int', useNull : true },
+ { name: 'connectShop', type: 'string', useNull : true },
  {/block}
  */
 
 /**
  * Extend the article's base fieldSet and add out customizing field
  */
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 //{block name="backend/order/view/list/list" append}
 Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
     override: 'Shopware.apps.Order.view.list.List',
@@ -27,7 +27,7 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
 
         columns.push({
             header: '',
-            dataIndex: 'bepadoOrderId',
+            dataIndex: 'connectOrderId',
             width:30,
             renderer: function(value, metaData, record) {
                 var me = this,
@@ -39,11 +39,11 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
                 if (value) {
                     if (value == 'remote') {
                         var orderDescription = Ext.String.format('{s name=order/fromRemote}Diese Bestellung enthält [0]-Produkte eines Fremdshops{/s}', marketplaceName);
-                        result = '<div  title="" class="bepado-icon" ' + style + '>&nbsp;</div>';
+                        result = '<div  title="" class="connect-icon" ' + style + '>&nbsp;</div>';
                         metaData.tdAttr = 'data-qtip="' + orderDescription + '"';
                     } else {
-                        result = '<div  title="" class="bepado-icon-green" ' + style + '>&nbsp;</div>';
-                        metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('bepadoShop') + '"';
+                        result = '<div  title="" class="connect-icon-green" ' + style + '>&nbsp;</div>';
+                        metaData.tdAttr = 'data-qtip="' + value + ' / ' +  record.get('connectShop') + '"';
                     }
                 }
 

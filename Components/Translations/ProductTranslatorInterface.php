@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components\Translations;
+namespace Shopware\Connect\Components\Translations;
 
 use Bepado\SDK\Struct\Translation;
 

@@ -22,22 +22,22 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components\Translations;
+namespace Shopware\Connect\Components\Translations;
 
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway;
 use Shopware\Components\Model\ModelManager;
 use Bepado\SDK\Struct\Translation;
 
 class ProductTranslator implements ProductTranslatorInterface
 {
     /**
-     * @var \Shopware\Bepado\Components\Config
+     * @var \Shopware\Connect\Components\Config
      */
     private $config;
 
     /**
-     * @var \Shopware\Bepado\Components\Gateway\ProductTranslationsGateway
+     * @var \Shopware\Connect\Components\Gateway\ProductTranslationsGateway
      */
     private $productTranslationsGateway;
 

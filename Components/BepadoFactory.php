@@ -1,29 +1,29 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 
-use Shopware\Bepado\Components\CategoryQuery\RelevanceSorter;
-use Shopware\Bepado\Components\CategoryQuery\Sw41Query;
+use Shopware\Connect\Components\CategoryQuery\RelevanceSorter;
+use Shopware\Connect\Components\CategoryQuery\Sw41Query;
 use Bepado\SDK;
-use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
-use Shopware\Bepado\Components\CategoryResolver\DefaultCategoryResolver;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
-use Shopware\Bepado\Components\OrderQuery\RemoteOrderQuery;
-use Shopware\Bepado\Components\Payment\ProductPayments;
-use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
-use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
-use Shopware\Bepado\Components\Translations\ProductTranslator;
-use Shopware\Bepado\Components\Utils\CountryCodeResolver;
+use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use Shopware\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
+use Shopware\Connect\Components\OrderQuery\RemoteOrderQuery;
+use Shopware\Connect\Components\Payment\ProductPayments;
+use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
+use Shopware\Connect\Components\ProductQuery\RemoteProductQuery;
+use Shopware\Connect\Components\Translations\ProductTranslator;
+use Shopware\Connect\Components\Utils\CountryCodeResolver;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
  *
- * Class BepadoFactory
- * @package Shopware\Bepado\Components
+ * Class ConnectFactory
+ * @package Shopware\Connect\Components
  */
-class BepadoFactory
+class ConnectFactory
 {
     private $helper;
     private $sdk;
@@ -31,10 +31,10 @@ class BepadoFactory
     private $modelManager;
     private $pluginVersion;
 
-    /** @var  \Shopware\Bepado\Components\Config */
+    /** @var  \Shopware\Connect\Components\Config */
     private $configComponent;
 
-    private $marketplaceGatway;
+    private $marketplaceGateway;
 
     private $productTranslationsGateway;
 
@@ -51,7 +51,7 @@ class BepadoFactory
     public function getSDK()
     {
         if(!$this->sdk) {
-            $this->sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
+            $this->sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
         }
 
         return $this->sdk;
@@ -85,10 +85,10 @@ class BepadoFactory
         $gateway = new SDK\Gateway\PDO($connection);
 
         /*
-         * The debugHost allows to specify an alternative bepado host.
+         * The debugHost allows to specify an alternative connect host.
          * Furthermore currently only one debugHost for *all* service can be specified
          */
-        $debugHost = $this->getConfigComponent()->getConfig('bepadoDebugHost');
+        $debugHost = $this->getConfigComponent()->getConfig('connectDebugHost');
         if (!empty($debugHost)) {
             $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
@@ -101,12 +101,12 @@ class BepadoFactory
             new AutoCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\Models\Category\Category'),
-                $manager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
             ) :
             new DefaultCategoryResolver(
                 $manager,
-                $manager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory'),
-                $manager->getRepository('Shopware\CustomModels\Bepado\ProductToRemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             );
         return new SDK\SDK(
             $apiKey,
@@ -148,7 +148,7 @@ class BepadoFactory
     }
 
     /**
-     * Returns a route to the bepado gateway controller
+     * Returns a route to the connect gateway controller
      *
      * @param $front \Enlight_Controller_Front
      * @return string
@@ -161,7 +161,7 @@ class BepadoFactory
 
         $url = $front->Router()->assemble(array(
             'module' => 'backend',
-            'controller' => 'bepado_gateway',
+            'controller' => 'connect_gateway',
             'fullPath' => true
         ));
         $hasSSL = $this->getConfigComponent()->getConfig('hasSSL', 0);
@@ -307,7 +307,7 @@ class BepadoFactory
 
         return Shopware()->Front()->Router()->assemble(array(
             'module' => 'frontend',
-            'controller' => 'bepado_product_gateway',
+            'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
@@ -328,11 +328,11 @@ class BepadoFactory
 
     public function getMarketplaceGateway()
     {
-        if (!$this->marketplaceGatway) {
-            $this->marketplaceGatway = new MarketplaceGateway($this->getModelManager());
+        if (!$this->marketplaceGateway) {
+            $this->marketplaceGateway = new MarketplaceGateway($this->getModelManager());
         }
 
-        return $this->marketplaceGatway;
+        return $this->marketplaceGateway;
     }
 
     public function getCountryCodeResolver()

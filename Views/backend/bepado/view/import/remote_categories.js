@@ -1,7 +1,7 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/remote_categories"}
-Ext.define('Shopware.apps.Bepado.view.import.RemoteCategories', {
+//{block name="backend/connect/view/import/remote_categories"}
+Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
     extend: 'Ext.tree.Panel',
     alias: 'widget.connect-remote-categories',
 

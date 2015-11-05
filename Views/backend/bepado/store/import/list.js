@@ -1,10 +1,10 @@
-//{block name="backend/bepado/store/import/list"}
-Ext.define('Shopware.apps.Bepado.store.import.List', {
+//{block name="backend/connect/store/import/list"}
+Ext.define('Shopware.apps.Connect.store.import.List', {
     extend: 'Ext.data.Store',
 
     groupField: 'category',
 
-    model:'Shopware.apps.Bepado.model.import.List',
+    model:'Shopware.apps.Connect.model.import.List',
     remoteSort: true,
     remoteFilter: true,
     pageSize: 20,

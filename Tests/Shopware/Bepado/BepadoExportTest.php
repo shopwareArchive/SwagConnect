@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
-use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\Bepado\Components\Config;
+use Shopware\Connect\Components\ConnectExport;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Connect\Components\Config;
 
-class BepadoExportTest extends BepadoTestHelper
+class ConnectExportTest extends ConnectTestHelper
 {
     /**
-     * @var \Shopware\Bepado\Components\BepadoExport
+     * @var \Shopware\Connect\Components\ConnectExport
      */
-    private $bepadoExport;
+    private $connectExport;
 
     public static function setUpBeforeClass()
     {
@@ -22,7 +22,7 @@ class BepadoExportTest extends BepadoTestHelper
 
     public function setUp()
     {
-        $this->bepadoExport = new BepadoExport(
+        $this->connectExport = new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
@@ -42,15 +42,15 @@ class BepadoExportTest extends BepadoTestHelper
         Shopware()->Models()->persist($model->getMainDetail());
         Shopware()->Models()->flush($model->getMainDetail());
 
-        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
-        $bepadoAttribute->setExportStatus('insert');
-        Shopware()->Models()->persist($bepadoAttribute);
+        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
+        $connectAttribute->setExportStatus('insert');
+        Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
 
-        $errors = $this->bepadoExport->export(array(3));
+        $errors = $this->connectExport->export(array(3));
 
         $this->assertEmpty($errors);
-        $sql = 'SELECT export_status, export_message FROM s_plugin_bepado_items WHERE source_id = ?';
+        $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE source_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(3));
 
         $this->assertEquals('update', $row['export_status']);
@@ -60,12 +60,12 @@ class BepadoExportTest extends BepadoTestHelper
     public function testExportErrors()
     {
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(4);
-        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
-        $errors = $this->bepadoExport->export(array(4));
+        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
+        $errors = $this->connectExport->export(array(4));
 
         $this->assertNotEmpty($errors);
 
-        $sql = 'SELECT export_status, export_message FROM s_plugin_bepado_items WHERE article_id = ?';
+        $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE article_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(4));
 
         $this->assertEquals('error', $row['export_status']);
@@ -78,16 +78,16 @@ class BepadoExportTest extends BepadoTestHelper
         $modelManager = Shopware()->Models();
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
 
-        $this->bepadoExport->syncDeleteArticle($article);
+        $this->connectExport->syncDeleteArticle($article);
         $result = Shopware()->Db()->executeQuery(
             'SELECT export_status
-              FROM s_plugin_bepado_items
+              FROM s_plugin_connect_items
               WHERE article_id = ?',
             array($articleId)
         )->fetchAll();
 
-        foreach ($result as $bepadoAttribute) {
-            $this->assertEquals('delete', $bepadoAttribute['export_status']);
+        foreach ($result as $connectAttribute) {
+            $this->assertEquals('delete', $connectAttribute['export_status']);
         }
 
         $this->assertEquals(4, Shopware()->Db()->query('SELECT COUNT(*) FROM bepado_change WHERE c_source_id LIKE "1919%"')->fetchColumn());
@@ -101,22 +101,22 @@ class BepadoExportTest extends BepadoTestHelper
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
         $detail = $article->getMainDetail();
 
-        $this->bepadoExport->syncDeleteDetail($detail);
+        $this->connectExport->syncDeleteDetail($detail);
 
         $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM bepado_change WHERE c_source_id LIKE "1919%"')->fetchColumn());
-        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_bepado_items WHERE source_id = "1919" AND export_status = "delete"')->fetchColumn());
+        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status = "delete"')->fetchColumn());
     }
 
     private function insertVariants()
     {
-        //clear bepado_change table
+        //clear connect_change table
         Shopware()->Db()->exec('DELETE FROM bepado_change WHERE c_source_id LIKE "1919%"');
         //clear s_articles table
         Shopware()->Db()->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
         //clear s_articles_detail table
         Shopware()->Db()->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "1919%"');
-        //clear bepado_items table
-        Shopware()->Db()->exec('DELETE FROM s_plugin_bepado_items WHERE source_id LIKE "1919%"');
+        //clear connect_items table
+        Shopware()->Db()->exec('DELETE FROM s_plugin_connect_items WHERE source_id LIKE "1919%"');
 
 
         $minimalTestArticle = array(
@@ -242,7 +242,7 @@ class BepadoExportTest extends BepadoTestHelper
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($article->getDetails() as $detail) {
             Shopware()->Db()->executeQuery(
-                'INSERT INTO s_plugin_bepado_items (article_id, article_detail_id, source_id, category)
+                'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
                   VALUES (?, ?, ?, ?)',
                 array(
                     $article->getId(),

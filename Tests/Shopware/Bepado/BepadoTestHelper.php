@@ -1,20 +1,20 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Translation;
-use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Bepado\Components\ImageImport;
-use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\CustomModels\Bepado\Attribute;
-use Shopware\Bepado\Components\Config;
+use Shopware\Connect\Components\ConnectExport;
+use Shopware\Connect\Components\ImageImport;
+use Shopware\Connect\Components\Logger;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\CustomModels\Connect\Attribute;
+use Shopware\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Tax\Tax;
 
-class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
+class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
 
     /**
@@ -22,16 +22,16 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+        return Shopware()->Bootstrap()->getResource('ConnectSDK');
     }
 
     /**
      * @return int
      */
-    public function getBepadoProductArticleId($sourceId, $shopId=3)
+    public function getConnectProductArticleId($sourceId, $shopId=3)
     {
         $id = Shopware()->Db()->fetchOne(
-            'SELECT article_id FROM s_plugin_bepado_items WHERE source_id = ? and shop_id =  ? LIMIT 1',
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? and shop_id =  ? LIMIT 1',
             array($sourceId, $shopId)
         );
         return $id;
@@ -39,18 +39,18 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     public function getExternalProductSourceId()
     {
-        $sql = 'SELECT source_id FROM s_plugin_bepado_items WHERE shop_id IS NOT NULL';
+        $sql = 'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NOT NULL';
         $sourceId = Shopware()->Db()->fetchOne($sql);
 
         return $sourceId;
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Helper
+     * @return \Shopware\Connect\Components\Helper
      */
     public function getHelper()
     {
-        return Shopware()->Plugins()->Backend()->SwagBepado()->getHelper();
+        return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
     }
 
 
@@ -66,11 +66,11 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return BepadoExport
+     * @return ConnectExport
      */
-    public function getBepadoExport()
+    public function getConnectExport()
     {
-        return new BepadoExport(
+        return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
@@ -92,7 +92,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         );
     }
 
-    public function changeCategoryBepadoMappingForCategoryTo($categoryId, $mapping)
+    public function changeCategoryConnectMappingForCategoryTo($categoryId, $mapping)
     {
         $modelManager = Shopware()->Models();
         $categoryRepository = $modelManager->getRepository('Shopware\Models\Category\Category');
@@ -103,8 +103,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         }
 
         $attribute = $category->getAttribute() ?: new \Shopware\Models\Attribute\Category();
-        $attribute->setBepadoImportMapping($mapping);
-        $attribute->setBepadoExportMapping($mapping);
+        $attribute->setConnectImportMapping($mapping);
+        $attribute->setConnectExportMapping($mapping);
         $category->setAttribute($attribute);
 
         $modelManager->flush();
@@ -112,7 +112,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     public static function dispatchRpcCall($service, $command, array $args)
     {
-        $sdk = Shopware()->Bootstrap()->getResource('BepadoSDK');
+        $sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
         $refl = new \ReflectionObject($sdk);
         $property = $refl->getProperty('dependencies');
         $property->setAccessible(true);
@@ -135,9 +135,9 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'ean' => $number,
             'url' => 'http://shopware.de',
             'title' => 'MassImport #'. $number,
-            'shortDescription' => 'Ein Produkt aus Bepado',
-            'longDescription' => 'Ein Produkt aus Bepado',
-            'vendor' => 'Bepado',
+            'shortDescription' => 'Ein Produkt aus shopware Connect',
+            'longDescription' => 'Ein Produkt aus shopware Connect',
+            'vendor' => 'shopware Connect',
             'price' => 9.99,
             'purchasePrice' => $purchasePrice,
             'purchasePriceHash' => hash_hmac(
@@ -152,8 +152,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'translations' => array(
                 'en' => new Translation(array(
                     'title' => 'MassImport #'. $number . ' EN',
-                    'longDescription' => 'Ein Produkt aus Bepado EN',
-                    'shortDescription' => 'Ein Produkt aus Bepado short EN',
+                    'longDescription' => 'Ein Produkt aus shopware Connect EN',
+                    'shortDescription' => 'Ein Produkt aus shopware Connect short EN',
                     'url' => 'http://shopware.de',
                 ))
             )
@@ -273,8 +273,8 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         ));
         $mainDetail->setPrices(array($price));
 
-        $bepadoAttribute = new Attribute();
-        $bepadoAttribute->fromArray(array(
+        $connectAttribute = new Attribute();
+        $connectAttribute->fromArray(array(
             'isMainVariant' => true,
             'article' => $article,
             'articleDetail' => $article->getMainDetail(),
@@ -288,7 +288,7 @@ class BepadoTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         Shopware()->Models()->persist($mainDetail);
         Shopware()->Models()->persist($detailAtrribute);
         Shopware()->Models()->persist($price);
-        Shopware()->Models()->persist($bepadoAttribute);
+        Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
 
         return $article;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
-use Shopware\Bepado\Components\Utils\BepadoOrderUtil;
+use Shopware\Connect\Components\Utils\ConnectOrderUtil;
 
 class OrderDocument extends BaseSubscriber
 {
@@ -14,7 +14,7 @@ class OrderDocument extends BaseSubscriber
     }
 
     /**
-     * Make sure, that bepado orders with "unknown" tax rates for shipping are handled properly
+     * Make sure, that connect orders with "unknown" tax rates for shipping are handled properly
      *
      * @param \Enlight_Hook_HookArgs $args
      */
@@ -24,13 +24,13 @@ class OrderDocument extends BaseSubscriber
         $order = $orderModel->order;
 
         // This will apply for remote orders
-        if ($order->attributes && $order->attributes['bepado_order_id']) {
+        if ($order->attributes && $order->attributes['connect_order_id']) {
             $this->setDefaultTaxRate($order);
         }
 
-        // This will apply for local bepado orders
-        $orderUtil = new BepadoOrderUtil();
-        if ($orderUtil->hasLocalOrderBepadoProducts($order->id)) {
+        // This will apply for local connect orders
+        $orderUtil = new ConnectOrderUtil();
+        if ($orderUtil->hasLocalOrderConnectProducts($order->id)) {
             $this->setDefaultTaxRate($order);
         }
 

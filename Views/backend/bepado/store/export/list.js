@@ -1,8 +1,8 @@
-//{block name="backend/bepado/store/export/list"}
-Ext.define('Shopware.apps.Bepado.store.export.List', {
+//{block name="backend/connect/store/export/list"}
+Ext.define('Shopware.apps.Connect.store.export.List', {
     extend: 'Ext.data.Store',
 
-    model:'Shopware.apps.Bepado.model.export.List',
+    model:'Shopware.apps.Connect.model.export.List',
     remoteSort: true,
     remoteFilter: true,
     pageSize: 20,

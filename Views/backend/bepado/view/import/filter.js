@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/filter"}
-Ext.define('Shopware.apps.Bepado.view.import.Filter', {
+//{block name="backend/connect/view/import/filter"}
+Ext.define('Shopware.apps.Connect.view.import.Filter', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-import-filter',
+    alias: 'widget.connect-import-filter',
 
     width: 200,
     layout: {

@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Shopware\Bepado\CategoryQuery;
+namespace Tests\Shopware\Connect\CategoryQuery;
 
-use Shopware\Bepado\Components\BepadoFactory;
+use Shopware\Connect\Components\ConnectFactory;
 
 class Sw40QueryTest extends CategoryQueryTest
 {
     protected function createQuery()
     {
-        $factory = new BepadoFactory();
+        $factory = new ConnectFactory();
 
         if ($factory->checkMinimumVersion('4.1.0')) {
             $this->markTestSkipped('This tests only run on Shopware 4.1.0 and greater');

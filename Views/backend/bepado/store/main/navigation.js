@@ -1,7 +1,7 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/store/main/navigation"}
-Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
+//{block name="backend/connect/store/main/navigation"}
+Ext.define('Shopware.apps.Connect.store.main.Navigation', {
     extend: 'Ext.data.TreeStore',
 
     autoLoad: false,
@@ -9,7 +9,7 @@ Ext.define('Shopware.apps.Bepado.store.main.Navigation', {
     root: {
         expanded: true,
         children: [
-            { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'bepado-icon' },
+            { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'connect-icon' },
             {
                 id: 'config', text: "{s name=navigation/settings/settings}Einstellungen{/s}",
                 leaf: false,

@@ -1,8 +1,8 @@
-//{block name="backend/bepado/store/changed_products/list"}
-Ext.define('Shopware.apps.Bepado.store.changed_products.List', {
+//{block name="backend/connect/store/changed_products/list"}
+Ext.define('Shopware.apps.Connect.store.changed_products.List', {
     extend: 'Ext.data.Store',
 
-    model:'Shopware.apps.Bepado.model.changed_products.List',
+    model:'Shopware.apps.Connect.model.changed_products.List',
     remoteSort: true,
     remoteFilter: true,
     pageSize: 20,

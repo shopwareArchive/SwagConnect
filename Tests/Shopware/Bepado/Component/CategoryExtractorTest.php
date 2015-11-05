@@ -4,27 +4,27 @@
 class CategoryExtractorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Shopware\Bepado\Components\CategoryExtractor
+     * @var \Shopware\Connect\Components\CategoryExtractor
      */
     private $categoryExtractor;
 
     public function setUp()
     {
-        $attributeRepository = $this->getMockBuilder('\\Shopware\\CustomModels\\Bepado\\AttributeRepository')
+        $attributeRepository = $this->getMockBuilder('\\Shopware\\CustomModels\\Connect\\AttributeRepository')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $attribute1 = new \Shopware\CustomModels\Bepado\Attribute();
+        $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute1->setCategory(array('/Ski' => 'Ski'));
 
-        $attribute2 = new \Shopware\CustomModels\Bepado\Attribute();
+        $attribute2 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute2->setCategory(array(
             '/Kleidung' => 'Kleidung',
             '/Kleidung/Hosen' => 'Hosen',
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
         ));
 
-        $attribute3 = new \Shopware\CustomModels\Bepado\Attribute();
+        $attribute3 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute3->setCategory(array(
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
             '/Kleidung/Nahrung & Getraenke' => 'Nahrung & Getraenke',
@@ -39,12 +39,12 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
                 $attribute3,
             ));
 
-        $this->categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
+        $this->categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
             $attributeRepository,
-            new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+            new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 Shopware()->Models(),
                 Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
             )
         );
     }

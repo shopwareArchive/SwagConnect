@@ -1,7 +1,7 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/own_categories"}
-Ext.define('Shopware.apps.Bepado.view.import.OwnCategories', {
+//{block name="backend/connect/view/import/own_categories"}
+Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
     extend: 'Ext.tree.Panel',
     alias: 'widget.connect-own-categories',
 

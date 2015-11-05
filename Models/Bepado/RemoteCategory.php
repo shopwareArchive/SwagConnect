@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM;
 use \Shopware\Components\Model\ModelEntity;
@@ -30,7 +30,7 @@ use \Shopware\Components\Model\ModelEntity;
 /**
  * Describes Shopware Connect categories
  *
- * @ORM\Table(name="s_plugin_bepado_categories")
+ * @ORM\Table(name="s_plugin_connect_categories")
  * @ORM\Entity(repositoryClass="RemoteCategoryRepository")
  */
 class RemoteCategory extends ModelEntity

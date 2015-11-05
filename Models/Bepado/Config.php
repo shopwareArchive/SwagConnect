@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Doctrine\ORM\Mapping as ORM,
     \Shopware\Components\Model\ModelEntity;
@@ -30,7 +30,7 @@ use \Doctrine\ORM\Mapping as ORM,
 /**
  * As writing config values in SW is quite hard, we use our own little configs
  *
- * @ORM\Table(name="s_plugin_bepado_config")
+ * @ORM\Table(name="s_plugin_connect_config")
  * @ORM\Entity(repositoryClass="ConfigRepository")
  */
 class Config extends ModelEntity

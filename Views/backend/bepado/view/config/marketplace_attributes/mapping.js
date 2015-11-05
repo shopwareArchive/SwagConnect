@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name='backend/bepado/view/config/marketplace_attributes/mapping'}
-Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Mapping', {
+//{namespace name=backend/connect/view/main}
+//{block name='backend/connect/view/config/marketplace_attributes/mapping'}
+Ext.define('Shopware.apps.Connect.view.config.marketplaceAttributes.Mapping', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-marketplace-attributes-mapping',
+    alias: 'widget.connect-marketplace-attributes-mapping',
 
     layout: 'fit',
 
@@ -41,15 +41,15 @@ Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Mapping', {
 
     initComponent: function() {
         var me = this;
-        me.marketplaceAttributesStore = Ext.create('Shopware.apps.Bepado.store.config.MarketplaceAttributes').load();
-        me.localProductAttributesStore = Ext.create('Shopware.apps.Bepado.store.config.LocalProductAttributes').load();
+        me.marketplaceAttributesStore = Ext.create('Shopware.apps.Connect.store.config.MarketplaceAttributes').load();
+        me.localProductAttributesStore = Ext.create('Shopware.apps.Connect.store.config.LocalProductAttributes').load();
 
 
 
         Ext.applyIf(me, {
             items: [
                 Ext.create('Ext.grid.Panel', {
-                    alias: 'widget.bepado-marketplace-attributes-mapping-list',
+                    alias: 'widget.connect-marketplace-attributes-mapping-list',
                     store: me.localProductAttributesStore,
                     selModel: 'cellmodel',
                     plugins: [ me.createCellEditor() ],
@@ -58,7 +58,7 @@ Ext.define('Shopware.apps.Bepado.view.config.marketplaceAttributes.Mapping', {
                         dataIndex: 'shopwareAttributeKey',
                         flex: 1
                     }, {
-                        header: Ext.String.format('{s name=config/marketplace/bepado_attribute_header}[0]-Attribut{/s}', marketplaceName),
+                        header: Ext.String.format('{s name=config/marketplace/connect_attribute_header}[0]-Attribut{/s}', marketplaceName),
                         dataIndex: 'attributeKey',
                         flex: 1,
                         editor: {

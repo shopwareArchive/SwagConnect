@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/main/panel"}
-Ext.define('Shopware.apps.Bepado.view.main.Panel', {
+//{block name="backend/connect/view/main/panel"}
+Ext.define('Shopware.apps.Connect.view.main.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-panel',
+    alias: 'widget.connect-panel',
 
     border: false,
     layout: 'card',
@@ -13,37 +13,37 @@ Ext.define('Shopware.apps.Bepado.view.main.Panel', {
 
         Ext.applyIf(me, {
             items: [{
-                xtype: 'bepado-home-page',
+                xtype: 'connect-home-page',
                 itemId: 'home'
             }, {
-                xtype: 'bepado-config',
+                xtype: 'connect-config',
                 itemId: 'config'
             }, {
-                xtype: 'bepado-config-import',
+                xtype: 'connect-config-import',
                 itemId: 'config-import'
             }, {
-                xtype: 'bepado-config-export',
+                xtype: 'connect-config-export',
                 itemId: 'config-export'
             }, {
-                xtype: 'bepado-config-marketplace-attributes',
+                xtype: 'connect-config-marketplace-attributes',
                 itemId: 'marketplace-attributes'
             }, {
-                xtype: 'bepado-mapping-import',
+                xtype: 'connect-mapping-import',
                 itemId: 'mapping-import'
             }, {
-                xtype: 'bepado-mapping-export',
+                xtype: 'connect-mapping-export',
                 itemId: 'mapping-export'
             }, {
-                xtype: 'bepado-export',
+                xtype: 'connect-export',
                 itemId: 'export'
             }, {
-                xtype: 'bepado-import',
+                xtype: 'connect-import',
                 itemId: 'import'
             }, {
-                xtype: 'bepado-changed-products',
+                xtype: 'connect-changed-products',
                 itemId: 'changed'
             }, {
-                xtype: 'bepado-log',
+                xtype: 'connect-log',
                 itemId: 'log'
             }
             ]

@@ -1,9 +1,9 @@
-//{block name="backend/article/model/bepado"}
-Ext.define('Shopware.apps.Article.model.Bepado', {
+//{block name="backend/article/model/connect"}
+Ext.define('Shopware.apps.Article.model.Connect', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/article/model/bepado/fields"}{/block}
+        //{block name="backend/article/model/connect/fields"}{/block}
         { name: 'fixedPrice', type: 'boolean' },
         { name: 'shopId', type: 'int', useNull: true },
         { name: 'sourceId', type: 'string', useNull: true },
@@ -32,8 +32,8 @@ Ext.define('Shopware.apps.Article.model.Bepado', {
          * @object
          */
         api: {
-            create: '{url controller=Bepado action="saveBepadoAttribute"}',
-            update: '{url controller=Bepado action="saveBepadoAttribute"}'
+            create: '{url controller=Connect action="saveConnectAttribute"}',
+            update: '{url controller=Connect action="saveConnectAttribute"}'
         },
 
         /**

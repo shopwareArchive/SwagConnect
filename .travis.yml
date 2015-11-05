@@ -8,21 +8,21 @@ sudo: false
 
 before_script:
     - git clone https://github.com/shopware/shopware.git /tmp/shopware
-    - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagBepado
+    - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagConnect
     - cd ..
     - cd /tmp/shopware
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
-    - mv /home/travis/build/shopware/SwagBepado /tmp/shopware/engine/Shopware/Plugins/Local/Backend
+    - mv /home/travis/build/shopware/SwagConnect /tmp/shopware/engine/Shopware/Plugins/Local/Backend
     - cd /tmp/shopware
     - ls engine/Shopware/Plugins/Local/Backend
     - php bin/console sw:plugin:refresh
     - php bin/console sw:plugin:list
-    - php bin/console sw:plugin:install SwagBepado
-    - php bin/console sw:plugin:activate SwagBepado
+    - php bin/console sw:plugin:install SwagConnect
+    - php bin/console sw:plugin:activate SwagConnect
     - php bin/console sw:generate:attributes
     - php bin/console orm:generate:proxies
 #    - bash cache/clear_cache.sh
-    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagBepado
+    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
 
 script: phpunit
 

@@ -1,10 +1,10 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
 /**
  * Shopware Controller - Cache backend module
  */
-//{block name="backend/bepado/controller/import"}
-Ext.define('Shopware.apps.Bepado.controller.Import', {
+//{block name="backend/connect/controller/import"}
+Ext.define('Shopware.apps.Connect.controller.Import', {
 
     extend: 'Enlight.app.Controller',
 
@@ -13,8 +13,8 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
     ],
 
     refs: [
-        { ref: 'window', selector: 'bepado-window' },
-        { ref: 'importPanel', selector: 'bepado-import' },
+        { ref: 'window', selector: 'connect-window' },
+        { ref: 'importPanel', selector: 'connect-import' },
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
         { ref: 'localProductsGrid', selector: 'local-products' },
         { ref: 'localCategoryTree', selector: 'connect-own-categories' },
@@ -41,13 +41,13 @@ Ext.define('Shopware.apps.Bepado.controller.Import', {
                 beforedrop: me.onBeforeDropLocalProduct,
                 drop: me.onDropToLocalProducts
             },
-            'bepado-import button[action=importRemoteCategory]': {
+            'connect-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
             },
-            'bepado-import button[action=activateProducts]': {
+            'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
             },
-            'bepado-import checkbox[action=filter-only-local-products]': {
+            'connect-import checkbox[action=filter-only-local-products]': {
                 change: me.onFilterLocalProducts
             }
         });

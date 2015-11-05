@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\Translation;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\ProductQuery;
-use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
-use Shopware\Bepado\Components\Translations\ProductTranslator;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\ProductQuery;
+use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
+use Shopware\Connect\Components\Translations\ProductTranslator;
 
-class LocalProductQueryTest extends BepadoTestHelper
+class LocalProductQueryTest extends ConnectTestHelper
 {
     protected $localProductQuery;
 
@@ -19,7 +19,7 @@ class LocalProductQueryTest extends BepadoTestHelper
 
     public function setUp()
     {
-        $this->productTranslator = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Translations\\ProductTranslator')
+        $this->productTranslator = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -29,16 +29,16 @@ class LocalProductQueryTest extends BepadoTestHelper
                 'en' => new Translation(
                     array(
                         'title' => 'Glas -Teetasse 0,25l EN',
-                        'shortDescription' => 'Bepado local product short description EN',
-                        'longDescription' => 'Bepado local product long description EN',
+                        'shortDescription' => 'shopware Connect local product short description EN',
+                        'longDescription' => 'shopware Connect local product long description EN',
                         'url' => $this->getProductBaseUrl() . '22/shId/2'
                     )
                 ),
                 'nl' => new Translation(
                     array(
                         'title' => 'Glas -Teetasse 0,25l NL',
-                        'shortDescription' => 'Bepado local product short description NL',
-                        'longDescription' => 'Bepado local product long description NL',
+                        'shortDescription' => 'shopware Connect local product short description NL',
+                        'longDescription' => 'shopware Connect local product long description NL',
                         'url' => $this->getProductBaseUrl() . '22/shId/176'
                     )
                 ),
@@ -48,7 +48,7 @@ class LocalProductQueryTest extends BepadoTestHelper
     public function getLocalProductQuery()
     {
         if (!$this->localProductQuery) {
-            /** @var \Shopware\Bepado\Components\Config $configComponent */
+            /** @var \Shopware\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
             $this->localProductQuery = new LocalProductQuery(
@@ -71,7 +71,7 @@ class LocalProductQueryTest extends BepadoTestHelper
 
         return Shopware()->Front()->Router()->assemble(array(
             'module' => 'frontend',
-            'controller' => 'bepado_product_gateway',
+            'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
@@ -90,7 +90,7 @@ class LocalProductQueryTest extends BepadoTestHelper
         $this->assertEquals($expectedUrl, $this->getLocalProductQuery()->getUrlForProduct(1091, 3));
     }
 
-    public function testGetBepadoProduct()
+    public function testGetConnectProduct()
     {
         $row = array (
             'sourceId' => '22',
@@ -118,21 +118,21 @@ class LocalProductQueryTest extends BepadoTestHelper
             'en' => new Translation(
                 array(
                     'title' => 'Glas -Teetasse 0,25l EN',
-                    'shortDescription' => 'Bepado local product short description EN',
-                    'longDescription' => 'Bepado local product long description EN',
+                    'shortDescription' => 'shopware Connect local product short description EN',
+                    'longDescription' => 'shopware Connect local product long description EN',
                     'url' => $this->getProductBaseUrl() . '22/shId/2'
                 )
             ),
             'nl' => new Translation(
                 array(
                     'title' => 'Glas -Teetasse 0,25l NL',
-                    'shortDescription' => 'Bepado local product short description NL',
-                    'longDescription' => 'Bepado local product long description NL',
+                    'shortDescription' => 'shopware Connect local product short description NL',
+                    'longDescription' => 'shopware Connect local product long description NL',
                     'url' => $this->getProductBaseUrl() . '22/shId/176'
                 )
             ),
         );
 
-        $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getBepadoProduct($row));
+        $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));
     }
 }

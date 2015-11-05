@@ -1,5 +1,5 @@
-//{block name="backend/bepado/application"}
-Ext.define('Shopware.apps.Bepado', {
+//{block name="backend/connect/application"}
+Ext.define('Shopware.apps.Connect', {
     extend: 'Enlight.app.SubApplication',
 
     bulkLoad: true,

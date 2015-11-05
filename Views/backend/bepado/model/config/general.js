@@ -21,25 +21,25 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/general"}
-Ext.define('Shopware.apps.Bepado.model.config.General', {
+//{block name="backend/connect/model/config/general"}
+Ext.define('Shopware.apps.Connect.model.config.General', {
     extend: 'Ext.data.Model',
 
     idProperty: 'shopId',
 
     fields: [
-        //{block name="backend/bepado/model/config/general/fields"}{/block}
+        //{block name="backend/connect/model/config/general/fields"}{/block}
         { name: 'shopId', type: 'int', useNull: true },
         { name: 'isDefaultShop', type: 'boolean' },
         { name: 'apiKey', type: 'string' },
-        { name: 'bepadoAttribute', type: 'int' },
-        { name: 'bepadoDebugHost', type: 'string' },
+        { name: 'connectAttribute', type: 'int' },
+        { name: 'connectDebugHost', type: 'string' },
         { name: 'logRequest', type: 'string' },
         { name: 'detailShopInfo', type: 'string' },
         { name: 'detailProductNoIndex', type: 'string' },
@@ -67,9 +67,9 @@ Ext.define('Shopware.apps.Bepado.model.config.General', {
          * @object
          */
         api: {
-            create: '{url controller="BepadoConfig" action="saveGeneral"}',
-            update: '{url controller="BepadoConfig" action="saveGeneral"}',
-            read: '{url controller="BepadoConfig" action="getGeneral"}'
+            create: '{url controller="ConnectConfig" action="saveGeneral"}',
+            update: '{url controller="ConnectConfig" action="saveGeneral"}',
+            read: '{url controller="ConnectConfig" action="getGeneral"}'
         },
 
         /**

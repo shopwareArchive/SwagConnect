@@ -21,18 +21,18 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-use Shopware\Bepado\Bootstrap\Uninstall;
-use Shopware\Bepado\Bootstrap\Update;
-use Shopware\Bepado\Bootstrap\Setup;
+use Shopware\Connect\Bootstrap\Uninstall;
+use Shopware\Connect\Bootstrap\Update;
+use Shopware\Connect\Bootstrap\Setup;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
-final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Components_Plugin_Bootstrap
+final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /** @var \Shopware\Bepado\Components\BepadoFactory */
-    private $bepadoFactory;
+    /** @var \Shopware\Connect\Components\ConnectFactory */
+    private $connectFactory;
 
     /**
      * Returns the current version of the plugin.
@@ -193,7 +193,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
 
-        /** @var $subscriber Shopware\Bepado\Subscribers\BaseSubscriber */
+        /** @var $subscriber Shopware\Connect\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
             $subscriber->setBootstrap($this);
             $this->Application()->Events()->registerSubscriber($subscriber);
@@ -203,28 +203,28 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function getSubscribersForUnverifiedKeys()
     {
         return array(
-            new \Shopware\Bepado\Subscribers\DisableBepadoInFrontend()
+            new \Shopware\Connect\Subscribers\DisableConnectInFrontend()
         );
     }
 
     /**
      * These subscribers will only be used, once the user has verified his api key
-     * This will prevent the users from having bepado extensions in their frontend
-     * even if they cannot use bepado due to the missing / wrong api key
+     * This will prevent the users from having shopware Connect extensions in their frontend
+     * even if they cannot use shopware Connect due to the missing / wrong api key
      *
      * @return array
      */
     public function getSubscribersForVerifiedKeys()
     {
         $subscribers = array(
-            new \Shopware\Bepado\Subscribers\TemplateExtension(),
+            new \Shopware\Connect\Subscribers\TemplateExtension(),
             $this->createCheckoutSubscriber(),
-            new \Shopware\Bepado\Subscribers\Voucher(),
-            new \Shopware\Bepado\Subscribers\BasketWidget(),
-            new \Shopware\Bepado\Subscribers\Dispatches(),
-            new \Shopware\Bepado\Subscribers\ShippingCosts(),
-            new \Shopware\Bepado\Subscribers\Javascript(),
-            new \Shopware\Bepado\Subscribers\Less()
+            new \Shopware\Connect\Subscribers\Voucher(),
+            new \Shopware\Connect\Subscribers\BasketWidget(),
+            new \Shopware\Connect\Subscribers\Dispatches(),
+            new \Shopware\Connect\Subscribers\ShippingCosts(),
+            new \Shopware\Connect\Subscribers\Javascript(),
+            new \Shopware\Connect\Subscribers\Less()
 
         );
 
@@ -232,7 +232,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
         $configComponent = $this->getConfigComponents();
 
         if ($configComponent->getConfig('autoUpdateProducts', true)) {
-            $subscribers[] = new \Shopware\Bepado\Subscribers\Lifecycle();
+            $subscribers[] = new \Shopware\Connect\Subscribers\Lifecycle();
         }
 
         return $subscribers;
@@ -246,14 +246,14 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     public function getDefaultSubscribers()
     {
         return array(
-            new \Shopware\Bepado\Subscribers\OrderDocument(),
-            new \Shopware\Bepado\Subscribers\ControllerPath(),
-            new \Shopware\Bepado\Subscribers\CustomerGroup(),
-            new \Shopware\Bepado\Subscribers\CronJob(),
-            new \Shopware\Bepado\Subscribers\ArticleList(),
-            new \Shopware\Bepado\Subscribers\Article(),
-            new \Shopware\Bepado\Subscribers\Bepado(),
-            new \Shopware\Bepado\Subscribers\Payment(),
+            new \Shopware\Connect\Subscribers\OrderDocument(),
+            new \Shopware\Connect\Subscribers\ControllerPath(),
+            new \Shopware\Connect\Subscribers\CustomerGroup(),
+            new \Shopware\Connect\Subscribers\CronJob(),
+            new \Shopware\Connect\Subscribers\ArticleList(),
+            new \Shopware\Connect\Subscribers\Article(),
+            new \Shopware\Connect\Subscribers\Connect(),
+            new \Shopware\Connect\Subscribers\Payment(),
         );
     }
 
@@ -261,7 +261,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     {
         $this->registerMyLibrary();
 
-        return $this->getBepadoFactory()->createSDK();
+        return $this->getConnectFactory()->createSDK();
     }
 
     /**
@@ -274,7 +274,7 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
             $this->Path() . 'Library/Bepado/'
         );
         $this->Application()->Loader()->registerNamespace(
-            'Shopware\\Bepado',
+            'Shopware\\Connect',
             $this->Path()
         );
 
@@ -282,19 +282,19 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     }
 
     /**
-     * Lazy getter for the bepadoFactory
+     * Lazy getter for the connectFactory
      *
-     * @return \Shopware\Bepado\Components\BepadoFactory
+     * @return \Shopware\Connect\Components\ConnectFactory
      */
-    public function getBepadoFactory()
+    public function getConnectFactory()
     {
         $this->registerMyLibrary();
 
-        if (!$this->bepadoFactory) {
-            $this->bepadoFactory = new \Shopware\Bepado\Components\BepadoFactory($this->getVersion());
+        if (!$this->connectFactory) {
+            $this->connectFactory = new \Shopware\Connect\Components\ConnectFactory($this->getVersion());
         }
 
-        return $this->bepadoFactory;
+        return $this->connectFactory;
     }
 
     /**
@@ -302,38 +302,38 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
      */
     public function getSDK()
     {
-        return $this->getBepadoFactory()->getSDK();
+        return $this->getConnectFactory()->getSDK();
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Helper
+     * @return \Shopware\Connect\Components\Helper
      */
     public function getHelper()
     {
-        return $this->getBepadoFactory()->getHelper();
+        return $this->getConnectFactory()->getHelper();
     }
 
     public function getBasketHelper()
     {
-        return $this->getBepadoFactory()->getBasketHelper();
+        return $this->getConnectFactory()->getBasketHelper();
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Config
+     * @return \Shopware\Connect\Components\Config
      */
     public function getConfigComponents()
     {
-        return $this->getBepadoFactory()->getConfigComponent();
+        return $this->getConnectFactory()->getConfigComponent();
     }
 
     public function getMarketplaceGateway()
     {
-        return $this->getBepadoFactory()->getMarketplaceGateway();
+        return $this->getConnectFactory()->getMarketplaceGateway();
     }
 
     public function getMarketplaceApplier()
     {
-        return $this->getBepadoFactory()->getMarketplaceApplier();
+        return $this->getConnectFactory()->getMarketplaceApplier();
     }
 
     /**
@@ -361,11 +361,11 @@ final class Shopware_Plugins_Backend_SwagBepado_Bootstrap extends Shopware_Compo
     /**
      * Creates checkout subscriber
      *
-     * @return \Shopware\Bepado\Subscribers\Checkout
+     * @return \Shopware\Connect\Subscribers\Checkout
      */
     private function createCheckoutSubscriber()
     {
-        $checkoutSubscriber = new \Shopware\Bepado\Subscribers\Checkout();
+        $checkoutSubscriber = new \Shopware\Connect\Subscribers\Checkout();
         foreach ($checkoutSubscriber->getListeners() as $listener) {
             if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
                 $listener->setPosition(-1);

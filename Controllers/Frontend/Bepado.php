@@ -24,17 +24,17 @@
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
-class Shopware_Controllers_Frontend_Bepado extends Enlight_Controller_Action
+class Shopware_Controllers_Frontend_Connect extends Enlight_Controller_Action
 {
     /**
      * @return \Bepado\SDK\SDK
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+        return Shopware()->Bootstrap()->getResource('ConnectSDK');
     }
 }

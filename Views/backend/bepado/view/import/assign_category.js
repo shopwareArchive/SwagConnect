@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/import/assign_category"}
-Ext.define('Shopware.apps.Bepado.view.import.AssignCategory', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/import/assign_category"}
+Ext.define('Shopware.apps.Connect.view.import.AssignCategory', {
     extend: 'Ext.window.Window',
-    alias: 'widget.bepado-assign-category-window',
+    alias: 'widget.connect-assign-category-window',
 
     layout: 'border',
     width: 500,

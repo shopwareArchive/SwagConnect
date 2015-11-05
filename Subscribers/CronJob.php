@@ -1,20 +1,20 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\ImageImport;
-use Shopware\Bepado\Components\Logger;
+namespace Shopware\Connect\Subscribers;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\ImageImport;
+use Shopware\Connect\Components\Logger;
 
 /**
  * Cronjob callback
  *
  * Class CronJob
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class CronJob extends BaseSubscriber
 {
     /**
-     * @var \Shopware\Bepado\Components\Config
+     * @var \Shopware\Connect\Components\Config
      */
     private $configComponent;
 

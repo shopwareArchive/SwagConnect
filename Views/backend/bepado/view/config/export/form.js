@@ -21,17 +21,17 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{namespace name=backend/bepado/view/main}
-//{block name="backend/bepado/view/config/export/form"}
-Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
+//{namespace name=backend/connect/view/main}
+//{block name="backend/connect/view/config/export/form"}
+Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     extend: 'Ext.form.Panel',
-    alias: 'widget.bepado-config-export-form',
+    alias: 'widget.connect-config-export-form',
 
     border: false,
     layout: 'anchor',
@@ -82,7 +82,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             }
         ];
 
-        me.exportConfigStore = Ext.create('Shopware.apps.Bepado.store.config.Export').load({
+        me.exportConfigStore = Ext.create('Shopware.apps.Connect.store.config.Export').load({
             callback: function() {
                 me.populateForm();
             }
@@ -187,7 +187,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
         // pricing mapping should be disabled
         Ext.Ajax.request({
             scope: me,
-            url: '{url controller=BepadoConfig action=isPricingMappingAllowed}',
+            url: '{url controller=ConnectConfig action=isPricingMappingAllowed}',
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false || response.isPricingMappingAllowed === false) {
@@ -309,7 +309,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     allowBlank: false,
                     displayField: 'name',
                     valueField: 'key',
-                    store: Ext.create('Shopware.apps.Bepado.store.config.CustomerGroup', { }).load({
+                    store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup', { }).load({
                         params:{
                             priceField: type
                         }
@@ -319,7 +319,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                 {
                     xtype: 'combobox',
                     name: dataIndexField,
-                    store: Ext.create('Shopware.apps.Bepado.store.config.PriceGroup', { }).load({}),
+                    store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup', { }).load({}),
                     queryMode: 'local',
                     editable: false,
                     allowBlank: false,
@@ -348,7 +348,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
             record = me.exportConfigStore.getAt(0);
 
         if (!record) {
-            record = Ext.create('Shopware.apps.Bepado.model.config.Export');
+            record = Ext.create('Shopware.apps.Connect.model.config.Export');
         }
 
         return record;
@@ -372,7 +372,7 @@ Ext.define('Shopware.apps.Bepado.view.config.export.Form', {
                     store: new Ext.data.SimpleStore({
                         fields: [ 'value', 'text' ],
                         data: [
-                            ['attribute.bepadoProductDescription', 'attribute.bepadoProductDescription'],
+                            ['attribute.connectProductDescription', 'attribute.connectProductDescription'],
                             ['a.description', 'Artikel-Kurzbeschreibung'],
                             ['a.descriptionLong', 'Artikel-Langbeschreibung']
                         ]

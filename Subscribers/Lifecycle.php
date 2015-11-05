@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Utils;
-use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+namespace Shopware\Connect\Subscribers;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Utils;
+use Shopware\Connect\Components\ConnectExport;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
- * Handles article lifecycle events in order to automatically update/delete products to/from bepado
+ * Handles article lifecycle events in order to automatically update/delete products to/from connect
  *
  * Class Lifecycle
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class Lifecycle extends BaseSubscriber
 {
@@ -28,11 +28,11 @@ class Lifecycle extends BaseSubscriber
     }
 
     /**
-     * @return BepadoExport
+     * @return ConnectExport
      */
-    public function getBepadoExport()
+    public function getConnectExport()
     {
-        return new BepadoExport(
+        return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             Shopware()->Models(),
@@ -50,7 +50,7 @@ class Lifecycle extends BaseSubscriber
         $order = $eventArgs->get('entity');
 
         $attribute = $order->getAttribute();
-        if (!$attribute || !$attribute->getBepadoShopId()) {
+        if (!$attribute || !$attribute->getConnectShopId()) {
             return;
         }
 
@@ -72,7 +72,7 @@ class Lifecycle extends BaseSubscriber
     }
 
     /**
-     * Callback function to delete an product from bepado
+     * Callback function to delete an product from connect
      * after it is going to be deleted locally
      *
      * @param \Enlight_Event_EventArgs $eventArgs
@@ -80,11 +80,11 @@ class Lifecycle extends BaseSubscriber
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-        $this->getBepadoExport()->syncDeleteArticle($entity);
+        $this->getConnectExport()->syncDeleteArticle($entity);
     }
 
     /**
-     * Callback function to delete product detail from bepado
+     * Callback function to delete product detail from connect
      * after it is going to be deleted locally
      *
      * @param \Enlight_Event_EventArgs $eventArgs
@@ -95,20 +95,20 @@ class Lifecycle extends BaseSubscriber
         $entity = $eventArgs->get('entity');
         if ($entity->getKind() == 1) {
             $article = $entity->getArticle();
-            $this->getBepadoExport()->setDeleteStatusForVariants($article, 'delete');
+            $this->getConnectExport()->setDeleteStatusForVariants($article, 'delete');
         } else {
-            $this->getBepadoExport()->syncDeleteDetail($entity);
+            $this->getConnectExport()->syncDeleteDetail($entity);
         }
     }
 
     /**
-     * Callback method to update changed bepado products
+     * Callback method to update changed connect products
      *
      * @param \Enlight_Event_EventArgs $eventArgs
      */
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        /** @var \Shopware\Connect\Components\Config $configComponent */
         $configComponent = new Config(Shopware()->Models());
 
         if (!$configComponent->getConfig('autoUpdateProducts', true)) {
@@ -131,8 +131,8 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-        // Check if entity is a bepado product
-        $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
+        // Check if entity is a connect product
+        $attribute = $this->getHelper()->getConnectAttributeByModel($model);
         if (!$attribute) {
             return;
         }
@@ -145,26 +145,26 @@ class Lifecycle extends BaseSubscriber
         }
 
         // if status is delete,
-        // article should not be updated in bepado
+        // article should not be updated in connect
         if ($status == 'delete') {
             return;
         }
 
-        // Mark the product for bepado update
+        // Mark the product for connect update
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
-                $this->getBepadoExport()->export(
+                $this->getConnectExport()->export(
                     array($attribute->getSourceId())
                 );
             } else {
                 /** @var \Shopware\Models\Article\Detail $detail */
                 $sourceIds = array();
                 foreach ($model->getDetails() as $detail) {
-                    $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
-                    $sourceIds[] = $bepadoAttribute->getSourceId();
+                    $connectAttribute = $this->getHelper()->getConnectAttributeByModel($detail);
+                    $sourceIds[] = $connectAttribute->getSourceId();
 
                 }
-                $this->getBepadoExport()->export($sourceIds);
+                $this->getConnectExport()->export($sourceIds);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements

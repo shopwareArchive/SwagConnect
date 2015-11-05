@@ -1,11 +1,11 @@
 <?php
 
-namespace Shopware\Bepado\Components\ShippingCosts;
+namespace Shopware\Connect\Components\ShippingCosts;
 
 use Bepado\SDK\ShippingCosts\Rule;
 use Bepado\SDK\ShippingCosts\Rules;
 use Bepado\SDK\ShippingCosts\RulesVisitor;
-use Shopware\Bepado\Components\Translations\TranslationServiceInterface;
+use Shopware\Connect\Components\Translations\TranslationServiceInterface;
 
 class ShippingCostRuleVisitor extends RulesVisitor
 {
@@ -16,7 +16,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
 
     protected $currentRule = null;
 
-    /** @var \Shopware\Bepado\Components\Translations\TranslationServiceInterface */
+    /** @var \Shopware\Connect\Components\Translations\TranslationServiceInterface */
     protected $translationService;
 
     public function __construct(TranslationServiceInterface $translationService)

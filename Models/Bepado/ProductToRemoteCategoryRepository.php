@@ -22,13 +22,13 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\CustomModels\Bepado;
+namespace Shopware\CustomModels\Connect;
 
 use \Shopware\Components\Model\ModelRepository;
 
 /**
  * Class ProductToRemoteCategoryRepository
- * @package Shopware\CustomModels\Bepado
+ * @package Shopware\CustomModels\Connect
  */
 class ProductToRemoteCategoryRepository extends ModelRepository
 {
@@ -51,7 +51,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('a.attribute', 'att');
         $builder->where('rc.categoryKey = :categoryKey');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
-        $builder->andWhere('att.bepadoMappedCategory IS NULL');
+        $builder->andWhere('att.connectMappedCategory IS NULL');
         $builder->distinct(true);
         $builder->setFirstResult($offset);
         $builder->setMaxResults($limit);
@@ -75,7 +75,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('ptrc.article', 'a');
         $builder->leftJoin('a.attribute', 'att');
         $builder->where('rc.categoryKey = :categoryKey');
-        $builder->andWhere('att.bepadoMappedCategory IS NULL');
+        $builder->andWhere('att.connectMappedCategory IS NULL');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
 
         $query = $builder->getQuery();

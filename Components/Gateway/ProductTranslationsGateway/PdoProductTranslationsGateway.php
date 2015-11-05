@@ -22,10 +22,10 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
+namespace Shopware\Connect\Components\Gateway\ProductTranslationsGateway;
 
 use Bepado\SDK\Struct\Translation;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway;
 
 class PdoProductTranslationsGateway implements ProductTranslationsGateway
 {

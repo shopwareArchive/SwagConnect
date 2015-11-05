@@ -1,6 +1,6 @@
 
-//{block name="backend/bepado/model/changed_products/product"}
-Ext.define('Shopware.apps.Bepado.model.changed_products.Product', {
+//{block name="backend/connect/model/changed_products/product"}
+Ext.define('Shopware.apps.Connect.model.changed_products.Product', {
     extend: 'Ext.data.Model',
     fields: [
         { name: 'shortDescriptionLocal', type: 'string' },

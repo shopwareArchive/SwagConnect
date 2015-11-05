@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/log/panel"}
-Ext.define('Shopware.apps.Bepado.view.log.Panel', {
+//{block name="backend/connect/view/log/panel"}
+Ext.define('Shopware.apps.Connect.view.log.Panel', {
     extend: 'Ext.container.Container',
-    alias: 'widget.bepado-log',
+    alias: 'widget.connect-log',
 
     border: false,
     layout: 'border',
@@ -13,15 +13,15 @@ Ext.define('Shopware.apps.Bepado.view.log.Panel', {
 
         Ext.applyIf(me, {
             items: [{
-                xtype: 'bepado-log-filter',
+                xtype: 'connect-log-filter',
                 region: 'west',
                 //collapsible: true,
                 split: true
             },{
-                xtype: 'bepado-log-list',
+                xtype: 'connect-log-list',
                 region: 'center'
             }, {
-                xtype: 'bepado-log-tabs',
+                xtype: 'connect-log-tabs',
                 collapsible: true,
                 split: true,
                 region: 'south'

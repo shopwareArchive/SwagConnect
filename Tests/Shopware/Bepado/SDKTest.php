@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Product;
 
-class SDKTest extends BepadoTestHelper
+class SDKTest extends ConnectTestHelper
 {
     public function testHandleProductUpdates()
     {
@@ -26,10 +26,10 @@ class SDKTest extends BepadoTestHelper
                         'sourceId' => 'ABCDEFGH' . time(),
                         'ean' => '1234',
                         'url' => 'http://shopware.de',
-                        'title' => 'Bepado Test-Produkt',
-                        'shortDescription' => 'Ein Produkt aus Bepado',
-                        'longDescription' => 'Ein Produkt aus Bepado',
-                        'vendor' => 'Bepado',
+                        'title' => 'shopware Connect Test-Produkt',
+                        'shortDescription' => 'Ein Produkt aus shopware Connect',
+                        'longDescription' => 'Ein Produkt aus shopware Connect',
+                        'vendor' => 'shopware Connect',
                         'price' => 9.99,
                         'purchasePrice' => $purchasePrice,
                         'purchasePriceHash' => hash_hmac(
@@ -55,11 +55,11 @@ class SDKTest extends BepadoTestHelper
         Shopware()->Models()->persist($prices[0]);
         Shopware()->Models()->flush();
 
-        $this->getBepadoExport()->export(array($article->getId()));
+        $this->getConnectExport()->export(array($article->getId()));
 
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('sourceId' => $article->getId()));
+        /** @var \Shopware\CustomModels\Connect\Attribute $model */
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
         $message = $model->getExportMessage();
 
         $this->assertContains('purchasePrice', $message);
@@ -69,14 +69,14 @@ class SDKTest extends BepadoTestHelper
     public function testExportProductWithPurchasePrice()
     {
         // Assign a category mapping
-//        $this->changeCategoryBepadoMappingForCategoryTo(14, '/bücher');
+//        $this->changeCategoryConnectMappingForCategoryTo(14, '/bücher');
 
         $article = $this->getLocalArticle();
         // Insert the product
-        $this->getBepadoExport()->export(array($article->getId()));
+        $this->getConnectExport()->export(array($article->getId()));
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute')->findOneBy(array('articleId' => 3));
+        /** @var \Shopware\CustomModels\Connect\Attribute $model */
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
         $message = $model->getExportMessage();
 
         $this->assertNull($message);

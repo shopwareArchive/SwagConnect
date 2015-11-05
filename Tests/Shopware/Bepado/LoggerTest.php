@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
-use Shopware\Bepado\Components\Logger;
+use Shopware\Connect\Components\Logger;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class loggerTest extends BepadoTestHelper
+class loggerTest extends ConnectTestHelper
 {
     protected $logger;
 
@@ -24,7 +24,7 @@ class loggerTest extends BepadoTestHelper
         $message = 'Example Exception '.rand(1, 9999);
         $logger->write(true, null, new \Exception($message));
 
-        $sql = 'SELECT id FROM s_plugin_bepado_log WHERE response LIKE ?';
+        $sql = 'SELECT id FROM s_plugin_connect_log WHERE response LIKE ?';
         $id = Shopware()->Db()->fetchOne($sql, array('%' . $message . '%'));
 
         $this->assertNotEmpty($id);
@@ -37,7 +37,7 @@ class loggerTest extends BepadoTestHelper
         $message = 'Example Message '.rand(1, 9999);
         $logger->write(false, null, $message);
 
-        $sql = 'SELECT id FROM s_plugin_bepado_log WHERE response = ?';
+        $sql = 'SELECT id FROM s_plugin_connect_log WHERE response = ?';
         $id = Shopware()->Db()->fetchOne($sql, array($message));
 
         $this->assertNotEmpty($id);

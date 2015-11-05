@@ -21,12 +21,12 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Bepado\Components\Validator\ProductAttributesValidator;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator;
+namespace Shopware\Connect\Components\Validator\ProductAttributesValidator;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator;
 
 /**
  * Interface ProductAttributesValidator
- * @package Shopware\Bepado\Components\Validator
+ * @package Shopware\Connect\Components\Validator
  */
 class ProductsAttributesValidator implements ProductAttributesValidator
 {

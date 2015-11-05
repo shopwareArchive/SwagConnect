@@ -1,10 +1,10 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
 /**
  * Shopware Controller - Cache backend module
  */
-//{block name="backend/bepado/controller/main"}
-Ext.define('Shopware.apps.Bepado.controller.Main', {
+//{block name="backend/connect/controller/main"}
+Ext.define('Shopware.apps.Connect.controller.Main', {
 
     extend: 'Enlight.app.Controller',
 
@@ -14,36 +14,36 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         'changed_products.List',
         'log.List',
         'mapping.Import', 'mapping.Export',
-        'mapping.BepadoCategoriesExport', 'mapping.BepadoCategoriesImport',
+        'mapping.ConnectCategoriesExport', 'mapping.ConnectCategoriesImport',
         'mapping.GoogleCategories',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup', 'config.PriceGroup',
-        'config.Units', 'config.BepadoUnits', 'config.MarketplaceAttributes', 'config.LocalProductAttributes'
+        'config.Units', 'config.ConnectUnits', 'config.MarketplaceAttributes', 'config.LocalProductAttributes'
     ],
     models: [
         'main.Mapping', 'main.Product',
         'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product', 'log.List',
         'config.General', 'config.Import', 'config.Units', 'config.MarketplaceAttributes',
-        'config.BepadoUnit', 'config.Pages', 'config.LocalProductAttributes', 'config.PriceGroup'
+        'config.ConnectUnit', 'config.Pages', 'config.LocalProductAttributes', 'config.PriceGroup'
     ],
 
     refs: [
-        { ref: 'window', selector: 'bepado-window' },
-        { ref: 'navigation', selector: 'bepado-navigation' },
-        { ref: 'panel', selector: 'bepado-panel' },
-        { ref: 'exportList', selector: 'bepado-export-list' },
-        { ref: 'exportFilter', selector: 'bepado-export-filter' },
-        { ref: 'importList', selector: 'bepado-import-list' },
-        { ref: 'importMapping', selector: 'bepado-mapping-import treepanel' },
-        { ref: 'exportMapping', selector: 'bepado-mapping-export treepanel' },
-        { ref: 'changeView', selector: 'bepado-changed-products-tabs' },
-        { ref: 'changedList', selector: 'bepado-changed-products-list' },
-        { ref: 'logList', selector: 'bepado-log-list' },
-        { ref: 'logFilter', selector: 'bepado-log-filter' },
-        { ref: 'logTabs', selector: 'bepado-log-tabs' },
-        { ref: 'marketeplaceMappingPanel', selector: 'bepado-config-marketplace-attributes' },
-        { ref: 'marketeplaceMapping', selector: 'bepado-marketplace-attributes-mapping' },
-        { ref: 'unitsMapping', selector: 'bepado-units-mapping' }
+        { ref: 'window', selector: 'connect-window' },
+        { ref: 'navigation', selector: 'connect-navigation' },
+        { ref: 'panel', selector: 'connect-panel' },
+        { ref: 'exportList', selector: 'connect-export-list' },
+        { ref: 'exportFilter', selector: 'connect-export-filter' },
+        { ref: 'importList', selector: 'connect-import-list' },
+        { ref: 'importMapping', selector: 'connect-mapping-import treepanel' },
+        { ref: 'exportMapping', selector: 'connect-mapping-export treepanel' },
+        { ref: 'changeView', selector: 'connect-changed-products-tabs' },
+        { ref: 'changedList', selector: 'connect-changed-products-list' },
+        { ref: 'logList', selector: 'connect-log-list' },
+        { ref: 'logFilter', selector: 'connect-log-filter' },
+        { ref: 'logTabs', selector: 'connect-log-tabs' },
+        { ref: 'marketeplaceMappingPanel', selector: 'connect-config-marketplace-attributes' },
+        { ref: 'marketeplaceMapping', selector: 'connect-marketplace-attributes-mapping' },
+        { ref: 'unitsMapping', selector: 'connect-units-mapping' }
     ],
 
     messages: {
@@ -76,8 +76,8 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         minutes: '{s name=minutes}Minute(s){/s}',
         seconds: '{s name=seconds}Second(s){/s}',
 
-        importBepadoCategoriesTitle: '{s name=mapping/importBepadoCategoriesTitle}Import categories?{/s}',
-        importBepadoCategoriesMessage: '{s name=mapping/importBepadoCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
+        importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
+        importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
     },
 
@@ -100,46 +100,46 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
         }).show();
 
         me.control({
-            'bepado-navigation': {
+            'connect-navigation': {
                 select: me.onSelectNavigationEntry
             },
-            'bepado-config button[action=save-general-config]': {
+            'connect-config button[action=save-general-config]': {
                 click: me.onSaveConfigForm
             },
-            'bepado-config-form': {
+            'connect-config-form': {
                 calculateFinishTime: me.onCalculateFinishTime
             },
-			'bepado-config-import-form button[action=save-import-config]': {
+			'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
             },
-			'bepado-config-export-form button[action=save-export-config]': {
+			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
             },
-			'bepado-mapping button[action=save]': {
+			'connect-mapping button[action=save]': {
                 click: me.onSaveMapping
             },
-            'bepado-mapping-import button[action=save]': {
+            'connect-mapping-import button[action=save]': {
                 click: me.onSaveImportMapping
             },
-            'bepado-mapping-export button[action=save]': {
+            'connect-mapping-export button[action=save]': {
                 click: me.onSaveExportMapping
             },
-            'bepado-mapping-export': {
+            'connect-mapping-export': {
                 applyToChildren: me.onApplyMappingToChildCategories
             },
-            'bepado-mapping-import': {
-                importCategories: me.onImportCategoriesFromBepado
+            'connect-mapping-import': {
+                importCategories: me.onImportCategoriesFromConnect
             },
-            'bepado-export button[action=add]': {
+            'connect-export button[action=add]': {
                click: me.onExportFilterAction
             },
-            'bepado-export button[action=delete]': {
+            'connect-export button[action=delete]': {
                 click: me.onExportFilterAction
             },
-            'bepado-export-filter button[action=category-clear-filter]': {
+            'connect-export-filter button[action=category-clear-filter]': {
                 click: me.onExportCategoryFilterClearAction
             },
-            'bepado-export-filter textfield[name=searchfield]': {
+            'connect-export-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -154,7 +154,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 }
             },
 
-            'bepado-export-filter base-element-select[name=supplierId]': {
+            'connect-export-filter base-element-select[name=supplierId]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -169,7 +169,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-export-filter [name=exportStatus]': {
+            'connect-export-filter [name=exportStatus]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -187,7 +187,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                 }
             },
 
-            'bepado-export-filter treepanel': {
+            'connect-export-filter treepanel': {
                 select: function(tree, node) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -204,25 +204,25 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-import-list button[action=activate]': {
+            'connect-import-list button[action=activate]': {
                 click: me.onImportFilterAction
             },
-            'bepado-import-list button[action=deactivate]': {
+            'connect-import-list button[action=deactivate]': {
                 click: me.onImportFilterAction
             },
-            'bepado-import-list': {
+            'connect-import-list': {
                 'unsubscribeAndDelete': me.onImportFilterAction
             },
-            'bepado-import-list button[action=assignCategory]': {
+            'connect-import-list button[action=assignCategory]': {
                 click: me.onAssignCategoryAction
             },
-            'bepado-assign-category-window button[action=save]': {
+            'connect-assign-category-window button[action=save]': {
                 click: me.onSaveAssignCategoryAction
             },
-            'bepado-import-list button[action=unsubscribe]': {
+            'connect-import-list button[action=unsubscribe]': {
                 click: me.onImportFilterAction
             },
-            'bepado-import-filter textfield[name=searchfield]': {
+            'connect-import-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
@@ -236,7 +236,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-import-filter base-element-select': {
+            'connect-import-filter base-element-select': {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
@@ -250,7 +250,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-import-filter [name=active]': {
+            'connect-import-filter [name=active]': {
                 change: function(field, value) {
                     var table = me.getImportList(),
                         store = table.getStore();
@@ -267,7 +267,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-import-filter treepanel': {
+            'connect-import-filter treepanel': {
                 select: function(tree, node) {
                     var table = me.getImportList(),
                         store = table.getStore();
@@ -283,10 +283,10 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     }
                 }
             },
-            'bepado-changed-products-list': {
+            'connect-changed-products-list': {
                 'selectionchange': me.onChangedProductsSelectionChanged
             },
-            'bepado-log-filter [filter=commandFilter]': {
+            'connect-log-filter [filter=commandFilter]': {
                 change: function(field, value) {
                     var table = me.getLogList(),
                         store = table.getStore();
@@ -295,7 +295,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.reload();
                 }
             },
-            'bepado-log-filter [name=error]': {
+            'connect-log-filter [name=error]': {
                 change: function(field, value) {
                     var table = me.getLogList(),
                         store = table.getStore();
@@ -308,7 +308,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.reload();
                 }
             },
-            'bepado-log-filter textfield[name=searchfield]': {
+            'connect-log-filter textfield[name=searchfield]': {
                 change: function(field, value) {
                     var table = me.getLogList(),
                         store = table.getStore();
@@ -324,7 +324,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     }
                 }
             },
-            'bepado-log-list': {
+            'connect-log-list': {
                 'selectionchange': function(grid, selected, eOpts) {
                     var me = this,
                         record,
@@ -342,7 +342,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
                 }
             },
-            'bepado-log-list button[action=clear]': {
+            'connect-log-list button[action=clear]': {
                 click: function() {
                     var table = me.getLogList(),
                         store = table.getStore();
@@ -366,19 +366,19 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     );
                 }
             },
-            'bepado-mapping-import textfield[name=searchImportMapping]': {
+            'connect-mapping-import textfield[name=searchImportMapping]': {
                 change: function(field, value) {
                     var tree = me.getImportMapping(),
                         store = tree.getStore();
                     store.filters.removeAtKey('searchImportShopwareCategory');
-                    store.filters.removeAtKey('searchBepadoCategory');
+                    store.filters.removeAtKey('searchConnectCategory');
                     if (value.length > 0 ) {
                         store.filters.clear();
                         store.filters.add('searchImportShopwareCategory', new Ext.util.Filter({
                             property: 'name',
                             value: '%' + value + '%'
                         }));
-                        store.filters.add('searchBepadoCategory', new Ext.util.Filter({
+                        store.filters.add('searchConnectCategory', new Ext.util.Filter({
                             property: 'mapping',
                             value: '%' + value + '%'
                         }));
@@ -386,19 +386,19 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-mapping-export textfield[name=searchExportMapping]': {
+            'connect-mapping-export textfield[name=searchExportMapping]': {
                 change: function(field, value) {
                     var tree = me.getExportMapping(),
                         store = tree.getStore();
                     store.filters.removeAtKey('searchExportShopwareCategory');
-                    store.filters.removeAtKey('searchBepadoCategory');
+                    store.filters.removeAtKey('searchConnectCategory');
                     if (value.length > 0 ) {
                         store.filters.clear();
                         store.filters.add('searchExportShopwareCategory', new Ext.util.Filter({
                             property: 'name',
                             value: '%' + value + '%'
                         }));
-                        store.filters.add('searchBepadoCategory', new Ext.util.Filter({
+                        store.filters.add('searchConnectCategory', new Ext.util.Filter({
                             property: 'mapping',
                             value: '%' + value + '%'
                         }));
@@ -406,7 +406,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
                     store.load();
                 }
             },
-            'bepado-marketplace-attributes-mapping button[action=save]': {
+            'connect-marketplace-attributes-mapping button[action=save]': {
                 click: function () {
                     me.saveMarketplaceAttributesMapping();
                 }
@@ -500,7 +500,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             remoteChangeSet = Ext.JSON.decode(record.get('lastUpdate'));
 
             // Build a record for the changeset
-            changeRecord = Ext.create('Shopware.apps.Bepado.model.changed_products.Product', {
+            changeRecord = Ext.create('Shopware.apps.Connect.model.changed_products.Product', {
                 shortDescriptionLocal: record.get('description'),
                 shortDescriptionRemote: remoteChangeSet['shortDescription'],
 
@@ -592,18 +592,18 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
     },
 
     /**
-     * Callback function that will create the bepado categories in the selected category
+     * Callback function that will create the connect categories in the selected category
      *
      * @param record
      */
-    onImportCategoriesFromBepado: function(record) {
+    onImportCategoriesFromConnect: function(record) {
         var me = this,
             panel = me.getImportMapping(),
             store = panel.store;
 
         Ext.MessageBox.confirm(
-            me.messages.importBepadoCategoriesTitle,
-            Ext.String.format(me.messages.importBepadoCategoriesMessage, record.get('mapping'), record.get('name')),
+            me.messages.importConnectCategoriesTitle,
+            Ext.String.format(me.messages.importConnectCategoriesMessage, record.get('mapping'), record.get('name')),
             function (response) {
                 if ( response !== 'yes' ) {
                     return;
@@ -611,7 +611,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
 
                 panel.setLoading();
                 Ext.Ajax.request({
-                    url: '{url action=importBepadoCategories}',
+                    url: '{url action=importConnectCategories}',
                     method: 'POST',
                     params: {
                         fromCategory: record.get('mapping'),
@@ -978,7 +978,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             records = list.selModel.getSelection();
 
         if (records.length > 0) {
-            Ext.create('Shopware.apps.Bepado.view.import.AssignCategory').show();
+            Ext.create('Shopware.apps.Connect.view.import.AssignCategory').show();
         }
     },
 
@@ -1103,7 +1103,7 @@ Ext.define('Shopware.apps.Bepado.controller.Main', {
             interval: 60000,
             run: function() {
                 Ext.Ajax.request({
-                    url: '{url controller=BepadoConfig action=calculateFinishTime}',
+                    url: '{url controller=ConnectConfig action=calculateFinishTime}',
                     method: 'POST',
                     success: function(response, opts) {
                         var responseObject = Ext.decode(response.responseText);

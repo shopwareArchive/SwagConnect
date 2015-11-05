@@ -1,9 +1,9 @@
-//{namespace name="backend/bepado/view/main"}
-//{block name="backend/article/view/bepado_form"}
-Ext.define('Shopware.apps.Article.view.BepadoForm', {
+//{namespace name="backend/connect/view/main"}
+//{block name="backend/article/view/connect_form"}
+Ext.define('Shopware.apps.Article.view.ConnectForm', {
     extend: 'Ext.form.Panel',
 
-    alias: 'widget.article-bepado-form',
+    alias: 'widget.article-connect-form',
 
     defaults: {
         margin: 10,
@@ -15,17 +15,17 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
     initComponent: function() {
         var me = this;
 
-        me.items = me.getBepadoContent();
+        me.items = me.getConnectContent();
 
         me.callParent();
     },
 
-    getBepadoContent: function() {
+    getConnectContent: function() {
         var me = this;
 
         return [
             me.getFixedPriceFieldSet(),
-            me.getBepadoImportConfigFieldSet()
+            me.getConnectImportConfigFieldSet()
         ];
 
     },
@@ -33,7 +33,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
     getFixedPriceFieldSet: function() {
         var me = this;
 
-        me.bepadoFixedPriceFieldset = Ext.create('Ext.form.FieldSet', {
+        me.connectFixedPriceFieldset = Ext.create('Ext.form.FieldSet', {
             defaults: me.defaults,
             title: '{s name=fixedPriceConfig}Fixed price configuration{/s}',
             items:
@@ -46,14 +46,14 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
                 ]
         });
 
-        return me.bepadoFixedPriceFieldset;
+        return me.connectFixedPriceFieldset;
     },
 
 
-    getBepadoImportConfigFieldSet: function() {
+    getConnectImportConfigFieldSet: function() {
         var me = this;
 
-        me.bepadoLeftContainer = Ext.create('Ext.container.Container', {
+        me.connectLeftContainer = Ext.create('Ext.container.Container', {
             columnWidth:0.5,
             defaults: {
                 labelWidth: 155,
@@ -65,7 +65,7 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             items:me.getLeftContainer()
         });
 
-        me.bepadoRightContainer = Ext.create('Ext.container.Container', {
+        me.connectRightContainer = Ext.create('Ext.container.Container', {
             columnWidth:0.5,
             layout: 'anchor',
             defaults: {
@@ -83,8 +83,8 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
             title: '{s name=overrideConfig}Field update configuration{/s}',
             items:
                 [
-                    me.bepadoLeftContainer,
-                    me.bepadoRightContainer
+                    me.connectLeftContainer,
+                    me.connectRightContainer
                 ]
         };
     },
@@ -139,10 +139,10 @@ Ext.define('Shopware.apps.Article.view.BepadoForm', {
     getFixedPriceCombo: function() {
         var me = this;
 
-        return me.bepadoFixedPrice = Ext.create('Ext.form.field.Checkbox', {
+        return me.connectFixedPrice = Ext.create('Ext.form.field.Checkbox', {
             labelWidth: 155,
             name: 'fixedPrice',
-            fieldLabel: '{s name=bepadoFixedPrice}Enable price fixing{/s}',
+            fieldLabel: '{s name=connectFixedPrice}Enable price fixing{/s}',
             inputValue: true,
             uncheckedValue:false
         })

@@ -21,18 +21,18 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/model/config/price_group"}
-Ext.define('Shopware.apps.Bepado.model.config.PriceGroup', {
+//{block name="backend/connect/model/config/price_group"}
+Ext.define('Shopware.apps.Connect.model.config.PriceGroup', {
     extend: 'Ext.data.Model',
 
     fields: [
-        //{block name="backend/bepado/model/config/price_group/fields"}{/block}
+        //{block name="backend/connect/model/config/price_group/fields"}{/block}
         { name: 'field', type: 'string' },
         { name: 'name', type: 'string' }
     ]

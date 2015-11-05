@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/import/local_products"}
-Ext.define('Shopware.apps.Bepado.store.import.LocalProducts', {
+//{block name="backend/connect/store/import/local_products"}
+Ext.define('Shopware.apps.Connect.store.import.LocalProducts', {
     extend : 'Ext.data.Store',
 
     autoLoad: false,
@@ -12,7 +12,7 @@ Ext.define('Shopware.apps.Bepado.store.import.LocalProducts', {
         { name: 'Article_active',  type: 'boolean' },
         { name: 'Price_basePrice',  type: 'float' },
         { name: 'Tax_name',  type: 'string' },
-        { name: 'Attribute_bepadoMappedCategory',  type: 'int' }
+        { name: 'Attribute_connectMappedCategory',  type: 'int' }
     ],
     proxy : {
         type : 'ajax',

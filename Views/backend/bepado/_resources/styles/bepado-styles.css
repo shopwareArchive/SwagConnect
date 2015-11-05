@@ -23,30 +23,30 @@
 }
 
 /** General info text */
-.bepado-info {
+.connect-info {
     line-height: 18px;
 }
-.bepado-info strong { font-weight: bold }
-.bepado-info p { margin: 0 0 18px; }
-.bepado-info li {
+.connect-info strong { font-weight: bold }
+.connect-info p { margin: 0 0 18px; }
+.connect-info li {
     margin: 0 0 8px;
     background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
     padding: 0 0 0 25px;
 }
-.bepado-info li.question {
+.connect-info li.question {
     margin: 0 0 8px;
     background: url("../images/icon_list-question.png") no-repeat 0 2px;
     padding: 0 0 0 25px;
 }
-.bepado-info .content { width: 100% }
-.bepado-info .headline {
+.connect-info .content { width: 100% }
+.connect-info .headline {
     font-size: 21px;
     line-height: 26px;
     margin: 0 0 18px;
 }
 
 /** Configuration */
-div[id^=bepado-window] div[id^=bepado-config] .x-window-body-default {
+div[id^=connect-window] div[id^=connect-config] .x-window-body-default {
     border: 0 none;
     -webkit-box-shadow: 0 0 0 transparent;
     -moz-box-shadow: 0 0 0 transparent;
@@ -54,7 +54,7 @@ div[id^=bepado-window] div[id^=bepado-config] .x-window-body-default {
     box-shadow: 0 0 0 transparent;
 }
 
-div[id^=bepado-window] div[id^=base-element-fieldset] {
+div[id^=connect-window] div[id^=base-element-fieldset] {
     background: #f0f2f4;
     -webkit-box-shadow: 0 0 0 transparent;
     -moz-box-shadow: 0 0 0 transparent;

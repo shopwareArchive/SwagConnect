@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/export/filter"}
-Ext.define('Shopware.apps.Bepado.view.export.Filter', {
+//{block name="backend/connect/view/export/filter"}
+Ext.define('Shopware.apps.Connect.view.export.Filter', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.bepado-export-filter',
+    alias: 'widget.connect-export-filter',
 
     width: 200,
     layout: 'accordion',

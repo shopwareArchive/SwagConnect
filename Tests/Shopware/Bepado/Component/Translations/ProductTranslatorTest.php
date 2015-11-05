@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Shopware\Bepado\Component\Translations;
+namespace Tests\Shopware\Connect\Component\Translations;
 
 use Bepado\SDK\Struct\Translation;
 use Shopware\Models\Shop\Locale;
-use Tests\Shopware\Bepado\BepadoTestHelper;
+use Tests\Shopware\Connect\ConnectTestHelper;
 
-class ProductTranslatorTest extends BepadoTestHelper
+class ProductTranslatorTest extends ConnectTestHelper
 {
     /**
-     * @var \Shopware\Bepado\Components\Translations\ProductTranslatorInterface
+     * @var \Shopware\Connect\Components\Translations\ProductTranslatorInterface
      */
     private $productTranslator;
 
@@ -25,11 +25,11 @@ class ProductTranslatorTest extends BepadoTestHelper
 
     public function setUp()
     {
-        $this->configComponent = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Config')
+        $this->configComponent = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Config')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->translationGateway = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Gateway\\ProductTranslationsGateway\\PdoProductTranslationsGateway')
+        $this->translationGateway = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Gateway\\ProductTranslationsGateway\\PdoProductTranslationsGateway')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -45,7 +45,7 @@ class ProductTranslatorTest extends BepadoTestHelper
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->productTranslator = new \Shopware\Bepado\Components\Translations\ProductTranslator(
+        $this->productTranslator = new \Shopware\Connect\Components\Translations\ProductTranslator(
             $this->configComponent,
             $this->translationGateway,
             $this->modelManager,
@@ -57,15 +57,15 @@ class ProductTranslatorTest extends BepadoTestHelper
     {
         $translations = array(
             2 => array(
-                'title' => 'Bepado Local Product EN',
-                'shortDescription' => 'Bepado Local Product short description EN',
-                'longDescription' => 'Bepado Local Product long description EN',
+                'title' => 'shopware Connect Local Product EN',
+                'shortDescription' => 'shopware Connect Local Product short description EN',
+                'longDescription' => 'shopware Connect Local Product long description EN',
                 'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
-                'title' => 'Bepado Local Product NL',
-                'shortDescription' => 'Bepado Local Product short description NL',
-                'longDescription' => 'Bepado Local Product long description NL',
+                'title' => 'shopware Connect Local Product NL',
+                'shortDescription' => 'shopware Connect Local Product short description NL',
+                'longDescription' => 'shopware Connect Local Product long description NL',
                 'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
@@ -95,17 +95,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -118,15 +118,15 @@ class ProductTranslatorTest extends BepadoTestHelper
     {
         $translations = array(
             2 => array(
-                'title' => 'Bepado Local Product EN',
-                'shortDescription' => 'Bepado Local Product short description EN',
-                'longDescription' => 'Bepado Local Product long description EN',
+                'title' => 'shopware Connect Local Product EN',
+                'shortDescription' => 'shopware Connect Local Product short description EN',
+                'longDescription' => 'shopware Connect Local Product long description EN',
                 'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
-                'title' => 'Bepado Local Product NL',
-                'shortDescription' => 'Bepado Local Product short description NL',
-                'longDescription' => 'Bepado Local Product long description NL',
+                'title' => 'shopware Connect Local Product NL',
+                'shortDescription' => 'shopware Connect Local Product short description NL',
+                'longDescription' => 'shopware Connect Local Product long description NL',
                 'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
@@ -148,15 +148,15 @@ class ProductTranslatorTest extends BepadoTestHelper
     {
         $translations = array(
             2 => array(
-                'title' => 'Bepado Local Product EN',
-                'shortDescription' => 'Bepado Local Product short description EN',
-                'longDescription' => 'Bepado Local Product long description EN',
+                'title' => 'shopware Connect Local Product EN',
+                'shortDescription' => 'shopware Connect Local Product short description EN',
+                'longDescription' => 'shopware Connect Local Product long description EN',
                 'url' => $this->getProductBaseUrl() . '35/shId/2',
             ),
             176 => array(
-                'title' => 'Bepado Local Product NL',
-                'shortDescription' => 'Bepado Local Product short description NL',
-                'longDescription' => 'Bepado Local Product long description NL',
+                'title' => 'shopware Connect Local Product NL',
+                'shortDescription' => 'shopware Connect Local Product short description NL',
+                'longDescription' => 'shopware Connect Local Product long description NL',
                 'url' => $this->getProductBaseUrl() . '35/shId/3',
             ),
         );
@@ -203,9 +203,9 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                     'variantLabels' => array(
                         'farbe' => 'color'
@@ -214,9 +214,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
@@ -228,17 +228,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -254,17 +254,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -305,17 +305,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
@@ -327,17 +327,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -378,9 +378,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             'en' => array(),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
@@ -393,9 +393,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             'en' => array(),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -438,17 +438,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantLabels' => array(
                         'farbe' => 'kleur'
@@ -460,17 +460,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -513,9 +513,9 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                     'variantValues' => array(
                         'rot' => 'red'
@@ -524,9 +524,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
@@ -538,17 +538,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -564,17 +564,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -615,17 +615,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $expected = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
@@ -637,17 +637,17 @@ class ProductTranslatorTest extends BepadoTestHelper
         $translations = array(
             'en' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product EN',
-                    'shortDescription' => 'Bepado Local Product short description EN',
-                    'longDescription' => 'Bepado Local Product long description EN',
+                    'title' => 'shopware Connect Local Product EN',
+                    'shortDescription' => 'shopware Connect Local Product short description EN',
+                    'longDescription' => 'shopware Connect Local Product long description EN',
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -688,9 +688,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             'en' => array(),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                     'variantValues' => array(
                         'rot' => 'rood'
@@ -703,9 +703,9 @@ class ProductTranslatorTest extends BepadoTestHelper
             'en' => array(),
             'nl' => new Translation(
                 array(
-                    'title' => 'Bepado Local Product NL',
-                    'shortDescription' => 'Bepado Local Product short description NL',
-                    'longDescription' => 'Bepado Local Product long description NL',
+                    'title' => 'shopware Connect Local Product NL',
+                    'shortDescription' => 'shopware Connect Local Product short description NL',
+                    'longDescription' => 'shopware Connect Local Product long description NL',
                     'url' => $this->getProductBaseUrl() . '35/shId/3',
                 )
             )
@@ -717,9 +717,9 @@ class ProductTranslatorTest extends BepadoTestHelper
     public function testValidate()
     {
         $translation = new Translation(array(
-            'title' => 'Bepado Local Product EN',
-            'shortDescription' => 'Bepado Local Product short description EN',
-            'longDescription' => 'Bepado Local Product long description EN',
+            'title' => 'shopware Connect Local Product EN',
+            'shortDescription' => 'shopware Connect Local Product short description EN',
+            'longDescription' => 'shopware Connect Local Product long description EN',
             'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
@@ -740,8 +740,8 @@ class ProductTranslatorTest extends BepadoTestHelper
     public function testValidateMissingTitle()
     {
         $translation = new Translation(array(
-            'shortDescription' => 'Bepado Local Product short description EN',
-            'longDescription' => 'Bepado Local Product long description EN',
+            'shortDescription' => 'shopware Connect Local Product short description EN',
+            'longDescription' => 'shopware Connect Local Product long description EN',
             'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
@@ -762,9 +762,9 @@ class ProductTranslatorTest extends BepadoTestHelper
     public function testValidateWrongVariantLabels()
     {
         $translation = new Translation(array(
-            'title' => 'Bepado Local Product EN',
-            'shortDescription' => 'Bepado Local Product short description EN',
-            'longDescription' => 'Bepado Local Product long description EN',
+            'title' => 'shopware Connect Local Product EN',
+            'shortDescription' => 'shopware Connect Local Product short description EN',
+            'longDescription' => 'shopware Connect Local Product long description EN',
             'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'farbe' => 'color',
@@ -784,9 +784,9 @@ class ProductTranslatorTest extends BepadoTestHelper
     public function testValidateWrongVariantValues()
     {
         $translation = new Translation(array(
-            'title' => 'Bepado Local Product EN',
-            'shortDescription' => 'Bepado Local Product short description EN',
-            'longDescription' => 'Bepado Local Product long description EN',
+            'title' => 'shopware Connect Local Product EN',
+            'shortDescription' => 'shopware Connect Local Product short description EN',
+            'longDescription' => 'shopware Connect Local Product long description EN',
             'url' => $this->getProductBaseUrl() . '35/shId/2',
             'variantLabels' => array(
                 'größe' => 'size',
@@ -808,7 +808,7 @@ class ProductTranslatorTest extends BepadoTestHelper
 
         return Shopware()->Front()->Router()->assemble(array(
             'module' => 'frontend',
-            'controller' => 'bepado_product_gateway',
+            'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true

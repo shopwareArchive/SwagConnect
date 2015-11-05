@@ -1,7 +1,7 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/import/remote_products"}
-Ext.define('Shopware.apps.Bepado.view.import.RemoteProducts', {
+//{block name="backend/connect/view/import/remote_products"}
+Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.connect-products',
     store: 'import.RemoteProducts',

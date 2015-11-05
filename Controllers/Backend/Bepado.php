@@ -23,30 +23,30 @@
  */
 
 use \Bepado\SDK\Struct\Product;
-use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Bepado\Components\ImageImport;
+use Shopware\Connect\Components\ConnectExport;
+use Shopware\Connect\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier;
-use \Shopware\Bepado\Components\Marketplace\MarketplaceSettings;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
+use \Shopware\Connect\Components\Marketplace\MarketplaceSettings;
 
 /**
- * Class Shopware_Controllers_Backend_Bepado
+ * Class Shopware_Controllers_Backend_Connect
  */
-class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_ExtJs
+class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_ExtJs
 {
     /**
-     * @var \Shopware\Bepado\Components\BepadoFactory
+     * @var \Shopware\Connect\Components\ConnectFactory
      */
     private $factory;
 
-    /** @var  \Shopware\Bepado\Components\Config */
+    /** @var  \Shopware\Connect\Components\Config */
     private $configComponent;
 
     /**
-     * @var \Shopware\Bepado\Components\Marketplace\MarketplaceSettingsApplier
+     * @var \Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier
      */
     private $marketplaceSettingsApplier;
 
@@ -63,16 +63,16 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+        return Shopware()->Bootstrap()->getResource('ConnectSDK');
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Helper
+     * @return \Shopware\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
@@ -130,12 +130,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
-            new \Shopware\Bepado\Components\Logger(Shopware()->Db())
+            new \Shopware\Connect\Components\Logger(Shopware()->Db())
         );
     }
 
     /**
-     * Lists categories for a given bepado category tree
+     * Lists categories for a given connect category tree
      */
     public function getCategoryListAction()
     {
@@ -160,9 +160,9 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
             //todo@sb: Find better solution
             $categories = Shopware()->Db()->fetchPairs(
-                'SELECT `id`,`category` FROM s_plugin_bepado_items
+                'SELECT `id`,`category` FROM s_plugin_connect_items
                 WHERE `source_id` > 0 AND `shop_id` > 0 AND ((SELECT COUNT( * ) FROM  `s_categories_attributes`
-                WHERE  `bepado_import_mapping` = `category`) = 0)
+                WHERE  `connect_import_mapping` = `category`) = 0)
                 GROUP BY `category`'
             );
 
@@ -183,13 +183,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * When the backend module is being loaded, update bepado products.
+     * When the backend module is being loaded, update connect products.
      *
      * It might be considerable to move this to e.g. the lifecycle events of the products
      */
     public function indexAction()
     {
-        $this->getHelper()->updateBepadoProducts();
+        $this->getHelper()->updateConnectProducts();
 
         parent::loadAction();
     }
@@ -204,7 +204,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     private function getListQueryBuilder($filter, $order)
     {
         $builder = $this->getModelManager()->createQueryBuilder();
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
         $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
@@ -266,7 +266,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Get all products exported to bepado
+     * Get all products exported to connect
      */
     public function getExportListAction()
     {
@@ -288,7 +288,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
         $total = array_sum($countResult);
-        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
 //        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
@@ -300,7 +300,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Get all products imported from bepado
+     * Get all products imported from connect
      */
     public function getImportListAction()
     {
@@ -320,7 +320,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $builder->addSelect(array(
             'at.shopId',
             'at.sourceId',
-            'at.exportStatus as bepadoStatus',
+            'at.exportStatus as connectStatus',
         ));
         $builder->andWhere('at.shopId IS NOT NULL');
 
@@ -333,7 +333,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
         $total = array_sum($countResult);
-        // todo@sb: find better solution. getQueryCount method counts s_plugin_bepado_items.id like they are not grouped by article id
+        // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
 //        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
@@ -356,23 +356,23 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         }
 
         $repository = $this->getCategoryRepository();
-        // remove bepado category filter
+        // remove connect category filter
         foreach($filter as $key=>&$f) {
             if ($f['property'] == 'mapping') {
-                $bepadoCategoryFilter = $f;
+                $connectCategoryFilter = $f;
                 unset($filter[$key]);
             }
         }
 
         $builder = $repository->getListQueryBuilder($filter, array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
-        $builder->add('select', 'ct.bepadoImportMapping as mapping', true);
+        $builder->add('select', 'ct.connectImportMapping as mapping', true);
 
         if (!empty($filter)) {
-            // add bepado category attribute in where clause
-            if ($bepadoCategoryFilter) {
-                $builder->orWhere('ct.bepadoImportMapping LIKE :mapping');
-                $builder->setParameter(':mapping', $bepadoCategoryFilter['value']);
+            // add connect category attribute in where clause
+            if ($connectCategoryFilter) {
+                $builder->orWhere('ct.connectImportMapping LIKE :mapping');
+                $builder->setParameter(':mapping', $connectCategoryFilter['value']);
             }
 
             $query = $builder->getQuery();
@@ -412,7 +412,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         foreach($rows as $row) {
             $result = $this->getCategoryModelById($row['id']);
             if($result !== null) {
-                $result->getAttribute()->setBepadoImportMapping($row['mapping']);
+                $result->getAttribute()->setConnectImportMapping($row['mapping']);
             }
         }
         Shopware()->Models()->flush();
@@ -431,23 +431,23 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $filter = array();
         }
 
-        // remove bepado category filter
+        // remove connect category filter
         foreach($filter as $key=>&$f) {
             if ($f['property'] == 'mapping') {
-                $bepadoCategoryFilter = $f;
+                $connectCategoryFilter = $f;
                 unset($filter[$key]);
             }
         }
 
         $builder = $repository->getListQueryBuilder($filter, array(), null, null, true);
         $builder->leftJoin('c.attribute', 'ct');
-        $builder->add('select', 'ct.bepadoExportMapping as mapping', true);
+        $builder->add('select', 'ct.connectExportMapping as mapping', true);
 
         if (!empty($filter)) {
-            // add bepado category attribute in where clause
-            if ($bepadoCategoryFilter) {
-                $builder->orWhere('ct.bepadoExportMapping LIKE :mapping');
-                $builder->setParameter(':mapping', $bepadoCategoryFilter['value']);
+            // add connect category attribute in where clause
+            if ($connectCategoryFilter) {
+                $builder->orWhere('ct.connectExportMapping LIKE :mapping');
+                $builder->setParameter(':mapping', $connectCategoryFilter['value']);
             }
 
             $query = $builder->getQuery();
@@ -487,16 +487,16 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         foreach($rows as $row) {
             $result = $this->getCategoryModelById($row['id']);
             if($result !== null) {
-                $result->getAttribute()->setBepadoExportMapping($row['mapping']);
+                $result->getAttribute()->setConnectExportMapping($row['mapping']);
             }
         }
         Shopware()->Models()->flush();
     }
 
     /**
-     * Import parts of the bepado category tree to shopware
+     * Import parts of the connect category tree to shopware
      */
-    public function importBepadoCategoriesAction()
+    public function importConnectCategoriesAction()
     {
         $fromCategory = $this->Request()->getParam('fromCategory');
         $toCategory = $this->Request()->getParam('toCategory');
@@ -513,12 +513,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         // The user might have changed the mapping without saving and then hit the "importCategories"
         // button. So we save the parent category's mapping first
         $parentCategory = $this->getCategoryModelById($toCategory);
-        $parentCategory->getAttribute()->setBepadoImportMapping($fromCategory);
+        $parentCategory->getAttribute()->setConnectImportMapping($fromCategory);
         $entityManager->flush();
 
         try {
             $entityManager->getConnection()->beginTransaction();
-            $this->importBepadoCategories($fromCategory, $toCategory);
+            $this->importConnectCategories($fromCategory, $toCategory);
             $entityManager->getConnection()->commit();
         } catch (\Exception $e) {
             $entityManager->getConnection()->rollback();
@@ -528,14 +528,14 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Will import a bepado category tree into shopware.
+     * Will import a connect category tree into shopware.
      *
      * @param $fromCategory
      * @param $toCategory
      */
-    public function importBepadoCategories($fromCategory, $toCategory)
+    public function importConnectCategories($fromCategory, $toCategory)
     {
-        $categoriesToImport = $this->getFlatBepadoCategories($fromCategory);
+        $categoriesToImport = $this->getFlatConnectCategories($fromCategory);
         $toCategoryModel = $this->getCategoryRepository()->find($toCategory);
         $entityManager = $this->getModelManager();
 
@@ -571,7 +571,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
             // Check if there is already a category attribute for this import
             $categoryAttributes = $entityManager->getRepository('\Shopware\Models\Attribute\Category')->findBy(
-                array('bepadoImported' => $importString, 'bepadoImportMapping' => $id),
+                array('connectImported' => $importString, 'connectImportMapping' => $id),
                 null,
                 1
             );
@@ -587,8 +587,8 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $category->setParent($parentModel);
 
                 $attribute = new \Shopware\Models\Attribute\Category();
-                $attribute->setBepadoImportMapping($id);
-                $attribute->setBepadoImported($importString);
+                $attribute->setConnectImportMapping($id);
+                $attribute->setConnectImported($importString);
                 $category->setAttribute($attribute);
 
                 Shopware()->Models()->persist($category);
@@ -604,20 +604,20 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Returns a flat array of bepado categories
+     * Returns a flat array of connect categories
      *
      * @param $rootCategory
      * @return array(
      *      string => array('id' => string, 'name' => string, 'level' => int, 'parent' => string|null)
      * )
      */
-    private function getFlatBepadoCategories($rootCategory)
+    private function getFlatConnectCategories($rootCategory)
     {
         $sdk = $this->getSDK();
-        $bepadoCategories = $sdk->getCategories();
+        $connectCategories = $sdk->getCategories();
 
         $categoriesToImport = array();
-        foreach ($bepadoCategories as $id => $name) {
+        foreach ($connectCategories as $id => $name) {
             // Skip all entries which do not start with the parent or do not have it at all
             if (strpos($id, $rootCategory) !== 0) {
                 continue;
@@ -701,13 +701,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         // First of all try to save the mapping for the parent category. If that fails,
         // it mustn't be done for the child categories
         $parentCategory = $this->getCategoryModelById($categoryId);
-        $parentCategory->getAttribute()->setBepadoExportMapping($mapping);
+        $parentCategory->getAttribute()->setConnectExportMapping($mapping);
         $entityManager->flush();
 
         // Don't set the children with models in order to speed things up
         $builder = $entityManager->createQueryBuilder();
         $builder->update('\Shopware\Models\Attribute\Category', 'categoryAttribute')
-            ->set('categoryAttribute.bepadoExportMapping',  $builder->expr()->literal($mapping))
+            ->set('categoryAttribute.connectExportMapping',  $builder->expr()->literal($mapping))
             ->where($builder->expr()->in('categoryAttribute.categoryId', $ids));
 
         $builder->getQuery()->execute();
@@ -746,7 +746,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $ids = array();
         foreach ($articleIds as $articleId) {
             /** @var \Shopware\Models\Article\Article $article */
-            $article = $this->getBepadoExport()->getArticleModelById($articleId);
+            $article = $this->getConnectExport()->getArticleModelById($articleId);
             if (!$article) {
                 continue;
             }
@@ -767,16 +767,16 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Called when a product was marked for update in the bepado backend module
+     * Called when a product was marked for update in the connect backend module
      */
     public function insertOrUpdateProductAction()
     {
         $articleIds = $this->Request()->getPost('ids');
         $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
 
-        $bepadoExport = $this->getBepadoExport();
+        $connectExport = $this->getConnectExport();
         try {
-            $errors = $bepadoExport->export($sourceIds);
+            $errors = $connectExport->export($sourceIds);
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
@@ -801,7 +801,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Delete a product from bepado export
+     * Delete a product from connect export
      */
     public function deleteProductAction()
     {
@@ -809,13 +809,13 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
             /** @var \Shopware\Models\Article\Article $model */
-            $model = $this->getBepadoExport()->getArticleModelById($id);
+            $model = $this->getConnectExport()->getArticleModelById($id);
             if($model === null) {
                 continue;
             }
             /** @var \Shopware\Models\Article\Detail $detail */
             foreach ($model->getDetails() as $detail) {
-                $attribute = $this->getHelper()->getBepadoAttributeByModel($detail);
+                $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
                 $sdk->recordDelete($attribute->getSourceId());
                 $attribute->setExportStatus(
                     'delete'
@@ -826,7 +826,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Updates products and flag the for bepado export.
+     * Updates products and flag the for connect export.
      */
     public function updateProductAction()
     {
@@ -836,12 +836,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         if (!$unsubscribe) {
             foreach ($ids as $id) {
-                $model = $this->getBepadoExport()->getArticleModelById($id);
+                $model = $this->getConnectExport()->getArticleModelById($id);
                 if ($model === null) {
                     continue;
                 }
 
-                $attribute = $this->getHelper()->getBepadoAttributeByModel($model);
+                $attribute = $this->getHelper()->getConnectAttributeByModel($model);
                 if ($attribute->getExportStatus() !== null) {
                     continue;
                 }
@@ -881,12 +881,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Verify a given api key against the bepado server
+     * Verify a given api key against the connect server
      */
     public function verifyApiKeyAction()
     {
-        /** @var Shopware\CustomModels\Bepado\ConfigRepository $repo */
-        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Bepado\Config');
+        /** @var Shopware\CustomModels\Connect\ConfigRepository $repo */
+        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Config');
 
         $sdk = $this->getSDK();
         try {
@@ -969,7 +969,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Could not find model for article with id {$articleId}");
         }
 
-        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($articleModel);
+        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($articleModel);
 
         $updateFlags = $this->getHelper()->getUpdateFlags();
         $updateFlagsByName = array_flip($updateFlags);
@@ -999,7 +999,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 $price->fromArray(array(
                     'from' => 1,
                     'price' => $netPrice,
-                    'basePrice' => $bepadoAttribute->getPurchasePrice(),
+                    'basePrice' => $connectAttribute->getPurchasePrice(),
                     'customerGroup' => $customerGroup,
                     'article' => $articleModel
                 ));
@@ -1007,12 +1007,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
                 break;
         }
 
-        if ($bepadoAttribute->getLastUpdateFlag() & $flag) {
-            $bepadoAttribute->flipLastUpdateFlag($flag);
+        if ($connectAttribute->getLastUpdateFlag() & $flag) {
+            $connectAttribute->flipLastUpdateFlag($flag);
         }
         if ($type == 'image') {
-            if ($bepadoAttribute->getLastUpdateFlag() & $updateFlagsByName['imageInitialImport']) {
-                $bepadoAttribute->flipLastUpdateFlag($updateFlagsByName['imageInitialImport']);
+            if ($connectAttribute->getLastUpdateFlag() & $updateFlagsByName['imageInitialImport']) {
+                $connectAttribute->flipLastUpdateFlag($updateFlagsByName['imageInitialImport']);
             }
         }
 
@@ -1049,17 +1049,17 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Returns the bepadoAttribute data for a given articleId
+     * Returns the connectAttribute data for a given articleId
      *
      * @throws RuntimeException
      * @throws Exception
      */
-    public function getBepadoDataAction()
+    public function getConnectDataAction()
     {
         $articleId = $this->Request()->getParam('articleId');
 
         if (!$articleId) {
-            throw new \Exception("Bepado: ArticleId empty");
+            throw new \Exception("Connect: ArticleId empty");
         }
 
         /** @var Article $articleModel */
@@ -1069,7 +1069,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             throw new \RuntimeException("Could not find model for article with id {$articleId}");
         }
 
-        $data = $this->getHelper()->getOrCreateBepadoAttributes($articleModel);
+        $data = $this->getHelper()->getOrCreateConnectAttributes($articleModel);
 
         $data = $this->getModelManager()->toArray($data);
         if (isset($data['articleId'])) {
@@ -1083,33 +1083,33 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Save a given bepado attribute
+     * Save a given connect attribute
      */
-    public function saveBepadoAttributeAction()
+    public function saveConnectAttributeAction()
     {
         $data = $this->Request()->getParams();
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
-        $bepadoAttribute = $this->getModelManager()->find('Shopware\CustomModels\Bepado\Attribute', $data['id']);
-        if (!$bepadoAttribute) {
-            throw new \RuntimeException("Could not find bepado attribute with id {$data['id']}");
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->getModelManager()->find('Shopware\CustomModels\Connect\Attribute', $data['id']);
+        if (!$connectAttribute) {
+            throw new \RuntimeException("Could not find connect attribute with id {$data['id']}");
         }
 
         /** @var \Shopware\Models\Article\Detail $detail */
-        foreach ($bepadoAttribute->getArticle()->getDetails() as $detail) {
-            $bepadoAttribute = $this->getHelper()->getBepadoAttributeByModel($detail);
+        foreach ($connectAttribute->getArticle()->getDetails() as $detail) {
+            $connectAttribute = $this->getHelper()->getConnectAttributeByModel($detail);
             // Only allow changes in the fixedPrice field if this is a local product
-            if (!$bepadoAttribute->getShopId()) {
-                $bepadoAttribute->setFixedPrice($data['fixedPrice']);
+            if (!$connectAttribute->getShopId()) {
+                $connectAttribute->setFixedPrice($data['fixedPrice']);
             }
             // Save the update fields
             foreach ($data as $key => $value) {
                 if (strpos($key, 'update') === 0) {
                     $setter = 'set' . ucfirst($key);
-                    $bepadoAttribute->$setter($value);
+                    $connectAttribute->$setter($value);
                 }
             }
-            $this->getModelManager()->persist($bepadoAttribute);
+            $this->getModelManager()->persist($connectAttribute);
         }
 
         $this->getModelManager()->flush();
@@ -1118,7 +1118,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * Saves the changed "bepadoAllowed" attribute. Saving this attribute should be done
+     * Saves the changed "connectAllowed" attribute. Saving this attribute should be done
      * by the shipping-module on its own, right now (as of SW 4.2.0) it does not do so.
      *
      * todo: Once the shipping module is fixed, increase the required version of this plugin
@@ -1127,7 +1127,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function saveShippingAttributeAction()
     {
         $shippingId = $this->Request()->getParam('shippingId');
-        $bepadoAllowed = $this->Request()->getParam('bepadoAllowed', true);
+        $connectAllowed = $this->Request()->getParam('connectAllowed', true);
 
         if (!$shippingId) {
             return;
@@ -1150,7 +1150,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
             $this->getModelManager()->persist($attribute);
         }
 
-        $attribute->setBepadoAllowed($bepadoAllowed);
+        $attribute->setConnectAllowed($connectAllowed);
 
         $this->getModelManager()->flush();
 
@@ -1186,7 +1186,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
 
         $builder = $this->getModelManager()->createQueryBuilder();
         $builder->select('logs');
-        $builder->from('Shopware\CustomModels\Bepado\Log', 'logs')
+        $builder->from('Shopware\CustomModels\Connect\Log', 'logs')
             ->addOrderBy($order)
             ->where('logs.command IN (:commandFilter)')
             ->setParameter('commandFilter', $commandFilters);
@@ -1232,7 +1232,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function getLogCommandsAction()
     {
         $data = $this->getModelManager()->getConnection()->fetchAll(
-            'SELECT DISTINCT `command` FROM `s_plugin_bepado_log`'
+            'SELECT DISTINCT `command` FROM `s_plugin_connect_log`'
         );
 
         $data = array_map(function($column) {
@@ -1258,15 +1258,15 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     public function clearLogAction()
     {
         $connection = $this->getModelManager()->getConnection();
-        $connection->exec('TRUNCATE `s_plugin_bepado_log`;');
+        $connection->exec('TRUNCATE `s_plugin_connect_log`;');
     }
 
     /**
-     * @return BepadoExport
+     * @return ConnectExport
      */
-    public function getBepadoExport()
+    public function getConnectExport()
     {
-        return new BepadoExport(
+        return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             $this->getModelManager(),
@@ -1276,12 +1276,12 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Config
+     * @return \Shopware\Connect\Components\Config
      */
     public function getConfigComponent()
     {
         if ($this->configComponent === null) {
-            $this->configComponent = new \Shopware\Bepado\Components\Config($this->getModelManager());
+            $this->configComponent = new \Shopware\Connect\Components\Config($this->getModelManager());
         }
 
         return $this->configComponent;
@@ -1300,7 +1300,7 @@ class Shopware_Controllers_Backend_Bepado extends Shopware_Controllers_Backend_E
         if (!is_null($category)) {
             foreach ($articleIds as $id) {
                 /** @var \Shopware\Models\Article\Article $article */
-                $article = $this->getBepadoExport()->getArticleModelById($id);
+                $article = $this->getConnectExport()->getArticleModelById($id);
                 if (is_null($article)) {
                     continue;
                 }

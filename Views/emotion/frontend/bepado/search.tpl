@@ -1,14 +1,14 @@
 {extends file='frontend/index/index.tpl'}
 
-{* Include the stylesheet if we're dealing with an bepado product *}
+{* Include the stylesheet if we're dealing with an connect product *}
 {block name="frontend_index_header_css_screen" append}
-    <link rel="stylesheet" href="{link file='frontend/_resources/styles/bepado.css'}" />
+    <link rel="stylesheet" href="{link file='frontend/_resources/styles/connect.css'}" />
 {/block}
 
 {* Sidebar left *}
 {block name='frontend_index_content_left'}
     {if $searchResult->resultCount > 0}
-        {include file='frontend/bepado/search_left.tpl'}
+        {include file='frontend/connect/search_left.tpl'}
     {else}
         {$smarty.block.parent}
     {/if}
@@ -20,9 +20,9 @@
         {block name='frontend_search_index_headline'}
             <h2>
                 {if $searchResult->results|count gt 0}
-                    {s name='SearchHeading' namespace='frontend/search/bepado'}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}
+                    {s name='SearchHeading' namespace='frontend/search/connect'}Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.{/s}
                 {else}
-                    {s name='SearchHeadingEmpty' namespace='frontend/search/bepado'}Leider wurden zu "{$searchQuery|escape}" keine Artikel gefunden{/s}
+                    {s name='SearchHeadingEmpty' namespace='frontend/search/connect'}Leider wurden zu "{$searchQuery|escape}" keine Artikel gefunden{/s}
                 {/if}
             </h2>
         {/block}
@@ -30,10 +30,10 @@
             <div>
                 <div class="listing" id="listing-1col">
                     {foreach from=$searchResult->results item=result key=key name=list}
-                        <div class="bepado-article artbox">
+                        <div class="connect-article artbox">
                             <div class="inner">
 
-                                <a title="{$result->vendor|escape}" href="{$result->url}" class="bepado-img">
+                                <a title="{$result->vendor|escape}" href="{$result->url}" class="connect-img">
                                     {if $result->images[0]}
                                         <img src="{$result->images[0]}">
                                     {else}
@@ -55,7 +55,7 @@
                                 <div class="actions">
                                     <a class="more" href="{$result->url}" title="{$result->title|escape}">Zum Produkt</a>
                                 </div>
-                                <div class="bepado-clear"></div>
+                                <div class="connect-clear"></div>
                             </div>
                         </div>
                     {/foreach}

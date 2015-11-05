@@ -3,7 +3,7 @@
 class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway
+     * @var \Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway
      */
     private $gateway;
 
@@ -21,12 +21,12 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->gateway = new \Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway($this->mockDbAdapter);
+        $this->gateway = new \Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway($this->mockDbAdapter);
     }
 
     public function testGetSingleTranslation()
     {
-        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:3:{s:10:"txtArtikel";s:20:"Bepado local article";s:19:"txtshortdescription";s:38:"Bepado local article short description";s:19:"txtlangbeschreibung";s:37:"Bepado local article long description";}');
+        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:3:{s:10:"txtArtikel";s:20:"Connect local article";s:19:"txtshortdescription";s:38:"Connect local article short description";s:19:"txtlangbeschreibung";s:37:"Connect local article long description";}');
 
         $sql = 'SELECT objectdata
                 FROM s_core_translations
@@ -36,16 +36,16 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
         $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
 
         $expected = array(
-            'title' => 'Bepado local article',
-            'shortDescription' => 'Bepado local article short description',
-            'longDescription' => 'Bepado local article long description',
+            'title' => 'shopware Connect local article',
+            'shortDescription' => 'shopware Connect local article short description',
+            'longDescription' => 'shopware Connect local article long description',
         );
         $this->assertEquals($expected, $this->gateway->getSingleTranslation(105, 3));
     }
 
     public function testGetSingleTranslationTitleOnly()
     {
-        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:1:{s:10:"txtArtikel";s:20:"Bepado local article";}');
+        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:1:{s:10:"txtArtikel";s:20:"shopware Connect local article";}');
 
         $sql = 'SELECT objectdata
                 FROM s_core_translations
@@ -55,7 +55,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
         $this->mockDbAdapter->expects($this->any())->method('executeQuery')->with($sql, $queryParams)->will($this->returnValue($this->mockDbStatement));
 
         $expected = array(
-            'title' => 'Bepado local article',
+            'title' => 'shopware Connect local article',
             'shortDescription' => '',
             'longDescription' => '',
         );
@@ -82,11 +82,11 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->method('fetchAll')
             ->willReturn(array(
                 0 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:20:"Bepado local article";s:19:"txtshortdescription";s:38:"Bepado local article short description";s:19:"txtlangbeschreibung";s:37:"Bepado local article long description";}',
+                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:20:"shopware Connect local article";s:19:"txtshortdescription";s:38:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:37:"shopware Connect local article long description";}',
                     'objectlanguage' => 2,
                 ),
                 1 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:23:"Bepado local article EN";s:19:"txtshortdescription";s:41:"Bepado local article short description EN";s:19:"txtlangbeschreibung";s:40:"Bepado local article long description EN";}',
+                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:23:"shopware Connect local article EN";s:19:"txtshortdescription";s:41:"shopware Connect local article short description EN";s:19:"txtlangbeschreibung";s:40:"shopware Connect local article long description EN";}',
                     'objectlanguage' => 3,
                 ),
             ));
@@ -101,14 +101,14 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $expected = array(
             2 => array(
-                'title' => 'Bepado local article',
-                'shortDescription' => 'Bepado local article short description',
-                'longDescription' => 'Bepado local article long description',
+                'title' => 'shopware Connect local article',
+                'shortDescription' => 'shopware Connect local article short description',
+                'longDescription' => 'shopware Connect local article long description',
             ),
             3 => array(
-                'title' => 'Bepado local article EN',
-                'shortDescription' => 'Bepado local article short description EN',
-                'longDescription' => 'Bepado local article long description EN',
+                'title' => 'shopware Connect local article EN',
+                'shortDescription' => 'shopware Connect local article short description EN',
+                'longDescription' => 'shopware Connect local article long description EN',
             ),
         );
 
@@ -121,11 +121,11 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->method('fetchAll')
             ->willReturn(array(
                 0 => array(
-                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:20:"Bepado local article";}',
+                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:20:"shopware Connect local article";}',
                     'objectlanguage' => 2,
                 ),
                 1 => array(
-                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:23:"Bepado local article EN";}',
+                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:23:"shopware Connect local article EN";}',
                     'objectlanguage' => 3,
                 ),
             ));
@@ -140,12 +140,12 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
         $expected = array(
             2 => array(
-                'title' => 'Bepado local article',
+                'title' => 'shopware Connect local article',
                 'shortDescription' => '',
                 'longDescription' => '',
             ),
             3 => array(
-                'title' => 'Bepado local article EN',
+                'title' => 'shopware Connect local article EN',
                 'shortDescription' => '',
                 'longDescription' => '',
             ),
@@ -371,7 +371,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
     public function testAddArticleTranslation()
     {
         $translation = new \Bepado\SDK\Struct\Translation(array(
-            'title' => 'Bepado remote article EN',
+            'title' => 'shopware Connect remote article EN',
             'longDescription' => 'Long description EN',
             'shortDescription' => 'Short description EN',
         ));

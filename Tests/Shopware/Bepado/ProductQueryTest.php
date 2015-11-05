@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Verificator\Product;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\ProductQuery;
-use Shopware\Bepado\Components\ProductQuery\RemoteProductQuery;
-use Shopware\Bepado\Components\ProductQuery\LocalProductQuery;
-use Shopware\Bepado\Components\Translations\ProductTranslator;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\ProductQuery;
+use Shopware\Connect\Components\ProductQuery\RemoteProductQuery;
+use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
+use Shopware\Connect\Components\Translations\ProductTranslator;
 
-class ProductQueryTest extends BepadoTestHelper
+class ProductQueryTest extends ConnectTestHelper
 {
     protected $productQuery;
 
@@ -20,7 +20,7 @@ class ProductQueryTest extends BepadoTestHelper
     public function getProductQuery()
     {
         if (!$this->productQuery) {
-            $this->productTranslator = $this->getMockBuilder('\\Shopware\\Bepado\\Components\\Translations\\ProductTranslator')
+            $this->productTranslator = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Translations\\ProductTranslator')
                 ->disableOriginalConstructor()
                 ->getMock();
 
@@ -28,7 +28,7 @@ class ProductQueryTest extends BepadoTestHelper
                 ->method('translate')
                 ->willReturn(array());
 
-            /** @var \Shopware\Bepado\Components\Config $configComponent */
+            /** @var \Shopware\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
             $this->productQuery = new ProductQuery(
@@ -102,14 +102,14 @@ class ProductQueryTest extends BepadoTestHelper
 
         return Shopware()->Front()->Router()->assemble(array(
             'module' => 'frontend',
-            'controller' => 'bepado_product_gateway',
+            'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
         ));
     }
 
-    public function testGetBepadoProduct()
+    public function testGetConnectProduct()
     {
         $result = $this->getProductQuery()->getLocal(array(3));
         /** @var \Bepado\SDK\Struct\Product $product */
@@ -122,7 +122,7 @@ class ProductQueryTest extends BepadoTestHelper
 
 
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(11);
-        $bepadoAttribute = $this->getHelper()->getOrCreateBepadoAttributeByModel($model);
+        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $result = $this->getProductQuery()->getLocal(array(11));
         /** @var \Bepado\SDK\Struct\Product $product */
         $product = $result[0];

@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Product;
 
-class MassImportTest extends BepadoTestHelper
+class MassImportTest extends ConnectTestHelper
 {
     public function testHandleProductUpdates()
     {

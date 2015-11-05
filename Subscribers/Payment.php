@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
  * Class Payment
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class Payment extends BaseSubscriber
 {
@@ -36,11 +36,11 @@ class Payment extends BaseSubscriber
             $this->registerMyTemplateDir();
 
             $subject->View()->extendsTemplate(
-                'backend/payment/model/bepado_attribute.js'
+                'backend/payment/model/connect_attribute.js'
             );
 
             $subject->View()->extendsTemplate(
-                'backend/payment/view/payment/bepado_form.js'
+                'backend/payment/view/payment/connect_form.js'
             );
         }
     }
@@ -53,9 +53,9 @@ class Payment extends BaseSubscriber
         $paymentMeans = $args->getReturn();
 
         $sessionId = Shopware()->SessionID();
-        $hasBepadoProduct = $this->getHelper()->hasBasketBepadoProducts($sessionId);
+        $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($sessionId);
 
-        if ($hasBepadoProduct === true) {
+        if ($hasConnectProduct === true) {
             foreach ($paymentMeans as $key => &$payment) {
                 /** @var \Shopware\Models\Payment\Payment $model */
                 $model = $this->getPaymentRepository()->find($payment['id']);
@@ -70,8 +70,8 @@ class Payment extends BaseSubscriber
                 }
 
                 $attribute = $model->getAttribute();
-                if (method_exists($attribute, 'getBepadoIsAllowed') === true
-                    && $attribute->getBepadoIsAllowed() == 0) {
+                if (method_exists($attribute, 'getConnectIsAllowed') === true
+                    && $attribute->getConnectIsAllowed() == 0) {
                     unset($paymentMeans[$key]);
                     continue;
                 }

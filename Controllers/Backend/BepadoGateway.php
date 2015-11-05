@@ -22,15 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-use Shopware\Bepado\Components\Logger;
+use Shopware\Connect\Components\Logger;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
-class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Action
+class Shopware_Controllers_Backend_ConnectGateway extends Enlight_Controller_Action
 {
     private $configComponent;
 
@@ -58,20 +58,20 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+        return Shopware()->Bootstrap()->getResource('ConnectSDK');
     }
 
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \Shopware\Bepado\Components\Config(Shopware()->Models());
+            $this->configComponent = new \Shopware\Connect\Components\Config(Shopware()->Models());
         }
 
         return $this->configComponent;
     }
 
     /**
-     * Main bepado interface
+     * Main connect interface
      *
      * @throws Exception
      */
@@ -109,7 +109,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
             throw new \RuntimeException('Invalid country. Country code must be iso3');
         }
 
-        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute');
+        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
         $attributes = $repository->findBy(array('sourceId' => $sourceIds, 'shopId' => null));
 
 
@@ -120,7 +120,7 @@ class Shopware_Controllers_Backend_BepadoGateway extends Enlight_Controller_Acti
         }
         $shop->registerResources(Shopware()->Bootstrap());
 
-        $sessionId = uniqid('bepado_remote');
+        $sessionId = uniqid('connect_remote');
         Shopware()->System()->sSESSION_ID = $sessionId;
         Shopware()->System()->_SESSION['sDispatch'] = Shopware()->Session()['sDispatch'];
 

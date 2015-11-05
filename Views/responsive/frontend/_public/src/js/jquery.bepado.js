@@ -1,6 +1,6 @@
 ;(function ($, undefined) {
 
-	$.plugin('bepado', {
+	$.plugin('connect', {
 
 		/** Plugin constructor */
 		init: function () {
@@ -14,9 +14,9 @@
         onSlideDispatch: function (event) {
             var me = this,
                 $el = $(event.currentTarget),
-                dispatchCt = $el.parents('.bepado--collapsible-dispatch'),
+                dispatchCt = $el.parents('.connect--collapsible-dispatch'),
                 dispatchBody = dispatchCt.find('.collapsible-dispatch--body'),
-                raquo = $el.find('.bepado--raquo');
+                raquo = $el.find('.connect--raquo');
 			event.preventDefault();
 
             if (raquo.hasClass('collapsible-dispatch--collapsed')) {
@@ -34,5 +34,5 @@
 		}
 	});
 
-    $('.bepado--store-dispatch').bepado();
+    $('.connect--store-dispatch').connect();
 })(jQuery);

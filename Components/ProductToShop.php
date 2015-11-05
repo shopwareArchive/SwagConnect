@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
+namespace Shopware\Connect\Components;
 use Bepado\SDK\ProductToShop as ProductToShopBase,
     Bepado\SDK\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
@@ -31,20 +31,20 @@ use Bepado\SDK\ProductToShop as ProductToShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 use Bepado\SDK\Struct\ProductUpdate;
-use Shopware\Bepado\Components\Translations\LocaleMapper;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\Utils\UnitMapper;
-use Shopware\CustomModels\Bepado\Attribute as BepadoAttribute;
+use Shopware\Connect\Components\Translations\LocaleMapper;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\Utils\UnitMapper;
+use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
 
 /**
- * The interface for products imported *from* bepado *to* the local shop
+ * The interface for products imported *from* connect *to* the local shop
  *
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class ProductToShop implements ProductToShopBase
 {
@@ -59,7 +59,7 @@ class ProductToShop implements ProductToShopBase
     private $manager;
 
     /**
-     * @var \Shopware\Bepado\Components\Config
+     * @var \Shopware\Connect\Components\Config
      */
     private $config;
 
@@ -69,7 +69,7 @@ class ProductToShop implements ProductToShopBase
     private $imageImport;
 
     /**
-     * @var \Shopware\Bepado\Components\VariantConfigurator
+     * @var \Shopware\Connect\Components\VariantConfigurator
      */
     private $variantConfigurator;
 
@@ -97,11 +97,11 @@ class ProductToShop implements ProductToShopBase
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
-     * @param \Shopware\Bepado\Components\Config $config
+     * @param \Shopware\Connect\Components\Config $config
      * @param VariantConfigurator $variantConfigurator
-     * @param \Shopware\Bepado\Components\Marketplace\MarketplaceGateway $marketplaceGateway
+     * @param \Shopware\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param \Shopware\Bepado\Components\CategoryResolver
+     * @param \Shopware\Connect\Components\CategoryResolver
      */
     public function __construct(
         Helper $helper,
@@ -175,7 +175,7 @@ class ProductToShop implements ProductToShopBase
                     $isMainVariant = true;
                 }
             } else {
-                $model = $this->helper->getBepadoArticleModel($product->sourceId, $product->shopId);
+                $model = $this->helper->getConnectArticleModel($product->sourceId, $product->shopId);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
                 }
@@ -211,23 +211,23 @@ class ProductToShop implements ProductToShopBase
         } else {
             $model = $detail->getArticle();
             // fix for isMainVariant flag
-            // in bepado attribute table
+            // in connect attribute table
             $mainDetail = $model->getMainDetail();
             if ($detail->getId() === $mainDetail->getId()) {
                 $isMainVariant = true;
             }
         }
 
-        $bepadoAttribute = $this->helper->getBepadoAttributeByModel($detail) ?: new BepadoAttribute;
+        $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
         // configure main variant and groupId
         if ($isMainVariant === true) {
-            $bepadoAttribute->setIsMainVariant(true);
+            $connectAttribute->setIsMainVariant(true);
         }
-        $bepadoAttribute->setGroupId($product->groupId);
+        $connectAttribute->setGroupId($product->groupId);
 
         $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
 
-        list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $bepadoAttribute, $product);
+        list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         /*
          * Make sure, that the following properties are set for
          * - new products
@@ -264,19 +264,19 @@ class ProductToShop implements ProductToShopBase
         // apply marketplace attributes
         $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
 
-        $bepadoAttribute->setShopId($product->shopId);
-        $bepadoAttribute->setSourceId($product->sourceId);
-        $bepadoAttribute->setExportStatus(null);
-        $bepadoAttribute->setPurchasePrice($product->purchasePrice);
-        $bepadoAttribute->setFixedPrice($product->fixedPrice);
+        $connectAttribute->setShopId($product->shopId);
+        $connectAttribute->setSourceId($product->sourceId);
+        $connectAttribute->setExportStatus(null);
+        $connectAttribute->setPurchasePrice($product->purchasePrice);
+        $connectAttribute->setFixedPrice($product->fixedPrice);
 
-        // store product categories to bepado attribute
-        $bepadoAttribute->setCategory($product->categories);
+        // store product categories to connect attribute
+        $connectAttribute->setCategory($product->categories);
 
-        $bepadoAttribute->setLastUpdateFlag($flag);
+        $connectAttribute->setLastUpdateFlag($flag);
         // store purchasePriceHash and offerValidUntil
-        $bepadoAttribute->setPurchasePriceHash($product->purchasePriceHash);
-        $bepadoAttribute->setOfferValidUntil($product->offerValidUntil);
+        $connectAttribute->setPurchasePriceHash($product->purchasePriceHash);
+        $connectAttribute->setOfferValidUntil($product->offerValidUntil);
 
         $detail->setInStock($product->availability);
         $detail->setEan($product->ean);
@@ -286,14 +286,14 @@ class ProductToShop implements ProductToShopBase
         $detail->setReleaseDate($releaseDate);
         $model->setLastStock(true);
 
-        // if bepado product has unit
+        // if connect product has unit
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
-            /** @var \Shopware\Bepado\Components\Config $configComponent */
+            /** @var \Shopware\Connect\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
 
-            /** @var \Shopware\Bepado\Components\Utils\UnitMapper $unitMapper */
+            /** @var \Shopware\Connect\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
 
             $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
@@ -326,7 +326,7 @@ class ProductToShop implements ProductToShopBase
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
-        $bepadoAttribute->setLastUpdate(json_encode(array(
+        $connectAttribute->setLastUpdate(json_encode(array(
             'shortDescription' => $product->shortDescription,
             'longDescription' => $product->longDescription,
             'purchasePrice' => $product->purchasePrice,
@@ -340,7 +340,7 @@ class ProductToShop implements ProductToShopBase
         $basePrice = $product->purchasePrice;
 
         // Only set prices, if fixedPrice is active or price updates are configured
-        if (count($detail->getPrices()) == 0 || $bepadoAttribute->getFixedPrice() || $updateFields['price']) {
+        if (count($detail->getPrices()) == 0 || $connectAttribute->getFixedPrice() || $updateFields['price']) {
             $customerGroup = $this->helper->getDefaultCustomerGroup();
 
             $detail->getPrices()->clear();
@@ -369,13 +369,13 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute->setArticle($model);
         }
 
-        $bepadoAttribute->setArticle($model);
-        $bepadoAttribute->setArticleDetail($detail);
-        $this->manager->persist($bepadoAttribute);
+        $connectAttribute->setArticle($model);
+        $connectAttribute->setArticleDetail($detail);
+        $this->manager->persist($connectAttribute);
 
         $this->manager->persist($detail);
 
-        // some articles from bepado have long sourceId
+        // some articles from connect have long sourceId
         // like OXID articles. They use md5 has, but it is not supported
         // in shopware.
         if (strlen($detail->getNumber()) > 30) {
@@ -478,7 +478,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // Not sure why, but the Attribute can be NULL
-        $attribute = $this->helper->getBepadoAttributeByModel($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detail);
         if ($attribute) {
             $this->manager->remove($attribute);
         }
@@ -586,11 +586,11 @@ class ProductToShop implements ProductToShopBase
      *
      * @param $field
      * @param $model ProductModel
-     * @param $attribute BepadoAttribute
+     * @param $attribute ConnectAttribute
      * @return bool|null
      * @throws \RuntimeException
      */
-    public function isFieldUpdateAllowed($field, ProductModel $model, BepadoAttribute $attribute)
+    public function isFieldUpdateAllowed($field, ProductModel $model, ConnectAttribute $attribute)
     {
         $allowed = array(
             'ShortDescription',
@@ -635,11 +635,11 @@ class ProductToShop implements ProductToShopBase
      */
     private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
     {
-        // Set the configured attribute so users can easily check if a given product is a bepado attribute
-        $setter = 'setAttr' . $this->config->getConfig('bepadoAttribute', 19);
+        // Set the configured attribute so users can easily check if a given product is a connect attribute
+        $setter = 'setAttr' . $this->config->getConfig('connectAttribute', 19);
         $detailAttribute->$setter($product->sourceId);
-        $detailAttribute->setBepadoArticleShipping($product->shipping);
-        //todo@sb: check if bepadoAttribute matches position of the marketplace attribute
+        $detailAttribute->setConnectArticleShipping($product->shipping);
+        //todo@sb: check if connectAttribute matches position of the marketplace attribute
         array_walk($product->attributes, function($value, $key) use ($detailAttribute) {
             $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);
             if (strlen($shopwareAttribute) > 0) {
@@ -655,13 +655,13 @@ class ProductToShop implements ProductToShopBase
     {
         // find article detail id
         $articleDetailId = $this->manager->getConnection()->fetchColumn(
-            'SELECT article_detail_id FROM s_plugin_bepado_items WHERE source_id = ? AND shop_id = ?',
+            'SELECT article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
             array($sourceId, $shopId)
         );
 
-        // update purchasePriceHash, offerValidUntil and purchasePrice in bepado attribute
+        // update purchasePriceHash, offerValidUntil and purchasePrice in connect attribute
         $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_plugin_bepado_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
+            'UPDATE s_plugin_connect_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
             WHERE source_id = ? AND shop_id = ?',
             array(
                 $product->purchasePriceHash,
@@ -689,7 +689,7 @@ class ProductToShop implements ProductToShopBase
     {
         // find article detail id
         $articleDetailId = $this->manager->getConnection()->fetchColumn(
-            'SELECT article_detail_id FROM s_plugin_bepado_items WHERE source_id = ? AND shop_id = ?',
+            'SELECT article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
             array($sourceId, $shopId)
         );
 

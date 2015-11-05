@@ -1,5 +1,5 @@
 jQuery(document).bind('DOMNodeInserted', function(){
-    // this file is included only when bepado product is in basket
+    // this file is included only when connect product is in basket
     // if class .modal_paypal_button or .basket_bottom_paypal exists
     // hide the button
     if(jQuery('.modal_paypal_button').length > 0)

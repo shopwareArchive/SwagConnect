@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
- * Handle vouchers, remove discounts and don't allow percentaged vouchers for bepado baskets
+ * Handle vouchers, remove discounts and don't allow percentaged vouchers for connect baskets
  *
  * Class Voucher
- * @package Shopware\Bepado\Subscribers
+ * @package Shopware\Connect\Subscribers
  */
 class Voucher extends BaseSubscriber
 {
@@ -20,23 +20,23 @@ class Voucher extends BaseSubscriber
     }
 
     /**
-     * Helper method to remove percentaged discounts from the basket if bepado products are available
+     * Helper method to remove percentaged discounts from the basket if connect products are available
      *
      * Alternative:
      *  * Calculate discount only for the default products
-     *  * Removed percentaged discounts only if bepado product has a fixedPrice
+     *  * Removed percentaged discounts only if connect product has a fixedPrice
      *
      * @event Shopware_Modules_Basket_GetBasket_FilterSQL
      */
     public function removeDiscount(\Enlight_Event_EventArgs $args)
     {
-        $message = Shopware()->Snippets()->getNamespace('frontend/bepado/checkout')->get(
+        $message = Shopware()->Snippets()->getNamespace('frontend/connect/checkout')->get(
             'noPercentagedDiscountsAllowed',
-            'In Kombination mit bepado-Produkten sind keine prozentualen Rabatte möglich.',
+            'In Kombination mit connect-Produkten sind keine prozentualen Rabatte möglich.',
             true
         );
 
-        if ($this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if ($this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             $stmt = Shopware()->Db()->query(
                 "DELETE FROM s_order_basket WHERE sessionID=? AND modus=3",
                 array(Shopware()->SessionID())
@@ -50,7 +50,7 @@ class Voucher extends BaseSubscriber
     }
 
     /**
-     * Will not allow percentaged vouchers if bepado products are in the basket
+     * Will not allow percentaged vouchers if connect products are in the basket
      *
      * @event Shopware_Modules_Basket_AddVoucher_Start
      *
@@ -61,15 +61,15 @@ class Voucher extends BaseSubscriber
     {
         $code = $args->getCode();
 
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             return null;
         }
 
         $basketHelper = $this->getBasketHelper();
 
-        $message = Shopware()->Snippets()->getNamespace('frontend/bepado/checkout')->get(
+        $message = Shopware()->Snippets()->getNamespace('frontend/connect/checkout')->get(
             'noPercentagedVoucherAllowed',
-            'In Kombination mit bepado-Produkten sind keine prozentualen Gutscheine möglich.',
+            'In Kombination mit connect-Produkten sind keine prozentualen Gutscheine möglich.',
             true
         );
 

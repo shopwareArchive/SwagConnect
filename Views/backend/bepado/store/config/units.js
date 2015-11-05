@@ -21,27 +21,27 @@
  * our trademarks remain entirely with us.
  */
 /**
- * Shopware SwagBepado Plugin
+ * Shopware SwagConnect Plugin
  *
  * @category Shopware
- * @package Shopware\Plugins\SwagBepado
+ * @package Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
-//{block name="backend/bepado/store/config/units"}
-Ext.define('Shopware.apps.Bepado.store.config.Units', {
+//{block name="backend/connect/store/config/units"}
+Ext.define('Shopware.apps.Connect.store.config.Units', {
     extend: 'Ext.data.Store',
 
     autoLoad: false,
-    model: 'Shopware.apps.Bepado.model.config.Units',
+    model: 'Shopware.apps.Connect.model.config.Units',
     remoteSort: false,
     remoteFilter: false,
     proxy: {
         type: 'ajax',
-        url: '{url controller="BepadoConfig" action="getUnits"}',
+        url: '{url controller="ConnectConfig" action="getUnits"}',
         api: {
-            create: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            update: '{url controller="BepadoConfig" action="saveUnitsMapping"}',
-            read: '{url controller="BepadoConfig" action="getUnits"}'
+            create: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            update: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            read: '{url controller="ConnectConfig" action="getUnits"}'
         },
         reader: {
             type: 'json',

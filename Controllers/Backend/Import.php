@@ -30,12 +30,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private $categoryExtractor;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\ProductToRemoteCategory
+     * @var \Shopware\CustomModels\Connect\ProductToRemoteCategory
      */
     private $productToRemoteCategoryRepository;
 
     /**
-     * @var \Shopware\Bepado\Components\ImportService
+     * @var \Shopware\Connect\Components\ImportService
      */
     private $importService;
 
@@ -180,12 +180,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
-            $this->categoryExtractor = new \Shopware\Bepado\Components\CategoryExtractor(
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\Attribute'),
-                new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+            $this->categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute'),
+                new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                    Shopware()->Models()->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                    Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
                 )
             );
         }
@@ -194,13 +194,13 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\CustomModels\Bepado\ProductToRemoteCategoryRepository
+     * @return \Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository
      */
     private function getProductToRemoteCategoryRepository()
     {
         if (!$this->productToRemoteCategoryRepository) {
             $this->productToRemoteCategoryRepository = Shopware()->Models()->getRepository(
-                'Shopware\CustomModels\Bepado\ProductToRemoteCategory'
+                'Shopware\CustomModels\Connect\ProductToRemoteCategory'
             );
         }
 
@@ -208,13 +208,13 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\CustomModels\Bepado\RemoteCategoryRepository
+     * @return \Shopware\CustomModels\Connect\RemoteCategoryRepository
      */
     private function getRemoteCategoryRepository()
     {
         if (!$this->remoteCategoryRepository) {
             $this->remoteCategoryRepository = Shopware()->Models()->getRepository(
-                'Shopware\CustomModels\Bepado\RemoteCategory'
+                'Shopware\CustomModels\Connect\RemoteCategory'
             );
         }
 
@@ -222,12 +222,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Bepado\Components\ImportService
+     * @return \Shopware\Connect\Components\ImportService
      */
     private function getImportService()
     {
         if (!$this->importService) {
-            $this->importService = new \Shopware\Bepado\Components\ImportService(
+            $this->importService = new \Shopware\Connect\Components\ImportService(
                 $this->getModelManager(),
                 $this->container->get('multi_edit.product'),
                 $this->getCategoryRepository(),
@@ -243,12 +243,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver
+     * @return \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver
      */
     private function getAutoCategoryResolver()
     {
         if (!$this->autoCategoryResolver) {
-            $this->autoCategoryResolver = new \Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver(
+            $this->autoCategoryResolver = new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 $this->getModelManager(),
                 $this->getCategoryRepository(),
                 $this->getRemoteCategoryRepository()
@@ -273,7 +273,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getLogger()
     {
         if (!$this->logger) {
-            $this->logger = new \Shopware\Bepado\Components\Logger(Shopware()->Db());
+            $this->logger = new \Shopware\Connect\Components\Logger(Shopware()->Db());
         }
 
         return $this->logger;

@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/log/list"}
-Ext.define('Shopware.apps.Bepado.view.log.List', {
+//{block name="backend/connect/view/log/list"}
+Ext.define('Shopware.apps.Connect.view.log.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.bepado-log-list',
+    alias: 'widget.connect-log-list',
 
     border: false,
 

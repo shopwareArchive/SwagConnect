@@ -1,9 +1,9 @@
-//{namespace name=backend/bepado/view/main}
+//{namespace name=backend/connect/view/main}
 
-//{block name="backend/bepado/view/changed_products/tabs"}
-Ext.define('Shopware.apps.Bepado.view.changed_products.Tabs', {
+//{block name="backend/connect/view/changed_products/tabs"}
+Ext.define('Shopware.apps.Connect.view.changed_products.Tabs', {
     extend: 'Ext.tab.Panel',
-    alias: 'widget.bepado-changed-products-tabs',
+    alias: 'widget.connect-changed-products-tabs',
 
     height: 300,
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryResolver;
+namespace Shopware\Connect\Components\CategoryResolver;
 
-use Shopware\Bepado\Components\CategoryResolver;
-use Shopware\CustomModels\Bepado\ProductToRemoteCategory;
-use Shopware\CustomModels\Bepado\ProductToRemoteCategoryRepository;
-use Shopware\CustomModels\Bepado\RemoteCategory;
-use Shopware\CustomModels\Bepado\RemoteCategoryRepository;
+use Shopware\Connect\Components\CategoryResolver;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
+use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Components\Model\ModelManager;
 
 class DefaultCategoryResolver implements CategoryResolver
@@ -17,12 +17,12 @@ class DefaultCategoryResolver implements CategoryResolver
     private  $manager;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\RemoteCategoryRepository
+     * @var \Shopware\CustomModels\Connect\RemoteCategoryRepository
      */
     private  $remoteCategoryRepository;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\ProductToRemoteCategoryRepository
+     * @var \Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository
      */
     private $productToRemoteCategoryRepository;
 
@@ -43,7 +43,7 @@ class DefaultCategoryResolver implements CategoryResolver
     public function resolve(array $categories)
     {
         $localCategories = array();
-        /** @var \Shopware\CustomModels\Bepado\RemoteCategory[] $remoteCategoriesModels */
+        /** @var \Shopware\CustomModels\Connect\RemoteCategory[] $remoteCategoriesModels */
         $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(array('categoryKey' => array_keys($categories)));
 
         foreach ($remoteCategoriesModels as $remoteCategory) {
@@ -84,7 +84,7 @@ class DefaultCategoryResolver implements CategoryResolver
         }
         $this->manager->flush();
 
-        /** @var  $remoteCategory \Shopware\CustomModels\Bepado\RemoteCategory */
+        /** @var  $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
         foreach ($remoteCategories as $remoteCategory) {
             $productToCategory = $this->productToRemoteCategoryRepository->findOneBy(array(
                 'articleId' => $articleId,

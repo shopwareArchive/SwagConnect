@@ -21,9 +21,9 @@
  * our trademarks remain entirely with us.
  */
 
-//{namespace name="backend/bepado/view/main"}
+//{namespace name="backend/connect/view/main"}
 //{block name="backend/article/view/detail/window" append}
-Ext.define('Shopware.apps.Article.view.detail.Bepado', {
+Ext.define('Shopware.apps.Article.view.detail.Connect', {
     override: 'Shopware.apps.Article.view.detail.Window',
 
     /**
@@ -39,9 +39,9 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
         result = me.callParent(arguments);
 
         me.registerAdditionalTab({
-            title: Ext.String.format('{s name=window/bepado_tab}[0]{/s}', marketplaceName),
-            contentFn: me.createBepadoTab,
-            articleChangeFn: me.articleChangeBepado,
+            title: Ext.String.format('{s name=window/connect_tab}[0]{/s}', marketplaceName),
+            contentFn: me.createConnectTab,
+            articleChangeFn: me.articleChangeConnect,
             tabConfig: {
                 layout: {
                     type: 'fit',
@@ -49,10 +49,10 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
                 },
                 listeners: {
                     activate: function() {
-                        me.fireEvent('bepadoTabActivated', me);
+                        me.fireEvent('connectTabActivated', me);
                     },
                     deactivate: function() {
-                        me.fireEvent('bepadoTabDeactivated', me);
+                        me.fireEvent('connectTabDeactivated', me);
                     }
                 }
             },
@@ -68,40 +68,40 @@ Ext.define('Shopware.apps.Article.view.detail.Bepado', {
      * @param article
      * @param tabConfig
      */
-    articleChangeBepado: function(article, tabConfig) {
+    articleChangeConnect: function(article, tabConfig) {
         var me = this;
 
-        me.bepadoStore.getProxy().extraParams.articleId = me.article.get('id');
-        me.fireEvent('bepadoStoreReloadNeeded');
+        me.connectStore.getProxy().extraParams.articleId = me.article.get('id');
+        me.fireEvent('connectStoreReloadNeeded');
     },
 
     /**
      * Creates the tab container for the abo commerce plugin.
      * @return Ext.container.Container
      */
-    createBepadoTab: function(article, stores, eOpts) {
+    createConnectTab: function(article, stores, eOpts) {
         var me = this,
             tab = eOpts.tab;
 
-        me.bepadoTab = tab;
+        me.connectTab = tab;
 
-        tab.add(me.createBepadoComponents());
+        tab.add(me.createConnectComponents());
 
-        var controller = me.subApplication.getController('Bepado');
+        var controller = me.subApplication.getController('Connect');
 
-        me.bepadoStore = Ext.create('Shopware.apps.Article.store.Bepado');
-        me.bepadoStore.getProxy().extraParams.articleId = me.article.get('id');
+        me.connectStore = Ext.create('Shopware.apps.Article.store.Connect');
+        me.connectStore.getProxy().extraParams.articleId = me.article.get('id');
 
-        controller.bepadoStore = me.bepadoStore;
-        controller.doReloadBepadoStore();
+        controller.connectStore = me.connectStore;
+        controller.doReloadConnectStore();
 
         tab.setDisabled(article.get('id') === null)
     },
 
-    createBepadoComponents: function() {
+    createConnectComponents: function() {
         var me = this;
 
-        return Ext.create('Shopware.apps.Article.view.BepadoForm');
+        return Ext.create('Shopware.apps.Article.view.ConnectForm');
     }
 
 

@@ -1,5 +1,5 @@
 //{block name="backend/article/controller/detail" append}
-Ext.define('Shopware.apps.Article.controller.DetailBepado', {
+Ext.define('Shopware.apps.Article.controller.DetailConnect', {
     override: 'Shopware.apps.Article.controller.Detail',
 
     /**
@@ -10,15 +10,15 @@ Ext.define('Shopware.apps.Article.controller.DetailBepado', {
      */
     reconfigureAssociationComponents: function() {
         var me = this,
-            bepadoController;
+            connectController;
 
         me.callOverridden(arguments);
 
-        bepadoController = me.subApplication.getController('Bepado');
+        connectController = me.subApplication.getController('Connect');
 
-        bepadoController.bepadoStore.getProxy().extraParams.articleId = me.subApplication.article.get('id');
-        bepadoController.doReloadBepadoStore();
-        bepadoController.enableTab();
+        connectController.connectStore.getProxy().extraParams.articleId = me.subApplication.article.get('id');
+        connectController.doReloadConnectStore();
+        connectController.enableTab();
 
     },
 
@@ -35,7 +35,7 @@ Ext.define('Shopware.apps.Article.controller.DetailBepado', {
             length = prices.length,
             originalPrice;
 
-        if ('{$disableBepadoPrice}' == 'true') {
+        if ('{$disableConnectPrice}' == 'true') {
             return prices;
         }
 

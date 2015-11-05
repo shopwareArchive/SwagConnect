@@ -1,5 +1,5 @@
-//{block name="backend/bepado/store/mapping/bepado_categories_import"}
-Ext.define('Shopware.apps.Bepado.store.mapping.BepadoCategoriesImport', {
+//{block name="backend/connect/store/mapping/connect_categories_import"}
+Ext.define('Shopware.apps.Connect.store.mapping.ConnectCategoriesImport', {
     extend : 'Ext.data.TreeStore',
 
     autoLoad: false,

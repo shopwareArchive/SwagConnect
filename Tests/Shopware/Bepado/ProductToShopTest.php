@@ -1,20 +1,20 @@
 <?php
 
-namespace Tests\Shopware\Bepado;
+namespace Tests\Shopware\Connect;
 
 use Bepado\SDK\Struct\Product;
 use Bepado\SDK\Struct\ProductUpdate;
-use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
-use Shopware\Bepado\Components\CategoryResolver\DefaultCategoryResolver;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\ProductToShop;
-use Shopware\Bepado\Components\VariantConfigurator;
+use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use Shopware\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use Shopware\Connect\Components\Config;
+use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
+use Shopware\Connect\Components\ProductToShop;
+use Shopware\Connect\Components\VariantConfigurator;
 
-class ProductToShopTest extends BepadoTestHelper
+class ProductToShopTest extends ConnectTestHelper
 {
-    /** @var  \Shopware\Bepado\Components\ProductToShop */
+    /** @var  \Shopware\Connect\Components\ProductToShop */
     private $productToShop;
 
     private $modelManager;
@@ -22,8 +22,8 @@ class ProductToShopTest extends BepadoTestHelper
     public function setUp()
     {
         $conn = Shopware()->Db();
-        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'activateProductsAutomatically'));
-        $conn->delete('s_plugin_bepado_config', array('name = ?' => 'createUnitsAutomatically'));
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
 
         $this->modelManager = Shopware()->Models();
         $this->productToShop = new ProductToShop(
@@ -39,8 +39,8 @@ class ProductToShopTest extends BepadoTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new DefaultCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\ProductToRemoteCategory')
+                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             )
         );
     }
@@ -52,9 +52,9 @@ class ProductToShopTest extends BepadoTestHelper
 
         $articlesCount = Shopware()->Db()->query(
             'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              WHERE s_plugin_bepado_items.source_id = :sourceId',
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              WHERE s_plugin_connect_items.source_id = :sourceId',
             array('sourceId' => $product->sourceId)
         )->fetchColumn();
 
@@ -134,10 +134,10 @@ class ProductToShopTest extends BepadoTestHelper
             $this->productToShop->insertOrUpdate($variant);
         }
 
-        $bepadoAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
             ->findOneBy(array('sourceId' => $variants[0]->sourceId));
-        $article = $bepadoAttribute->getArticle();
+        $article = $connectAttribute->getArticle();
         // check articles details count
         $this->assertEquals(4, count($article->getDetails()));
         // check configurator set
@@ -180,8 +180,8 @@ class ProductToShopTest extends BepadoTestHelper
         $newTitle = 'Massimport#updateVariant' . rand(1, 10000000);
         $newPrice = 22.48;
         $newPurchasePrice = 8.48;
-        $newLongDesc = 'Updated bepado variant - long description';
-        $newShortDesc = 'Updated bepado variant - short description';
+        $newLongDesc = 'Updated connect variant - long description';
+        $newShortDesc = 'Updated connect variant - short description';
         $newVat = 0.07;
         $variants[1]->title = $newTitle;
         $variants[1]->price = $newPrice;
@@ -193,20 +193,20 @@ class ProductToShopTest extends BepadoTestHelper
 
         $this->productToShop->insertOrUpdate($variants[1]);
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
-        $bepadoAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
             ->findOneBy(array('sourceId' => $variants[1]->sourceId));
-        $this->assertEquals($newTitle, $bepadoAttribute->getArticle()->getName());
-        $this->assertEquals($newLongDesc, $bepadoAttribute->getArticle()->getDescriptionLong());
-        $this->assertEquals($newShortDesc, $bepadoAttribute->getArticle()->getDescription());
+        $this->assertEquals($newTitle, $connectAttribute->getArticle()->getName());
+        $this->assertEquals($newLongDesc, $connectAttribute->getArticle()->getDescriptionLong());
+        $this->assertEquals($newShortDesc, $connectAttribute->getArticle()->getDescription());
         /** @var \Shopware\Models\Article\Price[] $prices */
-        $prices = $bepadoAttribute->getArticleDetail()->getPrices();
+        $prices = $connectAttribute->getArticleDetail()->getPrices();
 
         $this->assertEquals($newPrice, $prices[0]->getPrice());
         $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
-        $this->assertEquals(2, count($bepadoAttribute->getArticle()->getImages()));
-        $this->assertEquals(7.00, $bepadoAttribute->getArticle()->getTax()->getTax());
+        $this->assertEquals(2, count($connectAttribute->getArticle()->getImages()));
+        $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
     }
 
     public function testImportWithoutTitle()
@@ -232,11 +232,11 @@ class ProductToShopTest extends BepadoTestHelper
         // test delete only one variant
         $this->productToShop->delete($variants[1]->shopId, $variants[1]->sourceId);
 
-        $bepadoAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
             ->findOneBy(array('sourceId' => $variants[2]->sourceId));
 
-        $article = $bepadoAttribute->getArticle();
+        $article = $connectAttribute->getArticle();
         // check articles details count
         $this->assertEquals(3, count($article->getDetails()));
 
@@ -245,18 +245,18 @@ class ProductToShopTest extends BepadoTestHelper
 
         $articlesCount = Shopware()->Db()->query(
             'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              WHERE s_plugin_bepado_items.source_id = :sourceId',
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              WHERE s_plugin_connect_items.source_id = :sourceId',
             array('sourceId' => $variants[0]->sourceId)
         )->fetchColumn();
 
         $this->assertEquals(0, $articlesCount);
 
         $attributesCount = Shopware()->Db()->query(
-            'SELECT COUNT(s_plugin_bepado_items.id)
-              FROM s_plugin_bepado_items
-              WHERE s_plugin_bepado_items.article_id = :articleId',
+            'SELECT COUNT(s_plugin_connect_items.id)
+              FROM s_plugin_connect_items
+              WHERE s_plugin_connect_items.article_id = :articleId',
             array('articleId' => $article->getId())
         )->fetchColumn();
 
@@ -270,11 +270,11 @@ class ProductToShopTest extends BepadoTestHelper
 
         $articlesCount = Shopware()->Db()->query(
             'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              WHERE s_plugin_bepado_items.purchase_price_hash = :purchasePriceHash
-              AND s_plugin_bepado_items.offer_valid_until = :offerValidUntil
-              AND s_plugin_bepado_items.source_id = :sourceId',
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              WHERE s_plugin_connect_items.purchase_price_hash = :purchasePriceHash
+              AND s_plugin_connect_items.offer_valid_until = :offerValidUntil
+              AND s_plugin_connect_items.source_id = :sourceId',
             array(
                 'purchasePriceHash' => $product->purchasePriceHash,
                 'offerValidUntil' => $product->offerValidUntil,
@@ -292,9 +292,9 @@ class ProductToShopTest extends BepadoTestHelper
 
         $articlesCount = Shopware()->Db()->query(
             'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              WHERE s_plugin_bepado_items.source_id = :sourceId',
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              WHERE s_plugin_connect_items.source_id = :sourceId',
             array('sourceId' => $product->sourceId)
         )->fetchColumn();
 
@@ -315,18 +315,18 @@ class ProductToShopTest extends BepadoTestHelper
 
         $this->productToShop->update($product->shopId, $product->sourceId, $productUpdate);
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
-        $bepadoAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
             ->findOneBy(array('sourceId' => $product->sourceId));
 
-        $this->assertEquals($productUpdate->purchasePriceHash, $bepadoAttribute->getPurchasePriceHash());
-        $this->assertEquals($productUpdate->offerValidUntil, $bepadoAttribute->getOfferValidUntil());
-        $this->assertEquals($productUpdate->purchasePrice, $bepadoAttribute->getPurchasePrice());
+        $this->assertEquals($productUpdate->purchasePriceHash, $connectAttribute->getPurchasePriceHash());
+        $this->assertEquals($productUpdate->offerValidUntil, $connectAttribute->getOfferValidUntil());
+        $this->assertEquals($productUpdate->purchasePrice, $connectAttribute->getPurchasePrice());
 
-        $this->assertEquals($productUpdate->availability, $bepadoAttribute->getArticleDetail()->getInStock());
+        $this->assertEquals($productUpdate->availability, $connectAttribute->getArticleDetail()->getInStock());
         /** @var \Shopware\Models\Article\Price[] $prices */
-        $prices = $bepadoAttribute->getArticleDetail()->getPrices();
+        $prices = $connectAttribute->getArticleDetail()->getPrices();
         $this->assertEquals($productUpdate->price, $prices[0]->getPrice());
         $this->assertEquals($productUpdate->purchasePrice, $prices[0]->getBasePrice());
     }
@@ -338,9 +338,9 @@ class ProductToShopTest extends BepadoTestHelper
 
         $articlesCount = Shopware()->Db()->query(
             'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              WHERE s_plugin_bepado_items.source_id = :sourceId',
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              WHERE s_plugin_connect_items.source_id = :sourceId',
             array('sourceId' => $product->sourceId)
         )->fetchColumn();
 
@@ -349,12 +349,12 @@ class ProductToShopTest extends BepadoTestHelper
         $newAvailability = 20;
         $this->productToShop->changeAvailability($product->shopId, $product->sourceId, $newAvailability);
 
-        /** @var \Shopware\CustomModels\Bepado\Attribute $bepadoAttribute */
-        $bepadoAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Bepado\Attribute')
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
             ->findOneBy(array('sourceId' => $product->sourceId));
 
-        $this->assertEquals($newAvailability, $bepadoAttribute->getArticleDetail()->getInStock());
+        $this->assertEquals($newAvailability, $connectAttribute->getArticleDetail()->getInStock());
     }
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
@@ -373,7 +373,7 @@ class ProductToShopTest extends BepadoTestHelper
             new AutoCategoryResolver(
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Bepado\RemoteCategory')
+                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
             )
         );
 
@@ -407,11 +407,11 @@ class ProductToShopTest extends BepadoTestHelper
 
             $articlesCount = Shopware()->Db()->query(
                 'SELECT COUNT(s_articles.id)
-              FROM s_plugin_bepado_items
-              LEFT JOIN s_articles ON (s_plugin_bepado_items.article_id = s_articles.id)
-              INNER JOIN s_articles_categories ON (s_plugin_bepado_items.article_id = s_articles_categories.articleID)
+              FROM s_plugin_connect_items
+              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
+              INNER JOIN s_articles_categories ON (s_plugin_connect_items.article_id = s_articles_categories.articleID)
               INNER JOIN s_categories ON (s_articles_categories.categoryID = s_categories.id)
-              WHERE s_plugin_bepado_items.source_id = :sourceId
+              WHERE s_plugin_connect_items.source_id = :sourceId
               AND s_categories.description = :category',
                 array('sourceId' => $product->sourceId, 'category' => $category)
             )->fetchColumn();
@@ -423,7 +423,7 @@ class ProductToShopTest extends BepadoTestHelper
     public function testAutomaticallyCreateUnits()
     {
         $conn = Shopware()->Db();
-        $conn->insert('s_plugin_bepado_config', array(
+        $conn->insert('s_plugin_connect_config', array(
             'name' => 'createUnitsAutomatically',
             'value' => '1'
         ));
@@ -448,7 +448,7 @@ class ProductToShopTest extends BepadoTestHelper
     public function testAutomaticallyActivateArticles()
     {
         $conn = Shopware()->Db();
-        $conn->insert('s_plugin_bepado_config', array(
+        $conn->insert('s_plugin_connect_config', array(
             'name' => 'activateProductsAutomatically',
             'value' => '1'
         ));

@@ -22,30 +22,30 @@
  * our trademarks remain entirely with us.
  */
 
-use Shopware\Bepado\Components\Config;
+use Shopware\Connect\Components\Config;
 use Bepado\SDK\Units;
-use Shopware\Bepado\Components\BepadoExport;
-use Shopware\Bepado\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Connect\Components\ConnectExport;
+use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  */
-class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Backend_ExtJs
+class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Backend_ExtJs
 {
 
-    /** @var  \Shopware\Bepado\Components\Config */
+    /** @var  \Shopware\Connect\Components\Config */
     private $configComponent;
 
     /**
-     * @var \Shopware\Bepado\Components\BepadoFactory
+     * @var \Shopware\Connect\Components\ConnectFactory
      */
     private $factory;
 
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * connect module. The function is used to load store
      * required in the general config form.
      * @return string
      */
@@ -61,7 +61,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The saveGeneralAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to save store data.
+     * connect module. The function is used to save store data.
      * @return string
      */
     public function saveGeneralAction()
@@ -85,7 +85,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The getImportAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * connect module. The function is used to load store
      * required in the import config form.
      * @return string
      */
@@ -103,7 +103,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The saveImportAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to save store data.
+     * connect module. The function is used to save store data.
      * @return string
      */
     public function saveImportAction()
@@ -122,7 +122,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The getExportAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * connect module. The function is used to load store
      * required in the export config form.
      * @return string
      */
@@ -153,7 +153,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * ExtJS uses this action to check is price mapping allowed.
-     * If there is at least one exported product to bepado,
+     * If there is at least one exported product to connect,
      * price mapping cannot be changed.
      */
     public function isPricingMappingAllowedAction()
@@ -175,7 +175,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $this->View()->assign(
             array(
                 'success' => true,
-                'isPricingMappingAllowed' => !count($this->getBepadoExport()->getExportArticlesIds()) > 0,
+                'isPricingMappingAllowed' => !count($this->getConnectExport()->getExportArticlesIds()) > 0,
                 'isPriceModeEnabled' => $isPriceModeEnabled,
                 'isPurchasePriceModeEnabled' => $isPurchasePriceModeEnabled,
             )
@@ -184,7 +184,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The saveExportAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to save store data.
+     * connect module. The function is used to save store data.
      * @return string
      */
     public function saveExportAction()
@@ -195,7 +195,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         if ($data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']) {
             $this->View()->assign(array(
                 'success' => false,
-                'message' => Shopware()->Snippets()->getNamespace('backend/bepado/view/main')->get(
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                     'config/export/error/same_price_fields',
                     'Endkunden-VK und Listenverkaufspreis müssen an verschiedene Felder angeschlossen sein',
                     true
@@ -208,11 +208,11 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $this->getConfigComponent()->setExportConfigs($data);
 
         if ($isModified === true) {
-            $bepadoExport = $this->getBepadoExport();
+            $connectExport = $this->getConnectExport();
             try {
-                $ids = $bepadoExport->getExportArticlesIds();
+                $ids = $connectExport->getExportArticlesIds();
                 $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
-                $errors = $bepadoExport->export($sourceIds);
+                $errors = $connectExport->export($sourceIds);
             }catch (\RuntimeException $e) {
                 $this->View()->assign(array(
                         'success' => false,
@@ -238,11 +238,11 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
-     * @return BepadoExport
+     * @return ConnectExport
      */
-    public function getBepadoExport()
+    public function getConnectExport()
     {
-        return new BepadoExport(
+        return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             $this->getModelManager(),
@@ -252,12 +252,12 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Helper
+     * @return \Shopware\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
@@ -268,7 +268,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('BepadoSDK');
+        return Shopware()->Bootstrap()->getResource('ConnectSDK');
     }
 
     /**
@@ -281,7 +281,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The getStaticPagesAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * connect module. The function is used to load store
      * required in the general config form for static cms pages combo.
      * @return string
      */
@@ -309,7 +309,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     /**
      * Helper function to get access on the Config component
      *
-     * @return \Shopware\Bepado\Components\Config
+     * @return \Shopware\Connect\Components\Config
      */
     private function getConfigComponent()
     {
@@ -323,7 +323,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
 	/**
      * The getUnitsAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * connect module. The function is used to load store
      * required in the units mapping.
      * @return string
      */
@@ -332,14 +332,12 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
         $units = $repository->findAll();
 
-        $bepadoUnits = new Units();
-
         $unitsMappingArray = array();
         foreach ($units as $unit) {
             $unitsMappingArray[] = array(
                 'shopwareUnitName' => $unit->getName(),
                 'shopwareUnitKey' => $unit->getUnit(),
-                'bepadoUnit' => $this->getConfigComponent()->getConfig($unit->getUnit())
+                'connectUnit' => $this->getConfigComponent()->getConfig($unit->getUnit())
             );
         }
 
@@ -354,7 +352,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
 
     /**
      * The saveUnitsMappingAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to save units store data.
+     * connect module. The function is used to save units store data.
      * @return string
      */
     public function saveUnitsMappingAction()
@@ -372,21 +370,21 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
-     * The getBepadoUnitsAction function is an ExtJs event listener method of the
-     * bepado module. The function is used to load store
+     * The getConnectUnitsAction function is an ExtJs event listener method of the
+     * connect module. The function is used to load store
      * required in the units mapping.
      * @return string
      */
-    public function getBepadoUnitsAction()
+    public function getConnectUnitsAction()
     {
-        $bepadoUnits = new Units();
+        $connectUnits = new Units();
 
         $unitsArray = array();
 
-        foreach ($bepadoUnits->getLocalizedUnits() as $key => $bepadoUnit) {
+        foreach ($connectUnits->getLocalizedUnits() as $key => $connectUnit) {
             $unitsArray[] = array(
                 'key' => $key,
-                'name' => $bepadoUnit
+                'name' => $connectUnit
             );
         }
 
@@ -403,7 +401,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
      */
     public function calculateFinishTimeAction()
     {
-        $changes = $this->getBepadoExport()->getChangesCount();
+        $changes = $this->getConnectExport()->getChangesCount();
         $seconds = 0;
         if ($changes > 0) {
             $seconds = $this->getSDK()->calculateFinishTime($changes);
@@ -447,7 +445,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
             }
         } catch(\Exception $e) {
             // ignore this exception because sometimes
-            // bepado plugin is not configured and tries to
+            // connect plugin is not configured and tries to
             // read marketplace attributes
             $attributes = array();
         }
@@ -498,7 +496,7 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
                 array_filter(
                     Shopware()->Models()->getRepository('Shopware\Models\Article\Element')->findAll(),
                     function ($attribute) {
-                        return $attribute->getName() != 'bepadoProductDescription';
+                        return $attribute->getName() != 'connectProductDescription';
                     }
                 )
             )
@@ -624,12 +622,12 @@ class Shopware_Controllers_Backend_BepadoConfig extends Shopware_Controllers_Bac
     }
 
     /**
-     * @return \Shopware\Bepado\Components\BepadoFactory
+     * @return \Shopware\Connect\Components\ConnectFactory
      */
     public function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;

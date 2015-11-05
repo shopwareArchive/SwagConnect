@@ -1,21 +1,21 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace Shopware\Connect\Subscribers;
 
 /**
- * The DisableBepadoInFrontend subscriber is used, if the user's api key is not valid. In this case, bepado products
+ * The DisableConnectInFrontend subscriber is used, if the user's api key is not valid. In this case, connect products
  * cannot be ordered in the frontend.
  *
- * Class DisableBepadoInFrontend
- * @package Shopware\Bepado\Subscribers
+ * Class DisableConnectInFrontend
+ * @package Shopware\Connect\Subscribers
  */
-class DisableBepadoInFrontend extends BaseSubscriber
+class DisableConnectInFrontend extends BaseSubscriber
 {
 
     public function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail' => 'disableBuyButtonForBepado'
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail' => 'disableBuyButtonForConnect'
         );
     }
 
@@ -23,7 +23,7 @@ class DisableBepadoInFrontend extends BaseSubscriber
      * @event Enlight_Controller_Action_PostDispatch_Frontend_Detail
      * @param \Enlight_Event_EventArgs $args
      */
-    public function disableBuyButtonForBepado(\Enlight_Event_EventArgs $args)
+    public function disableBuyButtonForConnect(\Enlight_Event_EventArgs $args)
     {
         /** \Shopware_Controllers_Frontend_Detail $controller */
         $controller = $args->getSubject();
@@ -31,12 +31,12 @@ class DisableBepadoInFrontend extends BaseSubscriber
 
         $article = $view->getAssign('sArticle');
 
-        if ($this->isBepadoArticle($article['articleID'])) {
+        if ($this->isConnectArticle($article['articleID'])) {
             $this->registerMyTemplateDir();
             if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-                $view->extendsTemplate('frontend/bepado/detail.tpl');
+                $view->extendsTemplate('frontend/connect/detail.tpl');
             }
-            $view->assign('hideBepado', true);
+            $view->assign('hideConnect', true);
         }
     }
 
@@ -47,9 +47,9 @@ class DisableBepadoInFrontend extends BaseSubscriber
      * @param $id
      * @return string
      */
-    public function isBepadoArticle($id)
+    public function isConnectArticle($id)
     {
-        $sql = 'SELECT shop_id FROM s_plugin_bepado_items WHERE article_id = ? AND shop_id IS NOT NULL';
+        $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
         return Shopware()->Db()->fetchOne($sql, array($id));
     }
 

@@ -21,7 +21,7 @@ class CronJob extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            'Shopware_CronJob_ImportImages' => 'importImages',
+            'ShopwareConnect_CronJob_ImportImages' => 'importImages',
         );
     }
 

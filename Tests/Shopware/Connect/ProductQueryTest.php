@@ -20,7 +20,7 @@ class ProductQueryTest extends ConnectTestHelper
     public function getProductQuery()
     {
         if (!$this->productQuery) {
-            $this->productTranslator = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Translations\\ProductTranslator')
+            $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
                 ->disableOriginalConstructor()
                 ->getMock();
 

@@ -30,7 +30,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
-use Shopware\Connect\ProductUpdate;
+use Shopware\Connect\Struct\ProductUpdate;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;

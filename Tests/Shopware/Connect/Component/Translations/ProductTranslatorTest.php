@@ -25,11 +25,11 @@ class ProductTranslatorTest extends ConnectTestHelper
 
     public function setUp()
     {
-        $this->configComponent = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Config')
+        $this->configComponent = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Config')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->translationGateway = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Gateway\\ProductTranslationsGateway\\PdoProductTranslationsGateway')
+        $this->translationGateway = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Gateway\\ProductTranslationsGateway\\PdoProductTranslationsGateway')
             ->disableOriginalConstructor()
             ->getMock();
 

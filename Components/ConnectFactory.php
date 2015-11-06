@@ -11,7 +11,6 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoPro
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use ShopwarePlugins\Connect\Components\OrderQuery\RemoteOrderQuery;
-use ShopwarePlugins\Connect\Components\Payment\ProductPayments;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
@@ -130,8 +129,7 @@ class ConnectFactory
             ),
             new ShopwareErrorHandler(),
             null,
-            $this->getPluginVersion(),
-            new ProductPayments()
+            $this->getPluginVersion()
         );
     }
 

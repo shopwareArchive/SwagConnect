@@ -19,7 +19,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function setUp()
     {
-        $this->productTranslator = $this->getMockBuilder('\\Shopware\\Connect\\Components\\Translations\\ProductTranslator')
+        $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
             ->getMock();
 

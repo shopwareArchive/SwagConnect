@@ -86,11 +86,11 @@ class Setup
         );
         Shopware()->Db()->query(
             'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect', 'action' => 'Shopware_CronJob_ImportImages')
+            array('name' => 'SwagConnect', 'action' => 'ShopwareConnect_CronJob_ImportImages')
         );
         $this->bootstrap->createCronJob(
             'SwagConnect',
-            'Shopware_CronJob_ImportImages',
+            'ShopwareConnect_CronJob_ImportImages',
             60 * 30,
             true
         );

@@ -26,7 +26,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
     public function testGetSingleTranslation()
     {
-        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:3:{s:10:"txtArtikel";s:20:"Connect local article";s:19:"txtshortdescription";s:38:"Connect local article short description";s:19:"txtlangbeschreibung";s:37:"Connect local article long description";}');
+        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:3:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";}');
 
         $sql = 'SELECT objectdata
                 FROM s_core_translations
@@ -45,7 +45,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
     public function testGetSingleTranslationTitleOnly()
     {
-        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:1:{s:10:"txtArtikel";s:20:"shopware Connect local article";}');
+        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:1:{s:10:"txtArtikel";s:30:"shopware Connect local article";}');
 
         $sql = 'SELECT objectdata
                 FROM s_core_translations
@@ -82,11 +82,11 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->method('fetchAll')
             ->willReturn(array(
                 0 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:20:"shopware Connect local article";s:19:"txtshortdescription";s:38:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:37:"shopware Connect local article long description";}',
+                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";}',
                     'objectlanguage' => 2,
                 ),
                 1 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:23:"shopware Connect local article EN";s:19:"txtshortdescription";s:41:"shopware Connect local article short description EN";s:19:"txtlangbeschreibung";s:40:"shopware Connect local article long description EN";}',
+                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:33:"shopware Connect local article EN";s:19:"txtshortdescription";s:51:"shopware Connect local article short description EN";s:19:"txtlangbeschreibung";s:50:"shopware Connect local article long description EN";}',
                     'objectlanguage' => 3,
                 ),
             ));
@@ -121,11 +121,11 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->method('fetchAll')
             ->willReturn(array(
                 0 => array(
-                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:20:"shopware Connect local article";}',
+                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:30:"shopware Connect local article";}',
                     'objectlanguage' => 2,
                 ),
                 1 => array(
-                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:23:"shopware Connect local article EN";}',
+                    'objectdata' => 'a:1:{s:10:"txtArtikel";s:33:"shopware Connect local article EN";}',
                     'objectlanguage' => 3,
                 ),
             ));

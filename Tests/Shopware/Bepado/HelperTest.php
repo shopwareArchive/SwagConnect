@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 
 class HelperTest extends ConnectTestHelper
 {

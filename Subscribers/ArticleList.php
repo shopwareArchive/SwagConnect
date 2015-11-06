@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Implements a 'connect' filter for the article list
  *
  * Class ArticleList
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class ArticleList extends BaseSubscriber
 {

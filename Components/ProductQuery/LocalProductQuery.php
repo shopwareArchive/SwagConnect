@@ -1,24 +1,24 @@
 <?php
 
-namespace Shopware\Connect\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Doctrine\ORM\QueryBuilder;
-use Bepado\SDK\Struct\Product;
-use Shopware\Connect\Components\Exceptions\NoLocalProductException;
-use Shopware\Connect\Components\Logger;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\Translations\ProductTranslatorInterface;
+use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Utils\UnitMapper;
-use Bepado\SDK\Struct\Translation;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
+use Shopware\Connect\Struct\Translation;
 
 /**
- * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
+ * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
  * Configured fields for price- and description export will be taken into account
  *
  * Class LocalProductQuery
- * @package Shopware\Connect\Components\ProductQuery
+ * @package ShopwarePlugins\Connect\Components\ProductQuery
  */
 class LocalProductQuery extends BaseProductQuery
 {
@@ -28,13 +28,13 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $baseProductUrl;
 
-    /** @var \Shopware\Connect\Components\Config $configComponent */
+    /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
     protected $configComponent;
 
     protected $marketplaceGateway;
 
     /**
-     * @var \Shopware\Connect\Components\Translations\ProductTranslatorInterface
+     * @var \ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface
      */
     protected $productTranslator;
 

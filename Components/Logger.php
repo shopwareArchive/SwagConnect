@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 /**
  * Logger for connectGateway operations
  *
  * Class Logger
- * @package Shopware\Connect\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class Logger
 {

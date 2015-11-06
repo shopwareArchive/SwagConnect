@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 
 class ConfigTest extends ConnectTestHelper
 {

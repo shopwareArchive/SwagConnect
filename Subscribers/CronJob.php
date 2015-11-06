@@ -1,20 +1,20 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\ImageImport;
-use Shopware\Connect\Components\Logger;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ImageImport;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * Cronjob callback
  *
  * Class CronJob
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class CronJob extends BaseSubscriber
 {
     /**
-     * @var \Shopware\Connect\Components\Config
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 

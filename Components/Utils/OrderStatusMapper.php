@@ -1,14 +1,14 @@
 <?php
 
-namespace Shopware\Connect\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
-use Bepado\SDK\Struct\Message;
-use Bepado\SDK\Struct\OrderStatus as OrderStatusStruct;
+use Shopware\Connect\Struct\Message;
+use Shopware\Connect\Struct\OrderStatus as OrderStatusStruct;
 use Shopware\Models\Order\Order;
 
 /**
  * Class OrderStatusMapper
- * @package Shopware\Connect\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class OrderStatusMapper
 {

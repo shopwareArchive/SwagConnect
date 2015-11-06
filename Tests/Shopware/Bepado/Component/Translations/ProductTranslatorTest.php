@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Shopware\Connect\Component\Translations;
+namespace Tests\ShopwarePlugins\Connect\Component\Translations;
 
-use Bepado\SDK\Struct\Translation;
+use Shopware\Connect\Struct\Translation;
 use Shopware\Models\Shop\Locale;
-use Tests\Shopware\Connect\ConnectTestHelper;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ProductTranslatorTest extends ConnectTestHelper
 {
     /**
-     * @var \Shopware\Connect\Components\Translations\ProductTranslatorInterface
+     * @var \ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface
      */
     private $productTranslator;
 
@@ -45,7 +45,7 @@ class ProductTranslatorTest extends ConnectTestHelper
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->productTranslator = new \Shopware\Connect\Components\Translations\ProductTranslator(
+        $this->productTranslator = new \ShopwarePlugins\Connect\Components\Translations\ProductTranslator(
             $this->configComponent,
             $this->translationGateway,
             $this->modelManager,

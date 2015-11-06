@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Shopware\Connect\CategoryQuery;
+namespace Tests\ShopwarePlugins\Connect\CategoryQuery;
 
-use Bepado\SDK\Struct\Product;
-use Tests\Shopware\Connect\ConnectTestHelper;
+use Shopware\Connect\Struct\Product;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 abstract class CategoryQueryTest extends ConnectTestHelper
 {

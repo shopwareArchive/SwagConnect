@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Verificator\Product;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\ProductQuery;
-use Shopware\Connect\Components\ProductQuery\RemoteProductQuery;
-use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
-use Shopware\Connect\Components\Translations\ProductTranslator;
+use Shopware\Connect\Struct\Verificator\Product;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\ProductQuery;
+use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
+use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
+use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 
 class ProductQueryTest extends ConnectTestHelper
 {
@@ -28,7 +28,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->method('translate')
                 ->willReturn(array());
 
-            /** @var \Shopware\Connect\Components\Config $configComponent */
+            /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
             $this->productQuery = new ProductQuery(
@@ -55,10 +55,10 @@ class ProductQueryTest extends ConnectTestHelper
     public function testGetLocal()
     {
         $result = $this->getProductQuery()->getLocal(array(3));
-        /** @var \Bepado\SDK\Struct\Product $product */
+        /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
-        $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
+        $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
         $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
         $this->assertEquals(12.56, round($product->price, 2));
     }
@@ -74,7 +74,7 @@ class ProductQueryTest extends ConnectTestHelper
         $newProduct = $this->getProduct();
         $this->dispatchRpcCall('products', 'toShop', array(
             array(
-                new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
+                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
                     'product' => $newProduct,
                     'revision' => time(),
                 ))
@@ -82,10 +82,10 @@ class ProductQueryTest extends ConnectTestHelper
         ));
 
         $result = $this->getProductQuery()->getRemote(array($newProduct->sourceId));
-        /** @var \Bepado\SDK\Struct\Product $product */
+        /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
-        $this->assertInstanceOf('\Bepado\SDK\Struct\Product', $product);
+        $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
         $this->assertEquals($newProduct->title, $product->title);
         $this->assertEquals($newProduct->price, $product->price);
         $this->assertEquals($newProduct->purchasePrice, $product->purchasePrice);
@@ -112,7 +112,7 @@ class ProductQueryTest extends ConnectTestHelper
     public function testGetConnectProduct()
     {
         $result = $this->getProductQuery()->getLocal(array(3));
-        /** @var \Bepado\SDK\Struct\Product $product */
+        /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
         $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
@@ -124,7 +124,7 @@ class ProductQueryTest extends ConnectTestHelper
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(11);
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $result = $this->getProductQuery()->getLocal(array(11));
-        /** @var \Bepado\SDK\Struct\Product $product */
+        /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
         $this->assertEquals('Münsterländer Aperitif Präsent Box', $product->title);

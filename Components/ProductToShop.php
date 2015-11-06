@@ -22,19 +22,19 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components;
-use Bepado\SDK\ProductToShop as ProductToShopBase,
-    Bepado\SDK\Struct\Product,
+namespace ShopwarePlugins\Connect\Components;
+use Shopware\Connect\ProductToShop as ProductToShopBase,
+    Shopware\Connect\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
     Shopware\Models\Article\Detail as DetailModel,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
-use Bepado\SDK\Struct\ProductUpdate;
-use Shopware\Connect\Components\Translations\LocaleMapper;
-use Shopware\Connect\Components\Gateway\ProductTranslationsGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\Utils\UnitMapper;
+use Shopware\Connect\ProductUpdate;
+use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Price;
@@ -59,7 +59,7 @@ class ProductToShop implements ProductToShopBase
     private $manager;
 
     /**
-     * @var \Shopware\Connect\Components\Config
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $config;
 
@@ -69,7 +69,7 @@ class ProductToShop implements ProductToShopBase
     private $imageImport;
 
     /**
-     * @var \Shopware\Connect\Components\VariantConfigurator
+     * @var \ShopwarePlugins\Connect\Components\VariantConfigurator
      */
     private $variantConfigurator;
 
@@ -97,11 +97,11 @@ class ProductToShop implements ProductToShopBase
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
-     * @param \Shopware\Connect\Components\Config $config
+     * @param \ShopwarePlugins\Connect\Components\Config $config
      * @param VariantConfigurator $variantConfigurator
-     * @param \Shopware\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
+     * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param \Shopware\Connect\Components\CategoryResolver
+     * @param \ShopwarePlugins\Connect\Components\CategoryResolver
      */
     public function __construct(
         Helper $helper,
@@ -290,10 +290,10 @@ class ProductToShop implements ProductToShopBase
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
-            /** @var \Shopware\Connect\Components\Config $configComponent */
+            /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config($this->manager);
 
-            /** @var \Shopware\Connect\Components\Utils\UnitMapper $unitMapper */
+            /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
             $unitMapper = new UnitMapper($configComponent, $this->manager);
 
             $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
@@ -411,7 +411,7 @@ class ProductToShop implements ProductToShopBase
      */
     private function addArticleTranslations(ProductModel $article, Product $sdkProduct)
     {
-        /** @var \Bepado\SDK\Struct\Translation $translation */
+        /** @var \Shopware\Connect\Struct\Translation $translation */
         foreach ($sdkProduct->translations as $key => $translation) {
             /** @var \Shopware\Models\Shop\Locale $locale */
 

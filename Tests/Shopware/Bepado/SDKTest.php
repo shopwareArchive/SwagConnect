@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 
 class SDKTest extends ConnectTestHelper
 {
@@ -19,8 +19,8 @@ class SDKTest extends ConnectTestHelper
         $purchasePrice = 6.99;
         $this->dispatchRpcCall('products', 'toShop', array(
             array(
-                new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
-                    'product' => new \Bepado\SDK\Struct\Product(array(
+                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
+                    'product' => new \Shopware\Connect\Struct\Product(array(
                         'shopId' => 3,
                         'revisionId' => time(),
                         'sourceId' => 'ABCDEFGH' . time(),

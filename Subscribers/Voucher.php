@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Handle vouchers, remove discounts and don't allow percentaged vouchers for connect baskets
  *
  * Class Voucher
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Voucher extends BaseSubscriber
 {

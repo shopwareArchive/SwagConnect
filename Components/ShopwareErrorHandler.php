@@ -1,9 +1,9 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Bepado\SDK\ErrorHandler;
-use Bepado\SDK\Struct\Error;
+use Shopware\Connect\ErrorHandler;
+use Shopware\Connect\Struct\Error;
 
 class ShopwareErrorHandler extends ErrorHandler
 {

@@ -22,23 +22,23 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components\Payment;
+namespace ShopwarePlugins\Connect\Components\Payment;
 
-use Bepado\SDK\Struct\PaymentStatus;
-use Shopware\Connect\Components\Logger;
-use Shopware\Connect\Components\OrderQuery\RemoteOrderQuery;
+use Shopware\Connect\Struct\PaymentStatus;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\OrderQuery\RemoteOrderQuery;
 
 /**
  * Class ProductPayments
  */
-class ProductPayments implements \Bepado\SDK\ProductPayments
+class ProductPayments implements \Shopware\Connect\ProductPayments
 {
     private $paymentStatusRepository;
 
     private $db;
 
     /**
-     * @var \Shopware\Connect\Components\Logger
+     * @var \ShopwarePlugins\Connect\Components\Logger
      */
     private $logger;
 

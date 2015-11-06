@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
 use \Shopware\Models\Article\Image;
@@ -18,7 +18,7 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
-    /** @var  \Shopware\Connect\Components\Logger */
+    /** @var  \ShopwarePlugins\Connect\Components\Logger */
     protected $logger;
 
     public function __construct(ModelManager $manager, Helper $helper, Logger $logger)

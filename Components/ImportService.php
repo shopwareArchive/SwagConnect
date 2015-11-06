@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\Product;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;

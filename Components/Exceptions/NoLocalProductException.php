@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Components\Exceptions;
+namespace ShopwarePlugins\Connect\Components\Exceptions;
 
 class NoLocalProductException extends \Exception
 {

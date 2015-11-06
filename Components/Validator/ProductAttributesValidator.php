@@ -21,11 +21,11 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Connect\Components\Validator;
+namespace ShopwarePlugins\Connect\Components\Validator;
 
 /**
  * Interface ProductAttributesValidator
- * @package Shopware\Connect\Components\Validator
+ * @package ShopwarePlugins\Connect\Components\Validator
  */
 interface ProductAttributesValidator
 {

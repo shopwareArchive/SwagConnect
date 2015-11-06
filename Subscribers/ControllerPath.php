@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Register some controllers
  *
  * Class ControllerPath
- * @package Shopware\Connect\Components\Subscribers
+ * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 class ControllerPath extends BaseSubscriber
 {

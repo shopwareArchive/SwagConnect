@@ -16,7 +16,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
     private $articleDetailRepository;
 
-    /** @var  Shopware\Connect\Components\ConnectFactory */
+    /** @var  ShopwarePlugins\Connect\Components\ConnectFactory */
     private $factory;
 
     /** @var  Shopware\Models\Category\Repository */
@@ -65,12 +65,12 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
     }
 
     /**
-     * @return \Shopware\Connect\Components\Helper
+     * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
@@ -226,7 +226,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
      * Return a single connect product for the given ID
      *
      * @param $id
-     * @return Bepado\SDK\Struct\Product|null
+     * @return Shopware\Connect\Struct\Product|null
      */
     public function getProductById($id)
     {

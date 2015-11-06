@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
 class ImageImportTest extends ConnectTestHelper
 {

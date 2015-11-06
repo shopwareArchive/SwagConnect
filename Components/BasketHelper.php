@@ -1,16 +1,18 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Bepado\SDK;
-use Shopware\Connect\Components;
+use Shopware\Connect\Struct\CheckResult;
+use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components;
 
 /**
  * Handles the basket manipulation. Most of it is done by modifying the template variables shown to the user.
  * Once we have new basket and order core classes, this should be refactored.
  *
  * Class BasketHelper
- * @package Shopware\Connect\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class BasketHelper
 {
@@ -42,7 +44,7 @@ class BasketHelper
     protected $connectShops = array();
 
     /**
-     * @var \Bepado\SDK\Struct\CheckResult
+     * @var \Shopware\Connect\Struct\CheckResult
      */
     protected $checkResult;
 
@@ -61,7 +63,7 @@ class BasketHelper
     protected $showCheckoutShopInfo;
 
     /**
-     * @var \Bepado\SDK\SDK
+     * @var \Shopware\Connect\SDK
      */
     protected $sdk;
 
@@ -84,11 +86,11 @@ class BasketHelper
 
     /**
      * @param \Enlight_Components_Db_Adapter_Pdo_Mysql $database
-     * @param SDK\SDK $sdk
+     * @param \Shopware\Connect\SDK $sdk
      * @param Helper $helper
      * @param $showCheckoutShopInfo
      */
-    public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $database, SDK\SDK $sdk, Connect\Helper $helper, $showCheckoutShopInfo)
+    public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $database, SDK $sdk, Helper $helper, $showCheckoutShopInfo)
     {
         $this->database = $database;
         $this->sdk = $sdk;
@@ -161,10 +163,10 @@ class BasketHelper
     /**
      * Returns the quantity of a given product in the sw basket
      *
-     * @param SDK\Struct\Product $product
+     * @param \Shopware\Connect\Struct\Product $product
      * @return mixed
      */
-    public function getQuantityForProduct(SDK\Struct\Product $product)
+    public function getQuantityForProduct(Product $product)
     {
         if (isset($this->connectContent[$product->shopId]) &&
             isset($this->connectContent[$product->shopId][$product->sourceId])
@@ -413,9 +415,9 @@ class BasketHelper
     /**
      * Increase the basket's shipping costs and amount by the total value of connect shipping costs
      *
-     * @param \Bepado\SDK\Struct\CheckResult $checkResult
+     * @param \Shopware\Connect\Struct\CheckResult $checkResult
      */
-    public function recalculate(SDK\Struct\CheckResult $checkResult)
+    public function recalculate(CheckResult $checkResult)
     {
         $this->checkResult = $checkResult;
         $this->basket['sAmount'] = number_format($this->basket['sAmount'], 2, '.', '');
@@ -621,7 +623,7 @@ class BasketHelper
     }
 
     /**
-     * @return \Bepado\SDK\SDk
+     * @return \Shopware\Connect\SDk
      */
     public function getSdk()
     {
@@ -710,7 +712,7 @@ class BasketHelper
     public function getConnectGrossShippingCosts()
     {
         $result = array();
-        if (!$this->checkResult instanceof SDK\Struct\CheckResult) {
+        if (!$this->checkResult instanceof CheckResult) {
             return $result;
         }
 
@@ -775,17 +777,17 @@ class BasketHelper
     }
 
     /**
-     * @return SDK\Struct\CheckResult
+     * @return \Shopware\Connect\Struct\CheckResult
      */
     public function getCheckResult()
     {
-        return $this->checkResult ?: new SDK\Struct\CheckResult();
+        return $this->checkResult ?: new CheckResult();
     }
 
     /**
-     * @param SDK\Struct\CheckResult $checkResult
+     * @param \Shopware\Connect\Struct\CheckResult $checkResult
      */
-    public function setCheckResult(SDK\Struct\CheckResult $checkResult)
+    public function setCheckResult(CheckResult $checkResult)
     {
         $this->checkResult = $checkResult;
     }

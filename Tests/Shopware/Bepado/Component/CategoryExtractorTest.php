@@ -4,7 +4,7 @@
 class CategoryExtractorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Shopware\Connect\Components\CategoryExtractor
+     * @var \ShopwarePlugins\Connect\Components\CategoryExtractor
      */
     private $categoryExtractor;
 
@@ -39,9 +39,9 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
                 $attribute3,
             ));
 
-        $this->categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
+        $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
             $attributeRepository,
-            new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
+            new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 Shopware()->Models(),
                 Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                 Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')

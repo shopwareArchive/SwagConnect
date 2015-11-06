@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Class Payment
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Payment extends BaseSubscriber
 {

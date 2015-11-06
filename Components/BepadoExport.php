@@ -1,10 +1,10 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Bepado\SDK\SDK;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator;
+use Shopware\Connect\SDK;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;

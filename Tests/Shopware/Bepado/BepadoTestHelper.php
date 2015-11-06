@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Translation;
-use Shopware\Connect\Components\ConnectExport;
-use Shopware\Connect\Components\ImageImport;
-use Shopware\Connect\Components\Logger;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Connect\Struct\Translation;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ImageImport;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\CustomModels\Connect\Attribute;
-use Shopware\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Price;
@@ -18,7 +18,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
 
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -46,7 +46,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return \Shopware\Connect\Components\Helper
+     * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
     {
@@ -128,7 +128,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $purchasePrice = 6.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $number = rand(1, 999999999);
-        $product =  new \Bepado\SDK\Struct\Product(array(
+        $product =  new \Shopware\Connect\Struct\Product(array(
             'shopId' => 3,
             'revisionId' => time(),
             'sourceId' => $number,
@@ -298,7 +298,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     {
         $commands = array();
         foreach ($this->getProducts($number, $withImage) as $product) {
-            $commands[$product->sourceId] = new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
+            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
                 'product' => $product,
                 'revision' => time(),
             ));

@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\Common\Collections\ArrayCollection;
 

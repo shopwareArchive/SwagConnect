@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
  *
  * Class Dispatches
- * @package Shopware\Connect\Components\Subscribers
+ * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 class Dispatches extends BaseSubscriber
 {

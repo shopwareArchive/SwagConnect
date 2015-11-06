@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * The base subscriber holds some default methods, which all other subscribers might need.
@@ -9,7 +9,7 @@ namespace Shopware\Connect\Subscribers;
  * todo: Refactor the subscribers and replace the $bootstrap reference with injected dependencies
  *
  * Class BaseSubscriber
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 abstract class BaseSubscriber extends SubscribeManager
 {
@@ -53,7 +53,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @return \Shopware\Connect\Components\BasketHelper
+     * @return \ShopwarePlugins\Connect\Components\BasketHelper
      */
     public function getBasketHelper()
     {
@@ -77,7 +77,7 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {

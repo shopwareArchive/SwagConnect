@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-use Shopware\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * @category  Shopware
@@ -54,7 +54,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends Enlight_Controller_Act
     }
 
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -64,7 +64,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends Enlight_Controller_Act
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \Shopware\Connect\Components\Config(Shopware()->Models());
+            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config(Shopware()->Models());
         }
 
         return $this->configComponent;
@@ -131,7 +131,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends Enlight_Controller_Act
         }
         $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
         if (!is_array($result)) {
-            echo serialize(new \Bepado\SDK\Struct\ShippingCosts(array(
+            echo serialize(new \Shopware\Connect\Struct\ShippingCosts(array(
                 'isShippable' => false,
             )));
         }
@@ -140,7 +140,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends Enlight_Controller_Act
             $sessionId,
         ));
 
-        echo serialize(new \Bepado\SDK\Struct\ShippingCosts(array(
+        echo serialize(new \Shopware\Connect\Struct\ShippingCosts(array(
             'shippingCosts' => $result['netto'],
             'grossShippingCosts' => $result['brutto'],
         )));

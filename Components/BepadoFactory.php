@@ -1,27 +1,27 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Connect\Components\CategoryQuery\RelevanceSorter;
-use Shopware\Connect\Components\CategoryQuery\Sw41Query;
-use Bepado\SDK;
-use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
-use Shopware\Connect\Components\CategoryResolver\DefaultCategoryResolver;
-use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
-use Shopware\Connect\Components\OrderQuery\RemoteOrderQuery;
-use Shopware\Connect\Components\Payment\ProductPayments;
-use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
-use Shopware\Connect\Components\ProductQuery\RemoteProductQuery;
-use Shopware\Connect\Components\Translations\ProductTranslator;
-use Shopware\Connect\Components\Utils\CountryCodeResolver;
+use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
+use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
+use Shopware\Connect\SDK;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
+use ShopwarePlugins\Connect\Components\OrderQuery\RemoteOrderQuery;
+use ShopwarePlugins\Connect\Components\Payment\ProductPayments;
+use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
+use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
+use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
+use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
  *
  * Class ConnectFactory
- * @package Shopware\Connect\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class ConnectFactory
 {
@@ -31,7 +31,7 @@ class ConnectFactory
     private $modelManager;
     private $pluginVersion;
 
-    /** @var  \Shopware\Connect\Components\Config */
+    /** @var  \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     private $marketplaceGateway;
@@ -46,7 +46,7 @@ class ConnectFactory
     }
 
     /**
-     * @return SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -70,9 +70,9 @@ class ConnectFactory
     }
 
     /**
-     * Will create an instance of the \Bepado\Sdk\Sdk object.
+     * Will create an instance of the \Shopware\Connect\SDK object.
      *
-     * @return SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function createSDK()
     {
@@ -82,7 +82,7 @@ class ConnectFactory
         $helper = $this->getHelper();
         $apiKey = $this->getConfigComponent()->getConfig('apiKey');
 
-        $gateway = new SDK\Gateway\PDO($connection);
+        $gateway = new \Shopware\Connect\Gateway\PDO($connection);
 
         /*
          * The debugHost allows to specify an alternative connect host.
@@ -108,7 +108,7 @@ class ConnectFactory
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             );
-        return new SDK\SDK(
+        return new SDK(
             $apiKey,
             $this->getSdkRoute($front),
             $gateway,

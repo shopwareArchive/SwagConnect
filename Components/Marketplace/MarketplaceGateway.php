@@ -21,7 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Connect\Components\Marketplace;
+namespace ShopwarePlugins\Connect\Components\Marketplace;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\MarketplaceAttribute;

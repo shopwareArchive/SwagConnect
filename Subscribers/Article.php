@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Models\Attribute\ArticlePrice;
 use Shopware\Models\Customer\Group;
 
 /**
  * Class Article
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Article extends BaseSubscriber
 {

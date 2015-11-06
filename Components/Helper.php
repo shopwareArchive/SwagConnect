@@ -22,12 +22,12 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 use Connect\Common\Struct\Product\ShopProduct;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
-use Bepado\SDK\SDK;
-use Bepado\SDK\Struct\Product,
+use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
     Shopware\Models\Category\Category as CategoryModel,
     Shopware\Components\Model\ModelManager,
@@ -37,7 +37,7 @@ use Shopware\Models\Article\Detail as ProductDetail;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
-use Shopware\Connect\Components\Utils\UnitMapper;
+use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 
 /**
  * @category  Shopware
@@ -52,7 +52,7 @@ class Helper
 
     private $connectCategoryQuery;
 
-    /** @var \Shopware\Connect\Components\ProductQuery  */
+    /** @var \ShopwarePlugins\Connect\Components\ProductQuery  */
     private $connectProductQuery;
 
     /**
@@ -453,7 +453,7 @@ class Helper
         foreach ($products as &$p) {
             if ($p->attributes['unit']) {
                 $configComponent = new Config($this->manager);
-                /** @var \Shopware\Connect\Components\Utils\UnitMapper $unitMapper */
+                /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
                 $unitMapper = new UnitMapper(
                     $configComponent,
                     $this->manager

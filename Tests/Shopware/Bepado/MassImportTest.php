@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 
 class MassImportTest extends ConnectTestHelper
 {
@@ -22,7 +22,7 @@ class MassImportTest extends ConnectTestHelper
         $commands = array();
         for ($i=0; $i<=60; $i++) {
             $product = $this->getProduct();
-            $commands[$product->sourceId] = new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
+            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
                 'product' => $product,
                 'revision' => time(),
             ));

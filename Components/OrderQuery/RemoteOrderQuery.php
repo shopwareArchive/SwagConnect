@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Shopware\Connect\Components\OrderQuery;
+namespace ShopwarePlugins\Connect\Components\OrderQuery;
 
 
 class RemoteOrderQuery

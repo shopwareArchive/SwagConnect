@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Connect\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelManager;
 
 /**
- * Will return an *imported* product as Bepado\SDK\Struct\Product
+ * Will return an *imported* product as Shopware\Connect\Struct\Product
  *
  * Class RemoteProductQuery
- * @package Shopware\Connect\Components\ProductQuery
+ * @package ShopwarePlugins\Connect\Components\ProductQuery
  */
 class RemoteProductQuery extends BaseProductQuery
 {

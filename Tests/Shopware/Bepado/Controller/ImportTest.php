@@ -21,7 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
 
 class ImportTest extends \Enlight_Components_Test_Controller_TestCase

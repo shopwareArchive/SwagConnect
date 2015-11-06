@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Components\CategoryQuery;
+namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 /**
  * The sorter will sort categories by their relevance.
@@ -10,7 +10,7 @@ namespace Shopware\Connect\Components\CategoryQuery;
  * The sorter returns the category by ascending relevance
  *
  * Class RelevanceSorter
- * @package Shopware\Connect\Components\CategoryQuery
+ * @package ShopwarePlugins\Connect\Components\CategoryQuery
  */
 class RelevanceSorter
 {

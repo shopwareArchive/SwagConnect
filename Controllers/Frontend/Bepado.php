@@ -31,7 +31,7 @@
 class Shopware_Controllers_Frontend_Connect extends Enlight_Controller_Action
 {
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {

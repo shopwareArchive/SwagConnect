@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Connect\Bootstrap;
-use Shopware\Connect\Components\CategoryExtractor;
-use Shopware\Connect\Components\Marketplace\MarketplaceSettings;
-use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
+namespace ShopwarePlugins\Connect\Bootstrap;
+use ShopwarePlugins\Connect\Components\CategoryExtractor;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use Shopware\Models\Order\Status;
 
 /**
  * Updates existing versions of the plugin
  *
  * Class Update
- * @package Shopware\Connect\Bootstrap
+ * @package ShopwarePlugins\Connect\Bootstrap
  */
 class Update
 {
@@ -561,7 +561,7 @@ class Update
         if (version_compare($this->version, '1.6.8', '<=')) {
 
             $configComponent = $this->bootstrap->getConfigComponents();
-            /** @var \Shopware\Connect\Components\Marketplace\MarketplaceSettings $settings */
+            /** @var \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings $settings */
             $settings = new MarketplaceSettings($this->bootstrap->getSDK()->getMarketplaceSettings());
             $marketplaceSettingsApplier = new MarketplaceSettingsApplier(
                 $configComponent,
@@ -613,9 +613,9 @@ class Update
     private function migrateProductCategories()
     {
         if (version_compare($this->version, '1.7.1', '<=')) {
-            $categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
+            $categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute'),
-                new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
+                new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')

@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
 
 use Behat\SahiClient\Exception\AbstractException;
-use Bepado\SDK\Struct\Address;
-use Bepado\SDK\Struct\Order;
-use Bepado\SDK\Struct\OrderItem;
-use Bepado\SDK\Struct\PaymentStatus;
-use Bepado\SDK\Struct\Product;
-use Bepado\SDK\Struct\ShippingCosts;
-use Shopware\Connect\Components\Logger;
-use Shopware\Connect\Components\ProductFromShop;
+use Shopware\Connect\Struct\Address;
+use Shopware\Connect\Struct\Order;
+use Shopware\Connect\Struct\OrderItem;
+use Shopware\Connect\Struct\PaymentStatus;
+use Shopware\Connect\Struct\Product;
+use Shopware\Connect\Struct\ShippingCosts;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\ProductFromShop;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
@@ -20,7 +20,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $fromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
-            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
             new Logger(Shopware()->Db())
         );
 
@@ -70,7 +70,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $fromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
-            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
             new Logger(Shopware()->Db())
         );
 
@@ -163,7 +163,7 @@ class ProductFromShopTest extends ConnectTestHelper
 //        $commands = array(
 //            $paymentStatus
 //        );
-//            $commands[] = new \Bepado\SDK\Struct\Change\ToShop\InsertOrUpdate(array(
+//            $commands[] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
 //                'product' => $product,
 //                'revision' => time(),
 //            ));
@@ -179,7 +179,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testCalculateShippingCosts()
     {
-        $mockGateway = $this->getMockBuilder('Bepado\SDK\Gateway\PDO')
+        $mockGateway = $this->getMockBuilder('Shopware\Connect\Gateway\PDO')
             ->disableOriginalConstructor()
             ->getMock();
         $mockGateway->expects($this->any())->method('getShopId')->willReturn(25);
@@ -200,7 +200,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $result = $fromShop->calculateShippingCosts($order);
 
-        $this->assertInstanceOf('Bepado\SDK\Struct\Shipping', $result);
+        $this->assertInstanceOf('Shopware\Connect\Struct\Shipping', $result);
         $this->assertTrue($result->isShippable);
         $this->assertEquals($result->shippingCosts, 3.28);
         $this->assertEquals($result->grossShippingCosts, 3.9);
@@ -213,7 +213,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $fromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
-            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
             new Logger(Shopware()->Db())
         );
 
@@ -231,7 +231,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $fromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
-            new \Bepado\SDK\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
             new Logger(Shopware()->Db())
         );
 

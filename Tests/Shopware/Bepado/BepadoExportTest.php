@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Components\ConnectExport;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Config;
 
 class ConnectExportTest extends ConnectTestHelper
 {
     /**
-     * @var \Shopware\Connect\Components\ConnectExport
+     * @var \ShopwarePlugins\Connect\Components\ConnectExport
      */
     private $connectExport;
 

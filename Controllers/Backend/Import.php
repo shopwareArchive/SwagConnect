@@ -35,7 +35,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private $productToRemoteCategoryRepository;
 
     /**
-     * @var \Shopware\Connect\Components\ImportService
+     * @var \ShopwarePlugins\Connect\Components\ImportService
      */
     private $importService;
 
@@ -180,9 +180,9 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
-            $this->categoryExtractor = new \Shopware\Connect\Components\CategoryExtractor(
+            $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute'),
-                new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
+                new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
@@ -222,12 +222,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Connect\Components\ImportService
+     * @return \ShopwarePlugins\Connect\Components\ImportService
      */
     private function getImportService()
     {
         if (!$this->importService) {
-            $this->importService = new \Shopware\Connect\Components\ImportService(
+            $this->importService = new \ShopwarePlugins\Connect\Components\ImportService(
                 $this->getModelManager(),
                 $this->container->get('multi_edit.product'),
                 $this->getCategoryRepository(),
@@ -243,12 +243,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
      */
     private function getAutoCategoryResolver()
     {
         if (!$this->autoCategoryResolver) {
-            $this->autoCategoryResolver = new \Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver(
+            $this->autoCategoryResolver = new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 $this->getModelManager(),
                 $this->getCategoryRepository(),
                 $this->getRemoteCategoryRepository()
@@ -273,7 +273,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getLogger()
     {
         if (!$this->logger) {
-            $this->logger = new \Shopware\Connect\Components\Logger(Shopware()->Db());
+            $this->logger = new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db());
         }
 
         return $this->logger;

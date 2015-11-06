@@ -22,19 +22,19 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components;
-use Bepado\SDK\Gateway;
-use Bepado\SDK\ProductFromShop as ProductFromShopBase,
-    Bepado\SDK\Struct\Order,
-    Bepado\SDK\Struct\Product,
-    Bepado\SDK\Struct\Address,
+namespace ShopwarePlugins\Connect\Components;
+use Shopware\Connect\Gateway;
+use Shopware\Connect\ProductFromShop as ProductFromShopBase,
+    Shopware\Connect\Struct\Order,
+    Shopware\Connect\Struct\Product,
+    Shopware\Connect\Struct\Address,
     Shopware\Models\Order as OrderModel,
     Shopware\Models\Customer as CustomerModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
-use Bepado\SDK\Struct\PaymentStatus;
-use Bepado\SDK\Struct\Shipping;
+use Shopware\Connect\Struct\PaymentStatus;
+use Shopware\Connect\Struct\Shipping;
 
 /**
  * The interface for products exported *to* connect *from* the local shop
@@ -55,7 +55,7 @@ class ProductFromShop implements ProductFromShopBase
     private $manager;
 
     /**
-     * @var \Bepado\SDK\Gateway
+     * @var \Shopware\Connect\Gateway
      */
     private $gateway;
 
@@ -397,7 +397,7 @@ class ProductFromShop implements ProductFromShopBase
 
         $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
         $products = array();
-        /** @var \Bepado\SDK\Struct\OrderItem $orderItem */
+        /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
         foreach ($order->orderItems as $orderItem) {
             $attributes = $repository->findBy(array('sourceId' => array($orderItem->product->sourceId), 'shopId' => null));
             if (count($attributes) === 0) {

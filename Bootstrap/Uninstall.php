@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Bootstrap;
+namespace ShopwarePlugins\Connect\Bootstrap;
 
 /**
  * Uninstaller of the plugin.
@@ -8,7 +8,7 @@ namespace Shopware\Connect\Bootstrap;
  * shopware supports asking the user, if he wants to remove the plugin permanently or temporarily
  *
  * Class Uninstall
- * @package Shopware\Connect\Bootstrap
+ * @package ShopwarePlugins\Connect\Bootstrap
  */
 class Uninstall
 {

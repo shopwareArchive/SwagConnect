@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Shopware\Connect\CategoryQuery;
+namespace Tests\ShopwarePlugins\Connect\CategoryQuery;
 
 use Enlight_Components_Test_Plugin_TestCase;
-use Bepado\SDK\Struct\Product;
-use Shopware\Connect\Components\ConnectFactory;
+use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 class Sw41QueryTest extends CategoryQueryTest
 {

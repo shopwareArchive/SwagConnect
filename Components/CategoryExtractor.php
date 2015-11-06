@@ -21,7 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 use Shopware\CustomModels\Connect\AttributeRepository;
 
 /**
@@ -36,7 +36,7 @@ class CategoryExtractor
     private $attributeRepository;
 
     /**
-     * @var \Shopware\Connect\Components\CategoryResolver
+     * @var \ShopwarePlugins\Connect\Components\CategoryResolver
      */
     private $categoryResolver;
 

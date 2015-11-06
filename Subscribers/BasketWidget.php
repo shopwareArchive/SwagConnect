@@ -1,14 +1,14 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Shopware\Connect\Components\Utils\CountryCodeResolver;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 
 /**
  * The basket widget shows the current basket amount and the current basket's products.
  * It needs to be modified in order to show the connect products / valuess
  *
  * Class BasketWidget
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class BasketWidget extends BaseSubscriber
 {
@@ -22,13 +22,13 @@ class BasketWidget extends BaseSubscriber
         );
     }
 
-    /** @var  \Shopware\Connect\Components\ConnectFactory */
+    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;

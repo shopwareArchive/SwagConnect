@@ -1,24 +1,24 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Bepado\SDK\Struct\CheckResult;
-use Bepado\SDK\Struct\Message;
-use Bepado\SDK\Struct\Order;
-use Bepado\SDK\Struct\OrderItem;
-use Bepado\SDK\Struct\Product;
-use Bepado\SDK\Struct\Reservation;
-use Bepado\SDK\Struct\TotalShippingCosts;
-use Shopware\Connect\Components\Exceptions\CheckoutException;
-use Shopware\Connect\Components\Logger;
-use Shopware\Connect\Components\Utils\CountryCodeResolver;
-use Shopware\Connect\Components\Utils\OrderPaymentMapper;
+namespace ShopwarePlugins\Connect\Subscribers;
+use Shopware\Connect\Struct\CheckResult;
+use Shopware\Connect\Struct\Message;
+use Shopware\Connect\Struct\Order;
+use Shopware\Connect\Struct\OrderItem;
+use Shopware\Connect\Struct\Product;
+use Shopware\Connect\Struct\Reservation;
+use Shopware\Connect\Struct\TotalShippingCosts;
+use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
+use ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper;
 use Shopware\Plugin\Debug\Components\Utils;
 
 /**
  * Handles the whole checkout manipulation, which is required for the connect checkout
  *
  * Class Checkout
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Checkout extends BaseSubscriber
 {
@@ -28,7 +28,7 @@ class Checkout extends BaseSubscriber
     /** @var  string */
     private $newSessionId;
 
-    /** @var  \Shopware\Connect\Components\ConnectFactory */
+    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     public function getSubscribedEvents()
@@ -59,7 +59,7 @@ class Checkout extends BaseSubscriber
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;
@@ -149,7 +149,7 @@ class Checkout extends BaseSubscriber
             $session = Shopware()->Session();
             $userData = $session['sOrderVariables']['sUserData'];
             // prepare an order to check products
-            $order = new \Bepado\SDK\Struct\Order();
+            $order = new \Shopware\Connect\Struct\Order();
             $order->orderItems = array();
             $order->billingAddress = $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
@@ -168,7 +168,7 @@ class Checkout extends BaseSubscriber
                 }, $products);
             }
 
-            /** @var $checkResult \Bepado\SDK\Struct\CheckResult */
+            /** @var $checkResult \Shopware\Connect\Struct\CheckResult */
             try {
                 $checkResult = $sdk->checkProducts($order);
                 $basketHelper->setCheckResult($checkResult);
@@ -300,13 +300,13 @@ class Checkout extends BaseSubscriber
 
         $this->enforcePhoneNumber($view);
 
-        $order = new \Bepado\SDK\Struct\Order();
+        $order = new \Shopware\Connect\Struct\Order();
         $order->orderItems = array();
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
         $basket = $session['sOrderVariables']['sBasket'];
 
-        /** @var \Shopware\Connect\Components\Utils\OrderPaymentMapper $orderPaymentMapper */
+        /** @var \ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper $orderPaymentMapper */
         $orderPaymentMapper = new OrderPaymentMapper();
         $orderPaymentName = $userData['additional']['payment']['name'];
         $order->paymentType = $orderPaymentMapper->mapShopwareOrderPaymentToConnect($orderPaymentName);
@@ -335,7 +335,7 @@ class Checkout extends BaseSubscriber
                 continue;
             }
 
-            $orderItem = new \Bepado\SDK\Struct\OrderItem();
+            $orderItem = new \Shopware\Connect\Struct\OrderItem();
             $orderItem->product = $product;
             $orderItem->count = (int)$row['quantity'];
             $order->orderItems[] = $orderItem;
@@ -346,7 +346,7 @@ class Checkout extends BaseSubscriber
         }
 
         try {
-            /** @var $reservation \Bepado\SDK\Struct\Reservation */
+            /** @var $reservation \Shopware\Connect\Struct\Reservation */
             $reservation = $sdk->reserveProducts($order);
             if(!empty($reservation->messages)) {
                 $messages = $reservation->messages;
@@ -373,7 +373,7 @@ class Checkout extends BaseSubscriber
      * Helper method to create an address struct from shopware session info
      *
      * @param $userData
-     * @return \Bepado\SDK\Struct\Address
+     * @return \Shopware\Connect\Struct\Address
      */
     private function getDeliveryAddress($userData)
     {
@@ -381,7 +381,7 @@ class Checkout extends BaseSubscriber
             return $this->createDummyAddres('DEU');
         }
         $shippingData = $userData['shippingaddress'];
-        $address = new \Bepado\SDK\Struct\Address();
+        $address = new \Shopware\Connect\Struct\Address();
         $address->zip = $shippingData['zipcode'];
         $address->city = $shippingData['city'];
         $address->country = $userData['additional']['countryShipping']['iso3']; //when the user is not logged in
@@ -402,7 +402,7 @@ class Checkout extends BaseSubscriber
 
     private function createDummyAddres($country='DEU')
     {
-        return new \Bepado\SDK\Struct\Address(array(
+        return new \Shopware\Connect\Struct\Address(array(
             'country' => $country,
             'firstName' => 'Shopware',
             'surName' => 'AG',
@@ -419,7 +419,7 @@ class Checkout extends BaseSubscriber
      * Hooks the sSaveOrder frontend method and reserves the connect products
      *
      * @param $orderNumber
-     * @throws \Shopware\Connect\Components\Exceptions\CheckoutException
+     * @throws \ShopwarePlugins\Connect\Components\Exceptions\CheckoutException
      */
     public function checkoutReservedProducts($orderNumber)
     {
@@ -466,7 +466,7 @@ class Checkout extends BaseSubscriber
     protected function getNotAvailableMessageForProducts($products)
     {
         $messages = array();
-        /** \Bepado\SDK\Struct\Product */
+        /** \Shopware\Connect\Struct\Product */
         foreach ($products as $product) {
             $messages[] = new Message(array(
                 'message' => 'Availability of product %product changed to %availability',
@@ -481,7 +481,7 @@ class Checkout extends BaseSubscriber
     }
 
     /**
-     * @param \Bepado\SDK\Struct\CheckResult $checkResult
+     * @param \Shopware\Connect\Struct\CheckResult $checkResult
      * @param $connectMessages
      * @return mixed
      */

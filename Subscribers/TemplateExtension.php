@@ -1,14 +1,14 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Utils\ConnectOrderUtil;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * Loads various template extensions
  *
  * Class TemplateExtension
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class TemplateExtension extends BaseSubscriber
 {
@@ -176,7 +176,7 @@ class TemplateExtension extends BaseSubscriber
         $shop = $sdk->getShop($product->shopId);
 
         $modelsManager = Shopware()->Models();
-        /** @var \Shopware\Connect\Components\Config $configComponent */
+        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
         $configComponent = new Config($modelsManager);
         $view->assign(array(
             'connectProduct' => $product,

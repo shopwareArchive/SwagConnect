@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Components\CategoryQuery;
+namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Category\Category;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
-use Shopware\Connect\Components\ShippingCostBridge;
-use Shopware\Connect\Components\ShippingCosts\ShippingCostRuleVisitor;
-use Shopware\Connect\Components\Translations\TranslationService;
+use ShopwarePlugins\Connect\Components\ShippingCostBridge;
+use ShopwarePlugins\Connect\Components\ShippingCosts\ShippingCostRuleVisitor;
+use ShopwarePlugins\Connect\Components\Translations\TranslationService;
 
 /**
  * The ShippingCosts class will prepend an automatically generated shipping cost table to the shop's shipping
@@ -12,11 +12,11 @@ use Shopware\Connect\Components\Translations\TranslationService;
  * The actual shipping cost page can be configured in the backend
  *
  * Class ShippingCosts
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class ShippingCosts extends BaseSubscriber
 {
-    /** @var  /Shopware\Connect\Components\Config */
+    /** @var  /ShopwarePlugins\Connect\Components\Config */
     protected $configComponent;
 
     public function getSubscribedEvents()
@@ -27,29 +27,29 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
-     * @return \Shopware\Connect\Components\Config
+     * @return \ShopwarePlugins\Connect\Components\Config
      */
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \Shopware\Connect\Components\Config(Shopware()->Models());
+            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config(Shopware()->Models());
         }
 
         return $this->configComponent;
     }
 
-    /** @var  \Shopware\Connect\Components\ConnectFactory */
+    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     /**
      * Returns the connect factory
      *
-     * @return \Shopware\Connect\Components\ConnectFactory
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;

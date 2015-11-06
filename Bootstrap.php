@@ -21,9 +21,9 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-use Shopware\Connect\Bootstrap\Uninstall;
-use Shopware\Connect\Bootstrap\Update;
-use Shopware\Connect\Bootstrap\Setup;
+use ShopwarePlugins\Connect\Bootstrap\Uninstall;
+use ShopwarePlugins\Connect\Bootstrap\Update;
+use ShopwarePlugins\Connect\Bootstrap\Setup;
 
 /**
  * @category  Shopware
@@ -31,7 +31,7 @@ use Shopware\Connect\Bootstrap\Setup;
  */
 final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /** @var \Shopware\Connect\Components\ConnectFactory */
+    /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
     private $connectFactory;
 
     /**
@@ -193,7 +193,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
 
-        /** @var $subscriber Shopware\Connect\Subscribers\BaseSubscriber */
+        /** @var $subscriber ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
             $subscriber->setBootstrap($this);
             $this->Application()->Events()->registerSubscriber($subscriber);
@@ -203,7 +203,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function getSubscribersForUnverifiedKeys()
     {
         return array(
-            new \Shopware\Connect\Subscribers\DisableConnectInFrontend()
+            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend()
         );
     }
 
@@ -217,14 +217,14 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function getSubscribersForVerifiedKeys()
     {
         $subscribers = array(
-            new \Shopware\Connect\Subscribers\TemplateExtension(),
+            new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             $this->createCheckoutSubscriber(),
-            new \Shopware\Connect\Subscribers\Voucher(),
-            new \Shopware\Connect\Subscribers\BasketWidget(),
-            new \Shopware\Connect\Subscribers\Dispatches(),
-            new \Shopware\Connect\Subscribers\ShippingCosts(),
-            new \Shopware\Connect\Subscribers\Javascript(),
-            new \Shopware\Connect\Subscribers\Less()
+            new \ShopwarePlugins\Connect\Subscribers\Voucher(),
+            new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
+            new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
+            new \ShopwarePlugins\Connect\Subscribers\ShippingCosts(),
+            new \ShopwarePlugins\Connect\Subscribers\Javascript(),
+            new \ShopwarePlugins\Connect\Subscribers\Less()
 
         );
 
@@ -232,7 +232,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         $configComponent = $this->getConfigComponents();
 
         if ($configComponent->getConfig('autoUpdateProducts', true)) {
-            $subscribers[] = new \Shopware\Connect\Subscribers\Lifecycle();
+            $subscribers[] = new \ShopwarePlugins\Connect\Subscribers\Lifecycle();
         }
 
         return $subscribers;
@@ -246,14 +246,14 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function getDefaultSubscribers()
     {
         return array(
-            new \Shopware\Connect\Subscribers\OrderDocument(),
-            new \Shopware\Connect\Subscribers\ControllerPath(),
-            new \Shopware\Connect\Subscribers\CustomerGroup(),
-            new \Shopware\Connect\Subscribers\CronJob(),
-            new \Shopware\Connect\Subscribers\ArticleList(),
-            new \Shopware\Connect\Subscribers\Article(),
-            new \Shopware\Connect\Subscribers\Connect(),
-            new \Shopware\Connect\Subscribers\Payment(),
+            new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
+            new \ShopwarePlugins\Connect\Subscribers\ControllerPath(),
+            new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
+            new \ShopwarePlugins\Connect\Subscribers\CronJob(),
+            new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
+            new \ShopwarePlugins\Connect\Subscribers\Article(),
+            new \ShopwarePlugins\Connect\Subscribers\Connect(),
+            new \ShopwarePlugins\Connect\Subscribers\Payment(),
         );
     }
 
@@ -270,11 +270,11 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function registerMyLibrary()
     {
         $this->Application()->Loader()->registerNamespace(
-            'Bepado',
-            $this->Path() . 'Library/Bepado/'
+            'Shopware\\Connect',
+            $this->Path() . 'Library/Shopware/Connect'
         );
         $this->Application()->Loader()->registerNamespace(
-            'Shopware\\Connect',
+            'ShopwarePlugins\\Connect',
             $this->Path()
         );
 
@@ -284,21 +284,21 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Lazy getter for the connectFactory
      *
-     * @return \Shopware\Connect\Components\ConnectFactory
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     public function getConnectFactory()
     {
         $this->registerMyLibrary();
 
         if (!$this->connectFactory) {
-            $this->connectFactory = new \Shopware\Connect\Components\ConnectFactory($this->getVersion());
+            $this->connectFactory = new \ShopwarePlugins\Connect\Components\ConnectFactory($this->getVersion());
         }
 
         return $this->connectFactory;
     }
 
     /**
-     * @return Bepado\SDK\SDK
+     * @return Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -306,7 +306,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     }
 
     /**
-     * @return \Shopware\Connect\Components\Helper
+     * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
     {
@@ -319,7 +319,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     }
 
     /**
-     * @return \Shopware\Connect\Components\Config
+     * @return \ShopwarePlugins\Connect\Components\Config
      */
     public function getConfigComponents()
     {
@@ -361,11 +361,11 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Creates checkout subscriber
      *
-     * @return \Shopware\Connect\Subscribers\Checkout
+     * @return \ShopwarePlugins\Connect\Subscribers\Checkout
      */
     private function createCheckoutSubscriber()
     {
-        $checkoutSubscriber = new \Shopware\Connect\Subscribers\Checkout();
+        $checkoutSubscriber = new \ShopwarePlugins\Connect\Subscribers\Checkout();
         foreach ($checkoutSubscriber->getListeners() as $listener) {
             if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
                 $listener->setPosition(-1);

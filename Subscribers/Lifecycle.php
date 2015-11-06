@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Utils;
-use Shopware\Connect\Components\ConnectExport;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Utils;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from connect
  *
  * Class Lifecycle
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Lifecycle extends BaseSubscriber
 {
@@ -108,7 +108,7 @@ class Lifecycle extends BaseSubscriber
      */
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \Shopware\Connect\Components\Config $configComponent */
+        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
         $configComponent = new Config(Shopware()->Models());
 
         if (!$configComponent->getConfig('autoUpdateProducts', true)) {

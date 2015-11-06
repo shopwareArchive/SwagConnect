@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
 class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 {

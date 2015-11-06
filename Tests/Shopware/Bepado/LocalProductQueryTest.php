@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Product;
-use Bepado\SDK\Struct\Translation;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\ProductQuery;
-use Shopware\Connect\Components\ProductQuery\LocalProductQuery;
-use Shopware\Connect\Components\Translations\ProductTranslator;
+use Shopware\Connect\Struct\Product;
+use Shopware\Connect\Struct\Translation;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\ProductQuery;
+use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
+use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
@@ -48,7 +48,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     public function getLocalProductQuery()
     {
         if (!$this->localProductQuery) {
-            /** @var \Shopware\Connect\Components\Config $configComponent */
+            /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
             $this->localProductQuery = new LocalProductQuery(

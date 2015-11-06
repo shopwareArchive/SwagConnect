@@ -1,13 +1,13 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * The DisableConnectInFrontend subscriber is used, if the user's api key is not valid. In this case, connect products
  * cannot be ordered in the frontend.
  *
  * Class DisableConnectInFrontend
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class DisableConnectInFrontend extends BaseSubscriber
 {

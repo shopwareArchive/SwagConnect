@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 
 interface CategoryQuery
 {

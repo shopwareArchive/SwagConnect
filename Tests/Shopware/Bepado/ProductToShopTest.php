@@ -1,20 +1,20 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
-use Bepado\SDK\Struct\Product;
-use Bepado\SDK\Struct\ProductUpdate;
-use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
-use Shopware\Connect\Components\CategoryResolver\DefaultCategoryResolver;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
-use Shopware\Connect\Components\Marketplace\MarketplaceGateway;
-use Shopware\Connect\Components\ProductToShop;
-use Shopware\Connect\Components\VariantConfigurator;
+use Shopware\Connect\Struct\Product;
+use Shopware\Connect\Struct\ProductUpdate;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\ProductToShop;
+use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ProductToShopTest extends ConnectTestHelper
 {
-    /** @var  \Shopware\Connect\Components\ProductToShop */
+    /** @var  \ShopwarePlugins\Connect\Components\ProductToShop */
     private $productToShop;
 
     private $modelManager;

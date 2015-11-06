@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Shopware\Components\Model\ModelManager;
 
 

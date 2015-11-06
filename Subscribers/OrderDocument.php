@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
-use Shopware\Connect\Components\Utils\ConnectOrderUtil;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 class OrderDocument extends BaseSubscriber
 {

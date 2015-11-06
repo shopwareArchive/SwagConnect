@@ -1,26 +1,26 @@
 <?php
 
-namespace Shopware\Connect\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
-use Bepado\SDK\Units;
-use Shopware\Connect\Components\Config;
+use Shopware\Connect\Units;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Unit;
 
 
 /**
  * Class UnitMapper
- * @package Shopware\Connect\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class UnitMapper
 {
 
-    /** @var \Shopware\Connect\Components\Config */
+    /** @var \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     private $manager;
 
-    /** @var  \Bepado\SDK\Units */
+    /** @var  \Shopware\Connect\Units */
     private $sdkUnits;
 
     private $repository;

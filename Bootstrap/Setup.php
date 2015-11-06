@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Bootstrap;
+namespace ShopwarePlugins\Connect\Bootstrap;
 
 use Shopware\Models\Article\Element;
 use Shopware\Models\Customer\Group;
@@ -10,7 +10,7 @@ use Shopware\Models\Customer\Group;
  * that they can also be run on update of the plugin
  *
  * Class Setup
- * @package Shopware\Connect\Bootstrap
+ * @package ShopwarePlugins\Connect\Bootstrap
  */
 class Setup
 {

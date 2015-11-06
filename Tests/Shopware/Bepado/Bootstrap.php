@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Shopware\Connect;
+namespace Tests\ShopwarePlugins\Connect;
 
 include('./../../../../../../tests/Shopware/TestHelper.php');
 
-Shopware()->Loader()->registerNamespace('Tests\Shopware\Connect', __DIR__  . '/');
+Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__  . '/');
 
 Shopware()->Bootstrap()->getResource('ConnectSDK');

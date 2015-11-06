@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Connect\Components\CategoryResolver;
+namespace ShopwarePlugins\Connect\Components\CategoryResolver;
 
-use Shopware\Connect\Components\CategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\RemoteCategory;

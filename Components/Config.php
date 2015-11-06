@@ -22,9 +22,9 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Config as ConfigModel;
 

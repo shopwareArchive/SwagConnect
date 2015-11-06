@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
-use Bepado\SDK\Struct\Order as OrderStruct;
+use Shopware\Connect\Struct\Order as OrderStruct;
 
 /**
  * Class OrderPaymentMapper
- * @package Shopware\Connect\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class OrderPaymentMapper
 {

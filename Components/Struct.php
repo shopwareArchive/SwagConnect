@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 abstract class Struct
 {

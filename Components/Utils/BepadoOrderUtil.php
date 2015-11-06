@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Connect\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
 /**
  * Util to check orders for connect products
  *
  * Class ConnectOrderUtil
- * @package Shopware\Connect\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class ConnectOrderUtil
 {

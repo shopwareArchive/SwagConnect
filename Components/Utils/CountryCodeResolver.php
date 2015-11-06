@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Shopware\Connect\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
 use \Shopware\Components\Model\ModelManager;
 use \Shopware\Models\Customer\Customer;
@@ -10,7 +10,7 @@ use \Shopware\Models\Customer\Customer;
  * The CountryCodeResolver class helps to determine the country code for the current user
  *
  * Class CountryCode
- * @package Shopware\Connect\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class CountryCodeResolver
 {

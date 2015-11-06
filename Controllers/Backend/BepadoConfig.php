@@ -22,10 +22,10 @@
  * our trademarks remain entirely with us.
  */
 
-use Shopware\Connect\Components\Config;
-use Bepado\SDK\Units;
-use Shopware\Connect\Components\ConnectExport;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Config;
+use Shopware\Connect\Units;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * @category  Shopware
@@ -35,11 +35,11 @@ use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAtt
 class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Backend_ExtJs
 {
 
-    /** @var  \Shopware\Connect\Components\Config */
+    /** @var  \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     /**
-     * @var \Shopware\Connect\Components\ConnectFactory
+     * @var \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     private $factory;
 
@@ -130,13 +130,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
         switch ($this->getSDK()->getPriceType()) {
-            case \Bepado\SDK\SDK::PRICE_TYPE_BOTH:
+            case \Shopware\Connect\SDK::PRICE_TYPE_BOTH:
                 $exportConfigArray['exportPriceMode'] = array('price', 'purchasePrice');
                 break;
-            case \Bepado\SDK\SDK::PRICE_TYPE_RETAIL:
+            case \Shopware\Connect\SDK::PRICE_TYPE_RETAIL:
                 $exportConfigArray['exportPriceMode'] = array('price');
                 break;
-            case \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE:
+            case \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE:
                 $exportConfigArray['exportPriceMode'] = array('purchasePrice');
                 break;
             default:
@@ -161,13 +161,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
 
-        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
-        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_RETAIL) {
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL) {
             $isPriceModeEnabled = true;
         }
 
-        if ($this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_BOTH
-        || $this->getSDK()->getPriceType() === \Bepado\SDK\SDK::PRICE_TYPE_PURCHASE)
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE)
         {
             $isPurchasePriceModeEnabled = true;
         }
@@ -252,19 +252,19 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
-     * @return \Shopware\Connect\Components\Helper
+     * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
     }
 
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -309,7 +309,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     /**
      * Helper function to get access on the Config component
      *
-     * @return \Shopware\Connect\Components\Config
+     * @return \ShopwarePlugins\Connect\Components\Config
      */
     private function getConfigComponent()
     {
@@ -622,12 +622,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
-     * @return \Shopware\Connect\Components\ConnectFactory
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     public function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;

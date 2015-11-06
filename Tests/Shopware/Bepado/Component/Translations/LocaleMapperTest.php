@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Shopware\Connect\Component\Translations;
+namespace Tests\ShopwarePlugins\Connect\Component\Translations;
 
 
-use Shopware\Connect\Components\Translations\LocaleMapper;
+use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 
 class LocaleMapperTest extends \PHPUnit_Framework_TestCase
 {

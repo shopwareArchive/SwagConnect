@@ -22,16 +22,16 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Connect\Components\Marketplace;
+namespace ShopwarePlugins\Connect\Components\Marketplace;
 
 
-use Shopware\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
 
 class MarketplaceSettingsApplier
 {
     /**
-     * @var \Shopware\Connect\Components\Config
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 

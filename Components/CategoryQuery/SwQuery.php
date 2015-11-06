@@ -1,9 +1,9 @@
 <?php
 
-namespace Shopware\Connect\Components\CategoryQuery;
+namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\Connect\Components\CategoryQuery;
+use ShopwarePlugins\Connect\Components\CategoryQuery;
 use Doctrine\ORM\QueryBuilder;
 
 abstract class SwQuery implements CategoryQuery

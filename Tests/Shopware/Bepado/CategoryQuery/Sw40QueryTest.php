@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Shopware\Connect\CategoryQuery;
+namespace Tests\ShopwarePlugins\Connect\CategoryQuery;
 
-use Shopware\Connect\Components\ConnectFactory;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 class Sw40QueryTest extends CategoryQueryTest
 {

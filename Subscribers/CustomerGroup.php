@@ -1,13 +1,13 @@
 <?php
 
-namespace Shopware\Connect\Subscribers;
-use Shopware\Connect\Components\Logger;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * Hides the connect customer group for actions other then article
  *
  * Class CustomerGroup
- * @package Shopware\Connect\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class CustomerGroup extends BaseSubscriber
 {

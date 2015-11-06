@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Connect\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
 use Doctrine\ORM\QueryBuilder;

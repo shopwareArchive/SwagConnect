@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Shopware\Connect\Component\CategoryResolver;
+namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
-use Shopware\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 
 class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var  \Shopware\Connect\Components\CategoryResolver */
+    /** @var  \ShopwarePlugins\Connect\Components\CategoryResolver */
     private $categoryResolver;
 
     public function setUp()

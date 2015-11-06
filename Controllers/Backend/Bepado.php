@@ -22,15 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-use \Bepado\SDK\Struct\Product;
-use Shopware\Connect\Components\ConnectExport;
-use Shopware\Connect\Components\ImageImport;
+use \Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
-use Shopware\Connect\Components\Config;
-use Shopware\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier;
-use \Shopware\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
+use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 
 /**
  * Class Shopware_Controllers_Backend_Connect
@@ -38,15 +38,15 @@ use \Shopware\Connect\Components\Marketplace\MarketplaceSettings;
 class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_ExtJs
 {
     /**
-     * @var \Shopware\Connect\Components\ConnectFactory
+     * @var \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     private $factory;
 
-    /** @var  \Shopware\Connect\Components\Config */
+    /** @var  \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     /**
-     * @var \Shopware\Connect\Components\Marketplace\MarketplaceSettingsApplier
+     * @var \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier
      */
     private $marketplaceSettingsApplier;
 
@@ -59,7 +59,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
-     * @return \Bepado\SDK\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -67,12 +67,12 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
-     * @return \Shopware\Connect\Components\Helper
+     * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Connect\Components\ConnectFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory->getHelper();
@@ -130,7 +130,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
-            new \Shopware\Connect\Components\Logger(Shopware()->Db())
+            new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
         );
     }
 
@@ -856,9 +856,9 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
             $products = $this->getHelper()->getRemoteProducts($sourceIds);
 
-            /** @var \Bepado\SDK\Struct\Product $product */
+            /** @var \Shopware\Connect\Struct\Product $product */
             foreach ($products as $product) {
-                $unsubscribedProducts[] = new \Bepado\SDK\Struct\ProductId(array(
+                $unsubscribedProducts[] = new \Shopware\Connect\Struct\ProductId(array(
                     'shopId' => $product->shopId,
                     'sourceId' => $product->sourceId
                 ));
@@ -1276,12 +1276,12 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
-     * @return \Shopware\Connect\Components\Config
+     * @return \ShopwarePlugins\Connect\Components\Config
      */
     public function getConfigComponent()
     {
         if ($this->configComponent === null) {
-            $this->configComponent = new \Shopware\Connect\Components\Config($this->getModelManager());
+            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config($this->getModelManager());
         }
 
         return $this->configComponent;

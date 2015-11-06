@@ -3,7 +3,7 @@
 class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway
+     * @var \ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway
      */
     private $gateway;
 
@@ -21,7 +21,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->gateway = new \Shopware\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway($this->mockDbAdapter);
+        $this->gateway = new \ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway($this->mockDbAdapter);
     }
 
     public function testGetSingleTranslation()
@@ -370,7 +370,7 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
     public function testAddArticleTranslation()
     {
-        $translation = new \Bepado\SDK\Struct\Translation(array(
+        $translation = new \Shopware\Connect\Struct\Translation(array(
             'title' => 'shopware Connect remote article EN',
             'longDescription' => 'Long description EN',
             'shortDescription' => 'Short description EN',

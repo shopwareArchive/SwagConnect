@@ -252,7 +252,7 @@ class ImportService
                 ),
                 array (
                     'type' => 'attribute',
-                    'token' => 'ATTRIBUTE.BEPADOMAPPEDCATEGORY',
+                    'token' => 'ATTRIBUTE.CONNECTMAPPEDCATEGORY',
                 ),
                 array (
                     'type' => 'unaryOperators',

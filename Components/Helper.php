@@ -23,18 +23,12 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
-use Connect\Common\Struct\Product\ShopProduct;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
-use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
-    Shopware\Models\Category\Category as CategoryModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Detail as ProductDetail;
-use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;

@@ -198,7 +198,7 @@ class Setup
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
-            CREATE TABLE IF NOT EXISTS `connect_shipping_rules` (
+            CREATE TABLE IF NOT EXISTS `bepado_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,
              `sr_group_id` int(11) unsigned DEFAULT NULL,
              `sr_country` varchar(32) COLLATE utf8_unicode_ci NOT NULL,

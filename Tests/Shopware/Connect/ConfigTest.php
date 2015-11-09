@@ -7,6 +7,13 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 
 class ConfigTest extends ConnectTestHelper
 {
+    public function tearDown()
+    {
+        Shopware()->Db()->exec("
+          DELETE FROM s_plugin_connect_config WHERE groupName = 'marketplace'
+        ");
+    }
+
     public function testGetConfig()
     {
         $configValue = $this->getConfigComponent()->getConfig('connectAttribute', null, 'general');

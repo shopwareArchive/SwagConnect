@@ -9,7 +9,6 @@ use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Product;
-use Shopware\Connect\Struct\ShippingCosts;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 

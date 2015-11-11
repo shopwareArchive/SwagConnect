@@ -1,10 +1,10 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
-use Shopware\Bepado\Components\ShippingCostBridge;
-use Shopware\Bepado\Components\ShippingCosts\ShippingCostRuleVisitor;
-use Shopware\Bepado\Components\Translations\TranslationService;
+use ShopwarePlugins\Connect\Components\ShippingCostBridge;
+use ShopwarePlugins\Connect\Components\ShippingCosts\ShippingCostRuleVisitor;
+use ShopwarePlugins\Connect\Components\Translations\TranslationService;
 
 /**
  * The ShippingCosts class will prepend an automatically generated shipping cost table to the shop's shipping
@@ -12,11 +12,11 @@ use Shopware\Bepado\Components\Translations\TranslationService;
  * The actual shipping cost page can be configured in the backend
  *
  * Class ShippingCosts
- * @package Shopware\Bepado\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class ShippingCosts extends BaseSubscriber
 {
-    /** @var  /Shopware\Bepado\Components\Config */
+    /** @var  /ShopwarePlugins\Connect\Components\Config */
     protected $configComponent;
 
     public function getSubscribedEvents()
@@ -27,29 +27,29 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
-     * @return \Shopware\Bepado\Components\Config
+     * @return \ShopwarePlugins\Connect\Components\Config
      */
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \Shopware\Bepado\Components\Config(Shopware()->Models());
+            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config(Shopware()->Models());
         }
 
         return $this->configComponent;
     }
 
-    /** @var  \Shopware\Bepado\Components\BepadoFactory */
+    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     /**
-     * Returns the bepado factory
+     * Returns the connect factory
      *
-     * @return \Shopware\Bepado\Components\BepadoFactory
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;
@@ -81,7 +81,7 @@ class ShippingCosts extends BaseSubscriber
     }
 
     /**
-     * If the shown page is the shipping cost page, add the bepado shipping cost information
+     * If the shown page is the shipping cost page, add the connect shipping cost information
      *
      * @param \Enlight_Event_EventArgs $args
      */
@@ -101,11 +101,11 @@ class ShippingCosts extends BaseSubscriber
 
         Shopware()->Template()->assign(
             array(
-                'bepadoShipping' => $this->getShippingCosts(),
-                'bepadoShopInfo' => $this->getConfigComponent()->getConfig('detailShopInfo')
+                'connectShipping' => $this->getShippingCosts(),
+                'connectShopInfo' => $this->getConfigComponent()->getConfig('detailShopInfo')
             )
         );
-        $result = Shopware()->Template()->fetch('frontend/bepado/shipping_costs.tpl');
+        $result = Shopware()->Template()->fetch('frontend/connect/shipping_costs.tpl');
 
         $controller->View()->sContent = $result . $controller->View()->sContent;
     }
@@ -118,7 +118,7 @@ class ShippingCosts extends BaseSubscriber
      */
     protected function getShopInfo($shopId)
     {
-        $info = Shopware()->BepadoSDK()->getShop($shopId);
+        $info = Shopware()->ConnectSDK()->getShop($shopId);
 
         return array(
             'id' => $info->id,
@@ -153,7 +153,7 @@ class ShippingCosts extends BaseSubscriber
      */
     public function getAllShippingCosts()
     {
-        return Shopware()->BepadoSDK()->getShippingCostRules();
+        return Shopware()->ConnectSDK()->getShippingCostRules();
     }
 
     /**
@@ -165,7 +165,7 @@ class ShippingCosts extends BaseSubscriber
      */
     private function hasImportedProductsFromShop($shopId)
     {
-        $sql = 'SELECT COUNT(id) FROM s_plugin_bepado_items WHERE shop_id = ?';
+        $sql = 'SELECT COUNT(id) FROM s_plugin_connect_items WHERE shop_id = ?';
 
         return Shopware()->Db()->fetchOne($sql, array($shopId)) > 0;
     }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryQuery;
+namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Category\Category;
 
@@ -20,7 +20,7 @@ class Sw41Query extends SwQuery
         $builder = $repository->createQueryBuilder('c');
         $builder->join('c.attribute', 'ca');
         $builder->select('c');
-        $builder->andWhere('ca.bepadoImportMapping = :mapping');
+        $builder->andWhere('ca.connectImportMapping = :mapping');
 
         $builder->leftJoin('c.children', 'children');
         $builder->andWhere('children.id IS NULL');
@@ -39,12 +39,12 @@ class Sw41Query extends SwQuery
     }
 
     /**
-     * Return bepado category mapping for the given product id
+     * Return connect category mapping for the given product id
      *
      * @param $id
      * @return array
      */
-    public function getBepadoCategoryForProduct($id)
+    public function getConnectCategoryForProduct($id)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('categories'))

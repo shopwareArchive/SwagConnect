@@ -1,0 +1,91 @@
+/** Plugin home page */
+.bp-home-page {
+    line-height: 18px;
+}
+.bp-home-page strong { font-weight: bold }
+.bp-home-page p { margin: 0 0 18px; }
+.bp-home-page li {
+    margin: 0 0 8px;
+    background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
+    padding: 0 0 0 25px;
+}
+.bp-home-page .content { width: 50% }
+.bp-home-page .headline {
+    font-size: 21px;
+    line-height: 26px;
+    margin: 0 0 18px;
+}
+
+.bp-home-page .logo {
+    float: right;
+    max-width: 380px;
+    max-height: 350px;
+}
+
+/** General info text */
+.connect-info {
+    line-height: 18px;
+}
+.connect-info strong { font-weight: bold }
+.connect-info p { margin: 0 0 18px; }
+.connect-info li {
+    margin: 0 0 8px;
+    background: url("../images/icon_list-bullet.png") no-repeat 0 2px;
+    padding: 0 0 0 25px;
+}
+.connect-info li.question {
+    margin: 0 0 8px;
+    background: url("../images/icon_list-question.png") no-repeat 0 2px;
+    padding: 0 0 0 25px;
+}
+.connect-info .content { width: 100% }
+.connect-info .headline {
+    font-size: 21px;
+    line-height: 26px;
+    margin: 0 0 18px;
+}
+
+/** Configuration */
+div[id^=connect-window] div[id^=connect-config] .x-window-body-default {
+    border: 0 none;
+    -webkit-box-shadow: 0 0 0 transparent;
+    -moz-box-shadow: 0 0 0 transparent;
+    -ms-box-shadow: 0 0 0 transparent;
+    box-shadow: 0 0 0 transparent;
+}
+
+div[id^=connect-window] div[id^=base-element-fieldset] {
+    background: #f0f2f4;
+    -webkit-box-shadow: 0 0 0 transparent;
+    -moz-box-shadow: 0 0 0 transparent;
+    -ms-box-shadow: 0 0 0 transparent;
+    box-shadow: 0 0 0 transparent;
+}
+table[id^=base-element-fieldset] tbody + tbody .x-btn {
+    margin: 0 0 18px;
+}
+.ul-disc-type-holder ol li {
+    list-style:decimal;
+}
+.ul-disc-type-holder ul li {
+    list-style:disc;
+}
+.ul-disc-type-holder ul ul li {
+    list-style:circle;
+}
+.ul-disc-type-holder ul, .ul-disc-type-holder ol {
+    padding-left: 2em;
+}
+
+.import-arrow {
+    background: url("../images/import_arrow.png") no-repeat;
+    height: 100%;
+}
+
+.shopware-connect-color {
+    color: #486783 !important;
+}
+
+.sc-btn-right {
+    float: right;
+}

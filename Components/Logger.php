@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 /**
- * Logger for bepadoGateway operations
+ * Logger for connectGateway operations
  *
  * Class Logger
- * @package Shopware\Bepado\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class Logger
 {
@@ -55,7 +55,7 @@ class Logger
         }
 
         $this->db->query('
-            INSERT INTO `s_plugin_bepado_log`
+            INSERT INTO `s_plugin_connect_log`
             (`isError`, `service`, `command`, `request`, `response`, `time`)
             VALUES (?, ?, ?, ?, ?, NOW())
         ', array($isError, $service, $command, $request, $response));
@@ -84,6 +84,6 @@ class Logger
      */
     protected function cleanup()
     {
-        $this->db->exec('DELETE FROM `s_plugin_bepado_log`  WHERE DATE_SUB(CURDATE(),INTERVAL 1 DAY) >= time');
+        $this->db->exec('DELETE FROM `s_plugin_connect_log`  WHERE DATE_SUB(CURDATE(),INTERVAL 1 DAY) >= time');
     }
 }

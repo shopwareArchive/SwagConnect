@@ -1,9 +1,9 @@
 <?php
 
-namespace Shopware\Bepado\Components\CategoryResolver;
+namespace ShopwarePlugins\Connect\Components\CategoryResolver;
 
-use Shopware\Bepado\Components\CategoryResolver;
-use Shopware\CustomModels\Bepado\RemoteCategoryRepository;
+use ShopwarePlugins\Connect\Components\CategoryResolver;
+use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
@@ -21,7 +21,7 @@ class AutoCategoryResolver implements CategoryResolver
     private $categoryRepository;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\RemoteCategoryRepository
+     * @var \Shopware\CustomModels\Connect\RemoteCategoryRepository
      */
     private $remoteCategoryRepository;
 
@@ -95,10 +95,10 @@ class AutoCategoryResolver implements CategoryResolver
                 $this->manager->persist($categoryModel);
 
                 $categoryAttribute = $categoryModel->getAttribute();
-                $categoryAttribute->setBepadoImportedCategory(true);
+                $categoryAttribute->setConnectImportedCategory(true);
                 $this->manager->persist($categoryAttribute);
 
-                /** @var \Shopware\CustomModels\Bepado\RemoteCategory $remoteCategory */
+                /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
                 $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $category['id']));
                 if ($remoteCategory) {
                     $remoteCategory->setLocalCategory($categoryModel);

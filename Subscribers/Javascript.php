@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -22,7 +22,7 @@ class Javascript extends BaseSubscriber
 	public function addJsFiles(\Enlight_Event_EventArgs $args)
 	{
 		$jsPath = array(
-            dirname(__DIR__) . '/Views/responsive/frontend/_public/src/js/jquery.bepado.js'
+            dirname(__DIR__) . '/Views/responsive/frontend/_public/src/js/jquery.connect.js'
 		);
 		return new ArrayCollection($jsPath);
 	}

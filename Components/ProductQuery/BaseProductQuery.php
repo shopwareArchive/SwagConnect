@@ -1,8 +1,8 @@
 <?php
 
-namespace Shopware\Bepado\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Shopware\Components\Model\ModelManager;
 
 
@@ -26,7 +26,7 @@ abstract class BaseProductQuery
      * @param $rows
      * @return array
      */
-    abstract function getBepadoProducts($rows);
+    abstract function getConnectProducts($rows);
 
     public function get(array $sourceIds)
     {
@@ -35,7 +35,7 @@ abstract class BaseProductQuery
         $builder->andWhere("at.sourceId IN ($implodedIds)");
         $query = $builder->getQuery();
 
-        return $this->getBepadoProducts($query->getArrayResult());
+        return $this->getConnectProducts($query->getArrayResult());
     }
 
     /**
@@ -119,11 +119,11 @@ abstract class BaseProductQuery
 
         // Fix attributes
         $row['attributes'] = array();
-        foreach ($this->getAttributeMapping() as $swField => $bepadoField) {
+        foreach ($this->getAttributeMapping() as $swField => $connectField) {
             if (!array_key_exists($swField, $row)) {
                 continue;
             }
-            $row['attributes'][$bepadoField] = $row[$swField];
+            $row['attributes'][$connectField] = $row[$swField];
             unset($row[$swField]);
         }
 

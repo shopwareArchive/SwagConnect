@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
+namespace ShopwarePlugins\Connect\Components;
 
 abstract class Struct
 {

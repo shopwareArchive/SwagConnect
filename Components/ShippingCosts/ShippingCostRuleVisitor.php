@@ -1,11 +1,11 @@
 <?php
 
-namespace Shopware\Bepado\Components\ShippingCosts;
+namespace ShopwarePlugins\Connect\Components\ShippingCosts;
 
-use Bepado\SDK\ShippingCosts\Rule;
-use Bepado\SDK\ShippingCosts\Rules;
-use Bepado\SDK\ShippingCosts\RulesVisitor;
-use Shopware\Bepado\Components\Translations\TranslationServiceInterface;
+use Shopware\Connect\ShippingCosts\Rule;
+use Shopware\Connect\ShippingCosts\Rules;
+use Shopware\Connect\ShippingCosts\RulesVisitor;
+use ShopwarePlugins\Connect\Components\Translations\TranslationServiceInterface;
 
 class ShippingCostRuleVisitor extends RulesVisitor
 {
@@ -16,7 +16,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
 
     protected $currentRule = null;
 
-    /** @var \Shopware\Bepado\Components\Translations\TranslationServiceInterface */
+    /** @var \ShopwarePlugins\Connect\Components\Translations\TranslationServiceInterface */
     protected $translationService;
 
     public function __construct(TranslationServiceInterface $translationService)
@@ -48,19 +48,19 @@ class ShippingCostRuleVisitor extends RulesVisitor
     public function startVisitRule(Rule $rule)
     {
         switch (get_class($rule)) {
-            case 'Bepado\SDK\ShippingCosts\Rule\CountryDecorator':
+            case 'Shopware\Connect\ShippingCosts\Rule\CountryDecorator':
                 $type = 'country';
                 break;
-            case 'Bepado\SDK\ShippingCosts\Rule\FreeCarriageLimit':
+            case 'Shopware\Connect\ShippingCosts\Rule\FreeCarriageLimit':
                 $type = 'freeCarriage';
                 break;
-            case 'Bepado\SDK\ShippingCosts\Rule\WeightDecorator':
+            case 'Shopware\Connect\ShippingCosts\Rule\WeightDecorator':
                 $type = 'weight';
                 break;
-            case 'Bepado\SDK\ShippingCosts\Rule\MinimumBasketValue':
+            case 'Shopware\Connect\ShippingCosts\Rule\MinimumBasketValue':
                 $type = 'minimum';
                 break;
-            case 'Bepado\SDK\ShippingCosts\Rule\UnitPrice':
+            case 'Shopware\Connect\ShippingCosts\Rule\UnitPrice':
                 $type = 'price';
                 break;
             default:

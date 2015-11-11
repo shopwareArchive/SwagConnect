@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;

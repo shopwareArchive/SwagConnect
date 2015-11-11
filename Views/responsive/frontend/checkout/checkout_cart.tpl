@@ -1,6 +1,6 @@
-{foreach name=basket from=$bepadoContent item=bepadoItems key=shopId}
-	{block name="frontend_checkout_bepado_second_row"}
-		<div class="bepado--second-cart">
+{foreach name=basket from=$connectContent item=connectItems key=shopId}
+	{block name="frontend_checkout_connect_second_row"}
+		<div class="connect--second-cart">
 			{block name='frontend_checkout_cart_cart_head'}
                 {if isset($template) && $template == 'confirm'}
                     {include file="frontend/checkout/confirm_header.tpl"}
@@ -12,7 +12,7 @@
                 {/if}
 			{/block}
 
-			{foreach name=bepadoItems from=$bepadoItems item=sBasketItem key=key}
+			{foreach name=connectItems from=$connectItems item=sBasketItem key=key}
 				{block name='frontend_checkout_cart_item'}
                     {if isset($template) && $template == 'confirm'}
                         {include file='frontend/checkout/confirm_item.tpl'}

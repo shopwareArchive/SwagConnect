@@ -1,0 +1,50 @@
+.table .table_row .checkout_item_connect {
+    float: left;
+    width: 18px;
+    border-right: 1px dashed #DFDFDF;
+    display: block;
+    margin: -36px 0 0 -10px;
+    padding-bottom: 9999em;
+    margin-bottom: -9999em;
+}
+.table .table_row .checkout_item_connect span {
+    background:  url('../images/bg_marketplace.png') center center no-repeat;
+    width: 20px;
+    height: 75px;
+    position: absolute;
+    top: 50%;
+    margin-top: -36px
+}
+#content #confirm .table .table_row .checkout_item_connect { height: 158px }
+#content #confirm .table .table_row { overflow: hidden }
+#content #confirm .table .table_row .main-article-features { padding-left: 15px }
+
+/** Splitting the basket */
+#content .table .table_head { margin: 1.4em 0 0 !important }
+.connect-additional-info-checkout {
+    position: absolute;
+    margin: -28px 0 0 25px;
+}
+.label-separate-dispatch {
+    background: #e1540f;
+    display: inline-block;
+    padding: 2px 4px;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 10px;
+
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    margin: 0 4px 0 0;
+}
+.display-shop-name {
+    display: inline-block;
+    font-size: 11px;
+    color: #888;
+}
+
+#confirm .border-top {
+    margin: 0 10px;
+    border-bottom: 1px solid #dfdfdf;
+}

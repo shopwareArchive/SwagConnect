@@ -1,16 +1,16 @@
 <?php
 
-namespace Shopware\Bepado\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelManager;
 
 /**
- * Will return an *imported* product as Bepado\SDK\Struct\Product
+ * Will return an *imported* product as Shopware\Connect\Struct\Product
  *
  * Class RemoteProductQuery
- * @package Shopware\Bepado\Components\ProductQuery
+ * @package ShopwarePlugins\Connect\Components\ProductQuery
  */
 class RemoteProductQuery extends BaseProductQuery
 {
@@ -34,7 +34,7 @@ class RemoteProductQuery extends BaseProductQuery
     {
         $builder = $this->manager->createQueryBuilder();
 
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
@@ -71,23 +71,23 @@ class RemoteProductQuery extends BaseProductQuery
             'd.referenceUnit as referenceUnit',
             'at.category as category',
             'at.fixedPrice as fixedPrice',
-            'attribute.bepadoArticleShipping as shipping',
+            'attribute.connectArticleShipping as shipping',
         ));
 
         return $builder;
     }
 
     /**
-     * Returns a list of bepado products
+     * Returns a list of connect products
      *
      * @param array $rows
      * @return array
      */
-    public function getBepadoProducts($rows)
+    public function getConnectProducts($rows)
     {
         $products = array();
         foreach ($rows as $row) {
-            $product = $this->getBepadoProduct($row);
+            $product = $this->getConnectProduct($row);
             if ($product) {
                 $products[] = $product;
             }
@@ -96,12 +96,12 @@ class RemoteProductQuery extends BaseProductQuery
     }
 
     /**
-     * Returns a bepado product or null if the given row does not reference a imported product
+     * Returns a connect product or null if the given row does not reference a imported product
      *
      * @param $row
      * @return Product|null
      */
-    protected function getBepadoProduct($row)
+    protected function getConnectProduct($row)
     {
         $row = $this->prepareCommonAttributes($row);
 

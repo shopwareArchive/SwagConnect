@@ -1,24 +1,24 @@
 <?php
 
-namespace Shopware\Bepado\Components\ProductQuery;
+namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Doctrine\ORM\QueryBuilder;
-use Bepado\SDK\Struct\Product;
-use Shopware\Bepado\Components\Exceptions\NoLocalProductException;
-use Shopware\Bepado\Components\Logger;
-use Shopware\Bepado\Components\Marketplace\MarketplaceGateway;
-use Shopware\Bepado\Components\Translations\ProductTranslatorInterface;
+use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Utils\UnitMapper;
-use Bepado\SDK\Struct\Translation;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
+use Shopware\Connect\Struct\Translation;
 
 /**
- * Will return a local product (e.g. for export) as Bepado\SDK\Struct\Product
+ * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
  * Configured fields for price- and description export will be taken into account
  *
  * Class LocalProductQuery
- * @package Shopware\Bepado\Components\ProductQuery
+ * @package ShopwarePlugins\Connect\Components\ProductQuery
  */
 class LocalProductQuery extends BaseProductQuery
 {
@@ -28,13 +28,13 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $baseProductUrl;
 
-    /** @var \Shopware\Bepado\Components\Config $configComponent */
+    /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
     protected $configComponent;
 
     protected $marketplaceGateway;
 
     /**
-     * @var \Shopware\Bepado\Components\Translations\ProductTranslatorInterface
+     * @var \ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface
      */
     protected $productTranslator;
 
@@ -68,7 +68,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $builder = $this->manager->createQueryBuilder();
 
-        $builder->from('Shopware\CustomModels\Bepado\Attribute', 'at');
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
@@ -128,11 +128,11 @@ class LocalProductQuery extends BaseProductQuery
      * @param array $rows
      * @return array
      */
-    public function getBepadoProducts($rows)
+    public function getConnectProducts($rows)
     {
         $products = array();
         foreach ($rows as $row) {
-            $products[] = $this->getBepadoProduct($row);
+            $products[] = $this->getConnectProduct($row);
         }
         return $products;
     }
@@ -142,7 +142,7 @@ class LocalProductQuery extends BaseProductQuery
      * @return Product
      * @throws NoLocalProductException
      */
-    public function getBepadoProduct($row)
+    public function getConnectProduct($row)
     {
         $row = $this->prepareCommonAttributes($row);
         $row['translations'] = $this->productTranslator->translate($row['localId'], $row['sourceId']);
@@ -172,10 +172,10 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailKind']);
 
         if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity']) {
-            //Map local unit to bepado unit
+            //Map local unit to connect unit
             if ($row['attributes']['unit']) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
-                $row['attributes']['unit'] = $unitMapper->getBepadoUnit($row['attributes']['unit']);
+                $row['attributes']['unit'] = $unitMapper->getConnectUnit($row['attributes']['unit']);
             }
 
             $intRefQuantity = (int)$row['attributes']['ref_quantity'];
@@ -203,7 +203,7 @@ class LocalProductQuery extends BaseProductQuery
     public function addPriceJoins(QueryBuilder $builder, $exportPriceColumn, $exportPurchasePriceColumn)
     {
         // When the price attribute is used, we need two joins to get it
-        if ($exportPriceColumn == 'bepadoPrice') {
+        if ($exportPriceColumn == 'connectPrice') {
             $builder->leftJoin(
                 'd.prices',
                 'price_join_for_export_price',
@@ -221,7 +221,7 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         // When the price attribute is used, we need two joins to get it
-        if ($exportPurchasePriceColumn == 'bepadoPrice') {
+        if ($exportPurchasePriceColumn == 'connectPrice') {
             $builder->leftJoin(
                 'd.prices',
                 'price_join_for_export_purchase_price',

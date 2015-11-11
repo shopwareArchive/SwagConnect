@@ -1,14 +1,14 @@
 <?php
 
-namespace Shopware\Bepado\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
-use Bepado\SDK\Struct\Message;
-use Bepado\SDK\Struct\OrderStatus as OrderStatusStruct;
+use Shopware\Connect\Struct\Message;
+use Shopware\Connect\Struct\OrderStatus as OrderStatusStruct;
 use Shopware\Models\Order\Order;
 
 /**
  * Class OrderStatusMapper
- * @package Shopware\Bepado\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class OrderStatusMapper
 {
@@ -16,9 +16,9 @@ class OrderStatusMapper
     private $mapping;
 
     /**
-     * Returns an array of mappings from sw order states to bepado order states
+     * Returns an array of mappings from sw order states to connect order states
      *
-     * Can be modified and extended by using the Bepado_OrderStatus_Mapping filter event
+     * Can be modified and extended by using the Connect_OrderStatus_Mapping filter event
      *
      * @return mixed
      */
@@ -38,19 +38,19 @@ class OrderStatusMapper
                 '4' => OrderStatusStruct::STATE_ERROR, // 4 = Storno / Rejected
             );
 
-            $this->mapping = Enlight()->Events()->filter('Bepado_OrderStatus_Mapping', $this->mapping);
+            $this->mapping = Enlight()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;
     }
 
     /**
-     * Helper to map shopware order states to bepado order states
+     * Helper to map shopware order states to connect order states
      *
      * @param $swOrderStatus
      * @return string
      */
-    public function mapShopwareOrderStatusToBepado($swOrderStatus)
+    public function mapShopwareOrderStatusToConnect($swOrderStatus)
     {
         $swOrderStatus = (string)$swOrderStatus;
 
@@ -71,7 +71,7 @@ class OrderStatusMapper
     {
         return new OrderStatusStruct(array(
             'id' => (string) $order->getNumber(),
-            'status' => $this->mapShopwareOrderStatusToBepado($order->getOrderStatus()->getId()),
+            'status' => $this->mapShopwareOrderStatusToConnect($order->getOrderStatus()->getId()),
             'messages' => array(
                 new Message(array('message' => $order->getOrderStatus()->getDescription()))
             )

@@ -1,9 +1,9 @@
 {extends file="parent:frontend/checkout/items/product.tpl"}
 
 {block name='frontend_checkout_cart_item_image_container_outer' prepend}
-    {if $shopId && $bepadoShopInfo}
-        <div class="bepado--bepado-image-article">
-			<span class="bepado-image-article--text">
+    {if $shopId && $connectShopInfo}
+        <div class="connect--connect-image-article">
+			<span class="connect-image-article--text">
 				Connect
 			</span>
         </div>
@@ -13,12 +13,12 @@
 {block name="frontend_checkout_cart_item_details_inline"}
     {$smarty.block.parent}
     {if $shopId}
-        <div class="bepado--additional-info">
+        <div class="connect--additional-info">
             {if $showShippingCostsSeparately}
-                <span class="bepado--cart-label">{s name="frontend_checkout_cart_bepado_dispatch"}Separater Versand{/s}</span>
+                <span class="connect--cart-label">{s name="frontend_checkout_cart_connect_dispatch"}Separater Versand{/s}</span>
             {/if}
-            {if $bepadoShopInfo}
-                <span class="bepado--cart-reseller">Artikel von {$bepadoShops[$shopId]->name}</span>
+            {if $connectShopInfo}
+                <span class="connect--cart-reseller">Artikel von {$connectShops[$shopId]->name}</span>
             {/if}
         </div>
     {/if}

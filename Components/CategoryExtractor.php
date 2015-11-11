@@ -21,22 +21,22 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Bepado\Components;
-use Shopware\CustomModels\Bepado\AttributeRepository;
+namespace ShopwarePlugins\Connect\Components;
+use Shopware\CustomModels\Connect\AttributeRepository;
 
 /**
  * Class CategoryExtractor
- * @package Shopware\CustomModels\Bepado
+ * @package Shopware\CustomModels\Connect
  */
 class CategoryExtractor
 {
     /**
-     * @var \Shopware\CustomModels\Bepado\AttributeRepository
+     * @var \Shopware\CustomModels\Connect\AttributeRepository
      */
     private $attributeRepository;
 
     /**
-     * @var \Shopware\Bepado\Components\CategoryResolver
+     * @var \ShopwarePlugins\Connect\Components\CategoryResolver
      */
     private $categoryResolver;
 
@@ -53,7 +53,7 @@ class CategoryExtractor
     public function extractImportedCategories()
     {
         $categories = array();
-        /** @var \Shopware\CustomModels\Bepado\Attribute $attribute */
+        /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
         foreach ($this->attributeRepository->findRemoteArticleAttributes() as $attribute) {
             $categories = array_merge($categories, $attribute->getCategory());
         }
@@ -71,7 +71,7 @@ class CategoryExtractor
      */
     public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false)
     {
-        $sql = 'SELECT category_key, label FROM `s_plugin_bepado_categories`';
+        $sql = 'SELECT category_key, label FROM `s_plugin_connect_categories`';
         if ($parent !== null) {
             $sql .= ' WHERE category_key LIKE ?';
             $whereParams = array($parent . '/%');

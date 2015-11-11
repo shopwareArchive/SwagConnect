@@ -1,26 +1,26 @@
 <?php
 
-namespace Shopware\Bepado\Components\Utils;
+namespace ShopwarePlugins\Connect\Components\Utils;
 
-use Bepado\SDK\Units;
-use Shopware\Bepado\Components\Config;
+use Shopware\Connect\Units;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Unit;
 
 
 /**
  * Class UnitMapper
- * @package Shopware\Bepado\Components\Utils
+ * @package ShopwarePlugins\Connect\Components\Utils
  */
 class UnitMapper
 {
 
-    /** @var \Shopware\Bepado\Components\Config */
+    /** @var \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     private $manager;
 
-    /** @var  \Bepado\SDK\Units */
+    /** @var  \Shopware\Connect\Units */
     private $sdkUnits;
 
     private $repository;
@@ -39,11 +39,11 @@ class UnitMapper
     }
 
     /**
-     * Returns bepado unit
+     * Returns connect unit
      * @param $shopwareUnit
      * @return string
      */
-    public function getBepadoUnit($shopwareUnit)
+    public function getConnectUnit($shopwareUnit)
     {
         // search for configured unit mapping
         $unit = $this->configComponent->getConfig($shopwareUnit);
@@ -51,30 +51,30 @@ class UnitMapper
             return $unit;
         }
 
-        $bepadoUnits = $this->getSdkLocalizedUnits();
+        $connectUnits = $this->getSdkLocalizedUnits();
 
-        // search for same key in bepado units
-        if ($bepadoUnits[$shopwareUnit]) {
+        // search for same key in connect units
+        if ($connectUnits[$shopwareUnit]) {
             return $shopwareUnit;
         }
 
-        // search for same label in bepado units
+        // search for same label in connect units
         $repository = $this->getUnitRepository();
         $unitModel = $repository->findOneBy(array('unit' => $shopwareUnit));
 
         if ($unitModel) {
             $unitName = $unitModel->getName();
 
-            foreach ($bepadoUnits as $key => $bepadoUnit) {
-                if ($bepadoUnit == $unitName) {
+            foreach ($connectUnits as $key => $connectUnit) {
+                if ($connectUnit == $unitName) {
                     return $key;
                 }
             }
 
-            // search in "de" bepado units
-            $deBepadoUnits = $this->getSdkLocalizedUnits('de');
-            foreach ($deBepadoUnits as $key => $bepadoUnit) {
-                if ($bepadoUnit == $unitName) {
+            // search in "de" connect units
+            $deConnectUnits = $this->getSdkLocalizedUnits('de');
+            foreach ($deConnectUnits as $key => $connectUnit) {
+                if ($connectUnit == $unitName) {
                     return $key;
                 }
             }
@@ -85,30 +85,30 @@ class UnitMapper
 
     /**
      * Returns shopware unit
-     * @param $bepadoUnit
+     * @param $connectUnit
      * @return mixed
      */
-    public function getShopwareUnit($bepadoUnit)
+    public function getShopwareUnit($connectUnit)
     {
         // search for configured unit mapping
-        $config = $this->configComponent->getConfigByValue($bepadoUnit);
+        $config = $this->configComponent->getConfigByValue($connectUnit);
         if ($config) {
             return $config->getName();
         }
 
         // search for same key in Shopware units
         $repository = $this->getUnitRepository();
-        $unitModel = $repository->findOneBy(array('unit' => $bepadoUnit));
+        $unitModel = $repository->findOneBy(array('unit' => $connectUnit));
 
         if ($unitModel) {
             return $unitModel->getUnit();
         }
 
-        $bepadoUnits = $this->getSdkLocalizedUnits();
+        $connectUnits = $this->getSdkLocalizedUnits();
 
         // search for same label in Shopware units
-        if ($bepadoUnits[$bepadoUnit]) {
-            $unitModel = $repository->findOneBy(array('name' => $bepadoUnits[$bepadoUnit]));
+        if ($connectUnits[$connectUnit]) {
+            $unitModel = $repository->findOneBy(array('name' => $connectUnits[$connectUnit]));
 
             if ($unitModel) {
                 return $unitModel->getUnit();
@@ -116,9 +116,9 @@ class UnitMapper
         }
 
         // search for same label in "de" Shopware units
-        $deBepadoUnits = $this->getSdkLocalizedUnits('de');
-        if ($deBepadoUnits[$bepadoUnit]) {
-            $unitModel = $repository->findOneBy(array('name' => $deBepadoUnits[$bepadoUnit]));
+        $deConnectUnits = $this->getSdkLocalizedUnits('de');
+        if ($deConnectUnits[$connectUnit]) {
+            $unitModel = $repository->findOneBy(array('name' => $deConnectUnits[$connectUnit]));
 
             if ($unitModel) {
                 return $unitModel->getUnit();
@@ -128,15 +128,15 @@ class UnitMapper
         if ($this->configComponent->getConfig('createUnitsAutomatically', false) == true) {
             // only german units for now
             $unit = new Unit();
-            $unit->setName($deBepadoUnits[$bepadoUnit]);
-            $unit->setUnit($bepadoUnit);
+            $unit->setName($deConnectUnits[$connectUnit]);
+            $unit->setUnit($connectUnit);
             $this->manager->persist($unit);
             $this->manager->flush();
 
             return $unit->getUnit();
         }
 
-        return $bepadoUnit;
+        return $connectUnit;
     }
 
     /**
@@ -152,7 +152,7 @@ class UnitMapper
     }
 
     /**
-     * Returns bepado units
+     * Returns connect units
      * @param string $locale
      * @return array\
      */

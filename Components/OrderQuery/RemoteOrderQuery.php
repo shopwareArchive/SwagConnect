@@ -1,18 +1,18 @@
 <?php
 
 
-namespace Shopware\Bepado\Components\OrderQuery;
+namespace ShopwarePlugins\Connect\Components\OrderQuery;
 
 
 class RemoteOrderQuery
 {
     private $repository;
 
-    public function getBepadoOrder($localOrderId)
+    public function getConnectOrder($localOrderId)
     {
         $builder = $this->getRepository()->getBackendOrdersQueryBuilder();
-        $builder->andWhere('attribute.bepadoOrderId = :bepadoOrderId')
-            ->setParameter('bepadoOrderId', $localOrderId);
+        $builder->andWhere('attribute.connectOrderId = :connectOrderId')
+            ->setParameter('connectOrderId', $localOrderId);
 
         /** @var \Shopware\Models\Order\Order $order */
         $order = $builder->getQuery()->getOneOrNullResult();

@@ -1,13 +1,13 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Logger;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
- * Hides the bepado customer group for actions other then article
+ * Hides the connect customer group for actions other then article
  *
  * Class CustomerGroup
- * @package Shopware\Bepado\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class CustomerGroup extends BaseSubscriber
 {
@@ -21,7 +21,7 @@ class CustomerGroup extends BaseSubscriber
     }
 
     /**
-     * Remove 'bepado' customer group from the base store - except 'showBepado' is set
+     * Remove 'connect' customer group from the base store - except 'showConnect' is set
      *
      * @param \Enlight_Event_EventArgs $args
      */
@@ -36,14 +36,14 @@ class CustomerGroup extends BaseSubscriber
         }
 
         try {
-            if (!$this->getBepadoCustomerGroupId()) {
+            if (!$this->getConnectCustomerGroupId()) {
                 return;
             }
-            if ($request->getParam('showBepado', false)) {
+            if ($request->getParam('showConnect', false)) {
                 return;
             }
             $filter = $request->getParam('filter', array());
-            $filter[] = array("property" => "id", "value" => $this->getBepadoCustomerGroupId(), 'expression' => '<>');
+            $filter[] = array("property" => "id", "value" => $this->getConnectCustomerGroupId(), 'expression' => '<>');
             $request->setParam('filter', $filter);
         } catch (\Exception $e) {
             $logger = new Logger(Shopware()->Db());
@@ -53,24 +53,24 @@ class CustomerGroup extends BaseSubscriber
     }
 
     /**
-     * This one will remove bepado from the default customer group query
+     * This one will remove connect from the default customer group query
      *
      * @param \Enlight_Hook_HookArgs $args
      */
     public function filterCustomerGroupFromQueryBuilder(\Enlight_Hook_HookArgs $args)
     {
-        if (!$this->getBepadoCustomerGroupId()) {
+        if (!$this->getConnectCustomerGroupId()) {
             return;
         }
 
-        // Allow the article module to list the bepado customer group
+        // Allow the article module to list the connect customer group
         $pathInfo = Shopware()->Front()->Request()->getPathInfo();
         if (strpos($pathInfo, '/backend/Article') !== false) {
             return;
         }
 
         $builder = $args->getReturn();
-        $builder->andWhere('groups.id != :groupId')->setParameter('groupId', $this->getBepadoCustomerGroupId());
+        $builder->andWhere('groups.id != :groupId')->setParameter('groupId', $this->getConnectCustomerGroupId());
 
         $args->setReturn($builder);
     }
@@ -82,7 +82,7 @@ class CustomerGroup extends BaseSubscriber
      */
     public function addToWithoutIdsQueryBuilder(\Enlight_Hook_HookArgs $args)
     {
-        if (!$this->getBepadoCustomerGroupId()) {
+        if (!$this->getConnectCustomerGroupId()) {
             return;
         }
 
@@ -91,21 +91,21 @@ class CustomerGroup extends BaseSubscriber
         if (!$userIds) {
             $userIds = array();
         }
-        $userIds[] = $this->getBepadoCustomerGroupId();
+        $userIds[] = $this->getConnectCustomerGroupId();
 
         $args->set('usedIds', $userIds);
     }
 
     /**
-     * Will return the id of the bepado customer group - or null if no such group can be found
+     * Will return the id of the connect customer group - or null if no such group can be found
      *
      * @return int|null
      */
-    public function getBepadoCustomerGroupId()
+    public function getConnectCustomerGroupId()
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->findOneBy(array('bepadoGroup' => true));
+        $model = $repo->findOneBy(array('connectGroup' => true));
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {

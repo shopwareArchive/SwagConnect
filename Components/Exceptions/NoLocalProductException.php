@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\Exceptions;
+namespace ShopwarePlugins\Connect\Components\Exceptions;
 
 class NoLocalProductException extends \Exception
 {

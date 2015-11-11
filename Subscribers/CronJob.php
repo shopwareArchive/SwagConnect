@@ -1,27 +1,27 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\ImageImport;
-use Shopware\Bepado\Components\Logger;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ImageImport;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * Cronjob callback
  *
  * Class CronJob
- * @package Shopware\Bepado\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class CronJob extends BaseSubscriber
 {
     /**
-     * @var \Shopware\Bepado\Components\Config
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 
     public function getSubscribedEvents()
     {
         return array(
-            'Shopware_CronJob_ImportImages' => 'importImages',
+            'ShopwareConnect_CronJob_ImportImages' => 'importImages',
         );
     }
 

@@ -22,9 +22,9 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components\Translations;
+namespace ShopwarePlugins\Connect\Components\Translations;
 
-use Bepado\SDK\Struct\Translation;
+use Shopware\Connect\Struct\Translation;
 
 interface ProductTranslatorInterface
 {
@@ -41,16 +41,16 @@ interface ProductTranslatorInterface
     /**
      * @param int $groupId
      * @param string $groupName
-     * @param \Bepado\SDK\Struct\Translation[] $translations
-     * @return \Bepado\SDK\Struct\Translation[]
+     * @param \Shopware\Connect\Struct\Translation[] $translations
+     * @return \Shopware\Connect\Struct\Translation[]
      */
     public function translateConfiguratorGroup($groupId, $groupName, $translations);
 
     /**
      * @param int $optionId
      * @param string $optionName
-     * @param \Bepado\SDK\Struct\Translation[] $translations
-     * @return \Bepado\SDK\Struct\Translation[]
+     * @param \Shopware\Connect\Struct\Translation[] $translations
+     * @return \Shopware\Connect\Struct\Translation[]
      */
     public function translateConfiguratorOption($optionId, $optionName, $translations);
 

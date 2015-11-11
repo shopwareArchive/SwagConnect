@@ -1,0 +1,105 @@
+//{namespace name=backend/connect/view/main}
+
+/**
+ * In old SW versions we need to overwrite the whole shipping attribute module
+  */
+//{block name="backend/shipping/model/attribute"}
+//{if $useOldConnectShippingAttributeExtension}
+
+Ext.define('Shopware.apps.Shipping.model.Attribute', {
+    extend: 'Ext.data.Model',
+
+    fields: [
+        { name: 'id', type: 'int' },
+        { name: 'dispatchId', type: 'int', useNull: true },
+        { name: 'connectAllowed', type: 'int' }
+    ]
+});
+//{else}
+//    {$smarty.block.parent}
+//{/if}
+//{/block}
+
+/**
+ * This block does not exist before 4.2.0
+ */
+//{block name="backend/shipping/model/attribute/fields" append}
+   { name: 'connectAllowed', type: 'int' },
+//{/block}
+
+/**
+ * Show a connect checkbox in the 'advanced' menu
+ */
+//{block name="backend/shipping/view/edit/advanced" append}
+Ext.define('Shopware.apps.Shipping.view.edit.Advanced-Connect', {
+    override: 'Shopware.apps.Shipping.view.edit.Advanced',
+
+    /**
+     * @Override
+     * @returns Array
+     */
+    getFormElementsRight: function() {
+        var me = this,
+            items = me.callOverridden(arguments);
+
+        // connectAllowed is not used during checkout
+        //items.push({
+        //    xtype : 'checkbox',
+        //    name : 'attribute[connectAllowed]',
+        //    internalName: 'connect',
+        //    fieldLabel : '{s name=shipping/connectAllowed}Allow with connect{/s}'
+        //});
+
+        return items;
+    }
+
+
+});
+
+//{/block}
+
+//{block name="backend/shipping/controller/default_form" append}
+Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Connect', {
+    override: 'Shopware.apps.Shipping.controller.DefaultForm',
+
+    /**
+     * As the attributes are not persisted automatically, they are saved after everything else has been saved
+     *
+     * @Override
+     *
+     * @returns Object
+     */
+    onDispatchSave: function() {
+        var me = this,
+            result = me.callOverridden(arguments),
+            advancedForm = me.getAdvancedForm(),
+            connectAllowed = advancedForm.down('checkbox[internalName=connect]').getValue();
+
+        me.saveConnectAttribute(advancedForm.record.get('id'), connectAllowed);
+
+        return result;
+    },
+
+    /**
+     * Save the given connect value via an Ajax request
+     *
+     * @param shippingId
+     * @param attributeValue
+     */
+    saveConnectAttribute: function(shippingId, attributeValue) {
+        Ext.Ajax.request({
+            url: '{url controller=connect action=saveShippingAttribute}',
+            method: 'POST',
+            params: {
+                shippingId: shippingId,
+                connectAllowed: attributeValue ? 1 : 0
+            },
+            failure: function(response, opts) {
+                Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+            }
+
+        });
+    }
+
+});
+//{/block}

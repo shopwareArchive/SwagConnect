@@ -1,6 +1,6 @@
 <?php
 
-namespace Shopware\Bepado\Components\Translations;
+namespace ShopwarePlugins\Connect\Components\Translations;
 
 class TranslationService implements TranslationServiceInterface
 {

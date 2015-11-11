@@ -1,16 +1,18 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Bepado\SDK;
-use Shopware\Bepado\Components;
+use Shopware\Connect\Struct\CheckResult;
+use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Components;
 
 /**
  * Handles the basket manipulation. Most of it is done by modifying the template variables shown to the user.
  * Once we have new basket and order core classes, this should be refactored.
  *
  * Class BasketHelper
- * @package Shopware\Bepado\Components
+ * @package ShopwarePlugins\Connect\Components
  */
 class BasketHelper
 {
@@ -22,27 +24,27 @@ class BasketHelper
     protected $basket;
 
     /**
-     * Array of bepado product structs
+     * Array of connect product structs
      * @var array
      */
-    protected $bepadoProducts = array();
+    protected $connectProducts = array();
 
     /**
-     * bepado content as formated by shopware
+     * connect content as formated by shopware
      *
      * @var array
      */
-    protected $bepadoContent = array();
+    protected $connectContent = array();
 
     /**
-     * Array of bepado shops affected by this basket
+     * Array of connect shops affected by this basket
      *
      * @var array
      */
-    protected $bepadoShops = array();
+    protected $connectShops = array();
 
     /**
-     * @var \Bepado\SDK\Struct\CheckResult
+     * @var \Shopware\Connect\Struct\CheckResult
      */
     protected $checkResult;
 
@@ -54,14 +56,14 @@ class BasketHelper
     protected $originalShippingCosts = 0;
 
     /**
-     * Should there be a bepado hint in the template
+     * Should there be a connect hint in the template
      *
      * @var boolean
      */
     protected $showCheckoutShopInfo;
 
     /**
-     * @var \Bepado\SDK\SDK
+     * @var \Shopware\Connect\SDK
      */
     protected $sdk;
 
@@ -76,19 +78,19 @@ class BasketHelper
     protected $helper;
 
     /**
-     * Indicates if the basket has only bepado products or not
+     * Indicates if the basket has only connect products or not
      *
      * @var bool
      */
-    protected $onlyBepadoProducts = false;
+    protected $onlyConnectProducts = false;
 
     /**
      * @param \Enlight_Components_Db_Adapter_Pdo_Mysql $database
-     * @param SDK\SDK $sdk
+     * @param \Shopware\Connect\SDK $sdk
      * @param Helper $helper
      * @param $showCheckoutShopInfo
      */
-    public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $database, SDK\SDK $sdk, Bepado\Helper $helper, $showCheckoutShopInfo)
+    public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $database, SDK $sdk, Helper $helper, $showCheckoutShopInfo)
     {
         $this->database = $database;
         $this->sdk = $sdk;
@@ -97,23 +99,23 @@ class BasketHelper
     }
 
     /**
-     * Prepare the basket for bepado
+     * Prepare the basket for connect
      *
      * @return array
      */
-    public function prepareBasketForBepado()
+    public function prepareBasketForConnect()
     {
         $this->buildProductsArray();
         $this->buildShopsArray();
     }
 
     /**
-     * Build array of bepado products. This will remove bepado products from the 'content' array
+     * Build array of connect products. This will remove connect products from the 'content' array
      */
     protected function buildProductsArray()
     {
-        $this->bepadoProducts = array();
-        $this->bepadoContent = array();
+        $this->connectProducts = array();
+        $this->connectContent = array();
 
         $this->basket['contentOrg'] = $this->basket['content'];
 
@@ -135,9 +137,9 @@ class BasketHelper
             if ($product === null || $product->shopId === null) {
                 continue;
             }
-            $row['bepadoShopId'] = $product->shopId;
-            $this->bepadoProducts[$product->shopId][$product->sourceId] = $product;
-            $this->bepadoContent[$product->shopId][$product->sourceId] = $row;
+            $row['connectShopId'] = $product->shopId;
+            $this->connectProducts[$product->shopId][$product->sourceId] = $product;
+            $this->connectContent[$product->shopId][$product->sourceId] = $row;
 
             //if($actionName == 'cart') {
             unset($this->basket['content'][$key]);
@@ -146,31 +148,31 @@ class BasketHelper
     }
 
     /**
-     * Build array of bepado remote shops
+     * Build array of connect remote shops
      */
     protected function buildShopsArray()
     {
-        $this->bepadoShops = array();
+        $this->connectShops = array();
 
         $this->basket['content'] = array_values($this->basket['content']);
-        foreach($this->bepadoContent as $shopId => $items) {
-            $this->bepadoShops[$shopId] = $this->getSdk()->getShop($shopId);
+        foreach($this->connectContent as $shopId => $items) {
+            $this->connectShops[$shopId] = $this->getSdk()->getShop($shopId);
         }
     }
 
     /**
      * Returns the quantity of a given product in the sw basket
      *
-     * @param SDK\Struct\Product $product
+     * @param \Shopware\Connect\Struct\Product $product
      * @return mixed
      */
-    public function getQuantityForProduct(SDK\Struct\Product $product)
+    public function getQuantityForProduct(Product $product)
     {
-        if (isset($this->bepadoContent[$product->shopId]) &&
-            isset($this->bepadoContent[$product->shopId][$product->sourceId])
+        if (isset($this->connectContent[$product->shopId]) &&
+            isset($this->connectContent[$product->shopId][$product->sourceId])
         ) {
 
-            return (int) $this->bepadoContent[$product->shopId][$product->sourceId]['quantity'];
+            return (int) $this->connectContent[$product->shopId][$product->sourceId]['quantity'];
         } else if (isset($this->basket['content'][$product->sourceId])) {
             return (int) $this->basket['content'][$product->sourceId]['quantity'];
         }
@@ -182,7 +184,7 @@ class BasketHelper
      * This method will check, if any *real* products from the local shop are in the basket. If this is not the
      * case, this method will:
      *
-     * - set the first bepado shop as content of the default basket ($basket['content'])
+     * - set the first connect shop as content of the default basket ($basket['content'])
      * - remove any surcharges, vouchers and  discount from the original basket(!)
      *
      * @return bool|mixed
@@ -200,19 +202,19 @@ class BasketHelper
                 }
         });
 
-        // If only bepado products are in the basket, do the basket fix
+        // If only connect products are in the basket, do the basket fix
         if(empty($content)) {
-            $this->onlyBepadoProducts = true;
+            $this->onlyConnectProducts = true;
 
             $this->removeNonProductsFromBasket();
 
-            $bepadoContent = $this->getBepadoContent();
+            $connectContent = $this->getConnectContent();
 
-            // Make the first bepado shop the default basket-content
-            reset($bepadoContent);
-            $shopId = current(array_keys($bepadoContent));
-            $this->basket['content'] = $bepadoContent[$shopId];
-            unset($this->bepadoContent[$shopId]);
+            // Make the first connect shop the default basket-content
+            reset($connectContent);
+            $shopId = current(array_keys($connectContent));
+            $this->basket['content'] = $connectContent[$shopId];
+            unset($this->connectContent[$shopId]);
 
             return $shopId;
         }
@@ -221,7 +223,7 @@ class BasketHelper
     }
 
     /**
-     * Removes non-bepado products from the database and fixes the basket variables
+     * Removes non-connect products from the database and fixes the basket variables
      */
     protected function removeNonProductsFromBasket()
     {
@@ -362,16 +364,16 @@ class BasketHelper
 
     /**
      * Returns an array of tax positions in the same way, as shopware does in the sTaxRates.
-     * This will only take bepado products returned by getBepadoContent() into account,
-     * so that bepado positions moved into basket['content'] earlier are not calculated twice.
+     * This will only take connect products returned by getConnectContent() into account,
+     * so that connect positions moved into basket['content'] earlier are not calculated twice.
      *
      * @return array
      */
-    public function getBepadoTaxRates()
+    public function getConnectTaxRates()
     {
         $taxes = array();
 
-        foreach ($this->getBepadoContent() as $shopId => $products) {
+        foreach ($this->getConnectContent() as $shopId => $products) {
             foreach ($products as $product) {
                 $vat = (string) number_format($product['tax_rate'], 2);
                 if (!isset($taxes[$vat])) {
@@ -411,11 +413,11 @@ class BasketHelper
     }
 
     /**
-     * Increase the basket's shipping costs and amount by the total value of bepado shipping costs
+     * Increase the basket's shipping costs and amount by the total value of connect shipping costs
      *
-     * @param \Bepado\SDK\Struct\CheckResult $checkResult
+     * @param \Shopware\Connect\Struct\CheckResult $checkResult
      */
-    public function recalculate(SDK\Struct\CheckResult $checkResult)
+    public function recalculate(CheckResult $checkResult)
     {
         $this->checkResult = $checkResult;
         $this->basket['sAmount'] = number_format($this->basket['sAmount'], 2, '.', '');
@@ -468,7 +470,7 @@ class BasketHelper
         $this->basket['sTaxRates'] = $this->getMergedTaxRates(
             array(
                 $this->getTaxRates($this->basket),
-                $this->getBepadoTaxRates(),
+                $this->getConnectTaxRates(),
                 $this->getShippingCostsTaxRates()
             )
         );
@@ -502,7 +504,7 @@ class BasketHelper
     {
 
         $taxRate = 0;
-        foreach ($this->getBepadoContent() as $shopId => $products) {
+        foreach ($this->getConnectContent() as $shopId => $products) {
             foreach ($products as $product) {
                 if ($product['tax_rate'] > $taxRate) {
                     $taxRate = $product['tax_rate'];
@@ -537,21 +539,21 @@ class BasketHelper
     }
 
     /**
-     * Return array of bepado specific template variables
+     * Return array of connect specific template variables
      *
-     * @param $bepadoMessages array Messages to show
+     * @param $connectMessages array Messages to show
      * @return array
      */
-    public function getBepadoTemplateVariables($bepadoMessages)
+    public function getConnectTemplateVariables($connectMessages)
     {
         return array(
-            'bepadoContent' => $this->getBepadoContent(),
-            'bepadoShops' => $this->getBepadoShops(),
-            'bepadoMessages' => $bepadoMessages,
-            'bepadoShippingCosts' => $this->getBepadoGrossShippingCosts(),
-            'bepadoShippingCostsOrg' => $this->getOriginalShippingCosts(),
-            'bepadoShopInfo' => $this->showCheckoutShopInfo,
-            'addBaseShop' => $this->onlyBepadoProducts ? 0 : 1,
+            'connectContent' => $this->getConnectContent(),
+            'connectShops' => $this->getConnectShops(),
+            'connectMessages' => $connectMessages,
+            'connectShippingCosts' => $this->getConnectGrossShippingCosts(),
+            'connectShippingCostsOrg' => $this->getOriginalShippingCosts(),
+            'connectShopInfo' => $this->showCheckoutShopInfo,
+            'addBaseShop' => $this->onlyConnectProducts ? 0 : 1,
         );
     }
 
@@ -621,7 +623,7 @@ class BasketHelper
     }
 
     /**
-     * @return \Bepado\SDK\SDk
+     * @return \Shopware\Connect\SDk
      */
     public function getSdk()
     {
@@ -644,7 +646,7 @@ class BasketHelper
     public function setBasket($basket)
     {
         $this->basket = $basket;
-        $this->prepareBasketForBepado();
+        $this->prepareBasketForConnect();
 
     }
 
@@ -657,60 +659,60 @@ class BasketHelper
     }
 
     /**
-     * @param array $bepadoContent
+     * @param array $connectContent
      */
-    public function setBepadoContent($bepadoContent)
+    public function setConnectContent($connectContent)
     {
-        $this->bepadoContent = $bepadoContent;
+        $this->connectContent = $connectContent;
     }
 
     /**
      * @return array
      */
-    public function getBepadoContent()
+    public function getConnectContent()
     {
-        return $this->bepadoContent;
+        return $this->connectContent;
     }
 
     /**
-     * @param array $bepadoProducts
+     * @param array $connectProducts
      */
-    public function setBepadoProducts($bepadoProducts)
+    public function setConnectProducts($connectProducts)
     {
-        $this->bepadoProducts = $bepadoProducts;
-    }
-
-    /**
-     * @return array
-     */
-    public function getBepadoProducts()
-    {
-        return $this->bepadoProducts;
-    }
-
-    /**
-     * @param array $bepadoShops
-     */
-    public function setBepadoShops($bepadoShops)
-    {
-        $this->bepadoShops = $bepadoShops;
+        $this->connectProducts = $connectProducts;
     }
 
     /**
      * @return array
      */
-    public function getBepadoShops()
+    public function getConnectProducts()
     {
-        return $this->bepadoShops;
+        return $this->connectProducts;
+    }
+
+    /**
+     * @param array $connectShops
+     */
+    public function setConnectShops($connectShops)
+    {
+        $this->connectShops = $connectShops;
     }
 
     /**
      * @return array
      */
-    public function getBepadoGrossShippingCosts()
+    public function getConnectShops()
+    {
+        return $this->connectShops;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConnectGrossShippingCosts()
     {
         $result = array();
-        if (!$this->checkResult instanceof SDK\Struct\CheckResult) {
+        if (!$this->checkResult instanceof CheckResult) {
             return $result;
         }
 
@@ -775,17 +777,17 @@ class BasketHelper
     }
 
     /**
-     * @return SDK\Struct\CheckResult
+     * @return \Shopware\Connect\Struct\CheckResult
      */
     public function getCheckResult()
     {
-        return $this->checkResult ?: new SDK\Struct\CheckResult();
+        return $this->checkResult ?: new CheckResult();
     }
 
     /**
-     * @param SDK\Struct\CheckResult $checkResult
+     * @param \Shopware\Connect\Struct\CheckResult $checkResult
      */
-    public function setCheckResult(SDK\Struct\CheckResult $checkResult)
+    public function setCheckResult(CheckResult $checkResult)
     {
         $this->checkResult = $checkResult;
     }

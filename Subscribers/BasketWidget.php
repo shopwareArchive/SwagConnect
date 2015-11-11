@@ -1,14 +1,14 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Utils\CountryCodeResolver;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 
 /**
  * The basket widget shows the current basket amount and the current basket's products.
- * It needs to be modified in order to show the bepado products / valuess
+ * It needs to be modified in order to show the connect products / valuess
  *
  * Class BasketWidget
- * @package Shopware\Bepado\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class BasketWidget extends BaseSubscriber
 {
@@ -17,18 +17,18 @@ class BasketWidget extends BaseSubscriber
     {
         return array(
             'sBasket::sGetBasket::after' => 'storeBasketResultToSession',
-            'Enlight_Controller_Action_PostDispatch_Widgets_Checkout' => 'fixBasketWidgetForBepado',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketWidgetForBepado'
+            'Enlight_Controller_Action_PostDispatch_Widgets_Checkout' => 'fixBasketWidgetForConnect',
+            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketWidgetForConnect'
         );
     }
 
-    /** @var  \Shopware\Bepado\Components\BepadoFactory */
+    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \Shopware\Bepado\Components\BepadoFactory();
+            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
         return $this->factory;
@@ -46,7 +46,7 @@ class BasketWidget extends BaseSubscriber
      *
      * @param \Enlight_Event_EventArgs $args
      */
-    public function fixBasketWidgetForBepado(\Enlight_Event_EventArgs $args)
+    public function fixBasketWidgetForConnect(\Enlight_Event_EventArgs $args)
     {
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
@@ -55,28 +55,28 @@ class BasketWidget extends BaseSubscriber
         $actionName = $request->getActionName();
 
         // ajaxCart was removed from array, because when user puts
-        // bepado article it's displayed in ajax cart, but
-        // then puts local article and bepado is missing
+        // connect article it's displayed in ajax cart, but
+        // then puts local article and connect is missing
         if (!in_array($actionName, array('info', 'ajaxAmount'))) {
             return;
         }
 
-        // If the basket is empty or does not contain bepado products return
-        $basket = Shopware()->Session()->bepadoGetBasket;
-        if (empty($basket) || !$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        // If the basket is empty or does not contain connect products return
+        $basket = Shopware()->Session()->connectGetBasket;
+        if (empty($basket) || !$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
         $basketHelper = $this->getBasketHelper();
         $basketHelper->setBasket($basket);
 
-        // Return if we don't have any bepado products
-        $bepadoProducts = $basketHelper->getBepadoProducts();
-        if (empty($bepadoProducts)) {
+        // Return if we don't have any connect products
+        $connectProducts = $basketHelper->getConnectProducts();
+        if (empty($connectProducts)) {
             return;
         }
 
-        // Fix the basket for bepado
+        // Fix the basket for connect
         $basketHelper->fixBasket();
         $vars = $basketHelper->getDefaultTemplateVariables();
 
@@ -106,7 +106,7 @@ class BasketWidget extends BaseSubscriber
     public function storeBasketResultToSession(\Enlight_Hook_HookArgs $args)
     {
         $basket = $args->getReturn();
-        Shopware()->Session()->bepadoGetBasket = $basket;
+        Shopware()->Session()->connectGetBasket = $basket;
 
         $args->setReturn($basket);
     }

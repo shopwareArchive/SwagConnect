@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
- * Extends the dispatch module and removes non-bepado aware dispatches, if bepado products are in the basket
+ * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
  *
  * Class Dispatches
- * @package Shopware\Bepado\Components\Subscribers
+ * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 class Dispatches extends BaseSubscriber
 {
@@ -19,7 +19,7 @@ class Dispatches extends BaseSubscriber
     }
 
     /**
-     * If bepado products are in the basket: Remove dispatches which are not allowed for bepado
+     * If connect products are in the basket: Remove dispatches which are not allowed for connect
      *
      * @event sAdmin::sGetPremiumDispatches::after
      * @param \Enlight_Hook_HookArgs $args
@@ -32,8 +32,8 @@ class Dispatches extends BaseSubscriber
             return;
         }
 
-        // If no bepado products are in basket, don't modify anything
-        if (!$this->getHelper()->hasBasketBepadoProducts(Shopware()->SessionID())) {
+        // If no connect products are in basket, don't modify anything
+        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
@@ -44,7 +44,7 @@ class Dispatches extends BaseSubscriber
         $sql = "
         SELECT `dispatchID`
         FROM s_premium_dispatch_attributes
-        WHERE `bepado_allowed` > 0
+        WHERE `connect_allowed` > 0
         AND `dispatchID` IN ({$questionMarks})
         ";
         
@@ -77,11 +77,11 @@ class Dispatches extends BaseSubscriber
                 $this->registerMySnippets();
                 // The version is needed as in older sw-versions the attribute cannot be extended easily
                 if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.0', '<')) {
-                    $subject->View()->assign('useOldBepadoShippingAttributeExtension', true);
+                    $subject->View()->assign('useOldConnectShippingAttributeExtension', true);
                 }
 
                 $subject->View()->extendsTemplate(
-                    'backend/shipping/bepado.js'
+                    'backend/shipping/connect.js'
                 );
 
                 break;

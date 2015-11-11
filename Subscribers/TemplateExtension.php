@@ -1,15 +1,14 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
-use Shopware\Bepado\Components\Config;
-use Shopware\Bepado\Components\Exceptions\NoRemoteProductException;
-use Shopware\Bepado\Components\Utils\BepadoOrderUtil;
+namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * Loads various template extensions
  *
  * Class TemplateExtension
- * @package Shopware\Bepado\Subscribers
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class TemplateExtension extends BaseSubscriber
 {
@@ -18,25 +17,25 @@ class TemplateExtension extends BaseSubscriber
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addBepadoTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Frontend' => 'addBepadoStyle'
+            'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addConnectTemplateVariablesToDetail',
+            'Enlight_Controller_Action_PostDispatch_Frontend' => 'addConnectStyle'
         );
     }
 
-    public function addBepadoStyle(\Enlight_Event_EventArgs $args)
+    public function addConnectStyle(\Enlight_Event_EventArgs $args)
     {
         /** @var $subject \Enlight_Controller_Action */
         $subject = $args->getSubject();
 
         $this->registerMyTemplateDir();
         if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $subject->View()->extendsTemplate('frontend/bepado/index/index.tpl');
+            $subject->View()->extendsTemplate('frontend/connect/index/index.tpl');
         }
 
     }
 
     /**
-     * Extends the order backend module in order to show a special hint for bepado products
+     * Extends the order backend module in order to show a special hint for connect products
      *
      * @param \Enlight_Event_EventArgs $args
      */
@@ -51,13 +50,13 @@ class TemplateExtension extends BaseSubscriber
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
-                    'backend/order/bepado.js'
+                    'backend/order/connect.js'
                 );
 
                 break;
 
             case 'getList':
-                $subject->View()->data = $this->markBepadoOrders(
+                $subject->View()->data = $this->markConnectOrders(
                     $subject->View()->data
                 );
 
@@ -69,12 +68,12 @@ class TemplateExtension extends BaseSubscriber
     }
 
     /**
-     * Mark Orders as Bepado Orders for view purposes.
+     * Mark Orders as Connect Orders for view purposes.
      *
      * @param array $data
      * @return array
      */
-    private function markBepadoOrders($data)
+    private function markConnectOrders($data)
     {
         $sdk = $this->getSDK();
 
@@ -86,56 +85,56 @@ class TemplateExtension extends BaseSubscriber
             return $data;
         }
 
-        $bepadoOrderData = array();
+        $connectOrderData = array();
 
 
-        $bepadoOrderUtil = new BepadoOrderUtil();
-        $result = $bepadoOrderUtil->getRemoteBepadoOrders($orderIds);
+        $connectOrderUtil = new ConnectOrderUtil();
+        $result = $connectOrderUtil->getRemoteConnectOrders($orderIds);
 
-        foreach ($result as $bepadoOrder) {
-            $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
+        foreach ($result as $connectOrder) {
+            $connectOrderData[$connectOrder['orderID']] = $connectOrder;
         }
 
-        $result = $bepadoOrderUtil->getLocalBepadoOrders($orderIds);
+        $result = $connectOrderUtil->getLocalConnectOrders($orderIds);
 
-        foreach ($result as $bepadoOrder) {
-            $bepadoOrderData[$bepadoOrder['orderID']] = $bepadoOrder;
+        foreach ($result as $connectOrder) {
+            $connectOrderData[$connectOrder['orderID']] = $connectOrder;
         }
 
-        if (!$bepadoOrderData) {
+        if (!$connectOrderData) {
             return $data;
         }
 
         $shopNames = array();
 
         foreach($data as $idx => $order) {
-            if ( ! isset($bepadoOrderData[$order['id']])) {
+            if ( ! isset($connectOrderData[$order['id']])) {
                 continue;
             }
 
-            $result = $bepadoOrderData[$order['id']];
+            $result = $connectOrderData[$order['id']];
 
-            $data[$idx]['bepadoShopId'] = $result['bepado_shop_id'];
-            $data[$idx]['bepadoOrderId'] = $result['bepado_order_id'];
+            $data[$idx]['connectShopId'] = $result['connect_shop_id'];
+            $data[$idx]['connectOrderId'] = $result['connect_order_id'];
 
-            if (!isset($shopNames[$result['bepado_shop_id']])) {
-                $shopNames[$result['bepado_shop_id']] = $sdk->getShop($result['bepado_shop_id'])->name;
+            if (!isset($shopNames[$result['connect_shop_id']])) {
+                $shopNames[$result['connect_shop_id']] = $sdk->getShop($result['connect_shop_id'])->name;
             }
 
-            $data[$idx]['bepadoShop'] = $shopNames[$result['bepado_shop_id']];
+            $data[$idx]['connectShop'] = $shopNames[$result['connect_shop_id']];
         }
 
         return $data;
     }
 
     /**
-     * Event listener method for the frontend detail page. Will add bepado template variables if the current product
-     * is a bepado product.
+     * Event listener method for the frontend detail page. Will add connect template variables if the current product
+     * is a connect product.
      *
      * @event Enlight_Controller_Action_PostDispatch_Frontend_Detail
      * @param \Enlight_Event_EventArgs $args
      */
-    public function addBepadoTemplateVariablesToDetail(\Enlight_Event_EventArgs $args)
+    public function addConnectTemplateVariablesToDetail(\Enlight_Event_EventArgs $args)
     {
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
@@ -145,7 +144,7 @@ class TemplateExtension extends BaseSubscriber
 
         $this->registerMyTemplateDir();
         if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $view->extendsTemplate('frontend/bepado/detail.tpl');
+            $view->extendsTemplate('frontend/connect/detail.tpl');
         }
 
         $articleData = $view->getAssign('sArticle');
@@ -177,13 +176,13 @@ class TemplateExtension extends BaseSubscriber
         $shop = $sdk->getShop($product->shopId);
 
         $modelsManager = Shopware()->Models();
-        /** @var \Shopware\Bepado\Components\Config $configComponent */
+        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
         $configComponent = new Config($modelsManager);
         $view->assign(array(
-            'bepadoProduct' => $product,
-            'bepadoShop' => $shop,
-            'bepadoShopInfo' => $configComponent->getConfig('detailShopInfo'),
-            'bepadoNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
+            'connectProduct' => $product,
+            'connectShop' => $shop,
+            'connectShopInfo' => $configComponent->getConfig('detailShopInfo'),
+            'connectNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
             'shippingCostsPage' => $configComponent->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId() , 'general')
         ));
     }

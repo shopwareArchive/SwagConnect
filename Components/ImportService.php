@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Bepado\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\Product;
-use Shopware\CustomModels\Bepado\ProductToRemoteCategoryRepository;
-use Shopware\CustomModels\Bepado\RemoteCategoryRepository;
+use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
+use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Article\Repository as ArticleRepository;
 use Shopware\Models\Category\Repository as CategoryRepository;
 
@@ -99,7 +99,7 @@ class ImportService
             /** @var \Shopware\Models\Article\Detail $detail */
             foreach ($article->getDetails() as $detail) {
                 $attribute = $detail->getAttribute();
-                $attribute->setBepadoMappedCategory(true);
+                $attribute->setConnectMappedCategory(true);
                 $this->manager->persist($attribute);
             }
         }
@@ -127,7 +127,7 @@ class ImportService
             throw new \RuntimeException('Local category not found!');
         }
 
-        /** @var \Shopware\CustomModels\Bepado\RemoteCategory $remoteCategory */
+        /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $remoteCategoryKey));
         if (!$remoteCategory) {
             throw new \RuntimeException('Remote category not found!');
@@ -168,7 +168,7 @@ class ImportService
                 foreach ($articles as $article) {
                     $article->addCategory($category);
                     $attribute = $article->getAttribute();
-                    $attribute->setBepadoMappedCategory(true);
+                    $attribute->setConnectMappedCategory(true);
                     $this->manager->persist($article);
                     $this->manager->persist($attribute);
                 }
@@ -252,7 +252,7 @@ class ImportService
                 ),
                 array (
                     'type' => 'attribute',
-                    'token' => 'ATTRIBUTE.BEPADOMAPPEDCATEGORY',
+                    'token' => 'ATTRIBUTE.CONNECTMAPPEDCATEGORY',
                 ),
                 array (
                     'type' => 'unaryOperators',

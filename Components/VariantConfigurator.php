@@ -22,12 +22,12 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bepado\Components;
+namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Bepado\Components\Gateway\ProductTranslationsGateway;
-use Shopware\Bepado\Components\Translations\LocaleMapper;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use Shopware\Components\Model\ModelManager;
-use Bepado\SDK\Struct\Product;
+use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Configurator\Group;
 use Shopware\Models\Article\Configurator\Option;
@@ -35,7 +35,7 @@ use Shopware\Models\Article\Configurator\Set;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class VariantConfigurator
 {
@@ -59,7 +59,7 @@ class VariantConfigurator
     /**
      * Configure variant group, options and configurator set
      *
-     * @param \Bepado\SDK\Struct\Product $product
+     * @param \Shopware\Connect\Struct\Product $product
      * @param \Shopware\Models\Article\Detail $detail
      */
     public function configureVariantAttributes(Product $product, Detail $detail)
@@ -251,7 +251,7 @@ class VariantConfigurator
 
     private function addGroupTranslation(Group $group, Product $product)
     {
-        /** @var \Bepado\SDK\Struct\Translation $translation */
+        /** @var \Shopware\Connect\Struct\Translation $translation */
         foreach ($product->translations as $key => $translation) {
             if (!array_key_exists($group->getName(), $translation->variantLabels)) {
                 continue;
@@ -276,7 +276,7 @@ class VariantConfigurator
 
     private function addOptionTranslation(Option $option, Product $product)
     {
-        /** @var \Bepado\SDK\Struct\Translation $translation */
+        /** @var \Shopware\Connect\Struct\Translation $translation */
         foreach ($product->translations as $key => $translation) {
             if (!array_key_exists($option->getName(), $translation->variantValues)) {
                 continue;

@@ -1,0 +1,49 @@
+<?php
+/**
+ * This file is part of the Shopware Connect SDK Component.
+ *
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
+ */
+
+namespace Shopware\Connect\Struct\Verificator;
+
+use Shopware\Connect\Struct\Verificator;
+use Shopware\Connect\Struct\VerificatorDispatcher;
+use Shopware\Connect\Struct;
+use Shopware\Connect\ShippingCosts\Rule;
+
+use Shopware\Connect\Exception\VerificationFailedException;
+
+/**
+ * Visitor verifying integrity of struct classes
+ *
+ * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
+ */
+class ShippingRules extends Verificator
+{
+    /**
+     * Method to verify a structs integrity
+     *
+     * Throws a RuntimeException if the struct does not verify.
+     *
+     * @param VerificatorDispatcher $dispatcher
+     * @param Struct $struct
+     * @return void
+     */
+    protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
+    {
+        if (!is_array($struct->rules)) {
+            throw new VerificationFailedException('Rules MUST be an array.');
+        }
+
+        foreach ($struct->rules as $product) {
+            if (!$product instanceof Rule\Product) {
+                throw new VerificationFailedException(
+                    'Rules array MUST contain only instances of \\Shopware\\Connect\\ShippingCosts\\Rule\\Product.'
+                );
+            }
+
+            $dispatcher->verify($product);
+        }
+    }
+}

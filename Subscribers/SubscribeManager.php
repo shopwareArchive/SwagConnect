@@ -1,12 +1,12 @@
 <?php
 
-namespace Shopware\Bepado\Subscribers;
+namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Implements the \Enlight_Event_Subscriber "interface"
  *
  * Class SubscribeManager
- * @package Shopware\Bepado\Components\Subscribers
+ * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 abstract class SubscribeManager extends \Enlight_Event_Subscriber
 {

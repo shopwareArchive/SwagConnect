@@ -21,14 +21,14 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
-namespace Shopware\Bepado\Components\Marketplace;
+namespace ShopwarePlugins\Connect\Components\Marketplace;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\CustomModels\Bepado\MarketplaceAttribute;
+use Shopware\CustomModels\Connect\MarketplaceAttribute;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagBepado
+ * @package   Shopware\Plugins\SwagConnect
  */
 class MarketplaceGateway
 {
@@ -38,7 +38,7 @@ class MarketplaceGateway
     private $manager;
 
     /**
-     * @var \Shopware\CustomModels\Bepado\MarketplaceAttributeRepository
+     * @var \Shopware\CustomModels\Connect\MarketplaceAttributeRepository
      */
     private $marketplaceAttributeRepository;
 
@@ -146,12 +146,12 @@ class MarketplaceGateway
     }
 
     /**
-     * @return \Shopware\CustomModels\Bepado\MarketplaceAttributeRepository
+     * @return \Shopware\CustomModels\Connect\MarketplaceAttributeRepository
      */
     private function getMarketplaceAttributeRepository()
     {
         if (!$this->marketplaceAttributeRepository) {
-            $this->marketplaceAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Bepado\MarketplaceAttribute');
+            $this->marketplaceAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\MarketplaceAttribute');
         }
 
         return $this->marketplaceAttributeRepository;

@@ -76,7 +76,7 @@ class MySQLi extends Gateway
                 `c_revision`,
                 `c_product`
             FROM
-                `bepado_change`
+                `sw_connect_change`
             WHERE
                 `c_revision` > ' . $offset . '
             ORDER BY `c_revision` ASC
@@ -119,7 +119,7 @@ class MySQLi extends Gateway
         // Disable cleanup for the first betas for debuggability and easier re-runs.
         $this->connection->query(
             'DELETE FROM
-                bepado_change
+                sw_connect_change
             WHERE
                 c_revision <= ' . $offset
         );
@@ -155,7 +155,7 @@ class MySQLi extends Gateway
             'EXPLAIN SELECT
                 *
             FROM
-                `bepado_change`
+                `sw_connect_change`
             WHERE
                 `c_revision` > ' . $this->connection->real_escape_string($offset)
         );
@@ -177,7 +177,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -205,7 +205,7 @@ class MySQLi extends Gateway
      */
     public function recordUpdate($id, $hash, $revision, Struct\Product $product)
     {
-        $sql = 'SELECT p_hash FROM bepado_product ' .
+        $sql = 'SELECT p_hash FROM sw_connect_product ' .
                'WHERE p_source_id = "' . $this->connection->real_escape_string($id) . '"';
 
         $row = $this->connection
@@ -219,7 +219,7 @@ class MySQLi extends Gateway
 
         $this->connection->query(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -247,7 +247,7 @@ class MySQLi extends Gateway
      */
     public function recordAvailabilityUpdate($id, $hash, $revision, Struct\Product $product)
     {
-        $sql = 'SELECT p_hash FROM bepado_product ' .
+        $sql = 'SELECT p_hash FROM sw_connect_product ' .
             'WHERE p_source_id = "' . $this->connection->real_escape_string($id) . '"';
 
         $row = $this->connection
@@ -261,7 +261,7 @@ class MySQLi extends Gateway
 
         $this->connection->query(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -292,7 +292,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_product
+                sw_connect_product
                 (p_source_id, p_hash)
             VALUES
                 (
@@ -316,7 +316,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`
@@ -330,7 +330,7 @@ class MySQLi extends Gateway
 
         $this->connection->query(
             'DELETE FROM
-                bepado_product
+                sw_connect_product
             WHERE
                 p_source_id = "' . $this->connection->real_escape_string($id) . '"
             ;'
@@ -352,7 +352,7 @@ class MySQLi extends Gateway
             'SELECT
                 `p_hash`
             FROM
-                `bepado_product`
+                `sw_connect_product`
             WHERE
                 p_source_id = "' . $this->connection->real_escape_string($id) . '"'
         );
@@ -372,7 +372,7 @@ class MySQLi extends Gateway
             'SELECT
                 `p_source_id`
             FROM
-                `bepado_product`'
+                `sw_connect_product`'
         );
 
         return array_map(
@@ -394,7 +394,7 @@ class MySQLi extends Gateway
             'SELECT
                 `d_value`
             FROM
-                `bepado_data`
+                `sw_connect_data`
             WHERE
                 `d_key` = "revision"'
         );
@@ -417,7 +417,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_data (
+                sw_connect_data (
                     `d_key`,
                     `d_value`
                 )
@@ -442,7 +442,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_shop_config (
+                sw_connect_shop_config (
                     `s_shop`,
                     `s_config`
                 )
@@ -469,7 +469,7 @@ class MySQLi extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `sw_connect_shop_config`
             WHERE
                 `s_shop` = "' . $this->connection->real_escape_string($shopId) . '"'
         );
@@ -495,7 +495,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_shop_config (
+                sw_connect_shop_config (
                     `s_shop`,
                     `s_config`
                 )
@@ -510,7 +510,7 @@ class MySQLi extends Gateway
 
         $this->connection->query(
             'INSERT INTO
-                bepado_shop_config (
+                sw_connect_shop_config (
                     `s_shop`,
                     `s_config`
                 )
@@ -537,7 +537,7 @@ class MySQLi extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `sw_connect_shop_config`
             WHERE
                 `s_shop` = "_self_"'
         );
@@ -561,7 +561,7 @@ class MySQLi extends Gateway
             'SELECT
                 `s_shop`
             FROM
-                `bepado_shop_config`'
+                `sw_connect_shop_config`'
         );
 
         return array_filter(
@@ -586,7 +586,7 @@ class MySQLi extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `sw_connect_shop_config`
             WHERE
                 `s_shop` = "_last_update_"'
         );
@@ -612,7 +612,7 @@ class MySQLi extends Gateway
         $reservationId = md5(microtime());
         $this->connection->query(
             'INSERT INTO
-                `bepado_reservations` (
+                `sw_connect_reservations` (
                     `r_id`,
                     `r_state`,
                     `r_order`
@@ -639,7 +639,7 @@ class MySQLi extends Gateway
             'SELECT
                 `r_order`
             FROM
-                `bepado_reservations`
+                `sw_connect_reservations`
             WHERE
                 `r_id` = "' . $this->connection->real_escape_string($reservationId) . '";'
         );
@@ -663,7 +663,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'UPDATE
-                `bepado_reservations`
+                `sw_connect_reservations`
             SET
                 `r_state` = "bought",
                 `r_order` = "' . $this->connection->real_escape_string(serialize($order)) . '"
@@ -687,7 +687,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'UPDATE
-                `bepado_reservations`
+                `sw_connect_reservations`
             SET
                 `r_state` = "confirmed"
             WHERE
@@ -711,7 +711,7 @@ class MySQLi extends Gateway
             'SELECT
                 MAX(`sc_revision`)
             FROM
-                `bepado_shipping_costs`'
+                `sw_connect_shipping_costs`'
         );
 
         $rows = $result->fetch_all();
@@ -736,7 +736,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_shipping_costs (
+                sw_connect_shipping_costs (
                     `sc_from_shop`,
                     `sc_to_shop`,
                     `sc_revision`,
@@ -773,7 +773,7 @@ class MySQLi extends Gateway
         $result = $this->connection->query(
             'SELECT `' . $column . '`
             FROM
-                `bepado_shipping_costs`
+                `sw_connect_shipping_costs`
             WHERE
                 `sc_from_shop` = "' . $this->connection->real_escape_string($fromShop) . '" AND
                 `sc_to_shop` = "' . $this->connection->real_escape_string($toShop) . '"
@@ -818,7 +818,7 @@ class MySQLi extends Gateway
     {
         $this->connection->query(
             'INSERT INTO
-                bepado_shop_config (
+                sw_connect_shop_config (
                     `s_shop`,
                     `s_config`
                 )
@@ -838,7 +838,7 @@ class MySQLi extends Gateway
             'SELECT
                 `s_config`
             FROM
-                `bepado_shop_config`
+                `sw_connect_shop_config`
             WHERE
                 `s_shop` = "' . $this->connection->real_escape_string($name) . '"'
         );

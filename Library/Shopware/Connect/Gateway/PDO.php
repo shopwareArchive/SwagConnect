@@ -55,7 +55,7 @@ class PDO extends Gateway
      */
     protected function tableName($suffix)
     {
-        return 'bepado_' . $suffix;
+        return 'sw_connect_' . $suffix;
     }
 
     /**
@@ -131,7 +131,7 @@ class PDO extends Gateway
         // Disable cleanup for the first betas for debuggability and easier re-runs.
         $this->connection->exec(
             'DELETE FROM
-                bepado_change
+                sw_connect_change
             WHERE
                 c_revision <= ' . $offset
         );
@@ -176,7 +176,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -203,7 +203,7 @@ class PDO extends Gateway
     public function recordUpdate($id, $hash, $revision, Struct\Product $product)
     {
         $stmt = $this->connection
-            ->prepare('SELECT p_hash FROM bepado_product WHERE p_source_id = ?');
+            ->prepare('SELECT p_hash FROM sw_connect_product WHERE p_source_id = ?');
         $stmt->execute(array($id));
 
         $currentHash = $stmt->fetchColumn();
@@ -214,7 +214,7 @@ class PDO extends Gateway
 
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -241,7 +241,7 @@ class PDO extends Gateway
     public function recordAvailabilityUpdate($id, $hash, $revision, Struct\Product $product)
     {
         $stmt = $this->connection
-            ->prepare('SELECT p_hash FROM bepado_product WHERE p_source_id = ?');
+            ->prepare('SELECT p_hash FROM sw_connect_product WHERE p_source_id = ?');
         $stmt->execute(array($id));
 
         $currentHash = $stmt->fetchColumn();
@@ -252,7 +252,7 @@ class PDO extends Gateway
 
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`,
@@ -281,7 +281,7 @@ class PDO extends Gateway
     {
         $query =  $this->connection->prepare(
             'INSERT INTO
-                bepado_product
+                sw_connect_product
                 (p_source_id, p_hash)
             VALUES
                 (?, ?)
@@ -302,7 +302,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_change (
+                sw_connect_change (
                     `c_source_id`,
                     `c_operation`,
                     `c_revision`
@@ -315,7 +315,7 @@ class PDO extends Gateway
 
         $query = $this->connection->prepare(
             'DELETE FROM
-                bepado_product
+                sw_connect_product
             WHERE
                 p_source_id = ?
             ;'
@@ -399,7 +399,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_data (
+                sw_connect_data (
                     `d_key`,
                     `d_value`
                 )
@@ -643,7 +643,7 @@ class PDO extends Gateway
     {
         $query = $this->connection->prepare(
             'INSERT INTO
-                bepado_shop_config (
+                sw_connect_shop_config (
                     `s_shop`,
                     `s_config`
                 )

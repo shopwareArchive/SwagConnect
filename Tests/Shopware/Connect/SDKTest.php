@@ -10,10 +10,10 @@ class SDKTest extends ConnectTestHelper
     {
         // pseudo verify SDK
         $conn = Shopware()->Db();
-        $conn->delete('bepado_shop_config', array());
-        $conn->insert('bepado_shop_config', array('s_shop' => '_self_', 's_config' => -1));
-        $conn->insert('bepado_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
-        $conn->insert('bepado_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
+        $conn->delete('sw_connect_shop_config', array());
+        $conn->insert('sw_connect_shop_config', array('s_shop' => '_self_', 's_config' => -1));
+        $conn->insert('sw_connect_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
+        $conn->insert('sw_connect_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
 
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $purchasePrice = 6.99;

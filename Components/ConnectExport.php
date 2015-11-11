@@ -178,7 +178,7 @@ class ConnectExport
      */
     public function getChangesCount()
     {
-        $sql = 'SELECT COUNT(*) FROM `bepado_change`';
+        $sql = 'SELECT COUNT(*) FROM `sw_connect_change`';
 
         return (int)Shopware()->Db()->fetchOne($sql);
     }

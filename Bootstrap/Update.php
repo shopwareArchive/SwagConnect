@@ -44,7 +44,7 @@ class Update
     public function reVerifySDK()
     {
         Shopware()->Db()->query('
-            UPDATE bepado_shop_config
+            UPDATE sw_connect_shop_config
             SET s_config = ?
             WHERE s_shop = "_last_update_"
             LIMIT 1; ',

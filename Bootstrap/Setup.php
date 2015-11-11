@@ -103,7 +103,7 @@ class Setup
     private function createMyTables()
     {
         $queries = array("
-            CREATE TABLE IF NOT EXISTS `bepado_change` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_change` (
               `c_source_id` varchar(64) NOT NULL,
               `c_operation` char(8) NOT NULL,
               `c_revision` decimal(20,10) NOT NULL,
@@ -112,26 +112,26 @@ class Setup
               UNIQUE KEY `c_revision` (`c_revision`),
               KEY `c_source_id` (`c_source_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-           CREATE TABLE IF NOT EXISTS `bepado_data` (
+           CREATE TABLE IF NOT EXISTS `sw_connect_data` (
               `d_key` varchar(32) NOT NULL,
               `d_value` varchar(256) NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`d_key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_product` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_product` (
               `p_source_id` varchar(64) NOT NULL,
               `p_hash` varchar(64) NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`p_source_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_reservations` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_reservations` (
               `r_id` varchar(32) NOT NULL,
               `r_state` varchar(12) NOT NULL,
               `r_order` longblob NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`r_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_shop_config` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_shop_config` (
               `s_shop` varchar(32) NOT NULL,
               `s_config` LONGBLOB NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -145,7 +145,7 @@ class Setup
               `groupName` varchar(255) NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
-            CREATE TABLE IF NOT EXISTS `bepado_shipping_costs` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_shipping_costs` (
               `sc_from_shop` VARCHAR(32) NOT NULL,
               `sc_to_shop` VARCHAR(32) NOT NULL,
               `sc_revision` VARCHAR(32) NOT NULL,
@@ -198,7 +198,7 @@ class Setup
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
-            CREATE TABLE IF NOT EXISTS `bepado_shipping_rules` (
+            CREATE TABLE IF NOT EXISTS `sw_connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,
              `sr_group_id` int(11) unsigned DEFAULT NULL,
              `sr_country` varchar(32) COLLATE utf8_unicode_ci NOT NULL,

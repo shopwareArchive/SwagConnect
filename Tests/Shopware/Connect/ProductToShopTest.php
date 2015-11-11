@@ -19,6 +19,13 @@ class ProductToShopTest extends ConnectTestHelper
 
     private $modelManager;
 
+    public function tearDown()
+    {
+        $conn = Shopware()->Db();
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
+    }
+
     public function setUp()
     {
         $conn = Shopware()->Db();
@@ -450,7 +457,8 @@ class ProductToShopTest extends ConnectTestHelper
         $conn = Shopware()->Db();
         $conn->insert('s_plugin_connect_config', array(
             'name' => 'activateProductsAutomatically',
-            'value' => '1'
+            'value' => '1',
+            'groupName' => 'general',
         ));
 
         $product = $this->getProduct();

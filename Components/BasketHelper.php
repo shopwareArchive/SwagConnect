@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Product;
@@ -78,6 +79,11 @@ class BasketHelper
     protected $helper;
 
     /**
+     * @var \Shopware\Connect\Gateway\PDO
+     */
+    protected $connectGateway;
+
+    /**
      * Indicates if the basket has only connect products or not
      *
      * @var bool
@@ -90,11 +96,17 @@ class BasketHelper
      * @param Helper $helper
      * @param $showCheckoutShopInfo
      */
-    public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $database, SDK $sdk, Helper $helper, $showCheckoutShopInfo)
+    public function __construct(
+        \Enlight_Components_Db_Adapter_Pdo_Mysql $database,
+        SDK $sdk,
+        Helper $helper,
+        PDO $connectGateway,
+        $showCheckoutShopInfo)
     {
         $this->database = $database;
         $this->sdk = $sdk;
         $this->helper = $helper;
+        $this->connectGateway = $connectGateway;
         $this->showCheckoutShopInfo = $showCheckoutShopInfo;
     }
 
@@ -422,8 +434,19 @@ class BasketHelper
         $this->checkResult = $checkResult;
         $this->basket['sAmount'] = number_format($this->basket['sAmount'], 2, '.', '');
 
-        $shippingCostsNet = number_format($this->checkResult->aggregatedShippingCosts->shippingCosts, 2, '.', '');
-        $shippingCostsWithTax = number_format($this->checkResult->aggregatedShippingCosts->grossShippingCosts, 2, '.', '');
+        $shippingCostsNet = 0;
+        $shippingCostsWithTax = 0;
+
+        /** @var \Shopware\Connect\Struct\Shipping $shipping */
+        foreach ($this->checkResult->shippingCosts as $shipping) {
+            $shopConfiguration = $this->connectGateway->getShopConfiguration($shipping->shopId);
+            if ($shopConfiguration->shippingCostType == 'remote') {
+                $shippingCostsNet += $shipping->shippingCosts;
+                $shippingCostsWithTax += $shipping->grossShippingCosts;
+            }
+        }
+        $shippingCostsNet = number_format($shippingCostsNet, 2, '.', '');
+        $shippingCostsWithTax = number_format($shippingCostsWithTax, 2, '.', '');
 
         $basketHasTax = $this->hasTax();
 

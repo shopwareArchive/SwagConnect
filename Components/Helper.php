@@ -546,9 +546,10 @@ class Helper
     {
         $articleDetailId = (int) $articleDetailId;
         $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $articleDetailRepository->find($articleDetailId);
         if (!$detail) {
-            throw new \RuntimeException('Invalid article detail id');
+            return false;
         }
 
         $connectAttribute = $this->getConnectAttributeByModel($detail);

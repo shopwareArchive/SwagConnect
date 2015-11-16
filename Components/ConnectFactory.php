@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
 use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
 use Shopware\Connect\SDK;
@@ -205,10 +206,12 @@ class ConnectFactory
 
     public function getBasketHelper()
     {
+        $db = Shopware()->Db();
         return new BasketHelper (
-            Shopware()->Db(),
+            $db,
             $this->getSDK(),
             $this->getHelper(),
+            new PDO($db->getConnection()),
             $this->getConfigComponent()->getConfig('checkoutShopInfo', 0)
         );
     }

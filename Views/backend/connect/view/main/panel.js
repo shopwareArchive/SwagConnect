@@ -28,12 +28,6 @@ Ext.define('Shopware.apps.Connect.view.main.Panel', {
                 xtype: 'connect-config-marketplace-attributes',
                 itemId: 'marketplace-attributes'
             }, {
-                xtype: 'connect-mapping-import',
-                itemId: 'mapping-import'
-            }, {
-                xtype: 'connect-mapping-export',
-                itemId: 'mapping-export'
-            }, {
                 xtype: 'connect-export',
                 itemId: 'export'
             }, {

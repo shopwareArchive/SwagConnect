@@ -10,12 +10,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     stores: [
         'main.Navigation',
-        'export.List', 'import.List', 'import.RemoteCategories', 'import.RemoteProducts', 'import.LocalProducts',
+        'export.List', 'import.RemoteCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'changed_products.List',
         'log.List',
-        'mapping.Import', 'mapping.Export',
-        'mapping.ConnectCategoriesExport', 'mapping.ConnectCategoriesImport',
-        'mapping.GoogleCategories',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup', 'config.PriceGroup',
         'config.Units', 'config.ConnectUnits', 'config.MarketplaceAttributes', 'config.LocalProductAttributes'
     ],
@@ -34,8 +31,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'exportList', selector: 'connect-export-list' },
         { ref: 'exportFilter', selector: 'connect-export-filter' },
         { ref: 'importList', selector: 'connect-import-list' },
-        { ref: 'importMapping', selector: 'connect-mapping-import treepanel' },
-        { ref: 'exportMapping', selector: 'connect-mapping-export treepanel' },
         { ref: 'changeView', selector: 'connect-changed-products-tabs' },
         { ref: 'changedList', selector: 'connect-changed-products-list' },
         { ref: 'logList', selector: 'connect-log-list' },
@@ -118,18 +113,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 			'connect-mapping button[action=save]': {
                 click: me.onSaveMapping
             },
-            'connect-mapping-import button[action=save]': {
-                click: me.onSaveImportMapping
-            },
-            'connect-mapping-export button[action=save]': {
-                click: me.onSaveExportMapping
-            },
-            'connect-mapping-export': {
-                applyToChildren: me.onApplyMappingToChildCategories
-            },
-            'connect-mapping-import': {
-                importCategories: me.onImportCategoriesFromConnect
-            },
             'connect-export button[action=add]': {
                click: me.onExportFilterAction
             },
@@ -186,7 +169,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     store.load();
                 }
             },
-
             'connect-export-filter treepanel': {
                 select: function(tree, node) {
                     var table = me.getExportList(),
@@ -202,85 +184,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         }));
                     }
                     store.load();
-                }
-            },
-            'connect-import-list button[action=activate]': {
-                click: me.onImportFilterAction
-            },
-            'connect-import-list button[action=deactivate]': {
-                click: me.onImportFilterAction
-            },
-            'connect-import-list': {
-                'unsubscribeAndDelete': me.onImportFilterAction
-            },
-            'connect-import-list button[action=assignCategory]': {
-                click: me.onAssignCategoryAction
-            },
-            'connect-assign-category-window button[action=save]': {
-                click: me.onSaveAssignCategoryAction
-            },
-            'connect-import-list button[action=unsubscribe]': {
-                click: me.onImportFilterAction
-            },
-            'connect-import-filter textfield[name=searchfield]': {
-                change: function(field, value) {
-                    var table = me.getImportList(),
-                        store = table.getStore();
-                    store.filters.removeAtKey('search');
-                    if (value.length > 0 ) {
-                        store.filters.add('search', new Ext.util.Filter({
-                            property: 'search',
-                            value: '%' + value + '%'
-                        }));
-                    }
-                    store.load();
-                }
-            },
-            'connect-import-filter base-element-select': {
-                change: function(field, value) {
-                    var table = me.getImportList(),
-                        store = table.getStore();
-                        store.filters.removeAtKey('supplierId');
-                    if (value) {
-                        store.filters.add('supplierId', new Ext.util.Filter({
-                            property: field.name,
-                            value: value
-                        }));
-                    }
-                    store.load();
-                }
-            },
-            'connect-import-filter [name=active]': {
-                change: function(field, value) {
-                    var table = me.getImportList(),
-                        store = table.getStore();
-                    if(!value) {
-                        return;
-                    }
-                        store.filters.removeAtKey('isActive');
-                    if(field.inputValue != '') {
-                        store.filters.add('isActive', new Ext.util.Filter({
-                            property: field.name,
-                            value: field.inputValue
-                        }));
-                    }
-                    store.load();
-                }
-            },
-            'connect-import-filter treepanel': {
-                select: function(tree, node) {
-                    var table = me.getImportList(),
-                        store = table.getStore();
-
-                    if (!node) {
-                        store.clearFilter();
-                    } else {
-                        store.filters.clear();
-                        store.filter(
-                            'categoryId',
-                            node.get('id')
-                        );
-                    }
                 }
             },
             'connect-changed-products-list': {
@@ -364,46 +267,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                         }
                     );
-                }
-            },
-            'connect-mapping-import textfield[name=searchImportMapping]': {
-                change: function(field, value) {
-                    var tree = me.getImportMapping(),
-                        store = tree.getStore();
-                    store.filters.removeAtKey('searchImportShopwareCategory');
-                    store.filters.removeAtKey('searchConnectCategory');
-                    if (value.length > 0 ) {
-                        store.filters.clear();
-                        store.filters.add('searchImportShopwareCategory', new Ext.util.Filter({
-                            property: 'name',
-                            value: '%' + value + '%'
-                        }));
-                        store.filters.add('searchConnectCategory', new Ext.util.Filter({
-                            property: 'mapping',
-                            value: '%' + value + '%'
-                        }));
-                    }
-                    store.load();
-                }
-            },
-            'connect-mapping-export textfield[name=searchExportMapping]': {
-                change: function(field, value) {
-                    var tree = me.getExportMapping(),
-                        store = tree.getStore();
-                    store.filters.removeAtKey('searchExportShopwareCategory');
-                    store.filters.removeAtKey('searchConnectCategory');
-                    if (value.length > 0 ) {
-                        store.filters.clear();
-                        store.filters.add('searchExportShopwareCategory', new Ext.util.Filter({
-                            property: 'name',
-                            value: '%' + value + '%'
-                        }));
-                        store.filters.add('searchConnectCategory', new Ext.util.Filter({
-                            property: 'mapping',
-                            value: '%' + value + '%'
-                        }));
-                    }
-                    store.load();
                 }
             },
             'connect-marketplace-attributes-mapping button[action=save]': {
@@ -592,156 +455,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     /**
-     * Callback function that will create the connect categories in the selected category
-     *
-     * @param record
-     */
-    onImportCategoriesFromConnect: function(record) {
-        var me = this,
-            panel = me.getImportMapping(),
-            store = panel.store;
-
-        Ext.MessageBox.confirm(
-            me.messages.importConnectCategoriesTitle,
-            Ext.String.format(me.messages.importConnectCategoriesMessage, record.get('mapping'), record.get('name')),
-            function (response) {
-                if ( response !== 'yes' ) {
-                    return;
-                }
-
-                panel.setLoading();
-                Ext.Ajax.request({
-                    url: '{url action=importConnectCategories}',
-                    method: 'POST',
-                    params: {
-                        fromCategory: record.get('mapping'),
-                        toCategory: record.get('id')
-                    },
-                    success: function(response, opts) {
-                        me.createGrowlMessage(me.messages.saveMappingTitle, me.messages.saveMappingSuccess);
-                        panel.setLoading(false);
-                        store.load();
-                    },
-                    failure: function(response, opts) {
-                        me.createGrowlMessage(me.messages.saveMappingError, response.responseText);
-                        panel.setLoading(false);
-                    }
-
-                });
-
-            }
-        );
-    },
-
-    /**
-     * Callback function that will apply the current mapping to all child mappings
-     *
-     * @param record
-     */
-    onApplyMappingToChildCategories: function(record) {
-        var me = this,
-            panel = me.getExportMapping(),
-            store = panel.store;
-
-        // No message needed, if there aren't any child nodes
-        if (record.get('childrenCount') == 0) {
-            return;
-        }
-
-        Ext.MessageBox.confirm(
-            me.messages.applyMappingToChildCategoriesTitle,
-            me.messages.applyMappingToChildCategoriesMessage,
-            function (response) {
-                if ( response !== 'yes' ) {
-                    return;
-                }
-
-                panel.setLoading();
-                Ext.Ajax.request({
-                    url: '{url action=applyMappingToChildren}',
-                    method: 'POST',
-                    params: {
-                        category: record.get('id'),
-                        mapping: record.get('mapping')
-                    },
-                    success: function(response, opts) {
-                        me.createGrowlMessage(me.messages.saveMappingTitle, me.messages.saveMappingSuccess);
-                        panel.setLoading(false);
-                        store.load();
-                    },
-                    failure: function(response, opts) {
-                        me.createGrowlMessage(me.messages.saveMappingError, response.responseText);
-                        panel.setLoading(false);
-                    }
-
-                });
-
-            }
-        );
-    },
-
-    /**
-     * Callback function that will save the current import mapping
-     *
-     * @param button
-     */
-    onSaveImportMapping: function(button) {
-        var me = this,
-            panel = me.getImportMapping(),
-            title = me.messages.saveMappingTitle, message;
-
-        if(panel.store.getUpdatedRecords().length < 1) {
-            return;
-        }
-        panel.setLoading();
-        panel.store.sync({
-            success :function (records, operation) {
-                panel.setLoading(false);
-                message = me.messages.saveMappingSuccess;
-                me.createGrowlMessage(title, message);
-            },
-            failure:function (batch) {
-                panel.setLoading(false);
-                message = me.messages.saveMappingError;
-                if(batch.proxy.reader.rawData.message) {
-                    message += '<br />' + batch.proxy.reader.rawData.message;
-                }
-                me.createGrowlMessage(title, message);
-            }
-        });
-    },
-
-    /**
-     * Callback function that will save the current mapping
-     *
-     * @param button
-     */
-    onSaveExportMapping: function(button) {
-        var me = this,
-            panel = me.getExportMapping(),
-            title = me.messages.saveMappingTitle, message;
-        if(panel.store.getUpdatedRecords().length < 1) {
-            return;
-        }
-        panel.setLoading();
-        panel.store.sync({
-            success :function (records, operation) {
-                panel.setLoading(false);
-                message = me.messages.saveMappingSuccess;
-                me.createGrowlMessage(title, message);
-            },
-            failure:function (batch) {
-                panel.setLoading(false);
-                message = me.messages.saveMappingError;
-                if(batch.proxy.reader.rawData.message) {
-                    message += '<br />' + batch.proxy.reader.rawData.message;
-                }
-                me.createGrowlMessage(title, message);
-            }
-        });
-    },
-
-    /**
      * Callback function that will insert or delete a product from/for export
      *
      * @param btn
@@ -787,55 +500,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     }
                 }
                 me.createGrowlMessage(title, message, sticky);
-                list.setLoading(false);
-                list.store.load();
-            }
-        });
-    },
-
-    /**
-     * Callback function that will activate or disable a product for import
-     *
-     * @param btn
-     */
-    onImportFilterAction: function(btn) {
-        var me = this,
-            list = me.getImportList(),
-            records = list.selModel.getSelection(),
-            ids = [], url, message, title;
-
-        if(btn.action == 'activate') {
-            url = '{url action=updateProduct}?active=1';
-            title = me.messages.activateProductTitle;
-            message = me.messages.activateProductMessage;
-        } else if(btn.action == 'deactivate') {
-            url = '{url action=updateProduct}?active=0';
-            title = me.messages.disableProductTitle;
-            message = me.messages.disableProductMessage;
-        } else if(btn.action == 'unsubscribe') {
-            url = '{url action=updateProduct}?unsubscribe=1';
-            title = me.messages.unsubscribeProductTitle;
-            message = me.messages.unsubscribeProductMessage;
-        } else {
-            return;
-        }
-
-        Ext.each(records, function(record) {
-            ids.push(record.get('id'));
-        });
-
-        list.setLoading();
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            params: {
-                'ids[]': ids
-            },
-            success: function(response, opts) {
-                //var operation = Ext.decode(response.responseText);
-                //if (operation.success == true) {
-                //}
-                me.createGrowlMessage(title, message);
                 list.setLoading(false);
                 list.store.load();
             }
@@ -966,86 +630,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             });
         }
-    },
-
-    /**
-     * Show categories tree window
-     * @param btn
-     */
-    onAssignCategoryAction: function(btn) {
-        var me = this,
-            list = me.getImportList(),
-            records = list.selModel.getSelection();
-
-        if (records.length > 0) {
-            Ext.create('Shopware.apps.Connect.view.import.AssignCategory').show();
-        }
-    },
-
-    /**
-     * Callback function that will assign products to category
-     * @param btn
-     */
-    onSaveAssignCategoryAction: function(btn) {
-        var me = this,
-            ids = [],
-            records = me.getImportList().getSelectionModel().getSelection(),
-            treeSelection = btn.up('treepanel').getSelectionModel().getSelection(),
-            categoriesWindow = btn.up('window');
-
-        if (treeSelection.length == 0) {
-            return;
-        }
-
-        Ext.each(records, function(record) {
-            ids.push(record.get('id'));
-        });
-
-        Ext.MessageBox.confirm(
-            '{s name=confirm}Confirm{/s}',
-            Ext.String.format(me.messages.importAssignCategoryConfirm, records.length),
-            function(button) {
-                if (button == 'yes') {
-                    categoriesWindow.setLoading(true);
-                    var categoryId = treeSelection[0].get('id');
-
-                    var url = '{url action=assignProductsToCategory}';
-                    Ext.Ajax.request({
-                        url: url,
-                        method: 'POST',
-                        params: {
-                            'ids[]': ids,
-                            'category': categoryId
-                        },
-                        success: function(response, opts) {
-                            var sticky = false;
-                            categoriesWindow.setLoading(false);
-
-                            if (response.responseText) {
-                                var operation = Ext.decode(response.responseText);
-                                if (operation) {
-                                    if (!operation.success) {
-                                        me.createGrowlMessage('{s name=error}Error{/s}',
-                                            '{s name=import/message/error_assign_category}Category has not been added successfully.{/s}',
-                                            false
-                                        );
-                                    } else {
-                                        me.createGrowlMessage('{s name=success}Success{/s}',
-                                            '{s name=import/message/success_assign_category}Category has been added successfully.{/s}',
-                                            sticky
-                                        );
-                                        btn.up('window').close();
-                                    }
-                                }
-                            }
-                        },
-                        failure: function(response, opts) {
-                            Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
-                        }
-                    });
-                }
-            }
-        );
     },
 
     saveUnitsMapping: function() {

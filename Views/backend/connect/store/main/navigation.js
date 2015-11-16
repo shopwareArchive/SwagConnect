@@ -35,12 +35,6 @@ Ext.define('Shopware.apps.Connect.store.main.Navigation', {
                 expanded: true,
                 children: [
                     {
-                        id: 'mapping-import',
-                        text: "{s name=navigation/mapping}Category mapping{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-sticky-notes-pin'
-                    },
-                    {
                         id: 'import',
                         text: "{s name=navigation/products}Products{/s}",
                         leaf: true,
@@ -59,12 +53,6 @@ Ext.define('Shopware.apps.Connect.store.main.Navigation', {
                 expanded: true,
                 children: [
                     {
-                        id: 'mapping-export',
-                        text: "{s name=navigation/mapping}Category mapping{/s}",
-                        leaf: true,
-                        iconCls: 'sprite-sticky-notes-pin'
-                    },
-                    {
                         id: 'export',
                         text: "{s name=navigation/products}Products{/s}",
                         leaf: true,
@@ -79,7 +67,7 @@ Ext.define('Shopware.apps.Connect.store.main.Navigation', {
         beforeappend: {
             element: this,
             fn: function (node, child) {
-                var semMenuItems = ['marketplace-attributes', 'mapping-import', 'mapping-export'];
+                var semMenuItems = ['marketplace-attributes'];
                 // hide menu items which depend on marketplace
                 if (defaultMarketplace == true && child) {
                     return semMenuItems.indexOf(child.data.id) === -1;

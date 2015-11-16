@@ -109,7 +109,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 'articleIds[]': articleIds
             },
             success: function(response, opts) {
-                if (response.success == true) {
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
@@ -158,7 +159,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             success: function(response, opts) {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
-                if (response.success == true) {
+                if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
@@ -278,7 +279,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             success: function(response, opts) {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
-                if (response.success == true) {
+                if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');

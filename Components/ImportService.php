@@ -184,6 +184,11 @@ class ImportService
         foreach ($articles as $article) {
             $article->setActive(true);
             $this->manager->persist($article);
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach($article->getDetails() as $detail) {
+                $detail->setActive(1);
+                $this->manager->persist($detail);
+            }
         }
 
         $this->manager->flush();

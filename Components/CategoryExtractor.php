@@ -108,6 +108,11 @@ class CategoryExtractor
             if ($includeChildren === true && !empty($category['children'])) {
                 $children = $this->convertTree($category['children'], $includeChildren);
             }
+
+            if (strlen($category['name']) === 0) {
+                continue;
+            }
+
             $categories[] = array(
                 'name' => $category['name'],
                 'id' => $id,

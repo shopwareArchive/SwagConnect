@@ -73,9 +73,9 @@ class ImportService
         $this->categoryExtractor = $categoryExtractor;
     }
 
-    public function findBothArticlesType($categoryId = null, $hideConnectArticle = false, $limit = 10, $offset = 0)
+    public function findBothArticlesType($categoryId = null, $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
     {
-        return $this->productResource->filter($this->getAst($categoryId, $hideConnectArticle), $offset, $limit);
+        return $this->productResource->filter($this->getAst($categoryId, $showOnlyConnectArticles), $offset, $limit);
     }
 
     public function assignCategoryToArticles($categoryId, array $articleIds)
@@ -197,10 +197,10 @@ class ImportService
     /**
      * Helper function to create filter values
      * @param int $categoryId
-     * @param boolean $hideConnectArticles
+     * @param boolean $showOnlyConnectArticles
      * @return array
      */
-    private function getAst($categoryId, $hideConnectArticles = false)
+    private function getAst($categoryId, $showOnlyConnectArticles = true)
     {
         $ast = array (
             array (
@@ -249,7 +249,7 @@ class ImportService
             ),
         );
 
-        if ($hideConnectArticles === true) {
+        if ($showOnlyConnectArticles === true) {
             $ast = array_merge($ast, array(
                 array (
                     'type' => 'boolOperators',
@@ -260,8 +260,12 @@ class ImportService
                     'token' => 'ATTRIBUTE.CONNECTMAPPEDCATEGORY',
                 ),
                 array (
-                    'type' => 'unaryOperators',
-                    'token' => 'ISNULL',
+                    'type' => 'binaryOperators',
+                    'token' => '!=',
+                ),
+                array (
+                    'type' => 'values',
+                    'token' => 'NULL',
                 ),
             ));
         }

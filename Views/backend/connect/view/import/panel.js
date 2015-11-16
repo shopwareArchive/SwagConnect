@@ -13,6 +13,8 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
 
     snippets: {
         connectProductsTitle: '{s name=import/shopware_connect_products}shopware Connect Produkte{/s}',
+        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
+        activateProductsLabel: '{s name=import/activate_products}Produkte aktivieren{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },
 
@@ -83,14 +85,15 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                 {
                                     xtype : 'checkbox',
                                     name : 'attribute[connectAllowed]',
-                                    action: 'filter-only-local-products',
+                                    action: 'show-only-connect-products',
                                     margin: '15px 0 0 50px',
-                                    boxLabel : 'Show only connect products'
+                                    checked: true,
+                                    boxLabel : me.snippets.showOnlyConnectProductsLabel
                                 },{
                                     xtype: 'button',
                                     cls: 'primary sc-btn-right',
                                     action: 'activateProducts',
-                                    text: 'Produkte aktivieren'
+                                    text: me.snippets.activateProductsLabel
                                 }
                             ]
                         }

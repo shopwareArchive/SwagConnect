@@ -47,8 +47,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
             },
-            'connect-import checkbox[action=filter-only-local-products]': {
-                change: me.onFilterLocalProducts
+            'connect-import checkbox[action=show-only-connect-products]': {
+                change: me.showOnlyConnectProducts
             }
         });
 
@@ -64,9 +64,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
     onSelectLocalCategory: function(treePanel, record) {
         var me = this;
+        var store = me.getLocalProductsGrid().getStore();
+        var showOnlyConnectArticles = me.getImportPanel().down('checkbox[action=show-only-connect-products]').getValue();
 
-        me.getLocalProductsGrid().getStore().getProxy().extraParams.categoryId = record.get('id');
-        me.getLocalProductsGrid().getStore().load();
+        if (showOnlyConnectArticles === true) {
+            store.getProxy().extraParams.showOnlyConnectArticles = showOnlyConnectArticles;
+        }
+        store.getProxy().extraParams.categoryId = record.get('id');
+        store.loadPage(1);
     },
 
     onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers)
@@ -233,7 +238,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         return localCategoryTreeSelection.length > 0;
     },
 
-    onFilterLocalProducts: function(checkbox, newValue, oldValue) {
+    showOnlyConnectProducts: function(checkbox, newValue, oldValue) {
         var me = this;
         var store = me.getLocalProductsGrid().getStore();
 
@@ -244,15 +249,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         if (newValue == true) {
             Ext.apply(store.getProxy().extraParams, {
-                hideConnectArticles: 1
+                showOnlyConnectArticles: 1
             });
         } else {
             Ext.apply(store.getProxy().extraParams, {
-                hideConnectArticles: null
+                showOnlyConnectArticles: null
             });
         }
         store.loadPage(1);
-        store.load();
     },
 
     onActivateProducts: function(button, event) {

@@ -84,10 +84,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $categoryId = (int)$this->request->getParam('categoryId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
-        $hideConnectArticles = $this->request->getParam('hideConnectArticles', null);
+        $showOnlyConnectArticles = $this->request->getParam('showOnlyConnectArticles', null);
+
         $result = $this->getImportService()->findBothArticlesType(
             $categoryId,
-            $hideConnectArticles ? true : false,
+            $showOnlyConnectArticles ? true : false,
             $limit,
             $offset
         );

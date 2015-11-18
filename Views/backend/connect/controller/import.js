@@ -18,7 +18,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         { ref: 'remoteProductsGrid', selector: 'connect-products' },
         { ref: 'localProductsGrid', selector: 'local-products' },
         { ref: 'localCategoryTree', selector: 'connect-own-categories' },
-        { ref: 'RemoteCategoryTree', selector: 'connect-remote-categories' }
+        { ref: 'remoteCategoryTree', selector: 'connect-remote-categories' }
     ],
 
     /**
@@ -29,9 +29,11 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         me.control({
             'connect-remote-categories': {
+                reloadRemoteCategories: me.onReloadRemoteCategories,
                 itemmousedown: me.onSelectRemoteCategory
             },
             'connect-own-categories': {
+                reloadOwnCategories: me.onReloadOwnCategories,
                 itemmousedown: me.onSelectLocalCategory
             },
             'connect-own-categories dataview': {
@@ -243,7 +245,6 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var store = me.getLocalProductsGrid().getStore();
 
         if (me.isLocalCategorySelected() === false) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -293,6 +294,46 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             failure: function(response, opts) {
                 panel.setLoading(false);
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
+        });
+    },
+
+    /**
+     *  Refreshes the tree.
+     *
+     *  @event reload
+     *  @return void
+     */
+    onReloadRemoteCategories : function() {
+        var tree = this.getRemoteCategoryTree(),
+            store = tree.getStore(),
+            rootNode = tree.getRootNode();
+
+        rootNode.removeAll(false);
+        tree.setLoading(true);
+        store.load({
+            callback: function() {
+                tree.setLoading(false);
+            }
+        });
+    },
+
+    /**
+     *  Refreshes the tree.
+     *
+     *  @event reload
+     *  @return void
+     */
+    onReloadOwnCategories : function() {
+        var tree = this.getLocalCategoryTree(),
+            store = tree.getStore(),
+            rootNode = tree.getRootNode();
+
+        rootNode.removeAll(false);
+        tree.setLoading(true);
+        store.load({
+            callback: function() {
+                tree.setLoading(false);
             }
         });
     }

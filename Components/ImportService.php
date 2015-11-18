@@ -73,8 +73,11 @@ class ImportService
         $this->categoryExtractor = $categoryExtractor;
     }
 
-    public function findBothArticlesType($categoryId = null, $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
+    public function findBothArticlesType($categoryId, $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
     {
+        if ($categoryId == 0) {
+            return array();
+        }
         return $this->productResource->filter($this->getAst($categoryId, $showOnlyConnectArticles), $offset, $limit);
     }
 

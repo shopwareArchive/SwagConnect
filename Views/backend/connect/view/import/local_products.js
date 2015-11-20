@@ -84,7 +84,17 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
         return Ext.create('Ext.toolbar.Paging', {
             store: me.store,
             dock:'bottom',
-            displayInfo:true
+            displayInfo:true,
+            doRefresh : function(){
+                var toolbar = this,
+                    current = toolbar.store.currentPage;
+
+                if (toolbar.fireEvent('beforechange', toolbar, current) !== false) {
+                    toolbar.store.loadPage(current);
+                }
+
+                me.fireEvent('reloadOwnCategories');
+            }
         });
     }
 });

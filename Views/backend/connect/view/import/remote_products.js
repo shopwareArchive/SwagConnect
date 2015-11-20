@@ -35,6 +35,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
         });
 
         me.callParent(arguments);
+
     },
 
     getColumns: function() {
@@ -69,7 +70,17 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
         var pagingBar = Ext.create('Ext.toolbar.Paging', {
             store: me.store,
             dock:'bottom',
-            displayInfo:true
+            displayInfo:true,
+            doRefresh : function(){
+                var toolbar = this,
+                    current = toolbar.store.currentPage;
+
+                if (toolbar.fireEvent('beforechange', toolbar, current) !== false) {
+                    toolbar.store.loadPage(current);
+                }
+
+                me.fireEvent('reloadRemoteCategories');
+            }
         });
 
         return pagingBar;

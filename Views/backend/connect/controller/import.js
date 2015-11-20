@@ -49,6 +49,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
             },
+            'connect-products': {
+                reloadRemoteCategories: me.onReloadRemoteCategories
+            },
+            'local-products': {
+                reloadOwnCategories: me.onReloadOwnCategories
+            },
             'connect-import checkbox[action=show-only-connect-products]': {
                 change: me.showOnlyConnectProducts
             }

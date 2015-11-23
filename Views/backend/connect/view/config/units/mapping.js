@@ -30,7 +30,7 @@ Ext.define('Shopware.apps.Connect.view.config.units.Mapping', {
                         dataIndex: 'shopwareUnitName',
                         flex: 1
                     }, {
-                        header: me.snippets.unitHeader,
+                        header: me.snippets.connectUnitsHeader,
                         dataIndex: 'connectUnit',
                         flex: 1,
                         editor: {

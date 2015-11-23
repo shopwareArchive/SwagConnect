@@ -62,6 +62,9 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Produktbeschreibungen{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Produktbilder{/s}',
+        productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}',
+        connectUnitsHeader: '{s name=config/units/connect_units_header}importierte Maßeinheiten{/s}',
+        localUnitsHeader: '{s name=config/units/shopware_units_header}Meine Maßeinheiten{/s}',
         defaultCategoryHelp: '{s name=config/import/default_import_category_help}Hier geben Sie an, in welche Shop Kategorie Ihre Produkte importiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}',
         defaultCategory: '{s name=config/import/default_import_category}Default import category{/s}'
     },
@@ -165,6 +168,9 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             labelWidth: me.defaults.labelWidth
         });
 
+        me.unitsStore = Ext.create('Shopware.apps.Connect.store.config.Units').load();
+        me.connectUnitsStore = Ext.create('Shopware.apps.Connect.store.config.ConnectUnits').load();
+
         var container = Ext.create('Ext.container.Container', {
             padding: '0 20 0 0',
             flex: 1,
@@ -242,12 +248,64 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             }
                         }, me.imageLimitImportField
                     ]
-                }
+                },
+                {
+                    xtype: 'container',
+                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportUnitsTitle  + '</h1>',
+                    margin: '20px 0 0 0',
+                    width: 400,
+                    height: 30
+                },
+                {
+                    xtype: 'grid',
+                    alias: 'widget.connect-units-mapping-list',
+                    width: 400,
+                    height: 300,
+                    store: me.connectUnitsStore,
+                    selModel: 'cellmodel',
+                    plugins: [ me.createCellEditor() ],
+                    columns: [
+                        {
+                            header: me.snippets.connectUnitsHeader,
+                            dataIndex: 'name',
+                            flex: 1
+                        },
+                        {
+                            header: me.snippets.localUnitsHeader,
+                            dataIndex: 'shopwareUnitName',
+                            flex: 1,
+                            editor: {
+                                xtype: 'combo',
+                                store: me.unitsStore,
+                                displayField: 'shopwareUnitName',
+                                valueField: 'shopwareUnitKey'
+                            },
+                            renderer: function (value) {
+                                var index = me.unitsStore.findExact('shopwareUnitKey', value);
+                                if (index > -1) {
+                                    return me.unitsStore.getAt(index).get('shopwareUnitName');
+                                }
 
+                                return value;
+                            }
+                        }
+                    ]
+                }
                 ]
         });
 
         return [ container ];
+    },
+
+    createCellEditor: function() {
+        var me = this;
+
+        me.cellEditor = Ext.create('Ext.grid.plugin.CellEditing', {
+            clicksToMoveEditor: 1,
+            autoCancel: true
+        });
+
+        return me.cellEditor;
     },
 
     /**

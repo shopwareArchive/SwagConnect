@@ -95,5 +95,13 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $result = Shopware()->Db()->fetchAll($sql);
         $this->assertEmpty($result);
     }
+
+    public function testGetConnectUnitsAction()
+    {
+        $this->dispatch('backend/ConnectConfig/getConnectUnits');
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+        $this->assertTrue(isset($this->View()->data));
+    }
 }
  

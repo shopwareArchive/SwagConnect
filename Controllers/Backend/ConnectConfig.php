@@ -378,13 +378,16 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function getConnectUnitsAction()
     {
         $connectUnits = new Units();
-
+        $connectUnitsArray = $connectUnits->getLocalizedUnits('de');
         $unitsArray = array();
 
-        foreach ($connectUnits->getLocalizedUnits() as $key => $connectUnit) {
+        foreach ($this->getConfigComponent()->getUnitsMappings() as $connectUnit => $localUnit) {
+            if ($localUnit) {
+                continue;
+            }
             $unitsArray[] = array(
-                'key' => $key,
-                'name' => $connectUnit
+                'key' => $connectUnit,
+                'name' => $connectUnitsArray[$connectUnit]
             );
         }
 

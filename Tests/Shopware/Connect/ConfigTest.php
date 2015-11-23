@@ -227,6 +227,20 @@ class ConfigTest extends ConnectTestHelper
         $this->assertEquals('semdemo', $result[0]['value']);
     }
 
+    public function testGetUnitsMappings()
+    {
+        $this->getConfigComponent()->setConfig('testConfigUnit1', 'localUnit1');
+        $this->getConfigComponent()->setConfig('testConfigUnit2', '');
+        $unitsMapping = $this->getConfigComponent()->getUnitsMappings();
+
+        $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE shopId IS NULL AND groupName = ?';
+        $result = Shopware()->Db()->fetchPairs($sql, array('units'));
+
+        foreach ($result as $name => $value) {
+            $this->assertEquals($value, $unitsMapping[$name]);
+        }
+    }
+
     public static function tearDownAfterClass()
     {
         $sql = 'DELETE FROM s_plugin_connect_config WHERE name LIKE  "testConfig%"';

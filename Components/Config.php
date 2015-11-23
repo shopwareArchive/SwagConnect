@@ -430,6 +430,19 @@ class Config
         $this->manager->flush();
     }
 
+    /**
+     * Returns units mapping from Connect config table
+     *
+     * @return array
+     */
+    public function getUnitsMappings()
+    {
+        $query = "SELECT `name`, `value` FROM s_plugin_connect_config
+        WHERE `shopId` IS NULL AND `groupName` = 'units'";
+
+        return Shopware()->Db()->fetchPairs($query);
+    }
+
 	/**
      * Compare given export price configuration
      * and current export price configuration

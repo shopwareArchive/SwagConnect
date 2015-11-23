@@ -277,11 +277,12 @@ class ProductToShop implements ProductToShopBase
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
-            /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-            $configComponent = new Config($this->manager);
+            if ($this->config->getConfig($product->attributes['unit']) == null) {
+                $this->config->setConfig($product->attributes['unit'], '', null, 'units');
+            }
 
             /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
-            $unitMapper = new UnitMapper($configComponent, $this->manager);
+            $unitMapper = new UnitMapper($this->config, $this->manager);
 
             $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
 

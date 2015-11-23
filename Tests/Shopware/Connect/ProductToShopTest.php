@@ -24,6 +24,8 @@ class ProductToShopTest extends ConnectTestHelper
         $conn = Shopware()->Db();
         $conn->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
         $conn->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'yd'));
+        $conn->delete('s_plugin_connect_config', array('name = ?' => 'm'));
     }
 
     public function setUp()
@@ -450,6 +452,33 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertInstanceOf('Shopware\Models\Article\Unit', $article->getMainDetail()->getUnit());
         $this->assertEquals('yd', $article->getMainDetail()->getUnit()->getUnit());
         $this->assertEquals('Yard', $article->getMainDetail()->getUnit()->getName());
+    }
+
+    /**
+     * Connect units must be stored in config table
+     * during product import
+     *
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function testStoreUnitsOnProductImport()
+    {
+        $product = $this->getProduct();
+        $unit = 'm';
+        $product->attributes['unit'] = $unit;
+        $product->attributes['quantity'] = 1;
+        $product->attributes['ref_quantity'] = 5;
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $query = Shopware()->Db()->query(
+            'SELECT COUNT(id)
+              FROM s_plugin_connect_config
+              WHERE `name` = :configName
+              AND groupName = :groupName',
+            array('configName' => 'm', 'groupName' => 'units')
+        );
+
+        $this->assertEquals(1, $query->fetchColumn());
     }
 
     public function testAutomaticallyActivateArticles()

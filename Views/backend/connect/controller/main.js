@@ -38,7 +38,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'logTabs', selector: 'connect-log-tabs' },
         { ref: 'marketeplaceMappingPanel', selector: 'connect-config-marketplace-attributes' },
         { ref: 'marketeplaceMapping', selector: 'connect-marketplace-attributes-mapping' },
-        { ref: 'unitsMapping', selector: 'connect-units-mapping' }
+        { ref: 'unitsMapping', selector: 'connect-units-mapping-list' }
     ],
 
     messages: {
@@ -554,7 +554,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             form = btn.up('form');
 
         form.setLoading();
-        me.saveUnitsMapping();
+
         if (form.getRecord()) {
             var model = form.getRecord();
 
@@ -591,7 +591,20 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    var unitsStore = me.getUnitsMapping().getStore();
+                    if (unitsStore.getUpdatedRecords().length < 1) {
+                        me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                        return;
+                    }
+
+                    unitsStore.sync({
+                        success :function (records, operation) {
+                            me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                        },
+                        failure:function (batch) {
+                            me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
+                        }
+                    });
                 },
                 failure: function(record) {
                     form.setLoading(false);
@@ -632,23 +645,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         }
     },
 
-    saveUnitsMapping: function() {
-        var me = this,
-            unitsStore = me.getUnitsMapping().unitsStore;
-
-        if (unitsStore.getUpdatedRecords().length < 1) {
-            return;
-        }
-
-        unitsStore.sync({
-            success :function (records, operation) {
-            },
-            failure:function (batch) {
-                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
-            }
-        });
-    },
-
     /**
      * Sends marketplace attributes mapping to the PHP
      */
@@ -665,7 +661,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
                 },
                 failure:function (batch) {
-                    console.log(batch);
                     panel.setLoading(false);
                     me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
                 }

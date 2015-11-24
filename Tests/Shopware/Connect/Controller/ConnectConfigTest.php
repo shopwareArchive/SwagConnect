@@ -38,7 +38,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('logRequest', '1', 'general'),
             ('shippingCostsPage', '6', 'general'),
             ('showShippingCostsSeparately', '0', 'general'),
-            ('articleImagesLimitImport', '10', 'general');
+            ('articleImagesLimitImport', '10', 'import');
             "
         );
     }

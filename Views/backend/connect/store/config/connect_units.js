@@ -38,7 +38,16 @@ Ext.define('Shopware.apps.Connect.store.config.ConnectUnits', {
     proxy: {
         type: 'ajax',
         url: '{url controller="ConnectConfig" action="getConnectUnits"}',
+        api: {
+            create: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            update: '{url controller="ConnectConfig" action="saveUnitsMapping"}',
+            read: '{url controller="ConnectConfig" action="getConnectUnits"}'
+        },
         reader: {
+            type: 'json',
+            root: 'data'
+        },
+        writer: {
             type: 'json',
             root: 'data'
         }

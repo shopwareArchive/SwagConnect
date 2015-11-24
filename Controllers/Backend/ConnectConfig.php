@@ -336,8 +336,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         foreach ($units as $unit) {
             $unitsMappingArray[] = array(
                 'shopwareUnitName' => $unit->getName(),
-                'shopwareUnitKey' => $unit->getUnit(),
-                'connectUnit' => $this->getConfigComponent()->getConfig($unit->getUnit())
+                'shopwareUnitKey' => $unit->getUnit()
             );
         }
 
@@ -386,8 +385,9 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 continue;
             }
             $unitsArray[] = array(
-                'key' => $connectUnit,
-                'name' => $connectUnitsArray[$connectUnit]
+                'connectUnit' => $connectUnit,
+                'name' => $connectUnitsArray[$connectUnit],
+                'shopwareUnitKey' => $localUnit
             );
         }
 

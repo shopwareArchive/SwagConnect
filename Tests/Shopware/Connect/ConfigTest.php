@@ -150,10 +150,10 @@ class ConfigTest extends ConnectTestHelper
         $this->getConfigComponent()->setUnitsMapping($data);
 
         $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE name = ? AND groupName = ?';
-        $result = Shopware()->Db()->fetchRow($sql, array($unitName, 'units'));
+        $result = Shopware()->Db()->fetchRow($sql, array($connectUnit, 'units'));
 
-        $this->assertEquals($unitName, $result['name']);
-        $this->assertEquals($connectUnit, $result['value']);
+        $this->assertEquals($unitName, $result['value']);
+        $this->assertEquals($connectUnit, $result['name']);
     }
 
     public function testCompareExportConfiguration()

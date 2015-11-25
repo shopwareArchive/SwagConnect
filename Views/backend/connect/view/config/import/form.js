@@ -62,7 +62,8 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Produktbeschreibungen{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Produktbilder{/s}',
-        productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}'
+        productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}',
+        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}zugewiesene Maßeinheiten ausblenden{/s}'
     },
 
     initComponent: function() {
@@ -249,22 +250,17 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                     width: 400,
                     height: 30
                 },
-                Ext.create('Shopware.apps.Connect.view.config.import.UnitsMapping')
-                ]
+                Ext.create('Shopware.apps.Connect.view.config.import.UnitsMapping'),
+                {
+                    xtype: 'checkbox',
+                    name: 'hideAssignedUnits',
+                    boxLabel: me.snippets.hideAssignedUnitsLabel,
+                    labelWidth: me.defaults.labelWidth
+                }
+            ]
         });
 
         return [ container ];
-    },
-
-    createCellEditor: function() {
-        var me = this;
-
-        me.cellEditor = Ext.create('Ext.grid.plugin.CellEditing', {
-            clicksToMoveEditor: 1,
-            autoCancel: true
-        });
-
-        return me.cellEditor;
     },
 
     /**

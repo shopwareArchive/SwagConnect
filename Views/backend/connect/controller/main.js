@@ -107,6 +107,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 			'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
             },
+            'connect-config-import-form checkbox[name=hideAssignedUnits]': {
+                change: me.onHideAssignedUnits
+            },
 			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
             },
@@ -614,6 +617,27 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             });
         }
+    },
+
+    /**
+     * Reload Shopware Connect units store
+     * and show/hide already assigned units
+     */
+    onHideAssignedUnits: function(checkbox, value)
+    {
+        var me = this;
+        var store = me.getUnitsMapping().getStore();
+        var hideAssigned = 0;
+
+        if (value === true) {
+            hideAssigned = 1;
+        }
+
+        store.load({
+            params: {
+                'hideAssignedUnits': hideAssigned
+            }
+        });
     },
 
     /**

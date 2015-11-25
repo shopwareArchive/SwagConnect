@@ -379,9 +379,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connectUnits = new Units();
         $connectUnitsArray = $connectUnits->getLocalizedUnits('de');
         $unitsArray = array();
+        $hideAssigned = (int)$this->Request()->getParam('hideAssignedUnits', 0);
 
         foreach ($this->getConfigComponent()->getUnitsMappings() as $connectUnit => $localUnit) {
-            if ($localUnit) {
+            if ($hideAssigned == true && strlen($localUnit) > 0) {
                 continue;
             }
             $unitsArray[] = array(

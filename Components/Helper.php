@@ -29,6 +29,7 @@ use Shopware\Connect\Struct\Product,
     Doctrine\ORM\Query;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Detail as ProductDetail;
+use Shopware\Models\Article\Unit;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
@@ -630,4 +631,20 @@ class Helper
         return null;
     }
 
+    /**
+     * @param Unit $localUnit
+     * @param string $remoteUnit
+     */
+    public function updateUnitInRelatedProducts(Unit $localUnit, $remoteUnit)
+    {
+        $statement = $this->manager->getConnection()->prepare("UPDATE s_articles_details sad
+            LEFT JOIN s_articles_attributes saa ON sad.id = saa.articledetailsID
+            SET sad.unitID = :unitId
+            WHERE saa.connect_remote_unit = :remoteUnit");
+
+        $statement->bindValue(':unitId', $localUnit->getId(), \PDO::PARAM_INT);
+        $statement->bindValue(':remoteUnit', $remoteUnit, \PDO::PARAM_STR);
+
+        $statement->execute();
+    }
 }

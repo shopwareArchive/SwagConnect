@@ -63,7 +63,9 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Produktbeschreibungen{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Produktbilder{/s}',
         productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}',
-        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}zugewiesene Maßeinheiten ausblenden{/s}'
+        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}zugewiesene Maßeinheiten ausblenden{/s}',
+        takeOverUnits: '{s name=config/import/take_over_units}Maßeinheiten übernehmen{/s}',
+        takeOverUnitsTooltip: '{s name=config/import/take_over_units_tooltip}Übernehmen nicht zugeordnete Masseinheiten in ihren Shop{/s}'
     },
 
     initComponent: function() {
@@ -256,6 +258,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                     name: 'hideAssignedUnits',
                     boxLabel: me.snippets.hideAssignedUnitsLabel,
                     labelWidth: me.defaults.labelWidth
+                },
+                {
+                    xtype: 'button',
+                    text: me.snippets.takeOverUnits,
+                    action: 'adoptUnits',
+                    tooltip: me.snippets.takeOverUnitsTooltip
                 }
             ]
         });

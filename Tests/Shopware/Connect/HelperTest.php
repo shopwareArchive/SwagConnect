@@ -3,6 +3,8 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Struct\Product;
+use Shopware\Models\Article\Unit;
+use ShopwarePlugins\Connect\Components\Helper;
 
 class HelperTest extends ConnectTestHelper
 {
@@ -39,7 +41,6 @@ class HelperTest extends ConnectTestHelper
 //        $id = $this->getConnectProductArticleId();
 //        /** @var \Shopware\Models\Article\Detail $detail */
 //        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('articleId' => $id, 'kind' => 1));
-
 
 
 //        $this->Request()->setMethod('GET');
@@ -81,8 +82,8 @@ class HelperTest extends ConnectTestHelper
     public function _testGetImagesById()
     {
         $images = array();
-        for ($i=0; $i<10; $i++) {
-            $images[] = 'http://lorempixel.com/400/200?'.rand(0,9999);
+        for ($i = 0; $i < 10; $i++) {
+            $images[] = 'http://lorempixel.com/400/200?' . rand(0, 9999);
         }
 
         /** @var \Shopware\Models\Article\Article $model */
@@ -108,6 +109,52 @@ class HelperTest extends ConnectTestHelper
         $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
 
         $this->assertNotEmpty($categories);
+    }
+
+    public function testUpdateUnitInRelatedProducts()
+    {
+        $localUnit = new Unit();
+        $localUnit->setName('Yard');
+        $localUnit->setUnit('lyrd');
+        Shopware()->Models()->persist($localUnit);
+        Shopware()->Models()->flush($localUnit);
+
+        $remoteUnit = 'yrd';
+
+        $manager = $this->getMockBuilder('\\Shopware\\Components\\Model\\ModelManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $connection = $this->getMockBuilder('\\Doctrine\\DBAL\\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $manager->expects($this->any())->method('getConnection')->willReturn($connection);
+
+        $statement = $this->getMockBuilder('\\Doctrine\\DBAL\\Statement')
+        ->disableOriginalConstructor()
+        ->getMock();
+
+        $connection->expects($this->any())->method('prepare')->with(
+            "UPDATE s_articles_details sad
+            LEFT JOIN s_articles_attributes saa ON sad.id = saa.articledetailsID
+            SET sad.unitID = :unitId
+            WHERE saa.connect_remote_unit = :remoteUnit"
+        )->willReturn($statement);
+
+        $statement->expects($this->at(0))->method('bindValue')->with(':unitId', $localUnit->getId(), \PDO::PARAM_INT);
+        $statement->expects($this->at(1))->method('bindValue')->with(':remoteUnit', $remoteUnit, \PDO::PARAM_STR);
+
+        $statement->expects($this->atLeast(1))->method('execute');
+
+        $helper = new Helper(
+            $manager,
+            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\CategoryQuery')->disableOriginalConstructor(),
+            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\ProductQuery')->disableOriginalConstructor()
+        );
+
+        $helper->updateUnitInRelatedProducts($localUnit, $remoteUnit);
+        Shopware()->Models()->remove($localUnit);
+        Shopware()->Models()->flush($localUnit);
     }
 
     private function resetConnectCategoryMappings()

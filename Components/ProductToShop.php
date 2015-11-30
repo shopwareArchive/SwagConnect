@@ -277,6 +277,7 @@ class ProductToShop implements ProductToShopBase
         // find local unit with units mapping
         // and add to detail model
         if ($product->attributes['unit']) {
+            $detailAttribute->setConnectRemoteUnit($product->attributes['unit']);
             if ($this->config->getConfig($product->attributes['unit']) == null) {
                 $this->config->setConfig($product->attributes['unit'], '', null, 'units');
             }

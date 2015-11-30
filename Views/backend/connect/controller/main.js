@@ -71,6 +71,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         minutes: '{s name=minutes}Minute(s){/s}',
         seconds: '{s name=seconds}Second(s){/s}',
 
+        adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
+        adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
+
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
@@ -109,6 +112,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             },
             'connect-config-import-form checkbox[name=hideAssignedUnits]': {
                 change: me.onHideAssignedUnits
+            },
+            'connect-config-import-form button[action=adoptUnits]': {
+                click: me.onAdoptUnits
             },
 			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
@@ -636,6 +642,35 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         store.load({
             params: {
                 'hideAssignedUnits': hideAssigned
+            }
+        });
+    },
+
+    onAdoptUnits: function(btn) {
+        var me = this;
+        var form = btn.up('form');
+
+        Ext.Msg.show({
+            title: me.messages.adoptUnitsTitle,
+            msg: me.messages.adoptUnitsMessage,
+            buttons: Ext.Msg.YESNO,
+            fn: function(response) {
+                if(response !== 'yes') {
+                    return;
+                }
+
+                form.setLoading();
+                Ext.Ajax.request({
+                    url: '{url controller=ConnectConfig action=adoptUnits}',
+                    method: 'POST',
+                    success: function(response, opts) {
+                        var responseObject = Ext.decode(response.responseText);
+                        form.setLoading(false);
+                        if (responseObject.success) {
+                        } else {
+                        }
+                    }
+                });
             }
         });
     },

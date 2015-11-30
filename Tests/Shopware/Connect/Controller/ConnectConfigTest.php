@@ -103,5 +103,37 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertTrue($this->View()->success);
         $this->assertTrue(isset($this->View()->data));
     }
+
+    public function testAdoptUnitsAction()
+    {
+        Shopware()->Db()->exec("DELETE FROM s_core_units WHERE unit = 'week'");
+
+        Shopware()->Db()->executeQuery(
+            "INSERT INTO `s_plugin_connect_config`
+            (`name`, `value`, `groupName`) VALUES
+            ('week', '', 'units');
+            "
+        );
+
+        $this->dispatch('backend/ConnectConfig/adoptUnits');
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+    }
+
+    public function testSaveUnitsMappingAction()
+    {
+        Shopware()->Db()->exec("DELETE FROM s_plugin_connect_config WHERE name = 'ml' AND groupName = 'units'");
+
+        $this->Request()
+            ->setMethod('POST')
+            ->setPost('data', array(
+                'connectUnit' => 'ml',
+                'shopwareUnitKey' => 'l',
+            ));
+        $this->dispatch('backend/ConnectConfig/saveUnitsMapping');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+    }
 }
  

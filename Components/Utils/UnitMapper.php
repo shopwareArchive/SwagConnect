@@ -98,6 +98,7 @@ class UnitMapper
 
         // search for same key in Shopware units
         $repository = $this->getUnitRepository();
+        /** @var \Shopware\Models\Article\Unit $unitModel */
         $unitModel = $repository->findOneBy(array('unit' => $connectUnit));
 
         if ($unitModel) {
@@ -127,16 +128,56 @@ class UnitMapper
 
         if ($this->configComponent->getConfig('createUnitsAutomatically', false) == true) {
             // only german units for now
-            $unit = new Unit();
-            $unit->setName($deConnectUnits[$connectUnit]);
-            $unit->setUnit($connectUnit);
-            $this->manager->persist($unit);
-            $this->manager->flush();
+            $units = $this->createUnits(array($connectUnit));
+            /** @var \Shopware\Models\Article\Unit $unit */
+            $unit = $units[0];
+
+//            $unit = new Unit();
+//            $unit->setName($deConnectUnits[$connectUnit]);
+//            $unit->setUnit($connectUnit);
+//            $this->manager->persist($unit);
+//            $this->manager->flush();
 
             return $unit->getUnit();
         }
 
         return $connectUnit;
+    }
+
+    /**
+     * Creates units shopware entities
+     *
+     * @param array $units
+     * @return \Shopware\Models\Article\Unit[]
+     */
+    public function createUnits(array $units)
+    {
+        $deConnectUnits = $this->getSdkLocalizedUnits('de');
+
+        $models = array();
+
+        foreach ($units as $unitKey)
+        {
+            $unit = $this->getUnitRepository()->findOneBy(array(
+                'unit' => $unitKey
+            ));
+
+            if (!$unit) {
+                if (!isset($deConnectUnits[$unitKey])) {
+                    continue;
+                }
+                $unit = new Unit();
+                $unit->setName($deConnectUnits[$unitKey]);
+                $unit->setUnit($unitKey);
+                $this->manager->persist($unit);
+                $this->manager->flush($unit);
+            }
+
+            $models[] = $unit;
+            $this->configComponent->setConfig($unitKey, $unitKey, null, 'units');
+        }
+
+        return $models;
     }
 
     /**

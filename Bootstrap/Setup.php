@@ -331,6 +331,13 @@ class Setup
             true
         );
 
+        $modelManager->addAttribute(
+            's_articles_attributes',
+            'connect', 'remote_unit',
+            'varchar(32)',
+            true
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',

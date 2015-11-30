@@ -129,7 +129,9 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        $this->enforcePhoneNumber($view);
+        if (Shopware()->Config()->get('requirePhoneField')) {
+            $this->enforcePhoneNumber($view);
+        }
 
         $this->registerMyTemplateDir();
         if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
@@ -298,7 +300,9 @@ class Checkout extends BaseSubscriber
             $controller->forward('confirm');
         }
 
-        $this->enforcePhoneNumber($view);
+        if (Shopware()->Config()->get('requirePhoneField')) {
+            $this->enforcePhoneNumber($view);
+        }
 
         $order = new \Shopware\Connect\Struct\Order();
         $order->orderItems = array();

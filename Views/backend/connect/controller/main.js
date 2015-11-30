@@ -269,6 +269,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     );
                 }
             },
+            'connect-log-list checkbox[name=logRequest]': {
+                change: me.onChangeLogging
+            },
             'connect-marketplace-attributes-mapping button[action=save]': {
                 click: function () {
                     me.saveMarketplaceAttributesMapping();
@@ -732,6 +735,28 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
 
+    },
+
+    onChangeLogging: function(checkbox, newValue, oldValue) {
+        var me = this;
+        var loggingEnabled = 0;
+        if (newValue === true) {
+            loggingEnabled = 1;
+        }
+
+        Ext.Ajax.request({
+            url: '{url controller=ConnectConfig action=changeLogging}',
+            method: 'POST',
+            params: {
+                enableLogging: loggingEnabled
+            },
+            success: function(response, opts) {
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == false) {
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=config/log_label}Logging aktivieren{/s}');
+                }
+            }
+        });
     },
 
     /**

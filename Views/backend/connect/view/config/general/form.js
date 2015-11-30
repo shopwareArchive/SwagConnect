@@ -60,8 +60,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
         connectAttributeLabel: Ext.String.format('{s name=config/connect_attribute_label}[0]-Attribut{/s}', marketplaceName),
         alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
-        logLabel: '{s name=config/log_label}Logging aktivieren{/s}',
-        logDescription: Ext.String.format('{s name=config/log_description}[0]-Anfragen mitschreiben{/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
         hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
@@ -368,19 +366,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                         fieldLabel: me.snippets.exportDomainLabel,
                         labelWidth: me.defaults.labelWidth,
                         helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
-                    }, {
-                        xtype: 'fieldcontainer',
-                        fieldLabel: me.snippets.logLabel,
-                        defaultType: 'checkboxfield',
-                        labelWidth: me.defaults.labelWidth,
-                        items: [
-                            {
-                                boxLabel: me.snippets.logDescription,
-                                name: 'logRequest',
-                                inputValue: 1,
-                                uncheckedValue: 0
-                            }
-                        ]
                     }, {
                         xtype: 'fieldcontainer',
                         fieldLabel: me.snippets.separateShippingLabel,

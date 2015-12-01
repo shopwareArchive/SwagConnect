@@ -9,7 +9,6 @@ Ext.define('Shopware.apps.Connect.store.main.Navigation', {
     root: {
         expanded: true,
         children: [
-            { id: 'home', text: "{s name=navigation/home_page}Home page{/s}", leaf: true, iconCls: 'connect-icon' },
             {
                 id: 'config', text: "{s name=navigation/settings/settings}Einstellungen{/s}",
                 leaf: false,

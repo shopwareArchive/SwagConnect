@@ -226,12 +226,10 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             items = [],
             leftElements = me.createLeftElements(),
-            rightElements = me.createRightElements(),
-            bottomElements = me.createBottomElements();
+            rightElements = me.createRightElements();
 
         items.push(leftElements);
         items.push(rightElements);
-        items.push(bottomElements);
 
         if (me.defaultShop) {
             var defaultElements = me.createDefaultElements();
@@ -510,57 +508,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which are displayed in the bottom
-     * @return Ext.container.Container
-     */
-    createBottomElements: function() {
-        var me = this;
-
-        var bottomContainer = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
-            layout: 'anchor',
-            border: false,
-            items: [
-                me.createShippingCostsCombo()
-            ]
-        });
-
-        return bottomContainer;
-    },
-
-    /**
-     * Creates the shipping costs page combo
-     * @return Ext.container.Container
-     */
-    createShippingCostsCombo: function () {
-        var me = this;
-        me.shippingCostsCombo = Ext.create('Shopware.form.field.PagingComboBox', {
-            name: 'shippingCostsPage',
-            anchor: '100%',
-            valueField: 'id',
-            displayField: 'name',
-            fieldLabel: me.snippets.shippingCostsLabel,
-            store: me.staticPagesStore,
-            labelWidth: me.defaults.labelWidth,
-            helpText: Ext.String.format('{s name=config/help/connect_shipping_costs_page}[0] fügt seine eigenen Versandkosten-Informationen vor ihrer Versandkosten-Seite an. Wählen Sie hier ihre Standard-Versandkostenseite.{/s}', marketplaceName),
-            allowBlank: true,
-            forceSelection: true,
-            beforeBlur: function () {
-                var value = this.getRawValue();
-                if (value == '') {
-                    var model = this.up('form').getRecord();
-                    model.set('shippingCostsPage', '');
-                    this.lastSelection = [];
-                }
-                this.doQueryTask.cancel();
-                this.assertValue();
-            }
-        });
-
-        return me.shippingCostsCombo;
-    },
-
-    /**
      * Find general config record by id
      * and load into form
      */
@@ -575,10 +522,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         if (record.get('connectAttribute') < 1) {
             record.set('connectAttribute', 19);
-        }
-
-        if (record.get('shippingCostsPage') > 0) {
-            me.shippingCostsCombo.valueNotFoundText = record.get('shippingCostsPageName');
         }
 
         me.loadRecord(record);

@@ -217,15 +217,6 @@ class Config
             }
 
             $result = Shopware()->Db()->fetchPairs($query);
-            // Find shipping costs page name
-            // It is necessary, because page will not be found in paginated store
-            if (isset($result['shippingCostsPage']) && $result['shippingCostsPage'] > 0) {
-                /** @var \Shopware\Models\Site\Site $shippingCostsPage */
-                $shippingCostsPage = $this->getStaticPagesRepository()->find($result['shippingCostsPage']);
-                if ($shippingCostsPage) {
-                    $result['shippingCostsPageName'] = $shippingCostsPage->getDescription();
-                }
-            }
             $configsArray[] = array_merge($shopConfig, $result);
         }
 
@@ -250,19 +241,7 @@ class Config
                     'detailShopInfo' => $shopConfig['detailShopInfo'],
                     'detailProductNoIndex' => $shopConfig['detailProductNoIndex'],
                     'checkoutShopInfo' => $shopConfig['checkoutShopInfo'],
-                    'shippingCostsPage' => $shopConfig['shippingCostsPage'],
                 );
-
-
-                try {
-                    if (!$shopConfig['shippingCostsPage']) {
-                        unset($shopConfig['shippingCostsPage']);
-                        $this->deleteConfig('shippingCostsPage', $shopId);
-                    }
-                } catch (\Exception $e) {
-                    // ignore exception when shippingCostsPage
-                    // doesn't exist
-                }
             } else {
                 unset($shopConfig['shopId']);
             }

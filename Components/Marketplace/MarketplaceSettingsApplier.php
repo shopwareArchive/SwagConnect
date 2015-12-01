@@ -108,7 +108,6 @@ class MarketplaceSettingsApplier
             'config/help/debug_host',
             'config/help/connect_attribute',
             'config/marketplace/connect_attribute_header',
-            'config/help/connect_shipping_costs_page',
             'mapping/message/export/description',
             'config/shipping_groups/shipping_group_empty_text',
             'config/synchronization_bar_description',

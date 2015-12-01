@@ -222,7 +222,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
             new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
-            new \ShopwarePlugins\Connect\Subscribers\ShippingCosts(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less()
 

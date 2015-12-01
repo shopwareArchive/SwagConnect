@@ -44,8 +44,6 @@ Ext.define('Shopware.apps.Connect.model.config.General', {
         { name: 'detailShopInfo', type: 'string' },
         { name: 'detailProductNoIndex', type: 'string' },
         { name: 'checkoutShopInfo', type: 'string' },
-        { name: 'shippingCostsPage', type: 'int', useNull: true },
-        { name: 'shippingCostsPageName', type: 'string' },
         { name: 'exportDomain', type: 'string' },
         { name: 'createCategoriesAutomatically', type: 'string' },
         { name: 'activateProductsAutomatically', type: 'string' },

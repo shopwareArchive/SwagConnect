@@ -183,7 +183,6 @@ class TemplateExtension extends BaseSubscriber
             'connectShop' => $shop,
             'connectShopInfo' => $configComponent->getConfig('detailShopInfo'),
             'connectNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
-            'shippingCostsPage' => $configComponent->getConfig('shippingCostsPage', 6, Shopware()->Shop()->getId() , 'general')
         ));
     }
 }

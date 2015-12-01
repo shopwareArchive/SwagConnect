@@ -148,8 +148,8 @@ class HelperTest extends ConnectTestHelper
 
         $helper = new Helper(
             $manager,
-            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\CategoryQuery')->disableOriginalConstructor(),
-            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\ProductQuery')->disableOriginalConstructor()
+            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\CategoryQuery\\SwQuery')->disableOriginalConstructor()->getMock(),
+            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\ProductQuery')->disableOriginalConstructor()->getMock()
         );
 
         $helper->updateUnitInRelatedProducts($localUnit, $remoteUnit);

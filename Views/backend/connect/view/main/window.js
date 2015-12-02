@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
     cls: Ext.baseCSSPrefix + 'connect',
 
     layout: 'border',
-    width: 1100,
+    width: 1200,
     height:'90%',
     title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
 

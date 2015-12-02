@@ -29,7 +29,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
 
         Ext.applyIf(me, {
             height: 200,
-            width: 400,
+            width: 450,
 
             dockedItems: [
                 me.getPagingToolbar()
@@ -78,10 +78,48 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
         ];
     },
 
+    ///**
+    // * Creates a paging toolbar with additional page size selector
+    // *
+    // * @returns Array
+    // */
     getPagingToolbar: function() {
         var me = this;
+        var pageSize = Ext.create('Ext.form.field.ComboBox', {
+            cls: Ext.baseCSSPrefix + 'page-size',
+            queryMode: 'local',
+            width: 60,
+            listeners: {
+                scope: me,
+                select: function(combo, records) {
+                    var record = records[0],
+                        me = this;
 
-        return Ext.create('Ext.toolbar.Paging', {
+                    me.store.pageSize = record.get('value');
+                    me.store.loadPage(1);
+                }
+            },
+            store: Ext.create('Ext.data.Store', {
+                fields: [ 'value' ],
+                data: [
+                    { value: '10' },
+                    { value: '20' },
+                    { value: '40' },
+                    { value: '60' },
+                    { value: '80' },
+                    { value: '100' },
+                    { value: '250' },
+                    { value: '500' }
+                ]
+            }),
+            displayField: 'value',
+            valueField: 'value',
+            editable: false,
+            emptyText: '10'
+        });
+        pageSize.setValue(me.store.pageSize);
+
+        var pagingBar = Ext.create('Ext.toolbar.Paging', {
             store: me.store,
             dock:'bottom',
             displayInfo:true,
@@ -96,6 +134,9 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 me.fireEvent('reloadOwnCategories');
             }
         });
+        pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
+
+        return pagingBar;
     }
 });
 //{/block}

@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                         {
                             xtype: 'container',
                             html: '<h1 style="font-size: large">' + me.snippets.myProductsTitle + '</h1>',
-                            margin: '0 0 0 60px',
+                            margin: '0 0 0 110px',
                             width: 400
                         }
                     ]
@@ -48,7 +48,8 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     width: '100%',
                     items: [
                         {
-                            xtype: 'connect-remote-categories'
+                            xtype: 'connect-remote-categories',
+                            width: 460
                         },
                         {
                             xtype: 'button',
@@ -62,7 +63,8 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             height: 50
                         },
                         {
-                            xtype: 'connect-own-categories'
+                            xtype: 'connect-own-categories',
+                            width: 460
                         }
                     ]
                 }, {
@@ -70,7 +72,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     layout: 'hbox',
                     items: [
                         Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
-                            width: 400,
+                            width: 460,
                             height: 300,
                             margin: '10px 0 0 0'
                         }),
@@ -78,7 +80,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             xtype: 'container',
                             items: [
                                 Ext.create('Shopware.apps.Connect.view.import.LocalProducts', {
-                                    width: 400,
+                                    width: 460,
                                     height: 300,
                                     margin: '10px 0 0 50px'
                                 }),

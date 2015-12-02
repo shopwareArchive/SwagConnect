@@ -49,14 +49,18 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getImportedProductCategoriesTreeAction()
     {
-        $parent = $this->request->getParam('id', null);
+        $parent = $this->request->getParam('id', 'root');
         if ($parent == 'root') {
-            $parent = null;
+            $categories = $this->getCategoryExtractor()->getMainNodes();
+        } elseif (is_numeric($parent)) {
+            $categories = $this->getCategoryExtractor()->extractByShopId($parent);
+        } else {
+            $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true);
         }
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true),
+            'data' => $categories,
         ));
     }
 
@@ -187,7 +191,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
-                )
+                ),
+                new \Shopware\Connect\Gateway\PDO($this->getModelManager()->getConnection())
             );
         }
 

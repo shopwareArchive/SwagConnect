@@ -8,12 +8,140 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
      */
     private $categoryExtractor;
 
+    private $configurationGateway;
+
+    private $attributeRepository;
+
     public function setUp()
     {
-        $attributeRepository = $this->getMockBuilder('\\Shopware\\CustomModels\\Connect\\AttributeRepository')
+        // todo@sb: Improve me with mocks
+        Shopware()->Db()->exec("
+            INSERT INTO `s_plugin_connect_categories`(`category_key`, `label`, `local_category_id`) VALUES
+            ('/Ski-unit','Ski', NULL),
+            ('/Kleidung-unit','Kleidung', NULL),
+            ('/Kleidung-unit/Hosen-unit','Hosen', 1),
+            ('/Kleidung-unit/Hosen-unit/Hosentraeger-unit','Hosentraeger', NULL);
+        ");
+
+        $this->configurationGateway = $this->getMockBuilder('\\Shopware\\Connect\\Gateway\\PDO')
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->attributeRepository = $this->getMockBuilder('\\Shopware\\CustomModels\\Connect\\AttributeRepository')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
+            $this->attributeRepository,
+            new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
+                Shopware()->Models(),
+                Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
+                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+            ),
+            $this->configurationGateway
+        );
+    }
+
+    public function tearDown()
+    {
+        Shopware()->Db()->exec("DELETE FROM `s_plugin_connect_categories`");
+    }
+
+    public function testExtractByShopId()
+    {
+        $sql = 'SELECT article_id
+                FROM `s_plugin_connect_items`
+                WHERE shop_id = ?
+                ORDER BY id DESC
+                LIMIT 1';
+        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+
+        $sql = 'SELECT id, category_key
+                FROM `s_plugin_connect_categories`';
+        $categories = Shopware()->Db()->fetchPairs($sql);
+
+        foreach ($categories as $id => $key) {
+            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
+                'connect_category_id' => $id,
+                'articleID' => $articleId
+            ));
+        }
+
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(
+                ),
+            ),
+        );
+
+        $result = $this->categoryExtractor->extractByShopId(3);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testExtractByShopIdAndIncludeChildren()
+    {
+        $sql = 'SELECT article_id
+                FROM `s_plugin_connect_items`
+                WHERE shop_id = ?
+                ORDER BY id DESC
+                LIMIT 1';
+        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+
+        $sql = 'SELECT id, category_key
+                FROM `s_plugin_connect_categories`';
+        $categories = Shopware()->Db()->fetchPairs($sql);
+
+        foreach ($categories as $id => $key) {
+            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
+                'connect_category_id' => $id,
+                'articleID' => $articleId
+            ));
+        }
+
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(
+                    array(
+                        'id' => '/Kleidung-unit/Hosen-unit',
+                        'name' => 'Hosen',
+                        'leaf' => false,
+                        'children' => array(
+                            array(
+                                'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                                'name' => 'Hosentraeger',
+                                'leaf' => true,
+                                'children' => array(),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $result = $this->categoryExtractor->extractByShopId(3, $includeChildren = true);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testExtractImportedCategories()
+    {
         $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute1->setCategory(array('/Ski' => 'Ski'));
 
@@ -31,7 +159,7 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
             '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke' => 'Alkoholische Getränke',
         ));
 
-        $attributeRepository->expects($this->once())
+        $this->attributeRepository->expects($this->once())
             ->method('findRemoteArticleAttributes')
             ->willReturn(array(
                 $attribute1,
@@ -39,18 +167,6 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
                 $attribute3,
             ));
 
-        $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
-            $attributeRepository,
-            new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                Shopware()->Models(),
-                Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
-            )
-        );
-    }
-
-    public function testExtractImportedCategories()
-    {
         $expected = array(
             array(
                 'name' => 'Ski',
@@ -95,6 +211,189 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
         $result = $this->categoryExtractor->extractImportedCategories();
         $this->assertTrue(is_array($result), 'Extracted categories must be array');
         $this->assertEquals($expected, $result);
+    }
+
+    public function testGetShopNamesAsCategoriesTree()
+    {
+        $this->configurationGateway->expects($this->once())
+            ->method('getConnectedShopIds')
+            ->willReturn(array(1, 2, 3,));
+
+        $this->configurationGateway->expects($this->at(1))
+            ->method('getShopConfiguration')
+            ->with(1)
+            ->willReturn(
+                new \Shopware\Connect\Struct\ShopConfiguration(array(
+                    'displayName' => 'Shop 1'
+                ))
+            );
+
+        $this->configurationGateway->expects($this->at(2))
+            ->method('getShopConfiguration')
+            ->with(2)
+            ->willReturn(
+                new \Shopware\Connect\Struct\ShopConfiguration(array(
+                    'displayName' => 'Shop 2'
+                ))
+            );
+
+        $this->configurationGateway->expects($this->at(3))
+            ->method('getShopConfiguration')
+            ->with(3)
+            ->willReturn(
+                new \Shopware\Connect\Struct\ShopConfiguration(array(
+                    'displayName' => 'Shop 3'
+                ))
+            );
+
+        $expected = array(
+            array(
+                'id' => 1,
+                'name' => 'Shop 1',
+                'leaf' => false,
+                'children' => array(),
+            ),
+            array(
+                'id' => 2,
+                'name' => 'Shop 2',
+                'leaf' => false,
+                'children' => array(),
+            ),
+            array(
+                'id' => 3,
+                'name' => 'Shop 3',
+                'leaf' => false,
+                'children' => array(),
+            ),
+        );
+        $result = $this->categoryExtractor->getMainNodes();
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithoutParent()
+    {
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(),
+            ),
+        );
+        $result = $this->categoryExtractor->getRemoteCategoriesTree();
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithoutParentAndIncludeChildren()
+    {
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(
+                    array(
+                        'id' => '/Kleidung-unit/Hosen-unit',
+                        'name' => 'Hosen',
+                        'leaf' => false,
+                        'children' => array(
+                            array(
+                                'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                                'name' => 'Hosentraeger',
+                                'leaf' => true,
+                                'children' => array(),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        );
+        $parent = null;
+        $includeChildren = true;
+        $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithoutParentAndExcludeMapped()
+    {
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => true,
+                'children' => array(),
+            ),
+        );
+        $parent = null;
+        $includeChildren = true;
+        $excludeMapped = true;
+        $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, $excludeMapped);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithParent()
+    {
+        $expected = array(
+            array(
+                'id' => '/Kleidung-unit/Hosen-unit',
+                'name' => 'Hosen',
+                'leaf' => false,
+                'children' => array(),
+            ),
+        );
+        $parent = '/Kleidung-unit';
+        $result = $this->categoryExtractor->getRemoteCategoriesTree($parent);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithParentAndIncludeChildren()
+    {
+        $expected = array(
+            array(
+                'id' => '/Kleidung-unit/Hosen-unit',
+                'name' => 'Hosen',
+                'leaf' => false,
+                'children' => array(
+                    array(
+                        'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                        'name' => 'Hosentraeger',
+                        'leaf' => true,
+                        'children' => array(),
+                    ),
+                ),
+            ),
+        );
+        $parent = '/Kleidung-unit';
+        $includeChildren = true;
+        $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren);
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testGetTreeWithParentAndExcludeMapped()
+    {
+        $parent = '/Kleidung-unit';
+        $includeChildren = true;
+        $excludeMapped = true;
+        $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, $excludeMapped);
+        $this->assertEmpty($result);
     }
 }
  

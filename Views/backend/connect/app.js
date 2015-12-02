@@ -14,8 +14,7 @@ Ext.define('Shopware.apps.Connect', {
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
 		'config.general.Panel', 'config.general.Form', 'config.import.Panel', 'config.export.Panel', 'config.Tabs',
         'config.import.Form', 'config.export.Form', 'config.import.UnitsMapping',
-        'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping',
-        'config.units.Mapping'
+        'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping'
     ],
     controllers: [ 'Main', 'Import' ],
 

@@ -34,8 +34,7 @@ Ext.define('Shopware.apps.Connect.model.config.Units', {
     fields: [
         //{block name="backend/connect/model/config/units/fields"}{/block}
         { name: 'shopwareUnitName',  type: 'string' },
-        { name: 'shopwareUnitKey',  type: 'string' },
-        { name: 'connectUnit',  type: 'string' }
+        { name: 'shopwareUnitKey',  type: 'string' }
     ],
     proxy: {
         /**

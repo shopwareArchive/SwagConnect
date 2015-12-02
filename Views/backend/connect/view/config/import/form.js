@@ -60,8 +60,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
-        defaultCategoryHelp: '{s name=config/import/default_import_category_help}Hier geben Sie an, in welche Shop Kategorie Ihre Produkte importiert werden, wenn kein „Kategorie-Mapping“ vorgenommen wurde.{/s}',
-        defaultCategory: '{s name=config/import/default_import_category}Default import category{/s}'
+        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Produktbeschreibungen{/s}',
+        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Produktbilder{/s}',
+        productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}',
+        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}zugewiesene Maßeinheiten ausblenden{/s}',
+        takeOverUnits: '{s name=config/import/take_over_units}Maßeinheiten übernehmen{/s}',
+        takeOverUnitsTooltip: '{s name=config/import/take_over_units_tooltip}Übernehmen nicht zugeordnete Masseinheiten in ihren Shop{/s}'
     },
 
     initComponent: function() {
@@ -166,9 +170,16 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         var container = Ext.create('Ext.container.Container', {
             padding: '0 20 0 0',
             flex: 1,
-            layout: 'hbox',
+            layout: 'vbox',
             border: false,
-            items: [{
+            items: [
+                {
+                    xtype: 'container',
+                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportSettingsTitle  + '</h1>',
+                    width: 400,
+                    height: 30
+                },
+                {
                     xtype      : 'fieldcontainer',
                     fieldLabel : me.snippets.overwritePropertiesLabel,
                     defaultType: 'checkboxfield',
@@ -203,7 +214,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                         }
                     ]
                 },
-
+                {
+                    xtype: 'container',
+                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportImageSettingsTitle  + '</h1>',
+                    width: 400,
+                    height: 30
+                },
                 {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
@@ -226,28 +242,30 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                                     me.enableImageImportLimit(checkbox);
                                 }
                             }
-                        }, me.imageLimitImportField, {
-                            xtype: 'base-element-combotree',
-                            name: 'defaultImportCategory',
-                            allowBlank: true,
-                            width: 400,
-                            editable: true,
-                            fieldLabel: me.snippets.defaultCategory,
-                            labelWidth: me.defaults.labelWidth,
-                            helpText: me.snippets.defaultCategoryHelp,
-                            store: categoriesStore,
-                            displayField: 'name',
-                            valueField: 'id',
-                            listeners:{
-                                select: function(thisTree, record, index, obj ){
-                                    thisTree.createPicker();
-                                }
-                            }
-                        }
+                        }, me.imageLimitImportField
                     ]
+                },
+                {
+                    xtype: 'container',
+                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportUnitsTitle  + '</h1>',
+                    margin: '20px 0 0 0',
+                    width: 400,
+                    height: 30
+                },
+                Ext.create('Shopware.apps.Connect.view.config.import.UnitsMapping'),
+                {
+                    xtype: 'checkbox',
+                    name: 'hideAssignedUnits',
+                    boxLabel: me.snippets.hideAssignedUnitsLabel,
+                    labelWidth: me.defaults.labelWidth
+                },
+                {
+                    xtype: 'button',
+                    text: me.snippets.takeOverUnits,
+                    action: 'adoptUnits',
+                    tooltip: me.snippets.takeOverUnitsTooltip
                 }
-
-                ]
+            ]
         });
 
         return [ container ];

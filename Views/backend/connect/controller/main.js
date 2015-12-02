@@ -38,7 +38,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'logTabs', selector: 'connect-log-tabs' },
         { ref: 'marketeplaceMappingPanel', selector: 'connect-config-marketplace-attributes' },
         { ref: 'marketeplaceMapping', selector: 'connect-marketplace-attributes-mapping' },
-        { ref: 'unitsMapping', selector: 'connect-units-mapping' }
+        { ref: 'unitsMapping', selector: 'connect-units-mapping-list' }
     ],
 
     messages: {
@@ -70,6 +70,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         hours: '{s name=hours}Hour(s){/s}',
         minutes: '{s name=minutes}Minute(s){/s}',
         seconds: '{s name=seconds}Second(s){/s}',
+
+        adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
+        adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
@@ -106,6 +109,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             },
 			'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
+            },
+            'connect-config-import-form checkbox[name=hideAssignedUnits]': {
+                change: me.onHideAssignedUnits
+            },
+            'connect-config-import-form button[action=adoptUnits]': {
+                click: me.onAdoptUnits
             },
 			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
@@ -557,7 +566,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             form = btn.up('form');
 
         form.setLoading();
-        me.saveUnitsMapping();
+
         if (form.getRecord()) {
             var model = form.getRecord();
 
@@ -594,7 +603,20 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    var unitsStore = me.getUnitsMapping().getStore();
+                    if (unitsStore.getUpdatedRecords().length < 1) {
+                        me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                        return;
+                    }
+
+                    unitsStore.sync({
+                        success :function (records, operation) {
+                            me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                        },
+                        failure:function (batch) {
+                            me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
+                        }
+                    });
                 },
                 failure: function(record) {
                     form.setLoading(false);
@@ -604,6 +626,56 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             });
         }
+    },
+
+    /**
+     * Reload Shopware Connect units store
+     * and show/hide already assigned units
+     */
+    onHideAssignedUnits: function(checkbox, value)
+    {
+        var me = this;
+        var store = me.getUnitsMapping().getStore();
+        var hideAssigned = 0;
+
+        if (value === true) {
+            hideAssigned = 1;
+        }
+
+        store.load({
+            params: {
+                'hideAssignedUnits': hideAssigned
+            }
+        });
+    },
+
+    onAdoptUnits: function(btn) {
+        var me = this;
+        var form = btn.up('form');
+
+        Ext.Msg.show({
+            title: me.messages.adoptUnitsTitle,
+            msg: me.messages.adoptUnitsMessage,
+            buttons: Ext.Msg.YESNO,
+            fn: function(response) {
+                if(response !== 'yes') {
+                    return;
+                }
+
+                form.setLoading();
+                Ext.Ajax.request({
+                    url: '{url controller=ConnectConfig action=adoptUnits}',
+                    method: 'POST',
+                    success: function(response, opts) {
+                        var responseObject = Ext.decode(response.responseText);
+                        form.setLoading(false);
+                        if (responseObject.success) {
+                        } else {
+                        }
+                    }
+                });
+            }
+        });
     },
 
     /**
@@ -635,23 +707,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         }
     },
 
-    saveUnitsMapping: function() {
-        var me = this,
-            unitsStore = me.getUnitsMapping().unitsStore;
-
-        if (unitsStore.getUpdatedRecords().length < 1) {
-            return;
-        }
-
-        unitsStore.sync({
-            success :function (records, operation) {
-            },
-            failure:function (batch) {
-                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
-            }
-        });
-    },
-
     /**
      * Sends marketplace attributes mapping to the PHP
      */
@@ -668,7 +723,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
                 },
                 failure:function (batch) {
-                    console.log(batch);
                     panel.setLoading(false);
                     me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
                 }

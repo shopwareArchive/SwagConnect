@@ -103,7 +103,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     createElements: function() {
         var me = this;
             basicConfigFieldset = me.getBasicConfigFieldset(),
-            unitsFieldset = me.getUnitsFieldset(),
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
@@ -116,7 +115,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             }
         }
         elements.push(basicConfigFieldset);
-        elements.push(unitsFieldset);
         elements.push(advancedConfigFieldset);
 
         return elements;
@@ -287,34 +285,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         });
 
         return importSettingsFieldset;
-    },
-
-    getUnitsFieldset: function() {
-        var me = this,
-            items = [];
-
-        items.push({
-            xtype: 'container',
-            html: me.snippets.unitsFieldsetDescription
-        });
-        items.push({
-            xtype: 'connect-units-mapping',
-            width: '100%',
-            padding: '10 0 0 0'
-        });
-
-        var fieldset = Ext.create('Ext.form.FieldSet', {
-            layout: 'vbox',
-            title: me.snippets.unitsHeader,
-            collapsible: true,
-            collapsed: false,
-            defaults: {
-                anchor: '100%'
-            },
-            items: items
-        });
-
-        return fieldset;
     },
 
     /**

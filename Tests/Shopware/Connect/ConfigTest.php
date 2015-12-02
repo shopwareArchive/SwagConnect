@@ -150,10 +150,10 @@ class ConfigTest extends ConnectTestHelper
         $this->getConfigComponent()->setUnitsMapping($data);
 
         $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE name = ? AND groupName = ?';
-        $result = Shopware()->Db()->fetchRow($sql, array($unitName, 'units'));
+        $result = Shopware()->Db()->fetchRow($sql, array($connectUnit, 'units'));
 
-        $this->assertEquals($unitName, $result['name']);
-        $this->assertEquals($connectUnit, $result['value']);
+        $this->assertEquals($unitName, $result['value']);
+        $this->assertEquals($connectUnit, $result['name']);
     }
 
     public function testCompareExportConfiguration()
@@ -225,6 +225,20 @@ class ConfigTest extends ConnectTestHelper
         $this->assertEquals(5, count($result));
 
         $this->assertEquals('semdemo', $result[0]['value']);
+    }
+
+    public function testGetUnitsMappings()
+    {
+        $this->getConfigComponent()->setConfig('testConfigUnit1', 'localUnit1');
+        $this->getConfigComponent()->setConfig('testConfigUnit2', '');
+        $unitsMapping = $this->getConfigComponent()->getUnitsMappings();
+
+        $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE shopId IS NULL AND groupName = ?';
+        $result = Shopware()->Db()->fetchPairs($sql, array('units'));
+
+        foreach ($result as $name => $value) {
+            $this->assertEquals($value, $unitsMapping[$name]);
+        }
     }
 
     public static function tearDownAfterClass()

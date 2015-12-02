@@ -26,6 +26,8 @@ use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Units;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * @category  Shopware
@@ -42,6 +44,16 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      * @var \ShopwarePlugins\Connect\Components\ConnectFactory
      */
     private $factory;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper
+     */
+    private $unitMapper;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Logger
+     */
+    private $logger;
 
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
@@ -360,8 +372,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         foreach ($units as $unit) {
             $unitsMappingArray[] = array(
                 'shopwareUnitName' => $unit->getName(),
-                'shopwareUnitKey' => $unit->getUnit(),
-                'connectUnit' => $this->getConfigComponent()->getConfig($unit->getUnit())
+                'shopwareUnitKey' => $unit->getUnit()
             );
         }
 
@@ -386,6 +397,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $this->getConfigComponent()->setUnitsMapping($data);
 
+        // update related products
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
+        foreach ($data as $unit) {
+            /** @var \Shopware\Models\Article\Unit $unitModel */
+            $unitModel = $repository->findOneBy(array('unit' => $unit['shopwareUnitKey']));
+            if ($unitModel) {
+                continue;
+            }
+            $this->getHelper()->updateUnitInRelatedProducts($unitModel, $unit['connectUnit']);
+        }
+
         $this->View()->assign(
             array(
                 'success' => true
@@ -402,13 +424,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function getConnectUnitsAction()
     {
         $connectUnits = new Units();
-
+        $connectUnitsArray = $connectUnits->getLocalizedUnits('de');
         $unitsArray = array();
+        $hideAssigned = (int)$this->Request()->getParam('hideAssignedUnits', 0);
 
-        foreach ($connectUnits->getLocalizedUnits() as $key => $connectUnit) {
+        foreach ($this->getConfigComponent()->getUnitsMappings() as $connectUnit => $localUnit) {
+            if ($hideAssigned == true && strlen($localUnit) > 0) {
+                continue;
+            }
             $unitsArray[] = array(
-                'key' => $key,
-                'name' => $connectUnit
+                'connectUnit' => $connectUnit,
+                'name' => $connectUnitsArray[$connectUnit],
+                'shopwareUnitKey' => $localUnit
             );
         }
 
@@ -645,6 +672,34 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         );
     }
 
+    public function adoptUnitsAction()
+    {
+        try {
+            $units = array_filter($this->getConfigComponent()->getUnitsMappings(), function($unit) {
+                return strlen($unit) == 0;
+            });
+
+            $models = $this->getUnitMapper()->createUnits(array_keys($units));
+            foreach ($models as $unit) {
+                $this->getHelper()->updateUnitInRelatedProducts($unit, $unit->getUnit());
+            }
+        } catch(\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(
+                array(
+                    'success' => false,
+                )
+            );
+            return;
+        }
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+            )
+        );
+    }
+
     /**
      * @return \ShopwarePlugins\Connect\Components\ConnectFactory
      */
@@ -655,5 +710,32 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         return $this->factory;
+    }
+
+    /**
+     * @return UnitMapper
+     */
+    private function getUnitMapper()
+    {
+        if (!$this->unitMapper) {
+            $this->unitMapper = new UnitMapper(
+                $this->getConfigComponent(),
+                $this->getModelManager()
+            );
+        }
+
+        return $this->unitMapper;
+    }
+
+    /**
+     * @return Logger
+     */
+    private function getLogger()
+    {
+        if (!$this->logger) {
+            $this->logger = new Logger(Shopware()->Db());
+        }
+
+        return $this->logger;
     }
 } 

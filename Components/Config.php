@@ -391,22 +391,36 @@ class Config
         foreach ($units as $unit) {
             /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
-                    'name' => $unit['shopwareUnitKey'],
+                    'name' => $unit['connectUnit'],
                     'shopId' => null,
                     'groupName' => 'units'
                 ));
             if (is_null($model)) {
                 $model = new ConfigModel();
-                $model->setName($unit['shopwareUnitKey']);
+                $model->setName($unit['connectUnit']);
+                $model->setValue($unit['shopwareUnitKey']);
                 $model->setGroupName('units');
                 $model->setShopId(null);
             }
 
-            $model->setValue($unit['connectUnit']);
+            $model->setValue($unit['shopwareUnitKey']);
             $this->manager->persist($model);
         }
 
         $this->manager->flush();
+    }
+
+    /**
+     * Returns units mapping from Connect config table
+     *
+     * @return array
+     */
+    public function getUnitsMappings()
+    {
+        $query = "SELECT `name`, `value` FROM s_plugin_connect_config
+        WHERE `shopId` IS NULL AND `groupName` = 'units'";
+
+        return Shopware()->Db()->fetchPairs($query);
     }
 
 	/**

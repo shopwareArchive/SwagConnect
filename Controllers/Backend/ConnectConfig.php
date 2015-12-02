@@ -95,6 +95,30 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
     }
 
+    public function changeLoggingAction()
+    {
+        try {
+            $enableLogging = $this->Request()->getParam('enableLogging');
+            $this->getConfigComponent()->setConfig('logRequest', $enableLogging, null, 'general');
+
+            $this->View()->assign(array(
+                'success' => true
+            ));
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+            ));
+        }
+    }
+
+    public function getLoggingEnabledAction()
+    {
+        $this->View()->assign(array(
+            'success' => true,
+            'enableLogging' => $this->getConfigComponent()->getConfig('logRequest', 0),
+        ));
+    }
+
     /**
      * The getImportAction function is an ExtJs event listener method of the
      * connect module. The function is used to load store

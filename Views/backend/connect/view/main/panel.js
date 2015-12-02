@@ -13,9 +13,6 @@ Ext.define('Shopware.apps.Connect.view.main.Panel', {
 
         Ext.applyIf(me, {
             items: [{
-                xtype: 'connect-home-page',
-                itemId: 'home'
-            }, {
                 xtype: 'connect-config',
                 itemId: 'config'
             }, {

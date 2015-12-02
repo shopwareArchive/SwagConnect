@@ -9,6 +9,10 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
 
     store: 'log.List',
 
+    snippets: {
+        logLabel: '{s name=config/log_label}Logging aktivieren{/s}'
+    },
+
     initComponent: function() {
         var me = this;
 
@@ -117,12 +121,33 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
     getTopBar:function () {
         var me = this;
         var items = [];
+        var loggingCheckbox = Ext.create('Ext.form.field.Checkbox', {
+            boxLabel: me.snippets.logLabel,
+            name: 'logRequest',
+            inputValue: 1,
+            uncheckedValue: 0
+        });
 
         items.push('->');
+        items.push(loggingCheckbox);
         items.push({
             iconCls:'sprite-minus-circle-frame',
             text:'{s name=log/clear}Clear log{/s}',
             action:'clear'
+        });
+
+        Ext.Ajax.request({
+            scope: me,
+            url: '{url controller=ConnectConfig action=getLoggingEnabled}',
+            success: function(result, request) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success === false) {
+                    loggingCheckbox.setRawValue(0);
+                }
+
+                var loggingEnable = response.enableLogging ? 1 : 0;
+                loggingCheckbox.setRawValue(loggingEnable);
+            }
         });
 
         return items;

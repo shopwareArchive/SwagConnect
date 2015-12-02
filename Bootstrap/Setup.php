@@ -383,7 +383,6 @@ class Setup
             'overwriteProductShortDescription' => array('1', null, 'import'),
             'overwriteProductLongDescription' => array('1', null, 'import'),
             'logRequest' => array('1', null, 'general'),
-            'shippingCostsPage' => array('6', null, 'general'),
             'showShippingCostsSeparately' => array('0', null, 'general'),
             'articleImagesLimitImport' => array(10, null, 'import'),
         );

@@ -36,7 +36,6 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('overwriteProductShortDescription', '1', 'import'),
             ('overwriteProductLongDescription', '1', 'import'),
             ('logRequest', '1', 'general'),
-            ('shippingCostsPage', '6', 'general'),
             ('showShippingCostsSeparately', '0', 'general'),
             ('articleImagesLimitImport', '10', 'import');
             "
@@ -61,8 +60,6 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'createCategoriesAutomatically' => '1',
             'createUnitsAutomatically' => '1',
             'exportDomain' => '',
-            'shippingCostsPageName' => 'Versand und Zahlung',
-            'shippingCostsPage' => '6',
             'checkoutShopInfo' => '1',
             'detailProductNoIndex' => '1',
             'detailShopInfo' => '1',

@@ -15,22 +15,16 @@ Ext.define('Shopware.apps.Connect.view.main.Navigation', {
         var me = this;
 
         Ext.applyIf(me, {
-            store: 'main.Navigation'
-            //dockedItems: me.getToolbar()
+            store: 'main.Navigation',
+            listeners: {
+                afterrender: function(tree, eOpts) {
+                    var record = tree.getStore().getNodeById('config');
+                    tree.getSelectionModel().select(record);
+                }
+            }
         });
 
         me.callParent(arguments);
-    },
-
-    getToolbar: function() {
-        var me = this;
-        return {
-            xtype: 'toolbar',
-            dock: 'bottom',
-            border: false,
-            cls: 'shopware-toolbar',
-            items: me.getToolbarItems()
-        };
     }
 });
 //{/block}

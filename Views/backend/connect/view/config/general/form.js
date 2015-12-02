@@ -53,19 +53,18 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         apiKeyHeader: '{s name=config/main/api_key}API-Key{/s}',
         apiKeyDescription: Ext.String.format('{s name=config/api_key_description}Bitte hinterlegen Sie an dieser Stelle Ihren API-Key, um eine Verbindung zu [0] aufzubauen. Unter dem folgenden Link können Sie Ihren API-Key einsehen: <a href=[1]/settings/exchange target=_blank>[1]/settings/exchange</a><br>Sie können viele verschiedene ERP- und Shopsysteme an [0] andocken, wozu Ihnen eine Vielzahl von Schnittstellen zur Verfügung steht - <a href=http://info.bepado.de/schnittstellen target=_blank>Mehr Info</a><br><br>{/s}', marketplaceName, marketplaceNetworkUrl),
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
+        basicSettings: '{s name=config/main/basic_settings}Grundeinstellungen{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        detailPageHintLabel: '{s name=config/detail_page_hint}Show marketplace hint on article detail page{/s}',
+        detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
-        basketHintLabel: '{s name=config/basket_hint_label}Show marketplace hint in basket{/s}',
+        basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
         connectAttributeLabel: Ext.String.format('{s name=config/connect_attribute_label}[0]-Attribut{/s}', marketplaceName),
         alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
-        logLabel: '{s name=config/log_label}Logging aktivieren{/s}',
-        logDescription: Ext.String.format('{s name=config/log_description}[0]-Anfragen mitschreiben{/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
         hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
-        basicHeader: '{s name=config/basic}Basic{/s}',
+        basicHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
         unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}',marketplaceName),
         importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
@@ -155,10 +154,11 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      */
     getApiKeyFieldset: function() {
         var me = this;
+        var attributeCombo = me.createAttributeCombo();
 
         var apiFieldset = Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
-            title: me.snippets.apiKeyHeader,
+            title: me.snippets.basicSettings,
             defaultType: 'textfield',
             layout: 'anchor',
             items: [
@@ -211,7 +211,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     uncheckedValue: 0,
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
-                }
+                },
+                attributeCombo
             ]
         });
 
@@ -226,17 +227,10 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             items = [],
             leftElements = me.createLeftElements(),
-            rightElements = me.createRightElements(),
-            bottomElements = me.createBottomElements();
+            rightElements = me.createRightElements();
 
         items.push(leftElements);
         items.push(rightElements);
-        items.push(bottomElements);
-
-        if (me.defaultShop) {
-            var defaultElements = me.createDefaultElements();
-            items.push(defaultElements);
-        }
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
             layout: 'column',
@@ -338,31 +332,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                         fieldLabel: me.snippets.exportDomainLabel,
                         labelWidth: me.defaults.labelWidth,
                         helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
-                    }, {
-                        xtype: 'fieldcontainer',
-                        fieldLabel: me.snippets.logLabel,
-                        defaultType: 'checkboxfield',
-                        labelWidth: me.defaults.labelWidth,
-                        items: [
-                            {
-                                boxLabel: me.snippets.logDescription,
-                                name: 'logRequest',
-                                inputValue: 1,
-                                uncheckedValue: 0
-                            }
-                        ]
-                    }, {
-                        xtype: 'fieldcontainer',
-                        fieldLabel: me.snippets.separateShippingLabel,
-                        defaultType: 'checkboxfield',
-                        labelWidth: me.defaults.labelWidth,
-                        items: [
-                            {
-                                name: 'showShippingCostsSeparately',
-                                inputValue: 1,
-                                uncheckedValue: 0
-                            }
-                        ]
                     }
                 ]
             });
@@ -404,6 +373,13 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     inputValue: 1,
                     uncheckedValue: 0,
                     labelWidth: me.defaults.labelWidth
+                }, {
+                        xtype: 'checkbox',
+                        name: 'showShippingCostsSeparately',
+                        fieldLabel: me.snippets.separateShippingLabel,
+                        labelWidth: me.defaults.labelWidth,
+                        inputValue: 1,
+                        uncheckedValue: 0
                 }
             ]
         });
@@ -438,10 +414,10 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which are displayed only for default shop
+     * Creates the Shopware Connect attribute combo field which is displayed only for default shop
      * @return Ext.container.Container
      */
-    createDefaultElements: function() {
+    createAttributeCombo: function() {
         var me = this;
 
         var attributeStore = new Ext.data.ArrayStore({
@@ -495,57 +471,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     },
 
     /**
-     * Creates the field set items which are displayed in the bottom
-     * @return Ext.container.Container
-     */
-    createBottomElements: function() {
-        var me = this;
-
-        var bottomContainer = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
-            layout: 'anchor',
-            border: false,
-            items: [
-                me.createShippingCostsCombo()
-            ]
-        });
-
-        return bottomContainer;
-    },
-
-    /**
-     * Creates the shipping costs page combo
-     * @return Ext.container.Container
-     */
-    createShippingCostsCombo: function () {
-        var me = this;
-        me.shippingCostsCombo = Ext.create('Shopware.form.field.PagingComboBox', {
-            name: 'shippingCostsPage',
-            anchor: '100%',
-            valueField: 'id',
-            displayField: 'name',
-            fieldLabel: me.snippets.shippingCostsLabel,
-            store: me.staticPagesStore,
-            labelWidth: me.defaults.labelWidth,
-            helpText: Ext.String.format('{s name=config/help/connect_shipping_costs_page}[0] fügt seine eigenen Versandkosten-Informationen vor ihrer Versandkosten-Seite an. Wählen Sie hier ihre Standard-Versandkostenseite.{/s}', marketplaceName),
-            allowBlank: true,
-            forceSelection: true,
-            beforeBlur: function () {
-                var value = this.getRawValue();
-                if (value == '') {
-                    var model = this.up('form').getRecord();
-                    model.set('shippingCostsPage', '');
-                    this.lastSelection = [];
-                }
-                this.doQueryTask.cancel();
-                this.assertValue();
-            }
-        });
-
-        return me.shippingCostsCombo;
-    },
-
-    /**
      * Find general config record by id
      * and load into form
      */
@@ -560,10 +485,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         if (record.get('connectAttribute') < 1) {
             record.set('connectAttribute', 19);
-        }
-
-        if (record.get('shippingCostsPage') > 0) {
-            me.shippingCostsCombo.valueNotFoundText = record.get('shippingCostsPageName');
         }
 
         me.loadRecord(record);

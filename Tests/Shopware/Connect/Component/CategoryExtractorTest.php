@@ -47,99 +47,6 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
         Shopware()->Db()->exec("DELETE FROM `s_plugin_connect_categories`");
     }
 
-    public function testExtractByShopId()
-    {
-        $sql = 'SELECT article_id
-                FROM `s_plugin_connect_items`
-                WHERE shop_id = ?
-                ORDER BY id DESC
-                LIMIT 1';
-        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
-
-        $sql = 'SELECT id, category_key
-                FROM `s_plugin_connect_categories`';
-        $categories = Shopware()->Db()->fetchPairs($sql);
-
-        foreach ($categories as $id => $key) {
-            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
-                'connect_category_id' => $id,
-                'articleID' => $articleId
-            ));
-        }
-
-        $expected = array(
-            array(
-                'id' => '/Ski-unit',
-                'name' => 'Ski',
-                'leaf' => true,
-                'children' => array(),
-            ),
-            array(
-                'id' => '/Kleidung-unit',
-                'name' => 'Kleidung',
-                'leaf' => false,
-                'children' => array(
-                ),
-            ),
-        );
-
-        $result = $this->categoryExtractor->extractByShopId(3);
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testExtractByShopIdAndIncludeChildren()
-    {
-        $sql = 'SELECT article_id
-                FROM `s_plugin_connect_items`
-                WHERE shop_id = ?
-                ORDER BY id DESC
-                LIMIT 1';
-        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
-
-        $sql = 'SELECT id, category_key
-                FROM `s_plugin_connect_categories`';
-        $categories = Shopware()->Db()->fetchPairs($sql);
-
-        foreach ($categories as $id => $key) {
-            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
-                'connect_category_id' => $id,
-                'articleID' => $articleId
-            ));
-        }
-
-        $expected = array(
-            array(
-                'id' => '/Ski-unit',
-                'name' => 'Ski',
-                'leaf' => true,
-                'children' => array(),
-            ),
-            array(
-                'id' => '/Kleidung-unit',
-                'name' => 'Kleidung',
-                'leaf' => false,
-                'children' => array(
-                    array(
-                        'id' => '/Kleidung-unit/Hosen-unit',
-                        'name' => 'Hosen',
-                        'leaf' => false,
-                        'children' => array(
-                            array(
-                                'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
-                                'name' => 'Hosentraeger',
-                                'leaf' => true,
-                                'children' => array(),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        );
-
-        $result = $this->categoryExtractor->extractByShopId(3, $includeChildren = true);
-        $this->assertEquals($expected, $result);
-    }
-
     public function testExtractImportedCategories()
     {
         $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
@@ -394,6 +301,105 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
         $excludeMapped = true;
         $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, $excludeMapped);
         $this->assertEmpty($result);
+    }
+
+    /**
+     * @depends testExtractImportedCategories
+     */
+    public function testExtractByShopId()
+    {
+        $sql = 'SELECT article_id
+                FROM `s_plugin_connect_items`
+                WHERE shop_id = ?
+                ORDER BY id DESC
+                LIMIT 1';
+        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+
+        $sql = 'SELECT id, category_key
+                FROM `s_plugin_connect_categories`';
+        $categories = Shopware()->Db()->fetchPairs($sql);
+
+        foreach ($categories as $id => $key) {
+            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
+                'connect_category_id' => $id,
+                'articleID' => $articleId
+            ));
+        }
+
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(
+                ),
+            ),
+        );
+
+        $result = $this->categoryExtractor->extractByShopId(3);
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * @depends testExtractImportedCategories
+     */
+    public function testExtractByShopIdAndIncludeChildren()
+    {
+        $sql = 'SELECT article_id
+                FROM `s_plugin_connect_items`
+                WHERE shop_id = ?
+                ORDER BY id DESC
+                LIMIT 1';
+        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+
+        $sql = 'SELECT id, category_key
+                FROM `s_plugin_connect_categories`';
+        $categories = Shopware()->Db()->fetchPairs($sql);
+
+        foreach ($categories as $id => $key) {
+            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
+                'connect_category_id' => $id,
+                'articleID' => $articleId
+            ));
+        }
+
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(
+                    array(
+                        'id' => '/Kleidung-unit/Hosen-unit',
+                        'name' => 'Hosen',
+                        'leaf' => false,
+                        'children' => array(
+                            array(
+                                'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                                'name' => 'Hosentraeger',
+                                'leaf' => true,
+                                'children' => array(),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $result = $this->categoryExtractor->extractByShopId(3, $includeChildren = true);
+        $this->assertEquals($expected, $result);
     }
 }
  

@@ -63,11 +63,43 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.callParent(arguments);
     },
 
+    /**
+     * When remote category is clicked set params to
+     * remote products store and load it. Products are visible
+     * in remote products grid.
+     *
+     * @param treePanel
+     * @param record
+     */
     onSelectRemoteCategory: function(treePanel, record) {
         var me = this;
+        var mainCategory = me.getMainCategoryByNode(record);
 
-        me.getRemoteProductsGrid().getStore().getProxy().extraParams.category = record.get('id');
-        me.getRemoteProductsGrid().getStore().load();
+        var remoteProductsStore = me.getRemoteProductsGrid().getStore();
+        remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('id');
+        if (mainCategory.get('id') != record.get('id')) {
+            remoteProductsStore.getProxy().extraParams.category = record.get('id');
+        } else {
+            remoteProductsStore.getProxy().extraParams.category = null;
+        }
+
+        remoteProductsStore.loadPage(1);
+    },
+
+    /**
+     * Find main category
+     *
+     * @param node
+     * @returns node
+     */
+    getMainCategoryByNode: function(node) {
+        var me = this;
+
+        if (node.parentNode.get('id') == 'root') {
+            return node;
+        }
+
+        return me.getMainCategoryByNode(node.parentNode);
     },
 
     onSelectLocalCategory: function(treePanel, record) {
@@ -322,6 +354,10 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 tree.setLoading(false);
             }
         });
+    },
+
+    onRemoteCategorySelectionChange: function(tree, selected, eOpts) {
+        console.log('sb:da');
     },
 
     /**

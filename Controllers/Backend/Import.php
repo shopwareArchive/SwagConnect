@@ -67,14 +67,14 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function loadArticlesByRemoteCategoryAction()
     {
         $category = $this->request->getParam('category', null);
+        $shopId = $this->request->getParam('shopId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
 
-        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $limit, $offset);
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $shopId, $limit, $offset);
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
-        $paginator->setUseOutputWalkers(false);
         $totalCount = $paginator->count();
         $this->View()->assign(array(
             'success' => true,

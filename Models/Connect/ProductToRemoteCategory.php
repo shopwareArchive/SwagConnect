@@ -77,6 +77,16 @@ class ProductToRemoteCategory extends ModelEntity
     protected $article;
 
     /**
+     * @var \Shopware\CustomModels\Connect\Attribute
+     *
+     * @ORM\OneToOne(targetEntity="Shopware\CustomModels\Connect\Attribute")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="articleID", referencedColumnName="article_id")
+     * })
+     */
+    protected $connectAttribute;
+
+    /**
      * @return int
      */
     public function getId()

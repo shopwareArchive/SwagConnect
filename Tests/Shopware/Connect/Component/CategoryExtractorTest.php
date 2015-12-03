@@ -1,7 +1,7 @@
 <?php
 
 
-class CategoryExtractorTest extends PHPUnit_Framework_TestCase
+class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\CategoryExtractor
@@ -303,28 +303,18 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
         $this->assertEmpty($result);
     }
 
-    /**
-     * @depends testExtractImportedCategories
-     */
     public function testExtractByShopId()
     {
-        $sql = 'SELECT article_id
-                FROM `s_plugin_connect_items`
-                WHERE shop_id = ?
-                ORDER BY id DESC
-                LIMIT 1';
-        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+        $product = $this->getProduct();
+        $product->categories = array(
+            '/Ski-unit' => 'Ski',
+            '/Kleidung-unit' => 'Kleidung',
+            '/Kleidung-unit/Hosen-unit' => 'Hosen',
+            '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
 
-        $sql = 'SELECT id, category_key
-                FROM `s_plugin_connect_categories`';
-        $categories = Shopware()->Db()->fetchPairs($sql);
+        );
 
-        foreach ($categories as $id => $key) {
-            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
-                'connect_category_id' => $id,
-                'articleID' => $articleId
-            ));
-        }
+        $this->getProductToShop()->insertOrUpdate($product);
 
         $expected = array(
             array(
@@ -346,28 +336,18 @@ class CategoryExtractorTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @depends testExtractImportedCategories
-     */
     public function testExtractByShopIdAndIncludeChildren()
     {
-        $sql = 'SELECT article_id
-                FROM `s_plugin_connect_items`
-                WHERE shop_id = ?
-                ORDER BY id DESC
-                LIMIT 1';
-        $articleId = Shopware()->Db()->fetchOne($sql, array(3));
+        $product = $this->getProduct();
+        $product->categories = array(
+            '/Ski-unit' => 'Ski',
+            '/Kleidung-unit' => 'Kleidung',
+            '/Kleidung-unit/Hosen-unit' => 'Hosen',
+            '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
 
-        $sql = 'SELECT id, category_key
-                FROM `s_plugin_connect_categories`';
-        $categories = Shopware()->Db()->fetchPairs($sql);
+        );
 
-        foreach ($categories as $id => $key) {
-            Shopware()->Db()->insert('s_plugin_connect_product_to_categories', array(
-                'connect_category_id' => $id,
-                'articleID' => $articleId
-            ));
-        }
+        $this->getProductToShop()->insertOrUpdate($product);
 
         $expected = array(
             array(

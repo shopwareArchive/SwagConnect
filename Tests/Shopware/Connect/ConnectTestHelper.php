@@ -3,9 +3,13 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Struct\Translation;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
@@ -13,6 +17,7 @@ use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Price;
 use Shopware\Models\Tax\Tax;
+use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
@@ -292,6 +297,28 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         Shopware()->Models()->flush();
 
         return $article;
+    }
+
+    public function getProductToShop()
+    {
+        $manager = Shopware()->Models();
+        return new ProductToShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            $this->getImageImport(),
+            new Config(Shopware()->Models()),
+            new VariantConfigurator(
+                $manager,
+                new PdoProductTranslationsGateway(Shopware()->Db())
+            ),
+            new MarketplaceGateway($manager),
+            new PdoProductTranslationsGateway(Shopware()->Db()),
+            new DefaultCategoryResolver(
+                $manager,
+                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+            )
+        );
     }
 
     protected function insertOrUpdateProducts($number, $withImage)

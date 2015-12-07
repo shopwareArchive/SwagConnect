@@ -44,4 +44,32 @@ class ImportTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertTrue($this->View()->success);
         $this->assertTrue(is_array($returnData), 'Returned data must be array');
     }
+
+    public function testUnassignRemoteToLocalCategoryAction()
+    {
+        $this->Request()
+            ->setMethod('POST')
+            ->setPost('localCategoryId', 6);
+        $this->dispatch('backend/Import/unassignRemoteToLocalCategory');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+    }
+
+    public function testUnassignRemoteToLocalCategoryActionWithoutCategoryId()
+    {
+        $this->dispatch('backend/Import/unassignRemoteToLocalCategory');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertFalse($this->View()->success);
+        $this->assertEquals('Invalid local or remote category', $this->View()->error);
+    }
+
+    public function testUnassignRemoteArticlesFromLocalCategoryAction()
+    {
+        $this->dispatch('backend/Import/unassignRemoteArticlesFromLocalCategory');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+    }
 } 

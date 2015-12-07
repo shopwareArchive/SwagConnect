@@ -135,7 +135,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     /**
      * Unassign all categories from articles
      */
-    public function unassignRemoteFromLocalCategoryAction()
+    public function unassignRemoteArticlesFromLocalCategoryAction()
     {
         $articleIds = $this->request->getParam('articleIds', array());
 
@@ -176,6 +176,38 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->View()->assign(array(
                 'success' => false,
                 'error' => 'Remote category could not be mapped to local category!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
+    /**
+     * Unassign all remote articles from local category
+     */
+    public function unassignRemoteToLocalCategoryAction()
+    {
+        $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
+
+        if ($localCategoryId == 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Invalid local or remote category',
+            ));
+            return;
+        }
+
+        try {
+            $articleIds = $this->getImportService()->findRemoteArticleIdsByCategoryId($localCategoryId);
+            $this->getImportService()->unAssignArticleCategories($articleIds);
+        } catch (\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Products from remote category could not be unassigned!',
             ));
             return;
         }

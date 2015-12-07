@@ -32,6 +32,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 reloadRemoteCategories: me.onReloadRemoteCategories,
                 itemmousedown: me.onSelectRemoteCategory
             },
+            'connect-remote-categories dataview': {
+                drop: me.onDropToRemoteCategory
+            },
             'connect-own-categories': {
                 reloadOwnCategories: me.onReloadOwnCategories,
                 itemmousedown: me.onSelectLocalCategory
@@ -49,6 +52,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
+            },
+            'connect-import button[action=unassignRemoteCategory]': {
+                click: me.onUnassignRemoteCategoryButtonClick
             },
             'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
@@ -202,7 +208,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         panel.setLoading(false);
         Ext.Ajax.request({
-            url: '{url controller=Import action=unassignRemoteFromLocalCategory}',
+            url: '{url controller=Import action=unassignRemoteArticlesFromLocalCategory}',
             method: 'POST',
             params: {
                 'articleIds[]': ids
@@ -243,6 +249,16 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
     },
 
+    /**
+     * Get selected local category and unassign all remote articles from it
+     */
+    onDropToRemoteCategory: function(node, data, overModel, dropPosition, eOpts) {
+        var me = this;
+        var localCategoryId = data.records[0].get('id');
+
+        me.unassignRemoteToLocalCategories(localCategoryId);
+    },
+
     importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId) {
         var me = this;
         var panel = me.getImportPanel();
@@ -277,6 +293,43 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         });
     },
 
+    /**
+     * Send ajax request to unassign all remote articles from given category id
+     */
+    unassignRemoteToLocalCategories: function(localCategoryId) {
+        var me = this;
+        var panel = me.getImportPanel();
+
+        panel.setLoading();
+        Ext.Ajax.request({
+            url: '{url controller=Import action=unassignRemoteToLocalCategory}',
+            method: 'POST',
+            params: {
+                localCategoryId: localCategoryId
+            },
+            success: function(response, opts) {
+                panel.setLoading(false);
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == true) {
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                }
+
+                me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
+                me.getRemoteCategoryTree().getStore().load();
+                me.getLocalCategoryTree().getStore().getRootNode().removeAll();
+                me.getLocalCategoryTree().getStore().load();
+
+                me.getLocalProductsGrid().getStore().loadPage(1);
+            },
+            failure: function(response, opts) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
+        });
+    },
+
     onImportRemoteCategoryButtonClick: function() {
         var me = this;
 
@@ -297,6 +350,20 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var localCategoryId = localCategoryTreeSelection[0].get('id');
 
         me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+    },
+
+    onUnassignRemoteCategoryButtonClick: function () {
+        var me = this;
+
+        var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
+        if (localCategoryTreeSelection.length == 0) {
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            return;
+        }
+
+        var localCategoryId = localCategoryTreeSelection[0].get('id');
+
+        me.unassignRemoteToLocalCategories(localCategoryId);
     },
 
     /**

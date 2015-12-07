@@ -111,6 +111,45 @@ class ImportService
     }
 
     /**
+     * Unassign all categories from given article ids
+     * Set connect_mapped_category flag in article
+     * attributes to NULL
+     *
+     * @param array $articleIds
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    public function unAssignArticleCategories(array $articleIds)
+    {
+        // cast all items in $articleIds to int
+        // before use them in WHERE IN clause
+        foreach ($articleIds as $key => $articleId) {
+            $articleIds[$key] = (int)$articleId;
+        }
+
+        $connection = $this->manager->getConnection();
+        $connection->beginTransaction();
+
+        try {
+            $attributeStatement = $connection->prepare(
+                'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(", ", $articleIds) . ')'
+            );
+            $attributeStatement->execute();
+
+            $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+            $categoriesStatement->execute();
+
+            $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+            $categoryLogStatement->execute();
+            $connection->commit();
+
+        } catch (\Exception $e) {
+            $connection->rollBack();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    /**
      * Collect all child categories by given
      * remote category key and create same
      * categories structure as Shopware Connect structure.

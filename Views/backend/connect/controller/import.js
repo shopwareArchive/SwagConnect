@@ -43,6 +43,10 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 beforedrop: me.onBeforeDropLocalProduct,
                 drop: me.onDropToLocalProducts
             },
+            'connect-products dataview': {
+                drop: me.onDropToRemoteProducts,
+                beforedrop: me.onBeforeDropRemoteProducts
+            },
             'connect-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
             },
@@ -125,6 +129,22 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
     },
 
+    /**
+     * Check products before drop,
+     * they should be only remote products
+     */
+    onBeforeDropRemoteProducts: function(node, data, overModel, dropPosition, dropHandlers) {
+        var me = this;
+
+        for (var index in data.records) {
+            if (data.records[index].get('Attribute_connectMappedCategory') == 0) {
+                dropHandlers.cancelDrop();
+                me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/not_allowed_drag_local_products}Use drag&drop only on remote products{/s}');
+                break;
+            }
+        }
+    },
+
     onDropToLocalProducts: function(node, data, overModel, dropPosition, eOpts)
     {
         var me = this;
@@ -165,6 +185,41 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
             }
 
+        });
+    },
+
+    /**
+     * Handle drop product to remote products grid
+     */
+    onDropToRemoteProducts: function(node, data, overModel, dropPosition, eOpts) {
+        var me = this;
+        var ids = [];
+        var panel = me.getImportPanel();
+
+        for (var index in data.records) {
+            ids.push(data.records[index].get('Article_id'));
+        }
+
+        panel.setLoading(false);
+        Ext.Ajax.request({
+            url: '{url controller=Import action=unassignRemoteFromLocalCategory}',
+            method: 'POST',
+            params: {
+                'articleIds[]': ids
+            },
+            success: function(response, opts) {
+                panel.setLoading(false);
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == true) {
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                }
+            },
+            failure: function(response, opts) {
+                panel.setLoading(false);
+                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+            }
         });
     },
 
@@ -354,10 +409,6 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 tree.setLoading(false);
             }
         });
-    },
-
-    onRemoteCategorySelectionChange: function(tree, selected, eOpts) {
-        console.log('sb:da');
     },
 
     /**

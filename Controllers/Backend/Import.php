@@ -132,6 +132,29 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Unassign all categories from articles
+     */
+    public function unassignRemoteFromLocalCategoryAction()
+    {
+        $articleIds = $this->request->getParam('articleIds', array());
+
+        try {
+            $this->getImportService()->unAssignArticleCategories($articleIds);
+        } catch (\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Categories could not be unassigned from products!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
     public function assignRemoteToLocalCategoryAction()
     {
         $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);

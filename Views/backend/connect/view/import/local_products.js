@@ -12,6 +12,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
         plugins: {
             ptype: 'gridviewdragdrop',
             appendOnly: true,
+            dragGroup: 'remote',
             dropGroup: 'local'
         },
         getRowClass: function(rec, rowIdx, params, store) {

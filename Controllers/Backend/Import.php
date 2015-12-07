@@ -49,28 +49,32 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getImportedProductCategoriesTreeAction()
     {
-        $parent = $this->request->getParam('id', null);
+        $parent = $this->request->getParam('id', 'root');
         if ($parent == 'root') {
-            $parent = null;
+            $categories = $this->getCategoryExtractor()->getMainNodes();
+        } elseif (is_numeric($parent)) {
+            $categories = $this->getCategoryExtractor()->extractByShopId($parent);
+        } else {
+            $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true);
         }
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true),
+            'data' => $categories,
         ));
     }
 
     public function loadArticlesByRemoteCategoryAction()
     {
         $category = $this->request->getParam('category', null);
+        $shopId = $this->request->getParam('shopId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
 
-        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $limit, $offset);
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $shopId, $limit, $offset);
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
-        $paginator->setUseOutputWalkers(false);
         $totalCount = $paginator->count();
         $this->View()->assign(array(
             'success' => true,
@@ -128,6 +132,29 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Unassign all categories from articles
+     */
+    public function unassignRemoteArticlesFromLocalCategoryAction()
+    {
+        $articleIds = $this->request->getParam('articleIds', array());
+
+        try {
+            $this->getImportService()->unAssignArticleCategories($articleIds);
+        } catch (\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Categories could not be unassigned from products!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
     public function assignRemoteToLocalCategoryAction()
     {
         $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
@@ -149,6 +176,38 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->View()->assign(array(
                 'success' => false,
                 'error' => 'Remote category could not be mapped to local category!',
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
+    }
+
+    /**
+     * Unassign all remote articles from local category
+     */
+    public function unassignRemoteToLocalCategoryAction()
+    {
+        $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
+
+        if ($localCategoryId == 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Invalid local or remote category',
+            ));
+            return;
+        }
+
+        try {
+            $articleIds = $this->getImportService()->findRemoteArticleIdsByCategoryId($localCategoryId);
+            $this->getImportService()->unAssignArticleCategories($articleIds);
+        } catch (\Exception $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Products from remote category could not be unassigned!',
             ));
             return;
         }
@@ -187,7 +246,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                     Shopware()->Models(),
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
-                )
+                ),
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection())
             );
         }
 

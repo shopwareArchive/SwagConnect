@@ -111,6 +111,67 @@ class ImportService
     }
 
     /**
+     * Unassign all categories from given article ids
+     * Set connect_mapped_category flag in article
+     * attributes to NULL
+     *
+     * @param array $articleIds
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    public function unAssignArticleCategories(array $articleIds)
+    {
+        if (!empty($articleIds)) {
+            // cast all items in $articleIds to int
+            // before use them in WHERE IN clause
+            foreach ($articleIds as $key => $articleId) {
+                $articleIds[$key] = (int)$articleId;
+            }
+
+            $connection = $this->manager->getConnection();
+            $connection->beginTransaction();
+
+            try {
+                $attributeStatement = $connection->prepare(
+                    'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(", ", $articleIds) . ')'
+                );
+                $attributeStatement->execute();
+
+                $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+                $categoriesStatement->execute();
+
+                $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+                $categoryLogStatement->execute();
+                $connection->commit();
+
+            } catch (\Exception $e) {
+                $connection->rollBack();
+                throw new \Exception($e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Collect remote article ids by given category id
+     *
+     * @param int $localCategoryId
+     * @return array
+     */
+    public function findRemoteArticleIdsByCategoryId($localCategoryId)
+    {
+        $connection = $this->manager->getConnection();
+        $sql = 'SELECT sac.articleID
+            FROM s_articles_categories sac
+            LEFT JOIN s_articles_attributes saa ON sac.articleID = saa.articleID
+            WHERE sac.categoryID = :categoryId AND saa.connect_mapped_category = 1';
+        $rows = $connection->fetchAll($sql, array(':categoryId' => $localCategoryId));
+
+        return array_map(function($row) {
+            return $row['articleID'];
+        }, $rows);
+    }
+
+    /**
      * Collect all child categories by given
      * remote category key and create same
      * categories structure as Shopware Connect structure.

@@ -18,6 +18,7 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
         plugins: {
             ptype: 'treeviewdragdrop',
             appendOnly: true,
+            dragGroup: 'remote',
             dropGroup: 'local'
         }
     },

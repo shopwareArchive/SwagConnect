@@ -141,6 +141,8 @@ class Product extends ShopItem
      */
     public $vendor;
 
+    public $stream;
+
     /**
      * The language of the product title, description etc.
      *

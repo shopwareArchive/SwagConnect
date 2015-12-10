@@ -51,6 +51,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute1->setCategory(array('/Ski' => 'Ski'));
+        $attribute1->setStream('Awesome products');
 
         $attribute2 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute2->setCategory(array(
@@ -58,6 +59,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             '/Kleidung/Hosen' => 'Hosen',
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
         ));
+        $attribute2->setStream('Awesome products');
 
         $attribute3 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute3->setCategory(array(
@@ -65,6 +67,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             '/Kleidung/Nahrung & Getraenke' => 'Nahrung & Getraenke',
             '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke' => 'Alkoholische Getränke',
         ));
+        $attribute3->setStream('Awesome products');
 
         $this->attributeRepository->expects($this->once())
             ->method('findRemoteArticleAttributes')

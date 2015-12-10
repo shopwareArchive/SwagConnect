@@ -28,12 +28,14 @@ class Update
     public function run()
     {
         // When the dummy plugin is going to be installed, don't do the later updates
-        if (version_compare($this->version, '1.0.0', '<=')) {
-            return true;
-        }
+//        if (version_compare($this->version, '1.0.0', '<=')) {
+//            return true;
+//        }
 
         // Force an SDK re-verify
         $this->reVerifySDK();
+
+        $this->createStreamField();
 
         return true;
     }
@@ -50,6 +52,16 @@ class Update
             LIMIT 1; ',
             array(time() - 8 * 60 * 60 * 24)
         );
+    }
+
+    public function createStreamField()
+    {
+        if (version_compare($this->version, '0.0.1', '<=')) {
+            Shopware()->Db()->query('
+                ALTER TABLE s_plugin_connect_items
+                ADD stream VARCHAR(255) NOT NULL
+            ');
+        }
     }
 
     private function clearTemplateCache()

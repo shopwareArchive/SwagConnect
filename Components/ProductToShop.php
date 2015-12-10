@@ -256,6 +256,7 @@ class ProductToShop implements ProductToShopBase
         $connectAttribute->setExportStatus(null);
         $connectAttribute->setPurchasePrice($product->purchasePrice);
         $connectAttribute->setFixedPrice($product->fixedPrice);
+        $connectAttribute->setStream($product->stream);
 
         // store product categories to connect attribute
         $connectAttribute->setCategory($product->categories);

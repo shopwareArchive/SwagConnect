@@ -146,19 +146,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                             vertical: true,
                             columnWidth: .25,
                             items: [
-                                {
-                                    boxLabel: me.snippets.priceMode,
-                                    name: 'exportPriceMode',
-                                    readOnly: true,
-                                    inputValue: 'price'
-                                },
-                                {
-                                    boxLabel: me.snippets.purchasePriceMode,
-                                    name: 'exportPriceMode',
-                                    inputValue: 'purchasePrice',
-                                    readOnly: true,
-                                    margin: '15 0 0 0'
-                                }
+                                me.exportPriceCheckbox = me.createPriceCheckbox(),
+                                me.exportPurchasePriceCheckbox = me.createPurchasePriceCheckbox()
                             ]
                         },
                         me.exportPriceMode = me.createPriceField('price'),
@@ -184,20 +173,22 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         });
 
         // if there is exported product
-        // pricing mapping should be disabled
+        // pricing mapping fieldset should be not visible
         Ext.Ajax.request({
             scope: me,
             url: '{url controller=ConnectConfig action=isPricingMappingAllowed}',
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false || response.isPricingMappingAllowed === false) {
-                    me.priceMappingsFieldSet.setDisabled(true);
+                    me.priceMappingsFieldSet.setVisible(false);
                 }
                 if (response.success === false || response.isPriceModeEnabled === false) {
-                    me.exportPriceMode.setDisabled(true);
+                    me.exportPriceMode.setVisible(false);
+                    me.exportPriceCheckbox.setVisible(false);
                 }
                 if (response.success === false || response.isPurchasePriceModeEnabled === false) {
-                    me.exportPurchasePriceMode.setDisabled(true);
+                    me.exportPurchasePriceMode.setVisible(false);
+                    me.exportPurchasePriceCheckbox.setVisible(false);
                 }
             },
             failure: function() { }
@@ -332,6 +323,41 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             ]
         });
 
+    },
+
+    /**
+     * Creates price checkbox
+     * it's used to show only which price type is selected
+     *
+     * @returns Ext.form.field.Checkbox
+     */
+    createPriceCheckbox: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.field.Checkbox', {
+            boxLabel: me.snippets.priceMode,
+            name: 'exportPriceMode',
+            readOnly: true,
+            inputValue: 'price'
+        });
+    },
+
+    /**
+     * Creates purchase price checkbox
+     * it's used to show only which price type is selected
+     *
+     * @returns Ext.form.field.Checkbox
+     */
+    createPurchasePriceCheckbox: function() {
+        var me = this;
+
+        return Ext.create('Ext.form.field.Checkbox', {
+            boxLabel: me.snippets.purchasePriceMode,
+            name: 'exportPriceMode',
+            inputValue: 'purchasePrice',
+            readOnly: true,
+            margin: '15 0 0 0'
+        });
     },
 
     /**

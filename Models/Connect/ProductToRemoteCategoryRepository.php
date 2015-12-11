@@ -39,7 +39,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * @param int $offset
      * @return \Doctrine\ORM\Query
      */
-    public function findArticlesByRemoteCategory($remoteCategoryKey, $shopId, $limit = 10, $offset = 0)
+    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->addSelect('a.id as Article_id');
@@ -61,7 +61,12 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->where('scatt.shopId = :shopId');
         $builder->andWhere('att.connectMappedCategory IS NULL');
 
-        if ($remoteCategoryKey) {
+        if ($stream != null) {
+            $builder->andWhere('scatt.stream = :stream');
+            $builder->setParameter('stream', $stream);
+        }
+
+        if ($remoteCategoryKey != null) {
             $builder->andWhere('rc.categoryKey = :categoryKey');
             $builder->setParameter('categoryKey', $remoteCategoryKey);
         }

@@ -50,12 +50,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', 'root');
-        if ($parent == 'root') {
-            $categories = $this->getCategoryExtractor()->getMainNodes();
-        } elseif (is_numeric($parent)) {
-            $categories = $this->getCategoryExtractor()->extractByShopId($parent);
-        } else {
-            $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true);
+        switch ($parent) {
+            case 'root':
+                $categories = $this->getCategoryExtractor()->getMainNodes();
+                break;
+            case is_numeric($parent):
+                $categories = $this->getCategoryExtractor()->getStreamsByShopId($parent);
+                break;
+            case strpos($parent, '_stream_') > 0:
+                list($shopId, $stream) = explode('_stream_', $parent);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId);
+                break;
+            default:
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true);
         }
 
         $this->View()->assign(array(
@@ -70,8 +77,15 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $shopId = $this->request->getParam('shopId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
+        $stream = null;
 
-        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $shopId, $limit, $offset);
+        if (strpos($category, '_stream_') > 0) {
+            $stream = explode('_stream_', $category);
+            $stream = $stream[1];
+            $category = null;
+        }
+
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $shopId, $stream, $limit, $offset);
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);

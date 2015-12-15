@@ -30,6 +30,7 @@ class SDKTest extends ConnectTestHelper
                         'shortDescription' => 'Ein Produkt aus shopware Connect',
                         'longDescription' => 'Ein Produkt aus shopware Connect',
                         'vendor' => 'shopware Connect',
+                        'stream' => 'Awesome products',
                         'price' => 9.99,
                         'purchasePrice' => $purchasePrice,
                         'purchasePriceHash' => hash_hmac(

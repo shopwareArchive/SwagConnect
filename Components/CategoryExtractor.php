@@ -106,6 +106,25 @@ class CategoryExtractor
     }
 
     /**
+     * Collects remote categories by given stream and shopId
+     *
+     * @param string $stream
+     * @param int $shopId
+     * @return array
+     */
+    public function getRemoteCategoriesTreeByStream($stream, $shopId)
+    {
+        $sql = 'SELECT category_key, label
+                FROM `s_plugin_connect_categories` cat
+                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
+                INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
+                WHERE attributes.shop_id = ? AND attributes.stream = ?';
+        $rows = Shopware()->Db()->fetchPairs($sql, array((int)$shopId, $stream));
+
+        return $this->convertTree($this->categoryResolver->generateTree($rows), false);
+    }
+
+    /**
      * Collects supplier names as categories tree
      * @return array
      */
@@ -146,6 +165,29 @@ class CategoryExtractor
         $rows = Shopware()->Db()->fetchPairs($sql, array($shopId));
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
+    }
+
+    public function getStreamsByShopId($shopId)
+    {
+        $sql = 'SELECT DISTINCT(stream)
+                FROM `s_plugin_connect_items` attributes
+                WHERE attributes.shop_id = ?';
+        $rows = Shopware()->Db()->fetchCol($sql, array($shopId));
+
+        $streams = array();
+        foreach ($rows as $streamName) {
+            $id = sprintf('%s_stream_%s', $shopId, $streamName);
+            $streams[$id] = array(
+                'name' => $streamName,
+            );
+        }
+
+        $tree = $this->convertTree($streams, false);
+        array_walk($tree, function(&$node) {
+            $node['leaf'] = false;
+        });
+
+        return $tree;
     }
 
     /**

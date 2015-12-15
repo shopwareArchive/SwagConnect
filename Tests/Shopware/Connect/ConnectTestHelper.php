@@ -143,6 +143,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'shortDescription' => 'Ein Produkt aus shopware Connect',
             'longDescription' => 'Ein Produkt aus shopware Connect',
             'vendor' => 'shopware Connect',
+            'stream' => 'Awesome products',
             'price' => 9.99,
             'purchasePrice' => $purchasePrice,
             'purchasePriceHash' => hash_hmac(
@@ -288,6 +289,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'fixedPrice' => false,
             'purchasePriceHash' => '',
             'offerValidUntil' => 0,
+            'stream' => '',
         ));
 
         Shopware()->Models()->persist($mainDetail);

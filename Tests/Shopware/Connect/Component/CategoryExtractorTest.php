@@ -51,6 +51,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute1->setCategory(array('/Ski' => 'Ski'));
+        $attribute1->setStream('Awesome products');
 
         $attribute2 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute2->setCategory(array(
@@ -58,6 +59,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             '/Kleidung/Hosen' => 'Hosen',
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
         ));
+        $attribute2->setStream('Awesome products');
 
         $attribute3 = new \Shopware\CustomModels\Connect\Attribute();
         $attribute3->setCategory(array(
@@ -65,6 +67,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             '/Kleidung/Nahrung & Getraenke' => 'Nahrung & Getraenke',
             '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke' => 'Alkoholische Getränke',
         ));
+        $attribute3->setStream('Awesome products');
 
         $this->attributeRepository->expects($this->once())
             ->method('findRemoteArticleAttributes')
@@ -380,6 +383,82 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
         $result = $this->categoryExtractor->extractByShopId(3, $includeChildren = true);
         $this->assertEquals($expected, $result);
+    }
+
+    public function testGetStreamByShopId()
+    {
+        $shopId = 1;
+        for ($i=0; $i < 3; $i++) {
+            $product = $this->getProduct();
+            $product->shopId = $shopId;
+            $product->stream = 'Awesome products';
+
+            $this->getProductToShop()->insertOrUpdate($product);
+        }
+
+        for ($i=0; $i < 3; $i++) {
+            $product = $this->getProduct();
+            $product->shopId = $shopId;
+            $product->stream = 'Mobile devices';
+
+            $this->getProductToShop()->insertOrUpdate($product);
+        }
+
+        $streams = $this->categoryExtractor->getStreamsByShopId($shopId);
+        $expected = array(
+            array(
+                'id' => '1_stream_Awesome products',
+                'name' => 'Awesome products',
+                'leaf' => false,
+                'children' => array(),
+            ),
+            array(
+                'id' => '1_stream_Mobile devices',
+                'name' => 'Mobile devices',
+                'leaf' => false,
+                'children' => array(),
+            ),
+        );
+
+        $this->assertEquals($expected, $streams);
+    }
+
+    public function testGetRemoteCategoriesTreeByStream()
+    {
+        $shopId = 3;
+        $stream = 'Media devices';
+        for ($i=0; $i < 5; $i++) {
+            $product = $this->getProduct();
+            $product->shopId = $shopId;
+            $product->stream = $stream;
+            $product->categories = array(
+                '/Ski-unit' => 'Ski',
+                '/Kleidung-unit' => 'Kleidung',
+                '/Kleidung-unit/Hosen-unit' => 'Hosen',
+                '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
+
+            );
+
+            $this->getProductToShop()->insertOrUpdate($product);
+        }
+
+        $expected = array(
+            array(
+                'id' => '/Ski-unit',
+                'name' => 'Ski',
+                'leaf' => true,
+                'children' => array(),
+            ),
+            array(
+                'id' => '/Kleidung-unit',
+                'name' => 'Kleidung',
+                'leaf' => false,
+                'children' => array(),
+            ),
+        );
+
+        $remoteCategories = $this->categoryExtractor->getRemoteCategoriesTreeByStream($stream, $shopId);
+        $this->assertEquals($expected, $remoteCategories);
     }
 }
  

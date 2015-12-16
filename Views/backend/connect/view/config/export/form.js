@@ -150,8 +150,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                 me.exportPurchasePriceCheckbox = me.createPurchasePriceCheckbox()
                             ]
                         },
-                        me.exportPriceMode = me.createPriceField('price'),
-                        me.exportPurchasePriceMode = me.createPriceField('purchasePrice')
+                        me.exportPriceMode = me.createPriceField(),
+                        me.exportPurchasePriceMode = me.createPurchasePriceField()
                     ]
                 },
                 {
@@ -265,64 +265,117 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         return me.progressBar;
     },
 
-    /**
-     * Creates a price config fieldcontainer for price or purchasePrice
-     *
-     * @return Object
-     */
-    createPriceField: function (type) {
-        var me = this,
-            dataIndexCustomerGroup,
-            dataIndexField,
-            helpText;
+    createPurchasePriceField: function() {
+        var me = this;
+        var dataIndexCustomerGroup = 'priceGroupForPurchasePriceExport';
+        var dataIndexField = 'priceFieldForPurchasePriceExport';
+        var helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
 
-        if (type == 'price') {
-            dataIndexCustomerGroup = 'priceGroupForPriceExport';
-            dataIndexField = 'priceFieldForPriceExport';
-            helpText = '{s name=config/export/help/price}Configure, which price field of which customer group should be exported as the product\'s end user price{/s}';
-        } else if (type == 'purchasePrice') {
-            dataIndexCustomerGroup = 'priceGroupForPurchasePriceExport';
-            dataIndexField = 'priceFieldForPurchasePriceExport';
-            helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
-        } else {
-            return { };
-        }
+        me.groupFieldForPurchasePrice = Ext.create('Ext.form.field.ComboBox', {
+            queryMode: 'local',
+            editable: false,
+            name: dataIndexCustomerGroup,
+            allowBlank: false,
+            displayField: 'name',
+            valueField: 'key',
+            store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup'),
+            supportText: '{s name=config/export/support/customer}customer group{/s}'
+        });
+
+        var comboTpl = new Ext.XTemplate(
+            '<ul>',
+            '<tpl for=".">',
+            '<tpl if="available===true">',
+            '{literal}<li role="option" class="x-boundlist-item">{name}</li>{/literal}',
+            '<tpl else>',
+            '{literal}<li role="option" class="x-boundlist-item" style="color: #e6e6e6;">{name}</li>{/literal}',
+            '</tpl>',
+            '</tpl>',
+            '</ul>'
+        );
+
+        me.priceFieldForPurchasePrice = Ext.create('Ext.form.field.ComboBox', {
+            name: dataIndexField,
+            store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
+            queryMode: 'local',
+            editable: false,
+            allowBlank: false,
+            displayField: 'name',
+            valueField: 'field',
+            helpText: helpText,
+            supportText: '{s name=config/export/support/price}price field{/s}',
+            tpl: comboTpl
+        });
 
         return Ext.create('Ext.form.FieldContainer', {
             layout: 'hbox',
             columnWidth: .75,
             items: [
-                {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    editable: false,
-                    name: dataIndexCustomerGroup,
-                    allowBlank: false,
-                    displayField: 'name',
-                    valueField: 'key',
-                    store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup', { }).load({
-                        params:{
-                            priceField: type
-                        }
-                    }),
-                    supportText: '{s name=config/export/support/customer}customer group{/s}'
-                },
-                {
-                    xtype: 'combobox',
-                    name: dataIndexField,
-                    store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup', { }).load({}),
-                    queryMode: 'local',
-                    editable: false,
-                    allowBlank: false,
-                    displayField: 'name',
-                    valueField: 'field',
-                    helpText: helpText,
-                    supportText: '{s name=config/export/support/price}price field{/s}'
-
-                }
+                me.groupFieldForPurchasePrice,
+                me.priceFieldForPurchasePrice
             ]
         });
+    },
 
+    /**
+     * Creates a price config fieldcontainer for price or purchasePrice
+     *
+     * @return Object
+     */
+    createPriceField: function () {
+        var me = this,
+            dataIndexCustomerGroup,
+            dataIndexField,
+            helpText;
+
+            dataIndexCustomerGroup = 'priceGroupForPriceExport';
+            dataIndexField = 'priceFieldForPriceExport';
+            helpText = '{s name=config/export/help/price}Configure, which price field of which customer group should be exported as the product\'s end user price{/s}';
+
+
+        me.groupFieldForPrice = Ext.create('Ext.form.field.ComboBox', {
+            queryMode: 'local',
+            editable: false,
+            name: dataIndexCustomerGroup,
+            allowBlank: false,
+            displayField: 'name',
+            valueField: 'key',
+            store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup'),
+            supportText: '{s name=config/export/support/customer}customer group{/s}'
+        });
+
+        var comboTpl = new Ext.XTemplate(
+            '<ul>',
+            '<tpl for=".">',
+            '<tpl if="available===true">',
+            '{literal}<li role="option" class="x-boundlist-item">{name}</li>{/literal}',
+            '<tpl else>',
+            '{literal}<li role="option" class="x-boundlist-item" style="color: #e6e6e6;">{name}</li>{/literal}',
+            '</tpl>',
+            '</tpl>',
+            '</ul>'
+        );
+        me.priceFieldForPrice = Ext.create('Ext.form.field.ComboBox', {
+            name: dataIndexField,
+            store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
+            queryMode: 'local',
+            editable: false,
+            allowBlank: false,
+            displayField: 'name',
+            valueField: 'field',
+            helpText: helpText,
+            supportText: '{s name=config/export/support/price}price field{/s}',
+            tpl: comboTpl
+        });
+
+        return Ext.create('Ext.form.FieldContainer', {
+            layout: 'hbox',
+            columnWidth: .75,
+            items: [
+                me.groupFieldForPrice,
+                me.priceFieldForPrice
+            ]
+        });
     },
 
     /**
@@ -360,13 +413,34 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         });
     },
 
+    loadPriceAndGroupStores: function(record) {
+        var me = this;
+
+        me.groupFieldForPrice.store.load();
+        me.groupFieldForPurchasePrice.store.load();
+
+        me.priceFieldForPrice.store.load({
+            params: {
+                'customerGroup': record.get('priceGroupForPriceExport')
+            }
+        });
+
+        me.priceFieldForPurchasePrice.store.load({
+                params: {
+                    'customerGroup': record.get('priceGroupForPurchasePriceExport')
+                }
+        });
+    },
+
     /**
      * Populate export config form
      */
     populateForm: function () {
         var me = this;
+        var record = me.getRecord();
 
-        me.loadRecord(me.getRecord());
+        me.loadPriceAndGroupStores(record);
+        me.loadRecord(record);
     },
 
     getRecord: function () {

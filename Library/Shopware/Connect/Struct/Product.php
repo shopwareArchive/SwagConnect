@@ -141,14 +141,19 @@ class Product extends ShopItem
      */
     public $vendor;
 
-    public $stream;
-
     /**
      * The language of the product title, description etc.
      *
      * @var string
      */
     public $language = 'de';
+
+    /**
+     * Name of the product stream to whom it belongs
+     *
+     * @var string
+     */
+    public $stream;
 
     /**
      * The value added tax for this product. The property must be set as a numerical

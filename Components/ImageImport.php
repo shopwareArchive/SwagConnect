@@ -175,7 +175,6 @@ class ImageImport
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);
             $tempDir = Shopware()->DocPath('media_temp');
             foreach ($imagesToCreate as $imageUrl => $key) {
-
                 $tempFile = tempnam($tempDir, 'image');
                 copy($imageUrl, $tempFile);
                 $file = new File($tempFile);
@@ -207,18 +206,12 @@ class ImageImport
 
                 $this->manager->persist($image);
 
-                // check shopware version, because Shopware()->Container()
-                // is available after version 4.2.x
-                if (version_compare(Shopware()->Config()->version, '4.2.0', '<')) {
-                    $media->createAlbumThumbnails($album);
-                } else {
-                    $manager = Shopware()->Container()->get('thumbnail_manager');
-                    $manager->createMediaThumbnail(
-                        $media,
-                        $this->getThumbnailSize($album),
-                        true
-                    );
-                }
+                $manager = Shopware()->Container()->get('thumbnail_manager');
+                $manager->createMediaThumbnail(
+                    $media,
+                    $this->getThumbnailSize($album),
+                    true
+                );
             }
         } catch (\Exception $e) {
             // log exception message if for some reason

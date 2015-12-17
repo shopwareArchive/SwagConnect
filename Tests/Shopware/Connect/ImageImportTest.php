@@ -23,7 +23,6 @@ class ImageImportTest extends ConnectTestHelper
 
     public function testImportImagesForArticle()
     {
-        $this->markTestSkipped('Fix image import test');
         $images = array();
         for ($i=0; $i<10; $i++) {
             $images[] = 'http://lorempixel.com/400/200?'.$i;
@@ -33,6 +32,8 @@ class ImageImportTest extends ConnectTestHelper
         $model = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
         $this->getImageImport()->importImagesForArticle($images, $model);
 
+        // reload article model after image import otherwise model contains only old images
+        $model = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
         $this->assertEquals(13, $model->getImages()->count());
     }
 

@@ -7,6 +7,7 @@ use \Shopware\Models\Article\Image;
 use \Shopware\Models\Media\Media;
 use \Shopware\Models\Attribute\Media as MediaAttribute;
 use Symfony\Component\HttpFoundation\File\File;
+use Shopware\Models\Article\Supplier;
 
 
 class ImageImport
@@ -222,6 +223,42 @@ class ImageImport
         $this->manager->flush();
         $this->manager->clear();
     }
+
+    /**
+     * @param $imageUrl
+     * @param Supplier $supplier
+     */
+    public function importImageForSupplier($imageUrl, Supplier $supplier)
+    {
+        $album = $this->manager->find('Shopware\Models\Media\Album', -12);
+        $tempDir = Shopware()->DocPath('media_temp');
+
+        $tempFile = tempnam($tempDir, 'image');
+        copy($imageUrl, $tempFile);
+        $file = new File($tempFile);
+
+        $media = new Media();
+        $media->setAlbum($album);
+        $media->setDescription('');
+        $media->setCreated(new \DateTime());
+        $media->setUserId(0);
+        $media->setFile($file);
+
+        $this->manager->persist($media);
+
+        $manager = Shopware()->Container()->get('thumbnail_manager');
+        $manager->createMediaThumbnail(
+            $media,
+            $this->getThumbnailSize($album),
+            true
+        );
+
+        $supplier->setImage($media->getPath());
+        $this->manager->persist($supplier);
+
+        $this->manager->flush();
+    }
+
 
     /**
      * Returns thumbnails size by album

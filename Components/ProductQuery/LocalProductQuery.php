@@ -322,19 +322,19 @@ class LocalProductQuery extends BaseProductQuery
      * @param $row
      * @return array
      */
-    public function prepareVendor($row)
+    private function prepareVendor($row)
     {
         $row['vendor'] = array(
             'name' => $row['vendorName'],
-            'link' => $row['vendorLink'],
-            'image' => null,
+            'url' => $row['vendorLink'],
+            'logo_url' => null,
             'description' => $row['vendorDescription'],
-            'metaTitle' => $row['vendorMetaTitle'],
+            'page_title' => $row['vendorMetaTitle'],
         );
 
         if($row['vendorImage']){
             $info = pathinfo($row['vendorImage']);
-            $row['vendor']['image'] = $info['basename'];
+            $row['vendor']['logo_url'] = $info['basename'];
         }
 
         unset($row['vendorName']);

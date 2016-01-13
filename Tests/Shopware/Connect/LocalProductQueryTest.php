@@ -100,9 +100,9 @@ class LocalProductQueryTest extends ConnectTestHelper
             'vendor' =>  array(
                 'name' => 'Teapavilion',
                 'description' => 'Teapavilion description',
-                'image' => 'image.jpg',
-                'link' => 'http://teapavilion.com',
-                'metaTitle' => 'Teapavilion title'
+                'logo_url' => 'image.jpg',
+                'url' => 'http://teapavilion.com',
+                'page_title' => 'Teapavilion title',
             ),
             'vat' => '0.190000',
             'availability' => 3445,
@@ -140,10 +140,10 @@ class LocalProductQueryTest extends ConnectTestHelper
         );
 
         $row['vendorName'] = $row['vendor']['name'];
-        $row['vendorLink'] = $row['vendor']['link'];
-        $row['vendorImage'] = $row['vendor']['image'];
+        $row['vendorLink'] = $row['vendor']['url'];
+        $row['vendorImage'] = $row['vendor']['logo_url'];
         $row['vendorDescription'] = $row['vendor']['description'];
-        $row['vendorMetaTitle'] = $row['vendor']['metaTitle'];
+        $row['vendorMetaTitle'] = $row['vendor']['page_title'];
         unset($row['vendor']);
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));

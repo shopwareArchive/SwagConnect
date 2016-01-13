@@ -132,20 +132,41 @@ class Product extends Verificator
             }
         }
 
-        if (trim($struct->title) === '') {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Property title MUST be non-empty.");
+        if (!is_array($struct->vendor)) {
+            if (@iconv('UTF-8', 'UTF-8', $struct->vendor) != $struct->vendor) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property vendor MUST be UTF-8 encoded.");
+            }
+            if (trim($struct->vendor) === '') {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property vendor MUST be non-empty.");
+            }
+        } else {
+            if (empty($struct->vendor)) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property vendor MUST be non-empty.");
+            }
+            if (!array_key_exists('name', $struct->vendor)) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property vendor MUST have a name.");
+            }
+
+            $validKeys = array('name', 'url', 'logo_url', 'page_title', 'description');
+
+            foreach (array_keys($struct->vendor) as $key) {
+                if (!in_array($key, $validKeys)) {
+                    throw new \Shopware\Connect\Exception\VerificationFailedException("Invalid key: $key for property vendor.");
+                }
+            }
+
+            if (@iconv('UTF-8', 'UTF-8', $struct->vendor['name']) != $struct->vendor['name']) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property vendor MUST be UTF-8 encoded.");
+            }
+            if (trim($struct->vendor['name']) === '') {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("The name of Property vendor MUST be non-empty.");
+            }
         }
 
-        if (!is_array($struct->vendor) && empty($struct->vendor)) {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor MUST be array and non-empty.");
-        }
-
-        if (@iconv('UTF-8', 'UTF-8', $struct->vendor['name']) != $struct->vendor['name']) {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor name MUST be UTF-8 encoded.");
-        }
-
-        if (trim($struct->vendor['name']) === '') {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor name MUST be non-empty.");
+        foreach (array('title') as $property) {
+            if (trim($struct->$property) === '') {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property $property MUST be non-empty.");
+            }
         }
 
         if (!empty($struct->shipping)) {

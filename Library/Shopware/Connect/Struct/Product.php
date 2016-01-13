@@ -137,9 +137,9 @@ class Product extends ShopItem
     /**
      * Name of the product vendor
      *
-     * @var array
+     * @var array (can be the string name only, for legacy reasons)
      */
-    public $vendor = array();
+    public $vendor;
 
     /**
      * The language of the product title, description etc.

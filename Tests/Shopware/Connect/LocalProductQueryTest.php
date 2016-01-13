@@ -97,7 +97,13 @@ class LocalProductQueryTest extends ConnectTestHelper
             'ean' => NULL,
             'title' => 'Glas -Teetasse 0,25l',
             'shortDescription' => 'Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius.',
-            'vendor' => 'Teapavilion',
+            'vendor' =>  array(
+                'name' => 'Teapavilion',
+                'description' => 'Teapavilion description',
+                'image' => 'image.jpg',
+                'link' => 'http://teapavilion.com',
+                'metaTitle' => 'Teapavilion title'
+            ),
             'vat' => '0.190000',
             'availability' => 3445,
             'price' => 10.924369747899,
@@ -132,6 +138,13 @@ class LocalProductQueryTest extends ConnectTestHelper
                 )
             ),
         );
+
+        $row['vendorName'] = $row['vendor']['name'];
+        $row['vendorLink'] = $row['vendor']['link'];
+        $row['vendorImage'] = $row['vendor']['image'];
+        $row['vendorDescription'] = $row['vendor']['description'];
+        $row['vendorMetaTitle'] = $row['vendor']['metaTitle'];
+        unset($row['vendor']);
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));
     }

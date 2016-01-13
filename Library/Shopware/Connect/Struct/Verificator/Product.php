@@ -126,17 +126,26 @@ class Product extends Verificator
             'title',
             'shortDescription',
             'longDescription',
-            'vendor',
             ) as $property) {
             if (@iconv('UTF-8', 'UTF-8', $struct->$property) != $struct->$property) {
                 throw new \Shopware\Connect\Exception\VerificationFailedException("Property $property MUST be UTF-8 encoded.");
             }
         }
 
-        foreach (array('title', 'vendor') as $property) {
-            if (trim($struct->$property) === '') {
-                throw new \Shopware\Connect\Exception\VerificationFailedException("Property $property MUST be non-empty.");
-            }
+        if (trim($struct->title) === '') {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Property title MUST be non-empty.");
+        }
+
+        if (!is_array($struct->vendor) && empty($struct->vendor)) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor MUST be array and non-empty.");
+        }
+
+        if (@iconv('UTF-8', 'UTF-8', $struct->vendor['name']) != $struct->vendor['name']) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor name MUST be UTF-8 encoded.");
+        }
+
+        if (trim($struct->vendor['name']) === '') {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Vendor name MUST be non-empty.");
         }
 
         if (!empty($struct->shipping)) {

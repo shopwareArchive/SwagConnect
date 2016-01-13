@@ -85,7 +85,11 @@ class LocalProductQuery extends BaseProductQuery
             'd.ean',
             'a.name as title',
             'a.description as shortDescription',
-            's.name as vendor',
+            's.name as vendorName',
+            's.image as vendorImage',
+            's.link as vendorLink',
+            's.description as vendorDescription',
+            's.metaTitle as vendorMetaTitle',
             't.tax / 100 as vat',
 
             'd.releaseDate as deliveryDate',
@@ -156,6 +160,7 @@ class LocalProductQuery extends BaseProductQuery
         $row['images'] = $this->getImagesById($row['localId']);
 
         $row = $this->applyConfiguratorOptions($row);
+        $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {
             $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
@@ -311,6 +316,34 @@ class LocalProductQuery extends BaseProductQuery
         $query = $builder->getQuery();
 
         return $query->getSingleScalarResult() > 1 ? true : false;
+    }
+
+    /**
+     * @param $row
+     * @return array
+     */
+    public function prepareVendor($row)
+    {
+        $row['vendor'] = array(
+            'name' => $row['vendorName'],
+            'link' => $row['vendorLink'],
+            'image' => null,
+            'description' => $row['vendorDescription'],
+            'metaTitle' => $row['vendorMetaTitle'],
+        );
+
+        if($row['vendorImage']){
+            $info = pathinfo($row['vendorImage']);
+            $row['vendor']['image'] = $info['basename'];
+        }
+
+        unset($row['vendorName']);
+        unset($row['vendorLink']);
+        unset($row['vendorImage']);
+        unset($row['vendorDescription']);
+        unset($row['vendorMetaTitle']);
+
+        return $row;
     }
 
     /**

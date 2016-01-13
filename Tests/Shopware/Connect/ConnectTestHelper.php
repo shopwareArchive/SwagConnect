@@ -93,6 +93,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
+            Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
     }

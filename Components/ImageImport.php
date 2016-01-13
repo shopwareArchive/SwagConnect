@@ -8,6 +8,7 @@ use \Shopware\Models\Media\Media;
 use \Shopware\Models\Attribute\Media as MediaAttribute;
 use Symfony\Component\HttpFoundation\File\File;
 use Shopware\Models\Article\Supplier;
+use Shopware\Components\Thumbnail\Manager as ThumbnailManager;
 
 
 class ImageImport
@@ -19,13 +20,23 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
+    /**
+     * @var ThumbnailManager
+     */
+    protected $thumbnailManager;
+
     /** @var  \ShopwarePlugins\Connect\Components\Logger */
     protected $logger;
 
-    public function __construct(ModelManager $manager, Helper $helper, Logger $logger)
-    {
+    public function __construct(
+        ModelManager $manager,
+        Helper $helper,
+        ThumbnailManager $thumbnailManager,
+        Logger $logger
+    ) {
         $this->manager = $manager;
         $this->helper = $helper;
+        $this->thumbnailManager = $thumbnailManager;
         $this->logger = $logger;
     }
 
@@ -207,8 +218,7 @@ class ImageImport
 
                 $this->manager->persist($image);
 
-                $manager = Shopware()->Container()->get('thumbnail_manager');
-                $manager->createMediaThumbnail(
+                $this->thumbnailManager->createMediaThumbnail(
                     $media,
                     $this->getThumbnailSize($album),
                     true
@@ -246,8 +256,7 @@ class ImageImport
 
         $this->manager->persist($media);
 
-        $manager = Shopware()->Container()->get('thumbnail_manager');
-        $manager->createMediaThumbnail(
+        $this->thumbnailManager->createMediaThumbnail(
             $media,
             $this->getThumbnailSize($album),
             true

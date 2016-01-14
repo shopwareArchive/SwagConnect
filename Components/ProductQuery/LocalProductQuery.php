@@ -334,7 +334,7 @@ class LocalProductQuery extends BaseProductQuery
 
         if($row['vendorImage']){
             $info = pathinfo($row['vendorImage']);
-            $row['vendor']['logo_url'] = $info['basename'];
+            $row['vendor']['logo_url'] = $this->getImagePath() . $info['basename'];
         }
 
         unset($row['vendorName']);

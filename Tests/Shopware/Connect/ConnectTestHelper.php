@@ -93,6 +93,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
+            Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
     }
@@ -142,7 +143,13 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'title' => 'MassImport #'. $number,
             'shortDescription' => 'Ein Produkt aus shopware Connect',
             'longDescription' => 'Ein Produkt aus shopware Connect',
-            'vendor' => 'shopware Connect',
+            'vendor' => array(
+                'url' => 'http://connect.shopware.de/',
+                'name' => 'shopware Connect',
+                'logo_url' => 'http://lorempixel.com/400/200',
+                'page_title' => 'shopware Connect title',
+                'description' => 'shopware Connect description'
+            ),
             'stream' => 'Awesome products',
             'price' => 9.99,
             'purchasePrice' => $purchasePrice,

@@ -242,8 +242,7 @@ class ProductToShop implements ProductToShopBase
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
             if ($supplier === null) {
-                $supplier = new Supplier();
-                $supplier->setName($product->vendor);
+                $supplier = $this->createSupplier($product->vendor);
             }
             $model->setSupplier($supplier);
         }
@@ -639,6 +638,31 @@ class ProductToShop implements ProductToShopBase
         });
 
         return $detailAttribute;
+    }
+
+    /**
+     * @param $vendor
+     * @return Supplier
+     */
+    private function createSupplier($vendor)
+    {
+        $supplier = new Supplier();
+
+        if (is_array($vendor)){
+            $supplier->setName($vendor['name']);
+            $supplier->setDescription($vendor['description']);
+            $supplier->setLink($vendor['url']);
+            $supplier->setMetaTitle($vendor['page_title']);
+
+            if (isset($vendor['logo_url']) && $vendor['logo_url']) {
+                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            }
+
+        } else {
+            $supplier->setName($vendor);
+        }
+
+        return $supplier;
     }
 
     public function update($shopId, $sourceId, ProductUpdate $product)

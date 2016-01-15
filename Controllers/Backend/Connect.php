@@ -130,6 +130,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
+            Shopware()->Container()->get('thumbnail_manager'),
             new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
         );
     }

@@ -33,6 +33,7 @@ class CronJob extends BaseSubscriber
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
+            Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
     }

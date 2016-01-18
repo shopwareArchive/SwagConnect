@@ -22,6 +22,7 @@
  * our trademarks remain entirely with us.
  */
 namespace ShopwarePlugins\Connect\Components;
+use Shopware\Connect\Gateway;
 use Shopware\CustomModels\Connect\AttributeRepository;
 
 /**
@@ -40,10 +41,21 @@ class CategoryExtractor
      */
     private $categoryResolver;
 
-    public function __construct(AttributeRepository $attributeRepository, CategoryResolver $categoryResolver)
+    /**
+     * @var \Shopware\Connect\Gateway
+     */
+    private $configurationGateway;
+
+    public function __construct(
+        AttributeRepository $attributeRepository,
+        CategoryResolver $categoryResolver,
+        Gateway $configurationGateway
+    )
     {
+
         $this->attributeRepository = $attributeRepository;
         $this->categoryResolver = $categoryResolver;
+        $this->configurationGateway = $configurationGateway;
     }
 
     /**
@@ -91,6 +103,91 @@ class CategoryExtractor
         }
 
         return $rows;
+    }
+
+    /**
+     * Collects remote categories by given stream and shopId
+     *
+     * @param string $stream
+     * @param int $shopId
+     * @return array
+     */
+    public function getRemoteCategoriesTreeByStream($stream, $shopId)
+    {
+        $sql = 'SELECT category_key, label
+                FROM `s_plugin_connect_categories` cat
+                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
+                INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
+                WHERE attributes.shop_id = ? AND attributes.stream = ?';
+        $rows = Shopware()->Db()->fetchPairs($sql, array((int)$shopId, $stream));
+
+        return $this->convertTree($this->categoryResolver->generateTree($rows), false);
+    }
+
+    /**
+     * Collects supplier names as categories tree
+     * @return array
+     */
+    public function getMainNodes()
+    {
+        // if parent is null collect shop names
+        $shops = array();
+        foreach ($this->configurationGateway->getConnectedShopIds() as $shopId) {
+            $configuration = $this->configurationGateway->getShopConfiguration($shopId);
+            $shops[$shopId] = array(
+                'name' => $configuration->displayName,
+            );
+        }
+
+        $tree = $this->convertTree($shops, false);
+        array_walk($tree, function(&$node) {
+           $node['leaf'] = false;
+        });
+
+        return $tree;
+    }
+
+    /**
+     * Collects categories from products
+     * by given shopId
+     *
+     * @param int $shopId
+     * @param bool $includeChildren
+     * @return array
+     */
+    public function extractByShopId($shopId, $includeChildren = false)
+    {
+        $sql = 'SELECT category_key, label
+                FROM `s_plugin_connect_categories` cat
+                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
+                INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
+                WHERE attributes.shop_id = ?';
+        $rows = Shopware()->Db()->fetchPairs($sql, array($shopId));
+
+        return $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
+    }
+
+    public function getStreamsByShopId($shopId)
+    {
+        $sql = 'SELECT DISTINCT(stream)
+                FROM `s_plugin_connect_items` attributes
+                WHERE attributes.shop_id = ?';
+        $rows = Shopware()->Db()->fetchCol($sql, array($shopId));
+
+        $streams = array();
+        foreach ($rows as $streamName) {
+            $id = sprintf('%s_stream_%s', $shopId, $streamName);
+            $streams[$id] = array(
+                'name' => $streamName,
+            );
+        }
+
+        $tree = $this->convertTree($streams, false);
+        array_walk($tree, function(&$node) {
+            $node['leaf'] = false;
+        });
+
+        return $tree;
     }
 
     /**

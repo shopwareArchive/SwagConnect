@@ -32,7 +32,14 @@ use \Shopware\Components\Model\ModelRepository;
  */
 class ProductToRemoteCategoryRepository extends ModelRepository
 {
-    public function findArticlesByRemoteCategory($remoteCategoryKey, $limit = 10, $offset = 0)
+    /**
+     * @param string $remoteCategoryKey
+     * @param int $shopId
+     * @param int $limit
+     * @param int $offset
+     * @return \Doctrine\ORM\Query
+     */
+    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->addSelect('a.id as Article_id');
@@ -49,10 +56,23 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
         $builder->leftJoin('a.attribute', 'att');
-        $builder->where('rc.categoryKey = :categoryKey');
-        $builder->setParameter('categoryKey', $remoteCategoryKey);
+        $builder->leftJoin('ptrc.connectAttribute', 'scatt');
+
+        $builder->where('scatt.shopId = :shopId');
         $builder->andWhere('att.connectMappedCategory IS NULL');
-        $builder->distinct(true);
+
+        if ($stream != null) {
+            $builder->andWhere('scatt.stream = :stream');
+            $builder->setParameter('stream', $stream);
+        }
+
+        if ($remoteCategoryKey != null) {
+            $builder->andWhere('rc.categoryKey = :categoryKey');
+            $builder->setParameter('categoryKey', $remoteCategoryKey);
+        }
+
+        $builder->setParameter('shopId', $shopId);
+        $builder->groupBy('a.id');
         $builder->setFirstResult($offset);
         $builder->setMaxResults($limit);
 

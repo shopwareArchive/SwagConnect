@@ -137,7 +137,7 @@ class Product extends ShopItem
     /**
      * Name of the product vendor
      *
-     * @var string
+     * @var array (can be the string name only, for legacy reasons)
      */
     public $vendor;
 
@@ -147,6 +147,13 @@ class Product extends ShopItem
      * @var string
      */
     public $language = 'de';
+
+    /**
+     * Name of the product stream to whom it belongs
+     *
+     * @var string
+     */
+    public $stream;
 
     /**
      * The value added tax for this product. The property must be set as a numerical

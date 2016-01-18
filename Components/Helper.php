@@ -304,6 +304,7 @@ class Helper
             $attribute = new ConnectAttribute();
             $attribute->setPurchasePriceHash('');
             $attribute->setOfferValidUntil('');
+            $attribute->setStream('');
 
             if ($model instanceof ProductModel) {
                 $attribute->setArticle($model);

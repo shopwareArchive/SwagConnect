@@ -16,6 +16,7 @@ use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
+use Shopware\Components\DependencyInjection\Container;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
@@ -30,6 +31,11 @@ class ConnectFactory
 
     private $modelManager;
     private $pluginVersion;
+
+    /**
+     * @var Container
+     */
+    private $container;
 
     /** @var  \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
@@ -67,6 +73,18 @@ class ConnectFactory
         }
 
         return $this->modelManager;
+    }
+
+    /**
+     * @return Container
+     */
+    private function getContainer()
+    {
+        if ($this->container === null) {
+            $this->container = Shopware()->Container();
+        }
+
+        return $this->container;
     }
 
     /**
@@ -142,6 +160,7 @@ class ConnectFactory
         return new ImageImport(
             $this->getModelManager(),
             $this->getHelper(),
+            $this->getContainer()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
     }

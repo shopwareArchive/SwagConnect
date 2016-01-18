@@ -219,6 +219,12 @@ class Attribute extends ModelEntity
     protected $offerValidUntil;
 
     /**
+     * @var string
+     * @ORM\Column(name="stream", type="string", nullable=false)
+     */
+    protected $stream;
+
+    /**
      * @param \Shopware\Models\Article\Article $article
      */
     public function setArticle($article)
@@ -573,5 +579,21 @@ class Attribute extends ModelEntity
     public function setPurchasePriceHash($purchasePriceHash)
     {
         $this->purchasePriceHash = $purchasePriceHash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStream()
+    {
+        return $this->stream;
+    }
+
+    /**
+     * @param string $stream
+     */
+    public function setStream($stream)
+    {
+        $this->stream = $stream;
     }
 }

@@ -56,6 +56,16 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     private $logger;
 
     /**
+     * @var \Shopware\Components\Model\ModelRepository
+     */
+    private $customerGroupRepository;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\PriceGateway
+     */
+    private $priceGateway;
+
+    /**
      * The getGeneralAction function is an ExtJs event listener method of the
      * connect module. The function is used to load store
      * required in the general config form.
@@ -226,7 +236,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function saveExportAction()
     {
         $data = $this->Request()->getParam('data');
-        $data = !isset($data[0]) ? array($data) : $data;
 
         if ($data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']) {
             $this->View()->assign(array(
@@ -240,6 +249,59 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
+        /** @var \Shopware\Models\Customer\Group $groupPrice */
+        $groupPrice = $this->getCustomerGroupRepository()->findOneBy(array('key' => $data['priceGroupForPriceExport']));
+        if (!$groupPrice) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/invalid_customer_group',
+                    'Ungültige Kundengruppe',
+                    true
+                )
+            ));
+            return;
+        }
+        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/priceFieldIsNotSupported',
+                    'Preisfeld ist nicht gepflegt',
+                    true
+                )
+            ));
+            return;
+        }
+
+        /** @var \Shopware\Models\Customer\Group $groupPurchasePrice */
+        $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(
+            'key' => $data['priceGroupForPurchasePriceExport']
+        ));
+        if (!$groupPurchasePrice) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/invalid_customer_group',
+                    'Ungültige Kundengruppe',
+                    true
+                )
+            ));
+            return;
+        }
+        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) > 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/priceFieldIsNotSupported',
+                    'Preisfeld ist nicht gepflegt',
+                    true
+                )
+            ));
+            return;
+        }
+
+        $data = !isset($data[0]) ? array($data) : $data;
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
         $this->getConfigComponent()->setExportConfigs($data);
 
@@ -562,28 +624,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
-     * Loads all customer groups where at least
-     * one product with price or purchasePrice
-     * greater than 0 exists
+     * Loads all customer groups
      *
      * @throws Zend_Db_Statement_Exception
      */
     public function getExportCustomerGroupsAction()
     {
-        $priceField = $this->Request()->getParam('priceField', 'price');
-
-        if ($priceField == 'purchasePrice') {
-            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE baseprice > 0 GROUP BY pricegroup');
-            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
-        } else {
-            $query = Shopware()->Db()->query('SELECT pricegroup FROM s_articles_prices WHERE price > 0 GROUP BY pricegroup');
-            $availableGroups = $query->fetchAll(\PDO::FETCH_COLUMN);
-        }
-
-
-        $repository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
-
-        $builder = $repository->createQueryBuilder('groups');
+        $builder = $this->getCustomerGroupRepository()->createQueryBuilder('groups');
         $builder->select(array(
             'groups.id as id',
             'groups.key as key',
@@ -592,13 +639,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             'groups.taxInput as taxInput',
             'groups.mode as mode'
         ));
-        $builder->andWhere('groups.key IN (:groupKeys)')
-            ->setParameter('groupKeys', $availableGroups);
-        $builder->addFilter($this->Request()->getParam('filter', array()));
-        $builder->addOrderBy($this->Request()->getParam('sort', array()));
-
-        $builder->setFirstResult($this->Request()->getParam('start'))
-            ->setMaxResults($this->Request()->getParam('limit'));
 
         $query = $builder->getQuery();
 
@@ -627,41 +667,46 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $groups = array();
 
-        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE price > 0');
-        $priceCount = $query->fetchColumn();
-        if ($priceCount > 0) {
-            $groups[] = array(
-                'field' => 'price',
-                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                    'detail/price/price',
-                    'Preis'
+        $customerGroupKey = $this->Request()->getParam('customerGroup', 'EK');
+        /** @var \Shopware\Models\Customer\Group $customerGroup */
+        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
+        if (!$customerGroup) {
+            $this->View()->assign(
+                array(
+                    'success' => true,
+                    'data' => $groups,
+                    'total' => count($groups),
                 )
             );
+            return;
         }
 
-        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE baseprice > 0');
-        $purchasePriceCount = $query->fetchColumn();
-        if ($purchasePriceCount > 0) {
-            $groups[] = array(
-                'field' => 'basePrice',
-                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                    'detail/price/base_price',
-                    'Einkaufspreis'
-                )
-            );
-        }
+        $groups[] = array(
+            'field' => 'price',
+            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                'detail/price/price',
+                'Preis'
+            ),
+            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0
+        );
 
-        $query = Shopware()->Db()->query('SELECT COUNT(id) FROM s_articles_prices WHERE pseudoprice > 0');
-        $pseudoPriceCount = $query->fetchColumn();
-        if ($pseudoPriceCount > 0) {
-            $groups[] = array(
-                'field' => 'pseudoPrice',
-                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                    'detail/price/pseudo_price',
-                    'Pseudopreis'
-                )
-            );
-        }
+        $groups[] = array(
+            'field' => 'basePrice',
+            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                'detail/price/base_price',
+                'Einkaufspreis'
+            ),
+            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0
+        );
+
+        $groups[] = array(
+            'field' => 'pseudoPrice',
+            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                'detail/price/pseudo_price',
+                'Pseudopreis'
+            ),
+            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0
+        );
 
         $this->View()->assign(
             array(
@@ -737,5 +782,28 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         return $this->logger;
+    }
+
+    /**
+     * @return \Shopware\Components\Model\ModelRepository
+     */
+    private function getCustomerGroupRepository()
+    {
+        if (!$this->customerGroupRepository) {
+            $this->customerGroupRepository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        }
+
+        return $this->customerGroupRepository;
+    }
+
+    private function getPriceGateway()
+    {
+        if (!$this->priceGateway) {
+            $this->priceGateway = new \ShopwarePlugins\Connect\Components\PriceGateway(
+                Shopware()->Db()
+            );
+        }
+
+        return $this->priceGateway;
     }
 } 

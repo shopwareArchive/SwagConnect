@@ -38,6 +38,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'logTabs', selector: 'connect-log-tabs' },
         { ref: 'marketeplaceMappingPanel', selector: 'connect-config-marketplace-attributes' },
         { ref: 'marketeplaceMapping', selector: 'connect-marketplace-attributes-mapping' },
+        { ref: 'exportConfigForm', selector: 'connect-config-export-form' },
         { ref: 'unitsMapping', selector: 'connect-units-mapping-list' }
     ],
 
@@ -73,6 +74,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
+
+        priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Preisfeld ist nicht gepflegt{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
@@ -118,6 +121,18 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             },
 			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
+            },
+            'connect-config-export-form combobox[name=priceGroupForPriceExport]': {
+                change: me.onChangePriceGroupForPrice
+            },
+            'connect-config-export-form combobox[name=priceGroupForPurchasePriceExport]': {
+                change: me.onChangePriceGroupForPurchasePrice
+            },
+            'connect-config-export-form combobox[name=priceFieldForPriceExport]': {
+                change: me.onChangePriceFieldForPrice
+            },
+            'connect-config-export-form combobox[name=priceFieldForPurchasePriceExport]': {
+                change: me.onChangePriceFieldForPurchasePrice
             },
 			'connect-mapping button[action=save]': {
                 click: me.onSaveMapping
@@ -823,6 +838,100 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             }
         });
+    },
+
+    /**
+     * On change customer group for price configuration
+     * reload the store with available price fields
+     *
+     * @param combo
+     * @param newValue
+     * @param oldValue
+     */
+    onChangePriceGroupForPrice: function(combo, newValue, oldValue) {
+        if (!oldValue) {
+            return;
+        }
+
+        var me = this;
+        var exportConfigForm = me.getExportConfigForm();
+        exportConfigForm.setLoading(true);
+        exportConfigForm.priceFieldForPrice.store.load({
+            params: {
+                'customerGroup': newValue
+            },
+            callback: function() {
+                exportConfigForm.setLoading(false);
+            }
+        });
+    },
+
+    /**
+     * On change customer group for purchase price configuration
+     * reload the store with available price fields
+     *
+     * @param combo
+     * @param newValue
+     * @param oldValue
+     */
+    onChangePriceGroupForPurchasePrice: function(combo, newValue, oldValue) {
+        if (!oldValue) {
+            return;
+        }
+
+        var me = this;
+        var exportConfigForm = me.getExportConfigForm();
+        exportConfigForm.setLoading(true);
+        exportConfigForm.priceFieldForPurchasePrice.store.load({
+            params: {
+                'customerGroup': newValue
+            },
+            callback: function() {
+                exportConfigForm.setLoading(false);
+            }
+        });
+    },
+
+    /**
+     * Checks price field selection, if it's not supported
+     * shows error message
+     *
+     * @param combo
+     * @param newValue
+     * @param oldValue
+     */
+    onChangePriceFieldForPurchasePrice: function(combo, newValue, oldValue) {
+        if (!oldValue) {
+            return;
+        }
+
+        var me = this;
+
+        var newRecord = combo.findRecordByValue(newValue);
+        if (newRecord && newRecord.get('available') === false) {
+            me.createGrowlMessage('{s name=error}Error{/s}', me.messages.priceFieldIsNotSupported);
+        }
+    },
+
+    /**
+     * Checks price field selection, if it's not supported
+     * shows error message
+     *
+     * @param combo
+     * @param newValue
+     * @param oldValue
+     */
+    onChangePriceFieldForPrice: function(combo, newValue, oldValue) {
+        if (!oldValue) {
+            return;
+        }
+
+        var me = this;
+
+        var newRecord = combo.findRecordByValue(newValue);
+        if (newRecord && newRecord.get('available') === false) {
+            me.createGrowlMessage('{s name=error}Error{/s}', me.messages.priceFieldIsNotSupported);
+        }
     },
 
     /**

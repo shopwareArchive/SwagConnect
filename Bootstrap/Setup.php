@@ -194,6 +194,7 @@ class Setup
              `is_main_variant` TINYINT(1) NULL DEFAULT NULL,
              `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
              `offer_valid_until` int(10) NOT NULL,
+             `stream` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)

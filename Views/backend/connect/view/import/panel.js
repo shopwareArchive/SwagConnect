@@ -52,15 +52,35 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             width: 460
                         },
                         {
-                            xtype: 'button',
-                            alias: 'widget.arrow-import-categories',
-                            cls: 'import-arrow',
-                            action: 'importRemoteCategory',
-                            border: false,
-                            padding: '2px',
-                            margin: '125px 0 0 0',
+                            xtype: 'panel',
+                            layout: 'vbox',
                             width: 50,
-                            height: 50
+                            height: 100,
+                            margin: '100px 0 0 0',
+                            bodyStyle : 'background:none', // Removes the default white background
+                            border: false,
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    alias: 'widget.arrow-import-categories',
+                                    cls: 'import-arrow',
+                                    action: 'importRemoteCategory',
+                                    border: false,
+                                    padding: '2px',
+                                    width: 50,
+                                    height: 50
+                                },
+                                {
+                                    xtype: 'button',
+                                    alias: 'widget.arrow-unassign-categories',
+                                    cls: 'unassign-arrow',
+                                    action: 'unassignRemoteCategory',
+                                    border: false,
+                                    padding: '2px',
+                                    width: 50,
+                                    height: 50
+                                }
+                            ]
                         },
                         {
                             xtype: 'connect-own-categories',

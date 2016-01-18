@@ -475,7 +475,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this,
             list = me.getExportList(),
             records = list.selModel.getSelection(),
-            ids = [], url, message, title;
+            ids = [],
+            url,
+            message,
+            messages = [],
+            title;
 
         if(btn.action == 'add') {
             url = '{url action=insertOrUpdateProduct}';
@@ -506,12 +510,20 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     var operation = Ext.decode(response.responseText);
                     if (operation) {
                         if (!operation.success && operation.message) {
-                            message = operation.message;
+                            // message = operation.message;
+                            messages = operation.messages;
                             sticky = true;
                         }
                     }
                 }
-                me.createGrowlMessage(title, message, sticky);
+                if (messages.length > 0) {
+                    messages.forEach( function(message){
+                        me.createGrowlMessage(title, message, sticky);
+                    });
+                } else {
+                    me.createGrowlMessage(title, message, sticky);
+                }
+
                 list.setLoading(false);
                 list.store.load();
             }

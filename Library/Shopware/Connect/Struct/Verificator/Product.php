@@ -77,21 +77,33 @@ class Product extends Verificator
     protected function verifyPurchasePrice(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
-            $this->fail("The purchasePrice is not allowed to be 0 or smaller.");
+            if ($this->isMainArticle($struct)) {
+                $this->fail("The purchasePrice is not allowed to be 0 or smaller.");
+            } else {
+                $this->fail("The purchasePrice of a variation is not allowed to be 0 or smaller.");
+            }
         }
     }
 
     protected function verifyRetailPrice(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if (empty($struct->price) || $struct->price <= 0) {
-            $this->fail("The price is not allowed to be 0 or smaller.");
+            if ($this->isMainArticle($struct)) {
+                $this->fail("The price is not allowed to be 0 or smaller.");
+            } else {
+                $this->fail("The price of a variation is not allowed to be 0 or smaller.");
+            }
         }
     }
 
     protected function verifyFixedPrice(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         if ($struct->fixedPrice === true && $this->priceType == SDK::PRICE_TYPE_PURCHASE) {
-            $this->fail("Fixed price is not allowed when export purchasePrice only");
+            if ($this->isMainArticle($struct)) {
+                $this->fail("Fixed price is not allowed to be 0 or smaller.");
+            } else {
+                $this->fail("Fixed price of a variation is not allowed when export purchasePrice only");
+            }
         }
     }
 
@@ -288,5 +300,12 @@ class Product extends Verificator
                 );
             }
         }
+    }
+
+    /**
+     * @param Struct $struct
+     */
+    private function isMainArticle(Struct $struct){
+        return '' === $struct->getVariantString();
     }
 }

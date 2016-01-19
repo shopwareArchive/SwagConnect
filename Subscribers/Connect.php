@@ -1,7 +1,9 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
 use Shopware\Connect\SDK;
+use Shopware;
 use ShopwarePlugins\Connect\Components\Config;
 
 /**
@@ -22,9 +24,45 @@ class Connect extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PostDispatch_Backend_Index' => 'injectBackendConnectMenuEntry',
+            'Enlight_Controller_Action_PostDispatch_Backend_Index' => 'backendIndexEvent',
 
         );
+    }
+
+    public function backendIndexEvent(\Enlight_Event_EventArgs $args)
+    {
+        $this->checkPluginVersion($args);
+        $this->injectBackendConnectMenuEntry($args);
+    }
+
+    private function checkPluginVersion(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $action \Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $request = $action->Request();
+        $response = $action->Response();
+        $view = $action->View();
+        $info = null;
+
+        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate()) {
+            return;
+        }
+
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'plugin.json'), true);
+
+        // URL: https://api.shopware.com/pluginStore/updates?pluginNames%5B0%5D=SwagBepado&shopwareVersion=5.0.0
+        $baseUrl = 'https://api.shopware.com/pluginStore/updates';
+        $shopVersion = Shopware::VERSION;
+        $pluginName = 'SwagBepado';
+        $apiResponse = json_decode(
+            file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
+        )[0];
+
+        if($apiResponse->highestVersion > $info['currentVersion']) {
+            $view->falseVersionTitle = 'Neue Shopware Connect Version verfügbar';
+            $view->falseVersionMessage = 'Es ist eine neue Shopware Connect Version verfügbar. Bitte aktualisieren sie das Plugin über den Plugin-Manager.';
+            $view->extendsTemplate('backend/connect/plugin_version_check.tpl');
+        }
     }
 
     /**
@@ -35,7 +73,7 @@ class Connect extends BaseSubscriber
      * @param \Enlight_Event_EventArgs $args
      * @returns boolean|void
      */
-    public function injectBackendConnectMenuEntry(\Enlight_Event_EventArgs $args)
+    private function injectBackendConnectMenuEntry(\Enlight_Event_EventArgs $args)
     {
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();

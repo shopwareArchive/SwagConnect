@@ -161,10 +161,25 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         var categoriesStore = Ext.create('Shopware.apps.Base.store.CategoryTree');
         categoriesStore.load();
 
-        me.imageLimitImportField = Ext.create('Ext.form.field.Number', {
+        var numStore = Ext.create('Ext.data.Store', {
+            fields: ['name', 'value'],
+            data : [
+                { name: '5', value: '5' },
+                { name: '25', value: '25' },
+                { name: '50', value: '50' },
+                { name: '100', value: '100' },
+                { name: '150', value: '150' }
+            ]
+        });
+
+        me.imageLimitImportField = Ext.create('Ext.form.field.ComboBox', {
             name: 'articleImagesLimitImport',
             fieldLabel: me.snippets.articleImagesLimitImportLabel,
-            labelWidth: me.defaults.labelWidth
+            labelWidth: me.defaults.labelWidth,
+            editable: false,
+            valueField: 'value',
+            displayField: 'name',
+            store: numStore
         });
 
         var container = Ext.create('Ext.container.Container', {

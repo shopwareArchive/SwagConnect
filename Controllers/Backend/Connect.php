@@ -592,7 +592,6 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if (!empty($errors)) {
             $this->View()->assign(array(
                 'success' => false,
-                'message' => implode("<br>\n", $errors),
                 'messages' => $errors
             ));
             return;

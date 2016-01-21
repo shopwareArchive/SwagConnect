@@ -525,7 +525,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     var operation = Ext.decode(response.responseText);
                     if (operation) {
                         if (!operation.success && operation.message) {
-                            message = operation.message;
                             messages = operation.messages;
                             sticky = true;
                         }

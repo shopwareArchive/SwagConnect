@@ -41,6 +41,7 @@ class Connect extends BaseSubscriber
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
+        $snippets = Shopware()->Snippets()->getNamespace('backend/swagConnect');
         $view = $action->View();
         $info = null;
 
@@ -53,14 +54,15 @@ class Connect extends BaseSubscriber
         // URL: https://api.shopware.com/pluginStore/updates?pluginNames%5B0%5D=SwagBepado&shopwareVersion=5.0.0
         $baseUrl = 'https://api.shopware.com/pluginStore/updates';
         $shopVersion = Shopware::VERSION;
+        $shopVersion = $shopVersion === '___VERSION___' ? '5.0.0' : $shopVersion;
         $pluginName = 'SwagBepado';
         $apiResponse = json_decode(
             file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
         )[0];
 
         if($apiResponse->highestVersion > $info['currentVersion']) {
-            $view->falseVersionTitle = 'Neue Shopware Connect Version verfügbar';
-            $view->falseVersionMessage = 'Es ist eine neue Shopware Connect Version verfügbar. Bitte aktualisieren sie das Plugin über den Plugin-Manager.';
+            $view->falseVersionTitle = $snippets->get('Neue Shopware Connect Version verfügbar');
+            $view->falseVersionMessage = $snippets->get('Es ist eine neue Shopware Connect Version verfügbar. Bitte aktualisieren sie das Plugin über den Plugin-Manager.');
             $view->extendsTemplate('backend/connect/plugin_version_check.tpl');
         }
     }

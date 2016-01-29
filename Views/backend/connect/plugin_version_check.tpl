@@ -2,8 +2,8 @@
     <script type="text/javascript">
         setTimeout(function(){
             Shopware.Notification.createStickyGrowlMessage({
-                title: '{$falseVersionTitle|snippet:'falseVersionTitle':'backend/swagConnect'}',
-                text: '{$falseVersionMessage|snippet:'falseVersionMessage':'backend/swagConnect'}',
+                title: '{$falseVersionTitle}',
+                text: '{$falseVersionMessage}',
                 width: 400
             });
         }, 1000);

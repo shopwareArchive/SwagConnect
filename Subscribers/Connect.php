@@ -41,7 +41,7 @@ class Connect extends BaseSubscriber
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
-        $snippets = Shopware()->Snippets()->getNamespace('backend/swagConnect');
+        $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/connect');
         $view = $action->View();
         $info = null;
 
@@ -61,8 +61,8 @@ class Connect extends BaseSubscriber
         )[0];
 
         if($apiResponse->highestVersion > $info['currentVersion']) {
-            $view->falseVersionTitle = $snippets->get('Neue Shopware Connect Version verfügbar');
-            $view->falseVersionMessage = $snippets->get('Es ist eine neue Shopware Connect Version verfügbar. Bitte aktualisieren sie das Plugin über den Plugin-Manager.');
+            $view->falseVersionTitle = $snippets->get('info/new_version_header');
+            $view->falseVersionMessage = $snippets->get('info/new_version_text');
             $view->extendsTemplate('backend/connect/plugin_version_check.tpl');
         }
     }

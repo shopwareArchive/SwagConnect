@@ -51,21 +51,21 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
-        importPicturesHelp: '{s name=config/import/pictures_help}Der Import von Bildern kann den Import verlangsamen. Wenn Sie viele Produkte importieren möchten, sollten Sie diese Option nicht aktivieren und die Bilder über den CronJob oder »Geänderte Produkte« importieren.{/s}',
-        overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Folgende Felder beim Produkt-Aktualisierung überschreiben{/s}',
-        overwritePropertiesHelp: '{s name=config/import/overwrite_properties_help}Die hier ausgewählten Felder werden automatisch überschrieben, wenn der Quellshop diese ändert. Sie können auf Artikel-Ebene Ausnahmen definieren.{/s}',
+        importPicturesHelp: '{s name=config/import/pictures_help}The import of images can slow down the import. If you want to import many products, you should not activate and import the pictures on the CronJob.{/s}',
+        overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Overwrite the following properties during import{/s}',
+        overwritePropertiesHelp: '{s name=config/import/overwrite_properties_help}The fields selected here will automatically be overwritten when the source changes this store. You can define item-level exceptions.{/s}',
         overwriteProductName: '{s name=config/import/overwrite_product_name}Product name{/s}',
         overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
-        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Produktbeschreibungen{/s}',
-        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Produktbilder{/s}',
-        productImportUnitsTitle: '{s name=config/import/units_title}Maßeinheiten{/s}',
-        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}zugewiesene Maßeinheiten ausblenden{/s}',
-        takeOverUnits: '{s name=config/import/take_over_units}Maßeinheiten übernehmen{/s}',
-        takeOverUnitsTooltip: '{s name=config/import/take_over_units_tooltip}Übernehmen nicht zugeordnete Masseinheiten in ihren Shop{/s}'
+        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
+        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
+        productImportUnitsTitle: '{s name=config/import/units_title}Units{/s}',
+        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}hide assigned units{/s}',
+        takeOverUnits: '{s name=config/import/take_over_units}Take over units{/s}',
+        takeOverUnitsTooltip: '{s name=config/import/take_over_units_tooltip}Apply unassigned units of measurement in the shop{/s}'
     },
 
     initComponent: function() {
@@ -162,13 +162,13 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         categoriesStore.load();
 
         var numStore = Ext.create('Ext.data.Store', {
-            fields: ['name', 'value'],
+            fields: ['value'],
             data : [
-                { name: '5', value: '5' },
-                { name: '25', value: '25' },
-                { name: '50', value: '50' },
-                { name: '100', value: '100' },
-                { name: '150', value: '150' }
+                { value: 5 },
+                { value: 25 },
+                { value: 50 },
+                { value: 100 },
+                { value: 150 }
             ]
         });
 
@@ -178,7 +178,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             labelWidth: me.defaults.labelWidth,
             editable: false,
             valueField: 'value',
-            displayField: 'name',
+            displayField: 'value',
             store: numStore
         });
 

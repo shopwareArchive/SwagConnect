@@ -41,7 +41,7 @@ class Connect extends BaseSubscriber
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
-        $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/connect');
+        $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
         $view = $action->View();
         $info = null;
 

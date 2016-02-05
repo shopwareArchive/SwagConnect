@@ -182,7 +182,7 @@ class ProductToShop implements ProductToShopBase
             }
 
             $detail = new DetailModel();
-            $detail->setNumber('BP-' . $product->shopId . '-' . $product->sourceId);
+            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
             $detail->setActive(false);
             $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
             $detail->setActive($active);
@@ -368,7 +368,7 @@ class ProductToShop implements ProductToShopBase
         // like OXID articles. They use md5 has, but it is not supported
         // in shopware.
         if (strlen($detail->getNumber()) > 30) {
-            $detail->setNumber('BP-' . $product->shopId . '-' . $detail->getId());
+            $detail->setNumber('SC-' . $product->shopId . '-' . $detail->getId());
 
             $this->manager->persist($detail);
             $this->manager->flush($detail);

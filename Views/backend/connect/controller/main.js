@@ -513,6 +513,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
 
         list.setLoading();
+        
         Ext.Ajax.request({
             url: url,
             method: 'POST',
@@ -524,7 +525,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 if (response.responseText) {
                     var operation = Ext.decode(response.responseText);
                     if (operation) {
-                        if (!operation.success && operation.message) {
+                        if (!operation.success && operation.messages) {
                             messages = operation.messages;
                             sticky = true;
                         }

@@ -19,6 +19,8 @@ class ProductToShopTest extends ConnectTestHelper
 
     private $modelManager;
 
+    private $db;
+
     public function tearDown()
     {
         $conn = Shopware()->Db();
@@ -30,9 +32,9 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function setUp()
     {
-        $conn = Shopware()->Db();
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
+        $this->db = Shopware()->Db();
+        $this->db->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
+        $this->db->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
 
         $this->modelManager = Shopware()->Models();
         $this->productToShop = new ProductToShop(
@@ -52,6 +54,20 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             )
         );
+    }
+
+    private function deleteVendorIfExists($vendorName)
+    {
+        $vendorCount = $this->db->query(
+            'SELECT COUNT(id)
+              FROM s_articles_supplier as supplier
+              WHERE supplier.name = :supplierName',
+            array('supplierName' => $vendorName)
+        )->fetchColumn();
+
+        if ($vendorCount) {
+            Shopware()->Db()->delete('s_articles_supplier', array('name=?' => $vendorName));
+        }
     }
 
     public function testInsertArticle()
@@ -479,6 +495,43 @@ class ProductToShopTest extends ConnectTestHelper
         );
 
         $this->assertEquals(1, $query->fetchColumn());
+    }
+
+    public function testInsertArticleVendorArray()
+    {
+        $product = $this->getProduct();
+        $this->deleteVendorIfExists($product->vendor['name']);
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $supplier = $this->db->query(
+            'SELECT *
+              FROM s_articles_supplier as supplier
+              WHERE supplier.name = :supplierName',
+            array('supplierName' => $product->vendor['name'])
+        )->fetchObject();
+
+        $this->assertEquals($product->vendor['name'], $supplier->name);
+        $this->assertEquals($product->vendor['url'], $supplier->link);
+        $this->assertEquals($product->vendor['description'], $supplier->description);
+        $this->assertEquals($product->vendor['page_title'], $supplier->meta_title);
+    }
+
+    public function testInsertArticleVendorString()
+    {
+        $product = $this->getProduct();
+        $product->vendor = 'shopware Connect';
+        $this->deleteVendorIfExists($product->vendor);
+
+        $this->productToShop->insertOrUpdate($product);
+        $supplier = $this->db->query(
+            'SELECT *
+              FROM s_articles_supplier as supplier
+              WHERE supplier.name = :supplierName',
+            array('supplierName' => $product->vendor)
+        )->fetchObject();
+
+        $this->assertEquals($product->vendor, $supplier->name);
     }
 
     public function testAutomaticallyActivateArticles()

@@ -7,6 +7,8 @@ use \Shopware\Models\Article\Image;
 use \Shopware\Models\Media\Media;
 use \Shopware\Models\Attribute\Media as MediaAttribute;
 use Symfony\Component\HttpFoundation\File\File;
+use Shopware\Models\Article\Supplier;
+use Shopware\Components\Thumbnail\Manager as ThumbnailManager;
 
 
 class ImageImport
@@ -18,13 +20,23 @@ class ImageImport
     /** @var  Helper */
     protected $helper;
 
+    /**
+     * @var ThumbnailManager
+     */
+    protected $thumbnailManager;
+
     /** @var  \ShopwarePlugins\Connect\Components\Logger */
     protected $logger;
 
-    public function __construct(ModelManager $manager, Helper $helper, Logger $logger)
-    {
+    public function __construct(
+        ModelManager $manager,
+        Helper $helper,
+        ThumbnailManager $thumbnailManager,
+        Logger $logger
+    ) {
         $this->manager = $manager;
         $this->helper = $helper;
+        $this->thumbnailManager = $thumbnailManager;
         $this->logger = $logger;
     }
 
@@ -206,8 +218,7 @@ class ImageImport
 
                 $this->manager->persist($image);
 
-                $manager = Shopware()->Container()->get('thumbnail_manager');
-                $manager->createMediaThumbnail(
+                $this->thumbnailManager->createMediaThumbnail(
                     $media,
                     $this->getThumbnailSize($album),
                     true
@@ -222,6 +233,41 @@ class ImageImport
         $this->manager->flush();
         $this->manager->clear();
     }
+
+    /**
+     * @param $imageUrl
+     * @param Supplier $supplier
+     */
+    public function importImageForSupplier($imageUrl, Supplier $supplier)
+    {
+        $album = $this->manager->find('Shopware\Models\Media\Album', -12);
+        $tempDir = Shopware()->DocPath('media_temp');
+
+        $tempFile = tempnam($tempDir, 'image');
+        copy($imageUrl, $tempFile);
+        $file = new File($tempFile);
+
+        $media = new Media();
+        $media->setAlbum($album);
+        $media->setDescription('');
+        $media->setCreated(new \DateTime());
+        $media->setUserId(0);
+        $media->setFile($file);
+
+        $this->manager->persist($media);
+
+        $this->thumbnailManager->createMediaThumbnail(
+            $media,
+            $this->getThumbnailSize($album),
+            true
+        );
+
+        $supplier->setImage($media->getPath());
+        $this->manager->persist($supplier);
+
+        $this->manager->flush();
+    }
+
 
     /**
      * Returns thumbnails size by album

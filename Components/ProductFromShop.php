@@ -157,7 +157,7 @@ class ProductFromShop implements ProductFromShopBase
         $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $status = $this->manager->find('Shopware\Models\Order\Status', 0);
         $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);
-        $number = 'BP-' . $order->orderShop . '-' . $order->localOrderId;
+        $number = 'SC-' . $order->orderShop . '-' . $order->localOrderId;
 
         $repository = $this->manager->getRepository('Shopware\Models\Payment\Payment');
         $payment = $repository->findOneBy(array(

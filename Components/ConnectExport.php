@@ -88,9 +88,11 @@ class ConnectExport
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
-                    a.name as title
+                    a.name as title,
+                    d.ordernumber as number
             FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
+            LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
             WHERE bi.source_id IN ($implodedIds);"
         );
 
@@ -102,7 +104,7 @@ class ConnectExport
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
-            $prefix = $item['title'] ? $item['title'] . ': ' : '';
+            $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
             if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
                 $status = 'insert';
             } else {

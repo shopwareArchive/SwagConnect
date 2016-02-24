@@ -130,6 +130,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
+            Shopware()->Container()->get('thumbnail_manager'),
             new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
         );
     }
@@ -592,7 +593,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if (!empty($errors)) {
             $this->View()->assign(array(
                 'success' => false,
-                'message' => implode("<br>\n", $errors)
+                'messages' => $errors
             ));
             return;
         }

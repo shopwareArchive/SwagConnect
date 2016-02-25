@@ -445,37 +445,59 @@ class Setup
      */
     public function createConnectCustomerGroup()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        $db = Shopware()->Db();
+        $connectGroupAttributeId = $this->getConnectCustomerGroupId();
+        if (!$this->connectCustomerGroupExists($connectGroupAttributeId)) {
 
-        $connectGroupAttributeId = Shopware()->Db()->fetchOne(
-            'SELECT id FROM s_core_customergroups_attributes WHERE connect_group = 1'
+            // Create Customer Group
+            $db->insert(
+                's_core_customergroups',
+                [
+                    'groupkey' => $this->getAvailableCustomerGroupName(),
+                    'description' => "SC export",
+                    'tax' => 0,
+                    'taxinput' => 0,
+                    'mode' => 0
+                ]
+            );
+
+            $customerGroupID = $db->fetchOne('SELECT MAX(id) FROM s_core_customergroups');
+
+            // Create Customer Group Attributes
+            $db->insert(
+                's_core_customergroups_attributes',
+                [
+                  'customerGroupID' => $customerGroupID,
+                  'connect_group' => 1
+                ]
+            );
+        }
+    }
+
+    private function getConnectCustomerGroupId()
+    {
+        $db = Shopware()->Db();
+
+        return $db->fetchOne(
+            'SELECT customerGroupID
+            FROM `s_core_customergroups_attributes`
+            WHERE connect_group = 1'
+        );
+    }
+
+    private function connectCustomerGroupExists($attributeId)
+    {
+        $db = Shopware()->Db();
+        $result = $db->fetchOne(
+            'SELECT COUNT(*)
+            FROM `s_core_customergroups`
+            WHERE id = :id',
+            [
+                'id' => $attributeId
+            ]
         );
 
-        /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->find($connectGroupAttributeId);
-
-        $customerGroup = null;
-        if ($model && $model->getCustomerGroup()) {
-            $customerGroup = $model->getCustomerGroup();
-        }
-
-        if (!$customerGroup) {
-            $customerGroup = new Group();
-            $customerGroup->setKey($this->getAvailableCustomerGroupName());
-            $customerGroup->setTax(false);
-            $customerGroup->setTaxInput(false);
-            $customerGroup->setMode(0);
-            $customerGroup->setName('SC export');
-
-            $attribute = new \Shopware\Models\Attribute\CustomerGroup();
-            $attribute->setConnectGroup(true);
-            $customerGroup->setAttribute($attribute);
-
-
-            Shopware()->Models()->persist($customerGroup);
-            Shopware()->Models()->persist($attribute);
-            Shopware()->Models()->flush();
-        }
+        return !empty($result);
     }
 
     /**
@@ -531,7 +553,7 @@ class Setup
     {
         Shopware()->Models()->addAttribute(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed',
+            'connect', 'is_allowed', 
             'int(1)',
             true,
             1

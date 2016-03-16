@@ -31,6 +31,7 @@ use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
  * Class Shopware_Controllers_Backend_Connect
@@ -130,7 +131,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
-            Shopware()->Container()->get('thumbnail_manager'),
+            $this->get('thumbnail_manager'),
             new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
         );
     }
@@ -1119,6 +1120,40 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                 'success' => true
             )
         );
+    }
+
+    public function exportStreamsAction()
+    {
+        $streamIds = $this->request->getParam('ids', array());
+
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $articleIds = $productStreamService->getArticlesIds($streamIds);
+
+        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+
+        $connectExport = $this->getConnectExport();
+        try {
+            $errors = $connectExport->export($sourceIds);
+        } catch (\RuntimeException $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+            return;
+        }
+
+        if (!empty($errors)) {
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => $errors
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
     }
 
     private function getMarketplaceApplier()

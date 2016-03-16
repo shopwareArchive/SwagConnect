@@ -253,6 +253,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Article(),
             new \ShopwarePlugins\Connect\Subscribers\Connect(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
+            new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
+                Shopware()->Models()
+            ),
         );
     }
 

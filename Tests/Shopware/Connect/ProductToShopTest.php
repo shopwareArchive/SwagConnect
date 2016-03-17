@@ -213,7 +213,7 @@ class ProductToShopTest extends ConnectTestHelper
         $variants[1]->purchasePrice = $newPurchasePrice;
         $variants[1]->longDescription = $newLongDesc;
         $variants[1]->shortDescription = $newShortDesc;
-        $variants[1]->images[] = 'http://lorempixel.com/400/200?' . $variants[1]->sourceId;
+        $variants[1]->images[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->vat = $newVat;
 
         $this->productToShop->insertOrUpdate($variants[1]);

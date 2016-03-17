@@ -59,7 +59,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function getLabel()
     {
-        return 'Shopware Connect';
+        return 'Connect';
     }
 
     /**

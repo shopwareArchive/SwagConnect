@@ -51,13 +51,51 @@ class Setup
         $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => $this->bootstrap->getLabel()));
         // check if shopware Connect menu item exists
         if (!$connectItem) {
-            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Marketing'));
+            //move help menu item after Connect
+            $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
+            $helpItem->setPosition(1);
+            Shopware()->Models()->persist($helpItem);
+            Shopware()->Models()->flush();
 
-            $this->bootstrap->createMenuItem(array(
+            $parent = $this->bootstrap->createMenuItem(array(
                 'label' => $this->bootstrap->getLabel(),
                 'controller' => 'Connect',
-                'action' => 'Index',
                 'class' => 'connect-icon',
+                'active' => 1,
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Register',
+                'controller' => 'Connect',
+                'action' => 'Index3',
+                'class' => 'sprite-inbox-image contents--media-manager',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Import',
+                'controller' => 'Connect',
+                'action' => 'Index',
+                'class' => 'sprite-arrow-circle-double-135 contents--import-export',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Export',
+                'controller' => 'Connect',
+                'action' => 'Index1',
+                'class' => 'sprite-arrow-circle-double-135 contents--import-export',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Settings',
+                'controller' => 'Connect',
+                'action' => 'Index2',
+                'class' => 'sprite-gear',
                 'active' => 1,
                 'parent' => $parent
             ));

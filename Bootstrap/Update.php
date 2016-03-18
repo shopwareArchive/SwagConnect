@@ -36,6 +36,7 @@ class Update
         $this->reVerifySDK();
 
         $this->createStreamField();
+        $this->removeOldConnectMenu();
 
         return true;
     }
@@ -61,6 +62,17 @@ class Update
                 ALTER TABLE s_plugin_connect_items
                 ADD stream VARCHAR(255) NOT NULL
             ');
+        }
+    }
+
+    public function removeOldConnectMenu()
+    {
+        if (version_compare($this->version, '0.0.2', '<=')) {
+            $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Shopware Connect'));
+            if ($connectItem) {
+                Shopware()->Models()->remove($connectItem);
+                Shopware()->Models()->flush();
+            }
         }
     }
 

@@ -48,19 +48,78 @@ class Setup
      */
     private function createMyMenu()
     {
-        $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => $this->bootstrap->getLabel()));
+        $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
         // check if shopware Connect menu item exists
         if (!$connectItem) {
-            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Marketing'));
+            //move help menu item after Connect
+            $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
+            $helpItem->setPosition(1);
+            Shopware()->Models()->persist($helpItem);
+            Shopware()->Models()->flush();
+
+            $parent = $this->bootstrap->createMenuItem(array(
+                'label' => 'Connect',
+                'controller' => 'Connect',
+                'class' => 'connect-icon',
+                'active' => 1,
+            ));
 
             $this->bootstrap->createMenuItem(array(
-                'label' => $this->bootstrap->getLabel(),
+                'label' => 'Register',
                 'controller' => 'Connect',
-                'action' => 'Index',
-                'class' => 'connect-icon',
+                'action' => 'Index3',
+                'class' => 'contents--media-manager',
                 'active' => 1,
                 'parent' => $parent
             ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Import',
+                'controller' => 'Connect',
+                'action' => 'Index4',
+                'class' => 'contents--import-export',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Export',
+                'controller' => 'Connect',
+                'action' => 'Index1',
+                'class' => 'contents--import-export',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $this->bootstrap->createMenuItem(array(
+                'label' => 'Settings',
+                'controller' => 'Connect',
+                'action' => 'Index2',
+                'class' => 'sprite-gear',
+                'active' => 1,
+                'parent' => $parent
+            ));
+
+            $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
+            ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Index1', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Index1', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Index2', 'Einstellungen', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Index2', 'Settings', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Index3', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Index3', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Index4', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Index4', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
+
+            ON DUPLICATE KEY UPDATE
+              `namespace` = VALUES(`namespace`),
+              `shopID` = VALUES(`shopID`),
+              `name` = VALUES(`name`),
+              `localeID` = VALUES(`localeID`),
+              `value` = VALUES(`value`)
+              ;";
+            Shopware()->Db()->exec($sql);
         }
     }
 

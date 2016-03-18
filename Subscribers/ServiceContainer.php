@@ -6,7 +6,7 @@ use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Enlight\Event\SubscriberInterface;
-
+use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 
 class ServiceContainer extends BaseSubscriber
 {
@@ -32,7 +32,10 @@ class ServiceContainer extends BaseSubscriber
     {
         $productStreamQuery = new ProductStreamRepository($this->manager);
 
-        return new ProductStreamService($productStreamQuery);
+        /** @var ProductStreamAttributeRepository $streamAttrRepository */
+        $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+
+        return new ProductStreamService($productStreamQuery, $streamAttrRepository);
     }
 
 }

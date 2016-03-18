@@ -24,17 +24,16 @@ class ProductStreamAttribute extends ModelEntity
     /**
      * @var integer $streamId
      *
-     * @ORM\Column(name="stream_id", type="integer", nullable=true)
+     * @ORM\Column(name="stream_id", type="integer", nullable=false)
      */
     protected $streamId;
 
     /**
      * @var string $exportStatus
      *
-     * @ORM\Column(name="export_status", type="text", nullable=true)
+     * @ORM\Column(name="export_status", type="string", length=255, nullable=true)
      */
     protected $exportStatus;
-
 
     /**
      * @var string $exportMessage

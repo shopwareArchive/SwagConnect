@@ -10,5 +10,20 @@ use \Shopware\Components\Model\ModelRepository;
  */
 class ProductStreamAttributeRepository extends ModelRepository
 {
+    /**
+     * @param ProductStreamAttribute $productStreamAttribute
+     */
+    public function save(ProductStreamAttribute $productStreamAttribute)
+    {
+        $this->getEntityManager()->persist($productStreamAttribute);
+        $this->getEntityManager()->flush($productStreamAttribute);
+    }
 
+    /**
+     * @return ProductStreamAttribute
+     */
+    public function create()
+    {
+        return new ProductStreamAttribute();
+    }
 }

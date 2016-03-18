@@ -32,6 +32,7 @@ use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\Prod
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Doctrine\ORM\NoResultException;
 
 /**
  * Class Shopware_Controllers_Backend_Connect
@@ -1128,22 +1129,43 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
-        $articleIds = $productStreamService->getArticlesIds($streamIds);
 
-        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $errors = array();
+        foreach ($streamIds as $streamId) {
+            try {
+                $articleIds = $productStreamService->getArticlesIds($streamId);
+            } catch (NoResultException $e) {
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
 
-        $connectExport = $this->getConnectExport();
-        try {
-            $errors = $connectExport->export($sourceIds);
-        } catch (\RuntimeException $e) {
-            $this->View()->assign(array(
-                'success' => false,
-                'message' => $e->getMessage()
-            ));
-            return;
+            $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+
+            $connectExport = $this->getConnectExport();
+            try {
+                $errorMessages = $connectExport->export($sourceIds);
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+                //todo: save stream status as exported
+            } catch (\RuntimeException $e) {
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
+
+            if (!empty($errorMessages)) {
+                $message = implode(';', $errorMessages);
+                $productStreamService->logError($streamId, $message);
+                $errors = array_merge($errors, $errorMessages);
+            }
         }
 
-        if (!empty($errors)) {
+        if ($errors) {
             $this->View()->assign(array(
                 'success' => false,
                 'messages' => $errors

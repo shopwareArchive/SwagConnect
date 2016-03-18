@@ -227,9 +227,9 @@ class Setup
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
-              `stream_id` int(11) DEFAULT NULL,
+              `stream_id` int(11) NOT NULL,
               `export_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `export_message` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+              `export_message` text COLLATE utf8_unicode_ci DEFAULT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ");

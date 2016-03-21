@@ -1146,9 +1146,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
             $connectExport = $this->getConnectExport();
             try {
-                $errorMessages = $connectExport->export($sourceIds);
+                $errorMessages = $connectExport->export($sourceIds, $streamId);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
-                //todo: save stream status as exported
             } catch (\RuntimeException $e) {
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $this->View()->assign(array(

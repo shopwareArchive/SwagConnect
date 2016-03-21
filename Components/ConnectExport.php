@@ -72,9 +72,10 @@ class ConnectExport
      * Helper function to mark a given array of source ids for connect update
      *
      * @param array $ids
+     * @param string|null $streamId
      * @return array
      */
-    public function export(array $ids)
+    public function export(array $ids, $streamId = null)
     {
         $errors = array();
         if (count($ids) == 0) {
@@ -127,6 +128,10 @@ class ConnectExport
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
+                }
+
+                if ($streamId !== null) {
+                    //todo: assign streams to products in SDK
                 }
             } catch (\Exception $e) {
                 $connectAttribute->setExportStatus('error');

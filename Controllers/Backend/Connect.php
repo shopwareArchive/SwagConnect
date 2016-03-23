@@ -1134,7 +1134,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         foreach ($streamIds as $streamId) {
             try {
                 $articleIds = $productStreamService->getArticlesIds($streamId);
-            } catch (NoResultException $e) {
+            } catch (\Exception $e) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => $e->getMessage()

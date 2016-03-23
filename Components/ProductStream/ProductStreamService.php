@@ -50,6 +50,7 @@ class ProductStreamService
             $sourceIds = array_merge($sourceIds, $this->extractSourceIdsFromStaticStream($stream));
         } else {
             //todo: extract product from dynamic stream
+            throw new \Exception('Not allow to export articles ids from dynamic stream');
         }
 
         return $sourceIds;

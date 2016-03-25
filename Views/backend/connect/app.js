@@ -5,7 +5,7 @@ Ext.define('Shopware.apps.Connect', {
     bulkLoad: true,
     loadPath: '{url action=load}',
     views: [
-        'main.Window', 'main.Navigation', 'main.Panel',
+        'main.Window', 'main.TabPanel', 'main.Panel',
         'export.Panel', 'import.Panel',
         'export.List', 'export.Filter',
         'import.RemoteCategories', 'import.OwnCategories', 'import.RemoteProducts', 'import.LocalProducts',

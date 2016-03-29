@@ -83,7 +83,7 @@ class HelperTest extends ConnectTestHelper
     {
         $images = array();
         for ($i = 0; $i < 10; $i++) {
-            $images[] = 'http://lorempixel.com/400/200?' . rand(0, 9999);
+            $images[] = self::IMAGE_PROVIDER_URL . '?' . rand(0, 9999);
         }
 
         /** @var \Shopware\Models\Article\Article $model */

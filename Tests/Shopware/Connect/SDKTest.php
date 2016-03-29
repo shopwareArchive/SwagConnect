@@ -39,7 +39,7 @@ class SDKTest extends ConnectTestHelper
                         ),
                         'offerValidUntil' => $offerValidUntil,
                         'availability' => 100,
-                        'images' => array('http://lorempixel.com/400/200'),
+                        'images' => array(self::IMAGE_PROVIDER_URL),
                         'categories' => array('/bücher' => 'Bücher'),
                     )),
                     'revision' => time(),

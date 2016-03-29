@@ -27,7 +27,7 @@ class ImageImportTest extends ConnectTestHelper
     {
         $images = array();
         for ($i=0; $i<10; $i++) {
-            $images[] = 'http://lorempixel.com/400/200?'.$i;
+            $images[] = self::IMAGE_PROVIDER_URL . '?' . $i;
         }
 
         /** @var \Shopware\Models\Article\Article $model */
@@ -42,13 +42,11 @@ class ImageImportTest extends ConnectTestHelper
 
     public function testImportImagesForSupplier()
     {
-        $imageUrl = 'http://lorempixel.com/400/200';
-
         /* @var Supplier $supplier*/
         $supplier = Shopware()->Models()->find('Shopware\Models\Article\Supplier', 1);
         $supplier->setImage('');
 
-        $this->getImageImport()->importImageForSupplier($imageUrl, $supplier);
+        $this->getImageImport()->importImageForSupplier(self::IMAGE_PROVIDER_URL, $supplier);
 
         $this->assertNotEmpty($supplier->getImage());
     }

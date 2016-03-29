@@ -21,6 +21,7 @@ use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
+    const IMAGE_PROVIDER_URL = 'http://loremflickr.com/200/100';
 
     /**
      * @return \Shopware\Connect\SDK
@@ -146,7 +147,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'vendor' => array(
                 'url' => 'http://connect.shopware.de/',
                 'name' => 'shopware Connect',
-                'logo_url' => 'http://lorempixel.com/400/200',
+                'logo_url' => self::IMAGE_PROVIDER_URL,
                 'page_title' => 'shopware Connect title',
                 'description' => 'shopware Connect description'
             ),
@@ -173,7 +174,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         ));
 
         if ($withImage) {
-            $product->images = array('http://lorempixel.com/400/200?'.$number);
+            $product->images = array(self::IMAGE_PROVIDER_URL . '?' . $number);
         }
 
         return $product;

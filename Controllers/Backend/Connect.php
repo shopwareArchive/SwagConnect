@@ -241,7 +241,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
         $total = array_sum($countResult);
         // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
 //        $total = Shopware()->Models()->getQueryCount($query);
@@ -286,7 +286,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->getQuery()->getScalarResult());
+        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
+        $total = array_sum($countResult);
         $total = array_sum($countResult);
         // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
 //        $total = Shopware()->Models()->getQueryCount($query);

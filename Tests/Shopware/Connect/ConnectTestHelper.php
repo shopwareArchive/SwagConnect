@@ -21,6 +21,7 @@ use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
+    const IMAGE_PROVIDER_URL = 'http://loremflickr.com/200/100';
 
     const IMAGE_PROVIDER_URL = 'http://loremflickr.com/200/100';
 

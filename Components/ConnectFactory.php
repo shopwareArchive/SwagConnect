@@ -110,9 +110,8 @@ class ConnectFactory
         if (!empty($debugHost)) {
             $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
-            putenv("_SOCIALNETWORK_HOST=sn.{$debugHost}");
+            putenv("_SOCIALNETWORK_HOST={$debugHost}");
             putenv("_TRANSACTION_HOST=transaction.{$debugHost}");
-            putenv("_SEARCH_HOST=search.{$debugHost}");
         }
 
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?

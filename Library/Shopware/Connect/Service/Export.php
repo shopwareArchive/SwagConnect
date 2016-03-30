@@ -128,6 +128,15 @@ class Export
         );
     }
 
+    public function recordStreamAssignment($productId, array $supplierStreams)
+    {
+        $this->gateway->recordStreamAssignment(
+            $productId,
+            $this->revisionProvider->next(),
+            $supplierStreams
+        );
+    }
+
     /**
      * @return array
      */
@@ -140,7 +149,7 @@ class Export
      * Get single product from gateway
      *
      * @param mixed $productId
-     * @return Struct\Product
+     * @return \Shopware\Connect\Struct\Product
      */
     protected function getProduct($productId)
     {

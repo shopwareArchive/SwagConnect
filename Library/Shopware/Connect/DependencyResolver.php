@@ -137,12 +137,12 @@ class DependencyResolver
     /**
      * @var string
      */
-    protected $socialNetworkHost = 'https://sn.bepado.de';
+    protected $socialNetworkHost = 'https://sn.connect.shopware.com';
 
     /**
      * @var string
      */
-    protected $transactionHost = 'https://transaction.bepado.de';
+    protected $transactionHost = 'https://transaction.connect.shopware.com';
 
     /**
      * @var ChangeVisitor\Message
@@ -341,6 +341,8 @@ class DependencyResolver
                         new Struct\Verificator\Change(),
                     'Shopware\\Connect\\Struct\\Change\\FromShop\\Availability' =>
                         new Struct\Verificator\Change\Availability(),
+                    'Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment' =>
+                        new Struct\Verificator\Change\StreamAssignment(),
                     'Shopware\\Connect\\Struct\\Change\\ToShop\\InsertOrUpdate' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Shopware\\Connect\\Struct\\Change\\ToShop\\Delete' =>

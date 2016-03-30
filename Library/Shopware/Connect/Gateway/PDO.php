@@ -35,6 +35,7 @@ class PDO extends Gateway
         'update' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
         'stock' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         'delete' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
     );
 
     /**
@@ -107,10 +108,15 @@ class PDO extends Gateway
             );
 
             if ($row['c_product'] !== null) {
-                if ($row['c_operation'] == 'stock') {
-                    $change->availability = intval($row['c_product']);
-                } else {
-                    $change->product = unserialize($row['c_product']);
+                switch($row['c_operation']) {
+                    case 'stock':
+                        $change->availability = intval($row['c_product']);
+                        break;
+                    case self::STREAM_ASSIGNMENT:
+                        $change->supplierStreams = unserialize($row['c_product']);
+                        break;
+                    default:
+                        $change->product = unserialize($row['c_product']);
                 }
             }
         }
@@ -268,9 +274,33 @@ class PDO extends Gateway
     }
 
     /**
+     * Record stream assignment
+     *
+     * @param string $productId
+     * @param string $revision
+     * @param array $supplierStreams
+     */
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams)
+    {
+        $query = $this->connection->prepare(
+            'INSERT INTO
+                sw_connect_change (
+                    `c_source_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_product`
+                )
+            VALUES (
+                ?, ?, ?, ?
+            );'
+        );
+        $query->execute(array($productId, self::STREAM_ASSIGNMENT, $revision, serialize($supplierStreams)));
+    }
+
+    /**
      * Update hash for product
      *
-     * Updates the hash of exisitng products or inserts the hash, if product is
+     * Updates the hash of existing products or inserts the hash, if product is
      * not yet in database.
      *
      * @param string $productId

@@ -51,10 +51,12 @@ class ProductStreamService
 
         $collection = $this->productStreamQuery->fetchAllPreviousExportedStreams($articleIds);
 
+        //prepare previous related streams
         foreach ($collection as $item) {
             $assignment[$item['articleId']][$item['streamId']] = $item['name'];
         }
 
+        //merge prev with current streams
         foreach ($articleIds as $articleId) {
             $assignment[$articleId][$stream->getId()] = $stream->getName();
         }

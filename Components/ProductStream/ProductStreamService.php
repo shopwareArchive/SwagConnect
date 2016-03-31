@@ -38,7 +38,36 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @return ProductStreamsAssignments
+     * @throws \Exception
+     */
+    public function prepareStreamsAssignments($streamId)
+    {
+        $assignment = array();
+
+        $stream = $this->productStreamQuery->findById($streamId);
+
+        $articleIds = $this->getArticlesIds($streamId);
+
+        $collection = $this->productStreamQuery->fetchAllPreviousExportedStreams($articleIds);
+
+        foreach ($collection as $item) {
+            $assignment[$item['articleId']][$item['streamId']] = $item['name'];
+        }
+
+        foreach ($articleIds as $articleId) {
+            $assignment[$articleId][$stream->getId()] = $stream->getName();
+        }
+
+        return new ProductStreamsAssignments(
+            array('assignments' => $assignment)
+        );
+    }
+
+    /**
+     * @param $streamId
      * @return array
+     * @throws \Exception
      */
     public function getArticlesIds($streamId)
     {

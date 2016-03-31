@@ -1134,7 +1134,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $errors = array();
         foreach ($streamIds as $streamId) {
             try {
-                $articleIds = $productStreamService->getArticlesIds($streamId);
+                $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
             } catch (\Exception $e) {
                 $this->View()->assign(array(
                     'success' => false,
@@ -1143,11 +1143,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                 return;
             }
 
-            $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
             $connectExport = $this->getConnectExport();
             try {
-                $errorMessages = $connectExport->export($sourceIds, $streamId);
+                $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
             } catch (\RuntimeException $e) {
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);

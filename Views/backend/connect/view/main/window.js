@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
     cls: Ext.baseCSSPrefix + 'connect',
 
     layout: 'border',
-    width: 1200,
+    width: 1000,
     height:'90%',
     title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
 
@@ -51,13 +51,22 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
      */
     getItems: function() {
         var me = this;
-        return [{
-            xtype: 'connect-navigation',
-            region: 'west'
-        }, {
-            xtype: 'connect-panel',
-            region: 'center'
-        }];
+
+        if (me.action == 'Settings') {
+            return [
+                Ext.create('Shopware.apps.Connect.view.main.TabPanel', {
+                    region: 'center',
+                    action : me.action
+                })
+            ];
+        }
+
+        return [
+            Ext.create('Shopware.apps.Connect.view.main.Panel', {
+                region: 'center',
+                action : me.action
+            })
+        ];
     }
 });
 //{/block}

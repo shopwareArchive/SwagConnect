@@ -67,7 +67,7 @@ class Setup
             $this->bootstrap->createMenuItem(array(
                 'label' => 'Register',
                 'controller' => 'Connect',
-                'action' => 'Index3',
+                'action' => 'Register',
                 'class' => 'contents--media-manager',
                 'active' => 1,
                 'parent' => $parent
@@ -76,7 +76,7 @@ class Setup
             $this->bootstrap->createMenuItem(array(
                 'label' => 'Import',
                 'controller' => 'Connect',
-                'action' => 'Index4',
+                'action' => 'Import',
                 'class' => 'contents--import-export',
                 'active' => 1,
                 'parent' => $parent
@@ -85,7 +85,7 @@ class Setup
             $this->bootstrap->createMenuItem(array(
                 'label' => 'Export',
                 'controller' => 'Connect',
-                'action' => 'Index1',
+                'action' => 'Export',
                 'class' => 'contents--import-export',
                 'active' => 1,
                 'parent' => $parent
@@ -94,7 +94,7 @@ class Setup
             $this->bootstrap->createMenuItem(array(
                 'label' => 'Settings',
                 'controller' => 'Connect',
-                'action' => 'Index2',
+                'action' => 'Settings',
                 'class' => 'sprite-gear',
                 'active' => 1,
                 'parent' => $parent
@@ -103,14 +103,14 @@ class Setup
             $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
             ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Index1', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Index1', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Index2', 'Einstellungen', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Index2', 'Settings', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Index3', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Index3', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Index4', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Index4', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
+            ('backend/index/view/main', 1, 1, 'Connect/Export', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Export', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Settings', 'Einstellungen', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Settings', 'Settings', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
 
             ON DUPLICATE KEY UPDATE
               `namespace` = VALUES(`namespace`),

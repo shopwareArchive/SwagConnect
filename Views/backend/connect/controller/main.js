@@ -97,7 +97,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this;
 
         me.mainWindow = me.getView('main.Window').create({
-
+            'action': me.subApplication.action
         }).show();
 
         me.control({
@@ -303,7 +303,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
 
-        me.populateLogCommandFilter();
+        if (me.subApplication.action == 'Settings') {
+            me.populateLogCommandFilter();
+        }
 
         me.callParent(arguments);
     },

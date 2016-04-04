@@ -11,7 +11,7 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
 
     layout: 'border',
     width: 1000,
-    height:'90%',
+    height:'95%',
     title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
 
     titleTemplate: Ext.String.format('{s name=window/title_template}[0] - [text]{/s}', marketplaceName),

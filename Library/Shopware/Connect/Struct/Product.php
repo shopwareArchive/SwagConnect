@@ -313,7 +313,7 @@ class Product extends ShopItem
      * Note that you need to specify all parent categories of a deeply nested
      * category.
      *
-     * @var string[string]
+     * @var string[]
      */
     public $categories = array();
 

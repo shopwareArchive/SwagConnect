@@ -8,6 +8,7 @@ use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 
 class ConnectExport
 {
@@ -72,9 +73,10 @@ class ConnectExport
      * Helper function to mark a given array of source ids for connect update
      *
      * @param array $ids
+     * @param ProductStreamsAssignments|null $streamsAssignments
      * @return array
      */
-    public function export(array $ids)
+    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
         $errors = array();
         if (count($ids) == 0) {
@@ -127,6 +129,13 @@ class ConnectExport
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
+                }
+
+                if ($streamsAssignments !== null && $streamsAssignments->getStreamsByArticleId($item['articleId'] !== null)) {
+                    $this->sdk->recordStreamAssignment(
+                        $item['sourceId'],
+                        $streamsAssignments->getStreamsByArticleId($item['articleId'])
+                    );
                 }
             } catch (\Exception $e) {
                 $connectAttribute->setExportStatus('error');

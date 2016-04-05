@@ -31,6 +31,8 @@ use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Doctrine\ORM\NoResultException;
 
 /**
  * Class Shopware_Controllers_Backend_Connect
@@ -130,7 +132,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),
-            Shopware()->Container()->get('thumbnail_manager'),
+            $this->get('thumbnail_manager'),
             new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
         );
     }
@@ -1120,6 +1122,60 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                 'success' => true
             )
         );
+    }
+
+    public function exportStreamsAction()
+    {
+        $streamIds = $this->request->getParam('ids', array());
+
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+
+        $errors = array();
+        foreach ($streamIds as $streamId) {
+            try {
+                $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
+            } catch (\Exception $e) {
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
+
+            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+
+            $connectExport = $this->getConnectExport();
+            try {
+                $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            } catch (\RuntimeException $e) {
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
+
+            if (!empty($errorMessages)) {
+                $message = implode(';', $errorMessages);
+                $productStreamService->logError($streamId, $message);
+                $errors = array_merge($errors, $errorMessages);
+            }
+        }
+
+        if ($errors) {
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => $errors
+            ));
+            return;
+        }
+
+        $this->View()->assign(array(
+            'success' => true
+        ));
     }
 
     private function getMarketplaceApplier()

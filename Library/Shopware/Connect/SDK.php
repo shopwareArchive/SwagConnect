@@ -57,7 +57,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '$Revision$';
+    const VERSION = '2.0.0';
 
     /**
      * @param string $apiKey API key assigned to you by Shopware Connect
@@ -308,6 +308,13 @@ final class SDK
         $this->verifySdkIfNecessary();
 
         $this->dependencies->getExportService()->recordDelete($productId);
+    }
+
+    public function recordStreamAssignment($productId, array $supplierStreams)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->recordStreamAssignment($productId, $supplierStreams);
     }
 
     /**

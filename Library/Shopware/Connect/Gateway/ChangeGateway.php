@@ -17,6 +17,8 @@ use Shopware\Connect\Struct\Product;
  */
 interface ChangeGateway
 {
+    const STREAM_ASSIGNMENT = 's-assign';
+
     /**
      * Get next changes
      *
@@ -27,7 +29,7 @@ interface ChangeGateway
      *
      * @param string $offset
      * @param int $limit
-     * @return Struct\Changes[]
+     * @return \Shopware\Connect\Struct\Change[]
      */
     public function getNextChanges($offset, $limit);
 
@@ -94,4 +96,13 @@ interface ChangeGateway
      * @return void
      */
     public function recordAvailabilityUpdate($id, $hash, $revision, Product $product);
+
+    /**
+     * Record stream assignment
+     *
+     * @param string $productId
+     * @param string $revision
+     * @param array $supplierStreams
+     */
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams);
 }

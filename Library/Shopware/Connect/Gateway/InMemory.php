@@ -142,6 +142,9 @@ class InMemory extends Gateway
                 $data['availability'] = intval($data['product']->availability);
                 unset($data['product']);
                 break;
+            case self::STREAM_ASSIGNMENT:
+                $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment';
+                break;
         }
 
         unset($data['type']);
@@ -232,6 +235,25 @@ class InMemory extends Gateway
             'revision' => $revision
         );
         unset($this->products[$id]);
+    }
+
+    /**
+     * Record stream assignment
+     *
+     * @param string $id
+     * @param string $revision
+     * @param array $supplierStreams
+     */
+    public function recordStreamAssignment($id, $revision, array $supplierStreams)
+    {
+        $this->checkRevisionExists($revision);
+
+        $this->changes[$revision] = array(
+            'type'     => self::STREAM_ASSIGNMENT,
+            'sourceId' => $id,
+            'revision' => $revision,
+            'supplierStreams' => $supplierStreams,
+        );
     }
 
     /**

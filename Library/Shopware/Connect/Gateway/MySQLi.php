@@ -35,6 +35,7 @@ class MySQLi extends Gateway
         'update' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
         'stock' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         'delete' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
     );
 
     /**
@@ -95,10 +96,15 @@ class MySQLi extends Gateway
             );
 
             if ($row['c_product'] !== null) {
-                if ($row['c_operation'] == 'stock') {
-                    $change->availability = intval($row['c_product']);
-                } else {
-                    $change->product = $this->ensureUtf8(unserialize($row['c_product']));
+                switch ($row['c_operation']) {
+                    case 'stock':
+                        $change->availability = intval($row['c_product']);
+                        break;
+                    case self::STREAM_ASSIGNMENT:
+                        $change->supplierStreams = unserialize($row['c_product']);
+                        break;
+                    default:
+                        $change->product = $this->ensureUtf8(unserialize($row['c_product']));
                 }
             }
         }
@@ -276,6 +282,32 @@ class MySQLi extends Gateway
         );
 
         $this->updateHash($id, $hash);
+    }
+
+    /**
+     * Record stream assignment
+     *
+     * @param string $productId
+     * @param string $revision
+     * @param array $supplierStreams
+     */
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams)
+    {
+        $this->connection->query(
+            'INSERT INTO
+                sw_connect_change (
+                    `c_source_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_product`
+                )
+            VALUES (
+                "' . $this->connection->real_escape_string($productId) . '",
+                "' . self::STREAM_ASSIGNMENT . '",
+                "' . $this->connection->real_escape_string($revision) . '",
+                "' . $this->connection->real_escape_string(serialize($supplierStreams)) . '"
+            );'
+        );
     }
 
     /**

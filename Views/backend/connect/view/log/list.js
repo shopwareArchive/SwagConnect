@@ -156,7 +156,7 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false) {
-                    loggingCheckbox.setRawValue(0);
+                    loggingCheckbox.setValue(0);
                 }
 
                 var loggingEnable = response.enableLogging ? 1 : 0;

@@ -131,7 +131,7 @@ class ConnectExport
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
 
-                if ($streamsAssignments !== null) {
+                if ($streamsAssignments !== null && $streamsAssignments->getStreamsByArticleId($item['articleId'] !== null)) {
                     $this->sdk->recordStreamAssignment(
                         $item['sourceId'],
                         $streamsAssignments->getStreamsByArticleId($item['articleId'])

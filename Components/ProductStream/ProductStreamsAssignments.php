@@ -14,11 +14,15 @@ class ProductStreamsAssignments extends Struct
 
     /**
      * @param $articleId
-     * @return array
+     * @return array | null
      */
     public function getStreamsByArticleId($articleId)
     {
-        return $this->assignments[$articleId];
+        if (isset($this->assignments[$articleId])) {
+            return $this->assignments[$articleId];
+        }
+
+        return null;
     }
 
     /**

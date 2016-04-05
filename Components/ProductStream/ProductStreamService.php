@@ -16,7 +16,7 @@ class ProductStreamService
     /**
      * @var ProductStreamRepository
      */
-    private $productStreamQuery;
+    private $productStreamRepository;
 
     /**
      * @var ProductStreamAttributeRepository
@@ -25,14 +25,14 @@ class ProductStreamService
 
     /**
      * ProductStreamService constructor.
-     * @param ProductStreamRepository $productStreamQuery
+     * @param ProductStreamRepository $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
      */
     public function __construct(
-        ProductStreamRepository $productStreamQuery,
+        ProductStreamRepository $productStreamRepository,
         ProductStreamAttributeRepository $streamAttrRepository
     ) {
-        $this->productStreamQuery = $productStreamQuery;
+        $this->productStreamRepository = $productStreamRepository;
         $this->streamAttrRepository = $streamAttrRepository;
     }
 
@@ -45,11 +45,11 @@ class ProductStreamService
     {
         $assignment = array();
 
-        $stream = $this->productStreamQuery->findById($streamId);
+        $stream = $this->productStreamRepository->findById($streamId);
 
         $articleIds = $this->getArticlesIds($streamId);
 
-        $collection = $this->productStreamQuery->fetchAllPreviousExportedStreams($articleIds);
+        $collection = $this->productStreamRepository->fetchAllPreviousExportedStreams($articleIds);
 
         //prepare previous related streams
         foreach ($collection as $item) {
@@ -75,7 +75,7 @@ class ProductStreamService
     {
         $sourceIds = array();
 
-        $stream = $this->productStreamQuery->findById($streamId);
+        $stream = $this->productStreamRepository->findById($streamId);
 
         if ($this->isStatic($stream)) {
             $sourceIds = array_merge($sourceIds, $this->extractSourceIdsFromStaticStream($stream));
@@ -106,7 +106,7 @@ class ProductStreamService
      */
     public function extractSourceIdsFromStaticStream(ProductStream $productStream)
     {
-        return $this->productStreamQuery->fetchArticlesIds($productStream->getId());
+        return $this->productStreamRepository->fetchArticlesIds($productStream->getId());
     }
 
     /**

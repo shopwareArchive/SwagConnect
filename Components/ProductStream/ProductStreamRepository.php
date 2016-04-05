@@ -34,8 +34,8 @@ class ProductStreamRepository extends Repository
 
         return $builder->select('ps')
             ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
-            ->where("ps.id IN (:streamIds)")
-            ->setParameter('streamIds', $streamId)
+            ->where("ps.id = :streamId")
+            ->setParameter('streamId', $streamId)
             ->getQuery()
             ->getSingleResult();
     }
@@ -47,10 +47,9 @@ class ProductStreamRepository extends Repository
     public function fetchArticlesIds($streamId)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('product.id', 'variant.ordernumber as number', 'product.name'))
+        $build->select(array('product.id'))
             ->from('s_articles', 'product')
             ->innerJoin('product', 's_product_streams_selection', 'streamProducts', 'streamProducts.article_id = product.id')
-            ->innerJoin('product', 's_articles_details', 'variant', 'variant.id = product.main_detail_id')
             ->where('streamProducts.stream_id = :streamId')
             ->setParameter(':streamId', $streamId);
 

@@ -24,9 +24,18 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
             columns: me.getColumns()
         });
 
+        me.registerEvents();
+
         me.callParent(arguments);
 
         me.store.load();
+    },
+
+    /**
+     * Registers events in the event bus for firing events when needed
+     */
+    registerEvents: function() {
+        this.addEvents('changeLogging');
     },
 
     getColumns: function() {
@@ -125,7 +134,12 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
             boxLabel: me.snippets.logLabel,
             name: 'logRequest',
             inputValue: 1,
-            uncheckedValue: 0
+            uncheckedValue: 0,
+            listeners: {
+                change: function(checkbox, newValue, oldValue) {
+                    me.fireEvent('changeLogging', checkbox, newValue, oldValue);
+                }
+            }
         });
 
         items.push('->');
@@ -142,11 +156,11 @@ Ext.define('Shopware.apps.Connect.view.log.List', {
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false) {
-                    loggingCheckbox.setRawValue(0);
+                    loggingCheckbox.setValue(0);
                 }
 
                 var loggingEnable = response.enableLogging ? 1 : 0;
-                loggingCheckbox.setRawValue(loggingEnable);
+                loggingCheckbox.setValue(loggingEnable);
             }
         });
 

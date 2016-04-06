@@ -293,8 +293,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     );
                 }
             },
-            'connect-log-list checkbox[name=logRequest]': {
-                change: me.onChangeLogging
+            'connect-log-list': {
+                changeLogging: me.onChangeLogging
             },
             'connect-marketplace-attributes-mapping button[action=save]': {
                 click: function () {

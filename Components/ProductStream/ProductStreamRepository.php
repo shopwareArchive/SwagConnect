@@ -77,4 +77,44 @@ class ProductStreamRepository extends Repository
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @param $start
+     * @param $limit
+     * @return \Doctrine\ORM\QueryBuilder|\Shopware\Components\Model\QueryBuilder
+     */
+    public function getStreamBuilder($start, $limit)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        $builder->select('ps.id', 'ps.name', 'ps.type', 'psa.exportStatus', 'psa.exportMessage')
+            ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
+            ->leftJoin('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa', \Doctrine\ORM\Query\Expr\Join::WITH, 'psa.streamId = ps.id');
+
+        if ($start) {
+            $builder->setFirstResult($start);
+        }
+
+        if ($limit) {
+            $builder->setMaxResults($limit);
+        }
+
+        return $builder;
+    }
+
+    /**
+     * @param null $start
+     * @param null $limit
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator
+     */
+    public function getStreamPaginator($start = null, $limit = null)
+    {
+        $builder = $this->getStreamBuilder($start, $limit);
+        $query = $builder->getQuery();
+        $query->setHydrationMode(\Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
+
+        return $this->manager->createPaginator($query);
+    }
+
+
+
 }

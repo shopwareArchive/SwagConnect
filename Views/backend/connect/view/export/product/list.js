@@ -1,7 +1,7 @@
 //{namespace name=backend/connect/view/main}
 
-//{block name="backend/connect/view/export/list"}
-Ext.define('Shopware.apps.Connect.view.export.List', {
+//{block name="backend/connect/view/export/product/list"}
+Ext.define('Shopware.apps.Connect.view.export.product.List', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.connect-export-list',
 

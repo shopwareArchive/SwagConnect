@@ -1124,6 +1124,18 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         );
     }
 
+    public function getStreamListAction()
+    {
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+
+        $this->View()->assign(
+            $productStreamService->getList(
+                $this->Request()->getParam('start', 0),
+                $this->Request()->getParam('limit', 20)
+            )
+        );
+    }
+
     public function exportStreamsAction()
     {
         $streamIds = $this->request->getParam('ids', array());
@@ -1159,9 +1171,9 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             }
 
             if (!empty($errorMessages)) {
-                $message = implode(';', $errorMessages);
+                $message = implode(";\n", $errorMessages);
                 $productStreamService->logError($streamId, $message);
-                $errors = array_merge($errors, $errorMessages);
+                $errors = array_merge($errors, $message);
             }
         }
 

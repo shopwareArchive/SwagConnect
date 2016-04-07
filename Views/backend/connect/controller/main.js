@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     stores: [
         'main.Navigation',
-        'export.List', 'import.RemoteCategories', 'import.RemoteProducts', 'import.LocalProducts',
+        'export.StreamList', 'export.List', 'import.RemoteCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'changed_products.List',
         'log.List',
 		'config.General', 'config.Import', 'config.Export', 'config.CustomerGroup', 'config.PriceGroup',
@@ -18,7 +18,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     ],
     models: [
         'main.Mapping', 'main.Product',
-        'export.List', 'import.List',
+        'export.StreamList', 'export.List', 'import.List',
         'changed_products.List', 'changed_products.Product', 'log.List',
         'config.General', 'config.Import', 'config.Units', 'config.MarketplaceAttributes',
         'config.ConnectUnit', 'config.Pages', 'config.LocalProductAttributes', 'config.PriceGroup'
@@ -29,6 +29,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'navigation', selector: 'connect-navigation' },
         { ref: 'panel', selector: 'connect-panel' },
         { ref: 'exportList', selector: 'connect-export-list' },
+        { ref: 'exportStreamList', selector: 'connect-export-stream-list' },
         { ref: 'exportFilter', selector: 'connect-export-filter' },
         { ref: 'importList', selector: 'connect-import-list' },
         { ref: 'changeView', selector: 'connect-changed-products-tabs' },
@@ -52,6 +53,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         insertOrUpdateProductMessage: '{s name=export/message/import_product_messag}Products were marked for inserting / updating.{/s}',
         deleteProductTitle: '{s name=export/message/delete_title}Products export{/s}',
         deleteProductMessage: '{s name=export/message/delete_message}Products were marked for deleting.{/s}',
+
+        exportStreamTitle: '{s name=export/message/export_stream_title}Product streams export{/s}',
+        exportStreamMessage: '{s name=export/message/export_stream_message}Product streams were marked for export.{/s}',
+        removeStreamTitle: '{s name=export/message/remove_stream_title}Product streams export{/s}',
+        removeStreamMessage: '{s name=export/message/remove_stream_message}Products were marked for remove.{/s}',
 
         activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
@@ -138,11 +144,16 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onSaveMapping
             },
             'connect-export button[action=add]': {
-               click: me.onExportFilterAction
+                click: me.onExportFilterAction
             },
             'connect-export button[action=delete]': {
                 click: me.onExportFilterAction
             },
+
+            'connect-export-stream button[action=add]': {
+                click: me.onExportStream
+            },
+
             'connect-export-filter button[action=category-clear-filter]': {
                 click: me.onExportCategoryFilterClearAction
             },
@@ -533,6 +544,69 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         }
                     }
                 }
+                if (messages.length > 0) {
+                    messages.forEach( function(message){
+                        me.createGrowlMessage(title, message, sticky);
+                    });
+                } else {
+                    me.createGrowlMessage(title, message, sticky);
+                }
+
+                list.setLoading(false);
+                list.store.load();
+            }
+        });
+    },
+
+    /**
+     * Callback function that will export or delete a product stream from/for export
+     *
+     * @param btn
+     */
+    onExportStream: function(btn){
+        var me = this,
+            list = me.getExportStreamList(),
+            records = list.selModel.getSelection(),
+            ids = [],
+            url,
+            message,
+            messages = [],
+            title;
+
+        if(btn.action == 'add') {
+            url = '{url action=exportStreams}';
+            title = me.messages.exportStreamMessage;
+            message = me.messages.exportStreamMessage;
+        } else if(btn.action == 'remove') {
+            //todo
+        } else {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
+        list.setLoading();
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            params: {
+                'ids[]': ids
+            },
+            success: function(response, opts) {
+                var sticky = false;
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+                    if (operation) {
+                        if (!operation.success && operation.messages) {
+                            messages = operation.messages;
+                            sticky = true;
+                        }
+                    }
+                }
+
                 if (messages.length > 0) {
                     messages.forEach( function(message){
                         me.createGrowlMessage(title, message, sticky);

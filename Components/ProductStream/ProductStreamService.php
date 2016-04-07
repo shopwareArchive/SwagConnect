@@ -110,6 +110,21 @@ class ProductStreamService
     }
 
     /**
+     * @param null $start
+     * @param null $limit
+     * @return array
+     */
+    public function getList($start = null, $limit = null)
+    {
+        $paginator = $this->productStreamRepository->getStreamPaginator($start, $limit);
+
+        $data = $paginator->getIterator()->getArrayCopy();
+        $count = $paginator->count();
+
+        return array('success' => true, 'data' => $data, 'total' => $count);
+    }
+
+    /**
      * @param $streamId
      * @param $status
      */

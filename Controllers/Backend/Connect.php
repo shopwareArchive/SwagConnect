@@ -1194,7 +1194,6 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      */
     public function removeStreamsAction()
     {
-        $sdk = $this->getSDK();
         $streamIds = $this->request->getParam('ids', array());
 
         /** @var ProductStreamService $productStreamService */

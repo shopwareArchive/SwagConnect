@@ -60,7 +60,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
                 array('stream_id' => $this->streamAId, 'article_id' => $articleAId));
         }
 
-        $articleBIds = array(35, 36);
+        $articleBIds = array(35, 36, 37);
         foreach ($articleBIds as $articleBId) {
             $this->db->insert('s_product_streams_selection',
                 array('stream_id' => $this->streamBId, 'article_id' => $articleBId));
@@ -98,6 +98,17 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->assertNull($streamsAssignments->getStreamsByArticleId(35));
         $this->assertCount(3, $streamsAssignments->getStreamsByArticleId(36));
         $this->assertCount(1, $streamsAssignments->getArticleIds());
+    }
+
+    public function testRemoveProductsFromStream()
+    {
+        $assignments = $this->productStreamService->getStreamAssignments($this->streamBId);
+
+        foreach ($assignments->getArticleIds() as $articleId) {
+            if ($this->productStreamService->allowToRemove($assignments, $this->streamBId, $articleId)) {
+                $this->assertEquals(37, $articleId);
+            }
+        }
     }
 
     /**

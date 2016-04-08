@@ -45,8 +45,14 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->db->insert('s_product_streams', array('name' => 'TestProductStreamC', 'type' => 2));
         $this->streamCId = $this->db->lastInsertId();
 
-        $this->db->insert('s_plugin_connect_streams', array('stream_id' => $this->streamAId));
-        $this->db->insert('s_plugin_connect_streams', array('stream_id' => $this->streamBId));
+        $this->db->insert(
+            's_plugin_connect_streams',
+            array('stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_SUCCESS)
+        );
+        $this->db->insert(
+            's_plugin_connect_streams',
+            array('stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_SUCCESS)
+        );
 
         $articleAIds = array(33, 34, 35, 36);
         foreach ($articleAIds as $articleAId) {
@@ -78,7 +84,8 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
     public function testGetArticlesIds()
     {
-        $articlesIds = $this->productStreamService->getArticlesIds($this->streamAId);
+        $stream = $this->productStreamService->findStream($this->streamAId);
+        $articlesIds = $this->productStreamService->getArticlesIds($stream);
 
         $this->assertCount(4, $articlesIds);
         $this->assertTrue(in_array(33, $articlesIds));
@@ -98,7 +105,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
      */
     public function testNotExistingStream()
     {
-        $this->productStreamService->getArticlesIds(99999);
+        $this->productStreamService->findStream(99999);
     }
 
 }

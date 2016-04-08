@@ -154,6 +154,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onExportStream
             },
 
+            'connect-export-stream button[action=remove]': {
+                click: me.onExportStream
+            },
+
             'connect-export-filter button[action=category-clear-filter]': {
                 click: me.onExportCategoryFilterClearAction
             },
@@ -578,7 +582,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             title = me.messages.exportStreamMessage;
             message = me.messages.exportStreamMessage;
         } else if(btn.action == 'remove') {
-            //todo
+            url = '{url action=removeStreams}';
+            title = me.messages.removeStreamTitle;
+            message = me.messages.removeStreamMessage;
         } else {
             return;
         }

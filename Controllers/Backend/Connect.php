@@ -53,6 +53,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     private $marketplaceSettingsApplier;
 
     /**
+     * @var \Shopware\Connect\SDK
+     */
+    private $sdk;
+
+    /**
      * @return Shopware\Components\Model\ModelManager
      */
     public function getModelManager()
@@ -65,7 +70,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        if ($this->sdk === null) {
+            $this->sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+        }
+
+        return $this->sdk;
     }
 
     /**
@@ -615,19 +624,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
-            /** @var \Shopware\Models\Article\Article $model */
-            $model = $this->getConnectExport()->getArticleModelById($id);
-            if($model === null) {
-                continue;
-            }
-            /** @var \Shopware\Models\Article\Detail $detail */
-            foreach ($model->getDetails() as $detail) {
-                $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
-                $sdk->recordDelete($attribute->getSourceId());
-                $attribute->setExportStatus(
-                    'delete'
-                );
-            }
+            $this->removeArticle($id);
         }
         Shopware()->Models()->flush();
     }
@@ -1172,8 +1169,10 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
             if (!empty($errorMessages)) {
                 $message = implode(";\n", $errorMessages);
-                $productStreamService->logError($streamId, $message);
-                $errors = array_merge($errors, $message);
+                $productStreamService->log($streamId, $message);
+                $errors[] = $message;
+            } else {
+                $productStreamService->log($streamId, 'Success');
             }
         }
 
@@ -1188,6 +1187,60 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $this->View()->assign(array(
             'success' => true
         ));
+    }
+
+    /**
+     * Deletes products from connect stream export
+     */
+    public function removeStreamsAction()
+    {
+        $sdk = $this->getSDK();
+        $streamIds = $this->request->getParam('ids', array());
+
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+
+        foreach ($streamIds as $streamId) {
+            try {
+                $assignments = $productStreamService->getStreamAssignments($streamId);
+
+                foreach ($assignments->getArticleIds() as $articleId) {
+                    if ($productStreamService->allowToRemove($assignments, $streamId, $articleId)) {
+                        $this->removeArticle($articleId);
+                    }
+                }
+
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
+
+                Shopware()->Models()->flush();
+                Shopware()->Models()->clear();
+            } catch (\Exception $e) {
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param $articleId
+     */
+    private function removeArticle($articleId)
+    {
+        /** @var \Shopware\Models\Article\Article $model */
+        $model = $this->getConnectExport()->getArticleModelById($articleId);
+        if ($model === null) {
+            return;
+        }
+        /** @var \Shopware\Models\Article\Detail $detail */
+        foreach ($model->getDetails() as $detail) {
+            $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+            $this->getSDK()->recordDelete($attribute->getSourceId());
+            $attribute->setExportStatus('delete');
+        }
     }
 
     private function getMarketplaceApplier()

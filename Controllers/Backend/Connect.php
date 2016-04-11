@@ -1139,6 +1139,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
+        $connectExport = $this->getConnectExport();
 
         $errors = array();
         foreach ($streamIds as $streamId) {
@@ -1154,7 +1155,6 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
             $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
-            $connectExport = $this->getConnectExport();
             try {
                 $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
@@ -1198,14 +1198,33 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
+        $connectExport = $this->getConnectExport();
 
         foreach ($streamIds as $streamId) {
             try {
                 $assignments = $productStreamService->getStreamAssignments($streamId);
 
-                foreach ($assignments->getArticleIds() as $articleId) {
-                    if ($productStreamService->allowToRemove($assignments, $streamId, $articleId)) {
-                        $this->removeArticle($articleId);
+                $items = $connectExport->fetchConnectItems($assignments->getArticleIds());
+
+                foreach ($items as $item) {
+                    if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
+                        $this->removeArticle($item['articleId']);
+                    } else {
+                        //updates items with the new streams
+
+                        if (!$assignments->getStreamsByArticleId($item['articleId'])) {
+                            continue;
+                        }
+
+                        $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
+
+                        //removes current stream from the collection
+                        unset($streamCollection[$streamId]);
+
+                        $this->getSDK()->recordStreamAssignment(
+                            $item['sourceId'],
+                            $streamCollection
+                        );
                     }
                 }
 

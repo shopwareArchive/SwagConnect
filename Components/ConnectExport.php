@@ -78,25 +78,7 @@ class ConnectExport
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
-        $errors = array();
-        if (count($ids) == 0) {
-            return $errors;
-        }
-
-        $implodedIds = '"' . implode('","', $ids) . '"';
-        $connectItems = Shopware()->Db()->fetchAll(
-            "SELECT bi.article_id as articleId,
-                    bi.article_detail_id as articleDetailId,
-                    bi.export_status as exportStatus,
-                    bi.export_message as exportMessage,
-                    bi.source_id as sourceId,
-                    a.name as title,
-                    d.ordernumber as number
-            FROM s_plugin_connect_items bi
-            LEFT JOIN s_articles a ON bi.article_id = a.id
-            LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
-            WHERE bi.source_id IN ($implodedIds);"
-        );
+        $connectItems = $this->fetchConnectItems($ids);
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
@@ -149,6 +131,32 @@ class ConnectExport
         }
 
         return $errors;
+    }
+
+    /**
+     * @param array $articleIds
+     * @return array
+     */
+    public function fetchConnectItems(array $articleIds)
+    {
+        if (count($articleIds) == 0) {
+            return array();
+        }
+
+        $implodedIds = '"' . implode('","', $articleIds) . '"';
+        return Shopware()->Db()->fetchAll(
+            "SELECT bi.article_id as articleId,
+                    bi.article_detail_id as articleDetailId,
+                    bi.export_status as exportStatus,
+                    bi.export_message as exportMessage,
+                    bi.source_id as sourceId,
+                    a.name as title,
+                    d.ordernumber as number
+            FROM s_plugin_connect_items bi
+            LEFT JOIN s_articles a ON bi.article_id = a.id
+            LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
+            WHERE bi.source_id IN ($implodedIds);"
+        );
     }
 
     /**

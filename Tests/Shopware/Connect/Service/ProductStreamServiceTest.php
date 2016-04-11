@@ -79,7 +79,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->db->delete('s_product_streams', array('id = ?' => $this->streamBId));
         $this->db->delete('s_product_streams', array('id = ?' => $this->streamCId));
         $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamAId));
-        $this->db->delete('s_plugin_connect_streams', array('stream_id' => $this->streamBId));
+        $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamBId));
     }
 
     public function testGetArticlesIds()

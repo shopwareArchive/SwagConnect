@@ -57,7 +57,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportStreamTitle: '{s name=export/message/export_stream_title}Product streams export{/s}',
         exportStreamMessage: '{s name=export/message/export_stream_message}Product streams were marked for export.{/s}',
         removeStreamTitle: '{s name=export/message/remove_stream_title}Product streams export{/s}',
-        removeStreamMessage: '{s name=export/message/remove_stream_message}Products were marked for remove.{/s}',
+        removeStreamMessage: '{s name=export/message/remove_stream_message}Products streams were marked for remove.{/s}',
 
         activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',

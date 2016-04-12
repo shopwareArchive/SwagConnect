@@ -134,10 +134,8 @@ class ProductStreamService
      */
     public function getArticlesIds(ProductStream $stream)
     {
-        $sourceIds = array();
-
         if ($this->isStatic($stream)) {
-            $sourceIds = array_merge($sourceIds, $this->extractSourceIdsFromStaticStream($stream));
+            $sourceIds = $this->extractSourceIdsFromStaticStream($stream);
         } else {
             //todo: extract product from dynamic stream
             throw new \Exception('Not allow to export articles ids from dynamic stream');

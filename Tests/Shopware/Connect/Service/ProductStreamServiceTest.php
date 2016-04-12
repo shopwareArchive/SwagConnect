@@ -100,7 +100,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->assertCount(1, $streamsAssignments->getArticleIds());
     }
 
-    public function testRemoveProductsFromStream()
+    public function testAllowToRemoveProductsFromStream()
     {
         $assignments = $this->productStreamService->getStreamAssignments($this->streamBId);
 

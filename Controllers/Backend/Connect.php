@@ -624,7 +624,19 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
         foreach($ids as $id) {
-            $this->removeArticle($id);
+            /** @var \Shopware\Models\Article\Article $model */
+            $model = $this->getConnectExport()->getArticleModelById($id);
+            if($model === null) {
+                continue;
+            }
+            /** @var \Shopware\Models\Article\Detail $detail */
+            foreach ($model->getDetails() as $detail) {
+                $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+                $sdk->recordDelete($attribute->getSourceId());
+                $attribute->setExportStatus(
+                    'delete'
+                );
+            }
         }
         Shopware()->Models()->flush();
     }
@@ -1202,13 +1214,16 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         foreach ($streamIds as $streamId) {
             try {
+                $removedRecords = array();
+
                 $assignments = $productStreamService->getStreamAssignments($streamId);
 
                 $items = $connectExport->fetchConnectItems($assignments->getArticleIds());
 
                 foreach ($items as $item) {
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
-                        $this->removeArticle($item['articleId']);
+                        $this->getSDK()->recordDelete($item['sourceId']);
+                        $removedRecords[] = $item['sourceId'];
                     } else {
                         //updates items with the new streams
 
@@ -1228,10 +1243,10 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                     }
                 }
 
+                $connectExport->updateConnectItemsStatus($removedRecords, ConnectExport::ITEM_STATUS_DELETE);
+
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
 
-                Shopware()->Models()->flush();
-                Shopware()->Models()->clear();
             } catch (\Exception $e) {
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $this->View()->assign(array(
@@ -1240,24 +1255,6 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                 ));
                 return;
             }
-        }
-    }
-
-    /**
-     * @param $articleId
-     */
-    private function removeArticle($articleId)
-    {
-        /** @var \Shopware\Models\Article\Article $model */
-        $model = $this->getConnectExport()->getArticleModelById($articleId);
-        if ($model === null) {
-            return;
-        }
-        /** @var \Shopware\Models\Article\Detail $detail */
-        foreach ($model->getDetails() as $detail) {
-            $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
-            $this->getSDK()->recordDelete($attribute->getSourceId());
-            $attribute->setExportStatus('delete');
         }
     }
 

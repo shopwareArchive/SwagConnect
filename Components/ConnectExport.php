@@ -12,6 +12,8 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 
 class ConnectExport
 {
+    const ITEM_STATUS_DELETE = 'delete';
+
     /** @var  Helper */
     protected $helper;
 
@@ -89,7 +91,7 @@ class ConnectExport
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
             $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
-            if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
+            if (empty($item['exportStatus']) || $item['exportStatus'] == self::ITEM_STATUS_DELETE || $item['exportStatus'] == 'error') {
                 $status = 'insert';
             } else {
                 $status = 'update';
@@ -225,7 +227,7 @@ class ConnectExport
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
-        $attribute->setExportStatus('delete');
+        $attribute->setExportStatus(self::ITEM_STATUS_DELETE);
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
     }
@@ -250,11 +252,30 @@ class ConnectExport
 
         $builder = Shopware()->Models()->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
-            ->set('at.exportStatus', $builder->expr()->literal('delete'))
+            ->set('at.exportStatus', $builder->expr()->literal(self::ITEM_STATUS_DELETE))
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());
 
         $builder->getQuery()->execute();
+    }
+
+    /**
+     * @param array $sourceIds
+     * @param $status
+     */
+    public function updateConnectItemsStatus(array $sourceIds, $status)
+    {
+        if (empty($sourceIds)) {
+            return;
+        }
+
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->update('s_plugin_connect_items', 'ci')
+            ->set('ci.export_status', ':status')
+            ->where('source_id IN (:sourceIds)')
+            ->setParameter('sourceIds', $sourceIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+            ->setParameter('status', $status)
+            ->execute();
     }
 
     private function getMarketplaceGateway()

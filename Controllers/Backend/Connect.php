@@ -53,6 +53,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     private $marketplaceSettingsApplier;
 
     /**
+     * @var \Shopware\Connect\SDK
+     */
+    private $sdk;
+
+    /**
      * @return Shopware\Components\Model\ModelManager
      */
     public function getModelManager()
@@ -65,7 +70,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        if ($this->sdk === null) {
+            $this->sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+        }
+
+        return $this->sdk;
     }
 
     /**
@@ -1124,12 +1133,31 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         );
     }
 
+    public function getStreamListAction()
+    {
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+
+        $result = $productStreamService->getList(
+            $this->Request()->getParam('start', 0),
+            $this->Request()->getParam('limit', 20)
+        );
+
+        $this->View()->assign(
+            array(
+                'success' => true,
+                'data' => $result['data'],
+                'total' => $result['total'],
+            )
+        );
+    }
+
     public function exportStreamsAction()
     {
         $streamIds = $this->request->getParam('ids', array());
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
+        $connectExport = $this->getConnectExport();
 
         $errors = array();
         foreach ($streamIds as $streamId) {
@@ -1145,7 +1173,6 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
             $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
-            $connectExport = $this->getConnectExport();
             try {
                 $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
@@ -1159,9 +1186,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             }
 
             if (!empty($errorMessages)) {
-                $message = implode(';', $errorMessages);
-                $productStreamService->logError($streamId, $message);
-                $errors = array_merge($errors, $errorMessages);
+                $message = implode(";\n", $errorMessages);
+                $productStreamService->log($streamId, $message);
+                $errors[] = $message;
+            } else {
+                $productStreamService->log($streamId, 'Success');
             }
         }
 
@@ -1176,6 +1205,63 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $this->View()->assign(array(
             'success' => true
         ));
+    }
+
+    /**
+     * Deletes products from connect stream export
+     */
+    public function removeStreamsAction()
+    {
+        $streamIds = $this->request->getParam('ids', array());
+
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $connectExport = $this->getConnectExport();
+
+        foreach ($streamIds as $streamId) {
+            try {
+                $removedRecords = array();
+
+                $assignments = $productStreamService->getStreamAssignments($streamId);
+
+                $items = $connectExport->fetchConnectItems($assignments->getArticleIds());
+
+                foreach ($items as $item) {
+                    if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
+                        $this->getSDK()->recordDelete($item['sourceId']);
+                        $removedRecords[] = $item['sourceId'];
+                    } else {
+                        //updates items with the new streams
+
+                        if (!$assignments->getStreamsByArticleId($item['articleId'])) {
+                            continue;
+                        }
+
+                        $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
+
+                        //removes current stream from the collection
+                        unset($streamCollection[$streamId]);
+
+                        $this->getSDK()->recordStreamAssignment(
+                            $item['sourceId'],
+                            $streamCollection
+                        );
+                    }
+                }
+
+                $connectExport->updateConnectItemsStatus($removedRecords, ConnectExport::ITEM_STATUS_DELETE);
+
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
+
+            } catch (\Exception $e) {
+                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+                return;
+            }
+        }
     }
 
     private function getMarketplaceApplier()

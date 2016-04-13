@@ -11,6 +11,7 @@ class ProductStreamService
     const DYNAMIC_STREAM = 1;
     const STATIC_STREAM = 2;
     const STATUS_SUCCESS = 'export';
+    const STATUS_DELETE = 'delete';
     const STATUS_ERROR = 'error';
 
     /**
@@ -43,18 +44,11 @@ class ProductStreamService
      */
     public function prepareStreamsAssignments($streamId)
     {
-        $assignment = array();
+        $stream = $this->findStream($streamId);
 
-        $stream = $this->productStreamRepository->findById($streamId);
+        $articleIds = $this->getArticlesIds($stream);
 
-        $articleIds = $this->getArticlesIds($streamId);
-
-        $collection = $this->productStreamRepository->fetchAllPreviousExportedStreams($articleIds);
-
-        //prepare previous related streams
-        foreach ($collection as $item) {
-            $assignment[$item['articleId']][$item['streamId']] = $item['name'];
-        }
+        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
         //merge prev with current streams
         foreach ($articleIds as $articleId) {
@@ -68,17 +62,80 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @return ProductStreamsAssignments
+     * @throws \Exception
+     */
+    public function getStreamAssignments($streamId)
+    {
+        //checks stream existence
+        $stream = $this->findStream($streamId);
+
+        $articleIds = $this->getArticlesIds($stream);
+
+        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
+
+        return new ProductStreamsAssignments(
+            array('assignments' => $assignment)
+        );
+    }
+
+    /**
+     * @param $streamId
+     * @return mixed
+     */
+    public function findStream($streamId)
+    {
+        return $this->productStreamRepository->findById($streamId);
+    }
+
+    /**
+     * @param $articleIds
+     * @return array
+     */
+    private function collectRelatedStreamsAssignments($articleIds)
+    {
+        $assignment = array();
+
+        $collection = $this->productStreamRepository->fetchAllPreviousExportedStreams($articleIds);
+
+        //prepare previous related streams
+        foreach ($collection as $item) {
+            $assignment[$item['articleId']][$item['streamId']] = $item['name'];
+        }
+
+        return $assignment;
+    }
+
+    /**
+     * @param ProductStreamsAssignments $assignments
+     * @param $streamId
+     * @param $articleId
+     * @return bool
+     */
+    public function allowToRemove(ProductStreamsAssignments $assignments, $streamId, $articleId)
+    {
+        $streamAssignments = $assignments->getStreamsByArticleId($articleId);
+
+        if (!$streamAssignments || !isset($streamAssignments[$streamId])) {
+            return false;
+        }
+
+        if (count($streamAssignments) > 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param ProductStream $stream
      * @return array
      * @throws \Exception
      */
-    public function getArticlesIds($streamId)
+    public function getArticlesIds(ProductStream $stream)
     {
-        $sourceIds = array();
-
-        $stream = $this->productStreamRepository->findById($streamId);
-
         if ($this->isStatic($stream)) {
-            $sourceIds = array_merge($sourceIds, $this->extractSourceIdsFromStaticStream($stream));
+            $sourceIds = $this->extractSourceIdsFromStaticStream($stream);
         } else {
             //todo: extract product from dynamic stream
             throw new \Exception('Not allow to export articles ids from dynamic stream');
@@ -110,6 +167,31 @@ class ProductStreamService
     }
 
     /**
+     * @param null $start
+     * @param null $limit
+     * @return array
+     */
+    public function getList($start = null, $limit = null)
+    {
+        $streamBuilder = $this->productStreamRepository->getStreamsBuilder($start, $limit);
+
+        $stmt = $streamBuilder->execute();
+        $streams = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($streams as $index => $stream) {
+            if ($stream['type'] == self::STATIC_STREAM) {
+                $productCount = $this->productStreamRepository->countProductsInStream($stream['id']);
+                $streams[$index]['productCount'] = $productCount['productCount'];
+            }
+        }
+
+        return array(
+            'data' => $streams,
+            'count' => $stmt->rowCount()
+        );
+    }
+
+    /**
      * @param $streamId
      * @param $status
      */
@@ -130,7 +212,7 @@ class ProductStreamService
      * @param $streamId
      * @param $message
      */
-    public function logError($streamId, $message)
+    public function log($streamId, $message)
     {
         /** @var ProductStreamAttribute $streamAttr */
         $streamAttr = $this->streamAttrRepository->findOneBy(array('streamId' => $streamId));

@@ -6,8 +6,9 @@ Ext.define('Shopware.apps.Connect', {
     loadPath: '{url action=load}',
     views: [
         'main.Window', 'main.TabPanel', 'main.Panel',
-        'export.Panel', 'import.Panel',
-        'export.List', 'export.Filter',
+        'export.product.Panel', 'import.Panel',
+        'export.product.List', 'export.product.Filter',
+        'export.stream.Panel', 'export.stream.List',
         'import.RemoteCategories', 'import.OwnCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',

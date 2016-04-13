@@ -1,7 +1,7 @@
 //{namespace name=backend/connect/view/main}
 
-//{block name="backend/connect/view/export/filter"}
-Ext.define('Shopware.apps.Connect.view.export.Filter', {
+//{block name="backend/connect/view/export/product/filter"}
+Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.connect-export-filter',
 

@@ -12,6 +12,9 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 
 class ConnectExport
 {
+    const BATCH_SIZE = 200;
+    const ITEM_STATUS_DELETE = 'delete';
+
     /** @var  Helper */
     protected $helper;
 
@@ -78,25 +81,7 @@ class ConnectExport
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
-        $errors = array();
-        if (count($ids) == 0) {
-            return $errors;
-        }
-
-        $implodedIds = '"' . implode('","', $ids) . '"';
-        $connectItems = Shopware()->Db()->fetchAll(
-            "SELECT bi.article_id as articleId,
-                    bi.article_detail_id as articleDetailId,
-                    bi.export_status as exportStatus,
-                    bi.export_message as exportMessage,
-                    bi.source_id as sourceId,
-                    a.name as title,
-                    d.ordernumber as number
-            FROM s_plugin_connect_items bi
-            LEFT JOIN s_articles a ON bi.article_id = a.id
-            LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
-            WHERE bi.source_id IN ($implodedIds);"
-        );
+        $connectItems = $this->fetchConnectItems($ids);
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
@@ -107,7 +92,7 @@ class ConnectExport
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
             $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
-            if (empty($item['exportStatus']) || $item['exportStatus'] == 'delete' || $item['exportStatus'] == 'error') {
+            if (empty($item['exportStatus']) || $item['exportStatus'] == self::ITEM_STATUS_DELETE || $item['exportStatus'] == 'error') {
                 $status = 'insert';
             } else {
                 $status = 'update';
@@ -149,6 +134,32 @@ class ConnectExport
         }
 
         return $errors;
+    }
+
+    /**
+     * @param array $articleIds
+     * @return array
+     */
+    public function fetchConnectItems(array $articleIds)
+    {
+        if (count($articleIds) == 0) {
+            return array();
+        }
+
+        $implodedIds = '"' . implode('","', $articleIds) . '"';
+        return Shopware()->Db()->fetchAll(
+            "SELECT bi.article_id as articleId,
+                    bi.article_detail_id as articleDetailId,
+                    bi.export_status as exportStatus,
+                    bi.export_message as exportMessage,
+                    bi.source_id as sourceId,
+                    a.name as title,
+                    d.ordernumber as number
+            FROM s_plugin_connect_items bi
+            LEFT JOIN s_articles a ON bi.article_id = a.id
+            LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
+            WHERE bi.source_id IN ($implodedIds);"
+        );
     }
 
     /**
@@ -217,7 +228,7 @@ class ConnectExport
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
-        $attribute->setExportStatus('delete');
+        $attribute->setExportStatus(self::ITEM_STATUS_DELETE);
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
     }
@@ -242,11 +253,34 @@ class ConnectExport
 
         $builder = Shopware()->Models()->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
-            ->set('at.exportStatus', $builder->expr()->literal('delete'))
+            ->set('at.exportStatus', $builder->expr()->literal(self::ITEM_STATUS_DELETE))
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());
 
         $builder->getQuery()->execute();
+    }
+
+    /**
+     * @param array $sourceIds
+     * @param $status
+     */
+    public function updateConnectItemsStatus(array $sourceIds, $status)
+    {
+        if (empty($sourceIds)) {
+            return;
+        }
+
+        $chunks = array_chunk($sourceIds, self::BATCH_SIZE);
+
+        foreach ($chunks as $chunk) {
+            $builder = $this->manager->getConnection()->createQueryBuilder();
+            $builder->update('s_plugin_connect_items', 'ci')
+                ->set('ci.export_status', ':status')
+                ->where('source_id IN (:sourceIds)')
+                ->setParameter('sourceIds', $chunk, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+                ->setParameter('status', $status)
+                ->execute();
+        }
     }
 
     private function getMarketplaceGateway()

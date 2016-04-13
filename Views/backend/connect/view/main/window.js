@@ -52,21 +52,27 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
     getItems: function() {
         var me = this;
 
-        if (me.action == 'Settings') {
-            return [
-                Ext.create('Shopware.apps.Connect.view.main.TabPanel', {
+        switch (me.action){
+            case 'Settings':
+                return [
+                    Ext.create('Shopware.apps.Connect.view.main.TabPanel', {
+                        region: 'center',
+                        action : me.action
+                    })
+                ];
+            case 'Export':
+                return [ Ext.create('Shopware.apps.Connect.view.export.TabPanel', {
                     region: 'center',
                     action : me.action
-                })
-            ];
+                })];
+            default:
+                return [
+                    Ext.create('Shopware.apps.Connect.view.main.Panel', {
+                        region: 'center',
+                        action : me.action
+                    })
+                ];
         }
-
-        return [
-            Ext.create('Shopware.apps.Connect.view.main.Panel', {
-                region: 'center',
-                action : me.action
-            })
-        ];
     }
 });
 //{/block}

@@ -33,9 +33,13 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dataIndex: 'name',
             flex: 4
         }, {
+            header: '{s name=export/columns/product_amount}Product amount{/s}',
+            dataIndex: 'productCount',
+            flex: 1
+        }, {
             header: '{s name=export/columns/status}Status{/s}',
             dataIndex: 'exportStatus',
-            flex: 2,
+            flex: 1,
             renderer: function(value, metaData, record) {
                 if(record.get('exportMessage')) {
                     metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
@@ -74,9 +78,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                     { value: '40' },
                     { value: '60' },
                     { value: '80' },
-                    { value: '100' },
-                    { value: '250' },
-                    { value: '500' }
+                    { value: '100' }
                 ]
             }),
             displayField: 'value',

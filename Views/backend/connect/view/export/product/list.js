@@ -125,8 +125,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
                     { value: '60' },
                     { value: '80' },
                     { value: '100' },
-                    { value: '250' },
-                    { value: '500' }
+                    { value: '250' }
                 ]
             }),
             displayField: 'value',

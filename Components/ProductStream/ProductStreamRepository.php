@@ -80,17 +80,17 @@ class ProductStreamRepository extends Repository
     }
 
     /**
-     * @param $start
-     * @param $limit
-     * @return \Doctrine\ORM\QueryBuilder|\Shopware\Components\Model\QueryBuilder
+     * @param null $start
+     * @param null $limit
+     * @return \Doctrine\DBAL\Query\QueryBuilder
      */
-    public function getStreamBuilder($start, $limit)
+    public function getStreamsBuilder($start = null, $limit = null)
     {
-        $builder = $this->manager->createQueryBuilder();
+        $builder = $this->manager->getConnection()->createQueryBuilder();
 
-        $builder->select('ps.id', 'ps.name', 'ps.type', 'psa.exportStatus', 'psa.exportMessage')
-            ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
-            ->leftJoin('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa', \Doctrine\ORM\Query\Expr\Join::WITH, 'psa.streamId = ps.id');
+        $builder->select(array('ps.id', 'ps.name', 'ps.type', 'pcs.export_status as exportStatus', 'pcs.export_message as exportMessage'))
+            ->from('s_product_streams', 'ps')
+            ->leftJoin('ps', 's_plugin_connect_streams', 'pcs', 'ps.id = pcs.stream_id');
 
         if ($start) {
             $builder->setFirstResult($start);
@@ -103,20 +103,15 @@ class ProductStreamRepository extends Repository
         return $builder;
     }
 
-    /**
-     * @param null $start
-     * @param null $limit
-     * @return \Doctrine\ORM\Tools\Pagination\Paginator
-     */
-    public function getStreamPaginator($start = null, $limit = null)
+    public function countProductsInStream($streamId)
     {
-        $builder = $this->getStreamBuilder($start, $limit);
-        $query = $builder->getQuery();
-        $query->setHydrationMode(\Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
+        $builder = $this->manager->getConnection()->createQueryBuilder();
 
-        return $this->manager->createPaginator($query);
+        return $builder->select('COUNT(id) as productCount')
+            ->from('s_product_streams_selection')
+            ->where('stream_id = :streamId')
+            ->setParameter('streamId', $streamId)
+            ->execute()->fetch(\PDO::FETCH_ASSOC);
     }
-
-
 
 }

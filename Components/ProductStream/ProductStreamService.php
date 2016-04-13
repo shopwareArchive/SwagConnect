@@ -173,12 +173,18 @@ class ProductStreamService
      */
     public function getList($start = null, $limit = null)
     {
-        $paginator = $this->productStreamRepository->getStreamPaginator($start, $limit);
+        $streamBuilder = $this->productStreamRepository->getStreamsBuilder($start, $limit);
 
-        $data = $paginator->getIterator()->getArrayCopy();
-        $count = $paginator->count();
+        $streams = $streamBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array('success' => true, 'data' => $data, 'total' => $count);
+        foreach ($streams as $index => $stream) {
+            if ($stream['type'] == self::STATIC_STREAM) {
+                $productCount = $this->productStreamRepository->countProductsInStream($stream['id']);
+                $streams[$index]['productCount'] = $productCount['productCount'];
+            }
+        }
+
+        return array('success' => true, 'data' => $streams, 'total' => $streamBuilder->execute()->rowCount());
     }
 
     /**

@@ -12,6 +12,7 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 
 class ConnectExport
 {
+    const BATCH_SIZE = 200;
     const ITEM_STATUS_DELETE = 'delete';
 
     /** @var  Helper */
@@ -269,13 +270,17 @@ class ConnectExport
             return;
         }
 
-        $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->update('s_plugin_connect_items', 'ci')
-            ->set('ci.export_status', ':status')
-            ->where('source_id IN (:sourceIds)')
-            ->setParameter('sourceIds', $sourceIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
-            ->setParameter('status', $status)
-            ->execute();
+        $chunks = array_chunk($sourceIds, self::BATCH_SIZE);
+
+        foreach ($chunks as $chunk) {
+            $builder = $this->manager->getConnection()->createQueryBuilder();
+            $builder->update('s_plugin_connect_items', 'ci')
+                ->set('ci.export_status', ':status')
+                ->where('source_id IN (:sourceIds)')
+                ->setParameter('sourceIds', $chunk, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+                ->setParameter('status', $status)
+                ->execute();
+        }
     }
 
     private function getMarketplaceGateway()

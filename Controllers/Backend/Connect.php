@@ -1137,10 +1137,16 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     {
         $productStreamService = $this->get('swagconnect.product_stream_service');
 
+        $result = $productStreamService->getList(
+            $this->Request()->getParam('start', 0),
+            $this->Request()->getParam('limit', 20)
+        );
+
         $this->View()->assign(
-            $productStreamService->getList(
-                $this->Request()->getParam('start', 0),
-                $this->Request()->getParam('limit', 20)
+            array(
+                'success' => true,
+                'data' => $result['data'],
+                'total' => $result['total'],
             )
         );
     }

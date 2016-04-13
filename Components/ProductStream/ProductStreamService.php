@@ -175,7 +175,8 @@ class ProductStreamService
     {
         $streamBuilder = $this->productStreamRepository->getStreamsBuilder($start, $limit);
 
-        $streams = $streamBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
+        $stmt = $streamBuilder->execute();
+        $streams = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
@@ -184,7 +185,10 @@ class ProductStreamService
             }
         }
 
-        return array('success' => true, 'data' => $streams, 'total' => $streamBuilder->execute()->rowCount());
+        return array(
+            'data' => $streams,
+            'count' => $stmt->rowCount()
+        );
     }
 
     /**

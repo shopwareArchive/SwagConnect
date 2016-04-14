@@ -1223,8 +1223,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                 $removedRecords = array();
 
                 $assignments = $productStreamService->getStreamAssignments($streamId);
-
-                $items = $connectExport->fetchConnectItems($assignments->getArticleIds());
+                $sourceIds = $this->getHelper()->getArticleSourceIds($assignments->getArticleIds());
+                $items = $connectExport->fetchConnectItems($sourceIds);
 
                 foreach ($items as $item) {
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
@@ -1233,7 +1233,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                     } else {
                         //updates items with the new streams
 
-                        if (!$assignments->getStreamsByArticleId($item['articleId'])) {
+                        if (!$item['isMainVariant'] || !$assignments->getStreamsByArticleId($item['articleId'])) {
                             continue;
                         }
 

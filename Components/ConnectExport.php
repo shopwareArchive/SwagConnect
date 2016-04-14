@@ -116,7 +116,10 @@ class ConnectExport
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
 
-                if ($streamsAssignments !== null && $streamsAssignments->getStreamsByArticleId($item['articleId']) !== null) {
+                if ($item['isMainVariant'] &&
+                    $streamsAssignments !== null &&
+                    $streamsAssignments->getStreamsByArticleId($item['articleId']) !== null
+                ) {
                     $this->sdk->recordStreamAssignment(
                         $item['sourceId'],
                         $streamsAssignments->getStreamsByArticleId($item['articleId'])
@@ -137,22 +140,23 @@ class ConnectExport
     }
 
     /**
-     * @param array $articleIds
+     * @param array $sourceIds
      * @return array
      */
-    public function fetchConnectItems(array $articleIds)
+    public function fetchConnectItems(array $sourceIds)
     {
-        if (count($articleIds) == 0) {
+        if (count($sourceIds) == 0) {
             return array();
         }
 
-        $implodedIds = '"' . implode('","', $articleIds) . '"';
+        $implodedIds = '"' . implode('","', $sourceIds) . '"';
         return Shopware()->Db()->fetchAll(
             "SELECT bi.article_id as articleId,
                     bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
+                    bi.is_main_variant as isMainVariant,
                     a.name as title,
                     d.ordernumber as number
             FROM s_plugin_connect_items bi

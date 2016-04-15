@@ -352,12 +352,12 @@ class Helper
      * Generate sourceId
      *
      * @param ProductDetail $detail
-     * @return int|string
+     * @return string
      */
     public function generateSourceId(ProductDetail $detail)
     {
         if ($detail->getKind() == 1) {
-            $sourceId = $detail->getArticle()->getId();
+            $sourceId = (string)$detail->getArticle()->getId();
         } else {
             $sourceId = sprintf(
                 '%s-%s',

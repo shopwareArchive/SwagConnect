@@ -157,6 +157,28 @@ class HelperTest extends ConnectTestHelper
         Shopware()->Models()->flush($localUnit);
     }
 
+    public function testIsMainVariant()
+    {
+        $this->assertTrue($this->getHelper()->isMainVariant('5'));
+        $this->assertFalse($this->getHelper()->isMainVariant('5-142'));
+    }
+
+    public function testGenerateSourceId()
+    {
+        /** @var \Shopware\Models\Article\Detail $detail */
+        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('kind' => 2));
+
+        $detailSourceId = sprintf(
+            '%s-%s',
+            $detail->getArticle()->getId(),
+            $detail->getId()
+        );
+        $this->assertEquals($this->getHelper()->generateSourceId($detail), $detailSourceId);
+        $articleSourceId = (string)$detail->getArticle()->getId();
+
+        $this->assertEquals($this->getHelper()->generateSourceId($detail->getArticle()->getMainDetail()), $articleSourceId);
+    }
+
     private function resetConnectCategoryMappings()
     {
         $conn = Shopware()->Db();

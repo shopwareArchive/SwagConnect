@@ -116,7 +116,7 @@ class ConnectExport
                     $this->sdk->recordUpdate($item['sourceId']);
                 }
 
-                if ($item['isMainVariant'] &&
+                if ($this->helper->isMainVariant($item['sourceId']) &&
                     $streamsAssignments !== null &&
                     $streamsAssignments->getStreamsByArticleId($item['articleId']) !== null
                 ) {
@@ -156,7 +156,6 @@ class ConnectExport
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
-                    bi.is_main_variant as isMainVariant,
                     a.name as title,
                     d.ordernumber as number
             FROM s_plugin_connect_items bi

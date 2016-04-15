@@ -1232,12 +1232,10 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                         $removedRecords[] = $item['sourceId'];
                     } else {
                         //updates items with the new streams
-
-                        if (!$item['isMainVariant'] || !$assignments->getStreamsByArticleId($item['articleId'])) {
+                        $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
+                        if (!$this->getHelper()->isMainVariant($item['sourceId']) || !$streamCollection) {
                             continue;
                         }
-
-                        $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
 
                         //removes current stream from the collection
                         unset($streamCollection[$streamId]);

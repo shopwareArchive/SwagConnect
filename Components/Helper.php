@@ -648,4 +648,20 @@ class Helper
 
         $statement->execute();
     }
+
+    /**
+     * Checks whether given sourceId is main variant.
+     * Works only with local products.
+     * SourceIds pattern is articleId-variantId (58-142)
+     *
+     * For remote product check is_main_variant flag in
+     * s_plugin_connect_items
+     *
+     * @param string $sourceId
+     * @return bool
+     */
+    public function isMainVariant($sourceId)
+    {
+        return ctype_digit($sourceId);
+    }
 }

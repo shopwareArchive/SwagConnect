@@ -267,6 +267,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             },
             'connect-log-list': {
+                changeLogging: me.onChangeLogging,
                 'selectionchange': function(grid, selected, eOpts) {
                     var me = this,
                         record,
@@ -307,9 +308,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         }
                     );
                 }
-            },
-            'connect-log-list': {
-                changeLogging: me.onChangeLogging
             },
             'connect-marketplace-attributes-mapping button[action=save]': {
                 click: function () {

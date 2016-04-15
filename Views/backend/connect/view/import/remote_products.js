@@ -57,6 +57,8 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
             }, {
                 header: 'Preis (brutto)',
                 dataIndex: 'Price_basePrice',
+                xtype: 'numbercolumn',
+                format: '0.00',
                 flex: 3
             }, {
                 header: 'Steuersatz',

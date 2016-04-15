@@ -1230,6 +1230,11 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
                         $this->getSDK()->recordDelete($item['sourceId']);
                         $removedRecords[] = $item['sourceId'];
+
+                        $this->getSDK()->recordStreamAssignment(
+                            $item['sourceId'],
+                            array()
+                        );
                     } else {
                         //updates items with the new streams
                         $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);

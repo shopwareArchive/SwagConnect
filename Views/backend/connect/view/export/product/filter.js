@@ -8,6 +8,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
     width: 200,
     layout: 'accordion',
     border: false,
+    animate: Ext.isChrome,
 
     initComponent: function() {
         var me = this;
@@ -32,19 +33,23 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
     getCategoryFilter: function() {
         var me = this;
         return {
-            xtype: 'treepanel',
-            id: 'export-category-filter',
+            xtype: 'panel',
             title: '{s name=export/filter/category_title}Category filter{/s}',
-            rootVisible: false,
-            root: {
-                id: 1,
-                expanded: true
-            },
-            store: 'base.CategoryTree',
-            flex: 2,
-            dockedItems: [
-                me.createTreeBottomBar()
-            ]
+            layout: { type: 'hbox', align: 'stretch' },
+            items: [{
+                xtype: 'treepanel',
+                id: 'export-category-filter',
+                rootVisible: false,
+                root: {
+                    id: 1,
+                    expanded: true
+                },
+                store: 'base.CategoryTree',
+                flex: 1,
+                dockedItems: [
+                    me.createTreeBottomBar()
+                ]
+            }]
         }
     },
 

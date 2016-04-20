@@ -67,6 +67,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import checkbox[action=show-only-connect-products]': {
                 change: me.showOnlyConnectProducts
+            },
+            'connect-import checkbox[action=hide-mapped-products]': {
+                change: me.hideMappedProducts
             }
         });
 
@@ -418,6 +421,31 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             });
         }
         store.loadPage(1);
+    },
+
+    hideMappedProducts: function(checkbox, newValue, oldValue) {
+        var me = this,
+            store = me.getRemoteProductsGrid().getStore(),
+            categoryStore = me.getRemoteCategoryTree().getStore();
+
+        if (newValue == true) {
+            Ext.apply(store.getProxy().extraParams, {
+                hideMappedProducts: 1
+            });
+
+            Ext.apply(categoryStore.getProxy().extraParams, {
+                hideMappedProducts: 1
+            });
+        } else {
+            Ext.apply(store.getProxy().extraParams, {
+                hideMappedProducts: null
+            });
+            Ext.apply(categoryStore.getProxy().extraParams, {
+                hideMappedProducts: null
+            });
+        }
+        store.loadPage(1);
+        me.onReloadRemoteCategories();
     },
 
     onActivateProducts: function(button, event) {

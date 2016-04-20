@@ -14,6 +14,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
     snippets: {
         connectProductsTitle: '{s name=import/shopware_connect_products}shopware Connect Produkte{/s}',
         showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
+        hideMappedProducts: '{s name=import/hide_mapped_products}zugewiesene Produkte und Kategorien ausblenden{/s}',
         activateProductsLabel: '{s name=import/activate_products}Produkte aktivieren{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },
@@ -92,11 +93,25 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     layout: 'hbox',
                     width: '100%',
                     items: [
-                        Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
+                        {
+                            xtype: 'container',
                             width: '50%',
-                            height: 300,
-                            margin: '10px 0 0 0'
-                        }),
+                            items: [
+                                Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
+                                    width: '100%',
+                                    height: 300,
+                                    margin: '10px 0 0 0'
+                                }),
+                                {
+                                    xtype : 'checkbox',
+                                    name : 'attribute[hideMapped]',
+                                    action: 'hide-mapped-products',
+                                    margin: '15px 0 0 0',
+                                    checked: true,
+                                    boxLabel : me.snippets.hideMappedProducts
+                                }
+                            ]
+                        },
                         {
                             xtype: 'container',
                             width: '50%',

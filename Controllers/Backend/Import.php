@@ -50,6 +50,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('id', 'root');
+        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
+
         switch ($parent) {
             case 'root':
                 $categories = $this->getCategoryExtractor()->getMainNodes();
@@ -62,7 +64,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId);
                 break;
             default:
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, true);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped);
         }
 
         $this->View()->assign(array(
@@ -77,6 +79,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $shopId = $this->request->getParam('shopId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
+        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
+
         $stream = null;
 
         if (strpos($category, '_stream_') > 0) {
@@ -85,7 +89,13 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $category = null;
         }
 
-        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category, $shopId, $stream, $limit, $offset);
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category,
+            $shopId,
+            $stream,
+            $limit,
+            $offset,
+            $hideMapped);
+
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);

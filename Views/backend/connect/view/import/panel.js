@@ -31,14 +31,14 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                         {
                             xtype: 'container',
                             html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.connectProductsTitle  + '</h1>',
-                            width: '50%',
+                            width: '45%',
                             height: 30
                         },
                         {
                             xtype: 'container',
                             html: '<h1 style="font-size: large">' + me.snippets.myProductsTitle + '</h1>',
                             margin: '0 0 0 110px',
-                            width: '50%'
+                            width: '55%'
                         }
                     ]
                 },
@@ -49,7 +49,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     items: [
                         {
                             xtype: 'connect-remote-categories',
-                            width: '50%'
+                            width: '45%'
                         },
                         {
                             xtype: 'panel',
@@ -84,7 +84,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                         },
                         {
                             xtype: 'connect-own-categories',
-                            width: '50%'
+                            width: '55%'
                         }
                     ]
                 }, {
@@ -93,16 +93,16 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     width: '100%',
                     items: [
                         Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
-                            width: '50%',
+                            width: '45%',
                             height: 300,
                             margin: '10px 0 0 0'
                         }),
                         {
                             xtype: 'container',
-                            width: '50%',
+                            width: '55%',
                             items: [
                                 Ext.create('Shopware.apps.Connect.view.import.LocalProducts', {
-                                    width: '100%',
+                                    width: 'calc(100% - 51px)',
                                     height: 300,
                                     margin: '10px 0 0 50px'
                                 }),

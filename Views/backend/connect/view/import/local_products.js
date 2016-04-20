@@ -30,7 +30,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
 
         Ext.applyIf(me, {
             height: 200,
-            width: 450,
+            width: '90%',
 
             dockedItems: [
                 me.getPagingToolbar()

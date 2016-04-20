@@ -197,10 +197,6 @@ class ImportService
             throw new \RuntimeException('Remote category not found!');
         }
 
-        if ($remoteCategory->getLocalCategoryId() > 0) {
-            throw new \RuntimeException('Remote category is already mapped!');
-        }
-
         // collect his child categories and
         // generate remote category tree by given remote category
         $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey);

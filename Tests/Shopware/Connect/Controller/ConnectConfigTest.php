@@ -56,6 +56,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
 
         $expectations = array(
+            'id' => null,
             'activateProductsAutomatically' => '0',
             'createCategoriesAutomatically' => '1',
             'createUnitsAutomatically' => '1',
@@ -67,8 +68,6 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'connectDebugHost' => 'stage.connect.de',
             'connectAttribute' => '18',
             'apiKey' => '58dfcc22-0ab7-4bf6-8eff-e0d2c9455019',
-            'isDefaultShop' => '1',
-            'shopId' => '15',
             'hasSsl' => '0',
             'showShippingCostsSeparately' => '0',
             'articleImagesLimitImport' => '10',
@@ -80,6 +79,8 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ->setPost('data', $expectations);
         $this->dispatch('backend/ConnectConfig/saveGeneral');
 
+        unset($expectations['id']);
+
         $sql= "SELECT * from s_plugin_connect_config WHERE groupName = 'general'";
         $result = Shopware()->Db()->fetchAll($sql);
 
@@ -88,7 +89,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             $this->assertEquals($expectations[$config['name']], $config['value']);
         }
 
-        $sql= "SELECT * from s_plugin_connect_config WHERE (`name` = 'shopId' OR `name` = 'isDefaultShop') AND groupName = 'general'";
+        $sql= "SELECT * from s_plugin_connect_config WHERE `name` = 'id' AND groupName = 'general'";
         $result = Shopware()->Db()->fetchAll($sql);
         $this->assertEmpty($result);
     }

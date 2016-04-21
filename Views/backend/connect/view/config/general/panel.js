@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Panel', {
                 region: 'center',
                 bodyPadding: 10,
                 items: [{
-                    xtype: 'connect-config-tabs'
+                    xtype: 'connect-config-form'
                 }]
             }
         ];

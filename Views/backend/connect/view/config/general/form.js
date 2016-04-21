@@ -106,13 +106,11 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
-        if (me.isDefaultShop()) {
-            elements.push(me.getApiKeyFieldset());
-            if (defaultMarketplace == false) {
-                // extended import settings are available
-                // only for SEM shops
-                elements.push(me.getImportSettingsFieldset());
-            }
+        elements.push(me.getApiKeyFieldset());
+        if (defaultMarketplace == false) {
+            // extended import settings are available
+            // only for SEM shops
+            elements.push(me.getImportSettingsFieldset());
         }
         elements.push(basicConfigFieldset);
         elements.push(advancedConfigFieldset);
@@ -312,31 +310,29 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         });
         items.push(leftContainer);
 
-        if (me.isDefaultShop()) {
-            var bottomContainer = Ext.create('Ext.container.Container', {
-                columnWidth: 1,
-                layout: 'anchor',
-                border: false,
-                items: [
-                    {
-                        xtype: 'textfield',
-                        name: 'connectDebugHost',
-                        anchor: '100%',
-                        fieldLabel: me.snippets.alternativeHostLabel,
-                        labelWidth: me.defaults.labelWidth,
-                        helpText: Ext.String.format('{s name=config/help/debug_host}Nutze den angegebenen Host statt des [0]-Hosts. Nur für Testzweckecke{/s}', marketplaceName)
-                    }, {
-                        xtype: 'textfield',
-                        name: 'exportDomain',
-                        anchor: '100%',
-                        fieldLabel: me.snippets.exportDomainLabel,
-                        labelWidth: me.defaults.labelWidth,
-                        helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
-                    }
-                ]
-            });
-            items.push(bottomContainer);
-        }
+        var bottomContainer = Ext.create('Ext.container.Container', {
+            columnWidth: 1,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'textfield',
+                    name: 'connectDebugHost',
+                    anchor: '100%',
+                    fieldLabel: me.snippets.alternativeHostLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: Ext.String.format('{s name=config/help/debug_host}Nutze den angegebenen Host statt des [0]-Hosts. Nur für Testzweckecke{/s}', marketplaceName)
+                }, {
+                    xtype: 'textfield',
+                    name: 'exportDomain',
+                    anchor: '100%',
+                    fieldLabel: me.snippets.exportDomainLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
+                }
+            ]
+        });
+        items.push(bottomContainer);
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
             layout: 'column',
@@ -476,12 +472,11 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      */
     populateForm: function() {
         var me = this,
-            record = me.generalConfigStore.getById(me.shopId);
+            record = me.generalConfigStore.getAt(0);
 
         if (!record) {
             record = Ext.create('Shopware.apps.Connect.model.config.General');
         }
-
 
         if (record.get('connectAttribute') < 1) {
             record.set('connectAttribute', 19);
@@ -489,18 +484,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         me.loadRecord(record);
 
-    },
-
-    /**
-     * Helper method to check if the current
-     * shop is default one
-     *
-     * @returns boolean
-     */
-    isDefaultShop: function() {
-        var me = this;
-
-        return me.defaultShop;
     }
 });
 //{/block}

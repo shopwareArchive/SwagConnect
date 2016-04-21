@@ -12,7 +12,7 @@ Ext.define('Shopware.apps.Connect', {
         'import.RemoteCategories', 'import.OwnCategories', 'import.RemoteProducts', 'import.LocalProducts',
         'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
         'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
-		'config.general.Panel', 'config.general.Form', 'config.import.Panel', 'config.export.Panel', 'config.Tabs',
+		'config.general.Panel', 'config.general.Form', 'config.import.Panel', 'config.export.Panel',
         'config.import.Form', 'config.export.Form', 'config.import.UnitsMapping',
         'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping'
     ],

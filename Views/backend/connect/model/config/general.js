@@ -31,11 +31,8 @@
 Ext.define('Shopware.apps.Connect.model.config.General', {
     extend: 'Ext.data.Model',
 
-    idProperty: 'shopId',
-
     fields: [
         //{block name="backend/connect/model/config/general/fields"}{/block}
-        { name: 'shopId', type: 'int', useNull: true },
         { name: 'isDefaultShop', type: 'boolean' },
         { name: 'apiKey', type: 'string' },
         { name: 'connectAttribute', type: 'int' },

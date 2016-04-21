@@ -51,7 +51,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
     snippets: {
         apiKeyHeader: '{s name=config/main/api_key}API-Key{/s}',
-        apiKeyDescription: Ext.String.format('{s name=config/api_key_description}Bitte hinterlegen Sie an dieser Stelle Ihren API-Key, um eine Verbindung zu [0] aufzubauen. Unter dem folgenden Link können Sie Ihren API-Key einsehen: <a href=[1]/settings/exchange target=_blank>[1]/settings/exchange</a><br>Sie können viele verschiedene ERP- und Shopsysteme an [0] andocken, wozu Ihnen eine Vielzahl von Schnittstellen zur Verfügung steht - <a href=http://info.bepado.de/schnittstellen target=_blank>Mehr Info</a><br><br>{/s}', marketplaceName, marketplaceNetworkUrl),
+        apiKeyDescription: Ext.String.format('{s name=config/api-key-description}Du findest deinen API-Key in [0] unter Einstellungen und Synchronisation.<br><br>{/s}', marketplaceName),
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
         basicSettings: '{s name=config/main/basic_settings}Grundeinstellungen{/s}',
         save: '{s name=config/save}Save{/s}',

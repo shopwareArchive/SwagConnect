@@ -102,6 +102,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
+
         me.mainWindow = me.getView('main.Window').create({
             'action': me.subApplication.action
         }).show();

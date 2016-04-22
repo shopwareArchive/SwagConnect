@@ -11,7 +11,7 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
 
     layout: 'border',
     width: 1000,
-    height:'95%',
+    height: '95%',
     title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
 
     titleTemplate: Ext.String.format('{s name=window/title_template}[0] - [text]{/s}', marketplaceName),
@@ -21,6 +21,27 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
      */
     initComponent: function() {
         var me = this;
+
+        console.log(me.action);
+
+        switch (me.action) {
+            case 'Register':
+                Ext.applyIf(me, {
+                    width: 810,
+                    height: 630,
+                    maximizable: false,
+                    minimizable: false
+                });
+                console.log('TEST');
+                break;
+            default:
+                Ext.applyIf(me, {
+                    width: 1000,
+                    height: '95%',
+                    maximizable: true,
+                    minimizable: true
+                });
+        }
 
         Ext.applyIf(me, {
             items: me.getItems()
@@ -60,6 +81,12 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                         action : me.action
                     })
                 ];
+            case 'Register':
+                return [ Ext.create('Shopware.apps.Connect.view.register.panel', {
+                    region: 'center',
+                    action : me.action,
+                    width: 200
+                })];
             case 'Export':
                 return [ Ext.create('Shopware.apps.Connect.view.export.TabPanel', {
                     region: 'center',

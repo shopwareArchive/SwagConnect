@@ -361,10 +361,10 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
          * into multiple shopware categories. But it does prevent him from importing the same sub-tree
          * into the same category multiple times
          */
-        $importString = $fromCategory.'-'.$toCategory;
-
+        $importString = $fromCategory . '-' . $toCategory;
         $currentLevel = 1;
         $mappings = array();
+
         foreach ($categoriesToImport as $id => $category) {
             $name = $category['name'];
             $parent = $category['parent'];

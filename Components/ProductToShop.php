@@ -651,13 +651,15 @@ class ProductToShop implements ProductToShopBase
         if (is_array($vendor)){
             $supplier->setName($vendor['name']);
             $supplier->setDescription($vendor['description']);
-            $supplier->setLink($vendor['url']);
-            $supplier->setMetaTitle($vendor['page_title']);
-
-            if (isset($vendor['logo_url']) && $vendor['logo_url']) {
-                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            if (array_key_exists('url', $vendor) && $vendor['url']) {
+                $supplier->setLink($vendor['url']);
             }
 
+            $supplier->setMetaTitle($vendor['page_title']);
+
+            if (array_key_exists('logo_url', $vendor) && $vendor['logo_url']) {
+                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            }
         } else {
             $supplier->setName($vendor);
         }

@@ -32,14 +32,14 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                         {
                             xtype: 'container',
                             html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.connectProductsTitle  + '</h1>',
-                            width: '50%',
+                            width: '47%',
                             height: 30
                         },
                         {
                             xtype: 'container',
                             html: '<h1 style="font-size: large">' + me.snippets.myProductsTitle + '</h1>',
                             margin: '0 0 0 110px',
-                            width: '50%'
+                            width: '47%'
                         }
                     ]
                 },
@@ -50,14 +50,14 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     items: [
                         {
                             xtype: 'connect-remote-categories',
-                            width: '50%'
+                            width: '47%'
                         },
                         {
                             xtype: 'panel',
                             layout: 'vbox',
                             width: 50,
-                            height: 100,
-                            margin: '100px 0 0 0',
+                            height: 50,
+                            margin: '125px 0 0 0',
                             bodyStyle : 'background:none', // Removes the default white background
                             border: false,
                             items: [
@@ -70,22 +70,12 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     padding: '2px',
                                     width: 50,
                                     height: 50
-                                },
-                                {
-                                    xtype: 'button',
-                                    alias: 'widget.arrow-unassign-categories',
-                                    cls: 'unassign-arrow',
-                                    action: 'unassignRemoteCategory',
-                                    border: false,
-                                    padding: '2px',
-                                    width: 50,
-                                    height: 50
                                 }
                             ]
                         },
                         {
                             xtype: 'connect-own-categories',
-                            width: '50%'
+                            width: '47%'
                         }
                     ]
                 }, {
@@ -95,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     items: [
                         {
                             xtype: 'container',
-                            width: '50%',
+                            width: '47%',
                             items: [
                                 Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
                                     width: '100%',
@@ -113,13 +103,34 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             ]
                         },
                         {
+                            xtype: 'panel',
+                            layout: 'vbox',
+                            width: 50,
+                            height: 50,
+                            margin: '125px 0 0 0',
+                            bodyStyle : 'background: none', // Removes the default white background
+                            border: false,
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    alias: 'widget.arrow-unassign-categories',
+                                    cls: 'import-arrow',
+                                    action: 'assignArticlesToCategory',
+                                    border: false,
+                                    padding: '2px',
+                                    width: 50,
+                                    height: 50
+                                }
+                            ]
+                        },
+                        {
                             xtype: 'container',
-                            width: '50%',
+                            width: '47%',
                             items: [
                                 Ext.create('Shopware.apps.Connect.view.import.LocalProducts', {
                                     width: '100%',
                                     height: 300,
-                                    margin: '10px 0 0 50px'
+                                    margin: '10px 0 0 0'
                                 }),
                                 {
                                     xtype : 'checkbox',

@@ -56,6 +56,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             'connect-import button[action=unassignRemoteCategory]': {
                 click: me.onUnassignRemoteCategoryButtonClick
             },
+            'connect-import button[action=assignArticlesToCategory]': {
+                click: me.onAssignArticlesToCategory
+            },
             'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
             },
@@ -163,6 +166,26 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             articleIds.push(data.records[i].get('Article_id'));
         }
 
+        me.assignArticlesToCategory(articleIds);
+    },
+
+    onAssignArticlesToCategory: function()
+    {
+        var me = this;
+        var articleIds = [];
+        var remoteProductSelection = me.getRemoteProductsGrid().getSelectionModel().getSelection();
+
+        for (var i = 0; i < remoteProductSelection.length; i++) {
+            articleIds.push(remoteProductSelection[i].get('Article_id'));
+        }
+
+        me.assignArticlesToCategory(articleIds, true);
+    },
+
+    assignArticlesToCategory: function(articleIds, reload)
+    {
+        var me = this;
+
         if (articleIds.length == 0) {
             me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
             return;
@@ -186,6 +209,11 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    if (reload === true) {
+                        me.getRemoteProductsGrid().getStore().reload()
+                        me.getLocalProductsGrid().getStore().reload()
+                    }
+
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }

@@ -124,6 +124,26 @@ class ProductToShop implements ProductToShopBase
         $this->categoryResolver = $categoryResolver;
     }
 
+
+    public function profFlag($str)
+    {
+        global $prof_timing, $prof_names;
+        $prof_timing[] = microtime(true);
+        $prof_names[] = $str;
+    }
+
+    function profPrint()
+    {
+        global $prof_timing, $prof_names;
+        $size = count($prof_timing);
+        for($i=0;$i<$size - 1; $i++)
+        {
+            file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', $prof_names[$i] . "\n", FILE_APPEND);
+            file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', sprintf("%f", $prof_timing[$i+1]-$prof_timing[$i]) . "\n", FILE_APPEND);
+        }
+        file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', $prof_names[$size-1] . "\n", FILE_APPEND);
+    }
+
     /**
      * Start transaction
      *
@@ -159,6 +179,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        $this->profFlag("Start product import");
         // todo@dn: Set dummy values and make product inactive
         if (empty($product->title) || empty($product->vendor)) {
             return;
@@ -168,6 +189,7 @@ class ProductToShop implements ProductToShopBase
         $isMainVariant = false;
 
         if ($detail === null) {
+            $this->profFlag("Create detail model");
             if ($product->groupId > 0) {
                 $model = $this->helper->getArticleByGroupId($product->groupId);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
@@ -204,7 +226,7 @@ class ProductToShop implements ProductToShopBase
                 $isMainVariant = true;
             }
         }
-
+        $this->profFlag("Connect attribute");
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
         // configure main variant and groupId
         if ($isMainVariant === true) {
@@ -237,7 +259,7 @@ class ProductToShop implements ProductToShopBase
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
         }
-
+        $this->profFlag("Vendor");
         if ($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
             $supplier = $repo->findOneBy(array('name' => $product->vendor));
@@ -247,9 +269,11 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
+        $this->profFlag("applyMarketplaceAttributes");
         // apply marketplace attributes
         $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
 
+        $this->profFlag("set properties");
         $connectAttribute->setShopId($product->shopId);
         $connectAttribute->setSourceId($product->sourceId);
         $connectAttribute->setExportStatus(null);
@@ -272,7 +296,8 @@ class ProductToShop implements ProductToShopBase
         $releaseDate->setTimestamp($product->deliveryDate);
         $detail->setReleaseDate($releaseDate);
         $model->setLastStock(true);
-
+        $this->profFlag("End set properties");
+        $this->profFlag("Start import Units");
         // if connect product has unit
         // find local unit with units mapping
         // and add to detail model
@@ -297,6 +322,7 @@ class ProductToShop implements ProductToShopBase
             $detail->setPurchaseUnit(null);
             $detail->setReferenceUnit(null);
         }
+        $this->profFlag("End import Units");
 
         // set dimension
         if ($product->attributes['dimension']) {
@@ -324,7 +350,7 @@ class ProductToShop implements ProductToShopBase
             'name' => $product->title,
             'vat' => $product->vat
         )));
-
+        $this->profFlag("Prices");
         // The basePrice (purchasePrice) needs to be updated in any case
         $basePrice = $product->purchasePrice;
 
@@ -357,7 +383,7 @@ class ProductToShop implements ProductToShopBase
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
         }
-
+        $this->profFlag("Persist attribute and detail");
         $connectAttribute->setArticle($model);
         $connectAttribute->setArticleDetail($detail);
         $this->manager->persist($connectAttribute);
@@ -371,25 +397,31 @@ class ProductToShop implements ProductToShopBase
             $detail->setNumber('SC-' . $product->shopId . '-' . $detail->getId());
 
             $this->manager->persist($detail);
+            $this->profFlag("Flush detail");
             $this->manager->flush($detail);
         }
+        $this->profFlag("Flush all");
         $this->manager->flush();
 
         $this->manager->clear();
 
+        $this->profFlag("addArticleTranslations");
         $this->addArticleTranslations($model, $product);
 
+        $this->profFlag("clearArticleCache");
         //clear cache for that article
         $this->helper->clearArticleCache($model->getId());
 
         if ($updateFields['image']) {
+            $this->profFlag("Import images for article");
             // Reload the model in order to not to work an the already flushed model
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
-
+        $this->profFlag("store remote categories");
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
-
+        $this->profFlag("Done");
+        $this->profPrint();
     }
 
     /**

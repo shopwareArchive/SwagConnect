@@ -16,6 +16,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
         showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
         hideMappedProducts: '{s name=import/hide_mapped_products}zugewiesene Produkte und Kategorien ausblenden{/s}',
         activateProductsLabel: '{s name=import/activate_products}Produkte aktivieren{/s}',
+        removeProducts: '{s name=import/remove_products}Remove Products{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },
 
@@ -124,8 +125,9 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             ]
                         },
                         {
-                            xtype: 'container',
+                            xtype: 'panel',
                             width: '47%',
+                            bodyStyle : 'background: none; border-style: none;', // Removes the default white background
                             items: [
                                 Ext.create('Shopware.apps.Connect.view.import.LocalProducts', {
                                     width: '100%',
@@ -136,14 +138,21 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     xtype : 'checkbox',
                                     name : 'attribute[connectAllowed]',
                                     action: 'show-only-connect-products',
-                                    margin: '15px 0 0 50px',
+                                    margin: '15px 0 0 0px',
                                     checked: true,
                                     boxLabel : me.snippets.showOnlyConnectProductsLabel
-                                },{
-                                    xtype: 'button',
-                                    cls: 'primary sc-btn-right',
-                                    action: 'activateProducts',
-                                    text: me.snippets.activateProductsLabel
+                                }
+                            ],
+                            dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    style:{
+                                        background: 'none'
+                                    },
+                                    dock: 'bottom',
+                                    ui: 'shopware-ui',
+                                    cls: 'shopware-toolbar',
+                                    items: me.getFormButtons()
                                 }
                             ]
                         }
@@ -154,6 +163,27 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
         });
 
         me.callParent(arguments);
+    },
+
+    /**
+     * Returns form buttons, export and remove
+     * @returns Array
+     */
+    getFormButtons: function () {
+        var me = this,
+            items = ['->'];
+
+        items.push({
+            text: me.snippets.removeProducts,
+            action:'unAssignArticlesFromCategory'
+        });
+        items.push({
+            cls: 'primary',
+            text: me.snippets.activateProductsLabel,
+            action:'activateProducts'
+        });
+
+        return items;
     }
 });
 //{/block}

@@ -59,6 +59,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             'connect-import button[action=assignArticlesToCategory]': {
                 click: me.onAssignArticlesToCategory
             },
+            'connect-import button[action=unAssignArticlesFromCategory]': {
+                click: me.onUnAssignArticlesFromCategory
+            },
             'connect-import button[action=activateProducts]': {
                 click: me.onActivateProducts
             },
@@ -210,8 +213,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                     if (reload === true) {
-                        me.getRemoteProductsGrid().getStore().reload()
-                        me.getLocalProductsGrid().getStore().reload()
+                        me.getRemoteProductsGrid().getStore().reload();
+                        me.getLocalProductsGrid().getStore().reload();
                     }
 
                 } else {
@@ -231,10 +234,35 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     onDropToRemoteProducts: function(node, data, overModel, dropPosition, eOpts) {
         var me = this;
         var ids = [];
-        var panel = me.getImportPanel();
 
         for (var index in data.records) {
             ids.push(data.records[index].get('Article_id'));
+        }
+
+        me.unAssignArticlesFromCategory(ids);
+    },
+
+    onUnAssignArticlesFromCategory: function()
+    {
+        var me = this;
+        var articleIds = [];
+        var localProductSelection = me.getLocalProductsGrid().getSelectionModel().getSelection();
+
+        for (var i = 0; i < localProductSelection.length; i++) {
+            articleIds.push(localProductSelection[i].get('Article_id'));
+        }
+
+        me.unAssignArticlesFromCategory(articleIds, true);
+    },
+
+    unAssignArticlesFromCategory: function(articleIds, reload)
+    {
+        var me = this;
+        var panel = me.getImportPanel();
+
+        if (articleIds.length == 0) {
+            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
+            return;
         }
 
         panel.setLoading(false);
@@ -242,13 +270,18 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             url: '{url controller=Import action=unassignRemoteArticlesFromLocalCategory}',
             method: 'POST',
             params: {
-                'articleIds[]': ids
+                'articleIds[]': articleIds
             },
             success: function(response, opts) {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
                     me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    if (reload === true) {
+                        me.getRemoteProductsGrid().getStore().reload();
+                        me.getLocalProductsGrid().getStore().reload();
+                    }
+
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
@@ -257,6 +290,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');
             }
+
         });
     },
 

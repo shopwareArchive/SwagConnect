@@ -40,9 +40,9 @@ class ConfigTest extends ConnectTestHelper
         $this->assertEquals(null, $result['shopId']);
     }
 
-    public function testGetGeneralConfigArrays()
+    public function testGetGeneralConfig()
     {
-        $configs = $this->getConfigComponent()->getGeneralConfigArrays();
+        $configs = $this->getConfigComponent()->getGeneralConfig();
 
         $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE shopId IS NULL AND groupName = ?';
         $result = Shopware()->Db()->fetchPairs($sql, array('general'));
@@ -56,15 +56,9 @@ class ConfigTest extends ConnectTestHelper
     {
         $configName = 'testConfig' . rand(1, 9999);
         $configValue = 0;
-        $data = array(
-            array(
-                'shopId' => 1,
-                'isDefaultShop' => true,
-                $configName => $configValue,
-            )
-        );
+        $data = array($configName => $configValue);
 
-        $this->getConfigComponent()->setGeneralConfigsArrays($data);
+        $this->getConfigComponent()->setGeneralConfigs($data);
         $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE shopId IS NULL AND groupName = ? AND name = ?';
         $result = Shopware()->Db()->fetchPairs($sql, array('general', $configName));
 

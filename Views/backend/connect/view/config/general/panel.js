@@ -54,12 +54,12 @@ Ext.define('Shopware.apps.Connect.view.config.general.Panel', {
         return [{
                 xtype: 'form',
                 border: false,
-                layout: 'anchor',
+                layout: 'fit',
                 autoScroll: true,
                 region: 'center',
                 bodyPadding: 10,
                 items: [{
-                    xtype: 'connect-config-tabs'
+                    xtype: 'connect-config-form'
                 }]
             }
         ];

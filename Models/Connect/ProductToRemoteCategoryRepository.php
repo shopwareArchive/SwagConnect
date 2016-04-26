@@ -25,6 +25,7 @@
 namespace Shopware\CustomModels\Connect;
 
 use \Shopware\Components\Model\ModelRepository;
+use \Doctrine\ORM\Query\Expr\Join;
 
 /**
  * Class ProductToRemoteCategoryRepository
@@ -41,47 +42,47 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      */
     public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0, $hideMapped = true)
     {
-        $builder = $this->createQueryBuilder('ptrc');
-        $builder->addSelect('a.id as Article_id');
-        $builder->addSelect('md.number as Detail_number');
-        $builder->addSelect('a.name as Article_name');
-        $builder->addSelect('a.active as Article_active');
-        $builder->addSelect('p.price as Price_basePrice');
-        $builder->addSelect('t.tax as Tax_name');
-        $builder->addSelect('s.name as Supplier_name');
-        $builder->leftJoin('ptrc.connectCategory', 'rc');
-        $builder->leftJoin('ptrc.article', 'a');
-        $builder->leftJoin('a.mainDetail', 'md');
-        $builder->leftJoin('md.prices', 'p');
-        $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('a.tax', 't');
-        $builder->leftJoin('a.attribute', 'att');
-        $builder->leftJoin('ptrc.connectAttribute', 'scatt');
+        $builder = $this->getEntityManager()->createQueryBuilder();
+        $builder->select(array(
+            'pci',
+            'a.id as Article_id',
+            'a.name as Article_name',
+            'a.active as Article_active',
+            'md.number as Detail_number',
+            's.name as Supplier_name',
+            'p.price as Price_basePrice',
+            't.tax as Tax_name',
+        ))
+            ->from('Shopware\CustomModels\Connect\Attribute', 'pci')
+            ->leftJoin('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc', Join::WITH, 'ptrc.articleId = pci.articleId')
+            ->leftJoin('pci.article', 'a')
+            ->leftJoin('a.mainDetail', 'md')
+            ->leftJoin('md.prices', 'p')
+            ->leftJoin('a.supplier', 's')
+            ->leftJoin('a.tax', 't')
+            ->leftJoin('a.attribute', 'att')
+            ->where('pci.shopId = :shopId')
+            ->setParameter('shopId', $shopId)
+            ->groupBy('pci.articleId')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
 
-        $builder->where('scatt.shopId = :shopId');
+        if ($remoteCategoryKey != null) {
+            $builder->leftJoin('ptrc.connectCategory', 'rc')
+                ->andWhere('rc.categoryKey = :categoryKey')
+                ->setParameter('categoryKey', $remoteCategoryKey);
+        }
 
         if ($hideMapped) {
             $builder->andWhere('att.connectMappedCategory IS NULL');
         }
 
         if ($stream != null) {
-            $builder->andWhere('scatt.stream = :stream');
-            $builder->setParameter('stream', $stream);
+            $builder->andWhere('pci.stream = :stream')
+                ->setParameter('stream', $stream);
         }
 
-        if ($remoteCategoryKey != null) {
-            $builder->andWhere('rc.categoryKey = :categoryKey');
-            $builder->setParameter('categoryKey', $remoteCategoryKey);
-        }
-
-        $builder->setParameter('shopId', $shopId);
-        $builder->groupBy('a.id');
-        $builder->setFirstResult($offset);
-        $builder->setMaxResults($limit);
-
-        $query = $builder->getQuery();
-
-        return $query;
+        return $builder->getQuery();
     }
 
     /**

@@ -664,4 +664,23 @@ class Helper
     {
         return ctype_digit($sourceId);
     }
+
+    public function profFlag($str)
+    {
+        global $prof_timing, $prof_names;
+        $prof_timing[] = microtime(true);
+        $prof_names[] = $str;
+    }
+
+    function profPrint()
+    {
+        global $prof_timing, $prof_names;
+        $size = count($prof_timing);
+        for($i=0;$i<$size - 1; $i++)
+        {
+            file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', $prof_names[$i] . "\n", FILE_APPEND);
+            file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', sprintf("%f", $prof_timing[$i+1]-$prof_timing[$i]) . "\n", FILE_APPEND);
+        }
+        file_put_contents('/qadajprg/www.qa.de/ConnectNew/var/log/import', $prof_names[$size-1] . "\n", FILE_APPEND);
+    }
 }

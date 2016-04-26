@@ -272,7 +272,6 @@ class ProductToShop implements ProductToShopBase
         $releaseDate->setTimestamp($product->deliveryDate);
         $detail->setReleaseDate($releaseDate);
         $model->setLastStock(true);
-
         // if connect product has unit
         // find local unit with units mapping
         // and add to detail model
@@ -373,8 +372,8 @@ class ProductToShop implements ProductToShopBase
             $this->manager->persist($detail);
             $this->manager->flush($detail);
         }
-        $this->manager->flush();
 
+        $this->manager->flush();
         $this->manager->clear();
 
         $this->addArticleTranslations($model, $product);
@@ -387,9 +386,7 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
-
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
-
     }
 
     /**
@@ -651,13 +648,15 @@ class ProductToShop implements ProductToShopBase
         if (is_array($vendor)){
             $supplier->setName($vendor['name']);
             $supplier->setDescription($vendor['description']);
-            $supplier->setLink($vendor['url']);
-            $supplier->setMetaTitle($vendor['page_title']);
-
-            if (isset($vendor['logo_url']) && $vendor['logo_url']) {
-                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            if (array_key_exists('url', $vendor) && $vendor['url']) {
+                $supplier->setLink($vendor['url']);
             }
 
+            $supplier->setMetaTitle($vendor['page_title']);
+
+            if (array_key_exists('logo_url', $vendor) && $vendor['logo_url']) {
+                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            }
         } else {
             $supplier->setName($vendor);
         }

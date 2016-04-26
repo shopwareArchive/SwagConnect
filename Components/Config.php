@@ -193,32 +193,15 @@ class Config
      *
      * @return array
      */
-    public function getGeneralConfigArrays()
+    public function getGeneralConfig()
     {
         $configsArray = array();
 
-        $shops = $this->getShopRepository()->findAll();
-        /** @var \Shopware\Models\Shop\Shop $shop */
+        $query = "SELECT `name`, `value` FROM s_plugin_connect_config
+        WHERE `shopId` IS NULL AND `groupName` = 'general'";
 
-        foreach ($shops as $shop) {
-            $shopId = $shop->getId();
-            $shopConfig = array();
-
-            if ($shop->getDefault() === false) {
-                $query = "SELECT `name`, `value` FROM s_plugin_connect_config
-                          WHERE `shopId` = $shopId AND `groupName` = 'general'";
-                $shopConfig['shopId'] = $shopId;
-                $shopConfig['isDefaultShop'] = $shop->getDefault();
-            } else {
-                $query = "SELECT `name`, `value` FROM s_plugin_connect_config
-                WHERE `shopId` IS NULL AND `groupName` = 'general'";
-                $shopConfig['shopId'] = $shopId;
-                $shopConfig['isDefaultShop'] = $shop->getDefault();
-            }
-
-            $result = Shopware()->Db()->fetchPairs($query);
-            $configsArray[] = array_merge($shopConfig, $result);
-        }
+        $result = Shopware()->Db()->fetchPairs($query);
+        $configsArray[] = $result;
 
         return $configsArray;
     }
@@ -229,49 +212,31 @@ class Config
      *
      * @param array $data
      */
-    public function setGeneralConfigsArrays($data)
+    public function setGeneralConfigs($data)
     {
-        foreach ($data as $shopConfig) {
-            $shopId = null;
-            if ($shopConfig['isDefaultShop'] === false) {
-                $shopId = $shopConfig['shopId'];
-                // store only config options
-                // which are different for each shop
-                $shopConfig = array(
-                    'detailShopInfo' => $shopConfig['detailShopInfo'],
-                    'detailProductNoIndex' => $shopConfig['detailProductNoIndex'],
-                    'checkoutShopInfo' => $shopConfig['checkoutShopInfo'],
-                );
-            } else {
-                unset($shopConfig['shopId']);
-            }
-
-            unset($shopConfig['isDefaultShop']);
-
-            foreach ($shopConfig as $key => $configItem) {
+        foreach ($data as $key => $configItem) {
 
             /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
-                    'name' => $key,
-                    'shopId' => $shopId,
-                    'groupName' => 'general'
-                ));
+                'name' => $key,
+                'shopId' => $shopId,
+                'groupName' => 'general'
+            ));
 
-                if (is_null($model)) {
-                    $model = new ConfigModel();
-                    $model->setName($key);
-                    $model->setGroupName('general');
-                    $model->setShopId($shopId);
-                }
-
-                if (is_array($configItem)) {
-                    $model->setValue(json_encode($configItem));
-                } else {
-                    $model->setValue($configItem);
-                }
-
-                $this->manager->persist($model);
+            if (is_null($model)) {
+                $model = new ConfigModel();
+                $model->setName($key);
+                $model->setGroupName('general');
+                $model->setShopId($shopId);
             }
+
+            if (is_array($configItem)) {
+                $model->setValue(json_encode($configItem));
+            } else {
+                $model->setValue($configItem);
+            }
+
+            $this->manager->persist($model);
         }
 
         $this->manager->flush();

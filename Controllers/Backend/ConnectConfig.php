@@ -73,7 +73,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      */
     public function getGeneralAction()
     {
-        $generalConfig = $this->getConfigComponent()->getGeneralConfigArrays();
+        $generalConfig = $this->getConfigComponent()->getGeneralConfig();
 
         $this->View()->assign(array(
             'success' => true,
@@ -90,9 +90,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         try {
             $data = $this->Request()->getParam('data');
-            $data = !isset($data[0]) ? array($data) : $data;
-
-            $this->getConfigComponent()->setGeneralConfigsArrays($data);
+            unset($data['id']);
+            $this->getConfigComponent()->setGeneralConfigs($data);
 
             $this->View()->assign(array(
                 'success' => true

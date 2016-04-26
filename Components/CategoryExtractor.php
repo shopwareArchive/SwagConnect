@@ -220,6 +220,7 @@ class CategoryExtractor
                 'children' => $children,
             );
 
+            end($categories);
             if (isset($category['iconCls'])) {
                 $categories[key($categories)]['iconCls'] = $category['iconCls'];
             }

@@ -162,18 +162,21 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Shop 1',
                 'leaf' => false,
                 'children' => array(),
+                'iconCls' => 'sc-tree-node-icon',
             ),
             array(
                 'id' => 2,
                 'name' => 'Shop 2',
                 'leaf' => false,
                 'children' => array(),
+                'iconCls' => 'sc-tree-node-icon',
             ),
             array(
                 'id' => 3,
                 'name' => 'Shop 3',
                 'leaf' => false,
                 'children' => array(),
+                'iconCls' => 'sc-tree-node-icon',
             ),
         );
         $result = $this->categoryExtractor->getMainNodes();
@@ -411,12 +414,14 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Awesome products',
                 'leaf' => false,
                 'children' => array(),
+                'iconCls' => 'sprite-product-streams',
             ),
             array(
                 'id' => '1_stream_Mobile devices',
                 'name' => 'Mobile devices',
                 'leaf' => false,
                 'children' => array(),
+                'iconCls' => 'sprite-product-streams',
             ),
         );
 

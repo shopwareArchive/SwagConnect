@@ -22,25 +22,13 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
     initComponent: function() {
         var me = this;
 
-        console.log(me.action);
-
         switch (me.action) {
             case 'Register':
-                Ext.applyIf(me, {
-                    width: 810,
-                    height: 630,
-                    maximizable: false,
-                    minimizable: false
-                });
-                console.log('TEST');
+                me.setSize(810, 630);
+                me.maximizable = false;
+                me.minimizable = false;
+                me.resizable = false;
                 break;
-            default:
-                Ext.applyIf(me, {
-                    width: 1000,
-                    height: '95%',
-                    maximizable: true,
-                    minimizable: true
-                });
         }
 
         Ext.applyIf(me, {

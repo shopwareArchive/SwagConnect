@@ -53,7 +53,6 @@ Ext.define('Shopware.apps.Connect.view.register.registerPanel', {
                 me.createPasswordField(),
                 me.createPasswordConfirmationField(),
                 me.createEmailField(),
-                me.createRegisterDomainCheckbox(),
                 me.createActionButtons()
             ]
         });
@@ -183,26 +182,6 @@ Ext.define('Shopware.apps.Connect.view.register.registerPanel', {
         });
 
         return me.newRegistrationEmail;
-    },
-
-    createRegisterDomainCheckbox: function () {
-        var me = this;
-
-        me.newRegistrationRegisterDomain = Ext.create('Ext.form.field.Checkbox', {
-            name: 'registerDomain',
-            boxLabel: me.snippets.registerDomain,
-            cls: 'input--field',
-            checked: true,
-            listeners: {
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        me.sendRegisterForm();
-                    }
-                }
-            }
-        });
-
-        return me.newRegistrationRegisterDomain;
     },
 
     createActionButtons: function () {

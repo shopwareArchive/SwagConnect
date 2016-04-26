@@ -60,7 +60,6 @@ Ext.define('Shopware.apps.Connect.view.register.loginPanel', {
                 me.createShopwareIdField(),
                 me.createPasswordField(),
                 me.createForgotLink(),
-                me.createRegisterDomainField(),
                 me.createActionButtons()
             ]
         });
@@ -81,7 +80,7 @@ Ext.define('Shopware.apps.Connect.view.register.loginPanel', {
     createActionButtons: function () {
         var me = this;
 
-        me.registerButton = Ext.create('Ext.container.Container', {
+        me.registerButton = Ext.create('Shopware.apps.Connect.view.components.Container', {
             html: me.snippets.loginButton,
             cls: 'plugin-manager-action-button primary',
             margin: '0 0 0 0',
@@ -174,17 +173,19 @@ Ext.define('Shopware.apps.Connect.view.register.loginPanel', {
         }
 
         var loginData = me.formPanel.getForm().getValues();
-
-        loginData.registerDomain = loginData.registerDomain === "on";
         loginData.shopwareId = loginData.shopwareID;
 
         Shopware.app.Application.fireEvent(
             'store-login',
             loginData,
             function () {
-                me.callback();
+                me.loginCallback();
             }
         );
+    },
+
+    loginCallback: function(){
+        console.log('Doo aomwthing');
     }
 });
 //{/block}

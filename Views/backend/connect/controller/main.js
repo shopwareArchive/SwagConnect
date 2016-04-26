@@ -44,6 +44,14 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     ],
 
     messages: {
+        login: {
+            successTitle: '{s name=login/successTitle}Shopware ID{/s}',
+            successMessage: '{s name=login/successMessage}Login successful{/s}',
+            waitTitle: '{s name=login/waitTitle}Logging in...{/s}',
+            waitMessage: '{s name=login/waitMessage}This process might take a few seconds{/s}'
+        },
+        growlMessage:'{s name=growlMessage}Shopware Connect{/s}',
+
         saveMappingTitle: '{s name=mapping/message/title}Save category mapping{/s}',
         saveMappingSuccess: '{s name=mapping/message/success}Category mapping has been saved.{/s}',
         saveMappingError: '{s name=mapping/message/error}Category mapping could not be saved.{/s}',
@@ -87,6 +95,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
     },
+
 
     /**
      * Class property which holds the main application if it is created
@@ -321,7 +330,106 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             me.populateLogCommandFilter();
         }
 
+        Shopware.app.Application.on(me.getEventListeners());
+
         me.callParent(arguments);
+    },
+
+    getEventListeners: function() {
+        var me = this;
+
+        return {
+            'store-login': me.login,
+            'store-register': me.login,
+            scope: me
+        };
+    },
+
+    sendAjaxRequest: function(url, params, callback, errorCallback) {
+        var me = this;
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            params: params,
+            success: function(operation, opts) {
+                var response = Ext.decode(operation.responseText);
+
+                if (response.success === false) {
+                    if (Ext.isFunction(errorCallback)) {
+                        errorCallback(response);
+                    } else {
+                        me.displayErrorMessage(response);
+                        me.hideLoadingMask();
+                    }
+                    return;
+                }
+
+                callback(response);
+            }
+        });
+    },
+
+    login: function(params, callback) {
+        var me = this;
+
+        me.splashScreen = Ext.Msg.wait(
+            me.messages.login.waitMessage,
+            me.messages.login.waitTitle
+        );
+
+        me.sendAjaxRequest(
+            '{url controller=Connect action=login}',
+            params,
+            function(response) {
+
+                response.shopwareId = params.shopwareID;
+                me.splashScreen.close();
+
+                console.log(response);
+
+                if (response.success == true) {
+                    Ext.create('Shopware.notification.SubscriptionWarning').checkSecret();
+
+                    Shopware.Notification.createGrowlMessage(
+                        me.messages.login.successTitle,
+                        me.messages.login.successMessage,
+                        me.messages.growlMessage
+                    );
+
+                    me.fireRefreshAccountData(response);
+
+                    if (params.registerDomain !== false) {
+                        me.submitShopwareDomainRequest(params, callback);
+                    } else {
+                        me.destroyLogin(me.loginMask);
+                        callback(response);
+                    }
+                }
+            },
+            function(response) {
+                me.splashScreen.close();
+                me.displayErrorMessage(response, callback);
+            }
+        );
+    },
+
+    displayErrorMessage: function(response, callback) {
+        var message = response.message;
+
+        Shopware.Notification.createStickyGrowlMessage({
+            title: 'Error',
+            text: message,
+            width: 350
+        });
+
+        callback = typeof callback === 'function' && callback || function() {};
+
+        if (response.hasOwnProperty('authentication') && response.authentication) {
+            Shopware.app.Application.fireEvent('open-login', callback);
+        }
+
+        this.hideLoadingMask();
     },
 
     /**

@@ -497,6 +497,34 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
+     * Returns success true if user could be logged in, or false if something went wrong
+     *
+     * @return array(
+     *      string => bool
+     * )
+     */
+    public function loginAction($shopwareId){
+
+//        if (!$this->isApiAvailable()) {
+//            $this->View()->assign('success', false);
+//            return;
+//        }
+
+        $shopwareId = $this->Request()->getParam('shopwareId');
+        $password = $this->Request()->getParam('password');
+
+        // Try to login
+
+
+        // Save the data
+        $this->getConfigComponent()->setConfig('apiKey', 'FOOBAR');
+
+        $this->View()->assign([
+            'success' => true
+        ]);
+    }
+
+    /**
      * Helper that will assign a given mapping to all children of a given category
      *
      * @param $mapping string

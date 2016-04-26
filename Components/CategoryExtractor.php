@@ -203,31 +203,32 @@ class CategoryExtractor
     private function convertTree(array $tree, $includeChildren = true)
     {
         $categories = array();
-        foreach ($tree as $id => $category) {
+        foreach ($tree as $id => $node) {
             $children = array();
-            if ($includeChildren === true && !empty($category['children'])) {
-                $children = $this->convertTree($category['children'], $includeChildren);
+            if ($includeChildren === true && !empty($node['children'])) {
+                $children = $this->convertTree($node['children'], $includeChildren);
             }
 
-            if (strlen($category['name']) === 0) {
+            if (strlen($node['name']) === 0) {
                 continue;
             }
 
-            $categories[] = array(
-                'name' => $category['name'],
+            $category = array(
+                'name' => $node['name'],
                 'id' => $id,
-                'leaf' => empty($category['children']) ? true : false,
+                'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
             );
 
-            end($categories);
-            if (isset($category['iconCls'])) {
-                $categories[key($categories)]['iconCls'] = $category['iconCls'];
+            if (isset($node['iconCls'])) {
+                $category['iconCls'] = $node['iconCls'];
             }
 
-            if (isset($category['icon'])) {
-                $categories[key($categories)]['icon'] = $category['icon'];
+            if (isset($node['icon'])) {
+                $category['icon'] = $node['icon'];
             }
+
+            $categories[] = $category;
         }
 
         return $categories;

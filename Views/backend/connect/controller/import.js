@@ -189,6 +189,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 } else {
                     me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
+
+                me.getRemoteProductsGrid().getStore().load();
+                me.getLocalProductsGrid().getStore().load();
             },
             failure: function(response, opts) {
                 me.createGrowlMessage('{s name=error}Error{/s}', 'error');

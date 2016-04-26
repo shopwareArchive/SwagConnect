@@ -133,8 +133,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         store.loadPage(1);
     },
 
-    onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers)
-    {
+    onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers) {
         var me = this;
         var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
         if (selected.length > 0) {
@@ -160,8 +159,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
     },
 
-    onDropToLocalProducts: function(node, data, overModel, dropPosition, eOpts)
-    {
+    onDropToLocalProducts: function(node, data, overModel, dropPosition, eOpts) {
         var me = this;
         var articleIds = [];
 
@@ -172,8 +170,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.assignArticlesToCategory(articleIds);
     },
 
-    onAssignArticlesToCategory: function()
-    {
+    onAssignArticlesToCategory: function() {
         var me = this;
         var articleIds = [];
         var remoteProductSelection = me.getRemoteProductsGrid().getSelectionModel().getSelection();
@@ -185,8 +182,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.assignArticlesToCategory(articleIds, true);
     },
 
-    assignArticlesToCategory: function(articleIds, reload)
-    {
+    assignArticlesToCategory: function(articleIds, reload) {
         var me = this;
 
         if (articleIds.length == 0) {
@@ -242,8 +238,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.unAssignArticlesFromCategory(ids);
     },
 
-    onUnAssignArticlesFromCategory: function()
-    {
+    onUnAssignArticlesFromCategory: function() {
         var me = this;
         var articleIds = [];
         var localProductSelection = me.getLocalProductsGrid().getSelectionModel().getSelection();
@@ -255,8 +250,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.unAssignArticlesFromCategory(articleIds, true);
     },
 
-    unAssignArticlesFromCategory: function(articleIds, reload)
-    {
+    unAssignArticlesFromCategory: function(articleIds, reload) {
         var me = this;
         var panel = me.getImportPanel();
 

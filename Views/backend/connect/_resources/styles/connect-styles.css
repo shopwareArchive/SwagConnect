@@ -94,3 +94,8 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 .sc-btn-right {
     float: right;
 }
+
+.sc-tree-node-icon {
+    width: 16px !important;
+    height: 16px !important;
+}

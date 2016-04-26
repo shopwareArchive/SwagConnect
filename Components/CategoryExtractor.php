@@ -136,6 +136,8 @@ class CategoryExtractor
             $configuration = $this->configurationGateway->getShopConfiguration($shopId);
             $shops[$shopId] = array(
                 'name' => $configuration->displayName,
+                'iconCls' => 'sc-tree-node-icon',
+                'icon' => $configuration->logoUrl,
             );
         }
 
@@ -179,6 +181,7 @@ class CategoryExtractor
             $id = sprintf('%s_stream_%s', $shopId, $streamName);
             $streams[$id] = array(
                 'name' => $streamName,
+                'iconCls' => 'sprite-product-streams',
             );
         }
 
@@ -216,6 +219,14 @@ class CategoryExtractor
                 'leaf' => empty($category['children']) ? true : false,
                 'children' => $children,
             );
+
+            if (isset($category['iconCls'])) {
+                $categories[key($categories)]['iconCls'] = $category['iconCls'];
+            }
+
+            if (isset($category['icon'])) {
+                $categories[key($categories)]['icon'] = $category['icon'];
+            }
         }
 
         return $categories;

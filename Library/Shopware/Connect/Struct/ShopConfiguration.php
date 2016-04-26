@@ -50,6 +50,11 @@ class ShopConfiguration extends Struct
     public $shippingCostType = 'remote';
 
     /**
+     * @var string
+     */
+    public $logoUrl;
+
+    /**
      * Restores a shop configuration from a previously stored state array.
      *
      * @param array $state

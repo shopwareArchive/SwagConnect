@@ -177,15 +177,8 @@ Ext.define('Shopware.apps.Connect.view.register.loginPanel', {
 
         Shopware.app.Application.fireEvent(
             'store-login',
-            loginData,
-            function () {
-                me.loginCallback();
-            }
+            loginData
         );
-    },
-
-    loginCallback: function(){
-        console.log('Doo aomwthing');
     }
 });
 //{/block}

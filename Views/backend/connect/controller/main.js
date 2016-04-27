@@ -340,7 +340,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         return {
             'store-login': me.login,
-            'store-register': me.login,
+            'store-register': me.register,
             scope: me
         };
     },
@@ -397,14 +397,46 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.messages.growlMessage
                     );
 
-                    me.fireRefreshAccountData(response);
+                    callback(response);
+                    location.reload();
+                }
+            },
+            function(response) {
+                me.splashScreen.close();
+                me.displayErrorMessage(response, callback);
+            }
+        );
+    },
 
-                    if (params.registerDomain !== false) {
-                        me.submitShopwareDomainRequest(params, callback);
-                    } else {
-                        me.destroyLogin(me.loginMask);
-                        callback(response);
-                    }
+    register: function(params, callback) {
+        var me = this;
+
+        me.splashScreen = Ext.Msg.wait(
+            me.messages.login.waitMessage,
+            me.messages.login.waitTitle
+        );
+
+        me.sendAjaxRequest(
+            '{url controller=Connect action=register}',
+            params,
+            function(response) {
+
+                response.shopwareId = params.shopwareID;
+                me.splashScreen.close();
+
+                console.log(response);
+
+                if (response.success == true) {
+                    Ext.create('Shopware.notification.SubscriptionWarning').checkSecret();
+
+                    Shopware.Notification.createGrowlMessage(
+                        me.messages.login.successTitle,
+                        me.messages.login.successMessage,
+                        me.messages.growlMessage
+                    );
+
+                    callback(response);
+                    location.reload();
                 }
             },
             function(response) {

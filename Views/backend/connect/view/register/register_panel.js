@@ -187,7 +187,7 @@ Ext.define('Shopware.apps.Connect.view.register.registerPanel', {
     createActionButtons: function () {
         var me = this;
 
-        me.registerButton = Ext.create('Ext.container.Container', {
+        me.registerButton = Ext.create('Shopware.apps.Connect.view.components.Container', {
             html: me.snippets.registerButton,
             cls: 'plugin-manager-action-button primary',
             margin: '0 0 0 0',

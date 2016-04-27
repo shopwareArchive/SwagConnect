@@ -503,25 +503,93 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      *      string => bool
      * )
      */
-    public function loginAction($shopwareId){
-
-//        if (!$this->isApiAvailable()) {
-//            $this->View()->assign('success', false);
-//            return;
-//        }
+    public function loginAction(){
+        /** @var \Shopware\Components\HttpClient\GuzzleHttpClient $client */
+        $client = $this->get('http_client');
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', '');
+        $loginUrl = 'sn.'.$host.'/sdk/pluginCommunication/login';
 
-        // Try to login
+        // Try to login into connect
+        $response = $client->post(
+            $loginUrl,
+            [
+                'content-type' => 'application/x-www-form-urlencoded'
+            ],
+            'username=' . $shopwareId . '&password=' . $password
+        );
 
+        $responseObject = json_decode($response->getBody());
 
-        // Save the data
-        $this->getConfigComponent()->setConfig('apiKey', 'FOOBAR');
+        if($responseObject->success) {
+            // Save the data
+            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $this->removeConnectMenuEntry();
+            $this->View()->assign([
+                'success' => true
+            ]);
+
+            return;
+        }
 
         $this->View()->assign([
-            'success' => true
+            'success' => false,
+            'message' => $responseObject->reason
         ]);
+    }
+
+    /**
+     * Returns success true if user could be logged in, or false if something went wrong
+     *
+     * @return array(
+     *      string => bool
+     * )
+     */
+    public function registerAction(){
+        /** @var \Shopware\Components\HttpClient\GuzzleHttpClient $client */
+        $client = $this->get('http_client');
+
+        $shopwareId = $this->Request()->getParam('shopwareID');
+        $password = $this->Request()->getParam('password');
+        $email = $this->Request()->getParam('email');
+
+        // Enter the valid production url here
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', '');
+        $loginUrl = 'sn.'.$host.'/sdk/pluginCommunication/register';
+
+        $response = $client->post(
+            $loginUrl,
+            [
+                'content-type' => 'application/x-www-form-urlencoded'
+            ],
+            'username=' . $shopwareId .
+            '&password=' . $password .
+            '&email=' . $email
+        );
+
+        $responseObject = json_decode($response->getBody());
+
+        if($responseObject->success) {
+            // Save the data
+            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $this->removeConnectMenuEntry();
+            $this->View()->assign([
+                'success' => true
+            ]);
+
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => false,
+            'message' => $responseObject->reason
+        ]);
+    }
+
+    private function removeConnectMenuEntry() {
+        Shopware()->Db()->exec("DELETE FROM s_core_menu WHERE controller = 'connect' AND name = 'Register'");
     }
 
     /**

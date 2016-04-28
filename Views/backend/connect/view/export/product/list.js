@@ -65,8 +65,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
             format: '0,000',
             align: 'right',
             flex: 1
-        },
-            {
+        }, {
             header: '{s name=export/columns/status}Status{/s}',
             dataIndex: 'exportStatus',
             flex: 1,

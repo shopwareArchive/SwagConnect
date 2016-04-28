@@ -20,13 +20,11 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
                 xtype: 'connect-export',
                 title: me.snippets.products,
                 itemId: 'export'
-            //}]
-            },{
+            }, {
                 xtype: 'connect-export-stream',
                 title: me.snippets.streams,
                 itemId: 'stream'
             }]
-
         });
 
         me.callParent(arguments);

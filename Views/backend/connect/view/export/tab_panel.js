@@ -19,17 +19,27 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             items: [{
                 xtype: 'connect-export',
                 title: me.snippets.products,
+                iconMapping: me.getStatusIconMapping(),
                 itemId: 'export'
             //}]
             },{
                 xtype: 'connect-export-stream',
                 title: me.snippets.streams,
+                iconMapping: me.getStatusIconMapping(),
                 itemId: 'stream'
             }]
 
         });
 
         me.callParent(arguments);
+    },
+
+    getStatusIconMapping: function() {
+        return {
+            'insert': 'sprite-tick-circle',
+            'error': 'sprite-minus-circle-frame',
+            'update': 'sprite-arrow-circle-135'
+        };
     }
 });
 //{/block}

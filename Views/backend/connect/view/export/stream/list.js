@@ -28,6 +28,8 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
     },
 
     getColumns: function() {
+        var me = this;
+
         return [{
             header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
@@ -42,12 +44,13 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             flex: 1,
             renderer: function(value, metaData, record) {
                 var className;
-                if (value == 'insert') {
-                    className = 'sprite-tick-circle';
-                } else if (value == 'update') {
-                    className = 'sprite-arrow-circle-135';
-                } else if (value == 'error') {
-                    className = 'sprite-minus-circle-frame';
+
+                if (!value) {
+                    return;
+                }
+
+                if (me.iconMapping.hasOwnProperty(value)) {
+                    className = me.iconMapping[value];
                 }
 
                 if(record.get('exportMessage')) {

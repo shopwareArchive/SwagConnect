@@ -136,6 +136,8 @@ class CategoryExtractor
             $configuration = $this->configurationGateway->getShopConfiguration($shopId);
             $shops[$shopId] = array(
                 'name' => $configuration->displayName,
+                'iconCls' => 'sc-tree-node-icon',
+                'icon' => $configuration->logoUrl,
             );
         }
 
@@ -179,6 +181,7 @@ class CategoryExtractor
             $id = sprintf('%s_stream_%s', $shopId, $streamName);
             $streams[$id] = array(
                 'name' => $streamName,
+                'iconCls' => 'sprite-product-streams',
             );
         }
 
@@ -200,22 +203,32 @@ class CategoryExtractor
     private function convertTree(array $tree, $includeChildren = true)
     {
         $categories = array();
-        foreach ($tree as $id => $category) {
+        foreach ($tree as $id => $node) {
             $children = array();
-            if ($includeChildren === true && !empty($category['children'])) {
-                $children = $this->convertTree($category['children'], $includeChildren);
+            if ($includeChildren === true && !empty($node['children'])) {
+                $children = $this->convertTree($node['children'], $includeChildren);
             }
 
-            if (strlen($category['name']) === 0) {
+            if (strlen($node['name']) === 0) {
                 continue;
             }
 
-            $categories[] = array(
-                'name' => $category['name'],
+            $category = array(
+                'name' => $node['name'],
                 'id' => $id,
-                'leaf' => empty($category['children']) ? true : false,
+                'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
             );
+
+            if (isset($node['iconCls'])) {
+                $category['iconCls'] = $node['iconCls'];
+            }
+
+            if (isset($node['icon'])) {
+                $category['icon'] = $node['icon'];
+            }
+
+            $categories[] = $category;
         }
 
         return $categories;

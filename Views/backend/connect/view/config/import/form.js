@@ -61,11 +61,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
-        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
-        productImportUnitsTitle: '{s name=config/import/units_title}Units{/s}',
-        hideAssignedUnitsLabel: '{s name=config/import/hide_assigned_units}hide assigned units{/s}',
-        takeOverUnits: '{s name=config/import/take_over_units}Take over units{/s}',
-        takeOverUnitsTooltip: '{s name=config/import/take_over_units_tooltip}Apply unassigned units of measurement in the shop{/s}'
+        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}'
     },
 
     initComponent: function() {
@@ -259,26 +255,6 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             }
                         }, me.imageLimitImportField
                     ]
-                },
-                {
-                    xtype: 'container',
-                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportUnitsTitle  + '</h1>',
-                    margin: '20px 0 0 0',
-                    width: 400,
-                    height: 30
-                },
-                Ext.create('Shopware.apps.Connect.view.config.import.UnitsMapping'),
-                {
-                    xtype: 'checkbox',
-                    name: 'hideAssignedUnits',
-                    boxLabel: me.snippets.hideAssignedUnitsLabel,
-                    labelWidth: me.defaults.labelWidth
-                },
-                {
-                    xtype: 'button',
-                    text: me.snippets.takeOverUnits,
-                    action: 'adoptUnits',
-                    tooltip: me.snippets.takeOverUnitsTooltip
                 }
             ]
         });

@@ -41,10 +41,22 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dataIndex: 'exportStatus',
             flex: 1,
             renderer: function(value, metaData, record) {
+                var className;
+                if (value == 'insert') {
+                    className = 'sprite-tick-circle';
+                } else if (value == 'update') {
+                    className = 'sprite-arrow-circle-135';
+                } else if (value == 'error') {
+                    className = 'sprite-minus-circle-frame';
+                }
+
                 if(record.get('exportMessage')) {
                     metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                } else {
+                    metaData.tdAttr = 'data-qtip="' +  value + '"';
                 }
-                return value;
+
+                return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';
             }
         }];
     },

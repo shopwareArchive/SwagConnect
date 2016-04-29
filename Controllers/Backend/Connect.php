@@ -509,8 +509,14 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', '');
-        $loginUrl = 'sn.'.$host.'/sdk/pluginCommunication/login';
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        if ($host) {
+            $host = 'sn.' . $host;
+        } else {
+            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+        }
+
+        $loginUrl = $host . '/sdk/pluginCommunication/login';
 
         // Try to login into connect
         $response = $client->post(
@@ -556,8 +562,14 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $email = $this->Request()->getParam('email');
 
         // Enter the valid production url here
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', '');
-        $loginUrl = 'sn.'.$host.'/sdk/pluginCommunication/register';
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        if ($host) {
+            $host = 'sn.' . $host;
+        } else {
+            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+        }
+
+        $loginUrl = $host . '/sdk/pluginCommunication/register';
 
         $response = $client->post(
             $loginUrl,

@@ -20,6 +20,8 @@ Ext.define('Shopware.apps.Connect', {
         'import.OwnCategories',
         'import.RemoteProducts',
         'import.LocalProducts',
+        'import.TabPanel',
+        'import.unit.Panel',
 
         'log.Panel',
         'log.List',

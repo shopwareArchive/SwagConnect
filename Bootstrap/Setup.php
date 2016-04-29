@@ -67,8 +67,7 @@ class Setup
                 'active' => 1,
             ));
 
-            if ($configComponent->getConfig('apiKey', '') == '')
-            {
+            if ($configComponent->getConfig('apiKey', '') == '') {
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'Register',
                     'controller' => 'Connect',
@@ -625,7 +624,7 @@ class Setup
     {
         Shopware()->Models()->addAttribute(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed', 
+            'connect', 'is_allowed',
             'int(1)',
             true,
             1

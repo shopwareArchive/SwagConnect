@@ -63,13 +63,6 @@ Ext.define('Shopware.apps.Connect.view.register.panel', {
                     html: me.snippets.title,
                     width: 680,
                     cls: 'headline'
-                //}),
-                //Ext.create('PluginManager.container.Container', {
-                //    html: 'X',
-                //    cls: 'headline-close',
-                //    handler: function() {
-                //        Shopware.app.Application.fireEvent('destroy-login', me);
-                //    }
                 })
             ]
         });

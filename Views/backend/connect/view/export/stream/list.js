@@ -28,6 +28,8 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
     },
 
     getColumns: function() {
+        var me = this;
+
         return [{
             header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
@@ -41,10 +43,23 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dataIndex: 'exportStatus',
             flex: 1,
             renderer: function(value, metaData, record) {
+                var className;
+
+                if (!value) {
+                    return;
+                }
+
+                if (me.iconMapping.hasOwnProperty(value)) {
+                    className = me.iconMapping[value];
+                }
+
                 if(record.get('exportMessage')) {
                     metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                } else {
+                    metaData.tdAttr = 'data-qtip="' +  value + '"';
                 }
-                return value;
+
+                return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';
             }
         }];
     },

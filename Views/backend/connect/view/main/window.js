@@ -80,6 +80,11 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     region: 'center',
                     action : me.action
                 })];
+            case 'Import':
+                return {
+                    xtype: 'import-tab-panel',
+                    region: 'center'
+                };
             default:
                 return [
                     Ext.create('Shopware.apps.Connect.view.main.Panel', {

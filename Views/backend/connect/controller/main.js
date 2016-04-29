@@ -128,10 +128,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 			'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
             },
-            'connect-config-import-form checkbox[name=hideAssignedUnits]': {
+            'connect-import-unit button[action=save-unit]': {
+                click: me.onSaveUnitsMapping
+            },
+            'connect-import-unit checkbox[name=hideAssignedUnits]': {
                 change: me.onHideAssignedUnits
             },
-            'connect-config-import-form button[action=adoptUnits]': {
+            'connect-import-unit button[action=adoptUnits]': {
                 click: me.onAdoptUnits
             },
 			'connect-config-export-form button[action=save-export-config]': {
@@ -835,8 +838,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param button
      */
     onSaveImportConfigForm: function(btn) {
-        var me = this;
-        form = btn.up('form');
+        var me = this,
+            form = btn.up('form');
 
         form.setLoading();
         if (form.getRecord()) {
@@ -846,20 +849,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    var unitsStore = me.getUnitsMapping().getStore();
-                    if (unitsStore.getUpdatedRecords().length < 1) {
-                        me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
-                        return;
-                    }
-
-                    unitsStore.sync({
-                        success :function (records, operation) {
-                            me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
-                        },
-                        failure:function (batch) {
-                            me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
-                        }
-                    });
+                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
                 },
                 failure: function(record) {
                     form.setLoading(false);
@@ -869,6 +859,23 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             });
         }
+    },
+
+    onSaveUnitsMapping: function(btn){
+        var me = this,
+            unitsStore = me.getUnitsMapping().getStore(),
+            form = btn.up('form');
+
+        form.setLoading();
+        unitsStore.sync({
+            success :function (records, operation) {
+                form.setLoading(false);
+                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+            },
+            failure:function (batch) {
+                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
+            }
+        });
     },
 
     /**

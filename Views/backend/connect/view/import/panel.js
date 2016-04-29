@@ -60,7 +60,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     name : 'attribute[hideMapped]',
                                     action: 'hide-mapped-products',
                                     margin: '15px 0 0 0',
-                                    checked: true,
+                                    checked: false,
                                     boxLabel : me.snippets.hideMappedProducts
                                 }
                             ]

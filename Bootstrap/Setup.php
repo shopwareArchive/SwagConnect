@@ -51,6 +51,9 @@ class Setup
         $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
         // check if shopware Connect menu item exists
         if (!$connectItem) {
+            $models = Shopware()->Models();
+            $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
+
             //move help menu item after Connect
             $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
             $helpItem->setPosition(1);
@@ -64,14 +67,16 @@ class Setup
                 'active' => 1,
             ));
 
-            $this->bootstrap->createMenuItem(array(
-                'label' => 'Register',
-                'controller' => 'Connect',
-                'action' => 'Register',
-                'class' => 'contents--media-manager',
-                'active' => 1,
-                'parent' => $parent
-            ));
+            if ($configComponent->getConfig('apiKey', '') == '') {
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Register',
+                    'controller' => 'Connect',
+                    'action' => 'Register',
+                    'class' => 'contents--media-manager',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
+            }
 
             $this->bootstrap->createMenuItem(array(
                 'label' => 'Import',
@@ -619,7 +624,7 @@ class Setup
     {
         Shopware()->Models()->addAttribute(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed', 
+            'connect', 'is_allowed',
             'int(1)',
             true,
             1

@@ -5,19 +5,46 @@ Ext.define('Shopware.apps.Connect', {
     bulkLoad: true,
     loadPath: '{url action=load}',
     views: [
-        'main.Window', 'main.TabPanel', 'main.Panel',
-        'export.product.Panel', 'import.Panel',
-        'export.product.List', 'export.product.Filter',
-        'export.stream.Panel', 'export.stream.List',
-        'import.TabPanel', 'import.unit.Panel',
-        'import.RemoteCategories', 'import.OwnCategories', 'import.RemoteProducts', 'import.LocalProducts',
-        'log.Panel', 'log.List', 'log.Filter', 'log.Tabs',
-        'changed_products.Panel', 'changed_products.List', 'changed_products.Tabs', 'changed_products.Images',
-		'config.general.Panel', 'config.general.Form', 'config.import.Panel', 'config.export.Panel',
-        'config.import.Form', 'config.export.Form', 'config.import.UnitsMapping',
-        'config.marketplaceAttributes.Panel', 'config.marketplaceAttributes.Mapping'
+        'main.Window',
+        'main.TabPanel',
+        'main.Panel',
+
+        'export.product.Panel',
+        'export.product.List',
+        'export.product.Filter',
+        'export.stream.Panel',
+        'export.stream.List',
+
+        'import.Panel',
+        'import.RemoteCategories',
+        'import.OwnCategories',
+        'import.RemoteProducts',
+        'import.LocalProducts',
+        'import.TabPanel',
+        'import.unit.Panel',
+
+        'log.Panel',
+        'log.List',
+        'log.Filter',
+        'log.Tabs',
+
+        'changed_products.Panel',
+        'changed_products.List',
+        'changed_products.Tabs',
+        'changed_products.Images',
+
+        'config.Tabs',
+        'config.general.Panel',
+        'config.general.Form',
+        'config.export.Panel',
+        'config.export.Form',
+        'config.import.Panel',
+        'config.import.Form',
+        'config.import.UnitsMapping',
+        'config.marketplaceAttributes.Panel',
+        'config.marketplaceAttributes.Mapping'
     ],
-    controllers: [ 'Main', 'Import' ],
+    controllers: [ 'Main', 'Import'],
 
     //views: [],
 

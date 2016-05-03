@@ -66,6 +66,11 @@ class Config
      */
     public function getConfig($name, $default=null, $shopId=null)
     {
+        $result = $this->getPluginConfig($name);
+        if (!empty($result)) {
+            return $result;
+        }
+
         if (is_null($shopId)) {
             return $this->getMainConfig($name, $default);
         }
@@ -105,6 +110,15 @@ class Config
         }
 
         return $this->getMainConfig($name, $default);
+    }
+
+    /**
+     * @param $name
+     * @param null $default
+     * @return mixed
+     */
+    private function getPluginConfig($name, $default = null) {
+        return Shopware()->Config()->getByNamespace('SwagConnect', $name, $default);
     }
 
     /**

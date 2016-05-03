@@ -600,8 +600,66 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         ]);
     }
 
-    private function removeConnectMenuEntry() {
-        Shopware()->Db()->exec("DELETE FROM s_core_menu WHERE controller = 'connect' AND name = 'Register'");
+    /**
+     * @param bool $loggedIn
+     * @throws Zend_Db_Adapter_Exception
+     */
+    private function removeConnectMenuEntry($loggedIn = true) {
+        /** @var Enlight_Components_Db_Adapter_Pdo_Mysql $db */
+        $db = Shopware()->Db();
+
+        $result = $db->fetchAssoc("SELECT id, parent, pluginID FROM s_core_menu WHERE controller = 'connect' AND name = 'Register' ORDER BY id DESC LIMIT 1");
+        if (empty($result)) {
+            return;
+        }
+        $row = current($result);
+
+        $db->exec("DELETE FROM s_core_menu WHERE id = " . $row['id']);
+
+        $insertSql = "INSERT INTO s_core_menu (
+            parent,
+            name,
+            class,
+            pluginID,
+            controller,
+            action,
+            active
+          ) VALUES (
+            '#parent#',
+            '#name#',
+            '#class#',
+            #pluginID#,
+            '#controller#',
+            '#action#',
+            1
+          )";
+
+        $db->exec(strtr($insertSql, [
+            '#parent#' => $row['parent'],
+            '#name#' => 'Import',
+            '#class#' => 'contents--import-export',
+            '#pluginID#' => $row['pluginID'],
+            '#controller#' => 'Connect',
+            '#action#' => 'Import'
+        ]));
+
+        $db->exec(strtr($insertSql, [
+            '#parent#' => $row['parent'],
+            '#name#' => 'Export',
+            '#class#' => 'contents--import-export',
+            '#pluginID#' => $row['pluginID'],
+            '#controller#' => 'Connect',
+            '#action#' => 'Export'
+        ]));
+
+        $db->exec(strtr($insertSql, [
+            '#parent#' => $row['parent'],
+            '#name#' => 'Settings',
+            '#class#' => 'sprite-gear',
+            '#pluginID#' => $row['pluginID'],
+            '#controller#' => 'Connect',
+            '#action#' => 'Settings'
+        ]));
     }
 
     /**

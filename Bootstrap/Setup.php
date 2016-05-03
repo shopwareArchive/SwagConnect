@@ -25,6 +25,7 @@ class Setup
     {
         $this->createMyEvents();
         $this->createMyTables();
+        $this->createConfig();
         $this->createMyAttributes();
         $this->populateConfigTable();
         $this->importSnippets();
@@ -41,6 +42,17 @@ class Setup
             $this->createEngineElement();
             $this->populatePaymentStates();
         }
+    }
+
+    private function createConfig() {
+        $form = $this->bootstrap->Form();
+
+        $form->setElement('text',
+            'connectDebugHost',
+            array(
+                'label' => 'Alternativer Shopware Connect-Host (nur für Testzwecke)',
+                'required' => false
+            ));
     }
 
     /**
@@ -76,34 +88,35 @@ class Setup
                     'active' => 1,
                     'parent' => $parent
                 ));
+            } else {
+
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Import',
+                    'controller' => 'Connect',
+                    'action' => 'Import',
+                    'class' => 'contents--import-export',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
+
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Export',
+                    'controller' => 'Connect',
+                    'action' => 'Export',
+                    'class' => 'contents--import-export',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
+
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Settings',
+                    'controller' => 'Connect',
+                    'action' => 'Settings',
+                    'class' => 'sprite-gear',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
             }
-
-            $this->bootstrap->createMenuItem(array(
-                'label' => 'Import',
-                'controller' => 'Connect',
-                'action' => 'Import',
-                'class' => 'contents--import-export',
-                'active' => 1,
-                'parent' => $parent
-            ));
-
-            $this->bootstrap->createMenuItem(array(
-                'label' => 'Export',
-                'controller' => 'Connect',
-                'action' => 'Export',
-                'class' => 'contents--import-export',
-                'active' => 1,
-                'parent' => $parent
-            ));
-
-            $this->bootstrap->createMenuItem(array(
-                'label' => 'Settings',
-                'controller' => 'Connect',
-                'action' => 'Settings',
-                'class' => 'sprite-gear',
-                'active' => 1,
-                'parent' => $parent
-            ));
 
             $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
             ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),

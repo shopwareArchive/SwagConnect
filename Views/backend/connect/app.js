@@ -32,8 +32,7 @@ Ext.define('Shopware.apps.Connect', {
         'changed_products.List',
         'changed_products.Tabs',
         'changed_products.Images',
-
-        'config.Tabs',
+        
         'config.general.Panel',
         'config.general.Form',
         'config.export.Panel',

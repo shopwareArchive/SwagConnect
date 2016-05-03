@@ -397,7 +397,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.messages.growlMessage
                     );
 
-                    callback(response);
+                    if (callback && typeof callback === 'function') {
+                        callback(response);
+                    }
                     location.reload();
                 }
             },
@@ -433,7 +435,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.messages.growlMessage
                     );
 
-                    callback(response);
+                    if (callback && typeof callback === 'function') {
+                        callback(response);
+                    }
                     location.reload();
                 }
             },

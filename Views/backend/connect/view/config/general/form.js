@@ -317,13 +317,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             items: [
                 {
                     xtype: 'textfield',
-                    name: 'connectDebugHost',
-                    anchor: '100%',
-                    fieldLabel: me.snippets.alternativeHostLabel,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: Ext.String.format('{s name=config/help/debug_host}Nutze den angegebenen Host statt des [0]-Hosts. Nur für Testzweckecke{/s}', marketplaceName)
-                }, {
-                    xtype: 'textfield',
                     name: 'exportDomain',
                     anchor: '100%',
                     fieldLabel: me.snippets.exportDomainLabel,

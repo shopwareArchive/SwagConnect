@@ -1,4 +1,4 @@
-//{namespace name=backend/connect/view/register}
+//{namespace name=backend/connect/view/main}
 
 //{block name="backend/connect/view/register/panel"}
 Ext.define('Shopware.apps.Connect.view.register.panel', {
@@ -72,7 +72,7 @@ Ext.define('Shopware.apps.Connect.view.register.panel', {
         var me = this;
         return {
             html: me.snippets.descriptionMessage,
-            margin: '0 0 20 0',
+            margin: '0 0 40 0',
             cls: 'description-text',
             width: 720,
             border: false

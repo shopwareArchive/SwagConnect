@@ -1,4 +1,4 @@
-//{namespace name=backend/connect/view/register}
+//{namespace name=backend/connect/view/main}
 
 //{block name="backend/connect/view/register/loginPanel"}
 Ext.define('Shopware.apps.Connect.view.register.loginPanel', {

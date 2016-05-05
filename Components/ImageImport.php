@@ -139,7 +139,6 @@ class ImageImport
         // Build up an array of images imported from connect
         $positions = array(0);
         $localImagesFromConnect = array();
-        $this->helper->profFlag("Collect already downloaded images from Connect");
         /** @var $image Image */
         /** @var $media \Shopware\Models\Media\Media */
         foreach ($model->getImages() as $image) {
@@ -165,24 +164,19 @@ class ImageImport
 
             $localImagesFromConnect[$connectHash] = array('image' => $image, 'media' => $media);
         }
-        $this->helper->profFlag("Max position");
         $maxPosition = max($positions); // Get the highest position field
 
         $remoteImagesFromConnect = array_flip($images);
 
-        $this->helper->profFlag("Images to delete");
         // Build up arrays of images to delete and images to create
         $imagesToDelete = array_diff_key($localImagesFromConnect, $remoteImagesFromConnect);
-        $this->helper->profFlag("Images to create");
         $imagesToCreate = array_diff_key($remoteImagesFromConnect, $localImagesFromConnect);
 
-        $this->helper->profFlag("Delete images");
         // Delete old connect images and media objects
         foreach ($imagesToDelete as $hash => $data) {
             $this->manager->remove($data['image']);
             $this->manager->remove($data['media']);
         }
-        $this->helper->profFlag("Flush");
         $this->manager->flush();
         // Check if we still have a main image
         $hasMainImage = $this->hasArticleMainImage($model->getId());
@@ -193,12 +187,9 @@ class ImageImport
             $tempDir = Shopware()->DocPath('media_temp');
             foreach ($imagesToCreate as $imageUrl => $key) {
                 $tempFile = tempnam($tempDir, 'image');
-                $this->helper->profFlag("Copy image - " . $imageUrl);
                 copy($imageUrl, $tempFile);
-                $this->helper->profFlag("Create file object");
                 $file = new File($tempFile);
 
-                $this->helper->profFlag("Create media object");
                 // Create the media object
                 $media = new Media();
                 $media->setAlbum($album);
@@ -211,11 +202,9 @@ class ImageImport
                 $mediaAttribute->setConnectHash($imageUrl);
                 $mediaAttribute->setMedia($media);
 
-                $this->helper->profFlag("Persist media and attribute");
                 $this->manager->persist($media);
                 $this->manager->persist($mediaAttribute);
 
-                $this->helper->profFlag("Create image object");
                 // Create the associated image object
                 $image = new Image();
                 // If there is no main image and we are in the first iteration, set the current image as main image
@@ -226,10 +215,8 @@ class ImageImport
                 $image->setPath($media->getName());
                 $image->setExtension($media->getExtension());
 
-                $this->helper->profFlag("Persist image object");
                 $this->manager->persist($image);
 
-                $this->helper->profFlag("Create media thumbnail");
                 $this->thumbnailManager->createMediaThumbnail(
                     $media,
                     $this->getThumbnailSize($album),
@@ -242,11 +229,8 @@ class ImageImport
             $this->logger->write(true, 'Import images', $e->getMessage());
         }
 
-        $this->helper->profFlag("2nd flush");
         $this->manager->flush();
         $this->manager->clear();
-
-        $this->helper->profPrint();
     }
 
     /**

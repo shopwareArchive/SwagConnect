@@ -44,7 +44,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     getColumns: function() {
         return [
             {
-                header: 'Aritkel Nr.',
+                header: 'Artikel Nr.',
                 dataIndex: 'Detail_number',
                 flex: 1
             }, {

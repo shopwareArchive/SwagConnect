@@ -17,6 +17,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
         hideMappedProducts: '{s name=import/hide_mapped_products}zugewiesene Produkte und Kategorien ausblenden{/s}',
         activateProductsLabel: '{s name=import/activate_products}Produkte aktivieren{/s}',
         removeProducts: '{s name=import/remove_products}Remove Products{/s}',
+        myShopTitle: '{s name=import/my_shop}My Shop{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },
 
@@ -105,7 +106,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             items:[
                                 {
                                     xtype: 'container',
-                                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.connectProductsTitle  + '</h1>',
+                                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.myShopTitle  + '</h1>',
                                     height: 30
                                 }, {
                                     xtype: 'connect-own-categories',

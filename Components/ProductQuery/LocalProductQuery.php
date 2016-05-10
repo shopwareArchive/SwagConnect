@@ -159,7 +159,8 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
-        $row = $this->applyConfiguratorOptions($row);
+        //todo@sb: find better way to collect configuration option translations
+//        $row = $this->applyConfiguratorOptions($row);
         $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {
@@ -304,18 +305,12 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function hasVariants($productId)
     {
-        $builder = $this->manager->createQueryBuilder();
+        $result = $this->manager->getConnection()->fetchColumn(
+            'SELECT d.id FROM s_articles_details d WHERE d.kind = 2 AND articleID = ?',
+            array((int)$productId)
+        );
 
-        $builder->from('Shopware\Models\Article\Detail', 'd');
-        $builder->select(array(
-            'COUNT(d.id) as detailsCount'
-        ));
-
-        $builder->where("d.articleId = :productId");
-        $builder->setParameter(':productId', $productId);
-        $query = $builder->getQuery();
-
-        return $query->getSingleScalarResult() > 1 ? true : false;
+        return $result > 0;
     }
 
     /**

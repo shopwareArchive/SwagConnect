@@ -88,6 +88,30 @@ class Export
     }
 
     /**
+     * Update multiple products at once
+     *
+     * @param array $productIds
+     * @return void
+     */
+    public function recordsUpdate(array $productIds)
+    {
+        $products = $this->getProducts($productIds);
+        $shopId = $this->gateway->getShopId();
+
+        foreach ($products as $product) {
+            $product->shopId = $shopId;
+
+            $this->verificator->verify($product, $this->verificationGroups());
+            $this->gateway->recordUpdate(
+                $product->sourceId,
+                $this->productHasher->hash($product),
+                $this->revisionProvider->next(),
+                $product
+            );
+        }
+    }
+
+    /**
      * Record product availability update
      *
      * Establish a hook in your shop and call this method for every update of a
@@ -155,5 +179,16 @@ class Export
     {
         $products = $this->fromShop->getProducts(array($productId));
         return reset($products);
+    }
+
+    /**
+     * Get multiple products from gateway
+     *
+     * @param array $productIds
+     * @return \Shopware\Connect\Struct\Product
+     */
+    protected function getProducts(array $productIds)
+    {
+        return $this->fromShop->getProducts($productIds);
     }
 }

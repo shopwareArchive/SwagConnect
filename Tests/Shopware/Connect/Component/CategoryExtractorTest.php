@@ -64,6 +64,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             array('category_key' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit', 'label' => 'Hosentraeger'),
         );
 
+        //inserts a category without any products
+        $this->db->exec("
+            INSERT INTO `s_plugin_connect_categories`(`category_key`, `label`, `local_category_id`) VALUES
+            ('/Kleidung-unit/Schuhe-unit','Schuhe', NULL)
+        ");
+
         // todo@sb: Improve me with mocks
         foreach ($categories as $category) {
             $this->db->insert('s_plugin_connect_categories', $category);

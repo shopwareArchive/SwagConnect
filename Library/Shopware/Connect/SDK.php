@@ -278,7 +278,11 @@ final class SDK
         $this->dependencies->getExportService()->recordUpdate($productId);
     }
 
-    public function recordsUpdate($productIds)
+    /**
+     * @param array $productIds
+     * @return void
+     */
+    public function recordsUpdate(array $productIds)
     {
         $this->verifySdkIfNecessary();
 

@@ -158,24 +158,11 @@ class ConnectExport
             )
         );
 
-        $attribute = $this->helper->getConnectAttributeByModel($article);
         $categories = $this->helper->getConnectCategoryForProduct($article->getId());
 
         try {
             $this->productAttributesValidator->validate($this->extractProductAttributes($article->getMainDetail()));
             $this->sdk->recordsUpdate($sourceIds);
-
-            if (method_exists($article, 'getRelatedProductStreams') && count($article->getRelatedProductStreams()) > 0) {
-                $streams = $article->getRelatedProductStreams();
-                $streamAssignments = array();
-                foreach ($streams as $stream) {
-                    $streamAssignments[] = array($stream->getId() => $stream->getName());
-                }
-                $this->sdk->recordStreamAssignment(
-                    $attribute->getSourceId(),
-                    $streamAssignments
-                );
-            }
 
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',

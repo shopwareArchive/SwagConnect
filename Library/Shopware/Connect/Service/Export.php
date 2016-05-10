@@ -90,10 +90,10 @@ class Export
     /**
      * Update multiple products at once
      *
-     * @param string $productIds
+     * @param array $productIds
      * @return void
      */
-    public function recordsUpdate($productIds)
+    public function recordsUpdate(array $productIds)
     {
         $products = $this->getProducts($productIds);
         $shopId = $this->gateway->getShopId();
@@ -184,10 +184,10 @@ class Export
     /**
      * Get multiple products from gateway
      *
-     * @param mixed $productIds
+     * @param array $productIds
      * @return \Shopware\Connect\Struct\Product
      */
-    protected function getProducts($productIds)
+    protected function getProducts(array $productIds)
     {
         return $this->fromShop->getProducts($productIds);
     }

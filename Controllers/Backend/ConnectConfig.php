@@ -261,17 +261,19 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             ));
             return;
         }
-        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
-            $this->View()->assign(array(
-                'success' => false,
-                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-                    'config/export/priceFieldIsNotSupported',
-                    'Preisfeld ist nicht gepflegt',
-                    true
-                )
-            ));
-            return;
-        }
+
+        //todo@sb: it should be fixed in new price workflow -> CON-3171
+//        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
+//            $this->View()->assign(array(
+//                'success' => false,
+//                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+//                    'config/export/priceFieldIsNotSupported',
+//                    'Preisfeld ist nicht gepflegt',
+//                    true
+//                )
+//            ));
+//            return;
+//        }
 
         /** @var \Shopware\Models\Customer\Group $groupPurchasePrice */
         $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(

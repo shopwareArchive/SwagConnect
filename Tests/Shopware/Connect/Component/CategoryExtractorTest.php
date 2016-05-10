@@ -12,16 +12,69 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     private $attributeRepository;
 
+    private $db;
+    private $em;
+    private $article;
+
     public function setUp()
     {
+        $this->db = Shopware()->Db();
+        $this->em = Shopware()->Models();
+
+        $minimalTestArticle = array(
+            'name' => 'Turnschuh',
+            'active' => true,
+            'tax' => 19,
+            'supplier' => 'Turnschuh Inc.',
+            'categories' => array(
+                array('id' => 15),
+            ),
+            'mainDetail' => array(
+                'number' => '9898',
+                'prices' => array(
+                    array(
+                        'customerGroupKey' => 'EK',
+                        'price' => 999,
+                    ),
+                )
+            ),
+        );
+
+        $articleResource = \Shopware\Components\Api\Manager::getResource('article');
+        /** @var \Shopware\Models\Article\Article $article */
+        $this->article = $articleResource->create($minimalTestArticle);
+
+        /** @var \Shopware\Models\Article\Detail $detail */
+        $detail = $this->article->getMainDetail();
+        $this->db->executeQuery(
+            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
+              VALUES (?, ?, ?, ?)',
+            array(
+                $this->article->getId(),
+                $detail->getId(),
+                $detail->getNumber(),
+                '/bücher'
+            )
+        );
+
+        $categories = array(
+            array('category_key' => '/Ski-unit', 'label' => 'Ski'),
+            array('category_key' => '/Kleidung-unit', 'label' => 'Kleidung'),
+            array('category_key' => '/Kleidung-unit/Hosen-unit', 'label' => 'Hosen', 'local_category_id' => 1),
+            array('category_key' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit', 'label' => 'Hosentraeger'),
+        );
+
         // todo@sb: Improve me with mocks
-        Shopware()->Db()->exec("
-            INSERT INTO `s_plugin_connect_categories`(`category_key`, `label`, `local_category_id`) VALUES
-            ('/Ski-unit','Ski', NULL),
-            ('/Kleidung-unit','Kleidung', NULL),
-            ('/Kleidung-unit/Hosen-unit','Hosen', 1),
-            ('/Kleidung-unit/Hosen-unit/Hosentraeger-unit','Hosentraeger', NULL);
-        ");
+        foreach ($categories as $category) {
+            $this->db->insert('s_plugin_connect_categories', $category);
+            $categoryId = $this->db->lastInsertId();
+
+
+            $this->db->insert('s_plugin_connect_product_to_categories', array(
+                'connect_category_id' => $categoryId,
+                'articleID' => $this->article->getId(),
+            ));
+        }
 
         $this->configurationGateway = $this->getMockBuilder('\\Shopware\\Connect\\Gateway\\PDO')
             ->disableOriginalConstructor()
@@ -34,9 +87,9 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
             $this->attributeRepository,
             new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                Shopware()->Models(),
-                Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $this->em,
+                $this->em->getRepository('Shopware\Models\Category\Category'),
+                $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
             ),
             $this->configurationGateway
         );
@@ -44,7 +97,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function tearDown()
     {
-        Shopware()->Db()->exec("DELETE FROM `s_plugin_connect_categories`");
+        $this->db->exec("DELETE FROM `s_plugin_connect_categories`");
+        $this->db->exec("DELETE FROM `s_plugin_connect_product_to_categories`");
+        $this->db->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "9898%"');
+        $this->db->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
+        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
+        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE source_id LIKE "9898%"');
     }
 
     public function testExtractImportedCategories()

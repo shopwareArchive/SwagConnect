@@ -278,6 +278,13 @@ final class SDK
         $this->dependencies->getExportService()->recordUpdate($productId);
     }
 
+    public function recordsUpdate($productIds)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->recordsUpdate($productIds);
+    }
+
     /**
      * Record product availability update
      *

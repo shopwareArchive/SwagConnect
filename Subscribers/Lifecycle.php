@@ -157,14 +157,7 @@ class Lifecycle extends BaseSubscriber
                     array($attribute->getSourceId())
                 );
             } else {
-                /** @var \Shopware\Models\Article\Detail $detail */
-                $sourceIds = array();
-                foreach ($model->getDetails() as $detail) {
-                    $connectAttribute = $this->getHelper()->getConnectAttributeByModel($detail);
-                    $sourceIds[] = $connectAttribute->getSourceId();
-
-                }
-                $this->getConnectExport()->export($sourceIds);
+                $this->getConnectExport()->updateArticle($model);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements

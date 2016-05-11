@@ -2,8 +2,6 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-use Shopware\Models\Article\Article;
-use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -167,7 +165,7 @@ class Lifecycle extends BaseSubscriber
         }
     }
 
-    private function generateChangesForDetail(Detail $detail, $autoUpdate)
+    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
@@ -182,7 +180,7 @@ class Lifecycle extends BaseSubscriber
         }
     }
 
-    private function generateChangesForArticle(Article $article, $autoUpdate)
+    private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $autoUpdate)
     {
         if ($autoUpdate == 1) {
             $sourceIds = Shopware()->Db()->fetchCol(

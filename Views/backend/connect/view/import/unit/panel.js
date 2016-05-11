@@ -59,6 +59,7 @@ Ext.define('Shopware.apps.Connect.view.import.unit.Panel', {
                     xtype: 'checkbox',
                     name: 'hideAssignedUnits',
                     boxLabel: me.snippets.hideAssignedUnitsLabel,
+                    checked: true,
                     labelWidth: me.defaults.labelWidth
                 }
             ],
@@ -84,11 +85,6 @@ Ext.define('Shopware.apps.Connect.view.import.unit.Panel', {
     getFormButtons: function () {
         var me = this;
         var items = ['->'];
-        items.push({
-            text: me.snippets.takeOverUnits,
-            tooltip: me.snippets.takeOverUnitsTooltip,
-            action:'adoptUnits'
-        });
         items.push({
             cls: 'primary',
             text: me.snippets.save,

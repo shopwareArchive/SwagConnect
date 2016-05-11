@@ -14,6 +14,7 @@ use Shopware\Models\Article\Unit;
  */
 class UnitMapper
 {
+    const ADOPT_UNIT_KEY = 'connect_adopt_unit';
 
     /** @var \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;

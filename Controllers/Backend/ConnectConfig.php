@@ -440,6 +440,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             );
         }
 
+        $unitName = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+            'import/unit/take_over_units',
+            'Take over unit',
+            true
+        );
+
+        $unitsMappingArray[] = array(
+            'shopwareUnitName' => $unitName,
+            'shopwareUnitKey' => UnitMapper::ADOPT_UNIT_KEY,
+        );
+
         $this->View()->assign(
             array(
                 'success' => true,
@@ -459,6 +470,19 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $data = $this->Request()->getParam('data');
         $data = !isset($data[0]) ? array($data) : $data;
 
+        //prepares units for adoption
+        $adoptUnitKeys = array();
+        foreach ($data as $index => $unit) {
+            if ($unit['shopwareUnitKey'] == UnitMapper::ADOPT_UNIT_KEY) {
+                $adoptUnitKeys[] = $unit['connectUnit'];
+                $data[$index]['shopwareUnitKey'] = $unit['connectUnit'];
+            }
+        }
+
+        if (!empty($adoptUnitKeys)) {
+            $this->getUnitMapper()->createUnits($adoptUnitKeys);
+        }
+
         $this->getConfigComponent()->setUnitsMapping($data);
 
         // update related products
@@ -466,7 +490,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         foreach ($data as $unit) {
             /** @var \Shopware\Models\Article\Unit $unitModel */
             $unitModel = $repository->findOneBy(array('unit' => $unit['shopwareUnitKey']));
-            if ($unitModel) {
+            if (!$unitModel) {
                 continue;
             }
             $this->getHelper()->updateUnitInRelatedProducts($unitModel, $unit['connectUnit']);
@@ -490,7 +514,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connectUnits = new Units();
         $connectUnitsArray = $connectUnits->getLocalizedUnits('de');
         $unitsArray = array();
-        $hideAssigned = (int)$this->Request()->getParam('hideAssignedUnits', 0);
+        $hideAssigned = (int)$this->Request()->getParam('hideAssignedUnits', 1);
 
         foreach ($this->getConfigComponent()->getUnitsMappings() as $connectUnit => $localUnit) {
             if ($hideAssigned == true && strlen($localUnit) > 0) {

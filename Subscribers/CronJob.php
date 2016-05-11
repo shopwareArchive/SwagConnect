@@ -4,6 +4,8 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Cronjob callback
@@ -20,8 +22,10 @@ class CronJob extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
+        //todo@sb: fix cronjobs via bin/console
         return array(
-            'ShopwareConnect_CronJob_ImportImages' => 'importImages',
+            'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
+            'Shopware_CronJob_ShopwareConnectUpdateProducts' => 'updateProducts',
         );
     }
 
@@ -50,6 +54,47 @@ class CronJob extends BaseSubscriber
         $this->getImageImport()->import($limit);
 
         return true;
+    }
+
+    /**
+     * Collect all own products and send them
+     * to Connect system.
+     *
+     * Used to update products with many variants.
+     *
+     * @param \Shopware_Components_Cron_CronJob $job
+     * @return bool
+     */
+    public function updateProducts(\Shopware_Components_Cron_CronJob $job)
+    {
+        $sourceIds = Shopware()->Db()->fetchCol(
+            'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 LIMIT 30'
+        );
+
+        $this->getConnectExport()->export($sourceIds);
+
+        $quotedSourceIds = Shopware()->Db()->quote($sourceIds);
+        Shopware()->Db()->query("
+            UPDATE s_plugin_connect_items
+            SET cron_update = false
+            WHERE source_id IN ($quotedSourceIds)"
+        )->execute();
+
+        return true;
+    }
+
+    /**
+     * @return ConnectExport
+     */
+    private function getConnectExport()
+    {
+        return new ConnectExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            Shopware()->Models(),
+            new ProductsAttributesValidator(),
+            $this->getConfigComponent()
+        );
     }
 
     private function getConfigComponent()

@@ -158,17 +158,29 @@ class Setup
         );
 
         Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect', 'action' => 'importImages')
+            'DELETE FROM s_crontab WHERE `name` = :name',
+            array('name' => 'SwagConnect')
         );
         Shopware()->Db()->query(
             'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect', 'action' => 'ShopwareConnect_CronJob_ImportImages')
+            array('name' => 'SwagConnect Import images', 'action' => 'ShopwareConnectImportImages')
         );
+        Shopware()->Db()->query(
+            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
+            array('name' => 'SwagConnect Update Products', 'action' => 'ShopwareConnectUpdateProducts')
+        );
+
         $this->bootstrap->createCronJob(
-            'SwagConnect',
-            'ShopwareConnect_CronJob_ImportImages',
+            'SwagConnect Import images',
+            'ShopwareConnectImportImages',
             60 * 30,
+            true
+        );
+
+        $this->bootstrap->createCronJob(
+            'SwagConnect Update Products',
+            'ShopwareConnectUpdateProducts',
+            60 * 5,
             true
         );
     }
@@ -272,6 +284,7 @@ class Setup
              `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
              `offer_valid_until` int(10) NOT NULL,
              `stream` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+             `cron_update` TINYINT(1) NULL DEFAULT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)

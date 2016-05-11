@@ -225,6 +225,12 @@ class Attribute extends ModelEntity
     protected $stream;
 
     /**
+     * @var boolean
+     * @ORM\Column(name="cron_update", type="boolean", nullable=true)
+     */
+    protected $cronUpdate;
+
+    /**
      * @param \Shopware\Models\Article\Article $article
      */
     public function setArticle($article)
@@ -595,5 +601,21 @@ class Attribute extends ModelEntity
     public function setStream($stream)
     {
         $this->stream = $stream;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isCronUpdate()
+    {
+        return $this->cronUpdate;
+    }
+
+    /**
+     * @param boolean $cronUpdate
+     */
+    public function setCronUpdate($cronUpdate)
+    {
+        $this->cronUpdate = $cronUpdate;
     }
 }

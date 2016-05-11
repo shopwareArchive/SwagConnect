@@ -37,6 +37,7 @@ class Update
 
         $this->createStreamField();
         $this->removeOldConnectMenu();
+        $this->addCronUpdateFlag();
 
         return true;
     }
@@ -73,6 +74,16 @@ class Update
                 Shopware()->Models()->remove($connectItem);
                 Shopware()->Models()->flush();
             }
+        }
+    }
+
+    public function addCronUpdateFlag()
+    {
+        if (version_compare($this->version, '0.0.3', '<=')) {
+            Shopware()->Db()->query('
+                ALTER TABLE s_plugin_connect_items
+                ADD cron_update TINYINT(1) NULL DEFAULT NULL
+            ');
         }
     }
 

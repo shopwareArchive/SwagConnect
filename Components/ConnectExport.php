@@ -141,57 +141,6 @@ class ConnectExport
     }
 
     /**
-     * Update article and all variants
-     *
-     * @param Article $article
-     */
-    public function updateArticle(Article $article)
-    {
-        $errors = array();
-
-        $sourceIds = array_map(function ($row) {
-            return $row['source_id'];
-        },
-            $this->manager->getConnection()->fetchAll(
-                'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-                array($article->getId())
-            )
-        );
-
-        $categories = $this->helper->getConnectCategoryForProduct($article->getId());
-
-        try {
-            $this->productAttributesValidator->validate($this->extractProductAttributes($article->getMainDetail()));
-            $this->sdk->recordsUpdate($sourceIds);
-
-            $this->manager->getConnection()->update(
-                's_plugin_connect_items',
-                array(
-                    'export_status' => 'update',
-                    'export_message' => null,
-                    'category' => json_encode($categories),
-                ),
-                array(
-                    'article_id' => $article->getId(),
-                )
-            );
-        } catch (\Exception $e) {
-            $this->manager->getConnection()->update(
-                's_plugin_connect_items',
-                array(
-                    'export_status' => 'error',
-                    'export_message' => $e->getMessage() . "\n" . $e->getTraceAsString()
-                ),
-                array(
-                    'article_id' => $article->getId(),
-                )
-            );
-
-            $errors[] = " &bull; " . $article->getName() . ' - ' . $e->getMessage();
-        }
-    }
-
-    /**
      * @param array $sourceIds
      * @return array
      */

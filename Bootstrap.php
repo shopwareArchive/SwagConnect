@@ -183,7 +183,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $verified = false;
         }
 
-
         $subscribers = $this->getDefaultSubscribers();
 
         // Some subscribers may only be used, if the SDK is verified
@@ -204,7 +203,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function getSubscribersForUnverifiedKeys()
     {
         return array(
-            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend()
+            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
+            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
         );
     }
 
@@ -224,16 +224,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
-            new \ShopwarePlugins\Connect\Subscribers\Less()
+            new \ShopwarePlugins\Connect\Subscribers\Less(),
+            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
 
         );
 
         $this->registerMyLibrary();
-        $configComponent = $this->getConfigComponents();
-
-        if ($configComponent->getConfig('autoUpdateProducts', true)) {
-            $subscribers[] = new \ShopwarePlugins\Connect\Subscribers\Lifecycle();
-        }
 
         return $subscribers;
     }

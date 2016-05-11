@@ -65,6 +65,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
         exportLanguagesHelpText: Ext.String.format('{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu [0] verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}', marketplaceName),
+        yes: '{s name=yes}Ja{/s}',
+        no: '{s name=no}Nein{/s}',
         edit: '{s name=edit}Edit{/s}'
     },
 
@@ -485,14 +487,32 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                 }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: me.snippets.autoProductSync,
-                    defaultType: 'checkboxfield',
+                    defaultType: 'combo',
                     labelWidth: me.defaults.labelWidth,
                     items: [
                         {
-                            boxLabel: me.snippets.autoPlayedChanges,
-                            name: 'autoUpdateProducts',
-                            inputValue: 1,
-                            uncheckedValue: 0
+                            xtype:'combo',
+                            name:'autoUpdateProducts',
+                            queryMode:'local',
+                            store: Ext.create('Ext.data.Store', {
+                                fields: ['value', 'display'],
+                                data: [
+                                    {
+                                        "display": me.snippets.yes,
+                                        "value": 1
+                                    },
+                                    {
+                                        "display": "Cronjob",
+                                        "value": 2
+                                    },
+                                    {
+                                        "display": me.snippets.no,
+                                        "value": 0
+                                    }
+                                ]
+                            }),
+                            displayField:'display',
+                            valueField: 'value'
                         }
                     ]
                 }

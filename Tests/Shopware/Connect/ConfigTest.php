@@ -7,6 +7,12 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 
 class ConfigTest extends ConnectTestHelper
 {
+    public function setUp()
+    {
+
+
+    }
+
     public function tearDown()
     {
         Shopware()->Db()->exec("
@@ -129,25 +135,6 @@ class ConfigTest extends ConnectTestHelper
 
         $this->assertNotEmpty($result);
         $this->assertEquals($configValue, $result[$configName]);
-    }
-
-    public function testSetUnitsMapping()
-    {
-        $unitName = 'testConfigUnit' . rand(1, 9999);
-        $connectUnit = 'kg';
-        $data = array(
-            array(
-                'shopwareUnitKey' => $unitName,
-                'connectUnit' => $connectUnit
-            )
-        );
-        $this->getConfigComponent()->setUnitsMapping($data);
-
-        $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE name = ? AND groupName = ?';
-        $result = Shopware()->Db()->fetchRow($sql, array($connectUnit, 'units'));
-
-        $this->assertEquals($unitName, $result['value']);
-        $this->assertEquals($connectUnit, $result['name']);
     }
 
     public function testCompareExportConfiguration()

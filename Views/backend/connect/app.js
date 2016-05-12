@@ -12,6 +12,7 @@ Ext.define('Shopware.apps.Connect', {
         'export.product.Panel',
         'export.product.List',
         'export.product.Filter',
+        'export.product.Progress',
         'export.stream.Panel',
         'export.stream.List',
 

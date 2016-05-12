@@ -749,12 +749,37 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Called when a product was marked for update in the connect backend module
+     * Collect all detail ids by given article ids
+     */
+    public function getDetailIdsAction()
+    {
+        try {
+            $articleIds = $this->Request()->getPost('ids', array());
+            if (!is_array($articleIds)) {
+                $articleIds = array($articleIds);
+            }
+
+            $detailIds = $this->getHelper()->getArticleDetailIds($articleIds);
+
+            $this->View()->assign(array(
+                'success' => true,
+                'detailIds' => $detailIds
+            ));
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Called when a product variants were marked for update in the connect backend module
      */
     public function insertOrUpdateProductAction()
     {
-        $articleIds = $this->Request()->getPost('ids');
-        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $articleDetailIds = $this->Request()->getPost('articleDetailIds');
+        $sourceIds = $this->getHelper()->getArticleDetailSourceIds($articleDetailIds);
 
         $connectExport = $this->getConnectExport();
         try {
@@ -762,7 +787,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
-                'message' => $e->getMessage()
+                'messages' => array($e->getMessage())
             ));
             return;
         }
@@ -775,11 +800,9 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             return;
         }
 
-
         $this->View()->assign(array(
             'success' => true
         ));
-
     }
 
     /**

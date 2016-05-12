@@ -485,7 +485,6 @@ class Helper
      */
     public function getArticleSourceIds(array $articleIds)
     {
-//        todo: check where it's used, sometimes we need article detail sourceId
         $articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
         $sourceIds = array();
         foreach ($articleIds as $articleId) {
@@ -536,6 +535,25 @@ class Helper
         }
 
         return $connectAttribute->getSourceId();
+    }
+
+    public function getArticleDetailSourceIds(array $articleDetailIds)
+    {
+        $quotedArticleDetailIds = array();
+        foreach ($articleDetailIds as $articleDetailId) {
+            $articleDetailId = (int) $articleDetailId;
+            $quotedArticleDetailIds[] = $this->manager->getConnection()->quote($articleDetailId);
+        }
+
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT source_id
+              FROM s_plugin_connect_items
+              WHERE article_detail_id IN (' . implode(', ', $quotedArticleDetailIds) . ')'
+        );
+
+        return array_map(function($row) {
+            return $row['source_id'];
+        }, $rows);
     }
 
     /**
@@ -663,5 +681,26 @@ class Helper
     public function isMainVariant($sourceId)
     {
         return ctype_digit($sourceId);
+    }
+
+    /**
+     * @param array $articleIds
+     * @return array
+     */
+    public function getArticleDetailIds(array $articleIds)
+    {
+        $quotedArticleIds = array();
+        foreach ($articleIds as $articleId) {
+            $articleId = (int) $articleId;
+            $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
+        }
+
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ')'
+        );
+
+        return array_map(function($row) {
+            return $row['id'];
+        }, $rows);
     }
 }

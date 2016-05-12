@@ -83,19 +83,31 @@ class CategoryExtractor
      */
     public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false)
     {
-        $sql = 'SELECT category_key, label FROM `s_plugin_connect_categories`';
+        $sql = '
+            SELECT pcc.category_key, pcc.label
+            FROM `s_plugin_connect_categories` pcc
+            INNER JOIN `s_plugin_connect_product_to_categories` pcptc
+            ON pcptc.connect_category_id = pcc.id
+            INNER JOIN `s_plugin_connect_items` pci
+            ON pci.article_id = pcptc.articleID
+            INNER JOIN `s_articles_attributes` ar
+            ON ar.articleID = pci.article_id
+        ';
+
         if ($parent !== null) {
-            $sql .= ' WHERE category_key LIKE ?';
+            $sql .= ' WHERE pcc.category_key LIKE ? AND connect_mapped_category IS NULL';
             $whereParams = array($parent . '/%');
             if ($excludeMapped === true) {
-                $sql .= ' AND local_category_id IS NULL';
+                $sql .= ' AND pcc.local_category_id IS NULL';
             }
             // filter only first child categories
             $rows = Shopware()->Db()->fetchPairs($sql, $whereParams);
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
+            $sql .= ' WHERE connect_mapped_category IS NULL';
+
             if ($excludeMapped === true) {
-                $sql .= ' WHERE local_category_id IS NULL';
+                $sql .= ' AND pcc.local_category_id IS NULL';
             }
             $rows = Shopware()->Db()->fetchPairs($sql);
             // filter only main categories

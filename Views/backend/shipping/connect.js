@@ -95,7 +95,7 @@ Ext.define('Shopware.apps.Shipping.controller.DefaultForm-Connect', {
                 connectAllowed: attributeValue ? 1 : 0
             },
             failure: function(response, opts) {
-                Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
             }
 
         });

@@ -153,7 +153,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         for (var index in data.records) {
             if (data.records[index].get('Attribute_connectMappedCategory') == 0) {
                 dropHandlers.cancelDrop();
-                me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/not_allowed_drag_local_products}Use drag&drop only on remote products{/s}');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/not_allowed_drag_local_products}Use drag&drop only on remote products{/s}');
                 break;
             }
         }
@@ -186,14 +186,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var me = this;
 
         if (articleIds.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
             return;
         }
 
         var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
 
         if (selected.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -207,21 +207,21 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             success: function(response, opts) {
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                     if (reload === true) {
                         me.getRemoteProductsGrid().getStore().reload();
                         me.getLocalProductsGrid().getStore().reload();
                     }
 
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
                 me.getRemoteProductsGrid().getStore().load();
                 me.getLocalProductsGrid().getStore().load();
             },
             failure: function(response, opts) {
-                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
 
         });
@@ -258,7 +258,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var panel = me.getImportPanel();
 
         if (articleIds.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
             return;
         }
 
@@ -273,19 +273,19 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                     if (reload === true) {
                         me.getRemoteProductsGrid().getStore().reload();
                         me.getLocalProductsGrid().getStore().reload();
                     }
 
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
 
         });
@@ -295,12 +295,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var me = this;
 
         if (!data.records) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
             return;
         }
 
         if (!overModel) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -338,9 +338,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
                 me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
@@ -350,7 +350,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
         });
     },
@@ -373,9 +373,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
                 me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
@@ -387,7 +387,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
         });
     },
@@ -397,13 +397,13 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
         if (remoteCategoryTreeSelection.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_remote_category}Please select Shopware Connect category{/s}');
             return;
         }
 
         var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
         if (localCategoryTreeSelection.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -419,7 +419,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         var localCategoryTreeSelection = me.getLocalCategoryTree().getSelectionModel().getSelection();
         if (localCategoryTreeSelection.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
             return;
         }
 
@@ -516,7 +516,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
 
         if (articleIds.length == 0) {
-            me.createGrowlMessage('{s name=error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_articles}Please select at least one article{/s}');
             return;
         }
 
@@ -532,15 +532,15 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
                 me.getLocalProductsGrid().getStore().load();
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
-                me.createGrowlMessage('{s name=error}Error{/s}', 'error');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
         });
     },

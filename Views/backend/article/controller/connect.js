@@ -66,7 +66,7 @@ Ext.define('Shopware.apps.Article.controller.Connect', {
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
 
-                    Shopware.Notification.createGrowlMessage('{s name=error}error{/s}', message, 'connect');
+                    Shopware.Notification.createGrowlMessage('{s name=connect/error}error{/s}', message, 'connect');
                 }
         });
     },

@@ -68,7 +68,7 @@ class CronJob extends BaseSubscriber
     public function updateProducts(\Shopware_Components_Cron_CronJob $job)
     {
         $sourceIds = Shopware()->Db()->fetchCol(
-            'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 LIMIT 30'
+            'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 LIMIT 100'
         );
 
         $this->getConnectExport()->export($sourceIds);

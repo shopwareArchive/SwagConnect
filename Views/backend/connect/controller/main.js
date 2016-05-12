@@ -156,12 +156,14 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onSaveMapping
             },
             'connect-export button[action=add]': {
-                click: me.onExportFilterAction
+                click: me.onExportAction
             },
             'connect-export button[action=delete]': {
-                click: me.onExportFilterAction
+                click: me.onRemoveArticleAction
             },
-
+            'connect-article-export-progress-window': {
+                startExport: me.startArticleExport
+            },
             'connect-export-stream button[action=add]': {
                 click: me.onExportStream
             },
@@ -640,29 +642,18 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     /**
-     * Callback function that will insert or delete a product from/for export
+     * Callback function that will insert from/for export
      *
      * @param btn
      */
-    onExportFilterAction: function(btn) {
+    onExportAction: function(btn) {
         var me = this,
             list = me.getExportList(),
             records = list.selModel.getSelection(),
             ids = [],
-            url,
-            message,
-            messages = [],
-            title;
-
-        if(btn.action == 'add') {
-            url = '{url action=insertOrUpdateProduct}';
             title = me.messages.insertOrUpdateProductTitle;
-            message = me.messages.insertOrUpdateProductMessage;
-        } else if(btn.action == 'delete') {
-            url = '{url action=deleteProduct}';
-            title = me.messages.deleteProductTitle;
-            message = me.messages.deleteProductMessage;
-        } else {
+
+        if (records.length == 0) {
             return;
         }
 
@@ -670,10 +661,108 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             ids.push(record.get('id'));
         });
 
-        list.setLoading();
-        
         Ext.Ajax.request({
-            url: url,
+            url: '{url action=getDetailIds}',
+            method: 'POST',
+            params: {
+                'ids[]': ids
+            },
+            success: function(response, opts) {
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+                    if (operation) {
+                        if (!operation.success) {
+                            me.createGrowlMessage(title, operation.message, true);
+                        } else {
+                            Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
+                                articleDetailIds: operation.detailIds
+                            }).show();
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * Callback function that will insert from/for export
+     *
+     * @param articleDetailIds
+     * @param batchSize
+     * @param window
+     * @param offset
+     */
+    startArticleExport: function(articleDetailIds, batchSize, window, offset) {
+        offset = parseInt(offset) || 0;
+        var limit = offset + batchSize;
+
+        var me = this,
+        message = me.messages.insertOrUpdateProductMessage,
+        title = me.messages.insertOrUpdateProductTitle,
+        list = me.getExportList();
+
+        Ext.Ajax.request({
+            url: '{url action=insertOrUpdateProduct}',
+            method: 'POST',
+            params: {
+                'articleDetailIds[]': articleDetailIds.slice(offset, limit)
+            },
+            success: function(response, opts) {
+                var doneDetails = limit;
+                var operation = Ext.decode(response.responseText);
+
+                if (!operation.success && operation.messages) {
+                    operation.messages.forEach( function(message){
+                        me.createGrowlMessage(title, message, true);
+                    });
+                }
+
+                window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, articleDetailIds.length));
+                window.progressField.updateProgress(
+                    limit / articleDetailIds.length,
+                    Ext.String.format(window.snippets.process, doneDetails, articleDetailIds.length),
+                    true
+                );
+
+                if (limit >= articleDetailIds.length) {
+                    window.inProcess = false;
+                    window.startButton.setDisabled(false);
+                    window.destroy();
+                    me.createGrowlMessage(title, message, false);
+                    list.store.load();
+                } else {
+                    //otherwise we have to call this function recursive with the next offset
+                    me.startArticleExport(articleDetailIds, batchSize, window, limit);
+                }
+            },
+            failure: function(operation) {
+                me.createGrowlMessage(title, operation.responseText, true);
+                window.inProcess = false;
+                window.cancelButton.setDisabled(false);
+            }
+        });
+    },
+
+    /**
+     * Callback function that will delete a product from/for export
+     *
+     * @param btn
+     */
+    onRemoveArticleAction: function(btn) {
+        var me = this,
+            list = me.getExportList(),
+            records = list.selModel.getSelection(),
+            ids = [],
+            messages = [];
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
+        list.setLoading();
+
+        Ext.Ajax.request({
+            url: '{url action=deleteProduct}',
             method: 'POST',
             params: {
                 'ids[]': ids
@@ -691,10 +780,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
                 if (messages.length > 0) {
                     messages.forEach( function(message){
-                        me.createGrowlMessage(title, message, sticky);
+                        me.createGrowlMessage(me.messages.deleteProductTitle, message, sticky);
                     });
                 } else {
-                    me.createGrowlMessage(title, message, sticky);
+                    me.createGrowlMessage(me.messages.deleteProductTitle, me.messages.deleteProductMessage, sticky);
                 }
 
                 list.setLoading(false);

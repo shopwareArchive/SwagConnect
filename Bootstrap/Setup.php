@@ -180,7 +180,7 @@ class Setup
         $this->bootstrap->createCronJob(
             'SwagConnect Update Products',
             'ShopwareConnectUpdateProducts',
-            60 * 5,
+            60 * 2,
             true
         );
     }

@@ -35,12 +35,12 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
 
         me.connectFixedPriceFieldset = Ext.create('Ext.form.FieldSet', {
             defaults: me.defaults,
-            title: '{s name=fixedPriceConfig}Fixed price configuration{/s}',
+            title: '{s name=connect/fixedPriceConfig}Fixed price configuration{/s}',
             items:
                 [
                     {
                         xtype: 'label',
-                        html: '{s name=fixedPriceWarning}<strong>Warning:</strong> Fixed prices may only be used for products which are subject to price fixing by law.{/s}'
+                        html: '{s name=connect/fixedPriceWarning}<strong>Warning:</strong> Fixed prices may only be used for products which are subject to price fixing by law.{/s}'
                     },
                     me.getFixedPriceCombo()
                 ]
@@ -80,7 +80,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
             xtype: 'fieldset',
             layout: 'column',
             defaults: me.defaults,
-            title: '{s name=overrideConfig}Field update configuration{/s}',
+            title: '{s name=connect/overrideConfig}Field update configuration{/s}',
             items:
                 [
                     me.connectLeftContainer,
@@ -93,9 +93,9 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         var me = this;
 
         return [
-            me.getOverwriteCombo('{s name=updatePrice}Update prices{/s}', 'updatePrice'),
-            me.getOverwriteCombo('{s name=updateImage}Update images{/s}', 'updateImage'),
-            me.getOverwriteCombo('{s name=updateName}Update name{/s}', 'updateName')
+            me.getOverwriteCombo('{s name=connect/updatePrice}Update prices{/s}', 'updatePrice'),
+            me.getOverwriteCombo('{s name=connect/updateImage}Update images{/s}', 'updateImage'),
+            me.getOverwriteCombo('{s name=connect/updateName}Update name{/s}', 'updateName')
         ];
     },
 
@@ -103,8 +103,8 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         var me = this;
 
         return [
-            me.getOverwriteCombo('{s name=updateLongDescription}Update long description{/s}', 'updateLongDescription'),
-            me.getOverwriteCombo('{s name=updateShortDescription}Update short description{/s}', 'updateShortDescription')
+            me.getOverwriteCombo('{s name=connect/updateLongDescription}Update long description{/s}', 'updateLongDescription'),
+            me.getOverwriteCombo('{s name=connect/updateShortDescription}Update short description{/s}', 'updateShortDescription')
         ];
     },
 
@@ -119,7 +119,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
             fieldLabel: text,
             name: dataField,
             editable: false,
-            emptyText: '{s name=automatically}Automatic{/s}'
+            emptyText: '{s name=connect/automatically}Automatic{/s}'
         };
     },
 
@@ -129,8 +129,8 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         return Ext.create('Ext.data.Store', {
             fields: [ { name: 'value', useNull: true }, { name: 'description' } ],
             data: [
-                { value: 'overwrite', description: '{s name=automatically}Automatic{/s}' },
-                { value: 'no-overwrite', description: '{s name=manually}Manual{/s}' }
+                { value: 'overwrite', description: '{s name=connect/automatically}Automatic{/s}' },
+                { value: 'no-overwrite', description: '{s name=connect/manually}Manual{/s}' }
             ]
         });
 

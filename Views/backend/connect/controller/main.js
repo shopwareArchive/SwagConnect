@@ -82,9 +82,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         updatePartTwoMessage: '{s name=config/message/update_part_two}to finish{/s}',
         doneMessage: '{s name=config/message/done}Done{/s}',
 
-        hours: '{s name=hours}Hour(s){/s}',
-        minutes: '{s name=minutes}Minute(s){/s}',
-        seconds: '{s name=seconds}Second(s){/s}',
+        hours: '{s name=connect/hours}Hour(s){/s}',
+        minutes: '{s name=connect/minutes}Minute(s){/s}',
+        seconds: '{s name=connect/seconds}Second(s){/s}',
 
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
@@ -501,7 +501,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 store.reload();
             },
             failure: function(response, opts) {
-                Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
             }
 
         });
@@ -628,11 +628,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 articleId: articleId
             },
             success: function(response, opts) {
-                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 store.reload();
             },
             failure: function(response, opts) {
-                me.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
             }
 
         });
@@ -824,13 +824,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    Shopware.Notification.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
                 },
                 failure: function(record) {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', message);
+                    Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', message);
                 }
             });
         }
@@ -853,13 +853,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
                 },
                 failure: function(record) {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', response.responseText);
+                    Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
                 }
             });
         }
@@ -874,10 +874,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         unitsStore.sync({
             success :function (records, operation) {
                 form.setLoading(false);
-                me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
             },
             failure:function (batch) {
-                me.createGrowlMessage('{s name=error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
+                me.createGrowlMessage('{s name=connect/error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');
             }
         });
     },
@@ -949,13 +949,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    Shopware.Notification.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    Shopware.Notification.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
                 },
                 failure: function(record) {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=error}Error{/s}', message);
+                    Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', message);
                 }
             });
         }
@@ -974,11 +974,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             store.sync({
                 success :function (records, operation) {
                     panel.setLoading(false);
-                    me.createGrowlMessage('{s name=success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Änderungen erfolgreich übernommen{/s}');
                 },
                 failure:function (batch) {
                     panel.setLoading(false);
-                    me.createGrowlMessage('{s name=error}Error{/s}', batch.proxy.getReader().jsonData.message);
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', batch.proxy.getReader().jsonData.message);
                 }
             });
         }
@@ -1061,7 +1061,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             success: function(response, opts) {
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == false) {
-                    me.createGrowlMessage('{s name=error}Error{/s}', '{s name=config/log_label}Logging aktivieren{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=config/log_label}Logging aktivieren{/s}');
                 }
             }
         });
@@ -1136,7 +1136,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         var newRecord = combo.findRecordByValue(newValue);
         if (newRecord && newRecord.get('available') === false) {
-            me.createGrowlMessage('{s name=error}Error{/s}', me.messages.priceFieldIsNotSupported);
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', me.messages.priceFieldIsNotSupported);
         }
     },
 
@@ -1157,7 +1157,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         var newRecord = combo.findRecordByValue(newValue);
         if (newRecord && newRecord.get('available') === false) {
-            me.createGrowlMessage('{s name=error}Error{/s}', me.messages.priceFieldIsNotSupported);
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', me.messages.priceFieldIsNotSupported);
         }
     },
 

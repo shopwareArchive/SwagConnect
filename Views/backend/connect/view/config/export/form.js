@@ -55,7 +55,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
         autoPlayedChanges: Ext.String.format('{s name=config/export/changes_auto_played_label}Änderungen automatisch mit [0] synchronsieren{/s}', marketplaceName),
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        synchronization: '{s name=synchronization}Synchronization{/s}',
+        synchronization: '{s name=connect/synchronization}Synchronization{/s}',
         synchronizationBarDescription: Ext.String.format('{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu [0] an. Es kann etwas länger dauern, bis Ihre Produkte auf [0] erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}', marketplaceName),
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
         priceConfigurationDescription: Ext.String.format('{s name=config/export/label/export_price_description}Hier bestimmen Sie die Preise, die Sie zu [0] exportieren möchten. Alle Preise werden netto exportiert und können individuell mit Auf-und Abschlägen bearbeitet werden.<br><br>{/s}', marketplaceName),
@@ -65,9 +65,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
         exportLanguagesHelpText: Ext.String.format('{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu [0] verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}', marketplaceName),
-        yes: '{s name=yes}Ja{/s}',
-        no: '{s name=no}Nein{/s}',
-        edit: '{s name=edit}Edit{/s}'
+        yes: '{s name=connect/yes}Ja{/s}',
+        no: '{s name=connect/no}Nein{/s}',
+        edit: '{s name=connect/edit}Edit{/s}'
     },
 
     initComponent: function () {

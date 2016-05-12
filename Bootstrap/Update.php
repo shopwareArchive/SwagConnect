@@ -38,6 +38,7 @@ class Update
         $this->createStreamField();
         $this->removeOldConnectMenu();
         $this->addCronUpdateFlag();
+        $this->removeSnippets();
 
         return true;
     }
@@ -84,6 +85,15 @@ class Update
                 ALTER TABLE s_plugin_connect_items
                 ADD cron_update TINYINT(1) NULL DEFAULT NULL
             ');
+        }
+    }
+
+    public function removeSnippets()
+    {
+        if (version_compare($this->version, '0.0.5', '<=')) {
+            Shopware()->Db()->query("
+                DELETE FROM s_core_snippets WHERE namespace = 'backend/connect/view/main'
+            ");
         }
     }
 

@@ -48,6 +48,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.UnitsMapping', {
                 editor: {
                     xtype: 'combo',
                     store: me.unitsStore,
+                    editable: false,
                     displayField: 'shopwareUnitName',
                     valueField: 'shopwareUnitKey'
                 },

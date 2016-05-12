@@ -870,7 +870,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             unitsStore = me.getUnitsMapping().getStore(),
             form = btn.up('form');
 
-        form.setLoading();
+        if (unitsStore.getModifiedRecords().length > 0){
+            form.setLoading();
+        }
+
         unitsStore.sync({
             success :function (records, operation) {
                 form.setLoading(false);

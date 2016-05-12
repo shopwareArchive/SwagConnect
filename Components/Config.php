@@ -374,12 +374,9 @@ class Config
                     'shopId' => null,
                     'groupName' => 'units'
                 ));
-            if (is_null($model)) {
-                $model = new ConfigModel();
-                $model->setName($unit['connectUnit']);
-                $model->setValue($unit['shopwareUnitKey']);
-                $model->setGroupName('units');
-                $model->setShopId(null);
+
+            if (!$model) {
+                continue;
             }
 
             $model->setValue($unit['shopwareUnitKey']);

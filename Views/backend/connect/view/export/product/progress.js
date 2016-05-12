@@ -35,8 +35,8 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
      */
     snippets: {
         title: 'Export',
-        process: '{s name=export/article/progress/message}[0] of [1] products exported...{/s}',
-        notice: '{s name=progress/notice}This process will take about [0] minutes depending on your system resources. <br>Do you want to continue?{/s}'
+        process: '{s name=export/progress/process}[0] of [1] product(s) exported...{/s}',
+        notice: '{s name=export/progress/notice}This process will take about [0] minutes depending on your system resources. <br>Do you want to continue?{/s}'
     },
 
     bodyPadding: 10,

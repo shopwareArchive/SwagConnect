@@ -12,9 +12,9 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
     autoScroll: true,
 
     snippets: {
-        connectProductsTitle: '{s name=import/shopware_connect_products}shopware Connect Produkte{/s}',
+        connectProductsTitle: '{s name=import/shopware_connect_products}Shopware Connect Produkte{/s}',
         showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
-        hideMappedProducts: '{s name=import/hide_mapped_products}zugewiesene Produkte und Kategorien ausblenden{/s}',
+        hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}',
         activateProductsLabel: '{s name=import/activate_products}Produkte aktivieren{/s}',
         removeProducts: '{s name=import/remove_products}Remove Products{/s}',
         myShopTitle: '{s name=import/my_shop}My Shop{/s}',

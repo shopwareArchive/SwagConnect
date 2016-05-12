@@ -9,7 +9,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
     layout: 'card',
     snippets: {
         products: "{s name=export/tab/products}Products{/s}",
-        streams: "{s name=export/tab/streams}Product streams{/s}"
+        streams: "{s name=export/tab/streams}Product Streams{/s}"
     },
 
     initComponent: function () {

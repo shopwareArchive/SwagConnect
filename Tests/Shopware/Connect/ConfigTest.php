@@ -7,12 +7,6 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 
 class ConfigTest extends ConnectTestHelper
 {
-    public function setUp()
-    {
-
-
-    }
-
     public function tearDown()
     {
         Shopware()->Db()->exec("

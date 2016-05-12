@@ -432,14 +432,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
         $units = $repository->findAll();
 
-        $unitsMappingArray = array();
-        foreach ($units as $unit) {
-            $unitsMappingArray[] = array(
-                'shopwareUnitName' => $unit->getName(),
-                'shopwareUnitKey' => $unit->getUnit()
-            );
-        }
-
         $unitName = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
             'import/unit/take_over_units',
             'Take over unit',
@@ -450,6 +442,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             'shopwareUnitName' => $unitName,
             'shopwareUnitKey' => UnitMapper::ADOPT_UNIT_KEY,
         );
+
+        foreach ($units as $unit) {
+            $unitsMappingArray[] = array(
+                'shopwareUnitName' => $unit->getName(),
+                'shopwareUnitKey' => $unit->getUnit()
+            );
+        }
 
         $this->View()->assign(
             array(

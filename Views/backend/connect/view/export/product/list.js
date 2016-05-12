@@ -25,6 +25,12 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
         });
 
         me.callParent(arguments);
+        me.on('render', me.loadStore, me);
+    },
+
+    loadStore: function() {
+        var me = this;
+        me.getStore().load();
     },
 
     getColumns: function() {

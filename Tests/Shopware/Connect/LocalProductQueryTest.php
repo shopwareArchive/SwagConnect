@@ -17,11 +17,21 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     protected $productTranslator;
 
+    protected $mediaService;
+
     public function setUp()
     {
         $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
             ->getMock();
+
+        $this->mediaService = $this->getMockBuilder('\\Shopware\\Bundle\\MediaBundle\\MediaService')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->mediaService->expects('/media/image/tea_pavilion.jpg')
+            ->method('getUrl')
+            ->willReturn('http://myshop/media/image/2e/4f/tea_pavilion.jpg');
 
         $this->productTranslator->expects($this->any())
             ->method('translate')
@@ -57,7 +67,8 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->getProductBaseUrl(),
                 $configComponent,
                 new MarketplaceGateway(Shopware()->Models()),
-                $this->productTranslator
+                $this->productTranslator,
+                $this->mediaService
             );
         }
         return $this->localProductQuery;
@@ -100,7 +111,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             'vendor' =>  array(
                 'name' => 'Teapavilion',
                 'description' => 'Teapavilion description',
-                'logo_url' => 'image.jpg',
+                'logo_url' => 'tea_pavilion.jpg',
                 'url' => 'http://teapavilion.com',
                 'page_title' => 'Teapavilion title',
             ),
@@ -115,6 +126,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         );
 
         $expectedProduct = new Product($row);
+        $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         $expectedProduct->url = $this->getProductBaseUrl() . '22';
         $expectedProduct->attributes = array(
             'quantity' => NULL,

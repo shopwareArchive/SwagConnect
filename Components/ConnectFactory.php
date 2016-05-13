@@ -46,6 +46,8 @@ class ConnectFactory
 
     private $marketplaceSettingsApplier;
 
+    private $mediaService;
+
     public function __construct($version='')
     {
         $this->pluginVersion = $version;
@@ -85,6 +87,18 @@ class ConnectFactory
         }
 
         return $this->container;
+    }
+
+    /**
+     * @return \Shopware\Bundle\MediaBundle\MediaService | null
+     */
+    private function getMediaService()
+    {
+        if ($this->mediaService === null && $this->getContainer()->has('shopware_media.media_service')) {
+            $this->mediaService = $this->getContainer()->get('shopware_media.media_service');
+        }
+
+        return $this->mediaService;
     }
 
     /**
@@ -309,7 +323,8 @@ class ConnectFactory
                 new PdoProductTranslationsGateway(Shopware()->Db()),
                 $this->getModelManager(),
                 $this->getProductBaseUrl()
-            )
+            ),
+            $this->getMediaService()
         );
     }
 

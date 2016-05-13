@@ -22,8 +22,6 @@ use Shopware\Connect\Struct\Translation;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    protected $manager;
-
     protected $productDescriptionField;
 
     protected $baseProductUrl;
@@ -44,10 +42,12 @@ class LocalProductQuery extends BaseProductQuery
         $baseProductUrl,
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
-        ProductTranslatorInterface $productTranslator
+        ProductTranslatorInterface $productTranslator,
+        $mediaService = null
     )
     {
-        $this->manager = $manager;
+        parent::__construct($manager, $mediaService);
+
         $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
@@ -329,7 +329,7 @@ class LocalProductQuery extends BaseProductQuery
 
         if($row['vendorImage']){
             $info = pathinfo($row['vendorImage']);
-            $row['vendor']['logo_url'] = $this->getImagePath() . $info['basename'];
+            $row['vendor']['logo_url'] = $this->getImagePath($info['basename']);
         }
 
         unset($row['vendorName']);

@@ -8,6 +8,15 @@ use Shopware\Components\Model\ModelManager;
 
 abstract class BaseProductQuery
 {
+    protected $manager;
+
+    private $mediaService;
+
+    public function __construct(ModelManager $manager, $mediaService = null)
+    {
+        $this->manager = $manager;
+        $this->mediaService = $mediaService;
+    }
 
     protected $attributeMapping = array(
         'weight' => Product::ATTRIBUTE_WEIGHT,
@@ -58,9 +67,8 @@ abstract class BaseProductQuery
 
         $images = $query->getArrayResult();
 
-        $imagePath = $this->getImagePath();
-        $images = array_map(function($image) use ($imagePath) {
-            return "{$imagePath}{$image['path']}.{$image['extension']}";
+        $images = array_map(function($image) {
+            return $this->getImagePath($image['path'] . '.' . $image['extension']);
         }, $images);
 
 
@@ -70,10 +78,17 @@ abstract class BaseProductQuery
     /**
      * Returns URL for the shopware image directory
      *
+     * @param string $image
      * @return string
      */
-    protected function getImagePath()
+    protected function getImagePath($image)
     {
+        $imageFolderPath = '/media/image/';
+        if (get_class($this->mediaService) == 'Shopware\Bundle\MediaBundle\MediaService') {
+
+            return $this->mediaService->getUrl($imageFolderPath . $image);
+        }
+
         $request = Shopware()->Front()->Request();
 
         if (!$request) {
@@ -81,8 +96,7 @@ abstract class BaseProductQuery
         }
 
         $imagePath = $request->getScheme() . '://'
-            . $request->getHttpHost() . $request->getBasePath();
-        $imagePath .= '/media/image/';
+            . $request->getHttpHost() . $request->getBasePath() . $imageFolderPath . $image;
 
         return $imagePath;
     }

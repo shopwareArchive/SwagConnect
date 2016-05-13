@@ -29,7 +29,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->mediaService->expects($this->once())
+        $this->mediaService->expects($this->any())
             ->method('getUrl')
             ->with('/media/image/tea_pavilion.jpg')
             ->willReturn('http://myshop/media/image/2e/4f/tea_pavilion.jpg');

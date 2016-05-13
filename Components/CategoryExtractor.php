@@ -145,6 +145,9 @@ class CategoryExtractor
         // if parent is null collect shop names
         $shops = array();
         foreach ($this->configurationGateway->getConnectedShopIds() as $shopId) {
+            if (!$this->hasShopItems($shopId)) {
+                continue;
+            }
             $configuration = $this->configurationGateway->getShopConfiguration($shopId);
             $shops[$shopId] = array(
                 'name' => $configuration->displayName,
@@ -159,6 +162,22 @@ class CategoryExtractor
         });
 
         return $tree;
+    }
+
+    /**
+     * @param $shopId
+     * @return bool
+     */
+    public function hasShopItems($shopId)
+    {
+        $sql = 'SELECT COUNT(id)
+                FROM `s_plugin_connect_items`
+                WHERE shop_id = ?
+        ';
+
+        $count = Shopware()->Db()->fetchOne($sql, array($shopId));
+
+        return (bool) $count;
     }
 
     /**

@@ -54,7 +54,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         switch ($parent) {
             case 'root':
-                $categories = $this->getCategoryExtractor()->getMainNodes();
+                $categories = $this->getCategoryExtractor()->getMainNodes($hideMapped);
                 break;
             case is_numeric($parent):
                 $categories = $this->getCategoryExtractor()->getStreamsByShopId($parent);

@@ -47,11 +47,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $this->article->getMainDetail();
         $this->db->executeQuery(
-            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
-              VALUES (?, ?, ?, ?)',
+            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, shop_id, source_id, category)
+              VALUES (?, ?, ?, ?, ?)',
             array(
                 $this->article->getId(),
                 $detail->getId(),
+                1,
                 $detail->getNumber(),
                 '/bücher'
             )
@@ -202,42 +203,10 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 ))
             );
 
-        $this->configurationGateway->expects($this->at(2))
-            ->method('getShopConfiguration')
-            ->with(2)
-            ->willReturn(
-                new \Shopware\Connect\Struct\ShopConfiguration(array(
-                    'displayName' => 'Shop 2'
-                ))
-            );
-
-        $this->configurationGateway->expects($this->at(3))
-            ->method('getShopConfiguration')
-            ->with(3)
-            ->willReturn(
-                new \Shopware\Connect\Struct\ShopConfiguration(array(
-                    'displayName' => 'Shop 3'
-                ))
-            );
-
         $expected = array(
             array(
                 'id' => 1,
                 'name' => 'Shop 1',
-                'leaf' => false,
-                'children' => array(),
-                'iconCls' => 'sc-tree-node-icon',
-            ),
-            array(
-                'id' => 2,
-                'name' => 'Shop 2',
-                'leaf' => false,
-                'children' => array(),
-                'iconCls' => 'sc-tree-node-icon',
-            ),
-            array(
-                'id' => 3,
-                'name' => 'Shop 3',
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',

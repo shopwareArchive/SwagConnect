@@ -221,7 +221,9 @@ Ext.define('Shopware.apps.Connect.view.register.registerPanel', {
             'store-register',
             formValues,
             function () {
-                me.callback();
+                if (me.callback && typeof me.callback === 'function') {
+                    me.callback();
+                }
             }
         );
 

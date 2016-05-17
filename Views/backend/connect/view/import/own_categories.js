@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
     store: 'base.CategoryTree',
     viewConfig: {
         plugins: {
-            ptype: 'treeviewdragdrop',
+            ptype: 'customtreeviewdragdrop',
             appendOnly: true,
             dragGroup: 'remote',
             dropGroup: 'local'

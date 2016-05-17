@@ -95,19 +95,17 @@ class CategoryExtractor
         ';
 
         if ($parent !== null) {
-            $sql .= ' WHERE pcc.category_key LIKE ? AND connect_mapped_category IS NULL';
+            $sql .= ' WHERE pcc.category_key LIKE ?';
             $whereParams = array($parent . '/%');
             if ($excludeMapped === true) {
-                $sql .= ' AND pcc.local_category_id IS NULL';
+                $sql .= ' AND ar.connect_mapped_category IS NULL';
             }
             // filter only first child categories
             $rows = Shopware()->Db()->fetchPairs($sql, $whereParams);
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
-            $sql .= ' WHERE connect_mapped_category IS NULL';
-
             if ($excludeMapped === true) {
-                $sql .= ' AND pcc.local_category_id IS NULL';
+                $sql .= ' WHERE ar.connect_mapped_category IS NULL';
             }
             $rows = Shopware()->Db()->fetchPairs($sql);
             // filter only main categories

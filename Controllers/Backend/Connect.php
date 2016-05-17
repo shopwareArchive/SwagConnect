@@ -590,7 +590,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             $this->removeConnectMenuEntry();
             $this->View()->assign([
                 'success' => true,
-                'loginUrl' => $host . '/login/' . $responseObject->loginToken
+                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
             ]);
 
             return;

@@ -539,14 +539,12 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             ]);
 
             return;
-
-        } else {
-
-            $this->View()->assign([
-                'success' => false,
-                'message' => $responseObject->reason
-            ]);
         }
+
+        $this->View()->assign([
+            'success' => false,
+            'message' => $responseObject->reason
+        ]);
     }
 
     /**

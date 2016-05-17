@@ -375,7 +375,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     login: function(params, callback) {
-        var me = this;
+        var me = this,
+            redirectWindow = window.open('about:blank', '_blank');
+
+        redirectWindow.blur();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -402,8 +405,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    window.open(response.loginUrl);
+                    redirectWindow.location = response.loginUrl;
                     location.reload();
+                } else {
+                    redirectWindow.close();
                 }
             },
             function(response) {
@@ -414,7 +419,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     register: function(params, callback) {
-        var me = this;
+        var me = this,
+            redirectWindow = window.open('about:blank', '_blank');
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -441,7 +447,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    window.open(response.loginUrl);
+                    redirectWindow.location = response.loginUrl;
                     location.reload();
                 }
             },

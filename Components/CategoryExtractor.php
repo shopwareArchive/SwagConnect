@@ -228,6 +228,7 @@ class CategoryExtractor
                 'id' => $id,
                 'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
+                'cls' => 'sc-tree-node',
             );
 
             if (isset($node['iconCls'])) {

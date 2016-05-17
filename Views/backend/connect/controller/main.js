@@ -402,6 +402,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
+                    window.open(response.loginUrl);
                     location.reload();
                 }
             },
@@ -440,6 +441,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
+                    window.open(response.loginUrl);
                     location.reload();
                 }
             },

@@ -534,7 +534,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->removeConnectMenuEntry();
             $this->View()->assign([
-                'success' => true
+                'success' => true,
+                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
             ]);
 
             return;
@@ -588,7 +589,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->removeConnectMenuEntry();
             $this->View()->assign([
-                'success' => true
+                'success' => true,
+                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
             ]);
 
             return;

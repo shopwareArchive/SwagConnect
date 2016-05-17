@@ -969,6 +969,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             success :function (records, operation) {
                 form.setLoading(false);
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                me.getUnitsMapping().unitsStore.load({
+                    scope: this,
+                    callback: function(records, operation, success) {
+                        me.getUnitsMapping().getStore().reload();
+                    }
+                });
             },
             failure:function (batch) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');

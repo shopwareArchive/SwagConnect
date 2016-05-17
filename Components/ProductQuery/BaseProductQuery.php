@@ -8,6 +8,8 @@ use Shopware\Components\Model\ModelManager;
 
 abstract class BaseProductQuery
 {
+    const IMAGE_PATH = '/media/image/';
+
     protected $manager;
 
     private $mediaService;
@@ -83,10 +85,8 @@ abstract class BaseProductQuery
      */
     protected function getImagePath($image)
     {
-        $imageFolderPath = '/media/image/';
-        if (get_class($this->mediaService) == 'Shopware\Bundle\MediaBundle\MediaService') {
-
-            return $this->mediaService->getUrl($imageFolderPath . $image);
+        if ($this->mediaService) {
+            return $this->mediaService->getUrl(self::IMAGE_PATH . $image);
         }
 
         $request = Shopware()->Front()->Request();
@@ -96,7 +96,7 @@ abstract class BaseProductQuery
         }
 
         $imagePath = $request->getScheme() . '://'
-            . $request->getHttpHost() . $request->getBasePath() . $imageFolderPath . $image;
+            . $request->getHttpHost() . $request->getBasePath() . self::IMAGE_PATH . $image;
 
         return $imagePath;
     }

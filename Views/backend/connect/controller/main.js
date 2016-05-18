@@ -375,7 +375,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     login: function(params, callback) {
-        var me = this;
+        var me = this,
+            redirectWindow = window.open('about:blank', '_blank');
+
+        redirectWindow.blur();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -402,7 +405,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
+                    redirectWindow.location = response.loginUrl;
                     location.reload();
+                } else {
+                    redirectWindow.close();
                 }
             },
             function(response) {
@@ -413,7 +419,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     register: function(params, callback) {
-        var me = this;
+        var me = this,
+            redirectWindow = window.open('about:blank', '_blank');
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -440,6 +447,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
+                    redirectWindow.location = response.loginUrl;
                     location.reload();
                 }
             },
@@ -967,6 +975,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             success :function (records, operation) {
                 form.setLoading(false);
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                me.getUnitsMapping().unitsStore.load({
+                    scope: this,
+                    callback: function(records, operation, success) {
+                        me.getUnitsMapping().getStore().reload();
+                    }
+                });
             },
             failure:function (batch) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}','{s name=config/units/error_save_message}Mapping der Einheiten konnte nicht gespeichert werden.{/s}');

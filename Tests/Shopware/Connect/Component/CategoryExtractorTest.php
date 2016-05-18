@@ -257,44 +257,10 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 ))
             );
 
-        $this->configurationGateway->expects($this->at(2))
-            ->method('getShopConfiguration')
-            ->with(2)
-            ->willReturn(
-                new \Shopware\Connect\Struct\ShopConfiguration(array(
-                    'displayName' => 'Shop 2'
-                ))
-            );
-
-        $this->configurationGateway->expects($this->at(3))
-            ->method('getShopConfiguration')
-            ->with(3)
-            ->willReturn(
-                new \Shopware\Connect\Struct\ShopConfiguration(array(
-                    'displayName' => 'Shop 3'
-                ))
-            );
-
         $expected = array(
             array(
                 'id' => 1,
                 'name' => 'Shop 1',
-                'leaf' => false,
-                'children' => array(),
-                'iconCls' => 'sc-tree-node-icon',
-                'cls' => "sc-tree-node",
-            ),
-            array(
-                'id' => 2,
-                'name' => 'Shop 2',
-                'leaf' => false,
-                'children' => array(),
-                'iconCls' => 'sc-tree-node-icon',
-                'cls' => "sc-tree-node",
-            ),
-            array(
-                'id' => 3,
-                'name' => 'Shop 3',
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',

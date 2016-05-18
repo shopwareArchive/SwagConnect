@@ -136,13 +136,17 @@ class CategoryExtractor
 
     /**
      * Collects supplier names as categories tree
+     * @param null $excludeMapped
      * @return array
      */
-    public function getMainNodes()
+    public function getMainNodes($excludeMapped = null)
     {
         // if parent is null collect shop names
         $shops = array();
         foreach ($this->configurationGateway->getConnectedShopIds() as $shopId) {
+            if (!$this->hasShopItems($shopId, $excludeMapped)) {
+                continue;
+            }
             $configuration = $this->configurationGateway->getShopConfiguration($shopId);
             $shops[$shopId] = array(
                 'name' => $configuration->displayName,
@@ -157,6 +161,28 @@ class CategoryExtractor
         });
 
         return $tree;
+    }
+
+    /**
+     * @param $shopId
+     * @param bool $excludeMapped
+     * @return bool
+     */
+    public function hasShopItems($shopId, $excludeMapped = false)
+    {
+        $sql = 'SELECT COUNT(pci.id)
+                FROM `s_plugin_connect_items` pci
+                INNER JOIN `s_articles_attributes` aa ON aa.articleID = pci.article_id
+                WHERE pci.shop_id = ?
+        ';
+
+        if ($excludeMapped === true) {
+            $sql .= ' AND aa.connect_mapped_category IS NULL';
+        }
+
+        $count = Shopware()->Db()->fetchOne($sql, array($shopId));
+
+        return (bool) $count;
     }
 
     /**

@@ -14,15 +14,13 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     private $db;
     private $em;
-    private $article;
+    private $articleA;
+    private $articleB;
 
-    public function setUp()
+    private function createArticleA()
     {
-        $this->db = Shopware()->Db();
-        $this->em = Shopware()->Models();
-
         $minimalTestArticle = array(
-            'name' => 'Turnschuh',
+            'name' => 'TurnschuhA',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Turnschuh Inc.',
@@ -42,19 +40,51 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
         /** @var \Shopware\Models\Article\Article $article */
-        $this->article = $articleResource->create($minimalTestArticle);
+        $this->articleA = $articleResource->create($minimalTestArticle);
+    }
 
-        /** @var \Shopware\Models\Article\Detail $detail */
-        $detail = $this->article->getMainDetail();
-        $this->db->executeQuery(
-            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
-              VALUES (?, ?, ?, ?)',
-            array(
-                $this->article->getId(),
-                $detail->getId(),
-                $detail->getNumber(),
-                '/bücher'
-            )
+    private function createArticleB()
+    {
+        $minimalTestArticle = array(
+            'name' => 'TurnschuhB',
+            'active' => true,
+            'tax' => 19,
+            'supplier' => 'Turnschuh Inc.',
+            'categories' => array(
+                array('id' => 15),
+            ),
+            'mainDetail' => array(
+                'number' => '9897',
+                'prices' => array(
+                    array(
+                        'customerGroupKey' => 'EK',
+                        'price' => 999,
+                    ),
+                )
+            ),
+        );
+
+        $articleResource = \Shopware\Components\Api\Manager::getResource('article');
+        /** @var \Shopware\Models\Article\Article $article */
+        $this->articleB = $articleResource->create($minimalTestArticle);
+    }
+
+    public function setUp()
+    {
+        $this->db = Shopware()->Db();
+        $this->em = Shopware()->Models();
+
+        $this->createArticleA();
+        $this->createArticleB();
+
+        /** @var \Shopware\Models\Article\Detail $detailA */
+        $detailA = $this->articleA->getMainDetail();
+        $detailB = $this->articleB->getMainDetail();
+        $this->db->exec(
+            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category) VALUES
+                (' . $this->articleA->getId() . ',' . $detailA->getId() .',' . $detailA->getNumber() .', "/bücher"),
+                (' . $this->articleB->getId() . ',' . $detailB->getId() .',' . $detailB->getNumber() .', "/bücher")
+            '
         );
 
         $categories = array(
@@ -64,21 +94,36 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             array('category_key' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit', 'label' => 'Hosentraeger'),
         );
 
-        //inserts a category without any products
+        //inserts a category with map product
         $this->db->exec("
             INSERT INTO `s_plugin_connect_categories`(`category_key`, `label`, `local_category_id`) VALUES
-            ('/Kleidung-unit/Schuhe-unit','Schuhe', NULL)
+            ('/Kleidung-unit/SchuheA-unit','SchuheA', NULL)
         ");
+        $this->db->exec("
+            INSERT INTO `s_plugin_connect_categories`(`category_key`, `label`, `local_category_id`) VALUES
+            ('/Kleidung-unit/SchuheA-unit/SchuheB-unit','SchuheB', NULL)
+        ");
+        $this->db->insert(
+            's_plugin_connect_product_to_categories',
+            array(
+                'connect_category_id' => $this->db->lastInsertId(),
+                'articleID' => $this->articleB->getId(),
+            )
+        );
+        $this->db->update(
+            's_articles_attributes',
+            array('connect_mapped_category' => 1),
+            array('articleID=' . $this->articleB->getId())
+        );
 
         // todo@sb: Improve me with mocks
         foreach ($categories as $category) {
             $this->db->insert('s_plugin_connect_categories', $category);
             $categoryId = $this->db->lastInsertId();
 
-
             $this->db->insert('s_plugin_connect_product_to_categories', array(
                 'connect_category_id' => $categoryId,
-                'articleID' => $this->article->getId(),
+                'articleID' => $this->articleA->getId(),
             ));
         }
 
@@ -106,9 +151,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $this->db->exec("DELETE FROM `s_plugin_connect_categories`");
         $this->db->exec("DELETE FROM `s_plugin_connect_product_to_categories`");
         $this->db->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "9898%"');
+        $this->db->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "9897%"');
         $this->db->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
         $this->db->exec('DELETE FROM s_plugin_connect_items WHERE source_id LIKE "9898%"');
+        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9897%"');
+        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE source_id LIKE "9897%"');
     }
 
     public function testExtractImportedCategories()
@@ -147,6 +195,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'id' => '/Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'name' => 'Kleidung',
@@ -158,12 +207,14 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                         'id' => '/Kleidung/Hosen',
                         'leaf' => true,
                         'children' => array(),
+                        'cls' => "sc-tree-node",
                     ),
                     array(
                         'name' => 'Hosentraeger',
                         'id' => '/Kleidung/Hosentraeger',
                         'leaf' => true,
                         'children' => array(),
+                        'cls' => "sc-tree-node",
                     ),
                     array(
                         'name' => 'Nahrung & Getraenke',
@@ -175,12 +226,16 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'id' => '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke',
                                 'leaf' => true,
                                 'children' => array(),
+                                'cls' => "sc-tree-node",
                             ),
                         ),
+                        'cls' => "sc-tree-node",
                     )
                 ),
+                'cls' => "sc-tree-node",
             ),
         );
+
 
         $result = $this->categoryExtractor->extractImportedCategories();
         $this->assertTrue(is_array($result), 'Extracted categories must be array');
@@ -227,6 +282,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => 2,
@@ -234,6 +290,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => 3,
@@ -241,6 +298,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',
+                'cls' => "sc-tree-node",
             ),
         );
         $result = $this->categoryExtractor->getMainNodes();
@@ -255,12 +313,14 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
         );
         $result = $this->categoryExtractor->getRemoteCategoriesTree();
@@ -275,6 +335,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
@@ -291,10 +352,13 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'name' => 'Hosentraeger',
                                 'leaf' => true,
                                 'children' => array(),
+                                'cls' => "sc-tree-node",
                             ),
                         ),
+                        'cls' => "sc-tree-node",
                     ),
                 ),
+                'cls' => "sc-tree-node",
             ),
         );
         $parent = null;
@@ -311,12 +375,30 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
                 'name' => 'Kleidung',
-                'leaf' => true,
-                'children' => array(),
+                'leaf' => false,
+                'children' => array(
+                    array(
+                        'id' => '/Kleidung-unit/Hosen-unit',
+                        'name' => 'Hosen',
+                        'leaf' => false,
+                        'children' => array(
+                            array(
+                                'id' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                                'name' => 'Hosentraeger',
+                                'leaf' => true,
+                                'children' => array(),
+                                'cls' => "sc-tree-node",
+                            ),
+                        ),
+                        'cls' => "sc-tree-node",
+                    ),
+                ),
+                'cls' => "sc-tree-node",
             ),
         );
         $parent = null;
@@ -334,6 +416,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Hosen',
                 'leaf' => false,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
         );
         $parent = '/Kleidung-unit';
@@ -354,8 +437,10 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                         'name' => 'Hosentraeger',
                         'leaf' => true,
                         'children' => array(),
+                        'cls' => "sc-tree-node",
                     ),
                 ),
+                'cls' => "sc-tree-node",
             ),
         );
         $parent = '/Kleidung-unit';
@@ -366,7 +451,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function testGetTreeWithParentAndExcludeMapped()
     {
-        $parent = '/Kleidung-unit';
+        $parent = '/Kleidung-unit/SchuheA-unit';
         $includeChildren = true;
         $excludeMapped = true;
         $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, $excludeMapped);
@@ -392,13 +477,14 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(
-                ),
+                'children' => array(),
+                'cls' => "sc-tree-node",
             ),
         );
 
@@ -425,6 +511,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
@@ -441,10 +528,13 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'name' => 'Hosentraeger',
                                 'leaf' => true,
                                 'children' => array(),
+                                'cls' => "sc-tree-node",
                             ),
                         ),
+                        'cls' => "sc-tree-node",
                     ),
                 ),
+                'cls' => "sc-tree-node",
             ),
         );
 
@@ -479,6 +569,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sprite-product-streams',
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '1_stream_Mobile devices',
@@ -486,6 +577,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'iconCls' => 'sprite-product-streams',
+                'cls' => "sc-tree-node",
             ),
         );
 
@@ -517,12 +609,14 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'name' => 'Ski',
                 'leaf' => true,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
             array(
                 'id' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
                 'children' => array(),
+                'cls' => "sc-tree-node",
             ),
         );
 

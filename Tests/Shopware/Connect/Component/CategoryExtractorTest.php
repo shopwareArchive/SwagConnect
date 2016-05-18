@@ -81,9 +81,9 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $detailA = $this->articleA->getMainDetail();
         $detailB = $this->articleB->getMainDetail();
         $this->db->exec(
-            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category) VALUES
-                (' . $this->articleA->getId() . ',' . $detailA->getId() .',' . $detailA->getNumber() .', "/bücher"),
-                (' . $this->articleB->getId() . ',' . $detailB->getId() .',' . $detailB->getNumber() .', "/bücher")
+            'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, shop_id, source_id, category) VALUES
+                (' . $this->articleA->getId() . ',' . $detailA->getId() .',1,' . $detailA->getNumber() .', "/bücher"),
+                (' . $this->articleB->getId() . ',' . $detailB->getId() .',1,' . $detailB->getNumber() .', "/bücher")
             '
         );
 

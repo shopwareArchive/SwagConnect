@@ -135,9 +135,9 @@ class Shopping
             $shopCheckResult = $shopGateway->checkProducts($order, $myShopId);
             $logger = new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db());
             $logger->write(true, 'shopCheckResult', print_r($shopCheckResult, 1));
-//            if (count($shopCheckResult->changes)) {
-//                $this->applyRemoteShopChanges($shopCheckResult->changes);
-//            }
+            if (count($shopCheckResult->changes)) {
+                $this->applyRemoteShopChanges($shopCheckResult->changes);
+            }
 
             $checkResults[] = $shopCheckResult;
         }

@@ -279,17 +279,6 @@ final class SDK
     }
 
     /**
-     * @param array $productIds
-     * @return void
-     */
-    public function recordsUpdate(array $productIds)
-    {
-        $this->verifySdkIfNecessary();
-
-        $this->dependencies->getExportService()->recordsUpdate($productIds);
-    }
-
-    /**
      * Record product availability update
      *
      * Establish a hook in your shop and call this method for every update of a

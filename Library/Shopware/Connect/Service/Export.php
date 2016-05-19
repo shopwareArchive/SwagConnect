@@ -88,30 +88,6 @@ class Export
     }
 
     /**
-     * Update multiple products at once
-     *
-     * @param array $productIds
-     * @return void
-     */
-    public function recordsUpdate(array $productIds)
-    {
-        $products = $this->getProducts($productIds);
-        $shopId = $this->gateway->getShopId();
-
-        foreach ($products as $product) {
-            $product->shopId = $shopId;
-
-            $this->verificator->verify($product, $this->verificationGroups());
-            $this->gateway->recordUpdate(
-                $product->sourceId,
-                $this->productHasher->hash($product),
-                $this->revisionProvider->next(),
-                $product
-            );
-        }
-    }
-
-    /**
      * Record product availability update
      *
      * Establish a hook in your shop and call this method for every update of a

@@ -16,12 +16,13 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
     store: 'import.RemoteCategories',
     viewConfig: {
         plugins: {
-            ptype: 'treeviewdragdrop',
+            ptype: 'remote-category-drag-and-drop',
             appendOnly: true,
-            dragGroup: 'local',
-            dropGroup: 'remote'
+            dragGroup: 'local-category',
+            dropGroup: 'remote-category'
         }
     },
+    bodyCls: 'shopware-connect-color',
 
     snippets: {
         reload: '{s name=import/tree/reload}Neuladen{/s}'

@@ -101,7 +101,6 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 }
 
 .sc-tree-node{
-    color: #486783;
     font-weight: bold !important;
 }
 

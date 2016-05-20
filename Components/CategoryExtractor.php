@@ -251,7 +251,8 @@ class CategoryExtractor
 
             $category = array(
                 'name' => $node['name'],
-                'id' => $id,
+                'id' => uniqid($id),
+                'categoryId' => $id,
                 'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
                 'cls' => 'sc-tree-node',

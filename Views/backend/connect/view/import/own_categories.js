@@ -14,12 +14,33 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
         expanded: true
     },
     store: 'base.CategoryTree',
+    name: 'localCategoryTree',
     viewConfig: {
         plugins: {
             ptype: 'treeviewdragdrop',
+            pluginId: 'treeviewdragdrop',
             appendOnly: true,
-            dragGroup: 'remote',
-            dropGroup: 'local'
+            dragGroup: 'remote-category',
+            dropGroup: 'local-category'
+        },
+        listeners: {
+            viewready: function (tree) {
+                var view = tree,
+                    dd = view.getPlugin('treeviewdragdrop');
+
+                dd.dropZone.isValidDropPoint = function(node, position, dragZone, e, data) {
+                    var targetRecord = view.getRecord(node),
+                        draggedRecord = data.records[0];
+
+                    //its minus two, cause we have contact and stream node
+                    var draggedDepth = draggedRecord.data.depth - 2;
+
+                    //its plus one, cause we want the parent node depth
+                    var parentDepth = targetRecord.data.depth + 1;
+
+                    return !targetRecord.data.leaf && draggedDepth == parentDepth;
+                };
+            }
         }
     },
 

@@ -87,12 +87,21 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     height: 100%;
 }
 
+.sc-icon {
+    background: url("../images/shopware_connect.png") no-repeat !important;
+    height: 100%;
+}
+
 .shopware-connect-color {
     color: #486783 !important;
 }
 
 .sc-btn-right {
     float: right;
+}
+
+.sc-tree-node{
+    font-weight: bold !important;
 }
 
 .sc-tree-node-icon {

@@ -49,7 +49,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getImportedProductCategoriesTreeAction()
     {
-        $parent = $this->request->getParam('id', 'root');
+        $parent = $this->request->getParam('categoryId', 'root');
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
 
         switch ($parent) {
@@ -294,7 +294,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
                 ),
-                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection())
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                new \ShopwarePlugins\Connect\Components\RandomStringGenerator()
             );
         }
 

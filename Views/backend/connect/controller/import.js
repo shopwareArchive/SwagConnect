@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.control({
             'connect-remote-categories': {
                 reloadRemoteCategories: me.onReloadRemoteCategories,
+                beforeitemexpand: me.onBeforeLoadRemoteCategories,
                 itemmousedown: me.onSelectRemoteCategory
             },
             'connect-remote-categories dataview': {
@@ -80,6 +81,13 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         });
 
         me.callParent(arguments);
+    },
+
+    onBeforeLoadRemoteCategories: function( node ){
+        var me = this,
+            remoteCategoryStore = me.getRemoteCategoryTree().getStore();
+
+        remoteCategoryStore.getProxy().extraParams.categoryId = node.getData().categoryId;
     },
 
     /**

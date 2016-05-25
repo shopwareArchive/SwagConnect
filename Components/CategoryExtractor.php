@@ -24,6 +24,7 @@
 namespace ShopwarePlugins\Connect\Components;
 use Shopware\Connect\Gateway;
 use Shopware\CustomModels\Connect\AttributeRepository;
+use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 /**
  * Class CategoryExtractor
@@ -46,16 +47,29 @@ class CategoryExtractor
      */
     private $configurationGateway;
 
+    /**
+     * @var \ShopwarePlugins\Connect\Components\RandomStringGenerator;
+     */
+    private $randomStringGenerator;
+
+    /**
+     * @param AttributeRepository $attributeRepository
+     * @param CategoryResolver $categoryResolver
+     * @param Gateway $configurationGateway
+     * @param RandomStringGenerator $randomStringGenerator
+     */
     public function __construct(
         AttributeRepository $attributeRepository,
         CategoryResolver $categoryResolver,
-        Gateway $configurationGateway
+        Gateway $configurationGateway,
+        RandomStringGenerator $randomStringGenerator
     )
     {
 
         $this->attributeRepository = $attributeRepository;
         $this->categoryResolver = $categoryResolver;
         $this->configurationGateway = $configurationGateway;
+        $this->randomStringGenerator = $randomStringGenerator;
     }
 
     /**
@@ -251,7 +265,8 @@ class CategoryExtractor
 
             $category = array(
                 'name' => $node['name'],
-                'id' => $id,
+                'id' => $this->randomStringGenerator->generate($id),
+                'categoryId' => $id,
                 'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
                 'cls' => 'sc-tree-node',

@@ -108,3 +108,53 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     width: 16px !important;
     height: 16px !important;
 }
+
+.export-window-wrapper {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    position: absolute;
+    z-index: 2;
+}
+.export-window-mask {
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+
+    /* This works in IE 8 & 9 too */
+    /* ... but also 5, 6, 7 */
+    filter: alpha(opacity=85);
+
+    /* Older than Firefox 0.9 */
+    -moz-opacity:0.85;
+
+    /* Safari 1.x (pre WebKit!) */
+    -khtml-opacity: 0.85;
+
+    /* Modern!
+    /* Firefox 0.9+, Safari 2?, Chrome any?
+    /* Opera 9+, IE 9+ */
+    opacity: 0.85;
+}
+
+.export-window-message-wrapper {
+    position: absolute;
+    top: 45%;
+    text-align: center;
+    right: 7%;
+    z-index: 3;
+}
+
+.export-window-message {
+    float: left;
+    color: black;
+    margin: 25px 0 0 15px
+}
+
+.connect-wrench {
+    background: url("../images/wrench.png") no-repeat;
+    height: 65px;
+    width: 65px;
+    margin: 0 auto;
+    float: left;
+}

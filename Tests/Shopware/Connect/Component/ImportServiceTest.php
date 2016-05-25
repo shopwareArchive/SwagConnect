@@ -6,6 +6,7 @@ use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\ImportService;
+use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Connect\Gateway\PDO;
 
@@ -61,7 +62,8 @@ class ImportServiceTest extends ConnectTestHelper
             new CategoryExtractor(
                 $this->connectAttributeRepository,
                 $autoCategoryResolver,
-                new PDO(Shopware()->Db()->getConnection())
+                new PDO(Shopware()->Db()->getConnection()),
+                new RandomStringGenerator()
             )
         );
     }

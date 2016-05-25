@@ -235,11 +235,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function saveExportAction()
     {
         $data = $this->Request()->getParam('data');
-
-        $data = !isset($data[0]) ? array($data) : $data;
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
 
         if ($isModified === false) {
+            $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
             $this->View()->assign(
                 array(
@@ -318,6 +317,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connectExport = $this->getConnectExport();
 
         try {
+            $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
 
             $ids = $connectExport->getExportArticlesIds();

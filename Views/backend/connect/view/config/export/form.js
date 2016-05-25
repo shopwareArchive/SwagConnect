@@ -148,12 +148,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                             vertical: true,
                             columnWidth: .25,
                             items: [
-                                me.exportPriceCheckbox = me.createPriceCheckbox(),
-                                me.exportPurchasePriceCheckbox = me.createPurchasePriceCheckbox()
+                                me.exportPurchasePriceCheckbox = me.createPurchasePriceCheckbox(),
+                                me.exportPriceCheckbox = me.createPriceCheckbox()
                             ]
                         },
-                        me.exportPriceMode = me.createPriceField(),
-                        me.exportPurchasePriceMode = me.createPurchasePriceField()
+                        me.exportPurchasePriceMode = me.createPurchasePriceField(),
+                        me.exportPriceMode = me.createPriceField()
                     ]
                 },
                 {
@@ -182,15 +182,15 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             success: function(result, request) {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success === false || response.isPricingMappingAllowed === false) {
-                    me.priceMappingsFieldSet.setVisible(false);
+                    me.priceMappingsFieldSet.setDisabled(true);
                 }
                 if (response.success === false || response.isPriceModeEnabled === false) {
-                    me.exportPriceMode.setVisible(false);
-                    me.exportPriceCheckbox.setVisible(false);
+                    me.exportPriceMode.setDisabled(true);
+                    me.exportPriceCheckbox.setDisabled(true);
                 }
                 if (response.success === false || response.isPurchasePriceModeEnabled === false) {
-                    me.exportPurchasePriceMode.setVisible(false);
-                    me.exportPurchasePriceCheckbox.setVisible(false);
+                    me.exportPurchasePriceMode.setDisabled(true);
+                    me.exportPurchasePriceCheckbox.setDisabled(true);
                 }
             },
             failure: function() { }

@@ -171,24 +171,24 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertEquals('Ungültige Kundengruppe', $this->View()->message);
     }
 
-//    /**
-//     * @test
-//     */
-//    public function it_returns_error_when_at_least_one_article_has_not_supported_price()
-//    {
-//        $this->Request()
-//            ->setMethod('POST')
-//            ->setPost('data', array(
-//                'priceGroupForPriceExport' => 'EK',
-//                'priceFieldForPurchasePriceExport' => 'price',
-//                'priceFieldForPriceExport' => 'basePrice',
-//            ));
-//        $this->dispatch('backend/ConnectConfig/saveExport');
-//
-//        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-//        $this->assertFalse($this->View()->success);
-//        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
-//    }
+    /**
+     * @test
+     */
+    public function it_returns_error_when_at_least_one_article_has_not_supported_price()
+    {
+        $this->Request()
+            ->setMethod('POST')
+            ->setPost('data', array(
+                'priceGroupForPriceExport' => 'SC',
+                'priceFieldForPurchasePriceExport' => 'price',
+                'priceFieldForPriceExport' => 'basePrice',
+            ));
+        $this->dispatch('backend/ConnectConfig/saveExport');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertFalse($this->View()->success);
+        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
+    }
 
     /**
      * @test
@@ -210,24 +210,24 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertEquals('Ungültige Kundengruppe', $this->View()->message);
     }
 
-//    /**
-//     * @test
-//     */
-//    public function it_returns_error_when_at_least_one_article_has_not_supported_purchase_price()
-//    {
-//        $this->Request()
-//            ->setMethod('POST')
-//            ->setPost('data', array(
-//                'priceGroupForPriceExport' => 'EK',
-//                'priceGroupForPurchasePriceExport' => 'EK',
-//                'priceFieldForPurchasePriceExport' => 'basePrice',
-//                'priceFieldForPriceExport' => 'price',
-//            ));
-//        $this->dispatch('backend/ConnectConfig/saveExport');
-//
-//        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-//        $this->assertFalse($this->View()->success);
-//        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
-//    }
+    /**
+     * @test
+     */
+    public function it_returns_error_when_at_least_one_article_has_not_supported_purchase_price()
+    {
+        $this->Request()
+            ->setMethod('POST')
+            ->setPost('data', array(
+                'priceGroupForPriceExport' => 'EK',
+                'priceGroupForPurchasePriceExport' => 'XX',
+                'priceFieldForPurchasePriceExport' => 'basePrice',
+                'priceFieldForPriceExport' => 'price',
+            ));
+        $this->dispatch('backend/ConnectConfig/saveExport');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertFalse($this->View()->success);
+        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
+    }
 }
  

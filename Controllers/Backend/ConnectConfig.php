@@ -236,6 +236,19 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $data = $this->Request()->getParam('data');
 
+        $data = !isset($data[0]) ? array($data) : $data;
+        $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
+
+        if ($isModified === false) {
+            $this->getConfigComponent()->setExportConfigs($data);
+            $this->View()->assign(
+                array(
+                    'success' => true,
+                )
+            );
+            return;
+        }
+
         if ($data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']) {
             $this->View()->assign(array(
                 'success' => false,
@@ -262,18 +275,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
-        //todo@sb: it should be fixed in new price workflow -> CON-3171
-//        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
-//            $this->View()->assign(array(
-//                'success' => false,
-//                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-//                    'config/export/priceFieldIsNotSupported',
-//                    'Preisfeld ist nicht gepflegt',
-//                    true
-//                )
-//            ));
-//            return;
-//        }
+        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/priceFieldIsNotSupported',
+                    'Preisfeld ist nicht gepflegt',
+                    true
+                )
+            ));
+            return;
+        }
 
         /** @var \Shopware\Models\Customer\Group $groupPurchasePrice */
         $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(
@@ -290,44 +302,41 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             ));
             return;
         }
-        //todo@sb: it should be fixed in new price workflow -> CON-3171
-//        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) > 0) {
-//            $this->View()->assign(array(
-//                'success' => false,
-//                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-//                    'config/export/priceFieldIsNotSupported',
-//                    'Preisfeld ist nicht gepflegt',
-//                    true
-//                )
-//            ));
-//            return;
-//        }
 
-        $data = !isset($data[0]) ? array($data) : $data;
-        $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
-        $this->getConfigComponent()->setExportConfigs($data);
+        if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) > 0) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'config/export/priceFieldIsNotSupported',
+                    'Preisfeld ist nicht gepflegt',
+                    true
+                )
+            ));
+            return;
+        }
 
-        if ($isModified === true) {
-            $connectExport = $this->getConnectExport();
-            try {
-                $ids = $connectExport->getExportArticlesIds();
-                $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
-                $errors = $connectExport->export($sourceIds);
-            }catch (\RuntimeException $e) {
-                $this->View()->assign(array(
-                        'success' => false,
-                        'message' => $e->getMessage()
-                    ));
-                return;
-            }
+        $connectExport = $this->getConnectExport();
 
-            if (!empty($errors)) {
-                $this->View()->assign(array(
-                        'success' => false,
-                        'message' => implode("<br>\n", $errors)
-                    ));
-                return;
-            }
+        try {
+            $this->getConfigComponent()->setExportConfigs($data);
+
+            $ids = $connectExport->getExportArticlesIds();
+            $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
+            $errors = $connectExport->export($sourceIds);
+        }catch (\RuntimeException $e) {
+            $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
+            return;
+        }
+
+        if (!empty($errors)) {
+            $this->View()->assign(array(
+                    'success' => false,
+                    'message' => implode("<br>\n", $errors)
+                ));
+            return;
         }
 
         $this->View()->assign(

@@ -13,8 +13,10 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
     width: 1000,
     height: '95%',
     title: Ext.String.format('{s name=window/title}[0]{/s}', marketplaceName),
-
     titleTemplate: Ext.String.format('{s name=window/title_template}[0] - [text]{/s}', marketplaceName),
+    snippets: {
+        priceFieldsNotConfigured: "{s name=export/price_fields/not_configured}To export product, you need to configure price fields under Settings tab export{/s}"
+    },
 
     /**
      *
@@ -76,6 +78,20 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     width: 200
                 })];
             case 'Export':
+                Ext.Ajax.request({
+                    scope: me,
+                    url: '{url controller=ConnectConfig action=isPricingMappingAllowed}',
+                    success: function(result, request) {
+                        var response = Ext.JSON.decode(result.responseText);
+                        if (response.success === false || response.isPricingMappingAllowed === true) {
+                            me.body.insertHtml("beforeEnd", me.getHtmlMask());
+                        }
+                    },
+                    failure: function() {
+                        me.body.insertHtml("beforeEnd", me.getHtmlMask());
+                    }
+                });
+
                 return [ Ext.create('Shopware.apps.Connect.view.export.TabPanel', {
                     region: 'center',
                     action : me.action
@@ -93,6 +109,20 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     })
                 ];
         }
+    },
+
+    getHtmlMask: function () {
+        var me = this;
+
+        return '<div class="export-window-wrapper">' +
+            '<div class="export-window-message-wrapper">' +
+            '<div class="connect-wrench"></div>' +
+            '<div class="export-window-message">' +
+            '<h1>' + me.snippets.priceFieldsNotConfigured + '</h1>' +
+            '</div>' +
+            '</div>' +
+            '<div class="export-window-mask"></div>' +
+            '</div>';
     }
 });
 //{/block}

@@ -51,6 +51,11 @@ Ext.define('Shopware.apps.Connect.view.import.tree.RemoteCategoryDragAndDrop', {
         //its plus one, cause we want the parent node depth
         var parentDepth = me.getDepth(targetRecord) + 1;
 
+        //dragged leaf can be drop everywhere except on the main categories (deutsch, english)
+        if(me.isLeaf(draggedRecord) && !me.isLeaf(targetRecord) && parentDepth > 2){
+            return true;
+        }
+
         return !me.isLeaf(targetRecord) && draggedDepth == parentDepth;
     }
 });

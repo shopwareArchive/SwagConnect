@@ -92,6 +92,10 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     height: 100%;
 }
 
+.local-product-color {
+    color: #000000;
+}
+
 .shopware-connect-color {
     color: #486783 !important;
 }

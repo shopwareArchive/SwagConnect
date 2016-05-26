@@ -153,7 +153,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     getBasicFieldset: function() {
         var me = this;
 
-        var apiFieldset = Ext.create('Ext.form.FieldSet', {
+        return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.basicSettings,
             defaultType: 'textfield',
@@ -171,8 +171,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 me.createAttributeCombo()
             ]
         });
-
-        return apiFieldset;
     },
 
     /**

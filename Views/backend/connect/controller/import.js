@@ -30,7 +30,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.control({
             'connect-remote-categories': {
                 reloadRemoteCategories: me.onReloadRemoteCategories,
-                beforeitemexpand: me.onBeforeLoadRemoteCategories,
+                beforeload: me.onBeforeReloadRemoteCategories,
                 itemmousedown: me.onSelectRemoteCategory
             },
             'connect-remote-categories dataview': {
@@ -83,11 +83,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.callParent(arguments);
     },
 
-    onBeforeLoadRemoteCategories: function( node ){
-        var me = this,
-            remoteCategoryStore = me.getRemoteCategoryTree().getStore();
+    onBeforeReloadRemoteCategories: function( remoteCategoryStore, operation) {
+        var root = 'root';
 
-        remoteCategoryStore.getProxy().extraParams.categoryId = node.getData().categoryId;
+        if (operation.id == root) {
+            remoteCategoryStore.getProxy().extraParams.categoryId = root;
+        } else {
+            remoteCategoryStore.getProxy().extraParams.categoryId = operation.node.get('categoryId');
+        }
     },
 
     /**
@@ -103,9 +106,10 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var mainCategory = me.getMainCategoryByNode(record);
 
         var remoteProductsStore = me.getRemoteProductsGrid().getStore();
-        remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('id');
-        if (mainCategory.get('id') != record.get('id')) {
-            remoteProductsStore.getProxy().extraParams.category = record.get('id');
+        remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('categoryId');
+
+        if (mainCategory.get('categoryId') != record.get('categoryId')) {
+            remoteProductsStore.getProxy().extraParams.category = record.get('categoryId');
         } else {
             remoteProductsStore.getProxy().extraParams.category = null;
         }
@@ -312,7 +316,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].get('id'),
+        var remoteCategoryKey = data.records[0].get('categoryId'),
             remoteCategoryLabel = data.records[0].get('text'),
             localCategoryId = overModel.get('id');
 

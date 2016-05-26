@@ -145,6 +145,17 @@ class SocialNetwork
         return new Struct\Shipping($shipping);
     }
 
+    /**
+     * Set price type in SocialNetwork
+     *
+     * @param int $priceType
+     */
+    public function setPriceType($priceType)
+    {
+        $response = $this->request('/sdk/price-type', array('priceType' => (int)$priceType));
+        $this->handleResponse($response, "Set price type");
+    }
+
     private function verifyProductIds(array $productIds)
     {
         foreach ($productIds as $productId) {

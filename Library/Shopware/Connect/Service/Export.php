@@ -156,15 +156,4 @@ class Export
         $products = $this->fromShop->getProducts(array($productId));
         return reset($products);
     }
-
-    /**
-     * Get multiple products from gateway
-     *
-     * @param array $productIds
-     * @return \Shopware\Connect\Struct\Product
-     */
-    protected function getProducts(array $productIds)
-    {
-        return $this->fromShop->getProducts($productIds);
-    }
 }

@@ -57,7 +57,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '2.0.0';
+    const VERSION = '2.0.1';
 
     /**
      * @param string $apiKey API key assigned to you by Shopware Connect
@@ -539,5 +539,17 @@ final class SDK
         }
 
         return (int)$priceType;
+    }
+
+    public function setPriceType($priceType)
+    {
+        $availablePriceTypes = [self::PRICE_TYPE_RETAIL, self::PRICE_TYPE_PURCHASE, self::PRICE_TYPE_BOTH];
+        if (in_array((int)$priceType, $availablePriceTypes)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Price type %s is not supported, please check Shopware\Connect\SDK for available values.',
+                $priceType
+            ));
+        }
+        $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
     }
 }

@@ -280,7 +280,8 @@ class DependencyResolver
                     $this->gateway,
                     $this->gateway,
                     $this->toShop,
-                    $this->fromShop
+                    $this->fromShop,
+                    $this->getExportService()
                 )
             );
 

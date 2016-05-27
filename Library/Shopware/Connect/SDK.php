@@ -551,7 +551,10 @@ final class SDK
                 $priceType
             ));
         }
-        $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
-        $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, $priceType);
+
+        $result = $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
+        if ($result) {
+            $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, $priceType);
+        }
     }
 }

@@ -149,11 +149,15 @@ class SocialNetwork
      * Set price type in SocialNetwork
      *
      * @param int $priceType
+     * @return boolean
      */
     public function setPriceType($priceType)
     {
         $response = $this->request('/sdk/price-type', array('priceType' => (int)$priceType));
         $this->handleResponse($response, "Set price type");
+
+        $responseBody = json_decode($response->body);
+        return $responseBody->success;
     }
 
     private function verifyProductIds(array $productIds)

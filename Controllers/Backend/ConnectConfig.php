@@ -351,6 +351,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connectExport = $this->getConnectExport();
         try {
             $data = !isset($data[0]) ? array($data) : $data;
+            $this->getSDK()->setPriceType($priceType);
             $this->getConfigComponent()->setExportConfigs($data);
 
             $ids = $connectExport->getExportArticlesIds();

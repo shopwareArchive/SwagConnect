@@ -545,7 +545,7 @@ final class SDK
     {
         $priceType = (int)$priceType;
         $availablePriceTypes = [self::PRICE_TYPE_RETAIL, self::PRICE_TYPE_PURCHASE, self::PRICE_TYPE_BOTH];
-        if (in_array($priceType, $availablePriceTypes)) {
+        if (!in_array($priceType, $availablePriceTypes)) {
             throw new \InvalidArgumentException(sprintf(
                 'Price type %s is not supported, please check Shopware\Connect\SDK for available values.',
                 $priceType

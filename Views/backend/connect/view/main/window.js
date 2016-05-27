@@ -83,7 +83,9 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     url: '{url controller=ConnectConfig action=isPricingMappingAllowed}',
                     success: function(result, request) {
                         var response = Ext.JSON.decode(result.responseText);
-                        if (response.success === false || response.isPricingMappingAllowed === true) {
+                        if (response.success === false) {
+                            me.body.insertHtml("beforeEnd", me.getHtmlMask());
+                        } else if (response.isPriceModeEnabled == false && response.isPurchasePriceModeEnabled == false) {
                             me.body.insertHtml("beforeEnd", me.getHtmlMask());
                         }
                     },

@@ -543,13 +543,15 @@ final class SDK
 
     public function setPriceType($priceType)
     {
+        $priceType = (int)$priceType;
         $availablePriceTypes = [self::PRICE_TYPE_RETAIL, self::PRICE_TYPE_PURCHASE, self::PRICE_TYPE_BOTH];
-        if (in_array((int)$priceType, $availablePriceTypes)) {
+        if (in_array($priceType, $availablePriceTypes)) {
             throw new \InvalidArgumentException(sprintf(
                 'Price type %s is not supported, please check Shopware\Connect\SDK for available values.',
                 $priceType
             ));
         }
         $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
+        $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, $priceType);
     }
 }

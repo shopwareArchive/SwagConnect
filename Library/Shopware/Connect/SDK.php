@@ -541,20 +541,22 @@ final class SDK
         return (int)$priceType;
     }
 
+    /**
+     * Send chosen price type to Connect system
+     *
+     * Options are:
+     *
+     * - SDK::PRICE_TYPE_PURCHASE: Only the purchase price of a product is exported.
+     * - SDK::PRICE_TYPE_RETAIL: Only the retail price (Product#price) is exported.
+     * - SDK::PRICE_TYPE_BOTH: Both purchase and retail price are exported.
+     *
+     * @param $priceType
+     */
     public function setPriceType($priceType)
     {
-        $priceType = (int)$priceType;
-        $availablePriceTypes = [self::PRICE_TYPE_RETAIL, self::PRICE_TYPE_PURCHASE, self::PRICE_TYPE_BOTH];
-        if (!in_array($priceType, $availablePriceTypes)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Price type %s is not supported, please check Shopware\Connect\SDK for available values.',
-                $priceType
-            ));
-        }
+        $this->verifySdkIfNecessary();
 
-        $result = $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
-        if ($result) {
-            $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, $priceType);
-        }
+        $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
+        $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, (int)$priceType);
     }
 }

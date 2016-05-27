@@ -106,7 +106,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
-        elements.push(me.getApiKeyFieldset());
+        elements.push(me.getBasicFieldset());
         if (defaultMarketplace == false) {
             // extended import settings are available
             // only for SEM shops
@@ -150,58 +150,16 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      *
      * @return Ext.form.FieldSet
      */
-    getApiKeyFieldset: function() {
+    getBasicFieldset: function() {
         var me = this;
-        var attributeCombo = me.createAttributeCombo();
 
-        var apiFieldset = Ext.create('Ext.form.FieldSet', {
+        return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.basicSettings,
             defaultType: 'textfield',
             layout: 'anchor',
             items: [
                 {
-                    xtype: 'container',
-                    html: me.snippets.apiKeyDescription
-                }, {
-                    xtype: 'container',
-                    layout: 'hbox',
-                    items: [
-                        {
-                            xtype: 'textfield',
-                            fieldLabel: me.snippets.apiKeyHeader,
-                            labelWidth: 100,
-                            name: 'apiKey',
-                            flex: 5,
-                            padding: '0 20 10 0'
-                        }, {
-                            xtype: 'button',
-                            flex: 1,
-                            height: 27,
-                            text: me.snippets.apiKeyCheck,
-                            handler: function(btn) {
-                                var apiField = btn.up('form').down('textfield[name=apiKey]'),
-                                    apiKey = apiField.getValue();
-                                Ext.Ajax.request({
-                                    scope: this,
-                                    url: window.location.pathname + 'connect/verifyApiKey',
-                                    success: function(result, request) {
-                                        var response = Ext.JSON.decode(result.responseText);
-                                        Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
-                                        if(response.message) {
-                                            Shopware.Notification.createGrowlMessage(
-                                                btn.title,
-                                                response.message
-                                            );
-                                        }
-                                    },
-                                    failure: function() { },
-                                    params: { apiKey: apiKey }
-                                });
-                            }
-                        }
-                    ]
-                }, {
                     xtype: 'checkbox',
                     name: 'hasSsl',
                     fieldLabel: me.snippets.hasSslLabel,
@@ -210,11 +168,9 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
                 },
-                attributeCombo
+                me.createAttributeCombo()
             ]
         });
-
-        return apiFieldset;
     },
 
     /**
@@ -285,13 +241,63 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         return importSettingsFieldset;
     },
 
+    getApiKeyItems: function () {
+        var me = this;
+
+        return [
+            {
+                xtype: 'container',
+                html: me.snippets.apiKeyDescription
+            }, {
+                xtype: 'container',
+                layout: 'hbox',
+                columnWidth: 1,
+                items: [
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: me.snippets.apiKeyHeader,
+                        labelWidth: 100,
+                        name: 'apiKey',
+                        flex: 5,
+                        padding: '0 20 10 0'
+                    }, {
+                        xtype: 'button',
+                        flex: 1,
+                        height: 27,
+                        text: me.snippets.apiKeyCheck,
+                        handler: function(btn) {
+                            var apiField = btn.up('form').down('textfield[name=apiKey]'),
+                                apiKey = apiField.getValue();
+                            Ext.Ajax.request({
+                                scope: this,
+                                url: window.location.pathname + 'connect/verifyApiKey',
+                                success: function(result, request) {
+                                    var response = Ext.JSON.decode(result.responseText);
+                                    Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
+                                    if(response.message) {
+                                        Shopware.Notification.createGrowlMessage(
+                                            btn.title,
+                                            response.message
+                                        );
+                                    }
+                                },
+                                failure: function() { },
+                                params: { apiKey: apiKey }
+                            });
+                        }
+                    }
+                ]
+            }
+        ];
+    },
+
     /**
      * Creates advanced configuration field set
      * @return Ext.form.FieldSet
      */
     getAdvancedConfigFieldset: function() {
         var me = this,
-            items = [];
+            items = me.getApiKeyItems();
 
         var leftContainer = Ext.create('Ext.container.Container', {
             columnWidth: 0.5,
@@ -328,7 +334,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         items.push(bottomContainer);
 
         var fieldset = Ext.create('Ext.form.FieldSet', {
-            layout: 'column',
+            layout: 'anchor',
             title: me.snippets.advancedHeader,
             collapsible: true,
             collapsed: true,

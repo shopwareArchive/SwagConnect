@@ -193,7 +193,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                     me.exportPurchasePriceCheckbox.setDisabled(true);
                 }
             },
-            failure: function() { }
+            failure: function() {
+                me.priceMappingsFieldSet.setDisabled(true);
+            }
         });
 
         Ext.getStore('export.List').load();
@@ -392,7 +394,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         return Ext.create('Ext.form.field.Checkbox', {
             boxLabel: me.snippets.priceMode,
             name: 'exportPriceMode',
-            readOnly: true,
             inputValue: 'price'
         });
     },
@@ -410,7 +411,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             boxLabel: me.snippets.purchasePriceMode,
             name: 'exportPriceMode',
             inputValue: 'purchasePrice',
-            readOnly: true,
             margin: '15 0 0 0'
         });
     },

@@ -509,7 +509,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
             $host = 'sn.' . $host;
         } else {
@@ -563,7 +563,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $email = $this->Request()->getParam('email');
 
         // Enter the valid production url here
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
             $host = 'sn.' . $host;
         } else {
@@ -625,6 +625,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             pluginID,
             controller,
             action,
+            onclick,
             active
           ) VALUES (
             '#parent#',
@@ -633,6 +634,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             #pluginID#,
             '#controller#',
             '#action#',
+            '#onclick#',
             1
           )";
 
@@ -642,6 +644,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'contents--import-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Import'
         ]));
 
@@ -651,6 +654,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'contents--import-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Export'
         ]));
 
@@ -660,7 +664,18 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'sprite-gear',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Settings'
+        ]));
+
+        $db->exec(strtr($insertSql, [
+            '#parent#' => $row['parent'],
+            '#name#' => 'Open Connect',
+            '#class#' => 'connect-icon',
+            '#pluginID#' => $row['pluginID'],
+            '#controller#' => 'window.open(\'http://sn.' . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '\')',
+            '#onclick#' => '',
+            '#action#' => ''
         ]));
     }
 

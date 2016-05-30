@@ -274,6 +274,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
             && $data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']
+            && $data['priceGroupForPurchasePriceExport'] == $data['priceGroupForPriceExport']
         ) {
             $this->View()->assign(array(
                 'success' => false,

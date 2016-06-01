@@ -116,6 +116,14 @@ class Setup
                     'active' => 1,
                     'parent' => $parent
                 ));
+
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Open Connect',
+                    'onclick' => 'window.open(\'http://sn.' . $configComponent->getConfig('connectDebugHost', 'connect.shopware.com') . '\')',
+                    'class' => 'connect-icon',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
             }
 
             $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
@@ -128,7 +136,9 @@ class Setup
             ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
+            ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
 
             ON DUPLICATE KEY UPDATE
               `namespace` = VALUES(`namespace`),

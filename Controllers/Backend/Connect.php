@@ -673,8 +673,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#name#' => 'Open Connect',
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
-            '#controller#' => 'window.open(\'http://sn.' . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '\')',
-            '#onclick#' => '',
+            '#controller#' => '',
+            '#onclick#' => 'window.open("http://sn.' . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
             '#action#' => ''
         ]));
     }

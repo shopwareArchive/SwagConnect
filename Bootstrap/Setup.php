@@ -686,6 +686,7 @@ class Setup
         $states = array(
             'sc_received' => ' SC received',
             'sc_requested' => 'SC requested',
+            'sc_initiated' => 'SC initiated',
             'sc_instructed' => 'SC instructed',
             'sc_aborted' => 'SC aborted',
             'sc_timeout' => 'SC timeout',

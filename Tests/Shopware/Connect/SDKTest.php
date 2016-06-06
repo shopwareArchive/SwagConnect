@@ -79,6 +79,18 @@ class SDKTest extends ConnectTestHelper
 //        $this->changeCategoryConnectMappingForCategoryTo(14, '/bücher');
 
         $article = $this->getLocalArticle();
+        $detail = $article->getMainDetail();
+
+        if (method_exists($detail, 'setPurchasePrice')) {
+            $detail->setPurchasePrice(5.99);
+            Shopware()->Models()->persist($detail);
+        } else {
+            $prices = $detail->getPrices();
+            $prices[0]->setBasePrice(5.99);
+            Shopware()->Models()->persist($prices[0]);
+        }
+        Shopware()->Models()->flush();
+
         // Insert the product
         $this->getConnectExport()->export(array($article->getId()));
 

@@ -13,6 +13,11 @@ class ConnectExportTest extends ConnectTestHelper
      */
     private $connectExport;
 
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config
+     */
+    private $config;
+
     public static function setUpBeforeClass()
     {
         $conn = Shopware()->Db();
@@ -22,6 +27,7 @@ class ConnectExportTest extends ConnectTestHelper
 
     public function setUp()
     {
+        $this->config = new Config(Shopware()->Models());
         $this->connectExport = new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
@@ -29,6 +35,29 @@ class ConnectExportTest extends ConnectTestHelper
             new ProductsAttributesValidator(),
             new Config(Shopware()->Models())
         );
+
+        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $purchasePrice = 'detailPurchasePrice';
+        } else {
+            $purchasePrice = 'basePrice';
+        }
+        $configs = array(
+            'priceGroupForPriceExport' => array('EK', null, 'export'),
+            'priceGroupForPurchasePriceExport' => array('EK', null, 'export'),
+            'priceFieldForPriceExport' => array('price', null, 'export'),
+            'priceFieldForPurchasePriceExport' => array($purchasePrice, null, 'export'),
+        );
+
+        foreach ($configs as $name => $values) {
+            list($value, $shopId, $group) = $values;
+
+            $this->config->setConfig(
+                $name,
+                $value,
+                $shopId,
+                $group
+            );
+        }
     }
 
     public function testExport()

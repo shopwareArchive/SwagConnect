@@ -270,7 +270,7 @@ class ProductFromShopTest extends ConnectTestHelper
     }
 
     /**
-     * @expectedException \Doctrine\DBAL\DBALException
+     * @expectedException \RuntimeException
      */
     public function testByShouldThrowException()
     {

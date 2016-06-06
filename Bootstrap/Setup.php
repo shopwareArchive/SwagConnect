@@ -463,11 +463,6 @@ class Setup
         // open ConnectConfigTest.php and change tearDown function
         // for some reason shopware runs test during plugin installation
         $configs = array(
-            'priceGroupForPriceExport' => array('EK', null, 'export'),
-            'priceGroupForPurchasePriceExport' => array('EK', null, 'export'),
-            'priceFieldForPriceExport' => array('price', null, 'export'),
-            'priceFieldForPurchasePriceExport' => array('basePrice', null, 'export'),
-
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),

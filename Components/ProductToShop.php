@@ -336,16 +336,17 @@ class ProductToShop implements ProductToShopBase
             $price->fromArray(array(
                 'from' => 1,
                 'price' => $product->price,
-                'basePrice' => $basePrice,
                 'customerGroup' => $customerGroup,
                 'article' => $model
             ));
+
+            $this->setPurchasePrice($detail, $price, $basePrice);
             $detail->setPrices(array($price));
             // If the price is not being update, update the basePrice anyway
         } else {
             /** @var \Shopware\Models\Article\Price $price */
             $price = $detail->getPrices()->first();
-            $price->setBasePrice($basePrice);
+            $this->setPurchasePrice($detail, $price, $basePrice);
         }
 
         if ($model->getMainDetail() === null) {
@@ -664,6 +665,15 @@ class ProductToShop implements ProductToShopBase
         return $supplier;
     }
 
+    private function setPurchasePrice(DetailModel $detail, Price $price, $purchasePrice)
+    {
+        if (method_exists($detail, 'setPurchasePrice')) {
+            $detail->setPurchasePrice($purchasePrice);
+        } else {
+            $price->setBasePrice($purchasePrice);
+        }
+    }
+
     public function update($shopId, $sourceId, ProductUpdate $product)
     {
         // find article detail id
@@ -686,12 +696,22 @@ class ProductToShop implements ProductToShopBase
         );
 
         // update stock in article detail
-        $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles_details SET instock = ? WHERE id = ?',
-            array($product->availability, $articleDetailId)
-        );
-
         // update prices
+        // if purchase price is stored in article detail
+        // update it together with stock
+        // since shopware 5.2
+        if (method_exists('Shopware\Models\Article\Detail', 'getPurchasePrice')) {
+            $this->manager->getConnection()->executeUpdate(
+                'UPDATE s_articles_details SET instock = ?, purchaseprice = ? WHERE id = ?',
+                array($product->availability, $product->purchasePrice, $articleDetailId)
+            );
+
+        } else {
+            $this->manager->getConnection()->executeUpdate(
+                'UPDATE s_articles_details SET instock = ? WHERE id = ?',
+                array($product->availability, $articleDetailId)
+            );
+        }
         $this->manager->getConnection()->executeUpdate(
             "UPDATE s_articles_prices SET price = ?, baseprice = ? WHERE articledetailsID = ? AND pricegroup = 'EK'",
             array($product->price, $product->purchasePrice, $articleDetailId)

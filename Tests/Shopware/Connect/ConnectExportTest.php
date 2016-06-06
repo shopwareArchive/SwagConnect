@@ -35,17 +35,23 @@ class ConnectExportTest extends ConnectTestHelper
     {
         /** @var \Shopware\Models\Article\Article $model */
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(3);
+        $detail = $model->getMainDetail();
         /** @var \Shopware\Models\Article\Price $prices */
-        $prices = $model->getMainDetail()->getPrices();
-        $prices[0]->setBasePrice(9.89);
-        $model->getMainDetail()->setPrices($prices);
-        Shopware()->Models()->persist($model->getMainDetail());
-        Shopware()->Models()->flush($model->getMainDetail());
+        $prices = $detail->getPrices();
+        if (method_exists($detail, 'setPurchasePrice')) {
+            $detail->setPurchasePrice(9.89);
+        } else {
+            $prices[0]->setBasePrice(9.89);
+            $detail->setPrices($prices);
+        }
+
+        Shopware()->Models()->persist($detail);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $connectAttribute->setExportStatus('insert');
         Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
+        Shopware()->Models()->clear();
 
         $errors = $this->connectExport->export(array(3));
 

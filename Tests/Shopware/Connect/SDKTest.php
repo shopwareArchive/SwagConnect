@@ -52,8 +52,14 @@ class SDKTest extends ConnectTestHelper
     {
         $article = $this->getLocalArticle();
         $prices = $article->getMainDetail()->getPrices();
-        $prices[0]->setBasePrice(null);
-        Shopware()->Models()->persist($prices[0]);
+        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $article->getMainDetail()->setPurchasePrice(null);
+            Shopware()->Models()->persist($article->getMainDetail());
+        } else {
+            $prices[0]->setBasePrice(null);
+            Shopware()->Models()->persist($prices[0]);
+        }
+
         Shopware()->Models()->flush();
 
         $this->getConnectExport()->export(array($article->getId()));

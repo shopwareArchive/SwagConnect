@@ -111,19 +111,23 @@ class LocalProductQuery extends BaseProductQuery
         );
 
         if ($exportPriceColumn) {
-            $selectColumns[] = "exportPrice.{$exportPriceColumn}  as price";
+            $selectColumns[] = "exportPrice.{$exportPriceColumn} as price";
         }
-        if ($exportPurchasePriceColumn) {
+        if ($exportPurchasePriceColumn && $exportPurchasePriceColumn == 'detailPurchasePrice') {
+            $selectColumns[] = "d.purchasePrice as purchasePrice";
+        } elseif ($exportPurchasePriceColumn) {
             $selectColumns[] = "exportPurchasePrice.{$exportPurchasePriceColumn} as purchasePrice";
         }
-        $builder->select($selectColumns);
 
+        $builder->select($selectColumns);
 
         $builder = $this->addMarketplaceAttributeSelect($builder, $articleAttributeAlias);
         $builder = $this->addPriceJoins($builder, $exportPriceColumn, $exportPurchasePriceColumn);
 
         $builder->setParameter('priceCustomerGroup', $exportPriceCustomerGroup);
-        $builder->setParameter('purchasePriceCustomerGroup', $exportPurchasePriceCustomerGroup);
+        if ($exportPurchasePriceColumn != 'detailPurchasePrice') {
+            $builder->setParameter('purchasePriceCustomerGroup', $exportPurchasePriceCustomerGroup);
+        }
 
         return $builder;
     }
@@ -235,7 +239,7 @@ class LocalProductQuery extends BaseProductQuery
                 "price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup"
             );
             $builder->leftJoin('price_join_for_export_purchase_price.attribute', 'exportPurchasePrice');
-        } else {
+        } elseif ($exportPurchasePriceColumn != 'detailPurchasePrice') {
             $builder->leftJoin(
                 'd.prices',
                 'exportPurchasePrice',

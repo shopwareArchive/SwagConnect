@@ -2,12 +2,9 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-
-use Behat\SahiClient\Exception\AbstractException;
 use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
-use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
@@ -59,25 +56,6 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $order = $this->getOrderByNumber($orderNumber);
         $this->assertEquals($orderNumber, $order->getNumber());
-    }
-
-    /**
-     * @expectedException \Doctrine\DBAL\DBALException
-     */
-    public function testByShouldThrowException()
-    {
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
-        );
-
-        $address = new Address(array());
-        $fromShop->buy(new Order(array(
-            'billingAddress' => $address,
-            'deliveryAddress' => $address,
-        )));
     }
 
     /**
@@ -289,5 +267,24 @@ class ProductFromShopTest extends ConnectTestHelper
                 ))
             )
         ));
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testByShouldThrowException()
+    {
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
+
+        $address = new Address(array());
+        $fromShop->buy(new Order(array(
+            'billingAddress' => $address,
+            'deliveryAddress' => $address,
+        )));
     }
 }

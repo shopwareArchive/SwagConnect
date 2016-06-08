@@ -20,5 +20,6 @@
         var marketplaceLogo = '{$marketplaceLogo}';
         var defaultMarketplace = '{$defaultMarketplace}';
         var isFixedPriceAllowed = '{$isFixedPriceAllowed}';
+        var purchasePriceInDetail = '{$purchasePriceInDetail}';
     </script>
 {/block}

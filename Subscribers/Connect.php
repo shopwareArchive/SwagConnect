@@ -107,6 +107,7 @@ class Connect extends BaseSubscriber
         // if not marketplace icon should be used in both places
         $view->marketplaceIncomingIcon = ($marketplaceName == self::MARKETPLACE_NAME ? self::MARKETPLACE_GREEN_ICON : $marketplaceIcon);
         $view->marketplaceLogo = $this->getConfigComponent()->getConfig('marketplaceLogo', self::MARKETPLACE_LOGO);
+        $view->purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
 
         $view->addTemplateDir($this->Path() . 'Views/');
         $view->extendsTemplate('backend/connect/menu_entry.tpl');

@@ -90,7 +90,7 @@ class Update
 
     public function removeSnippets()
     {
-        if (version_compare($this->version, '0.0.5', '<=')) {
+        if (version_compare($this->version, '0.0.6', '<=')) {
             Shopware()->Db()->query("
                 DELETE FROM s_core_snippets WHERE namespace = 'backend/connect/view/main'
             ");

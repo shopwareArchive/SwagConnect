@@ -251,17 +251,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         if ($isModified === false) {
             $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
+
             $this->View()->assign(
                 array(
                     'success' => true,
                 )
             );
             return;
-        }
-
-        $detailPurchasePrice = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice');
-        if ($exportPurchasePrice && $detailPurchasePrice) {
-            $data['priceFieldForPurchasePriceExport'] = 'detailPurchasePrice';
         }
 
         if ($exportPrice && $exportPurchasePrice) {
@@ -281,6 +277,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             ));
             return;
         }
+
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
             && $data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']
             && $data['priceGroupForPurchasePriceExport'] == $data['priceGroupForPriceExport']
@@ -295,6 +292,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             ));
             return;
         }
+
+        $detailPurchasePrice = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice');
+        if ($exportPurchasePrice && $detailPurchasePrice) {
+            $data['priceFieldForPurchasePriceExport'] = 'detailPurchasePrice';
+        }
+
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
             || $priceType == \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
         ) {

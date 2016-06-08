@@ -134,12 +134,10 @@ class ConfigTest extends ConnectTestHelper
     public function testCompareExportConfiguration()
     {
         $data = array(
-            array(
-                'priceGroupForPriceExport' => 2,
-                'priceFieldForPriceExport' => 2,
-                'priceGroupForPurchasePriceExport' => 2,
-                'priceFieldForPurchasePriceExport' => 2
-            )
+            'priceGroupForPriceExport' => 2,
+            'priceFieldForPriceExport' => 2,
+            'priceGroupForPurchasePriceExport' => 2,
+            'priceFieldForPurchasePriceExport' => 2
         );
         $this->assertTrue($this->getConfigComponent()->compareExportConfiguration($data));
 
@@ -147,7 +145,7 @@ class ConfigTest extends ConnectTestHelper
         $exportConfig = Shopware()->Db()->fetchPairs($sql, array('export'));
 
         $this->assertFalse(
-            $this->getConfigComponent()->compareExportConfiguration(array($exportConfig))
+            $this->getConfigComponent()->compareExportConfiguration($exportConfig)
         );
     }
 

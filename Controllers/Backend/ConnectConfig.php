@@ -206,7 +206,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
         $isPricingMappingAllowed = !count($this->getConnectExport()->getExportArticlesIds()) > 0;
-        $isPricingMappingAllowed = true;
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
             $this->View()->assign(
                 array(

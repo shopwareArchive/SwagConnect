@@ -190,7 +190,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             },
 
-            'connect-export-filter base-element-select[name=supplierId]': {
+            'connect-export-filter [name=supplierId]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();

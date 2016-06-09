@@ -110,8 +110,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
             height: 65,
             bodyPadding: 5,
             items: [{
-                xtype: 'base-element-select',
+                xtype: 'combo',
                 name: 'supplierId',
+                displayField: 'name',
+                valueField: 'id',
                 anchor: '100%',
                 allowBlank: true,
                 pageSize: 25,

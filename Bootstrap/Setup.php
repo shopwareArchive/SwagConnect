@@ -118,7 +118,9 @@ class Setup
                 ));
 
                 $this->bootstrap->createMenuItem(array(
-                    'label' => 'Open Connect',
+                    'label' => 'OpenConnect',
+                    'controller' => 'Connect',
+                    'action' => 'OpenConnect',
                     'onclick' => 'window.open(\'http://sn.' . $configComponent->getConfig('connectDebugHost', 'connect.shopware.com') . '\')',
                     'class' => 'connect-icon',
                     'active' => 1,

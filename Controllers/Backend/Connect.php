@@ -159,6 +159,35 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
+     * If the price type is purchase or both
+     * and shopware is 5.2 or greater
+     * insert detailPurchasePrice in connect config table
+     * when priceFieldForPurchasePriceExport is empty
+     */
+    private function updatePurchasePriceField()
+    {
+        $field = $this->getConfigComponent()->getConfig('priceFieldForPurchasePriceExport');
+        if ($field) {
+            return;
+        }
+
+        if (!method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            return;
+        }
+
+        if ($this->getSDK()->getPriceType() == \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
+            || $this->getSDK()->getPriceType() == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        ) {
+            $this->getConfigComponent()->setConfig(
+                'priceFieldForPurchasePriceExport',
+                'detailPurchasePrice',
+                null,
+                'export'
+            );
+        }
+    }
+
+    /**
      * Helper function to return a QueryBuilder for creating the listing queries for the import and export listings
      *
      * @param $filter
@@ -795,6 +824,12 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      */
     public function insertOrUpdateProductAction()
     {
+        // if priceType comes from SN and shopware version is 5.2
+        // priceFieldForPurchasePriceExport is empty
+        // we need to set it because there isn't customer groups
+        // purchasePrice is stored always in article detail
+        $this->updatePurchasePriceField();
+
         $articleDetailIds = $this->Request()->getPost('articleDetailIds');
         $sourceIds = $this->getHelper()->getArticleDetailSourceIds($articleDetailIds);
 

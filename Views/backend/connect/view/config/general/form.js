@@ -270,7 +270,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                                 apiKey = apiField.getValue();
                             Ext.Ajax.request({
                                 scope: this,
-                                url: window.location.pathname + 'connect/verifyApiKey',
+                                url: '{url module=backend controller=Connect action=verifyApiKey}',
                                 success: function(result, request) {
                                     var response = Ext.JSON.decode(result.responseText);
                                     Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');

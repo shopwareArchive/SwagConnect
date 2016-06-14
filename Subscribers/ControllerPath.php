@@ -10,6 +10,18 @@ namespace ShopwarePlugins\Connect\Subscribers;
  */
 class ControllerPath extends BaseSubscriber
 {
+    private $shopware52Installed = false;
+
+    /**
+     * ControllerPath constructor.
+     * @param bool $shopware52Installed
+     */
+    public function __construct($shopware52Installed)
+    {
+        parent::__construct();
+        $this->shopware52Installed = $shopware52Installed;
+    }
+
     public function getSubscribedEvents()
     {
         return array(
@@ -22,7 +34,6 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
         );
     }
-
 
     /**
      * Register the connect backend controller
@@ -46,6 +57,9 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathGateway(\Enlight_Event_EventArgs $args)
     {
+        if ($this->shopware52Installed) {
+            return $this->Path() . '/Controllers/Backend/ConnectGateway52.php';
+        }
         return $this->Path() . 'Controllers/Backend/ConnectGateway.php';
     }
 

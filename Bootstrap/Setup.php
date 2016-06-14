@@ -117,11 +117,14 @@ class Setup
                     'parent' => $parent
                 ));
 
+                $targetConnectUrlFragement = empty($configComponent->getConfig('connectDebugHost', '')) ? 'connect.shopware.com' :
+                    $configComponent->getConfig('connectDebugHost', '');
+
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'OpenConnect',
                     'controller' => 'Connect',
                     'action' => 'OpenConnect',
-                    'onclick' => 'window.open(\'http://sn.' . $configComponent->getConfig('connectDebugHost', 'connect.shopware.com') . '\')',
+                    'onclick' => 'window.open(\'http://sn.' . $targetConnectUrlFragement . '\')',
                     'class' => 'connect-icon',
                     'active' => 1,
                     'parent' => $parent

@@ -117,8 +117,10 @@ class Setup
                     'parent' => $parent
                 ));
 
-                $targetConnectUrlFragement = empty($configComponent->getConfig('connectDebugHost', '')) ? 'connect.shopware.com' :
-                    $configComponent->getConfig('connectDebugHost', '');
+                $targetConnectUrlFragement = $configComponent->getConfig('connectDebugHost', '');
+                if (empty($targetConnectUrlFragement)) {
+                    $targetConnectUrlFragement = 'connect.shopware.com';
+                }
 
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'OpenConnect',

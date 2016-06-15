@@ -31,11 +31,28 @@ class PDO extends Gateway
      * @var array
      */
     protected $operationStruct = array(
-        'insert' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Insert',
-        'update' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
-        'stock' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
-        'delete' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::PRODUCT_INSERT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Insert',
+        self::PRODUCT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
+        self::PRODUCT_DELETE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::PRODUCT_STOCK => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
+        self::PAYMENT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus',
+    );
+
+    /**
+     * @var array
+     */
+    protected $types = array(
+        self::TYPE_PRODUCT => array(
+            self::PRODUCT_INSERT,
+            self::PRODUCT_UPDATE,
+            self::PRODUCT_DELETE,
+            self::PRODUCT_STOCK,
+            self::STREAM_ASSIGNMENT
+        ),
+        self::TYPE_PAYMENT => array(
+            self::PAYMENT_UPDATE
+        ),
     );
 
     /**
@@ -60,6 +77,71 @@ class PDO extends Gateway
     }
 
     /**
+     * @param $offset
+     * @param $limit
+     * @param array $types
+     * @return array
+     */
+    protected function doNextChange($offset, $limit, array $types)
+    {
+        $offset = $offset ?: 0;
+        // Float type cast does NOT work here, since the inaccuracy of floating
+        // point representations otherwise omit changes. Yes, this actually
+        // really happens.
+        if (!preg_match('(^[\\d\\.]+$)', $offset)) {
+            throw new \InvalidArgumentException("Offset revision must be a numeric string.");
+        }
+
+        $inStatement = implode("','", $types);
+
+        $result = $this->connection->query(
+            "SELECT
+                `c_entity_id`,
+                `c_operation`,
+                `c_revision`,
+                `c_payload`
+            FROM
+                `" . $this->tableName('change') . "`
+            WHERE
+                `c_revision` > $offset
+            AND
+                `c_operation` IN('$inStatement')
+            ORDER BY `c_revision` ASC
+            LIMIT
+                " . ((int) $limit)
+        );
+
+        $changes = array();
+        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+            $class = $this->operationStruct[$row['c_operation']];
+            $changes[] = $change = new $class(
+                array(
+                    'sourceId' => $row['c_entity_id'],
+                    'revision' => $row['c_revision'],
+                )
+            );
+
+            if ($row['c_payload'] !== null) {
+                switch($row['c_operation']) {
+                    case self::PRODUCT_STOCK:
+                        $change->availability = intval($row['c_payload']);
+                        break;
+                    case self::STREAM_ASSIGNMENT:
+                        $change->supplierStreams = unserialize($row['c_payload']);
+                        break;
+                    case self::PAYMENT_UPDATE:
+                        $change->paymentStatus = unserialize($row['c_payload']);
+                        break;
+                    default:
+                        $change->product = unserialize($row['c_payload']);
+                }
+            }
+        }
+
+        return $changes;
+    }
+
+    /**
      * Get next change
      *
      * The offset specified the revision to start from
@@ -74,54 +156,17 @@ class PDO extends Gateway
      */
     public function getNextChanges($offset, $limit)
     {
-        $offset = $offset ?: 0;
-        // Float type cast does NOT work here, since the inaccuracy of floating
-        // point representations otherwise omit changes. Yes, this actually
-        // really happens.
-        if (!preg_match('(^[\\d\\.]+$)', $offset)) {
-            throw new \InvalidArgumentException("Offset revision must be a numeric string.");
-        }
+        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PRODUCT]);
+    }
 
-        $result = $this->connection->query(
-            'SELECT
-                `c_source_id`,
-                `c_operation`,
-                `c_revision`,
-                `c_product`
-            FROM
-                `' . $this->tableName('change') . '`
-            WHERE
-                `c_revision` > ' . $offset . '
-            ORDER BY `c_revision` ASC
-            LIMIT
-                ' . ((int) $limit)
-        );
-
-        $changes = array();
-        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-            $class = $this->operationStruct[$row['c_operation']];
-            $changes[] = $change = new $class(
-                array(
-                    'sourceId' => $row['c_source_id'],
-                    'revision' => $row['c_revision'],
-                )
-            );
-
-            if ($row['c_product'] !== null) {
-                switch($row['c_operation']) {
-                    case 'stock':
-                        $change->availability = intval($row['c_product']);
-                        break;
-                    case self::STREAM_ASSIGNMENT:
-                        $change->supplierStreams = unserialize($row['c_product']);
-                        break;
-                    default:
-                        $change->product = unserialize($row['c_product']);
-                }
-            }
-        }
-
-        return $changes;
+    /**
+     * @param $offset
+     * @param $limit
+     * @return Struct\Change[]
+     */
+    public function getNextPaymentStatusChanges($offset, $limit)
+    {
+        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PAYMENT]);
     }
 
     public function cleanChangesUntil($offset)
@@ -155,13 +200,18 @@ class PDO extends Gateway
     public function getUnprocessedChangesCount($offset, $limit)
     {
         $offset = $offset ?: 0;
+
+        $inStatement = implode("','", $this->types['product']);
+
         $result = $this->connection->prepare(
-            'EXPLAIN SELECT
+            "EXPLAIN SELECT
                 *
             FROM
-                `' . $this->tableName('change') . '`
+                `" . $this->tableName('change') . "`
             WHERE
-                `c_revision` > ?'
+                `c_revision` > ?
+            AND
+                `c_operation` IN('$inStatement')"
         );
         $result->execute(array($offset));
         $changes = $result->fetch(\PDO::FETCH_ASSOC);
@@ -183,16 +233,16 @@ class PDO extends Gateway
         $query = $this->connection->prepare(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 ?, ?, ?, ?
             );'
         );
-        $query->execute(array($id, 'insert', $revision, serialize($product)));
+        $query->execute(array($id, self::PRODUCT_INSERT, $revision, serialize($product)));
 
         $this->updateHash($id, $hash);
     }
@@ -221,16 +271,16 @@ class PDO extends Gateway
         $query = $this->connection->prepare(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 ?, ?, ? ,?
             );'
         );
-        $query->execute(array($id, 'update', $revision, serialize($product)));
+        $query->execute(array($id, self::PRODUCT_UPDATE, $revision, serialize($product)));
 
         $this->updateHash($id, $hash);
     }
@@ -259,16 +309,16 @@ class PDO extends Gateway
         $query = $this->connection->prepare(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 ?, ?, ? ,?
             );'
         );
-        $query->execute(array($id, 'stock', $revision, $product->availability));
+        $query->execute(array($id, self::PRODUCT_STOCK, $revision, $product->availability));
 
         $this->updateHash($id, $hash);
     }
@@ -285,16 +335,43 @@ class PDO extends Gateway
         $query = $this->connection->prepare(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 ?, ?, ?, ?
             );'
         );
         $query->execute(array($productId, self::STREAM_ASSIGNMENT, $revision, serialize($supplierStreams)));
+    }
+
+    /**
+     * @param $revision
+     * @param Struct\PaymentStatus $paymentStatus
+     */
+    public function updatePaymentStatus($revision, Struct\PaymentStatus $paymentStatus)
+    {
+        $query = $this->connection->prepare(
+            'INSERT INTO
+                sw_connect_change (
+                    `c_entity_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_payload`
+                )
+            VALUES (
+                ?, ?, ?, ?
+            );'
+        );
+
+        $query->execute(array(
+            $paymentStatus->localOrderId,
+            self::PAYMENT_UPDATE,
+            $revision,
+            serialize($paymentStatus)
+        ));
     }
 
     /**
@@ -333,7 +410,7 @@ class PDO extends Gateway
         $query = $this->connection->prepare(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`
                 )
@@ -341,7 +418,7 @@ class PDO extends Gateway
                 ?, ?, ?
             );'
         );
-        $query->execute(array($id, 'delete', $revision));
+        $query->execute(array($id, self::PRODUCT_DELETE, $revision));
 
         $query = $this->connection->prepare(
             'DELETE FROM

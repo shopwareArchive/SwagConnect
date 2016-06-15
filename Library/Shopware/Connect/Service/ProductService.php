@@ -57,6 +57,11 @@ class ProductService
     protected $fromShop;
 
     /**
+     * @var \Shopware\Connect\Service\Export
+     */
+    protected $export;
+
+    /**
      * Construct from gateway
      *
      * @param ChangeGateway $changes
@@ -71,13 +76,15 @@ class ProductService
         RevisionGateway $revision,
         ShopConfiguration $configurationGateway,
         ProductToShop $toShop,
-        ProductFromShop $fromShop
+        ProductFromShop $fromShop,
+        Export $export
     ) {
         $this->changes = $changes;
         $this->revision = $revision;
         $this->configurationGateway = $configurationGateway;
         $this->toShop = $toShop;
         $this->fromShop = $fromShop;
+        $this->export = $export;
     }
 
     /**
@@ -129,6 +136,19 @@ class ProductService
         }
 
         return $this->fromShop->getProducts($ids);
+    }
+
+    /**
+     * Can be used by Connect Backend to retrigger updates of products.
+     *
+     * @param array<string> $ids
+     * @return void
+     */
+    public function triggerUpdate(array $ids)
+    {
+        foreach ($ids as $id) {
+            $this->export->recordUpdate($id);
+        }
     }
 
     /**

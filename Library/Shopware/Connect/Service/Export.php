@@ -8,6 +8,7 @@
 namespace Shopware\Connect\Service;
 
 use Shopware\Connect\ProductFromShop;
+use Shopware\Connect\Struct\PaymentStatus as PaymentStatusStruct;
 use Shopware\Connect\Struct\VerificatorDispatcher;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductHasher;
@@ -138,6 +139,19 @@ class Export
     }
 
     /**
+     * @param PaymentStatusStruct $paymentStatus
+     */
+    public function updatePaymentStatus(PaymentStatusStruct $paymentStatus)
+    {
+        $this->verificator->verify($paymentStatus);
+
+        $this->gateway->updatePaymentStatus(
+            $this->revisionProvider->next(),
+            $paymentStatus
+        );
+    }
+
+    /**
      * @return array
      */
     protected function verificationGroups()
@@ -155,16 +169,5 @@ class Export
     {
         $products = $this->fromShop->getProducts(array($productId));
         return reset($products);
-    }
-
-    /**
-     * Get multiple products from gateway
-     *
-     * @param array $productIds
-     * @return \Shopware\Connect\Struct\Product
-     */
-    protected function getProducts(array $productIds)
-    {
-        return $this->fromShop->getProducts($productIds);
     }
 }

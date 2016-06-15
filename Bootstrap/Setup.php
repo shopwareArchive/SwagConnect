@@ -690,15 +690,17 @@ class Setup
     public function populatePaymentStates()
     {
         $states = array(
-            'SC received',
-            'SC requested',
-            'SC instructed',
-            'SC aborted',
-            'SC timeout',
-            'SC pending',
-            'SC refunded',
-            'SC loss',
-            'SC error',
+            'sc_received' => ' SC received',
+            'sc_requested' => 'SC requested',
+            'sc_initiated' => 'SC initiated',
+            'sc_instructed' => 'SC instructed',
+            'sc_aborted' => 'SC aborted',
+            'sc_timeout' => 'SC timeout',
+            'sc_pending' => 'SC pending',
+            'sc_refunded' => 'SC refunded',
+            'sc_verify' => 'SC verify',
+            'sc_loss' => 'SC loss',
+            'sc_error' => 'SC error',
         );
 
         $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
@@ -715,10 +717,10 @@ class Setup
             }
         }
 
-        foreach ($states as $name) {
+        foreach ($states as $name => $description) {
             $isExists = Shopware()->Db()->query('
                 SELECT `id` FROM `s_core_states`
-                WHERE `description` = ?
+                WHERE `name` = ?
                 ', array($name)
             )->fetch();
 
@@ -729,9 +731,9 @@ class Setup
             $currentId++;
             Shopware()->Db()->query('
                 INSERT INTO `s_core_states`
-                (`id`, `description`, `position`, `group`, `mail`)
-                VALUES (?, ?, ?, ?, ?)
-                ', array($currentId, $name, $currentId, 'payment', 0)
+                (`id`, `name`, `description`, `position`, `group`, `mail`)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ', array($currentId, $name, $description, $currentId, 'payment', 0)
             );
         }
     }

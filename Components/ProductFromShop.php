@@ -325,7 +325,7 @@ class ProductFromShop implements ProductFromShopBase
             $paymentStatusRepository = $this->manager->getRepository('Shopware\Models\Order\Status');
             /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
             $orderPaymentStatus = $paymentStatusRepository->findOneBy(
-                array('description' => 'connect ' . $status->paymentStatus)
+                array('name' => 'sc_' . $status->paymentStatus)
             );
 
             if ($orderPaymentStatus) {

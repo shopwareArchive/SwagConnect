@@ -52,7 +52,7 @@ class OrderStatusMapper
      */
     public function mapShopwareOrderStatusToConnect($swOrderStatus)
     {
-        $swOrderStatus = (int) $swOrderStatus;
+        $swOrderStatus = (string) $swOrderStatus;
 
         $mapping = $this->getMapping();
 

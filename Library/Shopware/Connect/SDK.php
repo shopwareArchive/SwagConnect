@@ -57,7 +57,7 @@ final class SDK
     /**
      * Version constant
      */
-    const VERSION = '2.0.0';
+    const VERSION = '2.0.1';
 
     /**
      * @param string $apiKey API key assigned to you by Shopware Connect
@@ -452,6 +452,16 @@ final class SDK
                 'url' => $shopConfiguration->url,
             )
         );
+    }
+
+    /**
+     * @param Struct\PaymentStatus $paymentStatus
+     */
+    public function updatePaymentStatus(Struct\PaymentStatus $paymentStatus)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->updatePaymentStatus($paymentStatus);
     }
 
     /**

@@ -11,6 +11,19 @@ use Shopware\Connect\Struct;
 
 class PaymentStatus extends Struct
 {
+    const PAYMENT_OPEN      = 'open';
+    const PAYMENT_REQUESTED = 'requested';
+    const PAYMENT_INITIATED = 'initiated';
+    const PAYMENT_INSTRUCTED = 'instructed';
+    const PAYMENT_VERIFY    = 'verify';
+    const PAYMENT_ABORTED   = 'aborted';
+    const PAYMENT_TIMEOUT   = 'timeout';
+    const PAYMENT_PENDING   = 'pending';
+    const PAYMENT_RECEIVED  = 'received';
+    const PAYMENT_REFUNDED  = 'refunded';
+    const PAYMENT_LOSS      = 'loss';
+    const PAYMENT_ERROR     = 'error';
+
     /**
      * @var string
      */

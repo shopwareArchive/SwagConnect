@@ -28,6 +28,8 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\SnHttpClient;
+use Firebase\JWT\JWT;
 
 /**
  * @category  Shopware
@@ -64,6 +66,11 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      * @var \ShopwarePlugins\Connect\Components\PriceGateway
      */
     private $priceGateway;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\SnHttpClient
+     */
+    private $snHttpClient;
 
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
@@ -352,7 +359,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connectExport = $this->getConnectExport();
         try {
             $data = !isset($data[0]) ? array($data) : $data;
-            $this->getSDK()->setPriceType($priceType);
+            $response = $this->getSnHttpClient()->sendRequestToConnect(
+                array('priceType' => $priceType),
+                'account/settings'
+            );
+
+            $responseBody = json_decode($response->getBody());
+            if (!$responseBody->success) {
+                throw new \RuntimeException($responseBody->message);
+            }
+
+            $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setExportConfigs($data);
 
             $ids = $connectExport->getExportArticlesIds();
@@ -875,4 +892,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         return $this->priceGateway;
     }
-} 
+
+    private function getSnHttpClient()
+    {
+        if (!$this->snHttpClient) {
+            $this->snHttpClient = new SnHttpClient(
+                $this->get('http_client'),
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                $this->getConfigComponent(),
+                new JWT()
+            );
+        }
+
+        return $this->snHttpClient;
+    }
+}

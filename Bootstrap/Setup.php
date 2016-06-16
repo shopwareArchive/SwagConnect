@@ -116,6 +116,21 @@ class Setup
                     'active' => 1,
                     'parent' => $parent
                 ));
+
+                $targetConnectUrlFragement = $configComponent->getConfig('connectDebugHost', '');
+                if (empty($targetConnectUrlFragement)) {
+                    $targetConnectUrlFragement = 'connect.shopware.com';
+                }
+
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'OpenConnect',
+                    'controller' => 'Connect',
+                    'action' => 'OpenConnect',
+                    'onclick' => 'window.open(\'http://sn.' . $targetConnectUrlFragement . '\')',
+                    'class' => 'connect-icon',
+                    'active' => 1,
+                    'parent' => $parent
+                ));
             }
 
             $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
@@ -128,7 +143,9 @@ class Setup
             ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
+            ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
 
             ON DUPLICATE KEY UPDATE
               `namespace` = VALUES(`namespace`),
@@ -463,11 +480,10 @@ class Setup
         // open ConnectConfigTest.php and change tearDown function
         // for some reason shopware runs test during plugin installation
         $configs = array(
-            'priceGroupForPriceExport' => array('EK', null, 'export'),
-            'priceGroupForPurchasePriceExport' => array('EK', null, 'export'),
-            'priceFieldForPriceExport' => array('price', null, 'export'),
-            'priceFieldForPurchasePriceExport' => array('basePrice', null, 'export'),
-
+            'priceGroupForPriceExport' => array('', null, 'export'),
+            'priceGroupForPurchasePriceExport' => array('', null, 'export'),
+            'priceFieldForPriceExport' => array('', null, 'export'),
+            'priceFieldForPurchasePriceExport' => array('', null, 'export'),
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
@@ -674,15 +690,17 @@ class Setup
     public function populatePaymentStates()
     {
         $states = array(
-            'SC received',
-            'SC requested',
-            'SC instructed',
-            'SC aborted',
-            'SC timeout',
-            'SC pending',
-            'SC refunded',
-            'SC loss',
-            'SC error',
+            'sc_received' => ' SC received',
+            'sc_requested' => 'SC requested',
+            'sc_initiated' => 'SC initiated',
+            'sc_instructed' => 'SC instructed',
+            'sc_aborted' => 'SC aborted',
+            'sc_timeout' => 'SC timeout',
+            'sc_pending' => 'SC pending',
+            'sc_refunded' => 'SC refunded',
+            'sc_verify' => 'SC verify',
+            'sc_loss' => 'SC loss',
+            'sc_error' => 'SC error',
         );
 
         $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
@@ -699,10 +717,10 @@ class Setup
             }
         }
 
-        foreach ($states as $name) {
+        foreach ($states as $name => $description) {
             $isExists = Shopware()->Db()->query('
                 SELECT `id` FROM `s_core_states`
-                WHERE `description` = ?
+                WHERE `name` = ?
                 ', array($name)
             )->fetch();
 
@@ -713,9 +731,9 @@ class Setup
             $currentId++;
             Shopware()->Db()->query('
                 INSERT INTO `s_core_states`
-                (`id`, `description`, `position`, `group`, `mail`)
-                VALUES (?, ?, ?, ?, ?)
-                ', array($currentId, $name, $currentId, 'payment', 0)
+                (`id`, `name`, `description`, `position`, `group`, `mail`)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ', array($currentId, $name, $description, $currentId, 'payment', 0)
             );
         }
     }

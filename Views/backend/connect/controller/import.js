@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.control({
             'connect-remote-categories': {
                 reloadRemoteCategories: me.onReloadRemoteCategories,
+                beforeload: me.onBeforeReloadRemoteCategories,
                 itemmousedown: me.onSelectRemoteCategory
             },
             'connect-remote-categories dataview': {
@@ -82,6 +83,16 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.callParent(arguments);
     },
 
+    onBeforeReloadRemoteCategories: function( remoteCategoryStore, operation) {
+        var root = 'root';
+
+        if (operation.id == root) {
+            remoteCategoryStore.getProxy().extraParams.categoryId = root;
+        } else {
+            remoteCategoryStore.getProxy().extraParams.categoryId = operation.node.get('categoryId');
+        }
+    },
+
     /**
      * When remote category is clicked set params to
      * remote products store and load it. Products are visible
@@ -95,9 +106,10 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var mainCategory = me.getMainCategoryByNode(record);
 
         var remoteProductsStore = me.getRemoteProductsGrid().getStore();
-        remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('id');
-        if (mainCategory.get('id') != record.get('id')) {
-            remoteProductsStore.getProxy().extraParams.category = record.get('id');
+        remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('categoryId');
+
+        if (mainCategory.get('categoryId') != record.get('categoryId')) {
+            remoteProductsStore.getProxy().extraParams.category = record.get('categoryId');
         } else {
             remoteProductsStore.getProxy().extraParams.category = null;
         }
@@ -214,7 +226,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     }
 
                 } else {
-                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', data.message);
                 }
 
                 me.getRemoteProductsGrid().getStore().load();
@@ -304,7 +316,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].get('id'),
+        var remoteCategoryKey = data.records[0].get('categoryId'),
             remoteCategoryLabel = data.records[0].get('text'),
             localCategoryId = overModel.get('id');
 

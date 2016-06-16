@@ -159,6 +159,35 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
     }
 
     /**
+     * If the price type is purchase or both
+     * and shopware is 5.2 or greater
+     * insert detailPurchasePrice in connect config table
+     * when priceFieldForPurchasePriceExport is empty
+     */
+    private function updatePurchasePriceField()
+    {
+        $field = $this->getConfigComponent()->getConfig('priceFieldForPurchasePriceExport');
+        if ($field) {
+            return;
+        }
+
+        if (!method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            return;
+        }
+
+        if ($this->getSDK()->getPriceType() == \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
+            || $this->getSDK()->getPriceType() == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        ) {
+            $this->getConfigComponent()->setConfig(
+                'priceFieldForPurchasePriceExport',
+                'detailPurchasePrice',
+                null,
+                'export'
+            );
+        }
+    }
+
+    /**
      * Helper function to return a QueryBuilder for creating the listing queries for the import and export listings
      *
      * @param $filter
@@ -509,7 +538,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
             $host = 'sn.' . $host;
         } else {
@@ -563,7 +592,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $email = $this->Request()->getParam('email');
 
         // Enter the valid production url here
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
             $host = 'sn.' . $host;
         } else {
@@ -627,6 +656,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             pluginID,
             controller,
             action,
+            onclick,
             active
           ) VALUES (
             '#parent#',
@@ -635,6 +665,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             #pluginID#,
             '#controller#',
             '#action#',
+            '#onclick#',
             1
           )";
 
@@ -644,6 +675,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'contents--import-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Import'
         ]));
 
@@ -653,6 +685,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'contents--import-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Export'
         ]));
 
@@ -662,7 +695,18 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'sprite-gear',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
+            '#onclick#' => '',
             '#action#' => 'Settings'
+        ]));
+
+        $db->exec(strtr($insertSql, [
+            '#parent#' => $row['parent'],
+            '#name#' => 'Open Connect',
+            '#class#' => 'connect-icon',
+            '#pluginID#' => $row['pluginID'],
+            '#controller#' => '',
+            '#onclick#' => 'window.open("http://sn.' . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
+            '#action#' => ''
         ]));
     }
 
@@ -782,6 +826,12 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
      */
     public function insertOrUpdateProductAction()
     {
+        // if priceType comes from SN and shopware version is 5.2
+        // priceFieldForPurchasePriceExport is empty
+        // we need to set it because there isn't customer groups
+        // purchasePrice is stored always in article detail
+        $this->updatePurchasePriceField();
+
         $articleDetailIds = $this->Request()->getPost('articleDetailIds');
         $sourceIds = $this->getHelper()->getArticleDetailSourceIds($articleDetailIds);
 

@@ -50,14 +50,13 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             'a.active as Article_active',
             'md.number as Detail_number',
             's.name as Supplier_name',
-            'p.price as Price_basePrice',
+            'pci.purchasePrice as Price_basePrice',
             't.tax as Tax_name',
         ))
             ->from('Shopware\CustomModels\Connect\Attribute', 'pci')
             ->leftJoin('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc', Join::WITH, 'ptrc.articleId = pci.articleId')
             ->leftJoin('pci.article', 'a')
             ->leftJoin('a.mainDetail', 'md')
-            ->leftJoin('md.prices', 'p')
             ->leftJoin('a.supplier', 's')
             ->leftJoin('a.tax', 't')
             ->leftJoin('a.attribute', 'att')

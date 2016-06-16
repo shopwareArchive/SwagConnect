@@ -2,6 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Verificator\Product;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
@@ -16,6 +17,30 @@ class ProductQueryTest extends ConnectTestHelper
     protected $productQuery;
 
     protected $productTranslator;
+
+    public function setUp()
+    {
+        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $purchasePriceField = 'detailPurchasePrice';
+        } else {
+            $purchasePriceField = 'basePrice';
+        }
+
+        Shopware()->Db()->executeQuery(
+            "DELETE FROM s_plugin_connect_config WHERE `name` = 'priceFieldForPurchasePriceExport'"
+        );
+        Shopware()->Db()->executeQuery(
+            'INSERT IGNORE INTO s_plugin_connect_config (`name`, `value`, `groupName`)
+                  VALUES (?, ?, ?)
+                  ON DUPLICATE KEY UPDATE
+                  `value` = VALUES(`value`)
+              ',
+            array(
+                'priceFieldForPurchasePriceExport',
+                $purchasePriceField,
+                'export'
+            ));
+    }
 
     public function getProductQuery()
     {
@@ -84,6 +109,7 @@ class ProductQueryTest extends ConnectTestHelper
         $result = $this->getProductQuery()->getRemote(array($newProduct->sourceId));
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
+
 
         $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
         $this->assertEquals($newProduct->title, $product->title);

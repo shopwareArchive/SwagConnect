@@ -22,7 +22,6 @@
  * our trademarks remain entirely with us.
  */
 
-use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Controllers\Backend\ConnectGatewayBaseController;
 
 /**
@@ -31,10 +30,17 @@ use ShopwarePlugins\Connect\Controllers\Backend\ConnectGatewayBaseController;
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
-class Shopware_Controllers_Backend_ConnectGateway extends ConnectGatewayBaseController
+class Shopware_Controllers_Backend_ConnectGateway extends ConnectGatewayBaseController implements \Shopware\Components\CSRFWhitelistAware
 {
+    public function getWhitelistedCSRFActions()
+    {
+        return ['index'];
+    }
+
     public function indexAction()
     {
         parent::indexAction();
     }
+
+
 }

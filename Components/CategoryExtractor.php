@@ -24,6 +24,7 @@
 namespace ShopwarePlugins\Connect\Components;
 use Shopware\Connect\Gateway;
 use Shopware\CustomModels\Connect\AttributeRepository;
+use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 /**
  * Class CategoryExtractor
@@ -46,16 +47,29 @@ class CategoryExtractor
      */
     private $configurationGateway;
 
+    /**
+     * @var \ShopwarePlugins\Connect\Components\RandomStringGenerator;
+     */
+    private $randomStringGenerator;
+
+    /**
+     * @param AttributeRepository $attributeRepository
+     * @param CategoryResolver $categoryResolver
+     * @param Gateway $configurationGateway
+     * @param RandomStringGenerator $randomStringGenerator
+     */
     public function __construct(
         AttributeRepository $attributeRepository,
         CategoryResolver $categoryResolver,
-        Gateway $configurationGateway
+        Gateway $configurationGateway,
+        RandomStringGenerator $randomStringGenerator
     )
     {
 
         $this->attributeRepository = $attributeRepository;
         $this->categoryResolver = $categoryResolver;
         $this->configurationGateway = $configurationGateway;
+        $this->randomStringGenerator = $randomStringGenerator;
     }
 
     /**
@@ -95,19 +109,17 @@ class CategoryExtractor
         ';
 
         if ($parent !== null) {
-            $sql .= ' WHERE pcc.category_key LIKE ? AND connect_mapped_category IS NULL';
+            $sql .= ' WHERE pcc.category_key LIKE ?';
             $whereParams = array($parent . '/%');
             if ($excludeMapped === true) {
-                $sql .= ' AND pcc.local_category_id IS NULL';
+                $sql .= ' AND ar.connect_mapped_category IS NULL';
             }
             // filter only first child categories
             $rows = Shopware()->Db()->fetchPairs($sql, $whereParams);
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
-            $sql .= ' WHERE connect_mapped_category IS NULL';
-
             if ($excludeMapped === true) {
-                $sql .= ' AND pcc.local_category_id IS NULL';
+                $sql .= ' WHERE ar.connect_mapped_category IS NULL';
             }
             $rows = Shopware()->Db()->fetchPairs($sql);
             // filter only main categories
@@ -253,9 +265,11 @@ class CategoryExtractor
 
             $category = array(
                 'name' => $node['name'],
-                'id' => $id,
+                'id' => $this->randomStringGenerator->generate($id),
+                'categoryId' => $id,
                 'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,
+                'cls' => 'sc-tree-node',
             );
 
             if (isset($node['iconCls'])) {

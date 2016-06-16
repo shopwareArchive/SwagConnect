@@ -52,11 +52,11 @@ class OrderStatusMapper
      */
     public function mapShopwareOrderStatusToConnect($swOrderStatus)
     {
-        $swOrderStatus = (string)$swOrderStatus;
+        $swOrderStatus = (string) $swOrderStatus;
 
         $mapping = $this->getMapping();
 
-        if (!in_array($swOrderStatus, $mapping)) {
+        if (!isset($mapping[$swOrderStatus])) {
             return OrderStatusStruct::STATE_OPEN;
         }
 

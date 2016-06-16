@@ -81,6 +81,15 @@ class ImportService
         return $this->productResource->filter($this->getAst($categoryId, $showOnlyConnectArticles), $offset, $limit);
     }
 
+    /**
+     * @param $categoryId
+     * @return bool
+     */
+    public function hasCategoryChildren($categoryId)
+    {
+        return (bool) $this->categoryRepository->getChildrenCountList($categoryId);
+    }
+
     public function assignCategoryToArticles($categoryId, array $articleIds)
     {
         $articles = $this->articleRepository->findBy(array('id' => $articleIds));

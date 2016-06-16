@@ -191,7 +191,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertFalse($this->View()->success);
-        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
+        $this->assertEquals('Preisfeld ist nicht gepflegt. Bei einigen Produkten ist der Preis 0', $this->View()->message);
     }
 
     /**
@@ -226,14 +226,14 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
                 'exportPriceMode' => array('price', 'purchasePrice'),
                 'priceGroupForPriceExport' => 'EK',
                 'priceGroupForPurchasePriceExport' => 'EK',
-                'priceFieldForPurchasePriceExport' => 'basePrice',
+                'priceFieldForPurchasePriceExport' => 'pseudoPrice',
                 'priceFieldForPriceExport' => 'price',
             ));
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertFalse($this->View()->success);
-        $this->assertEquals('Preisfeld ist nicht gepflegt', $this->View()->message);
+        $this->assertEquals('Preisfeld ist nicht gepflegt. Bei einigen Produkten ist der Preis 0', $this->View()->message);
     }
 }
  

@@ -225,11 +225,16 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals($newTitle, $connectAttribute->getArticle()->getName());
         $this->assertEquals($newLongDesc, $connectAttribute->getArticle()->getDescriptionLong());
         $this->assertEquals($newShortDesc, $connectAttribute->getArticle()->getDescription());
+        $detail = $connectAttribute->getArticleDetail();
         /** @var \Shopware\Models\Article\Price[] $prices */
-        $prices = $connectAttribute->getArticleDetail()->getPrices();
+        $prices = $detail->getPrices();
 
         $this->assertEquals($newPrice, $prices[0]->getPrice());
-        $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
+        if (method_exists($detail, 'getPurchasePrice')) {
+            $this->assertEquals($newPurchasePrice, $detail->getPurchasePrice());
+        } else {
+            $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
+        }
         $this->assertEquals(2, count($connectAttribute->getArticle()->getImages()));
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
     }
@@ -350,10 +355,15 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals($productUpdate->purchasePrice, $connectAttribute->getPurchasePrice());
 
         $this->assertEquals($productUpdate->availability, $connectAttribute->getArticleDetail()->getInStock());
+        $detail = $connectAttribute->getArticleDetail();
         /** @var \Shopware\Models\Article\Price[] $prices */
-        $prices = $connectAttribute->getArticleDetail()->getPrices();
+        $prices = $detail->getPrices();
         $this->assertEquals($productUpdate->price, $prices[0]->getPrice());
-        $this->assertEquals($productUpdate->purchasePrice, $prices[0]->getBasePrice());
+        if (method_exists($detail, 'getPurchasePrice')) {
+            $this->assertEquals($productUpdate->purchasePrice, $detail->getPurchasePrice());
+        } else {
+            $this->assertEquals($productUpdate->purchasePrice, $prices[0]->getBasePrice());
+        }
     }
 
     public function testChangeAvailability()

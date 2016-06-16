@@ -19,6 +19,9 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
             appendOnly: true,
             dragGroup: 'local',
             dropGroup: 'remote'
+        },
+        getRowClass: function(rec, rowIdx, params, store) {
+            return 'shopware-connect-color';
         }
     },
 

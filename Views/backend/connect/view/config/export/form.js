@@ -139,7 +139,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                 },
                 {
                     xtype: 'container',
-                    layout: 'column',
+                    layout: 'hbox',
                     margin: '0 0 30 0',
                     items: [
                         {
@@ -152,8 +152,15 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                 me.exportPriceCheckbox = me.createPriceCheckbox()
                             ]
                         },
-                        me.exportPurchasePriceMode = me.createPurchasePriceField(),
-                        me.exportPriceMode = me.createPriceField()
+                        {
+                            xtype: 'container',
+                            layout: 'vbox',
+                            align: 'strech',
+                            items: [
+                                me.exportPurchasePriceMode = me.createPurchasePriceField(),
+                                me.exportPriceMode = me.createPriceField()
+                            ]
+                        }
                     ]
                 },
                 {
@@ -275,11 +282,17 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         var dataIndexField = 'priceFieldForPurchasePriceExport';
         var helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
 
+        if (purchasePriceInDetail) {
+            return Ext.create('Ext.form.FieldContainer', {
+                height: 30
+            });
+        }
+
         me.groupFieldForPurchasePrice = Ext.create('Ext.form.field.ComboBox', {
             queryMode: 'local',
             editable: false,
             name: dataIndexCustomerGroup,
-            allowBlank: false,
+            allowBlank: true,
             displayField: 'name',
             valueField: 'key',
             store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup'),
@@ -303,7 +316,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
             queryMode: 'local',
             editable: false,
-            allowBlank: false,
+            allowBlank: true,
             displayField: 'name',
             valueField: 'field',
             helpText: helpText,
@@ -341,7 +354,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             queryMode: 'local',
             editable: false,
             name: dataIndexCustomerGroup,
-            allowBlank: false,
+            allowBlank: true,
             displayField: 'name',
             valueField: 'key',
             store: Ext.create('Shopware.apps.Connect.store.config.CustomerGroup'),
@@ -364,7 +377,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
             queryMode: 'local',
             editable: false,
-            allowBlank: false,
+            allowBlank: true,
             displayField: 'name',
             valueField: 'field',
             helpText: helpText,
@@ -419,19 +432,20 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         var me = this;
 
         me.groupFieldForPrice.store.load();
-        me.groupFieldForPurchasePrice.store.load();
-
         me.priceFieldForPrice.store.load({
             params: {
                 'customerGroup': record.get('priceGroupForPriceExport')
             }
         });
 
-        me.priceFieldForPurchasePrice.store.load({
+        if (!purchasePriceInDetail) {
+            me.groupFieldForPurchasePrice.store.load();
+            me.priceFieldForPurchasePrice.store.load({
                 params: {
                     'customerGroup': record.get('priceGroupForPurchasePriceExport')
                 }
-        });
+            });
+        }
     },
 
     /**

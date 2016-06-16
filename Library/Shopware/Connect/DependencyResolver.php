@@ -301,7 +301,7 @@ class DependencyResolver
 
             $this->registry->registerService(
                 'productPayments',
-                array('lastRevision', 'replicate'),
+                array('lastRevision', 'replicate', 'getChanges'),
                 $this->getPaymentStatusService()
             );
         }
@@ -370,6 +370,8 @@ class DependencyResolver
                         new Struct\Verificator\Tracking(),
                     'Shopware\\Connect\\Struct\\OrderStatus' =>
                         new Struct\Verificator\OrderStatus(),
+                    'Shopware\\Connect\\Struct\\PaymentStatus' =>
+                        new Struct\Verificator\PaymentStatus(),
                     'Shopware\\Connect\\Struct\\Shipping' =>
                         new Struct\Verificator\Shipping(),
                     'Shopware\\Connect\\Struct\\ShippingRules' =>
@@ -595,6 +597,7 @@ class DependencyResolver
     {
         if ($this->paymentStatusService === null) {
             $this->paymentStatusService = new Service\PaymentStatus(
+                $this->gateway,
                 $this->fromShop,
                 $this->getGateway()
             );

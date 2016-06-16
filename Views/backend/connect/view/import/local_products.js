@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
             dropGroup: 'local'
         },
         getRowClass: function(rec, rowIdx, params, store) {
-            return rec.get('Attribute_connectMappedCategory') == 1 ? 'shopware-connect-color' : '';
+            return rec.get('Attribute_connectMappedCategory') == 1 ? 'shopware-connect-color' : 'local-product-color';
         }
     },
 

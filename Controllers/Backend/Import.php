@@ -49,7 +49,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getImportedProductCategoriesTreeAction()
     {
-        $parent = $this->request->getParam('id', 'root');
+        $parent = $this->request->getParam('categoryId', 'root');
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
 
         switch ($parent) {
@@ -132,10 +132,29 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     {
         $categoryId = (int)$this->request->getParam('categoryId', 0);
         $articleIds = $this->request->getParam('articleIds', array());
+
+        $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
+
         if ($categoryId == 0 || empty($articleIds)) {
             $this->View()->assign(array(
                 'success' => false,
-                'error' => 'Invalid category or articles',
+                'message' => $snippets->get(
+                    'import/message/category_has_children',
+                    'Invalid category or articles',
+                    true
+                ),
+            ));
+            return;
+        }
+
+        if ($this->getImportService()->hasCategoryChildren($categoryId)) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $snippets->get(
+                    'import/message/category_has_children',
+                    'Category has subcategories, please make sure you have selected single one',
+                    true
+                ),
             ));
             return;
         }
@@ -146,7 +165,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(array(
                 'success' => false,
-                'error' => 'Category could not be assigned to products!',
+                'message' => $snippets->get(
+                    'import/message/failed_product_to_category_assignment',
+                    'Category could not be assigned to products!',
+                    true
+                ),
             ));
             return;
         }
@@ -271,7 +294,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                     Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
                     Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
                 ),
-                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection())
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                new \ShopwarePlugins\Connect\Components\RandomStringGenerator()
             );
         }
 

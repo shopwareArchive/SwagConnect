@@ -89,7 +89,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
 
-        priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Preisfeld ist nicht gepflegt{/s}',
+        priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Price field is not maintained. Some of the products have price = 0{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
@@ -190,7 +190,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             },
 
-            'connect-export-filter base-element-select[name=supplierId]': {
+            'connect-export-filter [name=supplierId]': {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
@@ -1182,10 +1182,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param oldValue
      */
     onChangePriceGroupForPrice: function(combo, newValue, oldValue) {
-        if (!oldValue) {
-            return;
-        }
-
         var me = this;
         var exportConfigForm = me.getExportConfigForm();
         exportConfigForm.setLoading(true);
@@ -1208,10 +1204,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param oldValue
      */
     onChangePriceGroupForPurchasePrice: function(combo, newValue, oldValue) {
-        if (!oldValue) {
-            return;
-        }
-
         var me = this;
         var exportConfigForm = me.getExportConfigForm();
         exportConfigForm.setLoading(true);
@@ -1234,10 +1226,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param oldValue
      */
     onChangePriceFieldForPurchasePrice: function(combo, newValue, oldValue) {
-        if (!oldValue) {
-            return;
-        }
-
         var me = this;
 
         var newRecord = combo.findRecordByValue(newValue);
@@ -1255,10 +1243,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param oldValue
      */
     onChangePriceFieldForPrice: function(combo, newValue, oldValue) {
-        if (!oldValue) {
-            return;
-        }
-
         var me = this;
 
         var newRecord = combo.findRecordByValue(newValue);

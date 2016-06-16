@@ -2,8 +2,11 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-include('./../../../../../../tests/Shopware/TestHelper.php');
-
+if (file_exists('./../../../../../../tests/Shopware/TestHelper.php')) {
+    include('./../../../../../../tests/Shopware/TestHelper.php');
+} else {
+    include(__DIR__ . '/../../../../../../../../../tests/Functional/bootstrap.php');
+}
 Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__  . '/');
 
 Shopware()->Bootstrap()->getResource('ConnectSDK');

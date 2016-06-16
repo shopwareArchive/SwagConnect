@@ -134,6 +134,7 @@ class ProductFromShop implements ProductFromShopBase
         $this->manager->getConnection()->beginTransaction();
 
         try {
+            $this->validateBilling($order->billingAddress);
             $orderNumber = $this->doBuy($order);
             $this->manager->getConnection()->commit();
         } catch (\Exception $e) {
@@ -324,7 +325,7 @@ class ProductFromShop implements ProductFromShopBase
             $paymentStatusRepository = $this->manager->getRepository('Shopware\Models\Order\Status');
             /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
             $orderPaymentStatus = $paymentStatusRepository->findOneBy(
-                array('description' => 'connect ' . $status->paymentStatus)
+                array('name' => 'sc_' . $status->paymentStatus)
             );
 
             if ($orderPaymentStatus) {
@@ -431,5 +432,32 @@ class ProductFromShop implements ProductFromShopBase
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));
+    }
+
+    private function validateBilling(Address $address)
+    {
+        if (!$address->email) {
+            throw new \RuntimeException('Billing address should contain email');
+        }
+
+        if (!$address->firstName) {
+            throw new \RuntimeException('Billing address should contain first name');
+        }
+
+        if (!$address->surName) {
+            throw new \RuntimeException('Billing address should contain last name');
+        }
+
+        if (!$address->zip) {
+            throw new \RuntimeException('Billing address should contain zip');
+        }
+
+        if (!$address->city) {
+            throw new \RuntimeException('Billing address should contain city');
+        }
+
+        if (!$address->phone) {
+            throw new \RuntimeException('Billing address should contain phone');
+        }
     }
 }

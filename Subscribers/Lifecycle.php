@@ -2,10 +2,12 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Shopware\Connect\Struct\PaymentStatus;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use Shopware\Models\Order\Order;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from connect
@@ -50,25 +52,15 @@ class Lifecycle extends BaseSubscriber
         /** @var \Shopware\Models\Order\Order $order */
         $order = $eventArgs->get('entity');
 
-        $attribute = $order->getAttribute();
-        if (!$attribute || !$attribute->getConnectShopId()) {
-            return;
-        }
-
         // Compute the changeset and return, if orderStatus did not change
         $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($order);
-        if (!isset($changeSet['orderStatus'])) {
-            return;
+
+        if (isset($changeSet['paymentStatus'])) {
+            $this->updatePaymentStatus($order);
         }
 
-
-        $orderStatusMapper = new Utils\OrderStatusMapper();
-        $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
-
-        try {
-            $this->getSDK()->updateOrderStatus($orderStatus);
-        } catch (\Exception $e) {
-            // if sn is not available, proceed without exception
+        if (isset($changeSet['orderStatus'])) {
+            $this->updateOrderStatus($order);
         }
     }
 
@@ -195,6 +187,58 @@ class Lifecycle extends BaseSubscriber
                 array('cron_update' => 1),
                 array('article_id' => $article->getId())
             );
+        }
+    }
+
+    /**
+     * Sends the new order status when supplier change it
+     *
+     * @param Order $order
+     */
+    private function updateOrderStatus(Order $order)
+    {
+        $attribute = $order->getAttribute();
+        if (!$attribute || !$attribute->getConnectShopId()) {
+            return;
+        }
+
+        $orderStatusMapper = new Utils\OrderStatusMapper();
+        $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
+
+        try {
+            $this->getSDK()->updateOrderStatus($orderStatus);
+        } catch (\Exception $e) {
+            // if sn is not available, proceed without exception
+        }
+    }
+
+    /**
+     * Sends the new payment status when merchant change it
+     *
+     * @param Order $order
+     */
+    private function updatePaymentStatus(Order $order)
+    {
+        $orderUtil = new Utils\ConnectOrderUtil();
+        if (!$orderUtil->hasLocalOrderConnectProducts($order->getId())) {
+            return;
+        }
+
+        $paymentStatusMapper = new Utils\OrderPaymentStatusMapper();
+        $paymentStatus = $paymentStatusMapper->getPaymentStatus($order);
+
+        $this->generateChangeForPaymentStatus($paymentStatus);
+    }
+
+    /**
+     * @param PaymentStatus $paymentStatus
+     */
+    private function generateChangeForPaymentStatus(PaymentStatus $paymentStatus)
+    {
+        try {
+            $this->getSDK()->updatePaymentStatus($paymentStatus);
+        } catch (\Exception $e) {
+            // if sn is not available, proceed without exception
         }
     }
 }

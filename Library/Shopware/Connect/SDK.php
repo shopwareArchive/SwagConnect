@@ -455,6 +455,16 @@ final class SDK
     }
 
     /**
+     * @param Struct\PaymentStatus $paymentStatus
+     */
+    public function updatePaymentStatus(Struct\PaymentStatus $paymentStatus)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->updatePaymentStatus($paymentStatus);
+    }
+
+    /**
      * Update the status of a bepado order.
      *
      * @param \Shopware\Connect\Struct\OrderStatus $status

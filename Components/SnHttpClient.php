@@ -24,22 +24,15 @@ class SnHttpClient
      */
     private $configComponent;
 
-    /**
-     * @var \Firebase\JWT\JWT
-     */
-    private $jwt;
-
     public function __construct(
         ClientInterface $httpClient,
         Gateway $gateway,
-        Config $config,
-        JWT $jwt
+        Config $config
     )
     {
         $this->httpClient = $httpClient;
         $this->gateway = $gateway;
         $this->configComponent = $config;
-        $this->jwt = $jwt;
     }
 
     /**
@@ -68,7 +61,7 @@ class SnHttpClient
             "exp" => time() + (60),
             "content" => $data
         );
-        $connectAuthKey = $this->jwt->encode($token, $key);
+        $connectAuthKey = JWT::encode($token, $key);
         $url = $host . '/rest/' . $path;
 
         $response = $this->httpClient->post(

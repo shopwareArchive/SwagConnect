@@ -896,8 +896,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->snHttpClient = new SnHttpClient(
                 $this->get('http_client'),
                 new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-                $this->getConfigComponent(),
-                new JWT()
+                $this->getConfigComponent()
             );
         }
 

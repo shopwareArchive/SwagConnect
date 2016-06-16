@@ -282,7 +282,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         var dataIndexField = 'priceFieldForPurchasePriceExport';
         var helpText = '{s name=config/export/help/purchasePrice}Configure, which price field of which customer group should be exported as the product\'s merchant price{/s}';
 
-        if (purchasePriceInDetail) {
+        if (purchasePriceInDetail == true) {
             return Ext.create('Ext.form.FieldContainer', {
                 height: 30
             });
@@ -438,7 +438,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             }
         });
 
-        if (!purchasePriceInDetail) {
+        if (purchasePriceInDetail == false) {
             me.groupFieldForPurchasePrice.store.load();
             me.priceFieldForPurchasePrice.store.load({
                 params: {

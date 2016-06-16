@@ -79,7 +79,6 @@ class LocalProductQuery extends BaseProductQuery
         $selectColumns = array(
             'a.id as localId',
             'd.id as detailId',
-            'd.number as sku',
             'at.shopId as shopId',
             'at.sourceId as sourceId',
             'd.kind as detailKind',

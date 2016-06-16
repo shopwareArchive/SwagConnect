@@ -276,6 +276,10 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $this->Path() . 'Library/Shopware/Connect/'
         );
         $this->Application()->Loader()->registerNamespace(
+            'Firebase\\JWT',
+            $this->Path() . 'Library/Firebase/JWT/'
+        );
+        $this->Application()->Loader()->registerNamespace(
             'ShopwarePlugins\\Connect',
             $this->Path()
         );

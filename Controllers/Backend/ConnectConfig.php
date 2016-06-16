@@ -666,11 +666,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
             $marketplaceGateway->setMarketplaceMapping($data);
 
-            $this->View()->assign(
-                array(
-                    'success' => true,
-                )
-            );
+            $this->View()->assign(array('success' => true));
         } catch(\Exception $e) {
             $this->View()->assign(
                 array(

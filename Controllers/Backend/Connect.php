@@ -513,7 +513,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if ($host) {
             $host = 'sn.' . $host;
         } else {
-            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+            $host = 'sn.' . $this->getConfigComponent()->getMarketplaceUrl();
         }
 
         $loginUrl = $host . '/sdk/pluginCommunication/login';
@@ -567,7 +567,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if ($host) {
             $host = 'sn.' . $host;
         } else {
-            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+            $host = 'sn.' . $this->getConfigComponent()->getMarketplaceUrl();
         }
 
         $loginUrl = $host . '/sdk/pluginCommunication/register';
@@ -587,6 +587,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if($responseObject->success) {
             // Save the data
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             $this->removeConnectMenuEntry();
             $this->View()->assign([
                 'success' => true,

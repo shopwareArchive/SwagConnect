@@ -55,7 +55,7 @@ class SnHttpClient
         if ($host) {
             $host = 'sn.' . $host;
         } else {
-            $host = $this->configComponent->getConfig('marketplaceNetworkUrl');
+            $host = 'sn.' . $this->configComponent->getMarketplaceUrl();
         }
 
         $shopId = $this->gateway->getShopId();

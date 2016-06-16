@@ -34,6 +34,8 @@ use Shopware\CustomModels\Connect\Config as ConfigModel;
  */
 class Config
 {
+    const MARKETPLACE_URL = 'shopware.connect.com';
+
     /**
      * @var ModelManager
      */
@@ -446,6 +448,15 @@ class Config
         foreach ($settings as $settingName => $settingValue) {
             $this->setConfig($settingName, $settingValue, null, 'marketplace');
         }
+    }
+
+    public function getMarketplaceUrl()
+    {
+        if ($this->getConfig('marketplaceNetworkUrl')) {
+            return $this->getConfig('marketplaceNetworkUrl');
+        }
+
+        return self::MARKETPLACE_URL;
     }
 
     /**

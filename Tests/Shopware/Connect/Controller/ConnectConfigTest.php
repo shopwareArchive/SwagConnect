@@ -165,7 +165,6 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ->setPost('data', array(
                 'exportPriceMode' => array('price'),
                 'priceGroupForPriceExport' => 'XX',
-                'priceFieldForPurchasePriceExport' => 'price',
                 'priceFieldForPriceExport' => 'basePrice',
             ));
         $this->dispatch('backend/ConnectConfig/saveExport');
@@ -224,6 +223,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->Request()
             ->setMethod('POST')
             ->setPost('data', array(
+                'exportPriceMode' => array('price', 'purchasePrice'),
                 'priceGroupForPriceExport' => 'EK',
                 'priceGroupForPurchasePriceExport' => 'EK',
                 'priceFieldForPurchasePriceExport' => 'pseudoPrice',

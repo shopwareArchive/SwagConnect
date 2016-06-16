@@ -200,7 +200,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                     me.exportPurchasePriceCheckbox.setDisabled(true);
                 }
             },
-            failure: function() { }
+            failure: function() {
+                me.priceMappingsFieldSet.setDisabled(true);
+            }
         });
 
         Ext.getStore('export.List').load();

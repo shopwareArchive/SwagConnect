@@ -28,6 +28,8 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\SnHttpClient;
+use Firebase\JWT\JWT;
 
 /**
  * @category  Shopware
@@ -64,6 +66,11 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      * @var \ShopwarePlugins\Connect\Components\PriceGateway
      */
     private $priceGateway;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\SnHttpClient
+     */
+    private $snHttpClient;
 
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
@@ -174,18 +181,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function getExportAction()
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
-        switch ($this->getSDK()->getPriceType()) {
-            case \Shopware\Connect\SDK::PRICE_TYPE_BOTH:
-                $exportConfigArray['exportPriceMode'] = array('price', 'purchasePrice');
-                break;
-            case \Shopware\Connect\SDK::PRICE_TYPE_RETAIL:
-                $exportConfigArray['exportPriceMode'] = array('price');
-                break;
-            case \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE:
-                $exportConfigArray['exportPriceMode'] = array('purchasePrice');
-                break;
-            default:
-                $exportConfigArray['exportPriceMode'] = array();
+        if (!array_key_exists('exportPriceMode', $exportConfigArray)) {
+            $exportConfigArray['exportPriceMode'] = array();
         }
 
         $this->View()->assign(
@@ -206,6 +203,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
         $isPricingMappingAllowed = !count($this->getConnectExport()->getExportArticlesIds()) > 0;
+
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
             $this->View()->assign(
                 array(
@@ -217,15 +215,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             );
             return;
         }
+
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
-            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL) {
+        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL) {
             $isPriceModeEnabled = true;
         }
+
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
-            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE)
+        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE)
         {
             $isPurchasePriceModeEnabled = true;
         }
+
         $this->View()->assign(
             array(
                 'success' => true,
@@ -246,12 +247,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $data = $this->Request()->getParam('data');
         $exportPrice = in_array('price', $data['exportPriceMode']);
         $exportPurchasePrice = in_array('purchasePrice', $data['exportPriceMode']);
+
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
 
         if ($isModified === false) {
             $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
-
             $this->View()->assign(
                 array(
                     'success' => true,
@@ -271,7 +272,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 'success' => false,
                 'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                     'config/export/priceFieldIsNotSupported',
-                    'Price field is not maintained. Some of the products have price = 0',
+                    'Preisfeld ist nicht gepflegt',
                     true
                 )
             ));
@@ -293,11 +294,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
-        $detailPurchasePrice = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice');
-        if ($exportPurchasePrice && $detailPurchasePrice) {
-            $data['priceFieldForPurchasePriceExport'] = 'detailPurchasePrice';
-        }
-
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
             || $priceType == \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
         ) {
@@ -314,18 +310,20 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 ));
                 return;
             }
+
             if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
-                        'Price field is not maintained. Some of the products have price = 0',
+                        'Preisfeld ist nicht gepflegt',
                         true
                     )
                 ));
                 return;
             }
         }
+
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
             || $priceType == \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
         ) {
@@ -333,7 +331,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(
                 'key' => $data['priceGroupForPurchasePriceExport']
             ));
-            if (!$groupPurchasePrice && !$detailPurchasePrice) {
+            if (!$groupPurchasePrice) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
@@ -344,39 +342,56 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 ));
                 return;
             }
+
             if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) > 0) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
-                        'Price field is not maintained. Some of the products have price = 0',
+                        'Preisfeld ist nicht gepflegt',
                         true
                     )
                 ));
                 return;
             }
         }
+
         $connectExport = $this->getConnectExport();
+
         try {
             $data = !isset($data[0]) ? array($data) : $data;
+            $response = $this->getSnHttpClient()->sendRequestToConnect(
+                array('priceType' => $priceType),
+                'account/settings'
+            );
+
+            $responseBody = json_decode($response->getBody());
+            if (!$responseBody->success) {
+                throw new \RuntimeException($responseBody->message);
+            }
+
+            $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setExportConfigs($data);
+
             $ids = $connectExport->getExportArticlesIds();
             $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
             $errors = $connectExport->export($sourceIds);
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
-                'success' => false,
-                'message' => $e->getMessage()
-            ));
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ));
             return;
         }
+
         if (!empty($errors)) {
             $this->View()->assign(array(
-                'success' => false,
-                'message' => implode("<br>\n", $errors)
-            ));
+                    'success' => false,
+                    'message' => implode("<br>\n", $errors)
+                ));
             return;
         }
+
         $this->View()->assign(
             array(
                 'success' => true
@@ -651,11 +666,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
             $marketplaceGateway->setMarketplaceMapping($data);
 
-            $this->View()->assign(
-                array(
-                    'success' => true,
-                )
-            );
+            $this->View()->assign(array('success' => true));
         } catch(\Exception $e) {
             $this->View()->assign(
                 array(
@@ -878,4 +889,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         return $this->priceGateway;
     }
-} 
+
+    private function getSnHttpClient()
+    {
+        if (!$this->snHttpClient) {
+            $this->snHttpClient = new SnHttpClient(
+                $this->get('http_client'),
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                $this->getConfigComponent(),
+                new JWT()
+            );
+        }
+
+        return $this->snHttpClient;
+    }
+}

@@ -35,6 +35,7 @@ use Shopware\CustomModels\Connect\Config as ConfigModel;
 class Config
 {
     const MARKETPLACE_URL = 'shopware.connect.com';
+    const SN_PREFIX = 'sn.';
 
     /**
      * @var ModelManager
@@ -457,6 +458,11 @@ class Config
         }
 
         return self::MARKETPLACE_URL;
+    }
+
+    public function getSocialNetworkPrefix()
+    {
+        return self::SN_PREFIX;
     }
 
     /**

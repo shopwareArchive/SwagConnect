@@ -46,9 +46,9 @@ class SnHttpClient
     {
         $host = $this->configComponent->getConfig('connectDebugHost');
         if ($host) {
-            $host = 'sn.' . $host;
+            $host = $this->configComponent->getSocialNetworkPrefix() . $host;
         } else {
-            $host = 'sn.' . $this->configComponent->getMarketplaceUrl();
+            $host = $this->configComponent->getSocialNetworkPrefix() . $this->configComponent->getMarketplaceUrl();
         }
 
         $shopId = $this->gateway->getShopId();

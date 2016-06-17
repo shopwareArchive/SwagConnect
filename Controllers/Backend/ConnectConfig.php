@@ -272,7 +272,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 'success' => false,
                 'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                     'config/export/priceFieldIsNotSupported',
-                    'Preisfeld ist nicht gepflegt',
+                    'Price field is not maintained. Some of the products have price = 0',
                     true
                 )
             ));
@@ -292,6 +292,11 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 )
             ));
             return;
+        }
+
+        $detailPurchasePrice = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice');
+        if ($exportPurchasePrice && $detailPurchasePrice) {
+            $data['priceFieldForPurchasePriceExport'] = 'detailPurchasePrice';
         }
 
         if ($priceType == \Shopware\Connect\SDK::PRICE_TYPE_BOTH
@@ -316,7 +321,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
-                        'Preisfeld ist nicht gepflegt',
+                        'Price field is not maintained. Some of the products have price = 0',
                         true
                     )
                 ));
@@ -331,7 +336,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(
                 'key' => $data['priceGroupForPurchasePriceExport']
             ));
-            if (!$groupPurchasePrice) {
+            if (!$groupPurchasePrice && !$detailPurchasePrice) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
@@ -348,7 +353,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
-                        'Preisfeld ist nicht gepflegt',
+                        'Price field is not maintained. Some of the products have price = 0',
                         true
                     )
                 ));

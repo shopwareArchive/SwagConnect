@@ -762,14 +762,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0
         );
 
-        $groups[] = array(
-            'field' => 'basePrice',
-            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                'detail/price/base_price',
-                'Einkaufspreis'
-            ),
-            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0
-        );
+
+        if (!method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $groups[] = array(
+                'field' => 'basePrice',
+                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
+                    'detail/price/base_price',
+                    'Einkaufspreis'
+                ),
+                'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0
+            );
+        }
 
         $groups[] = array(
             'field' => 'pseudoPrice',

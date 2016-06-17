@@ -182,7 +182,12 @@ class ProductToShop implements ProductToShopBase
             }
 
             $detail = new DetailModel();
-            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
+            if (!empty($product->sku)) {
+                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
+            } else {
+                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
+            }
+            
             $detail->setActive(false);
             $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
             $detail->setActive($active);

@@ -540,9 +540,9 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         $password = $this->Request()->getParam('password');
         $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
-            $host = 'sn.' . $host;
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
         } else {
-            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
         }
 
         $loginUrl = $host . '/sdk/pluginCommunication/login';
@@ -594,9 +594,9 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         // Enter the valid production url here
         $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
         if ($host) {
-            $host = 'sn.' . $host;
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
         } else {
-            $host = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl');
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
         }
 
         $loginUrl = $host . '/sdk/pluginCommunication/register';
@@ -616,6 +616,8 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
         if($responseObject->success) {
             // Save the data
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             $this->removeConnectMenuEntry();
             $this->View()->assign([
                 'success' => true,
@@ -703,7 +705,7 @@ class Shopware_Controllers_Backend_Connect extends Shopware_Controllers_Backend_
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => '',
-            '#onclick#' => 'window.open("http://sn.' . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
+            '#onclick#' => 'window.open("http://' . $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
             '#action#' => ''
         ]));
     }

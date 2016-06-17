@@ -124,7 +124,8 @@ class ConnectFactory
         if (!empty($debugHost)) {
             $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
-            putenv("_SOCIALNETWORK_HOST=sn.{$debugHost}");
+            $snPrefix = $this->getConfigComponent()->getSocialNetworkPrefix();
+            putenv("_SOCIALNETWORK_HOST={$snPrefix}{$debugHost}");
             putenv("_TRANSACTION_HOST=transaction.{$debugHost}");
         }
 

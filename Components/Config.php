@@ -34,6 +34,9 @@ use Shopware\CustomModels\Connect\Config as ConfigModel;
  */
 class Config
 {
+    const MARKETPLACE_URL = 'shopware.connect.com';
+    const SN_PREFIX = 'sn.';
+
     /**
      * @var ModelManager
      */
@@ -64,7 +67,7 @@ class Config
      * @param null $shopId
      * @return null
      */
-    public function getConfig($name, $default=null, $shopId=null)
+    public function getConfig($name, $default = null, $shopId = null)
     {
         $result = $this->getPluginConfig($name);
         if (!empty($result)) {
@@ -117,7 +120,8 @@ class Config
      * @param null $default
      * @return mixed
      */
-    private function getPluginConfig($name, $default = null) {
+    private function getPluginConfig($name, $default = null)
+    {
         return Shopware()->Config()->getByNamespace('SwagConnect', $name, $default);
     }
 
@@ -126,7 +130,7 @@ class Config
      * @param null $default
      * @return null
      */
-    private function getMainConfig($name, $default=null)
+    private function getMainConfig($name, $default = null)
     {
         $query = $this->getConfigRepository()->getConfigsQuery($name);
         $query->setMaxResults(1);
@@ -284,10 +288,10 @@ class Config
             foreach ($config as $key => $configValue) {
                 /** @var \Shopware\CustomModels\Connect\Config $model */
                 $model = $this->getConfigRepository()->findOneBy(array(
-                        'name' => $key,
-                        'shopId' => null,
-                        'groupName' => 'import'
-                    ));
+                    'name' => $key,
+                    'shopId' => null,
+                    'groupName' => 'import'
+                ));
                 if (is_null($model)) {
                     $model = new ConfigModel();
                     $model->setName($key);
@@ -336,10 +340,10 @@ class Config
             foreach ($config as $key => $configValue) {
                 /** @var \Shopware\CustomModels\Connect\Config $model */
                 $model = $this->getConfigRepository()->findOneBy(array(
-                        'name' => $key,
-                        'shopId' => null,
-                        'groupName' => 'export'
-                    ));
+                    'name' => $key,
+                    'shopId' => null,
+                    'groupName' => 'export'
+                ));
                 if (is_null($model)) {
                     $model = new ConfigModel();
                     $model->setName($key);
@@ -370,10 +374,10 @@ class Config
         foreach ($units as $unit) {
             /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
-                    'name' => $unit['connectUnit'],
-                    'shopId' => null,
-                    'groupName' => 'units'
-                ));
+                'name' => $unit['connectUnit'],
+                'shopId' => null,
+                'groupName' => 'units'
+            ));
 
             if (!$model) {
                 continue;
@@ -418,6 +422,7 @@ class Config
             return true;
         elseif ($currentConfig['exportPriceMode'] != $config['exportPriceMode'])
             return true;
+
         return false;
     }
 
@@ -440,10 +445,24 @@ class Config
      */
     public function setMarketplaceSettings(MarketplaceSettings $settings)
     {
-        $settings = (array) $settings;
+        $settings = (array)$settings;
         foreach ($settings as $settingName => $settingValue) {
             $this->setConfig($settingName, $settingValue, null, 'marketplace');
         }
+    }
+
+    public function getMarketplaceUrl()
+    {
+        if ($this->getConfig('marketplaceNetworkUrl')) {
+            return $this->getConfig('marketplaceNetworkUrl');
+        }
+
+        return self::MARKETPLACE_URL;
+    }
+
+    public function getSocialNetworkPrefix()
+    {
+        return self::SN_PREFIX;
     }
 
     /**

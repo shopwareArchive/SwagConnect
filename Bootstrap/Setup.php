@@ -126,7 +126,7 @@ class Setup
                     'label' => 'OpenConnect',
                     'controller' => 'Connect',
                     'action' => 'OpenConnect',
-                    'onclick' => 'window.open(\'http://sn.' . $targetConnectUrlFragement . '\')',
+                    'onclick' => 'window.open(\'http://'. $configComponent->getSocialNetworkPrefix() . $targetConnectUrlFragement . '\')',
                     'class' => 'connect-icon',
                     'active' => 1,
                     'parent' => $parent

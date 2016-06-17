@@ -210,13 +210,13 @@ class Setup
     {
         $queries = array("
             CREATE TABLE IF NOT EXISTS `sw_connect_change` (
-              `c_source_id` varchar(64) NOT NULL,
+              `c_entity_id` varchar(64) NOT NULL,
               `c_operation` char(8) NOT NULL,
               `c_revision` decimal(20,10) NOT NULL,
-              `c_product` longblob,
+              `c_payload` longblob,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               UNIQUE KEY `c_revision` (`c_revision`),
-              KEY `c_source_id` (`c_source_id`)
+              KEY `c_entity_id` (`c_entity_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
            CREATE TABLE IF NOT EXISTS `sw_connect_data` (
               `d_key` varchar(32) NOT NULL,

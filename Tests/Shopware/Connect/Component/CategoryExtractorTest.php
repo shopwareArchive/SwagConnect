@@ -160,8 +160,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $this->db->exec("DELETE FROM `s_plugin_connect_categories`");
         $this->db->exec("DELETE FROM `s_plugin_connect_product_to_categories`");
-        $this->db->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "9898%"');
-        $this->db->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "9897%"');
+        $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9898%"');
+        $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9897%"');
         $this->db->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
         $this->db->exec('DELETE FROM s_plugin_connect_items WHERE source_id LIKE "9898%"');

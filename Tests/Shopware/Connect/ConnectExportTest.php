@@ -125,7 +125,7 @@ class ConnectExportTest extends ConnectTestHelper
             $this->assertEquals('delete', $connectAttribute['export_status']);
         }
 
-        $this->assertEquals(4, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_source_id LIKE "1919%"')->fetchColumn());
+        $this->assertEquals(4, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
     }
 
     public function testDeleteVariant()
@@ -138,14 +138,14 @@ class ConnectExportTest extends ConnectTestHelper
 
         $this->connectExport->syncDeleteDetail($detail);
 
-        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_source_id LIKE "1919%"')->fetchColumn());
+        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
         $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status = "delete"')->fetchColumn());
     }
 
     private function insertVariants()
     {
         //clear connect_change table
-        Shopware()->Db()->exec('DELETE FROM sw_connect_change WHERE c_source_id LIKE "1919%"');
+        Shopware()->Db()->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "1919%"');
         //clear s_articles table
         Shopware()->Db()->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
         //clear s_articles_detail table

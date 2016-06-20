@@ -46,6 +46,10 @@ class ControllerPath extends BaseSubscriber
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
+
+        if ($this->shopware52Installed) {
+            return $this->Path() . 'Controllers/Backend/Connect52.php';
+        }
         return $this->Path() . 'Controllers/Backend/Connect.php';
     }
 

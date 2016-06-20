@@ -620,6 +620,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         if($responseObject->success) {
             // Save the data
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $this->getSDK()->verifySdk();
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             $this->removeConnectMenuEntry();

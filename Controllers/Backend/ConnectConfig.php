@@ -382,6 +382,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
             $errors = $connectExport->export($sourceIds);
         }catch (\RuntimeException $e) {
+            $this->getLogger()->write(true, 'Save export settings', $e->getMessage() . $e->getTraceAsString());
             $this->View()->assign(array(
                     'success' => false,
                     'message' => $e->getMessage()

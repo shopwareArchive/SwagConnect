@@ -564,6 +564,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             // Save the data
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->removeConnectMenuEntry();
+            $this->getSDK()->verifySdk();
+            
             $this->View()->assign([
                 'success' => true,
                 'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken

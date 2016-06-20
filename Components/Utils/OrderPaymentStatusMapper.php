@@ -26,6 +26,7 @@ class OrderPaymentStatusMapper
         if (!$this->mapping) {
             $this->mapping = array(
                 'open' => PaymentStatus::PAYMENT_OPEN,
+                'completely_paid' => PaymentStatus::PAYMENT_RECEIVED,
                 'sc_requested' => PaymentStatus::PAYMENT_REQUESTED,
                 'sc_initiated' => PaymentStatus::PAYMENT_INITIATED,
                 'sc_instructed' => PaymentStatus::PAYMENT_INSTRUCTED,

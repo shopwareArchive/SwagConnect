@@ -7,7 +7,6 @@
 
 namespace Shopware\Connect\Service;
 
-use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\VerificatorDispatcher;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\HttpClient;
@@ -144,32 +143,6 @@ class SocialNetwork
         $shipping = $body['shipping'];
 
         return new Struct\Shipping($shipping);
-    }
-
-    /**
-     * Set price type in SocialNetwork
-     *
-     * @param int $priceType
-     * @return void
-     * @throws \RuntimeException
-     */
-    public function setPriceType($priceType)
-    {
-        $availablePriceTypes = array(SDK::PRICE_TYPE_RETAIL, SDK::PRICE_TYPE_PURCHASE, SDK::PRICE_TYPE_BOTH);
-        if (!in_array($priceType, $availablePriceTypes)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Price type %s is not supported, please check Shopware\Connect\SDK for available values.',
-                $priceType
-            ));
-        }
-
-        $response = $this->request('/sdk/price-type', array('priceType' => (int)$priceType));
-        $this->handleResponse($response, "Set price type");
-
-        $responseBody = json_decode($response->body);
-        if (!$responseBody->success) {
-            throw new \RuntimeException('Price type is not stored successfully!');
-        }
     }
 
     private function verifyProductIds(array $productIds)

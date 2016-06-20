@@ -7,7 +7,6 @@
 
 namespace Shopware\Connect\Service;
 
-use Shopware\Connect\Gateway\ChangeGateway;
 use Shopware\Connect\ProductFromShop;
 use Shopware\Connect\Gateway\ShopConfiguration;
 
@@ -24,11 +23,6 @@ class PaymentStatus
     const PAYMENT_REVISION = '_payment_revision_';
 
     /**
-     * @var \Shopware\Connect\Gateway\ChangeGateway
-     */
-    protected $changes;
-
-    /**
      * @var \Shopware\Connect\ProductFromShop
      */
     protected $fromShop;
@@ -38,9 +32,8 @@ class PaymentStatus
      */
     protected $shopConfiguration;
 
-    public function __construct(ChangeGateway $changes, ProductFromShop $fromShop, ShopConfiguration $shopConfiguration)
+    public function __construct(ProductFromShop $fromShop, ShopConfiguration $shopConfiguration)
     {
-        $this->changes = $changes;
         $this->fromShop = $fromShop;
         $this->shopConfiguration = $shopConfiguration;
     }
@@ -67,15 +60,5 @@ class PaymentStatus
             $this->fromShop->updatePaymentStatus($status);
             $this->shopConfiguration->setConfig(self::PAYMENT_REVISION, $revision);
         }
-    }
-
-    /**
-     * @param $since
-     * @param $limit
-     * @return \Shopware\Connect\Struct\Change[]
-     */
-    public function getChanges($since, $limit)
-    {
-        return $this->changes->getNextPaymentStatusChanges($since, $limit);
     }
 }

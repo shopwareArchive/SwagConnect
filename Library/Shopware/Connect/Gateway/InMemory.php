@@ -11,7 +11,6 @@ use Shopware\Connect\Gateway;
 use Shopware\Connect\Struct;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\Product;
-use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\ShippingCosts\Rules;
 
 /**
@@ -41,37 +40,23 @@ class InMemory extends Gateway
     protected $billingAddress;
 
     /**
-     * @var array
+     * Get next changes
+     *
+     * The offset specified the revision to start from
+     *
+     * May remove all pending changes, which are prior to the last requested
+     * revision.
+     *
+     * @param string $offset
+     * @param int $limit
+     * @return \Shopware\Connect\Struct\Change[]
      */
-    protected $types = array(
-        self::TYPE_PRODUCT => array(
-            self::PRODUCT_INSERT,
-            self::PRODUCT_UPDATE,
-            self::PRODUCT_DELETE,
-            self::PRODUCT_STOCK,
-            self::STREAM_ASSIGNMENT
-        ),
-        self::TYPE_PAYMENT => array(
-            self::PAYMENT_UPDATE
-        ),
-    );
-
-    /**
-     * @param $offset
-     * @param $limit
-     * @param array $types
-     * @return array
-     */
-    protected function doNextChange($offset, $limit, array $types)
+    public function getNextChanges($offset, $limit)
     {
         $record = $offset === null;
         $changes = array();
         $i = 0;
         foreach ($this->changes as $revision => $data) {
-            if (!in_array($data['type'], $types)) {
-                continue;
-            }
-
             if (strcmp($revision, $offset) > 0) {
                 $record = true;
             }
@@ -89,33 +74,6 @@ class InMemory extends Gateway
         }
 
         return $changes;
-    }
-
-    /**
-     * Get next changes
-     *
-     * The offset specified the revision to start from
-     *
-     * May remove all pending changes, which are prior to the last requested
-     * revision.
-     *
-     * @param string $offset
-     * @param int $limit
-     * @return \Shopware\Connect\Struct\Change[]
-     */
-    public function getNextChanges($offset, $limit)
-    {
-        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PRODUCT]);
-    }
-
-    /**
-     * @param $offset
-     * @param $limit
-     * @return array
-     */
-    public function getNextPaymentStatusChanges($offset, $limit)
-    {
-        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PAYMENT]);
     }
 
     public function cleanChangesUntil($offset)
@@ -149,10 +107,6 @@ class InMemory extends Gateway
         $i = 0;
         $count = 0;
         foreach ($this->changes as $revision => $data) {
-            if (array_key_exists($data['type'], $this->types)) {
-                continue;
-            }
-
             if (strcmp($revision, $offset) > 0) {
                 $record = true;
             }
@@ -174,25 +128,22 @@ class InMemory extends Gateway
     private function createChange(array $data)
     {
         switch ($data['type']) {
-            case self::PRODUCT_DELETE:
+            case 'delete':
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete';
                 break;
-            case self::PRODUCT_INSERT:
+            case 'insert':
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Insert';
                 break;
-            case self::PRODUCT_UPDATE:
+            case 'update':
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update';
                 break;
-            case self::PRODUCT_STOCK:
+            case 'stock':
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability';
                 $data['availability'] = intval($data['product']->availability);
                 unset($data['product']);
                 break;
             case self::STREAM_ASSIGNMENT:
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment';
-                break;
-            case self::PAYMENT_UPDATE:
-                $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus';
                 break;
         }
 
@@ -215,7 +166,7 @@ class InMemory extends Gateway
         $this->checkRevisionExists($revision);
 
         $this->changes[$revision] = array(
-            'type'     => self::PRODUCT_INSERT,
+            'type'     => 'insert',
             'sourceId' => $id,
             'revision' => $revision,
             'product'  => $product
@@ -237,7 +188,7 @@ class InMemory extends Gateway
         $this->checkRevisionExists($revision);
 
         $this->changes[$revision] = array(
-            'type'     => self::PRODUCT_UPDATE,
+            'type'     => 'update',
             'sourceId' => $id,
             'revision' => $revision,
             'product'  => $product
@@ -259,7 +210,7 @@ class InMemory extends Gateway
         $this->checkRevisionExists($revision);
 
         $this->changes[$revision] = array(
-            'type'     => self::PRODUCT_STOCK,
+            'type'     => 'stock',
             'sourceId' => $id,
             'revision' => $revision,
             'product'  => $product
@@ -279,7 +230,7 @@ class InMemory extends Gateway
         $this->checkRevisionExists($revision);
 
         $this->changes[$revision] = array(
-            'type'     => self::PRODUCT_DELETE,
+            'type'     => 'delete',
             'sourceId' => $id,
             'revision' => $revision
         );
@@ -302,25 +253,6 @@ class InMemory extends Gateway
             'sourceId' => $id,
             'revision' => $revision,
             'supplierStreams' => $supplierStreams,
-        );
-    }
-
-    /**
-     * Update payment status
-     *
-     * @param $revision
-     * @param PaymentStatus $paymentStatus
-     * @return void
-     */
-    public function updatePaymentStatus($revision, PaymentStatus $paymentStatus)
-    {
-        $this->checkRevisionExists($revision);
-
-        $this->changes[$revision] = array(
-            'type'     => self::PAYMENT_UPDATE,
-            'sourceId' => $paymentStatus->localOrderId,
-            'revision' => $revision,
-            'paymentStatus' => $paymentStatus,
         );
     }
 
@@ -611,6 +543,35 @@ class InMemory extends Gateway
     public function getBillingAddress()
     {
         return $this->billingAddress;
+    }
+
+    /**
+     * Set the shop features
+     *
+     * @param array $features
+     */
+    public function setFeatures(array $features)
+    {
+        $this->features = $features;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFeatures()
+    {
+        return $this->features;
+    }
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $feature
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        return in_array($feature, $this->features) && $this->features[$feature] === true;
     }
 
     public function setConfig($shopId, $config)

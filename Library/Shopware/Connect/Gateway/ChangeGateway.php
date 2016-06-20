@@ -7,7 +7,6 @@
 
 namespace Shopware\Connect\Gateway;
 
-use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Product;
 
 /**
@@ -18,14 +17,7 @@ use Shopware\Connect\Struct\Product;
  */
 interface ChangeGateway
 {
-    const TYPE_PRODUCT = 'product';
-    const TYPE_PAYMENT = 'payment';
-    const PRODUCT_INSERT = 'insert';
-    const PRODUCT_UPDATE = 'update';
-    const PRODUCT_DELETE = 'delete';
-    const PRODUCT_STOCK = 'stock';
     const STREAM_ASSIGNMENT = 's-assign';
-    const PAYMENT_UPDATE = 'pmnt-u';
 
     /**
      * Get next changes
@@ -40,13 +32,6 @@ interface ChangeGateway
      * @return \Shopware\Connect\Struct\Change[]
      */
     public function getNextChanges($offset, $limit);
-
-    /**
-     * @param $offset
-     * @param $limit
-     * @return mixed
-     */
-    public function getNextPaymentStatusChanges($offset, $limit);
 
     /**
      * Remove changes from the storage until the given offset.
@@ -120,13 +105,4 @@ interface ChangeGateway
      * @param array $supplierStreams
      */
     public function recordStreamAssignment($productId, $revision, array $supplierStreams);
-
-    /**
-     * Update payment status
-     *
-     * @param $revision
-     * @param PaymentStatus $paymentStatus
-     * @return void
-     */
-    public function updatePaymentStatus($revision, PaymentStatus $paymentStatus);
 }

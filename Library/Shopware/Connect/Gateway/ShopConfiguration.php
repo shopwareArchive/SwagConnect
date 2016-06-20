@@ -79,6 +79,26 @@ interface ShopConfiguration
     public function getBillingAddress();
 
     /**
+     * Set the shop features
+     *
+     * @param array $features
+     */
+    public function setFeatures(array $features);
+
+    /**
+     * @return array
+     */
+    public function getFeatures();
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $feature
+     * @return bool
+     */
+    public function isFeatureEnabled($feature);
+
+    /**
      * Set a configuration value.
      *
      * @param mixed $key

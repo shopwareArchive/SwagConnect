@@ -124,7 +124,6 @@ class Product extends Verificator
 
         foreach (array(
             'title',
-            'sku',
             'shortDescription',
             'longDescription',
             ) as $property) {

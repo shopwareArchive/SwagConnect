@@ -455,16 +455,6 @@ final class SDK
     }
 
     /**
-     * @param Struct\PaymentStatus $paymentStatus
-     */
-    public function updatePaymentStatus(Struct\PaymentStatus $paymentStatus)
-    {
-        $this->verifySdkIfNecessary();
-
-        $this->dependencies->getExportService()->updatePaymentStatus($paymentStatus);
-    }
-
-    /**
      * Update the status of a bepado order.
      *
      * @param \Shopware\Connect\Struct\OrderStatus $status
@@ -549,24 +539,5 @@ final class SDK
         }
 
         return (int)$priceType;
-    }
-
-    /**
-     * Send chosen price type to Connect system
-     *
-     * Options are:
-     *
-     * - SDK::PRICE_TYPE_PURCHASE: Only the purchase price of a product is exported.
-     * - SDK::PRICE_TYPE_RETAIL: Only the retail price (Product#price) is exported.
-     * - SDK::PRICE_TYPE_BOTH: Both purchase and retail price are exported.
-     *
-     * @param $priceType
-     */
-    public function setPriceType($priceType)
-    {
-        $this->verifySdkIfNecessary();
-
-        $this->dependencies->getSocialNetworkService()->setPriceType($priceType);
-        $this->dependencies->getGateway()->setConfig(self::CONFIG_PRICE_TYPE, (int)$priceType);
     }
 }

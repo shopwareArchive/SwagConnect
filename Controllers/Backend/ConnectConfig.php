@@ -202,15 +202,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
-        $isPricingMappingAllowed = !count($this->getConnectExport()->getExportArticlesIds()) > 0;
-        $isPricingMappingConfigured = !empty($this->getConfigComponent()->getConfig('exportPriceMode', array()));
+        $isPricingMappingAllowed = !count($this->getConnectExport()->getExportArticlesIds()) > 0
+            && empty($this->getConfigComponent()->getConfig('exportPriceMode', array()));
 
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
             $this->View()->assign(
                 array(
                     'success' => true,
                     'isPricingMappingAllowed' => $isPricingMappingAllowed,
-                    'isPricingMappingConfigured' => $isPricingMappingConfigured,
                     'isPriceModeEnabled' => true,
                     'isPurchasePriceModeEnabled' => true,
                 )
@@ -233,7 +232,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             array(
                 'success' => true,
                 'isPricingMappingAllowed' => $isPricingMappingAllowed,
-                'isPricingMappingConfigured' => $isPricingMappingConfigured,
                 'isPriceModeEnabled' => $isPriceModeEnabled,
                 'isPurchasePriceModeEnabled' => $isPurchasePriceModeEnabled,
             )

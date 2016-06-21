@@ -40,6 +40,7 @@ class Update
         $this->addCronUpdateFlag();
         $this->removeSnippets();
         $this->renameConnectChangeColumns();
+        $this->renameMenuOpenConnect();
 
         return true;
     }
@@ -105,6 +106,24 @@ class Update
                 ALTER TABLE `sw_connect_change` CHANGE `c_source_id` `c_entity_id` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
                 ALTER TABLE `sw_connect_change` CHANGE `c_product` `c_payload` LONGBLOB NULL DEFAULT NULL;
             ");
+        }
+    }
+
+    public function renameMenuOpenConnect()
+    {
+        if (version_compare($this->version, '0.0.8', '<=')) {
+            Shopware()->Db()->query("
+                UPDATE `s_core_menu`
+                SET `onclick` = 'window.open(''connect/autoLogin'')'
+                WHERE `name` = 'OpenConnect';
+            ");
+
+            Shopware()->Db()->query("
+                UPDATE `s_core_snippets`
+                SET `value` = 'Login'
+                WHERE `name` = 'Connect/OpenConnect';
+            ");
+
         }
     }
 

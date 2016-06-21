@@ -24,4 +24,45 @@ abstract class Gateway implements
     Gateway\ReservationGateway,
     Gateway\ShippingCosts
 {
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $feature
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        $features = $this->getConfig('_features_');
+
+        if ($features === null) {
+            return false;
+        }
+
+        $features = unserialize($features);
+        return array_key_exists($feature, $features) && $features[$feature] === true;
+    }
+
+    /**
+     * Set the shop features
+     *
+     * @param array $features
+     */
+    public function setFeatures(array $features)
+    {
+        $this->setConfig('_features_', serialize($features));
+    }
+
+    /**
+     * @return array
+     */
+    public function getFeatures()
+    {
+        $features = $this->getConfig('_features_');
+
+        if ($features) {
+            return unserialize($features);
+        }
+
+        return array();
+    }
 }

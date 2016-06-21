@@ -46,7 +46,7 @@ class Configuration
             }
 
             $this->configuration->setBillingAddress($config->billingAddress);
-
+            $this->configuration->setFeatures($config->features);
             $this->updatePriceType($config->priceType);
         }
     }

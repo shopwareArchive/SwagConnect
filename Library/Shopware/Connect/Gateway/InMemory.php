@@ -613,6 +613,35 @@ class InMemory extends Gateway
         return $this->billingAddress;
     }
 
+    /**
+     * Set the shop features
+     *
+     * @param array $features
+     */
+    public function setFeatures(array $features)
+    {
+        $this->features = $features;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFeatures()
+    {
+        return $this->features;
+    }
+
+    /**
+     * Is a feature enabled?
+     *
+     * @param string $feature
+     * @return bool
+     */
+    public function isFeatureEnabled($feature)
+    {
+        return in_array($feature, $this->features) && $this->features[$feature] === true;
+    }
+
     public function setConfig($shopId, $config)
     {
         $this->config[$shopId] = $config;

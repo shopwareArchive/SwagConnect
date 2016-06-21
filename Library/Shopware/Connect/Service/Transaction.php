@@ -318,7 +318,7 @@ class Transaction
 
     private function productUnavailable($localProduct)
     {
-        return $localProduct->availability <= 0;
+        return $localProduct->availability <= 0 && !$this->shopConfiguration->isFeatureEnabled('sellNotInStock');
     }
 
     private function floatsEqual($a, $b)

@@ -55,6 +55,11 @@ class ShopConfiguration extends Struct
     public $logoUrl;
 
     /**
+     * @var boolean
+     */
+    public $sellNotInStock;
+
+    /**
      * Restores a shop configuration from a previously stored state array.
      *
      * @param array $state

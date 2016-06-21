@@ -48,6 +48,11 @@ class ConnectFactory
 
     private $mediaService;
 
+    /**
+     * @var \Shopware\Connect\Gateway
+     */
+    private $connectGateway;
+
     public function __construct($version='')
     {
         $this->pluginVersion = $version;
@@ -108,13 +113,12 @@ class ConnectFactory
      */
     public function createSDK()
     {
-        $connection = Shopware()->Db()->getConnection();
         $manager = $this->getModelManager();
         $front = Shopware()->Front();
         $helper = $this->getHelper();
         $apiKey = $this->getConfigComponent()->getConfig('apiKey');
 
-        $gateway = new \Shopware\Connect\Gateway\PDO($connection);
+        $gateway = $this->getConnectPDOGateway();
 
         /*
          * The debugHost allows to specify an alternative connect host.
@@ -152,7 +156,8 @@ class ConnectFactory
                 new VariantConfigurator($manager, $this->getProductTranslationsGateway()),
                 $this->getMarketplaceGateway(),
                 $this->getProductTranslationsGateway(),
-                $categoryResolver
+                $categoryResolver,
+                $this->getConnectPDOGateway()
             ),
             new ProductFromShop(
                 $helper,
@@ -244,9 +249,21 @@ class ConnectFactory
             $db,
             $this->getSDK(),
             $this->getHelper(),
-            new PDO($db->getConnection()),
+            $this->getConnectPDOGateway(),
             $this->getConfigComponent()->getConfig('checkoutShopInfo', 0)
         );
+    }
+
+    /**
+     * @return \Shopware\Connect\Gateway\PDO
+     */
+    private function getConnectPDOGateway()
+    {
+        if (!$this->connectGateway) {
+            $this->connectGateway = new PDO(Shopware()->Db()->getConnection());
+        }
+
+        return $this->connectGateway;
     }
 
     /**

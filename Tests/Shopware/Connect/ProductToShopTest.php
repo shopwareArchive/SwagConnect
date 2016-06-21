@@ -2,8 +2,10 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\ProductUpdate;
+use Shopware\Connect\Struct\ShopConfiguration;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
@@ -21,6 +23,11 @@ class ProductToShopTest extends ConnectTestHelper
 
     private $db;
 
+    /**
+     * @var \Shopware\Connect\Gateway
+     */
+    private $gateway;
+
     public function tearDown()
     {
         $conn = Shopware()->Db();
@@ -35,6 +42,8 @@ class ProductToShopTest extends ConnectTestHelper
         $this->db = Shopware()->Db();
         $this->db->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
         $this->db->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
+
+        $this->gateway = new PDO($this->db->getConnection());
 
         $this->modelManager = Shopware()->Models();
         $this->productToShop = new ProductToShop(
@@ -52,7 +61,8 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
-            )
+            ),
+            $this->gateway
         );
     }
 
@@ -409,7 +419,8 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
-            )
+            ),
+            $this->gateway
         );
 
 
@@ -563,6 +574,24 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertInstanceOf('Shopware\Models\Article\Detail', $article->getMainDetail());
         $this->assertTrue($article->getActive(), 'Article is activated');
         $this->assertEquals(1, $article->getMainDetail()->getActive(), 'Detail is activated');
+    }
+
+    public function testInsertArticleWithSellNotInStock()
+    {
+        $product = $this->getProduct();
+
+        $shopConfiguration = new ShopConfiguration();
+        $shopConfiguration->sellNotInStock = true;
+
+        $this->gateway->setShopConfiguration($product->shopId, $shopConfiguration);
+
+        $this->productToShop->insertOrUpdate($product);
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+            'name' => $product->title
+        ));
+
+        $this->assertFalse($article->getLastStock());
     }
 }
  

@@ -2,6 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -327,7 +328,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
-            )
+            ),
+            new PDO(Shopware()->Db()->getConnection())
         );
     }
 

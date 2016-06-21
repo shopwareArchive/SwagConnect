@@ -126,7 +126,7 @@ class Setup
                     'label' => 'OpenConnect',
                     'controller' => 'Connect',
                     'action' => 'OpenConnect',
-                    'onclick' => 'window.open(\'http://'. $configComponent->getSocialNetworkPrefix() . $targetConnectUrlFragement . '\')',
+                    'onclick' => 'window.open(\'connect/autoLogin\')',
                     'class' => 'connect-icon',
                     'active' => 1,
                     'parent' => $parent
@@ -144,8 +144,8 @@ class Setup
             ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 2, 'Connect/OpenConnect', 'Login', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
+            ('backend/index/view/main', 1, 1, 'Connect/OpenConnect', 'Öffnen Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 2, 'Connect/OpenConnect', 'Open Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48')
 
             ON DUPLICATE KEY UPDATE
               `namespace` = VALUES(`namespace`),

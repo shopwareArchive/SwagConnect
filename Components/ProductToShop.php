@@ -23,6 +23,7 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
+use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Connect\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
@@ -94,6 +95,11 @@ class ProductToShop implements ProductToShopBase
     private $categoryResolver;
 
     /**
+     * @var \Shopware\Connect\Gateway
+     */
+    private $connectGateway;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -102,6 +108,7 @@ class ProductToShop implements ProductToShopBase
      * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
      * @param \ShopwarePlugins\Connect\Components\CategoryResolver
+     * @param \Shopware\Connect\Gateway
      */
     public function __construct(
         Helper $helper,
@@ -111,7 +118,8 @@ class ProductToShop implements ProductToShopBase
         VariantConfigurator $variantConfigurator,
         MarketplaceGateway $marketplaceGateway,
         ProductTranslationsGateway $productTranslationsGateway,
-        CategoryResolver $categoryResolver
+        CategoryResolver $categoryResolver,
+        Gateway $connectGateway
     )
     {
         $this->helper = $helper;
@@ -122,6 +130,7 @@ class ProductToShop implements ProductToShopBase
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslationsGateway = $productTranslationsGateway;
         $this->categoryResolver = $categoryResolver;
+        $this->connectGateway = $connectGateway;
     }
 
     /**
@@ -276,7 +285,16 @@ class ProductToShop implements ProductToShopBase
         $releaseDate = new \DateTime();
         $releaseDate->setTimestamp($product->deliveryDate);
         $detail->setReleaseDate($releaseDate);
-        $model->setLastStock(true);
+
+        // some shops have feature "sell not in stock",
+        // then end customer should be able to by the product with stock = 0
+        $shopConfiguration = $this->connectGateway->getShopConfiguration($product->shopId);
+        if ($shopConfiguration && $shopConfiguration->sellNotInStock) {
+            $model->setLastStock(false);
+        } else {
+            $model->setLastStock(true);
+        }
+
         // if connect product has unit
         // find local unit with units mapping
         // and add to detail model

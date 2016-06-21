@@ -85,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                         var response = Ext.JSON.decode(result.responseText);
                         if (response.success === false) {
                             me.body.insertHtml("beforeEnd", me.getHtmlMask());
-                        } else if (response.isPriceModeEnabled == false && response.isPurchasePriceModeEnabled == false) {
+                        } else if (response.isPricingMappingConfigured == false) {
                             me.body.insertHtml("beforeEnd", me.getHtmlMask());
                         }
                     },

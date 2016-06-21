@@ -84,6 +84,13 @@ class Product extends ShopItem
     public $sourceId;
 
     /**
+     * SKU of the product in your shop.
+     *
+     * @var string
+     */
+    public $sku;
+
+    /**
      * Shared ID for product variants.
      *
      * This ID must be identical for all variants of the same product. If the product

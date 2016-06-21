@@ -31,11 +31,28 @@ class MySQLi extends Gateway
      * @var array
      */
     protected $operationStruct = array(
-        'insert' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Insert',
-        'update' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
-        'stock' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
-        'delete' => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::PRODUCT_INSERT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Insert',
+        self::PRODUCT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Update',
+        self::PRODUCT_DELETE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
+        self::PRODUCT_STOCK => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
+        self::PAYMENT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus',
+    );
+
+    /**
+     * @var array
+     */
+    protected $types = array(
+        self::TYPE_PRODUCT => array(
+            self::PRODUCT_INSERT,
+            self::PRODUCT_UPDATE,
+            self::PRODUCT_DELETE,
+            self::PRODUCT_STOCK,
+            self::STREAM_ASSIGNMENT
+        ),
+        self::TYPE_PAYMENT => array(
+            self::PAYMENT_UPDATE
+        ),
     );
 
     /**
@@ -46,6 +63,65 @@ class MySQLi extends Gateway
     public function __construct(\Shopware\Connect\MySQLi $connection)
     {
         $this->connection = $connection;
+    }
+
+    protected function doNextChange($offset, $limit, array $types)
+    {
+        $offset = $offset ?: 0;
+        // Float type cast does NOT work here, since the inaccuracy of floating
+        // point representations otherwise omit changes. Yes, this actually
+        // really happens.
+        if (!preg_match('(^[\\d\\.]+$)', $offset)) {
+            throw new \InvalidArgumentException("Offset revision must be a numeric string.");
+        }
+
+        $inStatement = implode("','", $types);
+
+        $result = $this->connection->query(
+            "SELECT
+                `c_entity_id`,
+                `c_operation`,
+                `c_revision`,
+                `c_payload`
+            FROM
+                `sw_connect_change`
+            WHERE
+                `c_revision` > $offset
+            AND
+                `c_operation` IN('$inStatement')
+            ORDER BY `c_revision` ASC
+            LIMIT
+                " . ((int) $limit)
+        );
+
+        $changes = array();
+        while ($row = $result->fetch_assoc()) {
+            $class = $this->operationStruct[$row['c_operation']];
+            $changes[] = $change = new $class(
+                array(
+                    'sourceId' => $row['c_entity_id'],
+                    'revision' => $row['c_revision'],
+                )
+            );
+
+            if ($row['c_payload'] !== null) {
+                switch ($row['c_operation']) {
+                    case self::PRODUCT_STOCK:
+                        $change->availability = intval($row['c_payload']);
+                        break;
+                    case self::STREAM_ASSIGNMENT:
+                        $change->supplierStreams = unserialize($row['c_payload']);
+                        break;
+                    case self::PAYMENT_UPDATE:
+                        $change->paymentStatus = unserialize($row['c_payload']);
+                        break;
+                    default:
+                        $change->product = $this->ensureUtf8(unserialize($row['c_payload']));
+                }
+            }
+        }
+
+        return $changes;
     }
 
     /**
@@ -62,54 +138,12 @@ class MySQLi extends Gateway
      */
     public function getNextChanges($offset, $limit)
     {
-        $offset = $offset ?: 0;
-        // Float type cast does NOT work here, since the inaccuracy of floating
-        // point representations otherwise omit changes. Yes, this actually
-        // really happens.
-        if (!preg_match('(^[\\d\\.]+$)', $offset)) {
-            throw new \InvalidArgumentException("Offset revision must be a numeric string.");
-        }
+        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PRODUCT]);
+    }
 
-        $result = $this->connection->query(
-            'SELECT
-                `c_source_id`,
-                `c_operation`,
-                `c_revision`,
-                `c_product`
-            FROM
-                `sw_connect_change`
-            WHERE
-                `c_revision` > ' . $offset . '
-            ORDER BY `c_revision` ASC
-            LIMIT
-                ' . ((int) $limit)
-        );
-
-        $changes = array();
-        while ($row = $result->fetch_assoc()) {
-            $class = $this->operationStruct[$row['c_operation']];
-            $changes[] = $change = new $class(
-                array(
-                    'sourceId' => $row['c_source_id'],
-                    'revision' => $row['c_revision'],
-                )
-            );
-
-            if ($row['c_product'] !== null) {
-                switch ($row['c_operation']) {
-                    case 'stock':
-                        $change->availability = intval($row['c_product']);
-                        break;
-                    case self::STREAM_ASSIGNMENT:
-                        $change->supplierStreams = unserialize($row['c_product']);
-                        break;
-                    default:
-                        $change->product = $this->ensureUtf8(unserialize($row['c_product']));
-                }
-            }
-        }
-
-        return $changes;
+    public function getNextPaymentStatusChanges($offset, $limit)
+    {
+        return $this->doNextChange($offset, $limit, $this->types[self::TYPE_PAYMENT]);
     }
 
     public function cleanChangesUntil($offset)
@@ -157,13 +191,17 @@ class MySQLi extends Gateway
     public function getUnprocessedChangesCount($offset, $limit)
     {
         $offset = $offset ?: 0;
+        $inStatement = implode("','", $this->types['product']);
+
         $result = $this->connection->query(
-            'EXPLAIN SELECT
+            "EXPLAIN SELECT
                 *
             FROM
                 `sw_connect_change`
             WHERE
-                `c_revision` > ' . $this->connection->real_escape_string($offset)
+                `c_revision` > " . $this->connection->real_escape_string($offset) . "
+            AND
+                  `c_operation` IN('$inStatement')"
         );
 
         $row = $result->fetch_assoc();
@@ -184,14 +222,14 @@ class MySQLi extends Gateway
         $this->connection->query(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 "' . $this->connection->real_escape_string($id) . '",
-                "insert",
+                "' . self::PRODUCT_INSERT . '",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string(serialize($product)) . '"
             );'
@@ -226,14 +264,14 @@ class MySQLi extends Gateway
         $this->connection->query(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 "' . $this->connection->real_escape_string($id) . '",
-                "update",
+                "' . self::PRODUCT_UPDATE . '",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string(serialize($product)) . '"
             );'
@@ -268,14 +306,14 @@ class MySQLi extends Gateway
         $this->connection->query(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 "' . $this->connection->real_escape_string($id) . '",
-                "stock",
+                "' . self::PRODUCT_STOCK . '",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string($product->availability) . '"
             );'
@@ -296,16 +334,42 @@ class MySQLi extends Gateway
         $this->connection->query(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`,
-                    `c_product`
+                    `c_payload`
                 )
             VALUES (
                 "' . $this->connection->real_escape_string($productId) . '",
                 "' . self::STREAM_ASSIGNMENT . '",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string(serialize($supplierStreams)) . '"
+            );'
+        );
+    }
+
+    /**
+     * Update payment status
+     *
+     * @param $revision
+     * @param Struct\PaymentStatus $paymentStatus
+     * @return void
+     */
+    public function updatePaymentStatus($revision, Struct\PaymentStatus $paymentStatus)
+    {
+        $this->connection->query(
+            'INSERT INTO
+                sw_connect_change (
+                    `c_entity_id`,
+                    `c_operation`,
+                    `c_revision`,
+                    `c_payload`
+                )
+            VALUES (
+                "' . $this->connection->real_escape_string($paymentStatus->localOrderId) . '",
+                "' . self::PAYMENT_UPDATE . '",
+                "' . $this->connection->real_escape_string($revision) . '",
+                "' . $this->connection->real_escape_string(serialize($paymentStatus)) . '"
             );'
         );
     }
@@ -349,13 +413,13 @@ class MySQLi extends Gateway
         $this->connection->query(
             'INSERT INTO
                 sw_connect_change (
-                    `c_source_id`,
+                    `c_entity_id`,
                     `c_operation`,
                     `c_revision`
                 )
             VALUES (
                 "' . $this->connection->real_escape_string($id) . '",
-                "delete",
+                "' . self::PRODUCT_DELETE . '",
                 "' . $this->connection->real_escape_string($revision) . '"
             );'
         );

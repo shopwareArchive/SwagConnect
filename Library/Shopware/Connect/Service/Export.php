@@ -8,6 +8,7 @@
 namespace Shopware\Connect\Service;
 
 use Shopware\Connect\ProductFromShop;
+use Shopware\Connect\Struct\PaymentStatus as PaymentStatusStruct;
 use Shopware\Connect\Struct\VerificatorDispatcher;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductHasher;
@@ -134,6 +135,19 @@ class Export
             $productId,
             $this->revisionProvider->next(),
             $supplierStreams
+        );
+    }
+
+    /**
+     * @param PaymentStatusStruct $paymentStatus
+     */
+    public function updatePaymentStatus(PaymentStatusStruct $paymentStatus)
+    {
+        $this->verificator->verify($paymentStatus);
+
+        $this->gateway->updatePaymentStatus(
+            $this->revisionProvider->next(),
+            $paymentStatus
         );
     }
 

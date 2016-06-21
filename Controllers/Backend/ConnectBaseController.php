@@ -35,6 +35,7 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Doctrine\ORM\NoResultException;
+use ShopwarePlugins\Connect\Components\SnHttpClient;
 
 /**
  * Class ConnectBaseController
@@ -58,6 +59,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * @var \Shopware\Connect\SDK
      */
     private $sdk;
+
+    /**
+     * @var \ShopwarePlugins\Connect\Components\SnHttpClient
+     */
+    private $snHttpClient;
 
     /**
      * @return \Shopware\Components\Model\ModelManager
@@ -540,12 +546,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
-        if ($host) {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
-        } else {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
-        }
+        $host = $this->getHost();
 
         $loginUrl = $host . '/sdk/pluginCommunication/login';
 
@@ -594,12 +595,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $email = $this->Request()->getParam('email');
 
         // Enter the valid production url here
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
-        if ($host) {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
-        } else {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
-        }
+        $host = $this->getHost();
 
         $loginUrl = $host . '/sdk/pluginCommunication/register';
 
@@ -633,6 +629,21 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             'success' => false,
             'message' => $responseObject->reason
         ]);
+    }
+
+    /**
+     * Redirects and auto login to SN system
+     */
+    public function autoLoginAction()
+    {
+        $response = $this->getSnHttpClient()->sendRequestToConnect(array(), 'account/generate-token');
+
+        $responseBody = json_decode($response->getBody());
+        if (!$responseBody->success) {
+            throw new \RuntimeException($responseBody->message);
+        }
+
+        return $this->redirect('http://' . $this->getHost() . '/login/' . $responseBody->loginToken);
     }
 
     /**
@@ -1523,5 +1534,36 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         return $this->marketplaceSettingsApplier;
+    }
+
+    /**
+     * @return SnHttpClient
+     */
+    protected function getSnHttpClient()
+    {
+        if (!$this->snHttpClient) {
+            $this->snHttpClient = new SnHttpClient(
+                $this->get('http_client'),
+                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                $this->getConfigComponent()
+            );
+        }
+
+        return $this->snHttpClient;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getHost()
+    {
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
+        if ($host) {
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
+        } else {
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
+        }
+
+        return $host;
     }
 }

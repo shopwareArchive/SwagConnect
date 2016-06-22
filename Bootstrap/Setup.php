@@ -94,7 +94,7 @@ class Setup
                     'label' => 'Import',
                     'controller' => 'Connect',
                     'action' => 'Import',
-                    'class' => 'contents--import-export',
+                    'class' => 'sc-icon-import',
                     'active' => 1,
                     'parent' => $parent
                 ));
@@ -103,7 +103,7 @@ class Setup
                     'label' => 'Export',
                     'controller' => 'Connect',
                     'action' => 'Export',
-                    'class' => 'contents--import-export',
+                    'class' => 'sc-icon-export',
                     'active' => 1,
                     'parent' => $parent
                 ));

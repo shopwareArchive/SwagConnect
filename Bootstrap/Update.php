@@ -111,11 +111,11 @@ class Update
 
     public function renameMenuOpenConnect()
     {
-        if (version_compare($this->version, '0.0.8', '<=')) {
+        if (version_compare($this->version, '0.0.9', '<=')) {
             Shopware()->Db()->query("
                 UPDATE `s_core_menu`
-                SET `onclick` = 'window.open(''connect/autoLogin'')'
-                WHERE `name` = 'OpenConnect';
+                SET `name` = 'OpenConnect', `onclick` = 'window.open(''connect/autoLogin'')', `action` = 'OpenConnect', `controller` = 'Connect'
+                WHERE `name` = 'OpenConnect' OR `name` = 'Open Connect';
             ");
 
             Shopware()->Db()->query("

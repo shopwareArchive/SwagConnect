@@ -29,6 +29,7 @@ use Shopware\Connect\ProductFromShop as ProductFromShopBase,
     Shopware\Connect\Struct\Product,
     Shopware\Connect\Struct\Address,
     Shopware\Models\Order as OrderModel,
+    Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel,
     Shopware\Models\Customer as CustomerModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
@@ -208,7 +209,8 @@ class ProductFromShop implements ProductFromShopBase
                 'articleName' => $product->product->title,
                 'price' => $this->calculatePrice($product->product),
                 'taxRate' => $product->product->vat * 100,
-                'status' => $detailStatus
+                'status' => $detailStatus,
+                'attribute' => new OrderDetailAttributeModel()
             ));
             $items[] = $item;
         }

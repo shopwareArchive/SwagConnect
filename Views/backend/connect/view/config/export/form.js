@@ -50,13 +50,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     snippets: {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
+        productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionFieldHelp: Ext.String.format('{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu [0] exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',marketplaceName),
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
         autoPlayedChanges: Ext.String.format('{s name=config/export/changes_auto_played_label}Änderungen automatisch mit [0] synchronsieren{/s}', marketplaceName),
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        synchronization: '{s name=connect/synchronization}Synchronization{/s}',
-        synchronizationBarDescription: Ext.String.format('{s name=config/synchronization_bar_description}Dieser Ladebalken zeigt die Dauer der Übertragung aller Bilder Ihres Shops zu [0] an. Es kann etwas länger dauern, bis Ihre Produkte auf [0] erscheinen. Das Einfügen / Updaten der Produkte ist jedoch abgeschlossen.{/s}', marketplaceName),
         priceConfiguration: '{s name=config/export/priceConfiguration}Preiskonfiguration{/s}',
         priceConfigurationDescription: Ext.String.format('{s name=config/export/label/export_price_description}Hier bestimmen Sie die Preise, die Sie zu [0] exportieren möchten. Alle Preise werden netto exportiert und können individuell mit Auf-und Abschlägen bearbeitet werden.<br><br>{/s}', marketplaceName),
         priceMode: '{s name=config/config/price/priceMode}Endkunden-VK{/s}',
@@ -126,7 +125,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
      */
     createElements: function () {
         var me = this;
-        var syncFieldset = me.getSyncFieldset();
         var container = me.createProductContainer();
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
@@ -209,7 +207,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
 
         return [
             me.priceMappingsFieldSet,
-            syncFieldset,
             container,
             me.languagesExportFieldset
         ];
@@ -238,18 +235,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         });
     },
 
-    getSyncFieldset: function() {
-        var me = this;
-
-        return Ext.create('Ext.form.FieldSet', {
-            columnWidth: 1,
-            title: me.snippets.synchronization,
-            defaultType: 'textfield',
-            layout: 'anchor',
-            html: me.snippets.synchronizationBarDescription,
-            items: [ me.createProgressBar() ]
-        });
-    },
 
     /**
      * Returns a new progress bar for a detailed view of the exporting progress status
@@ -473,11 +458,11 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     createProductContainer: function () {
         var me = this;
 
-        return Ext.create('Ext.container.Container', {
+        return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
-            padding: '0 0 20 0',
-            layout: 'fit',
-            border: false,
+            title: me.snippets.productDescriptionLegend,
+            defaultType: 'textfield',
+            layout: 'anchor',
             items: [
                 {
                     xtype: 'combobox',

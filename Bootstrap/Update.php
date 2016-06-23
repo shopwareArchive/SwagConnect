@@ -41,6 +41,7 @@ class Update
         $this->removeSnippets();
         $this->renameConnectChangeColumns();
         $this->renameMenuOpenConnect();
+        $this->changeMenuIcons();
 
         return true;
     }
@@ -124,6 +125,23 @@ class Update
                 WHERE `name` = 'Connect/OpenConnect';
             ");
 
+        }
+    }
+
+    public function changeMenuIcons()
+    {
+        if (version_compare($this->version, '0.0.10', '<=')) {
+            Shopware()->Db()->query("
+                UPDATE `s_core_menu`
+                SET `class` = 'sc-icon-import'
+                WHERE `controller` = 'Connect' AND `name` = 'Import'
+            ");
+
+            Shopware()->Db()->query("
+                UPDATE `s_core_menu`
+                SET `class` = 'sc-icon-export'
+                WHERE `controller` = 'Connect' AND `name` = 'Export'
+            ");
         }
     }
 

@@ -92,6 +92,16 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     height: 100%;
 }
 
+.sc-icon-export {
+    background: url("../images/icon_export.png") no-repeat;
+    height: 100%;
+}
+
+.sc-icon-import {
+    background: url("../images/icon_import.png") no-repeat;
+    height: 100%;
+}
+
 .local-product-color {
     color: #000000;
 }

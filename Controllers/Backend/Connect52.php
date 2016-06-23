@@ -6,6 +6,6 @@ class Shopware_Controllers_Backend_Connect extends ConnectBaseController impleme
 {
     public function getWhitelistedCSRFActions()
     {
-        return ['login'];
+        return ['login', 'autoLogin'];
     }
 }

@@ -266,8 +266,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $priceType = \Shopware\Connect\SDK::PRICE_TYPE_BOTH;
         } elseif ($exportPrice) {
             $priceType = \Shopware\Connect\SDK::PRICE_TYPE_RETAIL;
+            unset($data['priceFieldForPurchasePriceExport']);
+            unset($data['priceGroupForPurchasePriceExport']);
         } elseif ($exportPurchasePrice) {
             $priceType = \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE;
+            unset($data['priceFieldForPriceExport']);
+            unset($data['priceGroupForPriceExport']);
         } else {
             $this->View()->assign(array(
                 'success' => false,

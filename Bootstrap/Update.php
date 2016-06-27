@@ -42,6 +42,7 @@ class Update
         $this->renameConnectChangeColumns();
         $this->renameMenuOpenConnect();
         $this->changeMenuIcons();
+        $this->createSyncRevision();
 
         return true;
     }
@@ -141,6 +142,16 @@ class Update
                 UPDATE `s_core_menu`
                 SET `class` = 'sc-icon-export'
                 WHERE `controller` = 'Connect' AND `name` = 'Export'
+            ");
+        }
+    }
+
+    public function createSyncRevision()
+    {
+        if (version_compare($this->version, '0.0.11', '<=')) {
+            Shopware()->Db()->query("
+                ALTER TABLE `s_plugin_connect_items`
+                ADD COLUMN `revision` decimal(20,10) DEFAULT NULL
             ");
         }
     }

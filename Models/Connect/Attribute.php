@@ -231,6 +231,14 @@ class Attribute extends ModelEntity
     protected $cronUpdate;
 
     /**
+     * Used to store change revision for fromShop products
+     *
+     * @var string
+     * @ORM\Column(name="revision", type="decimal", precision=20, scale=10, nullable=true)
+     */
+    protected $revision;
+
+    /**
      * @param \Shopware\Models\Article\Article $article
      */
     public function setArticle($article)
@@ -617,5 +625,21 @@ class Attribute extends ModelEntity
     public function setCronUpdate($cronUpdate)
     {
         $this->cronUpdate = $cronUpdate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRevision()
+    {
+        return $this->revision;
+    }
+
+    /**
+     * @param string $revision
+     */
+    public function setRevision($revision)
+    {
+        $this->revision = $revision;
     }
 }

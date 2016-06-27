@@ -75,4 +75,13 @@ interface ProductFromShop
      * @return void
      */
     public function updatePaymentStatus(Struct\PaymentStatus $status);
+
+    /**
+     * Perform sync changes to fromShop
+     *
+     * @param string $since
+     * @param \Shopware\Connect\Struct\Change[] $changes
+     * @return void
+     */
+    public function onPerformSync($since, array $changes);
 }

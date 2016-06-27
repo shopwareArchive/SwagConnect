@@ -436,6 +436,18 @@ class ProductFromShop implements ProductFromShopBase
         ));
     }
 
+    /**
+     * Perform sync changes to fromShop
+     *
+     * @param string $since
+     * @param \Shopware\Connect\Struct\Change[] $changes
+     * @return void
+     */
+    public function onPerformSync($since, array $changes)
+    {
+
+    }
+
     private function validateBilling(Address $address)
     {
         if (!$address->email) {

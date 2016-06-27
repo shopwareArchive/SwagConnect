@@ -209,7 +209,7 @@ class ImportService
         // collect his child categories and
         // generate remote category tree by given remote category
         $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey);
-        $remoteCategoryTree = array(
+        $remoteCategoryNodes = array(
             array(
                 'name' => $remoteCategoryLabel,
                 'id' => $remoteCategoryKey,
@@ -219,18 +219,12 @@ class ImportService
         );
 
         // create same category structure as Shopware Connect structure
-        $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryTree, $localCategory);
-
-        // collect only leaf categories
-        $categoryNames = array();
-        $categoryNames = $this->autoCategoryResolver->collectOnlyLeafCategories($remoteCategoryTree, $categoryNames);
-        $categories = $this->categoryRepository->findBy(array(
-            'name' => $categoryNames
-        ));
+        $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
 
         /** @var \Shopware\Models\Category\Category $category */
-        foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey());
+        foreach ($this->autoCategoryResolver->getLeafCollection() as $category) {
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategoryName($category->getName());
+
             while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
                 $articles = $this->articleRepository->findBy(array('id' => $currentIdBatch));
                 /** @var \Shopware\Models\Article\Article $article */

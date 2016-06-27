@@ -25,6 +25,11 @@ class AutoCategoryResolver implements CategoryResolver
      */
     private $remoteCategoryRepository;
 
+    /**
+     * @var array()
+     */
+    private $leafCollection = array();
+
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
@@ -86,7 +91,11 @@ class AutoCategoryResolver implements CategoryResolver
         }
 
         foreach ($tree as $category) {
-            $categoryModel = $this->categoryRepository->findOneBy(array('name' => $category['name']));
+            $categoryModel = $this->categoryRepository->findOneBy(array(
+                'name' => $category['name'],
+                'parentId' => $parent->getId()
+            ));
+
             if (!$categoryModel) {
                 $categoryModel = new Category();
                 $categoryModel->fromArray($this->getCategoryData($category['name']));
@@ -110,6 +119,8 @@ class AutoCategoryResolver implements CategoryResolver
 
             if (!empty($category['children'])) {
                 $this->convertTreeToEntities($category['children'], $categoryModel);
+            } else {
+                $this->addLeaf($categoryModel);
             }
         }
     }
@@ -152,6 +163,22 @@ class AutoCategoryResolver implements CategoryResolver
     public function storeRemoteCategories(array $categories, $articleId)
     {
         // Shops connected to SEM projects don't need to store Shopware Connect categories
+    }
+
+    /**
+     * @param $leaf
+     */
+    public function addLeaf(Category $leaf)
+    {
+        $this->leafCollection[] = $leaf;
+    }
+
+    /**
+     * @return Category[]
+     */
+    public function getLeafCollection()
+    {
+        return $this->leafCollection;
     }
 
     /**

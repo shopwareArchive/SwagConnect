@@ -445,7 +445,30 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function onPerformSync($since, array $changes)
     {
+        $this->manager->getConnection()->beginTransaction();
 
+        try {
+            $this->manager->getConnection()->executeQuery(
+                "UPDATE s_plugin_connect_items
+                SET export_status = 'synced'
+                WHERE revision <= ?",
+                array($since)
+            );
+
+            /** @var \Shopware\Connect\Struct\Change $change */
+            foreach ($changes as $change) {
+                $this->manager->getConnection()->executeQuery(
+                    "UPDATE s_plugin_connect_items
+                    SET revision = ?
+                    WHERE source_id = ? AND shop_id IS NULL",
+                    array($change->revision, $change->sourceId)
+                );
+            }
+
+            $this->manager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+        }
     }
 
     private function validateBilling(Address $address)

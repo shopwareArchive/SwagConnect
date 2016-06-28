@@ -34,7 +34,8 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
 
     getStatusIconMapping: function() {
         return {
-            'insert': 'sprite-tick-circle',
+            'insert': 'sprite-arrow-circle-135',
+            'synced': 'sprite-tick-circle',
             'error': 'sprite-minus-circle-frame',
             'update': 'sprite-arrow-circle-135'
         };

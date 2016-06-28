@@ -80,7 +80,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
                 }, {
                     boxLabel  : '{s name=export/filter/status_online}Online{/s}',
                     name      : 'exportStatus',
-                    inputValue: 'online'
+                    inputValue: 'synced'
                 }, {
                     boxLabel  : '{s name=export/filter/status_error}Error{/s}',
                     name      : 'exportStatus',

@@ -3,11 +3,14 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Struct\Address;
+use Shopware\Connect\Struct\Change\FromShop\Availability;
+use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
+use Shopware\Connect\Struct\Change\FromShop\Insert;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
@@ -286,5 +289,74 @@ class ProductFromShopTest extends ConnectTestHelper
             'billingAddress' => $address,
             'deliveryAddress' => $address,
         )));
+    }
+
+    public function testOnPerformSync()
+    {
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db())
+        );
+
+        $time = microtime(true);
+        $iteration = 0;
+        $changes = [];
+
+        $syncedProduct = $this->getLocalArticle();
+        Shopware()->Db()->executeQuery(
+            'UPDATE s_plugin_connect_items SET revision = ? WHERE source_id = ? AND shop_id IS NULL',
+            [
+                sprintf('%.5f%05d', $time, $iteration++),
+                $syncedProduct->getId()
+            ]
+        );
+
+        $since = sprintf('%.5f%05d', $time, $iteration++);
+
+        for ($i = 0; $i < 5; $i++) {
+            $product = $this->getLocalArticle();
+            $changes[] = new Insert([
+                'product' => $product,
+                'sourceId' => $product->getId(),
+                'revision' => sprintf('%.5f%05d', $time, $iteration++)
+            ]);
+        }
+
+        $product = $this->getLocalArticle();
+        $changes[] = new Update([
+            'product' => $product,
+            'sourceId' => $product->getId(),
+            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+        ]);
+
+        $product = $this->getLocalArticle();
+        $changes[] = new Availability([
+            'availability' => 5,
+            'sourceId' => $product->getId(),
+            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+        ]);
+
+        $fromShop->onPerformSync($since, $changes);
+
+        $result = Shopware()->Db()->fetchCol(
+            'SELECT COUNT(*)
+                FROM s_plugin_connect_items
+                WHERE source_id = ? AND shop_id IS NULL AND export_status = "synced"',
+            [$syncedProduct->getId()]
+        );
+        $this->assertEquals(1, reset($result));
+
+        foreach ($changes as $change) {
+            $result = Shopware()->Db()->fetchCol(
+                'SELECT revision
+                FROM s_plugin_connect_items
+                WHERE source_id = ? AND shop_id IS NULL',
+                [$change->sourceId]
+            );
+
+            $this->assertEquals($change->revision, reset($result));
+        }
     }
 }

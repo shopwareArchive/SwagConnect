@@ -34,6 +34,9 @@ use Shopware\Connect\ProductFromShop as ProductFromShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query,
     Shopware\Components\Random;
+use Shopware\Connect\Struct\Change\FromShop\Availability;
+use Shopware\Connect\Struct\Change\FromShop\Insert;
+use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Shipping;
 
@@ -434,6 +437,45 @@ class ProductFromShop implements ProductFromShopBase
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));
+    }
+
+    /**
+     * Perform sync changes to fromShop
+     *
+     * @param string $since
+     * @param \Shopware\Connect\Struct\Change[] $changes
+     * @return void
+     */
+    public function onPerformSync($since, array $changes)
+    {
+        $this->manager->getConnection()->beginTransaction();
+
+        try {
+            $this->manager->getConnection()->executeQuery(
+                "UPDATE s_plugin_connect_items
+                SET export_status = 'synced'
+                WHERE revision <= ?",
+                array($since)
+            );
+
+            /** @var \Shopware\Connect\Struct\Change $change */
+            foreach ($changes as $change) {
+                if (!$change instanceof Insert && !$change instanceof Update && !$change instanceof Availability) {
+                    continue;
+                }
+
+                $this->manager->getConnection()->executeQuery(
+                    "UPDATE s_plugin_connect_items
+                    SET revision = ?
+                    WHERE source_id = ? AND shop_id IS NULL",
+                    array($change->revision, $change->sourceId)
+                );
+            }
+
+            $this->manager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+        }
     }
 
     private function validateBilling(Address $address)

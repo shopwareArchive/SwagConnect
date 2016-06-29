@@ -244,14 +244,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                         ->setParameter('supplierId', $rule['value']);
                     break;
                 case 'exportStatus':
-                    if ($rule['value'] == 'online') {
-                        $builder->andWhere('at.exportStatus IN (:insert, :update)')
-                            ->setParameter('insert', 'insert')
-                            ->setParameter('update', 'update');
-                    } else {
-                        $builder->andWhere('at.exportStatus LIKE :status')
-                            ->setParameter('status', $rule['value']);
-                    }
+                    $builder->andWhere('at.exportStatus LIKE :status')
+                        ->setParameter('status', $rule['value']);
                     break;
                 case 'active':
                     $builder->andWhere('a.active LIKE :active')
@@ -567,6 +561,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->removeConnectMenuEntry();
             $this->getSDK()->verifySdk();
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             
             $this->View()->assign([
                 'success' => true,
@@ -618,6 +615,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             // Save the data
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->getSDK()->verifySdk();
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             $this->removeConnectMenuEntry();

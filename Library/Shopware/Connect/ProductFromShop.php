@@ -75,4 +75,14 @@ interface ProductFromShop
      * @return void
      */
     public function updatePaymentStatus(Struct\PaymentStatus $status);
+
+    /**
+     * Perform sync changes to fromShop
+     * FromShop can store revision for each exported product.
+     *
+     * @param string $since
+     * @param \Shopware\Connect\Struct\Change[] $changes
+     * @return void
+     */
+    public function onPerformSync($since, array $changes);
 }

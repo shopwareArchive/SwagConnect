@@ -302,6 +302,7 @@ class Setup
              `offer_valid_until` int(10) NOT NULL,
              `stream` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
              `cron_update` TINYINT(1) NULL DEFAULT NULL,
+             `revision` decimal(20,10) DEFAULT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)

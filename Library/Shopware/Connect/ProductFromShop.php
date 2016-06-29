@@ -78,6 +78,7 @@ interface ProductFromShop
 
     /**
      * Perform sync changes to fromShop
+     * FromShop can store revision for each exported product.
      *
      * @param string $since
      * @param \Shopware\Connect\Struct\Change[] $changes

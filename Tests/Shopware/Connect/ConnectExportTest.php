@@ -105,8 +105,8 @@ class ConnectExportTest extends ConnectTestHelper
         $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE article_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(4));
 
-        $this->assertEquals('error', $row['export_status']);
-        $this->assertContains('The purchasePrice is not allowed to be 0 or smaller.', $row['export_message']);
+        $this->assertEquals('error-price', $row['export_status']);
+        $this->assertContains('There is an empty price field', $row['export_message']);
     }
 
     public function testSyncDeleteArticle()

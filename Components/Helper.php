@@ -620,7 +620,7 @@ class Helper
      * @param int $mode
      * @return null|ProductModel
      */
-    public function getArticleByGroupId(Product $product, $mode = Query::HYDRATE_OBJECT)
+    public function getArticleByRemoteProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));
@@ -628,7 +628,7 @@ class Helper
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
-        $builder->where('ba.groupId = :groupId AND ba.isMainVariant = 1 AND ba.shopId = :shopId AND ba.sourceId = :sourceId');
+        $builder->where('ba.groupId = :groupId AND ba.isMainVariant = 1 AND ba.shopId = :shopId');
         $query = $builder->getQuery();
 
         $query->setParameter('groupId', $product->groupId);

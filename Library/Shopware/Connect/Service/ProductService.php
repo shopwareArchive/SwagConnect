@@ -107,6 +107,7 @@ class ProductService
         $changes = $this->changes->getNextChanges($since, $limit);
 
         $this->changes->cleanChangesUntil($since);
+        $this->fromShop->onPerformSync($since, $changes);
 
         return $changes;
     }

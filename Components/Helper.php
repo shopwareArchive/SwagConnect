@@ -121,12 +121,10 @@ class Helper
         $builder->leftJoin('d.attribute', 'at');
 
         $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
-        $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $product->shopId);
         $query->setParameter('sourceId', $product->sourceId);
-        $query->setParameter('number', 'SC-' . $product->shopId . '-' . $product->sourceId);
         $result = $query->getResult(
             $query::HYDRATE_OBJECT,
             $mode
@@ -151,12 +149,10 @@ class Helper
         $builder->leftJoin('d.attribute', 'at');
 
         $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
-        $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $shopId);
         $query->setParameter('sourceId', $sourceId);
-        $query->setParameter('number', 'SC-' . $shopId . '-' . $sourceId);
         $result = $query->getResult(
             $query::HYDRATE_OBJECT,
             Query::HYDRATE_OBJECT
@@ -620,11 +616,11 @@ class Helper
     /**
      * Returns main article detail by given groupId
      *
-     * @param $groupId
+     * @param $product
      * @param int $mode
      * @return null|ProductModel
      */
-    public function getArticleByGroupId($groupId, $mode = Query::HYDRATE_OBJECT)
+    public function getArticleByGroupId(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));
@@ -632,10 +628,12 @@ class Helper
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
 
-        $builder->where('ba.groupId = :groupId AND ba.isMainVariant = 1');
+        $builder->where('ba.groupId = :groupId AND ba.isMainVariant = 1 AND ba.shopId = :shopId AND ba.sourceId = :sourceId');
         $query = $builder->getQuery();
 
-        $query->setParameter('groupId', $groupId);
+        $query->setParameter('groupId', $product->groupId);
+        $query->setParameter('shopId', $product->shopId);
+        $query->setParameter('sourceId', $product->sourceId);
         $result = $query->getResult(
             $query::HYDRATE_OBJECT,
             $mode

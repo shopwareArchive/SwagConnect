@@ -178,7 +178,7 @@ class ProductToShop implements ProductToShopBase
 
         if ($detail === null) {
             if ($product->groupId > 0) {
-                $model = $this->helper->getArticleByGroupId($product->groupId);
+                $model = $this->helper->getArticleByGroupId($product);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
                     $isMainVariant = true;

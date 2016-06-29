@@ -3,6 +3,8 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Struct\Address;
+use Shopware\Connect\Struct\Change\FromShop\Availability;
+use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
@@ -321,6 +323,20 @@ class ProductFromShopTest extends ConnectTestHelper
                 'revision' => sprintf('%.5f%05d', $time, $iteration++)
             ]);
         }
+
+        $product = $this->getLocalArticle();
+        $changes[] = new Update([
+            'product' => $product,
+            'sourceId' => $product->getId(),
+            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+        ]);
+
+        $product = $this->getLocalArticle();
+        $changes[] = new Availability([
+            'availability' => 5,
+            'sourceId' => $product->getId(),
+            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+        ]);
 
         $fromShop->onPerformSync($since, $changes);
 

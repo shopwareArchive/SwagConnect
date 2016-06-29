@@ -35,6 +35,12 @@ use \Doctrine\ORM\Mapping as ORM,
  */
 class Attribute extends ModelEntity
 {
+
+    const STATUS_INSERT = 'insert';
+    const STATUS_UPDATE = 'update';
+    const STATUS_ERROR = 'error';
+    const STATUS_ERROR_PRICE = 'error-price';
+
     /**
      * @var integer $id
      * @ORM\Id

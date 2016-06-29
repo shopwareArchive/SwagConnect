@@ -4,6 +4,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Connect\Struct\PaymentStatus;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -40,7 +41,8 @@ class Lifecycle extends BaseSubscriber
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models())
+            new Config(Shopware()->Models()),
+            new ErrorHandler()
         );
     }
 

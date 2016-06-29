@@ -3,12 +3,14 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Connect\SDK;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 class ConnectExport
 {
@@ -30,6 +32,9 @@ class ConnectExport
     /** @var  MarketplaceGateway */
     protected $marketplaceGateway;
 
+    /** @var ErrorHandler */
+    protected $errorHandler;
+
     /**
      * @var Config
      */
@@ -40,7 +45,8 @@ class ConnectExport
         SDK $sdk,
         ModelManager $manager,
         ProductAttributesValidator $productAttributesValidator,
-        Config $configComponent
+        Config $configComponent,
+        ErrorHandler $errorHandler
     )
     {
         $this->helper = $helper;
@@ -48,6 +54,7 @@ class ConnectExport
         $this->manager = $manager;
         $this->productAttributesValidator = $productAttributesValidator;
         $this->configComponent = $configComponent;
+        $this->errorHandler = $errorHandler;
     }
 
     /**
@@ -127,17 +134,29 @@ class ConnectExport
                     );
                 }
             } catch (\Exception $e) {
-                $connectAttribute->setExportStatus('error');
-                $connectAttribute->setExportMessage(
-                    $e->getMessage() . "\n" . $e->getTraceAsString()
-                );
+                if ($this->errorHandler->isPriceError($e)) {
+                    $connectAttribute->setExportStatus(Attribute::STATUS_ERROR_PRICE);
+                    $connectAttribute->setExportMessage(
+                        Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                            'export/message/error_price_status',
+                            'There is an empty price field',
+                            true
+                        )
+                    );
+                } else {
+                    $connectAttribute->setExportStatus(Attribute::STATUS_ERROR);
+                    $connectAttribute->setExportMessage(
+                        $e->getMessage() . "\n" . $e->getTraceAsString()
+                    );
+                }
 
-                $errors[] = " &bull; " . $prefix . $e->getMessage();
+                $this->errorHandler->handle($e);
+
                 $this->manager->flush($connectAttribute);
             }
         }
 
-        return $errors;
+        return $this->errorHandler->getMessages();
     }
 
     /**

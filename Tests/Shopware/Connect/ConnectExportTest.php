@@ -3,6 +3,7 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Config;
 
@@ -33,7 +34,8 @@ class ConnectExportTest extends ConnectTestHelper
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models())
+            new Config(Shopware()->Models()),
+            new ErrorHandler()
         );
 
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {

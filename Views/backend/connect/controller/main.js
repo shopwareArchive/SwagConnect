@@ -74,6 +74,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         unsubscribeProductTitle: '{s name=import/message/unsubscribe_title}Products unsubscribed{/s}',
         unsubscribeProductMessage: '{s name=import/message/unsubscribe_message}Products have been unsubscribed.{/s}',
 
+        priceErrorMessage: '{s name=export/progress/error_price_message}[0] of [1] products weren\'t exported, because there were with empty price fields{/s}',
 
         applyMappingToChildCategoriesTitle: '{s name=mapping/applyConfirmTitle}Apply to child categories?{/s}',
         applyMappingToChildCategoriesMessage: '{s name=mapping/applyConfirmMessage}Do you want to apply this mapping to all empty child categories? This will immediately save the current mapping, all other unsaved changes will be lost{/s}',
@@ -720,9 +721,19 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 var operation = Ext.decode(response.responseText);
 
                 if (!operation.success && operation.messages) {
-                    operation.messages.forEach( function(message){
-                        me.createGrowlMessage(title, message, true);
-                    });
+
+                    if(operation.messages.price && operation.messages.price.length > 0){
+                        var priceMsg = Ext.String.format(
+                            me.messages.priceErrorMessage, operation.messages.price.length, articleDetailIds.length
+                        );
+                        me.createGrowlMessage(title, priceMsg, true);
+                    }
+
+                    if(operation.messages.default && operation.messages.default.length > 0){
+                        operation.messages.default.forEach( function(message){
+                            me.createGrowlMessage(title, message, true);
+                        });
+                    }
                 }
 
                 window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, articleDetailIds.length));

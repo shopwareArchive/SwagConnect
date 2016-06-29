@@ -26,7 +26,6 @@ class Uninstall
 
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
-        $this->deleteTables();
 
         return true;
     }
@@ -113,23 +112,5 @@ class Uninstall
             Shopware()->Models()->remove($element);
             Shopware()->Models()->flush();
         }
-    }
-
-    public function deleteTables()
-    {
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_change');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_data');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_product');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_reservations');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_shipping_costs');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_shipping_rules');
-        Shopware()->Db()->executeQuery('DROP TABLE sw_connect_shop_config');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_categories');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_config');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_items');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_log');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_marketplace_attr');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_product_to_categories');
-        Shopware()->Db()->executeQuery('DROP TABLE s_plugin_connect_streams');
     }
 }

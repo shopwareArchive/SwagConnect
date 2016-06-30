@@ -98,7 +98,6 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('ptrc.article', 'a');
         $builder->leftJoin('a.attribute', 'att');
         $builder->where('rc.categoryKey = :categoryKey');
-        $builder->andWhere('att.connectMappedCategory IS NULL');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
 
         $query = $builder->getQuery();
@@ -109,4 +108,5 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             return $resultItem['id'];
         }, $result);
     }
+
 }

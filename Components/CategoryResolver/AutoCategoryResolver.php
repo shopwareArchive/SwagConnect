@@ -76,42 +76,67 @@ class AutoCategoryResolver implements CategoryResolver
      * Loop categories tree recursive and
      * create same structure with entities
      *
-     * @param array $tree
-     * @param \Shopware\Models\Category\Category|null $parent
+     * @param array $node
+     * @param null Category $parent
+     * @param array $leafCollection
+     * @return array
      */
-    public function convertTreeToEntities(array $tree, $parent = null)
+    public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = array())
     {
         if (!$parent) {
             $parent = $this->categoryRepository->find(3);
         }
 
-        foreach ($tree as $category) {
-            $categoryModel = $this->categoryRepository->findOneBy(array('name' => $category['name']));
+        foreach ($node as $category) {
+            $categoryModel = $this->categoryRepository->findOneBy(array(
+                'name' => $category['name'],
+                'parentId' => $parent->getId()
+            ));
+
             if (!$categoryModel) {
-                $categoryModel = new Category();
-                $categoryModel->fromArray($this->getCategoryData($category['name']));
-                $categoryModel->setParent($parent);
-
-                $this->manager->persist($categoryModel);
-
-                $categoryAttribute = $categoryModel->getAttribute();
-                $categoryAttribute->setConnectImportedCategory(true);
-                $this->manager->persist($categoryAttribute);
-
-                /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-                $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $category['id']));
-                if ($remoteCategory) {
-                    $remoteCategory->setLocalCategory($categoryModel);
-                    $this->manager->persist($remoteCategory);
-                }
-
-                $this->manager->flush();
+                $categoryModel = $this->convertNodeToEntity($category, $parent);
             }
 
             if (!empty($category['children'])) {
-                $this->convertTreeToEntities($category['children'], $categoryModel);
+                $leafCollection = $this->convertTreeToEntities($category['children'], $categoryModel, $leafCollection);
+            } else {
+                $leafCollection[] = array(
+                    'model' => $categoryModel,
+                    'categoryKey' => $category['categoryId'],
+                );
             }
         }
+
+        return $leafCollection;
+    }
+
+    /**
+     * @param array $category
+     * @param Category $parent
+     * @return Category
+     */
+    public function convertNodeToEntity(array $category, Category $parent)
+    {
+        $categoryModel = new Category();
+        $categoryModel->fromArray($this->getCategoryData($category['name']));
+        $categoryModel->setParent($parent);
+
+        $this->manager->persist($categoryModel);
+
+        $categoryAttribute = $categoryModel->getAttribute();
+        $categoryAttribute->setConnectImportedCategory(true);
+        $this->manager->persist($categoryAttribute);
+
+        /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $category['categoryId']));
+        if ($remoteCategory) {
+            $remoteCategory->setLocalCategory($categoryModel);
+            $this->manager->persist($remoteCategory);
+        }
+
+        $this->manager->flush();
+
+        return $categoryModel;
     }
 
     /**

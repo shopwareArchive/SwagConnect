@@ -208,34 +208,27 @@ class ImportService
 
         // collect his child categories and
         // generate remote category tree by given remote category
-        $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey);
-        $remoteCategoryTree = array(
+        $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey, true);
+        $remoteCategoryNodes = array(
             array(
                 'name' => $remoteCategoryLabel,
-                'id' => $remoteCategoryKey,
+                'categoryId' => $remoteCategoryKey,
                 'leaf' => empty($remoteCategoryChildren) ? true : false,
                 'children' => $remoteCategoryChildren,
             )
         );
 
         // create same category structure as Shopware Connect structure
-        $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryTree, $localCategory);
+        $categories = $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
 
-        // collect only leaf categories
-        $categoryNames = array();
-        $categoryNames = $this->autoCategoryResolver->collectOnlyLeafCategories($remoteCategoryTree, $categoryNames);
-        $categories = $this->categoryRepository->findBy(array(
-            'name' => $categoryNames
-        ));
-
-        /** @var \Shopware\Models\Category\Category $category */
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey());
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
+
             while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
                 $articles = $this->articleRepository->findBy(array('id' => $currentIdBatch));
                 /** @var \Shopware\Models\Article\Article $article */
                 foreach ($articles as $article) {
-                    $article->addCategory($category);
+                    $article->addCategory($category['model']);
                     $attribute = $article->getAttribute();
                     $attribute->setConnectMappedCategory(true);
                     $this->manager->persist($article);

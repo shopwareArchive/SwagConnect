@@ -44,15 +44,6 @@ class ErrorHandler
     }
 
     /**
-     * @param $type
-     * @return mixed
-     */
-    public function getMessage($type)
-    {
-        return $this->messages[$type];
-    }
-
-    /**
      * @return array
      */
     public function getMessages()

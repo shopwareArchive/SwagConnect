@@ -25,6 +25,7 @@
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
+use Shopware\Connect\Gateway\PDO;
 
 /**
  * @category  Shopware
@@ -247,7 +248,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
             new \ShopwarePlugins\Connect\Subscribers\CronJob(),
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
-            new \ShopwarePlugins\Connect\Subscribers\Article(),
+            new \ShopwarePlugins\Connect\Subscribers\Article(
+                new PDO(Shopware()->Db()->getConnection())
+            ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 Shopware()->Db()
             ),

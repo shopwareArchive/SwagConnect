@@ -1,8 +1,10 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+use Shopware\Connect\Gateway\PDO;
 use Shopware\Models\Attribute\ArticlePrice;
 use Shopware\Models\Customer\Group;
+use Shopware\Connect\Gateway;
 
 /**
  * Class Article
@@ -10,11 +12,23 @@ use Shopware\Models\Customer\Group;
  */
 class Article extends BaseSubscriber
 {
+    /**
+     * @var \Shopware\Connect\Gateway\PDO
+     */
+    private $connectGateway;
+
+    public function __construct(Gateway $connectGateway)
+    {
+        parent::__construct();
+        $this->connectGateway = $connectGateway;
+    }
+
     public function getSubscribedEvents()
     {
         return array(
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
+            'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
             'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
         );
     }
@@ -174,5 +188,88 @@ class Article extends BaseSubscriber
             $params[$groupId] = $option->getId();
         }
         $request->setPost('group', $params);
+    }
+
+    /**
+     * Should be possible to buy connect products
+     * when they're not in stock.
+     * Depends on remote shop configuration.
+     *
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function modifyConnectArticle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var \Enlight_Controller_Request_RequestHttp $request */
+        $request = $args->getSubject()->Request();
+
+        if ($request->getActionName() != 'index') {
+            return;
+        }
+        $subject = $args->getSubject();
+        $article = $subject->View()->getAssign('sArticle');
+        if (!$article) {
+            return;
+        }
+
+        // when article stock is greater than 0
+        // we don't need to modify it.
+        if ($article['instock'] > 0) {
+            return;
+        }
+
+        $articleId = $article['articleID'];
+        $remoteShopId = $this->getRemoteShopId($articleId);
+        if (!$remoteShopId) {
+            // article is not imported via Connect
+            return;
+        }
+
+        /** @var \Shopware\Models\Article\Article $articleModel */
+        $articleModel = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($articleId);
+        if (!$articleModel) {
+            return;
+        }
+
+        $shopConfiguration = $this->connectGateway->getShopConfiguration($remoteShopId);
+        if ($shopConfiguration->sellNotInStock && !$articleModel->getLastStock()) {
+            // if selNotInStock is = true and article getLastStock = false
+            // we don't need to modify it
+            return;
+        }
+
+        if (!$shopConfiguration->sellNotInStock && $articleModel->getLastStock()) {
+            // if sellNotInStock is = false and article getLastStock = true
+            // we don't need to modify it
+            return;
+        }
+
+        // sellNotInStock is opposite on articleLastStock
+        // when it's true, lastStock must be false
+        $articleModel->setLastStock(!$shopConfiguration->sellNotInStock);
+        Shopware()->Models()->persist($articleModel);
+        Shopware()->Models()->flush();
+
+        // modify assigned article
+        if ($shopConfiguration->sellNotInStock) {
+            $article['laststock'] = false;
+            $article['instock'] = 100;
+            $article['isAvailable'] = true;
+        } else {
+            $article['laststock'] = true;
+        }
+        $subject->View()->assign('sArticle', $article);
+    }
+
+    /**
+     * Not using the default helper-methods here, in order to keep this small and without any dependencies
+     * to the SDK
+     *
+     * @param $id
+     * @return boolean|int
+     */
+    private function getRemoteShopId($id)
+    {
+        $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
+        return Shopware()->Db()->fetchOne($sql, array($id));
     }
 }

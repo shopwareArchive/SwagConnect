@@ -249,11 +249,14 @@ class Article extends BaseSubscriber
         Shopware()->Models()->persist($articleModel);
         Shopware()->Models()->flush();
 
-        // modify assigned article, otherwise buy button
-        // in detail page is hidden
-        $article['laststock'] = false;
-        $article['instock'] = 100;
-        $article['isAvailable'] = true;
+        // modify assigned article
+        if ($shopConfiguration->sellNotInStock) {
+            $article['laststock'] = false;
+            $article['instock'] = 100;
+            $article['isAvailable'] = true;
+        } else {
+            $article['laststock'] = true;
+        }
         $subject->View()->assign('sArticle', $article);
     }
 
@@ -266,7 +269,6 @@ class Article extends BaseSubscriber
      */
     private function getRemoteShopId($id)
     {
-        $id = 4365;
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
         return Shopware()->Db()->fetchOne($sql, array($id));
     }

@@ -98,7 +98,6 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->leftJoin('ptrc.article', 'a');
         $builder->leftJoin('a.attribute', 'att');
         $builder->where('rc.categoryKey = :categoryKey');
-        $builder->andWhere('att.connectMappedCategory IS NULL');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
 
         $query = $builder->getQuery();
@@ -110,28 +109,4 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         }, $result);
     }
 
-    /**
-     * Collects article ids by given
-     * remote category name
-     * @param string $remoteCategoryName
-     * @return array
-     */
-    public function findArticleIdsByRemoteCategoryName($remoteCategoryName)
-    {
-        $builder = $this->createQueryBuilder('ptrc');
-        $builder->select('a.id');
-        $builder->leftJoin('ptrc.connectCategory', 'rc');
-        $builder->leftJoin('ptrc.article', 'a');
-        $builder->leftJoin('a.attribute', 'att');
-        $builder->where('rc.label = :label');
-        $builder->setParameter('label', $remoteCategoryName);
-
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        $result = $query->getArrayResult();
-
-        return array_map(function($resultItem) {
-            return $resultItem['id'];
-        }, $result);
-    }
 }

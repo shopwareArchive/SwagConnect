@@ -3,6 +3,7 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Config;
 
@@ -33,7 +34,8 @@ class ConnectExportTest extends ConnectTestHelper
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models())
+            new Config(Shopware()->Models()),
+            new ErrorHandler()
         );
 
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
@@ -103,8 +105,8 @@ class ConnectExportTest extends ConnectTestHelper
         $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE article_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(4));
 
-        $this->assertEquals('error', $row['export_status']);
-        $this->assertContains('The purchasePrice is not allowed to be 0 or smaller.', $row['export_message']);
+        $this->assertEquals('error-price', $row['export_status']);
+        $this->assertContains('There is an empty price field', $row['export_message']);
     }
 
     public function testSyncDeleteArticle()

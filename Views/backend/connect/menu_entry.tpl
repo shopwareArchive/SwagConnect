@@ -1,5 +1,6 @@
 {block name="backend/base/header/css" append}
 <link rel="stylesheet" href="{link file='backend/connect/_resources/styles/connect-styles.css'}" />
+<link rel="stylesheet" href="{link file='backend/connect/_resources/styles/sw-connect-style.css'}" />
 <style type="text/css">
     .connect-icon {
         background:url({$marketplaceIcon}) no-repeat 0 0 !important;

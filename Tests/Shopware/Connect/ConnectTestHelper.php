@@ -6,6 +6,7 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
@@ -82,7 +83,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models())
+            new Config(Shopware()->Models()),
+            new ErrorHandler()
         );
     }
 

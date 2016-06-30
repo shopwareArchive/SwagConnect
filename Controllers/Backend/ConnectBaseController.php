@@ -26,6 +26,7 @@ namespace ShopwarePlugins\Connect\Controllers\Backend;
 
 use \Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
@@ -1344,7 +1345,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getSDK(),
             $this->getModelManager(),
             new ProductsAttributesValidator(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            new ErrorHandler()
         );
     }
 

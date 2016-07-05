@@ -633,7 +633,6 @@ class Helper
 
         $query->setParameter('groupId', $product->groupId);
         $query->setParameter('shopId', $product->shopId);
-        $query->setParameter('sourceId', $product->sourceId);
         $result = $query->getResult(
             $query::HYDRATE_OBJECT,
             $mode

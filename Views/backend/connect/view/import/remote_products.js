@@ -14,7 +14,8 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     },
 
     snippets: {
-        hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}'
+        hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}',
+        assignProducts: '{s name=import/assign_selected_products}Artikel hinzügen{/s}'
     },
 
     viewConfig: {
@@ -148,7 +149,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 xtype: 'button',
                 iconCls: 'sprite-plus-circle-frame',
                 alias: 'widget.arrow-unassign-categories',
-                text: 'Artikel hinzügen',
+                text: me.snippets.assignProducts,
                 action: 'assignArticlesToCategory',
                 margin: '0 10px 0 0'
             }, {

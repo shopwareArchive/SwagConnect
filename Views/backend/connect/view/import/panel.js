@@ -55,15 +55,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     height: 300,
                                     width: '100%',
                                     margin: '10px 0 0 0'
-                                }),
-                                {
-                                    xtype : 'checkbox',
-                                    name : 'attribute[hideMapped]',
-                                    action: 'hide-mapped-products',
-                                    margin: '15px 0 0 0',
-                                    checked: true,
-                                    boxLabel : me.snippets.hideMappedProducts
-                                }
+                                })
                             ]
                         },
                         {
@@ -82,17 +74,6 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     action: 'importRemoteCategory',
                                     border: false,
                                     padding: '2px',
-                                    width: 50,
-                                    height: 50
-                                },
-                                {
-                                    xtype: 'button',
-                                    alias: 'widget.arrow-unassign-categories',
-                                    cls: 'import-arrow',
-                                    action: 'assignArticlesToCategory',
-                                    border: false,
-                                    padding: '2px',
-                                    margin: '250px 0 0 0',
                                     width: 50,
                                     height: 50
                                 }

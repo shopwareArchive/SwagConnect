@@ -13,6 +13,10 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
         mode: 'MULTI'
     },
 
+    snippets: {
+        hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}'
+    },
+
     viewConfig: {
         plugins: {
             ptype: 'gridviewdragdrop',
@@ -33,6 +37,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
             width: 450,
 
             dockedItems: [
+                me.getToolbar(),
                 me.getPagingToolbar()
 
             ],
@@ -130,6 +135,30 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
 
         return pagingBar;
+    },
+
+    getToolbar: function () {
+        var me = this;
+
+        return Ext.create('Ext.toolbar.Toolbar', {
+            padding: '0 0 0 10px',
+            dock: 'top',
+            ui: 'shopware-ui',
+            items: [{
+                xtype: 'button',
+                iconCls: 'sprite-plus-circle-frame',
+                alias: 'widget.arrow-unassign-categories',
+                text: 'Artikel hinzügen',
+                action: 'assignArticlesToCategory',
+                margin: '0 10px 0 0'
+            }, {
+                xtype : 'checkbox',
+                name : 'attribute[hideMapped]',
+                action: 'hide-mapped-products',
+                checked: true,
+                boxLabel : me.snippets.hideMappedProducts
+            }]
+        });
     }
 });
 //{/block}

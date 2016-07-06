@@ -156,7 +156,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 xtype : 'checkbox',
                 name : 'attribute[hideMapped]',
                 action: 'hide-mapped-products',
-                checked: true,
+                checked: false,
                 boxLabel : me.snippets.hideMappedProducts
             }]
         });

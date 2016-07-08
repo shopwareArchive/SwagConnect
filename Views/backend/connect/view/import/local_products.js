@@ -8,8 +8,8 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
 
     snippets: {
         removeProducts: '{s name=import/remove_products}Remove Products{/s}',
-        activateProductsLabel: '{s name=import/activate_products}Artikel aktivieren{/s}',
-        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Artikel anzeigen{/s}'
+        activateProductsLabel: '{s name=import/activate_products}Activate products{/s}',
+        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Show products{/s}'
     },
 
     border: false,

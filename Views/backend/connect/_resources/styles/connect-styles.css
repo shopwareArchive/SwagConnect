@@ -178,3 +178,16 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     margin: 0 auto;
     float: left;
 }
+
+.connect-checkbox-label {
+    padding: 3px 0 0 20px;
+    margin: 0 0 0 5px;
+    display: inline-block;
+    height: 16px;
+}
+
+@-moz-document url-prefix() {
+    .connect-checkbox-label{
+        padding: 0 0 0 20px;
+    }
+}

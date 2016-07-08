@@ -25,7 +25,8 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
     bodyCls: 'shopware-connect-color',
 
     snippets: {
-        reload: '{s name=import/tree/reload}Neuladen{/s}'
+        reload: '{s name=import/tree/reload}Neuladen{/s}',
+        importSelectedCategories: '{s name=import/tree/import_selected_categories}Import categories{/s}'
     },
 
     initComponent: function() {
@@ -38,6 +39,12 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
             containercontextmenu: me.onOpenContainerContextMenu,
             // scope
             scope: me
+        });
+
+        Ext.applyIf(me, {
+            dockedItems: [
+                me.getToolbar()
+            ]
         });
 
         me.callParent(arguments);
@@ -110,6 +117,23 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
             items: menuElements
         });
         menu.showAt(event.getPageX(), event.getPageY());
+    },
+
+    getToolbar: function () {
+        var me = this;
+
+        return Ext.create('Ext.toolbar.Toolbar', {
+            padding: '2px 0 2px 10px',
+            cls: 'tree-table-toolbar',
+            dock: 'top',
+            ui: 'shopware-ui',
+            items: [{
+                xtype: 'button',
+                iconCls: 'sprite-plus-circle-frame',
+                action: 'importRemoteCategory',
+                text: me.snippets.importSelectedCategories
+            }]
+        });
     }
 });
 //{/block}

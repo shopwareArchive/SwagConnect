@@ -6,6 +6,12 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     alias: 'widget.local-products',
     store: 'import.LocalProducts',
 
+    snippets: {
+        removeProducts: '{s name=import/remove_products}Remove Products{/s}',
+        activateProductsLabel: '{s name=import/activate_products}Activate products{/s}',
+        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Show products{/s}'
+    },
+
     border: false,
 
     viewConfig: {
@@ -33,6 +39,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
             width: '90%',
 
             dockedItems: [
+                me.getToolbar(),
                 me.getPagingToolbar()
             ],
             columns: me.getColumns()
@@ -138,6 +145,35 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
 
         return pagingBar;
+    },
+
+    getToolbar: function() {
+        var me = this;
+
+        return Ext.create('Ext.toolbar.Toolbar', {
+            padding: '0 0 0 10px',
+            dock: 'top',
+            ui: 'shopware-ui',
+            items: [{
+                xtype: 'button',
+                iconCls: 'sprite-plus-circle-frame',
+                text: me.snippets.activateProductsLabel,
+                action:'activateProducts'
+            }, {
+                xtype: 'button',
+                iconCls: 'sprite-minus-circle-frame',
+                margin: '0 10px 0 0',
+                text: me.snippets.removeProducts,
+                action:'unAssignArticlesFromCategory'
+            }, {
+                xtype : 'checkbox',
+                boxLabelCls: "x-form-cb-label connect-icon connect-checkbox-label",
+                name : 'attribute[connectAllowed]',
+                action: 'show-only-connect-products',
+                checked: true,
+                boxLabel : "- " + me.snippets.showOnlyConnectProductsLabel
+            }]
+        });
     }
 });
 //{/block}

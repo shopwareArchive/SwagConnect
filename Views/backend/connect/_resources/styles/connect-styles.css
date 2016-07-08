@@ -82,6 +82,12 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     height: 100%;
 }
 
+.tree-table-toolbar {
+    border-top: 1px solid #a3b5c1 !important;
+    border-right: 1px solid #a3b5c1 !important;
+    border-left: 1px solid #a3b5c1 !important;
+}
+
 .unassign-arrow {
     background: url("../images/unassign_arrow.png") no-repeat;
     height: 100%;

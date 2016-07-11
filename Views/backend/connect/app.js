@@ -15,6 +15,9 @@ Ext.define('Shopware.apps.Connect', {
         'export.product.Progress',
         'export.stream.Panel',
         'export.stream.List',
+        'export.price.Window',
+        'export.price.Form',
+        'export.price.Checkboxcolumn',
 
         'import.Panel',
         'import.RemoteCategories',

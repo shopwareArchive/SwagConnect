@@ -141,6 +141,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 			'connect-config-export-form button[action=save-export-config]': {
                 click: me.onSaveExportConfigForm
             },
+            'connect-export-price-form': {
+                saveExportSettings: me.onSaveExportSettingsForm
+            },
             'connect-config-export-form combobox[name=priceGroupForPriceExport]': {
                 change: me.onChangePriceGroupForPrice
             },
@@ -300,6 +303,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                 }
             },
+            'connect-window': {
+                showPriceWindow: me.onShowPriceWindow
+            },
+
             'connect-log-list button[action=clear]': {
                 click: function() {
                     var table = me.getLogList(),
@@ -1052,11 +1059,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     /**
      * Callback function to save the export configuration form
      *
-     * @param button
+     * @param btn
      */
     onSaveExportConfigForm: function(btn) {
-        var me = this;
-        form = btn.up('form');
+        var me = this,
+            form = btn.up('form');
 
         form.setLoading();
         if (form.getRecord()) {
@@ -1076,6 +1083,32 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             });
         }
+    },
+
+    /**
+     *
+     * @param data
+     * @param btn
+     */
+    onSaveExportSettingsForm: function(data, btn) {
+        var me = this,
+            form = btn.up('form');
+
+        var model = Ext.create('Shopware.apps.Connect.model.config.Export', data);
+
+        form.setLoading();
+        model.save({
+            success: function(record) {
+                form.setLoading(false);
+                Shopware.Notification.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+            },
+            failure: function(record) {
+                form.setLoading(false);
+                var rawData = record.getProxy().getReader().rawData,
+                    message = rawData.message;
+                Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', message);
+            }
+        });
     },
 
     /**
@@ -1260,6 +1293,18 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         if (newRecord && newRecord.get('available') === false) {
             me.createGrowlMessage('{s name=connect/error}Error{/s}', me.messages.priceFieldIsNotSupported);
         }
+    },
+
+    onShowPriceWindow: function() {
+        var me = this;
+
+        me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
+            callback: function(){
+                me.getView('export.price.Window').create({
+                    customerGroupStore: me.customerGroupStore
+                }).show();
+            }
+        });
     },
 
     /**

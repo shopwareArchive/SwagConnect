@@ -35,7 +35,13 @@ Ext.define('Shopware.apps.Connect.model.config.PriceGroup', {
         //{block name="backend/connect/model/config/price_group/fields"}{/block}
         { name: 'field', type: 'string' },
         { name: 'name', type: 'string' },
-        { name: 'available', type: 'boolean' }
+        { name: 'available', type: 'boolean' },
+        { name: 'price', type: 'boolean' },
+        { name: 'priceAvailable', type: 'boolean' },
+        { name: 'basePrice', type: 'boolean' },
+        { name: 'basePriceAvailable', type: 'boolean' },
+        { name: 'pseudoPrice', type: 'boolean' },
+        { name: 'pseudoPriceAvailable', type: 'boolean' }
     ]
 });
 //{/block}

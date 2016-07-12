@@ -50,7 +50,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('categoryId', 'root');
-        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
+        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
 
         switch ($parent) {
             case 'root':

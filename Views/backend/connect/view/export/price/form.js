@@ -13,13 +13,15 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     height: '100%',
 
     snippets: {
+        exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
-        productDescriptionFieldHelp: Ext.String.format('{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu [0] exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}', marketplaceName),
-        purchasePriceMode: '{s name=config/price/purchasePriceMode}Listenverkaufspreis-VK{/s}',
-        priceMode: '{s name=config/config/price/priceMode}Endkunden-VK{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+        purchasePriceMode: '{s name=config/price/purchasePriceMode}Purchase price{/s}',
+        priceMode: '{s name=config/config/price/priceMode}End customer price{/s}',
+        priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
         price: '{s name=detail/price/price}Price{/s}',
         pseudoPrice: '{s name=detail/price/pseudo_price}Pseudo price{/s}',
@@ -305,8 +307,14 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                 me.processPricePanel(me.purchasePriceTabPanel, 'purchasePrice');
                 me.processPricePanel(me.priceTabPanel, 'price');
 
+                if (me.priceParams.exportPriceMode.length == 0) {
+                    return Shopware.Notification.createGrowlMessage(me.snippets.exportTitle, me.snippets.priceModeNotSelected);
+                }
+
                 if (me.productDescriptionCombo.getValue()) {
                     me.priceParams.alternateDescriptionField = me.productDescriptionCombo.getValue();
+                } else {
+                    return Shopware.Notification.createGrowlMessage(me.snippets.exportTitle, me.snippets.productDescriptionNotSelected);
                 }
 
                 me.fireEvent('saveExportSettings', me.priceParams, btn);

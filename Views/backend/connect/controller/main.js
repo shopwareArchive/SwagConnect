@@ -1101,6 +1101,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             success: function(record) {
                 form.setLoading(false);
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+
+                if (me.exportWindow.isWindow) {
+                    var domEl = Ext.dom.Query.select('.export-window-wrapper');
+                    domEl[0].remove();
+                    me.exportWindow.close();
+                }
             },
             failure: function(record) {
                 form.setLoading(false);
@@ -1300,7 +1306,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
             callback: function(){
-                me.getView('export.price.Window').create({
+                me.exportWindow = me.getView('export.price.Window').create({
                     customerGroupStore: me.customerGroupStore
                 }).show();
             }

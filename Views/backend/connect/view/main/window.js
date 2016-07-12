@@ -85,8 +85,10 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                         var response = Ext.JSON.decode(result.responseText);
                         if (response.success === false) {
                             me.body.insertHtml("beforeEnd", me.getHtmlMask());
+                            me.fireEvent('showPriceWindow');
                         } else if (response.isPricingMappingAllowed == true) {
                             me.body.insertHtml("beforeEnd", me.getHtmlMask());
+                            me.fireEvent('showPriceWindow');
                         }
                     },
                     failure: function() {
@@ -118,10 +120,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
 
         return '<div class="export-window-wrapper">' +
             '<div class="export-window-message-wrapper">' +
-            '<div class="connect-wrench"></div>' +
-            '<div class="export-window-message">' +
-            '<h1>' + me.snippets.priceFieldsNotConfigured + '</h1>' +
-            '</div>' +
             '</div>' +
             '<div class="export-window-mask"></div>' +
             '</div>';

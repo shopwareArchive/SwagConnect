@@ -29,6 +29,7 @@ use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\Prod
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Firebase\JWT\JWT;
 
 /**
@@ -420,7 +421,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getSDK(),
             $this->getModelManager(),
             new ProductsAttributesValidator(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            new ErrorHandler()
         );
     }
 
@@ -762,6 +764,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $groups = array();
 
         $customerGroupKey = $this->Request()->getParam('customerGroup', 'EK');
+        $customerExportMode = $this->Request()->getParam('customerExportMode', false);
         /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
         if (!$customerGroup) {
@@ -804,6 +807,26 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             ),
             'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0
         );
+
+        //todo: refactor me
+        if ($customerExportMode) {
+            $newGroup[] = array(
+                'price' => false,
+                'priceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0,
+                'basePrice' => false,
+                'basePriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0,
+                'pseudoPrice' => false,
+                'pseudoPriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0,
+            );
+
+            return $this->View()->assign(
+                array(
+                    'success' => true,
+                    'data' => $newGroup,
+                    'total' => count($groups),
+                )
+            );
+        }
 
         $this->View()->assign(
             array(

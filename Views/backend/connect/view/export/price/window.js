@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Window', {
     layout: 'border',
     width: 700,
     height: 570,
-    title: 'Export price setting ',
+    title: '{s name=connect/tab_panel/export}Export{/s}',
     maximizable: false,
     minimizable: false,
     resizable: false,

@@ -84,6 +84,8 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     createPurchasePriceContainer: function () {
         var me = this;
 
+        me.purchasePriceTabPanel = me.createPriceTab();
+
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.purchasePriceMode,
@@ -91,13 +93,15 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             width: '90%',
 
             items: [
-                me.createPurchasePriceTab()
+                me.purchasePriceTabPanel
             ]
         });
     },
 
     createPriceContainer: function () {
         var me = this;
+
+        me.priceTabPanel = me.createPriceTab();
 
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
@@ -106,33 +110,9 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             width: '90%',
 
             items: [
-                me.createPriceTab()
+                me.priceTabPanel
             ]
         });
-    },
-
-    /**
-     * Creates the elements for the description field set.
-     * @return array Contains all Ext.form.Fields for the description field set
-     */
-    createPurchasePriceTab: function () {
-        var me = this, tabs = [];
-
-        me.customerGroupStore.each(function (customerGroup) {
-            if (customerGroup.get('mode') === false) {
-                var tab = me.createPriceGrid(customerGroup);
-                tabs.push(tab);
-            }
-        });
-
-        me.purchasePriceTabPanel = Ext.create('Ext.tab.Panel', {
-            activeTab: 0,
-
-            layout: 'card',
-            items: tabs
-        });
-
-        return me.purchasePriceTabPanel;
     },
 
     /**
@@ -149,13 +129,11 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             }
         });
 
-        me.priceTabPanel = Ext.create('Ext.tab.Panel', {
+        return Ext.create('Ext.tab.Panel', {
             activeTab: 0,
             layout: 'card',
             items: tabs
         });
-
-        return me.priceTabPanel;
     },
 
     /**
@@ -331,7 +309,6 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                     me.priceParams.alternateDescriptionField = me.productDescriptionCombo.getValue();
                 }
 
-                console.log(me.priceParams);
                 me.fireEvent('saveExportSettings', me.priceParams, btn);
             },
             cls: 'primary'

@@ -29,6 +29,7 @@ use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\Prod
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Firebase\JWT\JWT;
 
 /**
@@ -420,7 +421,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getSDK(),
             $this->getModelManager(),
             new ProductsAttributesValidator(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            new ErrorHandler()
         );
     }
 

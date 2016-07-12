@@ -1073,13 +1073,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             model.save({
                 success: function(record) {
                     form.setLoading(false);
-                    Shopware.Notification.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
                 },
                 failure: function(record) {
                     form.setLoading(false);
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;
-                    Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', message);
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', message);
                 }
             });
         }
@@ -1100,13 +1100,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         model.save({
             success: function(record) {
                 form.setLoading(false);
-                Shopware.Notification.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
+                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
             },
             failure: function(record) {
                 form.setLoading(false);
                 var rawData = record.getProxy().getReader().rawData,
                     message = rawData.message;
-                Shopware.Notification.createGrowlMessage('{s name=connect/error}Error{/s}', message);
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', message);
             }
         });
     },

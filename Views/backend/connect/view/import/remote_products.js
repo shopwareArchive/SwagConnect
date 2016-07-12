@@ -14,7 +14,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     },
 
     snippets: {
-        hideMappedProducts: '{s name=import/hide_mapped_products}Hide Assigned products and categories{/s}',
+        hideMappedProducts: '{s name=import/hide_mapped}Hide Assigned products{/s}',
         assignProducts: '{s name=import/assign_selected_products}Add product{/s}'
     },
 

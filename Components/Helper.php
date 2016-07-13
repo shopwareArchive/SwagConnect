@@ -100,7 +100,6 @@ class Helper
         $query->setParameter('sourceId', $product->sourceId);
         $query->setParameter('number', 'SC-' . $product->shopId . '-' . $product->sourceId);
         $result = $query->getResult(
-            $query::HYDRATE_OBJECT,
             $mode
         );
 
@@ -126,7 +125,6 @@ class Helper
         $query->setParameter('shopId', $product->shopId);
         $query->setParameter('sourceId', $product->sourceId);
         $result = $query->getResult(
-            $query::HYDRATE_OBJECT,
             $mode
         );
 
@@ -154,8 +152,7 @@ class Helper
         $query->setParameter('shopId', $shopId);
         $query->setParameter('sourceId', $sourceId);
         $result = $query->getResult(
-            $query::HYDRATE_OBJECT,
-            Query::HYDRATE_OBJECT
+            $query::HYDRATE_OBJECT
         );
 
         if (isset($result[0])) {
@@ -634,7 +631,6 @@ class Helper
         $query->setParameter('groupId', $product->groupId);
         $query->setParameter('shopId', $product->shopId);
         $result = $query->getResult(
-            $query::HYDRATE_OBJECT,
             $mode
         );
 

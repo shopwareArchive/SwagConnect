@@ -177,16 +177,19 @@ class ProductToShop implements ProductToShopBase
         $isMainVariant = false;
 
         if ($detail === null) {
+            $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
             if ($product->groupId > 0) {
                 $model = $this->helper->getArticleByRemoteProduct($product);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
+                    $model->setActive($active);
                     $isMainVariant = true;
                 }
             } else {
                 $model = $this->helper->getConnectArticleModel($product->sourceId, $product->shopId);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
+                    $model->setActive($active);
                 }
             }
 
@@ -197,10 +200,7 @@ class ProductToShop implements ProductToShopBase
                 $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
             }
             
-            $detail->setActive(false);
-            $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
             $detail->setActive($active);
-            $model->setActive($active);
 
             $detail->setArticle($model);
             if (!empty($product->variant)) {

@@ -112,9 +112,23 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
-        me.mainWindow = me.getView('main.Window').create({
-            'action': me.subApplication.action
-        }).show();
+        switch (me.subApplication.action){
+            case 'Settings':
+                me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
+                    callback: function(){
+                        me.mainWindow = me.getView('config.Window').create({
+                            customerGroupStore: me.customerGroupStore
+                        }).show();
+                        me.populateLogCommandFilter();
+                    }
+                });
+                break;
+            default:
+                me.mainWindow = me.getView('main.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+            break;
+        }
 
         me.control({
             'connect-navigation': {
@@ -142,7 +156,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onSaveExportConfigForm
             },
             'connect-export-price-form': {
-                saveExportSettings: me.onSaveExportSettingsForm
+                saveExportSettings: me.onSaveExportSettingsForm,
+                rejectPriceConfigChanges: me.rejectPriceConfigChanges
             },
             'connect-config-export-form combobox[name=priceGroupForPriceExport]': {
                 change: me.onChangePriceGroupForPrice
@@ -174,6 +189,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
             'connect-export-stream button[action=remove]': {
                 click: me.onExportStream
+            },
+            'connect-config-export-form': {
+                rejectPriceConfigChanges: me.rejectPriceConfigChanges
             },
 
             'connect-export-filter button[action=category-clear-filter]': {
@@ -337,10 +355,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             }
         });
-
-        if (me.subApplication.action == 'Settings') {
-            me.populateLogCommandFilter();
-        }
 
         Shopware.app.Application.on(me.getEventListeners());
 
@@ -1310,6 +1324,18 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     customerGroupStore: me.customerGroupStore
                 }).show();
             }
+        });
+    },
+
+    /**
+     * Resets store
+     * @param column
+     */
+    rejectPriceConfigChanges: function (column) {
+        var tabs = column.up('panel').up('panel').items;
+
+        tabs.each(function(tab){
+            tab.getStore().rejectChanges();
         });
     },
 

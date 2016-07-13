@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     },
 
     registerEvents: function() {
-        this.addEvents('saveExportSettings');
+        this.addEvents('saveExportSettings', 'rejectPriceConfigChanges');
     },
 
     loadPriceStores: function() {
@@ -171,8 +171,8 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                     columnType: 'price',
                     xtype: 'checkboxcolumn',
                     listeners: {
-                        beforecheckchange: function(type, view, cell, recordIndex, cellIndex){
-                            me.rejectChanges(type);
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
                         }
                     }
                 }, {
@@ -181,8 +181,8 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                     columnType: 'pseudoPrice',
                     xtype: 'checkboxcolumn',
                     listeners: {
-                        beforecheckchange: function(type, view, cell, recordIndex, cellIndex){
-                            me.rejectChanges(type);
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
                         }
                     }
                 }, {
@@ -192,8 +192,8 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                     columnType: 'basePrice',
                     xtype: 'checkboxcolumn',
                     listeners: {
-                        beforecheckchange: function(type, view, cell, recordIndex, cellIndex){
-                            me.rejectChanges(type);
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
                         }
                     }
                 }

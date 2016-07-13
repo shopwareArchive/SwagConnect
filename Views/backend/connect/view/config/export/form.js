@@ -64,6 +64,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
         exportLanguagesHelpText: Ext.String.format('{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu [0] verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}', marketplaceName),
+        price: '{s name=detail/price/price}Price{/s}',
+        pseudoPrice: '{s name=detail/price/pseudo_price}Pseudo price{/s}',
+        basePrice: '{s name=detail/price/base_price}Purchase price{/s}',
         yes: '{s name=connect/yes}Ja{/s}',
         no: '{s name=connect/no}Nein{/s}',
         edit: '{s name=connect/edit}Edit{/s}'
@@ -89,7 +92,13 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             }
         });
 
+        me.loadPriceStores();
+
         me.callParent(arguments);
+    },
+
+    registerEvents: function() {
+        this.addEvents('rejectPriceConfigChanges');
     },
 
     /**
@@ -119,6 +128,124 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         return buttons;
     },
 
+    createPriceContainer: function (item, title) {
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: title,
+            layout: 'anchor',
+            width: '90%',
+            items: [
+                item
+            ]
+        });
+    },
+
+    /**
+     * Creates the elements for the description field set.
+     * @return array Contains all Ext.form.Fields for the description field set
+     */
+    createPriceTab: function () {
+        var me = this, tabs = [];
+
+        me.customerGroupStore.each(function (customerGroup) {
+            if (customerGroup.get('mode') === false) {
+                var tab = me.createPriceGrid(customerGroup);
+                tabs.push(tab);
+            }
+        });
+
+        return Ext.create('Ext.tab.Panel', {
+            activeTab: 0,
+            layout: 'card',
+            items: tabs
+        });
+    },
+
+    /**
+     * Creates a grid
+     *
+     * @param customerGroup
+     * @return Ext.grid.Panel
+     */
+    createPriceGrid: function (customerGroup) {
+        var me = this;
+
+        return Ext.create('Ext.grid.Panel', {
+            height: 100,
+            sortableColumns: false,
+            defaults: {
+                align: 'right',
+                flex: 2
+            },
+            plugins: [{
+                ptype: 'cellediting',
+                clicksToEdit: 1
+            }],
+            title: customerGroup.get('name'),
+            store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
+            customerGroup: customerGroup,
+            columns: [
+                {
+                    header: '',
+                    flex: 1
+                }, {
+                    header: me.snippets.price,
+                    dataIndex: 'price',
+                    columnType: 'price',
+                    xtype: 'checkboxcolumn',
+                    listeners: {
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                        }
+                    }
+                }, {
+                    header: me.snippets.pseudoPrice,
+                    dataIndex: 'pseudoPrice',
+                    columnType: 'pseudoPrice',
+                    xtype: 'checkboxcolumn',
+                    listeners: {
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                        }
+                    }
+                }, {
+
+                    header: me.snippets.basePrice,
+                    dataIndex: 'basePrice',
+                    columnType: 'basePrice',
+                    xtype: 'checkboxcolumn',
+                    listeners: {
+                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                        }
+                    }
+                }
+            ]
+        });
+    },
+
+    loadPriceStores: function() {
+        var me = this;
+
+        me.purchasePriceTabPanel.items.each(function(tab){
+            tab.getStore().load({
+                params: {
+                    'customerGroup': tab.customerGroup.get('key'),
+                    'customerExportMode': true
+                }
+            });
+        });
+
+        me.priceTabPanel.items.each(function(tab){
+            tab.getStore().load({
+                params: {
+                    'customerGroup': tab.customerGroup.get('key'),
+                    'customerExportMode': true
+                }
+            });
+        });
+    },
+
     /**
      * Creates the field set items
      * @return Array
@@ -126,6 +253,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     createElements: function () {
         var me = this;
         var container = me.createProductContainer();
+
+        me.purchasePriceTabPanel = me.createPriceTab();
+        me.priceTabPanel = me.createPriceTab();
 
         me.priceMappingsFieldSet = Ext.create('Ext.form.FieldSet', {
             title: me.snippets.priceConfiguration ,
@@ -206,6 +336,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         Ext.getStore('export.List').load();
 
         return [
+            me.createPriceContainer(me.purchasePriceTabPanel, me.snippets.purchasePriceMode),
+            me.createPriceContainer(me.priceTabPanel, me.snippets.priceMode),
             me.priceMappingsFieldSet,
             container,
             me.languagesExportFieldset

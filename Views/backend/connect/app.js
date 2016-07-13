@@ -6,7 +6,6 @@ Ext.define('Shopware.apps.Connect', {
     loadPath: '{url action=load}',
     views: [
         'main.Window',
-        'main.TabPanel',
         'main.Panel',
 
         'export.product.Panel',
@@ -38,6 +37,8 @@ Ext.define('Shopware.apps.Connect', {
         'changed_products.Tabs',
         'changed_products.Images',
 
+        'config.Window',
+        'config.TabPanel',
         'config.general.Panel',
         'config.general.Form',
         'config.export.Panel',

@@ -199,8 +199,8 @@ class ProductToShop implements ProductToShopBase
             } else {
                 $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
             }
-            
-            $detail->setActive($active);
+
+            $detail->setActive($model->getActive());
 
             $detail->setArticle($model);
             if (!empty($product->variant)) {

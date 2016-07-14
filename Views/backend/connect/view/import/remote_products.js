@@ -54,11 +54,11 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
             {
                 header: 'Artikel Nr.',
                 dataIndex: 'Detail_number',
-                flex: 1
+                flex: 2
             }, {
                 header: 'Name',
                 dataIndex: 'Article_name',
-                flex: 4
+                flex: 3
             }, {
                 header: 'Hersteller',
                 dataIndex: 'Supplier_name',
@@ -68,11 +68,11 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 dataIndex: 'Price_basePrice',
                 xtype: 'numbercolumn',
                 format: '0.00',
-                flex: 3
+                flex: 2
             }, {
                 header: 'Steuersatz',
                 dataIndex: 'Tax_name',
-                flex: 1
+                flex: 2
             }
         ];
     },

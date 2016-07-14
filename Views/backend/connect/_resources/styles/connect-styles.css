@@ -191,3 +191,8 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
         padding: 0 0 0 20px;
     }
 }
+
+.fieldset-label-icon {
+    height: 16px;
+    padding-left: 20px;
+}

@@ -237,7 +237,6 @@ class Config
             /** @var \Shopware\CustomModels\Connect\Config $model */
             $model = $this->getConfigRepository()->findOneBy(array(
                 'name' => $key,
-                'shopId' => $shopId,
                 'groupName' => 'general'
             ));
 
@@ -245,7 +244,6 @@ class Config
                 $model = new ConfigModel();
                 $model->setName($key);
                 $model->setGroupName('general');
-                $model->setShopId($shopId);
             }
 
             if (is_array($configItem)) {
@@ -425,6 +423,36 @@ class Config
 
         return false;
     }
+
+    /**
+     * @param $priceExportMode
+     * @param $customerGroupKey
+     * @return array
+     */
+    public function collectExportPrice($priceExportMode, $customerGroupKey)
+    {
+        $exportConfigArray = $this->getExportConfig();
+        $postfix = 'ForPriceExport';
+
+        if ($priceExportMode == 'purchasePrice') {
+            $postfix = 'ForPurchasePriceExport';
+        }
+
+        $group = 'priceGroup' . $postfix;
+        $price = 'priceField' . $postfix;
+
+        $allowGroup = isset($exportConfigArray[$group]) && $exportConfigArray[$group] == $customerGroupKey;
+
+        return array(
+            'price' => $allowGroup && $exportConfigArray[$price] == 'price' ? true : false,
+            'priceAvailable' => false,
+            'basePrice' =>$allowGroup && $exportConfigArray[$price] == 'basePrice' ? true : false,
+            'basePriceAvailable' => false,
+            'pseudoPrice' =>$allowGroup && $exportConfigArray[$price] == 'pseudoPrice' ? true : false,
+            'pseudoPriceAvailable' => false,
+        );
+    }
+
 
     /**
      * Returns config entity by value

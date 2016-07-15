@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     },
 
     registerEvents: function() {
-        this.addEvents('saveExportSettings', 'rejectPriceConfigChanges');
+        this.addEvents('saveExportSettings', 'rejectPriceConfigChanges', 'collectPriceParams');
     },
 
     loadPriceStores: function() {
@@ -236,51 +236,11 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         });
     },
 
-    //todo: move this into main controller
-    rejectChanges: function (type) {
-        var tabs = type.up('panel').up('panel').items;
-
-        tabs.each(function(tab){
-            tab.getStore().rejectChanges();
-        });
-    },
-
-    //todo: move this into main controller
-    processPricePanel: function(tabPanel, exportMode) {
-        var me = this,
-            priceTypes = ['price', 'pseudoPrice', 'basePrice'],
-            exportPriceType;
-
-        switch (exportMode) {
-            case 'purchasePrice':
-                exportPriceType = 'ForPurchasePriceExport';
-                break;
-            case 'price':
-                exportPriceType = 'ForPriceExport';
-                break;
-        }
-
-        tabPanel.items.each(function(tab) {
-            if (tab.getStore().getUpdatedRecords().length > 0) {
-                me.priceParams['priceGroup' + exportPriceType] = tab.customerGroup.get('key');
-                me.priceParams.exportPriceMode.push(exportMode);
-
-                for (var i = 0; i < priceTypes.length; i++){
-                    if (tab.getStore().getAt(0).get(priceTypes[i]) == true) {
-                        me.priceParams['priceField' + exportPriceType] = priceTypes[i];
-                    }
-                }
-            }
-        });
-    },
-
-    resetDefaultPriceParams: function () {
-        var me = this;
-
-        me.priceParams = {
+    createPriceParams: function () {
+        return {
             'autoUpdateProducts' : 1,
-                'exportLanguages': [],
-                'exportPriceMode': []
+            'exportLanguages': [],
+            'exportPriceMode': []
         };
     },
 
@@ -303,21 +263,15 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             text: me.snippets.save,
             action: 'save-export-settings',
             handler: function (btn) {
-                me.resetDefaultPriceParams();
-                me.processPricePanel(me.purchasePriceTabPanel, 'purchasePrice');
-                me.processPricePanel(me.priceTabPanel, 'price');
-
-                if (me.priceParams.exportPriceMode.length == 0) {
-                    return Shopware.Notification.createGrowlMessage(me.snippets.exportTitle, me.snippets.priceModeNotSelected);
-                }
+                var priceParams = me.createPriceParams();
+                me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', priceParams);
+                me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', priceParams);
 
                 if (me.productDescriptionCombo.getValue()) {
-                    me.priceParams.alternateDescriptionField = me.productDescriptionCombo.getValue();
-                } else {
-                    return Shopware.Notification.createGrowlMessage(me.snippets.exportTitle, me.snippets.productDescriptionNotSelected);
+                    priceParams.alternateDescriptionField = me.productDescriptionCombo.getValue();
                 }
 
-                me.fireEvent('saveExportSettings', me.priceParams, btn);
+                me.fireEvent('saveExportSettings', priceParams, btn);
             },
             cls: 'primary'
         });

@@ -764,6 +764,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $groups = array();
 
         $customerGroupKey = $this->Request()->getParam('customerGroup', 'EK');
+        $priceExportMode = $this->Request()->getParam('priceExportMode');
         $customerExportMode = $this->Request()->getParam('customerExportMode', false);
         /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
@@ -810,14 +811,20 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         //todo: refactor me
         if ($customerExportMode) {
-            $newGroup[] = array(
-                'price' => false,
-                'priceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0,
-                'basePrice' => false,
-                'basePriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0,
-                'pseudoPrice' => false,
-                'pseudoPriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0,
-            );
+            $exportConfigArray = $this->getConfigComponent()->getExportConfig();
+
+            if (array_key_exists('exportPriceMode', $exportConfigArray) && count($exportConfigArray['exportPriceMode']) > 0) {
+                $newGroup[] = $this->getConfigComponent()->collectExportPrice($priceExportMode, $customerGroupKey);
+            } else {
+                $newGroup[] = array(
+                    'price' => false,
+                    'priceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0,
+                    'basePrice' => false,
+                    'basePriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0,
+                    'pseudoPrice' => false,
+                    'pseudoPriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0,
+                );
+            }
 
             return $this->View()->assign(
                 array(

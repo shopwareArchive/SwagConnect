@@ -98,7 +98,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     },
 
     registerEvents: function() {
-        this.addEvents('rejectPriceConfigChanges');
+        this.addEvents('rejectPriceConfigChanges', 'collectPriceParams');
     },
 
     /**
@@ -112,6 +112,16 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         var saveButton = Ext.create('Ext.button.Button', {
             text: me.snippets.save,
             action: 'save-export-config',
+            handler: function (btn) {
+                var form = btn.up('form');
+                var model = form.getRecord();
+
+                form.getForm().updateRecord(model);
+                model.data.exportPriceMode = [];
+                me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', model.data);
+                me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
+                me.fireEvent('saveExportSettings', model.data, btn);
+            },
             cls: 'primary'
         });
 
@@ -231,6 +241,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             tab.getStore().load({
                 params: {
                     'customerGroup': tab.customerGroup.get('key'),
+                    'priceExportMode': 'purchasePrice',
                     'customerExportMode': true
                 }
             });
@@ -240,6 +251,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             tab.getStore().load({
                 params: {
                     'customerGroup': tab.customerGroup.get('key'),
+                    'priceExportMode': 'price',
                     'customerExportMode': true
                 }
             });

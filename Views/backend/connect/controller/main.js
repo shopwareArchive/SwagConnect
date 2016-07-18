@@ -87,6 +87,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         minutes: '{s name=connect/minutes}Minute(s){/s}',
         seconds: '{s name=connect/seconds}Second(s){/s}',
 
+        exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
+        priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
 
@@ -112,9 +116,23 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
-        me.mainWindow = me.getView('main.Window').create({
-            'action': me.subApplication.action
-        }).show();
+        switch (me.subApplication.action){
+            case 'Settings':
+                me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
+                    callback: function(){
+                        me.mainWindow = me.getView('config.Window').create({
+                            customerGroupStore: me.customerGroupStore
+                        }).show();
+                        me.populateLogCommandFilter();
+                    }
+                });
+                break;
+            default:
+                me.mainWindow = me.getView('main.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+                break;
+        }
 
         me.control({
             'connect-navigation': {
@@ -138,11 +156,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-import-unit button[action=adoptUnits]': {
                 click: me.onAdoptUnits
             },
-			'connect-config-export-form button[action=save-export-config]': {
-                click: me.onSaveExportConfigForm
-            },
             'connect-export-price-form': {
-                saveExportSettings: me.onSaveExportSettingsForm
+                saveExportSettings: me.onSaveExportSettingsForm,
+                collectPriceParams: me.collectPriceParams,
+                rejectPriceConfigChanges: me.rejectPriceConfigChanges
             },
             'connect-config-export-form combobox[name=priceGroupForPriceExport]': {
                 change: me.onChangePriceGroupForPrice
@@ -174,6 +191,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
             'connect-export-stream button[action=remove]': {
                 click: me.onExportStream
+            },
+            'connect-config-export-form': {
+                saveExportSettings: me.onSaveExportSettingsForm,
+                collectPriceParams: me.collectPriceParams,
+                rejectPriceConfigChanges: me.rejectPriceConfigChanges
+
             },
 
             'connect-export-filter button[action=category-clear-filter]': {
@@ -337,10 +360,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }
             }
         });
-
-        if (me.subApplication.action == 'Settings') {
-            me.populateLogCommandFilter();
-        }
 
         Shopware.app.Application.on(me.getEventListeners());
 
@@ -890,11 +909,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param message
      */
     createGrowlMessage: function(title, message, sticky) {
-        var me = this,
-            win = me.getWindow();
+        var me = this;
 
         if (!sticky) {
-            Shopware.Notification.createGrowlMessage(title, message, win.title);
+            Shopware.Notification.createGrowlMessage(title, message, me.mainWindow.title);
         } else {
             Shopware.Notification.createStickyGrowlMessage({
                 title: title,
@@ -1059,34 +1077,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     /**
      * Callback function to save the export configuration form
      *
-     * @param btn
-     */
-    onSaveExportConfigForm: function(btn) {
-        var me = this,
-            form = btn.up('form');
-
-        form.setLoading();
-        if (form.getRecord()) {
-            var model = form.getRecord();
-
-            form.getForm().updateRecord(model);
-            model.save({
-                success: function(record) {
-                    form.setLoading(false);
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
-                },
-                failure: function(record) {
-                    form.setLoading(false);
-                    var rawData = record.getProxy().getReader().rawData,
-                        message = rawData.message;
-                    me.createGrowlMessage('{s name=connect/error}Error{/s}', message);
-                }
-            });
-        }
-    },
-
-    /**
-     *
      * @param data
      * @param btn
      */
@@ -1096,13 +1086,21 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         var model = Ext.create('Shopware.apps.Connect.model.config.Export', data);
 
+        if (data.exportPriceMode.length == 0) {
+            return me.createGrowlMessage(me.messages.exportTitle, me.messages.priceModeNotSelected);
+        }
+
+        if (!data.hasOwnProperty('alternateDescriptionField') || data.alternateDescriptionField.length == 0) {
+            return me.createGrowlMessage(me.messages.exportTitle, me.messages.productDescriptionNotSelected);
+        }
+
         form.setLoading();
         model.save({
             success: function(record) {
                 form.setLoading(false);
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=config/success/message}Successfully applied changes{/s}');
 
-                if (me.exportWindow.isWindow) {
+                if (me.hasOwnProperty('exportWindow') && me.exportWindow.isWindow) {
                     var domEl = Ext.dom.Query.select('.export-window-wrapper');
                     domEl[0].remove();
                     me.exportWindow.close();
@@ -1309,6 +1307,53 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 me.exportWindow = me.getView('export.price.Window').create({
                     customerGroupStore: me.customerGroupStore
                 }).show();
+            }
+        });
+    },
+
+    /**
+     * Resets store
+     * @param column
+     */
+    rejectPriceConfigChanges: function (column) {
+        var tabs = column.up('panel').up('panel').items;
+
+        tabs.each(function(tab){
+            tab.getStore().rejectChanges();
+        });
+    },
+
+    /**
+     * Collects prices params from given tab panel
+     *
+     * @param tabPanel
+     * @param exportMode
+     * @param collection
+     */
+    collectPriceParams: function(tabPanel, exportMode, collection) {
+        var me = this,
+            priceTypes = ['price', 'pseudoPrice', 'basePrice'],
+            exportPriceType;
+
+        switch (exportMode) {
+            case 'purchasePrice':
+                exportPriceType = 'ForPurchasePriceExport';
+                break;
+            case 'price':
+                exportPriceType = 'ForPriceExport';
+                break;
+        }
+
+        tabPanel.items.each(function(tab) {
+            if (tab.getStore().getUpdatedRecords().length > 0) {
+                collection['priceGroup' + exportPriceType] = tab.customerGroup.get('key');
+                collection.exportPriceMode.push(exportMode);
+
+                for (var i = 0; i < priceTypes.length; i++){
+                    if (tab.getStore().getAt(0).get(priceTypes[i]) == true) {
+                        collection['priceField' + exportPriceType] = priceTypes[i];
+                    }
+                }
             }
         });
     },

@@ -764,7 +764,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $groups = array();
 
         $customerGroupKey = $this->Request()->getParam('customerGroup', 'EK');
-        $customerExportMode = $this->Request()->getParam('customerExportMode', false);
+        $priceExportMode = $this->Request()->getParam('priceExportMode');
         /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
         if (!$customerGroup) {
@@ -778,53 +778,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
-        $groups[] = array(
-            'field' => 'price',
-            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                'detail/price/price',
-                'Preis'
-            ),
-            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0
-        );
+        $exportConfigArray = $this->getConfigComponent()->getExportConfig();
 
-
-        if (!method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+        if (array_key_exists('exportPriceMode', $exportConfigArray) && count($exportConfigArray['exportPriceMode']) > 0) {
+            $groups[] = $this->getConfigComponent()->collectExportPrice($priceExportMode, $customerGroupKey);
+        } else {
             $groups[] = array(
-                'field' => 'basePrice',
-                'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                    'detail/price/base_price',
-                    'Einkaufspreis'
-                ),
-                'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0
-            );
-        }
-
-        $groups[] = array(
-            'field' => 'pseudoPrice',
-            'name' => Shopware()->Snippets()->getNamespace('backend/article/view/main')->get(
-                'detail/price/pseudo_price',
-                'Pseudopreis'
-            ),
-            'available' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0
-        );
-
-        //todo: refactor me
-        if ($customerExportMode) {
-            $newGroup[] = array(
                 'price' => false,
                 'priceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0,
                 'basePrice' => false,
                 'basePriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0,
                 'pseudoPrice' => false,
                 'pseudoPriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0,
-            );
-
-            return $this->View()->assign(
-                array(
-                    'success' => true,
-                    'data' => $newGroup,
-                    'total' => count($groups),
-                )
             );
         }
 

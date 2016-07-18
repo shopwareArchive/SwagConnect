@@ -52,10 +52,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Panel', {
      * @return [Array]
      */
     createElements:function () {
-        var form;
+        var me = this,
+            form;
 
         return [{
-            xtype: 'connect-config-export-form'
+            xtype: 'connect-config-export-form',
+            customerGroupStore: me.customerGroupStore
         }];
     }
 });

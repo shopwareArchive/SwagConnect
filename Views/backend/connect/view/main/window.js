@@ -64,13 +64,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
         var me = this;
 
         switch (me.action){
-            case 'Settings':
-                return [
-                    Ext.create('Shopware.apps.Connect.view.main.TabPanel', {
-                        region: 'center',
-                        action : me.action
-                    })
-                ];
             case 'Register':
                 return [ Ext.create('Shopware.apps.Connect.view.register.panel', {
                     region: 'center',

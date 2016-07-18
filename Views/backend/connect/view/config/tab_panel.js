@@ -1,9 +1,9 @@
 //{namespace name=backend/connect/view/main}
 
-//{block name="backend/connect/view/main/tab_panel"}
-Ext.define('Shopware.apps.Connect.view.main.TabPanel', {
+//{block name="backend/connect/view/config/tab_panel"}
+Ext.define('Shopware.apps.Connect.view.config.TabPanel', {
     extend: 'Ext.tab.Panel',
-    alias: 'widget.connect-panel',
+    alias: 'widget.connect-config-tab-panel',
 
     border: false,
     layout: 'card',
@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Connect.view.main.TabPanel', {
             }, {
                 xtype: 'connect-config-export',
                 title: me.snippets.export,
+                customerGroupStore: me.customerGroupStore,
                 itemId: 'config-export'
             }, {
                 xtype: 'connect-log',

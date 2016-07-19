@@ -17,6 +17,7 @@ Ext.define('Shopware.apps.Connect.view.import.TabPanel', {
 
         Ext.applyIf(me, {
             items: [{
+                style: 'background: #f0f2f4',
                 xtype: 'connect-import',
                 title: me.snippets.products,
                 itemId: 'import'

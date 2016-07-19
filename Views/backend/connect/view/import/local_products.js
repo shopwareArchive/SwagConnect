@@ -53,11 +53,11 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
             {
                 header: 'Artikel Nr.',
                 dataIndex: 'Detail_number',
-                flex: 1
+                flex: 2
             }, {
                 header: 'Name',
                 dataIndex: 'Article_name',
-                flex: 4
+                flex: 3
             }, {
                 header: 'Hersteller',
                 dataIndex: 'Supplier_name',
@@ -77,11 +77,11 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 header: 'Preis (brutto)',
                 xtype: 'numbercolumn',
                 dataIndex: 'Price_basePrice',
-                flex: 3
+                flex: 2
             }, {
                 header: 'Steuersatz',
                 dataIndex: 'Tax_name',
-                flex: 1
+                flex: 2
             }
         ];
     },

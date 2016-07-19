@@ -12,10 +12,10 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
     autoScroll: true,
 
     snippets: {
-        connectProductsTitle: '{s name=import/shopware_connect_products}Shopware Connect Produkte{/s}',
+        connectProductsTitle: '{s name=import/connect_products}Products{/s}',
         showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
         hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}',
-        myShopTitle: '{s name=import/my_shop}My Shop{/s}',
+        myShopTitle: '{s name=import/your_shop}Your Shop{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },
 
@@ -33,20 +33,20 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                     width: '100%',
                     items: [
                         {
-                            xtype: 'container',
+                            xtype: 'fieldset',
                             layout: 'vbox',
                             width: '50%',
+                            style: 'margin-right: 30px',
                             flex: 1,
+                            title: '<div class="connect-icon fieldset-label-icon">' + me.snippets.connectProductsTitle + '</div>',
                             items:[
                                 {
-                                    xtype: 'container',
-                                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.connectProductsTitle  + '</h1>',
-                                    height: 30
-                                }, {
                                     xtype: 'connect-remote-categories',
                                     border: 1,
                                     style: {
-                                        borderColor: '#a4b5c0'
+                                        borderLeft: '1px solid',
+                                        borderColor: '#a4b5c0',
+                                        background: '#fff'
                                     },
                                     width: '100%'
                                 }, Ext.create('Shopware.apps.Connect.view.import.RemoteProducts', {
@@ -57,17 +57,18 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             ]
                         },
                         {
-                            xtype: 'container',
+                            xtype: 'fieldset',
                             layout: 'vbox',
                             width: '50%',
                             flex: 1,
+                            title: me.snippets.myShopTitle,
                             items:[
                                 {
-                                    xtype: 'container',
-                                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.myShopTitle  + '</h1>',
-                                    height: 30
-                                }, {
                                     xtype: 'connect-own-categories',
+                                    style: {
+                                        background: '#fff',
+                                        borderLeft: '1px solid #a4b5c0'
+                                    },
                                     width: '100%'
                                 },
                                 {

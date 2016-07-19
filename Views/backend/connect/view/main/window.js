@@ -31,6 +31,9 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                 me.minimizable = false;
                 me.resizable = false;
                 break;
+            case 'Import':
+                me.setSize(1366, 768);
+                break;
         }
 
         Ext.applyIf(me, {

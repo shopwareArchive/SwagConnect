@@ -44,6 +44,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                                     xtype: 'connect-remote-categories',
                                     border: 1,
                                     style: {
+                                        borderLeft: '1px solid',
                                         borderColor: '#a4b5c0',
                                         background: '#fff'
                                     },
@@ -64,7 +65,10 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             items:[
                                 {
                                     xtype: 'connect-own-categories',
-                                    style: 'background: #fff',
+                                    style: {
+                                        background: '#fff',
+                                        borderLeft: '1px solid #a4b5c0'
+                                    },
                                     width: '100%'
                                 },
                                 {

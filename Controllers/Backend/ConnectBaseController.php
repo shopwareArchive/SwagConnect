@@ -719,7 +719,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#name#' => 'Open Connect',
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
-            '#controller#' => '',
+            '#controller#' => 'Connect',
             '#onclick#' => 'window.open("http://' . $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
             '#action#' => ''
         ]));

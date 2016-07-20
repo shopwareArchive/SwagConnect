@@ -64,9 +64,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         exportLanguagesTitle: '{s name=config/export/exportLanguagesTitle}Sprachen{/s}',
         exportLanguagesLabel: '{s name=config/export/exportLanguagesLabel}Sprachauswahl{/s}',
         exportLanguagesHelpText: Ext.String.format('{s name=config/export/exportLanguagesHelpText}Hier legen Sie fest, welche Sprachen für Ihren Export zu [0] verwendet werden sollen. Wenn Sie die Produkte inkl. Übersetzung exportieren möchten, können Sie mehrere Sprachen auswählen. Wenn Sie dieses Feld leer lassen, wird automatisch die standard- Sprache Ihres Shops verwendet.{/s}', marketplaceName),
-        price: '{s name=detail/price/price}Price{/s}',
-        pseudoPrice: '{s name=detail/price/pseudo_price}Pseudo price{/s}',
-        basePrice: '{s name=detail/price/base_price}Purchase price{/s}',
+        price: '{s name=export/price/price}Price{/s}',
+        pseudoPrice: '{s name=export/price/pseudo_price}Pseudo price{/s}',
+        purchasePrice: '{s name=export/price/purchase_price}Purchase price{/s}',
         yes: '{s name=connect/yes}Ja{/s}',
         no: '{s name=connect/no}Nein{/s}',
         edit: '{s name=connect/edit}Edit{/s}'
@@ -118,7 +118,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
 
                 form.getForm().updateRecord(model);
                 model.data.exportPriceMode = [];
-                me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', model.data);
+                if (purchasePriceInDetail == false) {
+                    me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', model.data);
+                } else if (purchasePriceInDetail == true && me.purchasePriceTabPanel.getValue()) {
+                    model.data.exportPriceMode.push('purchasePrice');
+                }
+
                 me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
                 me.fireEvent('saveExportSettings', model.data, btn);
             },
@@ -194,57 +199,71 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             title: customerGroup.get('name'),
             store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
             customerGroup: customerGroup,
-            columns: [
-                {
-                    header: '',
-                    flex: 1
-                }, {
-                    header: me.snippets.price,
-                    dataIndex: 'price',
-                    columnType: 'price',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
-                    }
-                }, {
-                    header: me.snippets.pseudoPrice,
-                    dataIndex: 'pseudoPrice',
-                    columnType: 'pseudoPrice',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
-                    }
-                }, {
+            columns: me.createGridColumns()
+        });
+    },
 
-                    header: me.snippets.basePrice,
-                    dataIndex: 'basePrice',
-                    columnType: 'basePrice',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
+    createGridColumns: function() {
+        var me = this;
+        var columns = [
+            {
+                header: '',
+                flex: 1
+            }, {
+                header: me.snippets.price,
+                dataIndex: 'price',
+                columnType: 'price',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
                     }
                 }
-            ]
-        });
+            }, {
+                header: me.snippets.pseudoPrice,
+                dataIndex: 'pseudoPrice',
+                columnType: 'pseudoPrice',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                    }
+                }
+            }
+        ];
+
+        if (purchasePriceInDetail == false) {
+            var basePrice = {
+                header: me.snippets.purchasePrice,
+                dataIndex: 'basePrice',
+                columnType: 'basePrice',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                    }
+                }
+            };
+
+            columns.push(basePrice);
+        }
+
+        return columns;
     },
 
     loadPriceStores: function() {
         var me = this;
 
-        me.purchasePriceTabPanel.items.each(function(tab){
-            tab.getStore().load({
-                params: {
-                    'customerGroup': tab.customerGroup.get('key'),
-                    'priceExportMode': 'purchasePrice'
-                }
+        if (purchasePriceInDetail == false) {
+            me.purchasePriceTabPanel.items.each(function(tab){
+                tab.getStore().load({
+                    params: {
+                        'customerGroup': tab.customerGroup.get('key'),
+                        'priceExportMode': 'purchasePrice'
+                    }
+                });
             });
-        });
+        }
 
         me.priceTabPanel.items.each(function(tab){
             tab.getStore().load({
@@ -264,7 +283,16 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         var me = this;
         var container = me.createProductContainer();
 
-        me.purchasePriceTabPanel = me.createPriceTab();
+        if (purchasePriceInDetail == false) {
+            me.purchasePriceTabPanel = me.createPriceTab();
+        } else {
+            me.purchasePriceTabPanel = Ext.create('Ext.form.field.Checkbox', {
+                boxLabel: me.snippets.purchasePrice,
+                name: 'exportPriceMode',
+                inputValue: 'purchasePrice'
+            });
+        }
+
         me.priceTabPanel = me.createPriceTab();
 
         me.languagesExportFieldset = Ext.create('Ext.form.FieldSet', {
@@ -341,8 +369,16 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
      * Populate export config form
      */
     populateForm: function () {
-        var me = this;
-        var record = me.getRecord();
+        var me = this,
+            record = me.getRecord(),
+            exportPriceMode = record.get('exportPriceMode');
+
+        if (purchasePriceInDetail == true
+            && typeof(exportPriceMode) !== 'undefined'
+            && exportPriceMode.length > 0) {
+
+            me.purchasePriceTabPanel.setDisabled(true);
+        }
 
         me.loadRecord(record);
     },

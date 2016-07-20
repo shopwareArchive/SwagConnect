@@ -23,9 +23,9 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         priceMode: '{s name=config/config/price/priceMode}End customer price{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
-        price: '{s name=detail/price/price}Price{/s}',
-        pseudoPrice: '{s name=detail/price/pseudo_price}Pseudo price{/s}',
-        basePrice: '{s name=detail/price/base_price}Purchase price{/s}'
+        price: '{s name=export/price/price}Price{/s}',
+        pseudoPrice: '{s name=export/price/pseudo_price}Pseudo price{/s}',
+        purchasePrice: '{s name=export/price/purchase_price}Purchase price{/s}'
     },
 
     initComponent: function () {
@@ -54,14 +54,16 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     loadPriceStores: function() {
         var me = this;
 
-        me.purchasePriceTabPanel.items.each(function(tab){
-            tab.getStore().load({
-                params: {
-                    'customerGroup': tab.customerGroup.get('key'),
-                    'customerExportMode': true
-                }
+        if (purchasePriceInDetail == false) {
+            me.purchasePriceTabPanel.items.each(function(tab){
+                tab.getStore().load({
+                    params: {
+                        'customerGroup': tab.customerGroup.get('key'),
+                        'customerExportMode': true
+                    }
+                });
             });
-        });
+        }
 
         me.priceTabPanel.items.each(function(tab){
             tab.getStore().load({
@@ -86,7 +88,15 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     createPurchasePriceContainer: function () {
         var me = this;
 
-        me.purchasePriceTabPanel = me.createPriceTab();
+        if (purchasePriceInDetail == false) {
+            me.purchasePriceTabPanel = me.createPriceTab();
+        } else {
+            me.purchasePriceTabPanel = Ext.create('Ext.form.field.Checkbox', {
+                boxLabel: me.snippets.purchasePrice,
+                name: 'exportPriceMode',
+                inputValue: 'purchasePrice'
+            });
+        }
 
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
@@ -161,45 +171,58 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             title: customerGroup.get('name'),
             store: Ext.create('Shopware.apps.Connect.store.config.PriceGroup'),
             customerGroup: customerGroup,
-            columns: [
-                {
-                    header: '',
-                    flex: 1
-                }, {
-                    header: me.snippets.price,
-                    dataIndex: 'price',
-                    columnType: 'price',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
-                    }
-                }, {
-                    header: me.snippets.pseudoPrice,
-                    dataIndex: 'pseudoPrice',
-                    columnType: 'pseudoPrice',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
-                    }
-                }, {
-
-                    header: me.snippets.basePrice,
-                    dataIndex: 'basePrice',
-                    columnType: 'basePrice',
-                    xtype: 'checkboxcolumn',
-                    listeners: {
-                        beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
-                            me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
-                        }
-                    }
-                }
-            ]
+            columns: me.createGridColumns()
         });
     },
+
+    createGridColumns: function() {
+        var me = this;
+        var columns = [
+            {
+                header: '',
+                flex: 1
+            }, {
+                header: me.snippets.price,
+                dataIndex: 'price',
+                columnType: 'price',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                    }
+                }
+            }, {
+                header: me.snippets.pseudoPrice,
+                dataIndex: 'pseudoPrice',
+                columnType: 'pseudoPrice',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                    }
+                }
+            }
+        ];
+
+        if (purchasePriceInDetail == false) {
+            var basePrice = {
+                header: me.snippets.purchasePrice,
+                dataIndex: 'basePrice',
+                columnType: 'basePrice',
+                xtype: 'checkboxcolumn',
+                listeners: {
+                    beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
+                        me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
+                    }
+                }
+            };
+
+            columns.push(basePrice);
+        }
+
+        return columns;
+    },
+
 
     createProductContainer: function () {
         var me = this;
@@ -264,7 +287,12 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             action: 'save-export-settings',
             handler: function (btn) {
                 var priceParams = me.createPriceParams();
-                me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', priceParams);
+                if (purchasePriceInDetail == false) {
+                    me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', priceParams);
+                } else if (purchasePriceInDetail == true && me.purchasePriceTabPanel.getValue()) {
+                    priceParams.exportPriceMode.push('purchasePrice');
+                }
+
                 me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', priceParams);
 
                 if (me.productDescriptionCombo.getValue()) {

@@ -239,32 +239,40 @@ class ImageImport
      */
     public function importImageForSupplier($imageUrl, Supplier $supplier)
     {
-        $album = $this->manager->find('Shopware\Models\Media\Album', -12);
-        $tempDir = Shopware()->DocPath('media_temp');
+        try {
+            $album = $this->manager->find('Shopware\Models\Media\Album', -12);
+            $tempDir = Shopware()->DocPath('media_temp');
 
-        $tempFile = tempnam($tempDir, 'image');
-        copy($imageUrl, $tempFile);
-        $file = new File($tempFile);
+            $tempFile = tempnam($tempDir, 'image');
+            copy($imageUrl, $tempFile);
+            $file = new File($tempFile);
 
-        $media = new Media();
-        $media->setAlbum($album);
-        $media->setDescription('');
-        $media->setCreated(new \DateTime());
-        $media->setUserId(0);
-        $media->setFile($file);
+            $media = new Media();
+            $media->setAlbum($album);
+            $media->setDescription('');
+            $media->setCreated(new \DateTime());
+            $media->setUserId(0);
+            $media->setFile($file);
 
-        $this->manager->persist($media);
+            $this->manager->persist($media);
 
-        $this->thumbnailManager->createMediaThumbnail(
-            $media,
-            $this->getThumbnailSize($album),
-            true
-        );
+            $this->thumbnailManager->createMediaThumbnail(
+                $media,
+                $this->getThumbnailSize($album),
+                true
+            );
 
-        $supplier->setImage($media->getPath());
-        $this->manager->persist($supplier);
+            $supplier->setImage($media->getPath());
+            $this->manager->persist($supplier);
 
-        $this->manager->flush();
+            $this->manager->flush();
+        } catch (\Exception $e) {
+            $this->logger->write(
+                true,
+                'import image for supplier',
+                $e->getMessage() . 'imageUrl:' . $imageUrl
+            );
+        }
     }
 
 

@@ -133,6 +133,7 @@ class ConnectFactory
             putenv("_TRANSACTION_HOST=transaction.{$debugHost}");
         }
 
+        $logger = new Logger(Shopware()->Db());
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
             new AutoCategoryResolver(
                 $manager,
@@ -163,9 +164,9 @@ class ConnectFactory
                 $helper,
                 $manager,
                 $gateway,
-                new Logger(Shopware()->Db())
+                $logger
             ),
-            new ShopwareErrorHandler(),
+            new ShopwareErrorHandler($logger),
             null,
             $this->getPluginVersion()
         );

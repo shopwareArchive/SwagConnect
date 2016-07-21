@@ -7,17 +7,25 @@ use Shopware\Connect\Struct\Error;
 
 class ShopwareErrorHandler extends ErrorHandler
 {
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Logger
+     */
+    private $logger;
+
+    public function __construct(Logger $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * Handle error
      *
      * @param Error $error
-     * @throws \Exception
      * @return void
      */
     public function handleError(Error $error)
     {
-        throw new \Exception($error->message);
+        $this->logger->write(true, null, $error);
     }
 
     /**
@@ -29,8 +37,7 @@ class ShopwareErrorHandler extends ErrorHandler
      */
     public function handleException(\Exception $exception)
     {
-        $logger = new Logger(Shopware()->Db());
-        $logger->write(true, null, $exception);
+        $this->logger->write(true, null, $exception);
 
         throw $exception;
     }

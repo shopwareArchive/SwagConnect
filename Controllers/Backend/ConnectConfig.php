@@ -263,6 +263,24 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
+        //debug code
+        $db = Shopware()->Db();
+        $logger = new Logger($db);
+
+        $debugResult = $db->fetchAll('
+            SELECT sad.id, sad.ordernumber
+            FROM s_articles_details sad
+            LEFT JOIN s_plugin_connect_items spci ON sad.id = spci.article_detail_id
+            WHERE spci.shop_id IS NULL AND sad.purchaseprice = 0
+        ');
+
+        $logger->write(
+            true,
+            'PurchasePriceExport',
+            json_encode($debugResult)
+        );
+        //debug code
+
         if ($exportPrice && $exportPurchasePrice) {
             $priceType = \Shopware\Connect\SDK::PRICE_TYPE_BOTH;
         } elseif ($exportPrice) {

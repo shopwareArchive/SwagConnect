@@ -379,11 +379,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             record = me.getRecord(),
             exportPriceMode = record.get('exportPriceMode');
 
-        if (purchasePriceInDetail == true
-            && typeof(exportPriceMode) !== 'undefined'
-            && exportPriceMode.length > 0) {
 
+        if (typeof(exportPriceMode) !== 'undefined' && exportPriceMode.length > 0){
             me.isExported = true;
+        }
+
+        if (purchasePriceInDetail == true && me.isExported) {
             me.purchasePriceTabPanel.setDisabled(true);
         }
 

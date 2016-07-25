@@ -172,8 +172,22 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 action: 'show-only-connect-products',
                 checked: true,
                 boxLabel : "- " + me.snippets.showOnlyConnectProductsLabel
-            }]
+            }, '->',
+                me.getSearchFilter()
+            ]
         });
+    },
+
+    getSearchFilter: function() {
+        return {
+            xtype:'textfield',
+            anchor: '100%',
+            cls:'searchfield',
+            emptyText:'{s name=import/filter/search_empty}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500,
+            action: 'search-local-products'
+        }
     }
 });
 //{/block}

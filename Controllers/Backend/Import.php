@@ -113,9 +113,11 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
         $showOnlyConnectArticles = $this->request->getParam('showOnlyConnectArticles', null);
+        $query = $this->request->getParam('localArticlesQuery', '');
 
         $result = $this->getImportService()->findBothArticlesType(
             $categoryId,
+            $query,
             $showOnlyConnectArticles ? true : false,
             $limit,
             $offset

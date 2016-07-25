@@ -165,7 +165,7 @@ class LocalProductQuery extends BaseProductQuery
         $row['images'] = $this->getImagesById($row['localId']);
 
         //todo@sb: find better way to collect configuration option translations
-//        $row = $this->applyConfiguratorOptions($row);
+        $row = $this->applyConfiguratorOptions($row);
         $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {

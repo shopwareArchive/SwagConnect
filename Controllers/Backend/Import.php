@@ -80,6 +80,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
+        $searchQuery = $this->request->getParam('remoteArticlesQuery', '');
 
         $stream = null;
 
@@ -94,7 +95,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $stream,
             $limit,
             $offset,
-            $hideMapped);
+            $hideMapped,
+            $searchQuery);
 
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 

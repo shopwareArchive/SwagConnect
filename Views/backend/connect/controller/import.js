@@ -80,6 +80,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import textfield[action=search-local-products]': {
                 change: me.searchLocalProducts
+            },
+            'connect-import textfield[action=search-remote-products]': {
+                change: me.searchRemoteProducts
             }
         });
 
@@ -606,6 +609,17 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         Ext.apply(store.getProxy().extraParams, {
             localArticlesQuery: newValue
+        });
+
+        store.loadPage(1);
+    },
+
+    searchRemoteProducts: function (textField, newValue) {
+        var me = this;
+        var store = me.getRemoteProductsGrid().getStore();
+
+        Ext.apply(store.getProxy().extraParams, {
+            remoteArticlesQuery: newValue
         });
 
         store.loadPage(1);

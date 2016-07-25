@@ -40,7 +40,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * @param int $offset
      * @return \Doctrine\ORM\Query
      */
-    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0, $hideMapped = true)
+    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0, $hideMapped = true, $searchQuery = "")
     {
         $builder = $this->getEntityManager()->createQueryBuilder();
         $builder->select(array(
@@ -79,6 +79,16 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         if ($stream != null) {
             $builder->andWhere('pci.stream = :stream')
                 ->setParameter('stream', $stream);
+        }
+
+        if (trim($searchQuery) !== "") {
+            $builder->andWhere(
+                $builder->expr()->orX(
+                    $builder->expr()->orX("a.name LIKE :searchQuery"),
+                    $builder->expr()->orX("s.name LIKE :searchQuery"),
+                    $builder->expr()->orX("md.number LIKE :searchQuery")
+                )
+            )->setParameter('searchQuery', '%'.$searchQuery.'%');
         }
 
         return $builder->getQuery();

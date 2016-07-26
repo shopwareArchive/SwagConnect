@@ -92,13 +92,18 @@ Ext.define('Shopware.apps.Connect.view.export.price.Checkboxcolumn', {
             cls.push(cssPrefix + 'grid-checkheader');
         }
 
-        $productCounter = "<span style='position: absolute; left: 20px'>" + record.get(columnType + 'ConfiguredProducts') + " von " + record.get('productCount') + " Produkten" +"</span>";
+        var configuredProducts = record.get(columnType + 'ConfiguredProducts');
+        var totalProducts = record.get('productCount');
+
+        var counterText = Ext.String.format('{s name=config/checkboxes/product_count}[0] from [1] products{/s}', configuredProducts, totalProducts);
+
+        var productCounter = "<span style='position: absolute; left: 20px'>" + counterText + "</span>";
 
         if (!record.get(columnType + 'Available')) {
-            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/>' + $productCounter + '<div class="export-window-wrapper export-window-mask"></div></div>';
+            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/>' + productCounter + '<div class="export-window-wrapper export-window-mask"></div></div>';
         }
 
-        return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" ' + checked + ' ' + readOnly + ' />' + $productCounter + '</div>';
+        return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" ' + checked + ' ' + readOnly + ' />' + productCounter + '</div>';
     }
 });
 //{/block}

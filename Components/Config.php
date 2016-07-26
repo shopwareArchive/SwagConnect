@@ -53,6 +53,10 @@ class Config
     /** @var  \Shopware\Models\Site\Repository */
     private $staticPagesRepository;
 
+    private $customerGroupRepository;
+
+    private $priceGateway;
+
     /**
      * @param ModelManager $manager
      */
@@ -545,7 +549,7 @@ class Config
     private function getCustomerGroupRepository()
     {
         if (!$this->customerGroupRepository) {
-            $this->customerGroupRepository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+            $this->customerGroupRepository = $this->manager->getRepository('Shopware\Models\Customer\Group');
         }
 
         return $this->customerGroupRepository;

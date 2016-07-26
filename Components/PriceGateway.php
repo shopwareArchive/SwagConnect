@@ -53,14 +53,14 @@ class PriceGateway
     public function countProductsWithoutConfiguredPrice(Group $group = null, $priceField)
     {
         if ($priceField == 'detailPurchasePrice') {
-            $query = Shopware()->Db()->query("
+            $query = $this->db->query("
                 SELECT COUNT(sad.id)
                 FROM s_articles_details sad
                 LEFT JOIN s_plugin_connect_items spci ON sad.id = spci.article_detail_id
                 WHERE spci.shop_id IS NULL AND sad.purchaseprice = 0
             ");
         } else {
-            $query = Shopware()->Db()->query("
+            $query = $this->db->query("
                 SELECT COUNT(sad.id)
                 FROM s_articles_details sad
                 LEFT JOIN s_articles_prices sap ON sad.id = sap.articledetailsID AND sap.pricegroup = ?
@@ -84,19 +84,19 @@ class PriceGateway
     public function countProductsWithConfiguredPrice(Group $group = null, $priceField)
     {
         if ($priceField == 'detailPurchasePrice') {
-            $query = Shopware()->Db()->query("
+            $query = $this->db->query("
                 SELECT COUNT(sad.id)
                 FROM s_articles_details sad
                 LEFT JOIN s_plugin_connect_items spci ON sad.id = spci.article_detail_id
-                WHERE spci.shop_id IS NULL AND sad.purchaseprice != 0
+                WHERE spci.shop_id IS NULL AND sad.purchaseprice > 0
             ");
         } else {
-            $query = Shopware()->Db()->query("
+            $query = $this->db->query("
                 SELECT COUNT(sad.id)
                 FROM s_articles_details sad
                 LEFT JOIN s_articles_prices sap ON sad.id = sap.articledetailsID AND sap.pricegroup = ?
                 LEFT JOIN s_plugin_connect_items spci ON sad.id = spci.article_detail_id
-                WHERE spci.shop_id IS NULL AND sap.{$priceField} IS NOT NULL AND sap.{$priceField} != 0
+                WHERE spci.shop_id IS NULL AND sap.{$priceField} IS NOT NULL AND sap.{$priceField} > 0
             ", array($group->getKey()));
         }
 
@@ -112,7 +112,7 @@ class PriceGateway
      */
     public function countProducts(Group $group = null)
     {
-        $query = Shopware()->Db()->query("
+        $query = $this->db->query("
             SELECT COUNT(sad.id)
             FROM s_articles_details sad
             LEFT JOIN s_articles_prices sap ON sad.id = sap.articledetailsID AND sap.pricegroup = ?

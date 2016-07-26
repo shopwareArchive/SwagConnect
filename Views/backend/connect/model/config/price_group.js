@@ -38,10 +38,14 @@ Ext.define('Shopware.apps.Connect.model.config.PriceGroup', {
         { name: 'available', type: 'boolean' },
         { name: 'price', type: 'boolean' },
         { name: 'priceAvailable', type: 'boolean' },
+        { name: 'priceConfiguredProducts', type: 'integer'},
         { name: 'basePrice', type: 'boolean' },
         { name: 'basePriceAvailable', type: 'boolean' },
+        { name: 'basePriceConfiguredProducts', type: 'integer'},
         { name: 'pseudoPrice', type: 'boolean' },
-        { name: 'pseudoPriceAvailable', type: 'boolean' }
+        { name: 'pseudoPriceAvailable', type: 'boolean' },
+        { name: 'pseudoPriceConfiguredProducts', type: 'integer'},
+        { name: 'productCount', type: 'integer'}
     ]
 });
 //{/block}

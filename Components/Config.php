@@ -443,13 +443,24 @@ class Config
 
         $allowGroup = isset($exportConfigArray[$group]) && $exportConfigArray[$group] == $customerGroupKey;
 
+        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
+
+        $productCount = $this->getPriceGateway()->countProducts($customerGroup);
+        $priceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'price');
+        $basePriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'baseprice');
+        $pseudoPriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'pseudoprice');
+
         return array(
             'price' => $allowGroup && $exportConfigArray[$price] == 'price' ? true : false,
             'priceAvailable' => false,
+            'priceConfiguredProducts' => $priceConfiguredProducts,
             'basePrice' =>$allowGroup && $exportConfigArray[$price] == 'basePrice' ? true : false,
             'basePriceAvailable' => false,
+            'basePriceConfiguredProducts' => $basePriceConfiguredProducts,
             'pseudoPrice' =>$allowGroup && $exportConfigArray[$price] == 'pseudoPrice' ? true : false,
             'pseudoPriceAvailable' => false,
+            'pseudoPriceConfiguredProducts' => $pseudoPriceConfiguredProducts,
+            'productCount' => $productCount
         );
     }
 
@@ -515,6 +526,29 @@ class Config
         }
 
         return $this->shopRepository;
+    }
+
+    private function getPriceGateway()
+    {
+        if (!$this->priceGateway) {
+            $this->priceGateway = new \ShopwarePlugins\Connect\Components\PriceGateway(
+                Shopware()->Db()
+            );
+        }
+
+        return $this->priceGateway;
+    }
+
+    /**
+     * @return \Shopware\Components\Model\ModelRepository
+     */
+    private function getCustomerGroupRepository()
+    {
+        if (!$this->customerGroupRepository) {
+            $this->customerGroupRepository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        }
+
+        return $this->customerGroupRepository;
     }
 
     /**

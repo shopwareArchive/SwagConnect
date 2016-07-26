@@ -92,11 +92,13 @@ Ext.define('Shopware.apps.Connect.view.export.price.Checkboxcolumn', {
             cls.push(cssPrefix + 'grid-checkheader');
         }
 
+        $productCounter = "<span style='position: absolute; left: 20px'>" + record.get(columnType + 'ConfiguredProducts') + " von " + record.get('productCount') + " Produkten" +"</span>";
+
         if (!record.get(columnType + 'Available')) {
-            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/><div class="export-window-wrapper export-window-mask"></div></div>';
+            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/>' + $productCounter + '<div class="export-window-wrapper export-window-mask"></div></div>';
         }
 
-        return '<input type="checkbox" class="' + cls.join(' ') + '" value="1" ' + checked + ' ' + readOnly + ' />';
+        return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" ' + checked + ' ' + readOnly + ' />' + $productCounter + '</div>';
     }
 });
 //{/block}

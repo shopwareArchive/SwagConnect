@@ -77,6 +77,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import checkbox[action=hide-mapped-products]': {
                 change: me.hideMappedProducts
+            },
+            'connect-import textfield[action=search-local-products]': {
+                change: me.searchLocalProducts
+            },
+            'connect-import textfield[action=search-remote-products]': {
+                change: me.searchRemoteProducts
             }
         });
 
@@ -595,6 +601,28 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 tree.setLoading(false);
             }
         });
+    },
+
+    searchLocalProducts: function (textField, newValue) {
+        var me = this;
+        var store = me.getLocalProductsGrid().getStore();
+
+        Ext.apply(store.getProxy().extraParams, {
+            localArticlesQuery: newValue
+        });
+
+        store.loadPage(1);
+    },
+
+    searchRemoteProducts: function (textField, newValue) {
+        var me = this;
+        var store = me.getRemoteProductsGrid().getStore();
+
+        Ext.apply(store.getProxy().extraParams, {
+            remoteArticlesQuery: newValue
+        });
+
+        store.loadPage(1);
     }
 });
 //{/block}

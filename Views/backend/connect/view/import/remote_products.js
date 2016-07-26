@@ -158,8 +158,22 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 action: 'hide-mapped-products',
                 checked: false,
                 boxLabel : me.snippets.hideMappedProducts
-            }]
+            }, '->',
+                me.getSearchFilter()
+            ]
         });
+    },
+
+    getSearchFilter: function() {
+        return {
+            xtype:'textfield',
+            anchor: '100%',
+            cls:'searchfield',
+            emptyText:'{s name=import/filter/search_empty}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500,
+            action: 'search-remote-products'
+        }
     }
 });
 //{/block}

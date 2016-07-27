@@ -57,7 +57,14 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
             }, {
                 header: 'Name',
                 dataIndex: 'Article_name',
-                flex: 3
+                flex: 3,
+                renderer: function(value, metaData, record) {
+                    var isConnectProduct = record.get('Attribute_connectMappedCategory');
+                    if (isConnectProduct) {
+                        return '<span class="connect-icon" style="padding: 2px 0 6px 20px">' + value + '</span>>';
+                    }
+                    return value;
+                }
             }, {
                 header: 'Hersteller',
                 dataIndex: 'Supplier_name',
@@ -172,8 +179,22 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 action: 'show-only-connect-products',
                 checked: true,
                 boxLabel : "- " + me.snippets.showOnlyConnectProductsLabel
-            }]
+            }, '->',
+                me.getSearchFilter()
+            ]
         });
+    },
+
+    getSearchFilter: function() {
+        return {
+            xtype:'textfield',
+            anchor: '100%',
+            cls:'searchfield',
+            emptyText:'{s name=import/filter/search_empty}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500,
+            action: 'search-local-products'
+        }
     }
 });
 //{/block}

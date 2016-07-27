@@ -73,12 +73,12 @@ class ImportService
         $this->categoryExtractor = $categoryExtractor;
     }
 
-    public function findBothArticlesType($categoryId, $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
+    public function findBothArticlesType($categoryId, $query = "", $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
     {
         if ($categoryId == 0) {
             return array();
         }
-        return $this->productResource->filter($this->getAst($categoryId, $showOnlyConnectArticles), $offset, $limit);
+        return $this->productResource->filter($this->getAst($categoryId, $query, $showOnlyConnectArticles), $offset, $limit);
     }
 
     /**
@@ -260,18 +260,84 @@ class ImportService
      * Helper function to create filter values
      * @param int $categoryId
      * @param boolean $showOnlyConnectArticles
+     * @param string $query
      * @return array
      */
-    private function getAst($categoryId, $showOnlyConnectArticles = true)
+    private function getAst($categoryId, $query = "", $showOnlyConnectArticles = true)
     {
         $ast = array (
             array (
                 'type' => 'nullaryOperators',
                 'token' => 'ISMAIN',
-            ),
+            )
+        );
+
+        if (trim($query) !== '') {
+            $queryArray = array(
+                array (
+                    'type' => 'boolOperators',
+                    'token' => 'AND',
+                ),
+                array (
+                    'type' => 'subOperators',
+                    'token' => '(',
+                ),
+                array (
+                    'type' => 'attribute',
+                    'token' => 'ARTICLE.NAME'
+                ),
+                array (
+                    'type' => 'binaryOperator',
+                    'token' => '~'
+                ),
+                array (
+                    'type' => 'values',
+                    'token' => '"'. $query .'"'
+                ),
+                array (
+                    'type' => 'boolOperators',
+                    'token' => 'OR',
+                ),
+                array (
+                    'type' => 'attribute',
+                    'token' => 'SUPPLIER.NAME'
+                ),
+                array (
+                    'type' => 'binaryOperator',
+                    'token' => '~'
+                ),
+                array (
+                    'type' => 'values',
+                    'token' => '"'. $query .'"'
+                ),
+                array (
+                    'type' => 'boolOperators',
+                    'token' => 'OR',
+                ),
+                array (
+                    'type' => 'attribute',
+                    'token' => 'DETAIL.NUMBER'
+                ),
+                array (
+                    'type' => 'binaryOperator',
+                    'token' => '~'
+                ),
+                array (
+                    'type' => 'values',
+                    'token' => '"'. $query .'"'
+                ),
+                array (
+                    'type' => 'subOperators',
+                    'token' => ')',
+                )
+            );
+            $ast = array_merge($ast, $queryArray);
+        };
+
+        $categoryArray = array(
             array (
-                'type' => 'boolOperators',
-                'token' => 'AND',
+            'type' => 'boolOperators',
+            'token' => 'AND',
             ),
             array (
                 'type' => 'subOperators',
@@ -308,8 +374,10 @@ class ImportService
             array (
                 'type' => 'subOperators',
                 'token' => ')',
-            ),
+            )
         );
+
+        $ast = array_merge($ast, $categoryArray);
 
         if ($showOnlyConnectArticles === true) {
             $ast = array_merge($ast, array(

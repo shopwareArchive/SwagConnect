@@ -47,6 +47,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         anchor: '100%'
     },
 
+    isExported: false,
+
     snippets: {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
@@ -117,14 +119,18 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                 var model = form.getRecord();
 
                 form.getForm().updateRecord(model);
-                model.data.exportPriceMode = [];
-                if (purchasePriceInDetail == false) {
-                    me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', model.data);
-                } else if (purchasePriceInDetail == true && me.purchasePriceTabPanel.getValue()) {
-                    model.data.exportPriceMode.push('purchasePrice');
+
+                if (me.isExported == false) {
+                    model.data.exportPriceMode = [];
+                    if (purchasePriceInDetail == false) {
+                        me.fireEvent('collectPriceParams', me.purchasePriceTabPanel, 'purchasePrice', model.data);
+                    } else if (purchasePriceInDetail == true && me.purchasePriceTabPanel.getValue()) {
+                        model.data.exportPriceMode.push('purchasePrice');
+                    }
+
+                    me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
                 }
 
-                me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
                 me.fireEvent('saveExportSettings', model.data, btn);
             },
             cls: 'primary'
@@ -373,10 +379,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             record = me.getRecord(),
             exportPriceMode = record.get('exportPriceMode');
 
-        if (purchasePriceInDetail == true
-            && typeof(exportPriceMode) !== 'undefined'
-            && exportPriceMode.length > 0) {
 
+        if (typeof(exportPriceMode) !== 'undefined' && exportPriceMode.length > 0){
+            me.isExported = true;
+        }
+
+        if (purchasePriceInDetail == true && me.isExported) {
             me.purchasePriceTabPanel.setDisabled(true);
         }
 

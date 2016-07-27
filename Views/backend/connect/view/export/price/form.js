@@ -180,12 +180,13 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         var columns = [
             {
                 header: '',
-                flex: 1
+                flex: 2
             }, {
                 header: me.snippets.price,
                 dataIndex: 'price',
                 columnType: 'price',
                 xtype: 'checkboxcolumn',
+                flex: 3,
                 listeners: {
                     beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
                         me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
@@ -196,6 +197,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                 dataIndex: 'pseudoPrice',
                 columnType: 'pseudoPrice',
                 xtype: 'checkboxcolumn',
+                flex: 3,
                 listeners: {
                     beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
                         me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);
@@ -210,6 +212,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                 dataIndex: 'basePrice',
                 columnType: 'basePrice',
                 xtype: 'checkboxcolumn',
+                flex: 3,
                 listeners: {
                     beforecheckchange: function(column, view, cell, recordIndex, cellIndex){
                         me.fireEvent('rejectPriceConfigChanges', column, view, cell, recordIndex, cellIndex);

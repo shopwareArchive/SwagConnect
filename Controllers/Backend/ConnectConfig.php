@@ -322,7 +322,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 return;
             }
 
-            if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) > 0) {
+            if ($this->getPriceGateway()->countProductsWithConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) === 0) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
@@ -354,7 +354,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 return;
             }
 
-            if ($this->getPriceGateway()->countProductsWithoutConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) > 0) {
+            if ($this->getPriceGateway()->countProductsWithConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) === 0) {
                 $this->View()->assign(array(
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
@@ -783,13 +783,23 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         if (array_key_exists('exportPriceMode', $exportConfigArray) && count($exportConfigArray['exportPriceMode']) > 0) {
             $groups[] = $this->getConfigComponent()->collectExportPrice($priceExportMode, $customerGroupKey);
         } else {
+
+            $productCount = $this->getPriceGateway()->countProducts($customerGroup);
+            $priceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'price');
+            $basePriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'baseprice');
+            $pseudoPriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'pseudoprice');
+
             $groups[] = array(
                 'price' => false,
-                'priceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'price') === 0,
+                'priceAvailable' => $priceConfiguredProducts > 0,
+                'priceConfiguredProducts' => $priceConfiguredProducts,
                 'basePrice' => false,
-                'basePriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'baseprice') === 0,
+                'basePriceAvailable' => $basePriceConfiguredProducts > 0,
+                'basePriceConfiguredProducts' => $basePriceConfiguredProducts,
                 'pseudoPrice' => false,
-                'pseudoPriceAvailable' => $this->getPriceGateway()->countProductsWithoutConfiguredPrice($customerGroup, 'pseudoprice') === 0,
+                'pseudoPriceAvailable' => $pseudoPriceConfiguredProducts > 0,
+                'pseudoPriceConfiguredProducts' => $pseudoPriceConfiguredProducts,
+                'productCount' => $productCount
             );
         }
 

@@ -687,7 +687,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
             '#name#' => 'Import',
-            '#class#' => 'contents--import-export',
+            '#class#' => 'sc-icon-import',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
@@ -697,7 +697,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
             '#name#' => 'Export',
-            '#class#' => 'contents--import-export',
+            '#class#' => 'sc-icon-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
@@ -719,7 +719,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#name#' => 'Open Connect',
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
-            '#controller#' => '',
+            '#controller#' => 'Connect',
             '#onclick#' => 'window.open("http://' . $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
             '#action#' => ''
         ]));

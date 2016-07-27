@@ -687,7 +687,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
             '#name#' => 'Import',
-            '#class#' => 'contents--import-export',
+            '#class#' => 'sc-icon-import',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
@@ -697,7 +697,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
             '#name#' => 'Export',
-            '#class#' => 'contents--import-export',
+            '#class#' => 'sc-icon-export',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',

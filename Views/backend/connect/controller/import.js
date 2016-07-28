@@ -108,8 +108,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
      * @param record
      */
     onSelectRemoteCategory: function(treePanel, record) {
-        var me = this;
-        var mainCategory = me.getMainCategoryByNode(record);
+        var me = this,
+            localTreeView = me.getLocalCategoryTree().getView(),
+            mainCategory = me.getMainCategoryByNode(record);
+
+        me.resetTreeViewStyle(localTreeView);
+
+        var style = 'color: #bbbbbb !important';
+        me.modifyTree(record, localTreeView, style);
 
         var remoteProductsStore = me.getRemoteProductsGrid().getStore();
         remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('categoryId');
@@ -477,6 +483,35 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
     getDepth: function(record) {
         return record.data.depth;
+    },
+
+    resetTreeViewStyle: function(treeView) {
+        var i, targetNodeRecord,
+            nodes = treeView.getNodes();
+
+        for (i = 0; i < nodes.length; i++){
+            targetNodeRecord = treeView.getRecord(nodes[i]);
+            nodes[i].style = '';
+        }
+    },
+
+    /**
+     * @param selectedNodeRecord
+     * @param tree
+     * @param stl
+     */
+    modifyTree: function(selectedNodeRecord, treeView, stl) {
+        var me = this,
+            i, targetNodeRecord,
+            nodes = treeView.getNodes();
+
+        for (i = 0; i < nodes.length; i++){
+            targetNodeRecord = treeView.getRecord(nodes[i]);
+
+            if (!me.isNodeValidForAssignment(selectedNodeRecord, targetNodeRecord)) {
+                nodes[i].style = stl;
+            }
+        }
     },
 
 

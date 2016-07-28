@@ -11,11 +11,13 @@ Ext.define('Shopware.apps.Connect.view.import.tree.RemoteCategoryDragAndDrop', {
         me.callParent(arguments);
 
         me.dragZone.onStartDrag = function (x, y) {
-            me.modifyTree('color: #bbbbbb !important');
+            //remove this code after CON-3515 is done
+            //me.modifyTree('color: #bbbbbb !important');
         };
 
         me.dragZone.afterInvalidDrop = function (e, id) {
-            me.modifyTree('');
+            //remove this code after CON-3515 is done
+            //me.modifyTree('');
         };
     },
 

@@ -425,7 +425,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('id');
+        if (!me.isNodeValidForAssignment(remoteCategoryTreeSelection[0], localCategoryTreeSelection[0])) {
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', 'No valid node');
+            return;
+        }
+
+        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('categoryId');
         var remoteCategoryLabel = remoteCategoryTreeSelection[0].get('text');
         var localCategoryId = localCategoryTreeSelection[0].get('id');
 
@@ -445,6 +450,35 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         me.unassignRemoteToLocalCategories(localCategoryId);
     },
+
+    /**
+     * @param selectedNodeRecord
+     * @param targetNodeRecord
+     * @returns boolean
+     */
+    isNodeValidForAssignment: function(selectedNodeRecord, targetNodeRecord) {
+        var me = this;
+
+        //its minus three, cause we have contact, stream node and language node (deutsch, english)
+        var draggedDepth = me.getDepth(selectedNodeRecord) - 3;
+        var droppedDepth = me.getDepth(targetNodeRecord);
+
+        //dragged leaf can be drop everywhere except at the main language categories
+        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord) && droppedDepth > 1){
+            return true;
+        }
+
+        return !me.isLeaf(targetNodeRecord) && draggedDepth == droppedDepth;
+    },
+
+    isLeaf: function(record) {
+        return record.data.leaf;
+    },
+
+    getDepth: function(record) {
+        return record.data.depth;
+    },
+
 
     /**
      * Helper to show a growl message

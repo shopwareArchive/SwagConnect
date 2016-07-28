@@ -45,17 +45,15 @@ Ext.define('Shopware.apps.Connect.view.import.tree.RemoteCategoryDragAndDrop', {
     isValidDropPoint: function (targetRecord, draggedRecord) {
         var me = this;
 
-        //its minus two, cause we have contact and stream node
-        var draggedDepth = me.getDepth(draggedRecord) - 2;
+        //its minus three, cause we have contact, stream node and language node (deutsch, english)
+        var draggedDepth = me.getDepth(draggedRecord) - 3;
+        var droppedDepth = me.getDepth(targetRecord);
 
-        //its plus one, cause we want the parent node depth
-        var parentDepth = me.getDepth(targetRecord) + 1;
-
-        //dragged leaf can be drop everywhere except on the main categories (deutsch, english)
-        if(me.isLeaf(draggedRecord) && !me.isLeaf(targetRecord) && parentDepth > 2){
+        //dragged leaf can be drop everywhere except at the main language categories
+        if(me.isLeaf(draggedRecord) && !me.isLeaf(targetRecord) && droppedDepth > 1){
             return true;
         }
 
-        return !me.isLeaf(targetRecord) && draggedDepth == parentDepth;
+        return !me.isLeaf(targetRecord) && draggedDepth == droppedDepth;
     }
 });

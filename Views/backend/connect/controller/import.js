@@ -108,8 +108,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
      * @param record
      */
     onSelectRemoteCategory: function(treePanel, record) {
-        var me = this;
-        var mainCategory = me.getMainCategoryByNode(record);
+        var me = this,
+            localTreeView = me.getLocalCategoryTree().getView(),
+            mainCategory = me.getMainCategoryByNode(record);
+
+        me.resetTreeViewStyle(localTreeView);
+
+        var style = 'color: #bbbbbb !important';
+        me.modifyTree(record, localTreeView, style);
 
         var remoteProductsStore = me.getRemoteProductsGrid().getStore();
         remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('categoryId');
@@ -425,7 +431,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('id');
+        if (!me.isNodeValidForAssignment(remoteCategoryTreeSelection[0], localCategoryTreeSelection[0])) {
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/invalid_assign_category}Invalid category for assignment{/s}');
+            return;
+        }
+
+        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('categoryId');
         var remoteCategoryLabel = remoteCategoryTreeSelection[0].get('text');
         var localCategoryId = localCategoryTreeSelection[0].get('id');
 
@@ -445,6 +456,64 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         me.unassignRemoteToLocalCategories(localCategoryId);
     },
+
+    /**
+     * @param selectedNodeRecord
+     * @param targetNodeRecord
+     * @returns boolean
+     */
+    isNodeValidForAssignment: function(selectedNodeRecord, targetNodeRecord) {
+        var me = this;
+
+        //its minus three, cause we have contact, stream node and language node (deutsch, english)
+        var draggedDepth = me.getDepth(selectedNodeRecord) - 3;
+        var droppedDepth = me.getDepth(targetNodeRecord);
+
+        //dragged leaf can be drop everywhere except at the main language categories
+        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord) && droppedDepth > 1){
+            return true;
+        }
+
+        return !me.isLeaf(targetNodeRecord) && draggedDepth == droppedDepth;
+    },
+
+    isLeaf: function(record) {
+        return record.data.leaf;
+    },
+
+    getDepth: function(record) {
+        return record.data.depth;
+    },
+
+    resetTreeViewStyle: function(treeView) {
+        var i, targetNodeRecord,
+            nodes = treeView.getNodes();
+
+        for (i = 0; i < nodes.length; i++){
+            targetNodeRecord = treeView.getRecord(nodes[i]);
+            nodes[i].style = '';
+        }
+    },
+
+    /**
+     * @param selectedNodeRecord
+     * @param tree
+     * @param stl
+     */
+    modifyTree: function(selectedNodeRecord, treeView, stl) {
+        var me = this,
+            i, targetNodeRecord,
+            nodes = treeView.getNodes();
+
+        for (i = 0; i < nodes.length; i++){
+            targetNodeRecord = treeView.getRecord(nodes[i]);
+
+            if (!me.isNodeValidForAssignment(selectedNodeRecord, targetNodeRecord)) {
+                nodes[i].style = stl;
+            }
+        }
+    },
+
 
     /**
      * Helper to show a growl message

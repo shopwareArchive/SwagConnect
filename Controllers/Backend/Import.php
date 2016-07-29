@@ -79,7 +79,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $shopId = $this->request->getParam('shopId', 0);
         $limit = (int)$this->request->getParam('limit', 10);
         $offset = (int)$this->request->getParam('start', 0);
-        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', true);
+        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
         $searchQuery = $this->request->getParam('remoteArticlesQuery', '');
 
         $stream = null;

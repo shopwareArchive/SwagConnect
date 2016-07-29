@@ -32,18 +32,16 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
                     var targetRecord = view.getRecord(node),
                         draggedRecord = data.records[0];
 
-                    //its minus two, cause we have contact and stream node
-                    var draggedDepth = draggedRecord.data.depth - 2;
+                    //its minus three, cause we have contact, stream node and language node (deutsch, english)
+                    var draggedDepth = draggedRecord.data.depth - 3;
+                    var droppedDepth = targetRecord.data.depth;
 
-                    //its plus one, cause we want the parent node depth
-                    var parentDepth = targetRecord.data.depth + 1;
-
-                    //dragged leaf can be drop everywhere except on the main categories (deutsch, english)
-                    if(draggedRecord.data.leaf && !targetRecord.data.leaf && parentDepth > 2){
+                    //dragged leaf can be drop everywhere except at the main language categories
+                    if(draggedRecord.data.leaf && !targetRecord.data.leaf && droppedDepth > 1){
                         return true;
                     }
 
-                    return !targetRecord.data.leaf && draggedDepth == parentDepth;
+                    return !targetRecord.data.leaf && draggedDepth == droppedDepth;
                 };
             }
         }

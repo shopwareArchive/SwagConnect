@@ -432,7 +432,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
 
         if (!me.isNodeValidForAssignment(remoteCategoryTreeSelection[0], localCategoryTreeSelection[0])) {
-            me.createGrowlMessage('{s name=connect/error}Error{/s}', 'No valid node');
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/invalid_assign_category}Invalid category for assignment{/s}');
             return;
         }
 

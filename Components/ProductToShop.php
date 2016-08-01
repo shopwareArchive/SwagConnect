@@ -755,4 +755,18 @@ class ProductToShop implements ProductToShopBase
             array($availability, $articleDetailId)
         );
     }
+
+    public function makeMainVariant($shopId, $sourceId, $groupId)
+    {
+        // find article detail id
+        $result = $this->manager->getConnection()->fetchArray(
+            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            array($sourceId, $shopId)
+        );
+
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',
+            array($result['article_detail_id'], $result['article_id'])
+        );
+    }
 }

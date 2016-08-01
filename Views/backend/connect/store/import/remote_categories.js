@@ -6,7 +6,8 @@ Ext.define('Shopware.apps.Connect.store.import.RemoteCategories', {
     fields: [
         { name: 'id', type: 'string' },
         { name: 'categoryId', type: 'string' },
-        { name: 'text',  type: 'string', mapping: 'name' }
+        { name: 'text',  type: 'string', mapping: 'name' },
+        { name: 'expanded', type: 'boolean', defaultValue: false, persist: false, mapping: 'expanded' }
     ],
     proxy : {
         type : 'ajax',

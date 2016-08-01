@@ -43,6 +43,7 @@ class Update
         $this->renameMenuOpenConnect();
         $this->changeMenuIcons();
         $this->createSyncRevision();
+        $this->updateItemsGroupId();
 
         return true;
     }
@@ -152,6 +153,18 @@ class Update
             Shopware()->Db()->query("
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `revision` decimal(20,10) DEFAULT NULL
+            ");
+        }
+    }
+
+    public function updateItemsGroupId()
+    {
+        if (version_compare($this->version, '0.0.14', '<=')) {
+            Shopware()->Db()->query("
+                UPDATE `s_plugin_connect_items` ci
+                INNER JOIN `s_plugin_connect_items` temp ON
+                    ci.id = temp.id
+                SET ci.group_id = ci.article_id
             ");
         }
     }

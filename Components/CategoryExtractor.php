@@ -412,7 +412,7 @@ class CategoryExtractor
 
         $result = $this->getCategoryNames($categoryKeys);
 
-        return $this->convertTree($this->categoryResolver->generateTree($result, $parent), false, true);
+        return $this->convertTree($this->categoryResolver->generateTree($result, $parent), false, true, true);
     }
 
     public function getUniqueParents($rows, $parent) {
@@ -475,7 +475,7 @@ class CategoryExtractor
      * @param array $tree
      * @return array
      */
-    private function convertTree(array $tree, $includeChildren = true, $expanded = false)
+    private function convertTree(array $tree, $includeChildren = true, $expanded = false, $checkLeaf = false)
     {
         $categories = array();
         foreach ($tree as $id => $node) {
@@ -497,6 +497,10 @@ class CategoryExtractor
                 'cls' => 'sc-tree-node',
                 'expanded' => $expanded
             );
+
+            if ($checkLeaf && $category['leaf'] == true) {
+                $category['leaf'] = $this->isLeaf($id);
+            }
 
             if (isset($node['iconCls'])) {
                 $category['iconCls'] = $node['iconCls'];
@@ -527,5 +531,16 @@ class CategoryExtractor
         $rows = Shopware()->Db()->fetchPairs($sql, array('%'.$query.'%', $parent.'%'));
 
         return $rows;
+    }
+
+    public function isLeaf($categoryId)
+    {
+        $sql = 'SELECT COUNT(id)
+                FROM `s_plugin_connect_categories` cat
+                WHERE cat.category_key LIKE ?';
+
+        $count = Shopware()->Db()->fetchOne($sql, array($categoryId.'/%'));
+
+        return $count == 0;
     }
 } 

@@ -711,6 +711,11 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     },
 
     searchRemoteCategories: function (textField, newValue) {
+
+        if (newValue.length != 0 && newValue.length < 3) {
+            return;
+        }
+
         var me = this,
             treeView = me.getRemoteCategoryTree().getView(),
             store = me.getRemoteCategoryTree().getStore();
@@ -725,6 +730,11 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     },
 
     searchLocalCategories: function (textField, newValue) {
+
+        if (newValue.length != 0 && newValue.length < 3) {
+            return;
+        }
+
         var me = this,
             treeView = me.getLocalCategoryTree().getView(),
             store = me.getLocalCategoryTree().getStore();

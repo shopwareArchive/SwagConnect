@@ -26,7 +26,8 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
 
     snippets: {
         reload: '{s name=import/tree/reload}Neuladen{/s}',
-        importSelectedCategories: '{s name=import/tree/import_selected_categories}Import categories{/s}'
+        importSelectedCategories: '{s name=import/tree/import_selected_categories}Import categories{/s}',
+        hideMappedCategories: '{s name=import/tree/hide_mapped_categories}Hide assigned categories{/s}'
     },
 
     initComponent: function() {
@@ -131,6 +132,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
                 xtype: 'button',
                 iconCls: 'sprite-plus-circle-frame',
                 action: 'importRemoteCategory',
+                margin: '0 10px 0 0',
                 text: me.snippets.importSelectedCategories
             }, {
                 xtype : 'checkbox',

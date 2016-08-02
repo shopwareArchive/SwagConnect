@@ -136,13 +136,19 @@ class CategoryExtractor
      * @param int $shopId
      * @return array
      */
-    public function getRemoteCategoriesTreeByStream($stream, $shopId)
+    public function getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped = false)
     {
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat
                 INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
                 INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
+                INNER JOIN `s_articles_attributes` ar ON ar.articleID = attributes.article_id
                 WHERE attributes.shop_id = ? AND attributes.stream = ?';
+
+        if ($hideMapped) {
+            $sql .= " AND ar.connect_mapped_category IS NULL";
+        }
+
         $rows = Shopware()->Db()->fetchPairs($sql, array((int)$shopId, $stream));
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false);

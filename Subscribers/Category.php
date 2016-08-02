@@ -7,6 +7,8 @@ class Category extends BaseSubscriber
 {
     private $db;
 
+    private $parentCollection = array();
+
     public function __construct(\Zend_Db_Adapter_Pdo_Mysql $db)
     {
         parent::__construct();
@@ -132,6 +134,9 @@ class Category extends BaseSubscriber
 
     public function getMaxRootCategories($category, $parent)
     {
+        if (in_array($category['parent'], $this->parentCollection)) {
+            return null;
+        }
 
         if ($category['parent'] == 1 && $parent != 'NaN') {
             return null;
@@ -150,6 +155,7 @@ class Category extends BaseSubscriber
                 WHERE ca.id = ?';
 
         $parentCategory = $this->db->fetchRow($sql, array($category['parent']));
+        $this->parentCollection[] = $category['parent'];
 
         return $this->getMaxRootCategories($parentCategory, $parent);
     }

@@ -272,7 +272,6 @@ class CategoryExtractor
 
 
     /**
-     * TODO Hide Mapped ?
      *
      * @param $parent
      * @param $query
@@ -346,7 +345,6 @@ class CategoryExtractor
 
 
     /**
-     * TODO Hide Mapped ?
      *
      * @param $shopId
      * @param $stream
@@ -406,7 +404,7 @@ class CategoryExtractor
 
     public function getChildrenCategoriesByQuery($parent, $query, $hideMapped)
     {
-        $rows = $this->getQueryCategories($query, $parent, $hideMapped);
+        $rows = $this->getQueryCategories($query, $hideMapped, $parent);
 
         $parents = $this->getUniqueParents($rows, $parent);
 

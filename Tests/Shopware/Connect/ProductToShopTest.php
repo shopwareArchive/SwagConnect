@@ -402,6 +402,24 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals($newAvailability, $connectAttribute->getArticleDetail()->getInStock());
     }
 
+    public function testMakeMainVariant()
+    {
+        $variants = $this->getVariants();
+
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $this->productToShop->makeMainVariant($variants[3]->shopId, $variants[3]->sourceId, null);
+
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
+            ->findOneBy(array('sourceId' => $variants[3]->sourceId));
+
+        $this->assertEquals(1, $connectAttribute->getArticleDetail()->getKind());
+    }
+
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
         $productToShop = new ProductToShop(

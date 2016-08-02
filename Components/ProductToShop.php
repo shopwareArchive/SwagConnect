@@ -759,7 +759,7 @@ class ProductToShop implements ProductToShopBase
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
         // find article detail id
-        $result = $this->manager->getConnection()->fetchArray(
+        $result = $this->manager->getConnection()->fetchAssoc(
             'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
             array($sourceId, $shopId)
         );

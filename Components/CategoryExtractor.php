@@ -275,7 +275,7 @@ class CategoryExtractor
      */
     public function getQueryStreams($parent, $query, $hideMapped)
     {
-        $rows = $this->getQueryCategories($query);
+        $rows = $this->getQueryCategories($query, $hideMapped);
 
         $rootCategories = array();
 
@@ -350,7 +350,7 @@ class CategoryExtractor
      */
     public function getMainCategoriesByQuery($shopId, $stream, $query, $hideMapped)
     {
-        $rows = $this->getQueryCategories($query);
+        $rows = $this->getQueryCategories($query, $hideMapped);
 
         $rootCategories = array();
 
@@ -400,7 +400,7 @@ class CategoryExtractor
 
     public function getChildrenCategoriesByQuery($parent, $query, $hideMapped)
     {
-        $rows = $this->getQueryCategories($query, $parent);
+        $rows = $this->getQueryCategories($query, $parent, $hideMapped);
 
         $parents = $this->getUniqueParents($rows, $parent);
 
@@ -521,12 +521,17 @@ class CategoryExtractor
         return $categories;
     }
 
-    public function getQueryCategories($query, $parent = "") {
+    public function getQueryCategories($query, $excludeMapped = false, $parent = "") {
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat
                 INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
                 INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
+                INNER JOIN `s_articles_attributes` ar ON ar.articleID = attributes.article_id
                 WHERE cat.label LIKE ? AND cat.category_key LIKE ?';
+
+        if ($excludeMapped === true) {
+            $sql .= ' AND ar.connect_mapped_category IS NULL';
+        }
 
         $rows = Shopware()->Db()->fetchPairs($sql, array('%'.$query.'%', $parent.'%'));
 

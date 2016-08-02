@@ -89,6 +89,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import textfield[action=search-remote-categories]': {
                 change: me.searchRemoteCategories
+            },
+            'connect-import textfield[action=search-local-categories]': {
+                change: me.searchLocalCategories
             }
         });
 
@@ -715,10 +718,25 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.resetTreeViewStyle(treeView);
 
         Ext.apply(store.getProxy().extraParams, {
-            remoteCategoriesQuery: newValue,
+            remoteCategoriesQuery: newValue
         });
 
         me.onReloadRemoteCategories();
+    },
+
+    searchLocalCategories: function (textField, newValue) {
+        var me = this,
+            treeView = me.getLocalCategoryTree().getView(),
+            store = me.getLocalCategoryTree().getStore();
+
+        me.resetTreeViewStyle(treeView);
+
+        Ext.apply(store.getProxy().extraParams, {
+            localCategoriesQuery: newValue
+        });
+
+        store.getRootNode().removeAll();
+        store.load();
     }
 });
 //{/block}

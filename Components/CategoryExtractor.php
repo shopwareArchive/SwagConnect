@@ -468,19 +468,6 @@ class CategoryExtractor
         return $rows;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Converts categories tree structure
      * to be usable in ExtJS tree

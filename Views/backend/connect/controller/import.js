@@ -83,6 +83,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import textfield[action=search-remote-products]': {
                 change: me.searchRemoteProducts
+            },
+            'connect-import checkbox[action=hide-mapped-categories]': {
+                change: me.hideMappedCategories
             }
         });
 
@@ -571,26 +574,33 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
     hideMappedProducts: function(checkbox, newValue, oldValue) {
         var me = this,
-            store = me.getRemoteProductsGrid().getStore(),
-            categoryStore = me.getRemoteCategoryTree().getStore();
+            store = me.getRemoteProductsGrid().getStore();
 
         if (newValue == true) {
             Ext.apply(store.getProxy().extraParams, {
-                hideMappedProducts: 1
-            });
-
-            Ext.apply(categoryStore.getProxy().extraParams, {
                 hideMappedProducts: 1
             });
         } else {
             Ext.apply(store.getProxy().extraParams, {
                 hideMappedProducts: null
             });
+        }
+        store.loadPage(1);
+    },
+
+    hideMappedCategories: function(checkbox, newValue, oldValue) {
+        var me = this,
+            categoryStore = me.getRemoteCategoryTree().getStore();
+
+        if (newValue == true) {
+            Ext.apply(categoryStore.getProxy().extraParams, {
+                hideMappedProducts: 1
+            });
+        } else {
             Ext.apply(categoryStore.getProxy().extraParams, {
                 hideMappedProducts: null
             });
         }
-        store.loadPage(1);
         me.onReloadRemoteCategories();
     },
 

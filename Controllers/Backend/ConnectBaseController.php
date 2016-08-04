@@ -25,6 +25,7 @@
 namespace ShopwarePlugins\Connect\Controllers\Backend;
 
 use \Shopware\Connect\Struct\Product;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ImageImport;
@@ -292,6 +293,27 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             'success' => true,
             'data' => $data,
             'total' => $total
+        ));
+    }
+
+    public function getExportStatusAction()
+    {
+        $attrRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Attribute');
+
+        $syncedItems = $attrRepo->countStatus(array(
+            Attribute::STATUS_SYNCED,
+        ));
+
+        $totalItems = $attrRepo->countStatus(array(
+            Attribute::STATUS_INSERT,
+            Attribute::STATUS_UPDATE,
+            Attribute::STATUS_SYNCED,
+        ));
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => $syncedItems,
+            'total' => $totalItems,
         ));
     }
 
@@ -564,7 +586,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
-            
+
             $this->View()->assign([
                 'success' => true,
                 'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken

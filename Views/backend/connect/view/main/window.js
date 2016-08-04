@@ -73,29 +73,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     action : me.action,
                     width: 200
                 })];
-            case 'Export':
-                Ext.Ajax.request({
-                    scope: me,
-                    url: '{url controller=ConnectConfig action=isPricingMappingAllowed}',
-                    success: function(result, request) {
-                        var response = Ext.JSON.decode(result.responseText);
-                        if (response.success === false) {
-                            me.body.insertHtml("beforeEnd", me.getHtmlMask());
-                            me.fireEvent('showPriceWindow');
-                        } else if (response.isPricingMappingAllowed == true) {
-                            me.body.insertHtml("beforeEnd", me.getHtmlMask());
-                            me.fireEvent('showPriceWindow');
-                        }
-                    },
-                    failure: function() {
-                        me.body.insertHtml("beforeEnd", me.getHtmlMask());
-                    }
-                });
-
-                return [ Ext.create('Shopware.apps.Connect.view.export.TabPanel', {
-                    region: 'center',
-                    action : me.action
-                })];
             case 'Import':
                 return {
                     xtype: 'import-tab-panel',
@@ -109,16 +86,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     })
                 ];
         }
-    },
-
-    getHtmlMask: function () {
-        var me = this;
-
-        return '<div class="export-window-wrapper">' +
-            '<div class="export-window-message-wrapper">' +
-            '</div>' +
-            '<div class="export-window-mask"></div>' +
-            '</div>';
     }
 });
 //{/block}

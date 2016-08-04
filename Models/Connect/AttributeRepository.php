@@ -50,4 +50,23 @@ class AttributeRepository extends ModelRepository
 
         return $builder;
     }
+
+    /**
+     * @param array $status
+     * @return mixed
+     */
+    public function countStatus(array $status)
+    {
+        $builder = $this->createQueryBuilder('at');
+        $builder
+            ->select($builder->expr()->count('at.id'))
+            ->where('at.exportStatus IN (:status)')
+            ->setParameter(
+                'status',
+                $status,
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+
+        return $builder->getQuery()->getSingleScalarResult();
+    }
 } 

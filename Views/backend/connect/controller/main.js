@@ -117,6 +117,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this;
 
         switch (me.subApplication.action){
+            case 'Export':
+                me.mainWindow = me.getView('export.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+                break;
             case 'Settings':
                 me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
                     callback: function(){
@@ -326,7 +331,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                 }
             },
-            'connect-window': {
+            'connect-export-window': {
                 showPriceWindow: me.onShowPriceWindow
             },
 

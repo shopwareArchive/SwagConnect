@@ -71,7 +71,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         purchasePrice: '{s name=export/price/purchase_price}Purchase price{/s}',
         yes: '{s name=connect/yes}Ja{/s}',
         no: '{s name=connect/no}Nein{/s}',
-        edit: '{s name=connect/edit}Edit{/s}'
+        edit: '{s name=connect/edit}Edit{/s}',
+        purchasePriceHint: '{s name=export/price/purchase_price_hint}You have the option to export your purchase prices to connect and edit it there. They are only visible for you.{/s}'
     },
 
     initComponent: function () {
@@ -298,7 +299,8 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             me.purchasePriceTabPanel = Ext.create('Ext.form.field.Checkbox', {
                 boxLabel: me.snippets.purchasePrice,
                 name: 'exportPriceMode',
-                inputValue: 'purchasePrice'
+                inputValue: 'purchasePrice',
+                helpText: me.snippets.purchasePriceHint
             });
         }
 

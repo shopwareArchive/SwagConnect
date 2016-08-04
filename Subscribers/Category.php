@@ -3,16 +3,20 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 
+use Doctrine\DBAL\Connection;
+use Shopware\Components\Model\ModelManager;
+
 class Category extends BaseSubscriber
 {
-    private $db;
+    /** @var Connection $connection */
+    private $connection;
 
     private $parentCollection = array();
 
-    public function __construct(\Zend_Db_Adapter_Pdo_Mysql $db)
+    public function __construct(ModelManager $modelManager)
     {
         parent::__construct();
-        $this->db = $db;
+        $this->connection = $modelManager->getConnection();
     }
 
     public function getSubscribedEvents()
@@ -60,21 +64,25 @@ class Category extends BaseSubscriber
             return (int)$node['id'];
         }, $nodes);
 
-        $sql = 'SELECT categoryID
-                FROM s_categories_attributes ca
-                WHERE ca.categoryID IN (' . implode(', ', $categoryIds) . ')
-                AND ca.connect_imported_category = 1';
+        $builder = $this->connection->createQueryBuilder();
+        $builder->select('categoryID')
+            ->from('s_categories_attributes', 'ca')
+            ->where('ca.categoryID IN (:categoryIds)')
+            ->andWhere('ca.connect_imported_category = 1')
+            ->setParameter(':categoryIds', $categoryIds, Connection::PARAM_STR_ARRAY);
 
-        $rows = $this->db->fetchCol($sql);
+        $rows = array();
+        $stmt = $builder->execute();
+        while ($row = $stmt->fetch()) {
+            $rows[] = $row['categoryID'];
+        }
 
         if (!$rows) {
             return $nodes;
         }
 
-        $mappedCategories = array_flip($rows);
-
         foreach ($nodes as $index => $node) {
-            if (isset($mappedCategories[$node['id']])) {
+            if (in_array($node['id'], $rows)) {
                 $nodes[$index]['cls'] = 'sc-tree-node';
                 $nodes[$index]['iconCls'] = 'sc-icon';
             }
@@ -86,11 +94,14 @@ class Category extends BaseSubscriber
     public function getCategoriesByQuery($query, $parentId)
     {
 
-        $sql = 'SELECT *
-                FROM s_categories ca
-                WHERE ca.description LIKE ?';
+        $builder = $this->connection->createQueryBuilder();
+        $builder->select('ca.*')
+            ->from('s_categories', 'ca')
+            ->where('ca.description LIKE :query')
+            ->setParameter(':query', '%' . $query . '%');
 
-        $rows = $this->db->fetchAll($sql, array('%' . $query . '%'));
+        $statement = $builder->execute();
+        $rows = $statement->fetchAll();
 
         $parents = array();
         foreach ($rows as $row) {
@@ -150,11 +161,14 @@ class Category extends BaseSubscriber
             return $category;
         }
 
-        $sql = 'SELECT *
-                FROM s_categories ca
-                WHERE ca.id = ?';
+        $builder = $this->connection->createQueryBuilder();
+        $builder->select('ca.*')
+            ->from('s_categories', 'ca')
+            ->where('ca.id = :parentId')
+            ->setParameter(':parentId', $category['parent']);
 
-        $parentCategory = $this->db->fetchRow($sql, array($category['parent']));
+        $parentCategory = $builder->execute()->fetch();
+
         $this->parentCollection[] = $category['parent'];
 
         return $this->getMaxRootCategories($parentCategory, $parent);
@@ -162,11 +176,13 @@ class Category extends BaseSubscriber
 
     public function isLeaf($categoryId)
     {
-        $sql = 'SELECT COUNT(id)
-                FROM s_categories ca
-                WHERE ca.parent = ?';
+        $builder = $this->connection->createQueryBuilder();
+        $builder->select('ca.id')
+            ->from('s_categories', 'ca')
+            ->where('ca.parent = :parentId')
+            ->setParameter(':parentId', $categoryId);
 
-        $count = $this->db->fetchOne($sql, array($categoryId));
+        $count = $builder->execute()->rowCount();
 
         return $count == 0;
     }

@@ -73,6 +73,23 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 header: 'Steuersatz',
                 dataIndex: 'Tax_name',
                 flex: 2
+            }, {
+                xtype: 'actioncolumn',
+                width: 26,
+                items: [{
+                    action: 'edit',
+                    cls: 'editBtn',
+                    iconCls: 'sprite-pencil',
+                    handler: function(view, rowIndex, colIndex, item, opts, record) {
+                        Shopware.app.Application.addSubApplication({
+                            name: 'Shopware.apps.Article',
+                            action: 'detail',
+                            params: {
+                                articleId: record.get('Article_id')
+                            }
+                        });
+                    }
+                }]
             }
         ];
     },

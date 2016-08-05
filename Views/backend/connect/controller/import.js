@@ -21,6 +21,13 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         { ref: 'remoteCategoryTree', selector: 'connect-remote-categories' }
     ],
 
+    snippets: {
+        messages: {
+            removeArticleTitle: '{s name=import/message/remove_article_title}Remove selected product?{/s}',
+            removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}'
+        }
+    },
+
     /**
      * Init component. Basically will create the app window and register to events
      */
@@ -70,7 +77,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 reloadRemoteCategories: me.onReloadRemoteCategories
             },
             'local-products': {
-                reloadOwnCategories: me.onReloadOwnCategories
+                reloadOwnCategories: me.onReloadOwnCategories,
+                deleteProduct: me.onUnAssignArticleFromCategory
             },
             'connect-import checkbox[action=show-only-connect-products]': {
                 change: me.showOnlyConnectProducts
@@ -278,6 +286,18 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
 
         me.unAssignArticlesFromCategory(articleIds, true);
+    },
+
+    onUnAssignArticleFromCategory: function(record) {
+        var me = this;
+
+        Ext.MessageBox.confirm(me.snippets.messages.removeArticleTitle, me.snippets.messages.removeArticle, function (response) {
+            if (response !== 'yes') {
+                return false;
+            }
+
+            me.unAssignArticlesFromCategory([record.get('Article_id')], true);
+        });
     },
 
     unAssignArticlesFromCategory: function(articleIds, reload) {

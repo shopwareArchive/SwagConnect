@@ -370,10 +370,19 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
-                me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
-                me.getRemoteCategoryTree().getStore().load();
-                me.getLocalCategoryTree().getStore().getRootNode().removeAll();
-                me.getLocalCategoryTree().getStore().load();
+                // remove the selected remote category as if dragged and dropped to local
+                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
+                remoteCategoryTreeSelection[0].remove(true);
+
+                // get all currently expanded nodes and reload the tree with them being expanded
+                var expandedCategories = [];
+                me.getLocalCategoryTree().getStore().getRootNode().cascade(function (n) {
+                    if (n.data.expanded) {
+                        expandedCategories.push(n.data.id);
+                    }
+                });
+                me.reloadAndExpandLocalCategories(expandedCategories);
+
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
@@ -572,6 +581,18 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         store.loadPage(1);
     },
 
+    reloadAndExpandLocalCategories: function (expandedCategories) {
+        var me = this;
+        var store = me.getLocalCategoryTree().getStore();
+
+        Ext.apply(store.getProxy().extraParams, {
+            'expandedCategories[]': expandedCategories
+        });
+
+        store.getRootNode().removeAll();
+        store.load();
+    },
+
     hideMappedProducts: function(checkbox, newValue, oldValue) {
         var me = this,
             store = me.getRemoteProductsGrid().getStore();
@@ -675,6 +696,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         rootNode.removeAll(false);
         tree.setLoading(true);
+
+        //reset the expanded categories on refresh
+        Ext.apply(store.getProxy().extraParams, {
+            'expandedCategories[]': []
+        });
+
         store.load({
             callback: function() {
                 tree.setLoading(false);

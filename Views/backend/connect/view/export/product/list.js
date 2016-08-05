@@ -28,9 +28,17 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
         me.on('render', me.loadStore, me);
     },
 
+    registerEvents: function() {
+        this.addEvents('getExportStatus', 'reloadLocalProducts');
+    },
+
     loadStore: function() {
         var me = this;
-        me.getStore().load();
+        me.getStore().load({
+            callback: function(records, options, success) {
+                me.fireEvent('getExportStatus');
+            }
+        });
     },
 
     getColumns: function() {
@@ -158,7 +166,16 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
         var pagingBar = Ext.create('Ext.toolbar.Paging', {
             store: me.store,
             dock:'bottom',
-            displayInfo:true
+            displayInfo:true,
+            doRefresh : function(){
+                var toolbar = this,
+                    current = toolbar.store.currentPage;
+
+                if (toolbar.fireEvent('beforechange', toolbar, current) !== false) {
+                    toolbar.store.loadPage(current);
+                }
+                me.fireEvent('reloadLocalProducts');
+            }
         });
 
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);

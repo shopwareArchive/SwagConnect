@@ -28,6 +28,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         { ref: 'window', selector: 'connect-window' },
         { ref: 'navigation', selector: 'connect-navigation' },
         { ref: 'panel', selector: 'connect-panel' },
+        { ref: 'exportWindow', selector: 'connect-export-window' },
         { ref: 'exportList', selector: 'connect-export-list' },
         { ref: 'exportStreamList', selector: 'connect-export-stream-list' },
         { ref: 'exportFilter', selector: 'connect-export-filter' },
@@ -88,6 +89,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         seconds: '{s name=connect/seconds}Second(s){/s}',
 
         exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
+        exportStatusCount:  '{s name=export/message/status_count}Sync-Status: [0] from [1] products{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
         productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
 
@@ -110,6 +112,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      */
     mainWindow: null,
 
+    exportStatusEl: null,
+
     /**
      * Init component. Basically will create the app window and register to events
      */
@@ -117,6 +121,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this;
 
         switch (me.subApplication.action){
+            case 'Export':
+                me.mainWindow = me.getView('export.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+                break;
             case 'Settings':
                 me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
                     callback: function(){
@@ -326,8 +335,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                 }
             },
-            'connect-window': {
+            'connect-export-window': {
                 showPriceWindow: me.onShowPriceWindow
+            },
+
+            'connect-export-list': {
+                getExportStatus: me.onGetExportStatus,
+                reloadLocalProducts: me.onGetExportStatus
             },
 
             'connect-log-list button[action=clear]': {
@@ -775,6 +789,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     window.destroy();
                     me.createGrowlMessage(title, message, false);
                     list.store.load();
+                    me.onGetExportStatus();
                 } else {
                     //otherwise we have to call this function recursive with the next offset
                     me.startArticleExport(articleDetailIds, batchSize, window, limit);
@@ -1220,6 +1235,41 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
     },
+
+    onGetExportStatus: function() {
+        var me = this;
+
+        Ext.Ajax.request({
+            scope: me,
+            url: '{url controller=Connect action=getExportStatus}',
+            success: function (result) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success === true) {
+
+                    //removes the old export status
+                    if (me.exportStatusEl) {
+                        Ext.destroy(me.exportStatusEl);
+                    }
+
+                    //sets the new export status
+                    me.exportStatusEl = me.getExportWindow().getEl().insertHtml(
+                        "afterBegin",
+                        me.getHtmlStatus(response.data, response.total),
+                        true
+                    );
+                }
+            }
+        });
+    },
+
+    getHtmlStatus: function ($start, $end) {
+        var me = this;
+
+        return '<div class="sc-export-status">' +
+            Ext.String.format(me.messages.exportStatusCount, $start, $end) +
+            '</div>';
+    },
+
 
     /**
      * On change customer group for price configuration

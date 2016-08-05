@@ -370,10 +370,6 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
-                // remove the selected remote category as if dragged and dropped to local
-                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
-                remoteCategoryTreeSelection[0].remove(true);
-
                 // get all currently expanded nodes and reload the tree with them being expanded
                 var expandedCategories = [];
                 me.getLocalCategoryTree().getStore().getRootNode().cascade(function (n) {
@@ -382,6 +378,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     }
                 });
                 me.reloadAndExpandLocalCategories(expandedCategories);
+
+                // remove the selected remote category as if dragged and dropped to local
+                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
+                if( remoteCategoryTreeSelection.length > 0) {
+                    remoteCategoryTreeSelection[0].remove(false);
+                }
 
             },
             failure: function(response, opts) {

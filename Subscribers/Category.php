@@ -49,9 +49,9 @@ class Category extends BaseSubscriber
             return $nodes;
         }
 
-        foreach ($nodes as &$node) {
+        foreach ($nodes as $index => $node) {
             if (in_array($node['id'], $expandedCategories)) {
-                $node['expanded'] = true;
+                $nodes[$index]['expanded'] = true;
             }
         }
 

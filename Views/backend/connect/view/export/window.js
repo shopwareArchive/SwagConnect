@@ -23,11 +23,9 @@ Ext.define('Shopware.apps.Connect.view.export.Window', {
 
         me.items = me.getItems();
         me.checkPricing();
-        me.getStatus();
 
         me.callParent(arguments);
     },
-
 
     /**
      * Creates the fields sets and the sidebar for the detail page.
@@ -62,36 +60,6 @@ Ext.define('Shopware.apps.Connect.view.export.Window', {
                 me.body.insertHtml("beforeEnd", me.getHtmlMask());
             }
         });
-    },
-
-    getStatus: function () {
-        var me = this;
-
-        Ext.Ajax.request({
-            scope: me,
-            url: '{url controller=Connect action=getExportStatus}',
-            success: function (result) {
-                var response = Ext.JSON.decode(result.responseText);
-                if (response.success === true) {
-                    me.body.insertHtml(
-                        "beforeBegin",
-                        me.getHtmlStatus(response.data, response.total)
-                    );
-                }
-            },
-            failure: function () {
-
-            }
-        });
-
-    },
-
-    getHtmlStatus: function ($start, $end) {
-        var me = this;
-
-        return '<div class="sc-export-status">' +
-            Ext.String.format(me.snippets.statusCount, $start, $end) +
-            '</div>';
     },
 
     getHtmlMask: function () {

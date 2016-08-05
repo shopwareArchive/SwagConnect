@@ -29,7 +29,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
     },
 
     registerEvents: function() {
-        this.addEvents('getExportStatus', 'localProducts');
+        this.addEvents('getExportStatus', 'reloadLocalProducts');
     },
 
     loadStore: function() {

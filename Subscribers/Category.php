@@ -93,7 +93,6 @@ class Category extends BaseSubscriber
 
     public function getCategoriesByQuery($query, $parentId)
     {
-
         $builder = $this->connection->createQueryBuilder();
         $builder->select('ca.*')
             ->from('s_categories', 'ca')

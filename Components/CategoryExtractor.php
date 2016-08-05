@@ -277,7 +277,6 @@ class CategoryExtractor
         return $categories;
     }
 
-
     /**
      *
      * @param $parent
@@ -305,7 +304,6 @@ class CategoryExtractor
             }
         }
 
-
         if (count($rootCategories) === 0) {
             return array();
         }
@@ -329,9 +327,7 @@ class CategoryExtractor
         }
 
         $sql .= " )";
-
         $rows = $this->db->fetchCol($sql, $params);
-
         $streams = array();
 
         foreach ($rows as $streamName) {
@@ -349,7 +345,6 @@ class CategoryExtractor
 
         return $tree;
     }
-
 
     /**
      *
@@ -392,7 +387,6 @@ class CategoryExtractor
         $params = array($shopId, $stream);
 
         foreach ($rootCategories as $item) {
-
             if ($item !== $rootCategories[0]) {
                 $sql .= ' OR ';
             }
@@ -406,7 +400,6 @@ class CategoryExtractor
         $rows = $this->db->fetchPairs($sql, $params);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false, true);
-
     }
 
     public function getChildrenCategoriesByQuery($parent, $query, $hideMapped)
@@ -422,8 +415,8 @@ class CategoryExtractor
         return $this->convertTree($this->categoryResolver->generateTree($result, $parent), false, true, true);
     }
 
-    public function getUniqueParents($rows, $parent) {
-
+    public function getUniqueParents($rows, $parent)
+    {
         $parents = array();
 
         foreach ($rows as $key => $name) {
@@ -523,7 +516,8 @@ class CategoryExtractor
         return $categories;
     }
 
-    public function getQueryCategories($query, $excludeMapped = false, $parent = "") {
+    public function getQueryCategories($query, $excludeMapped = false, $parent = "")
+    {
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat
                 INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id

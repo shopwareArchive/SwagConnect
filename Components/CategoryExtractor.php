@@ -53,6 +53,11 @@ class CategoryExtractor
     private $randomStringGenerator;
 
     /**
+     * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    /**
      * @param AttributeRepository $attributeRepository
      * @param CategoryResolver $categoryResolver
      * @param Gateway $configurationGateway
@@ -70,6 +75,8 @@ class CategoryExtractor
         $this->categoryResolver = $categoryResolver;
         $this->configurationGateway = $configurationGateway;
         $this->randomStringGenerator = $randomStringGenerator;
+
+        $this->db = Shopware()->Db();
     }
 
     /**
@@ -115,13 +122,13 @@ class CategoryExtractor
                 $sql .= ' AND ar.connect_mapped_category IS NULL';
             }
             // filter only first child categories
-            $rows = Shopware()->Db()->fetchPairs($sql, $whereParams);
+            $rows = $this->db->fetchPairs($sql, $whereParams);
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
         } else {
             if ($excludeMapped === true) {
                 $sql .= ' WHERE ar.connect_mapped_category IS NULL';
             }
-            $rows = Shopware()->Db()->fetchPairs($sql);
+            $rows = $this->db->fetchPairs($sql);
             // filter only main categories
             $rows = $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
         }
@@ -149,7 +156,7 @@ class CategoryExtractor
             $sql .= " AND ar.connect_mapped_category IS NULL";
         }
 
-        $rows = Shopware()->Db()->fetchPairs($sql, array((int)$shopId, $stream));
+        $rows = $this->db->fetchPairs($sql, array((int)$shopId, $stream));
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false);
     }
@@ -201,7 +208,7 @@ class CategoryExtractor
             $sql .= ' AND aa.connect_mapped_category IS NULL';
         }
 
-        $count = Shopware()->Db()->fetchOne($sql, array($shopId));
+        $count = $this->db->fetchOne($sql, array($shopId));
 
         return (bool) $count;
     }
@@ -221,7 +228,7 @@ class CategoryExtractor
                 INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
                 INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
                 WHERE attributes.shop_id = ?';
-        $rows = Shopware()->Db()->fetchPairs($sql, array($shopId));
+        $rows = $this->db->fetchPairs($sql, array($shopId));
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
     }
@@ -231,7 +238,7 @@ class CategoryExtractor
         $sql = 'SELECT DISTINCT(stream)
                 FROM `s_plugin_connect_items` attributes
                 WHERE attributes.shop_id = ?';
-        $rows = Shopware()->Db()->fetchCol($sql, array($shopId));
+        $rows = $this->db->fetchCol($sql, array($shopId));
 
         $streams = array();
         foreach ($rows as $streamName) {
@@ -323,7 +330,7 @@ class CategoryExtractor
 
         $sql .= " )";
 
-        $rows = Shopware()->Db()->fetchCol($sql, $params);
+        $rows = $this->db->fetchCol($sql, $params);
 
         $streams = array();
 
@@ -396,7 +403,7 @@ class CategoryExtractor
 
         $sql .= " )";
 
-        $rows = Shopware()->Db()->fetchPairs($sql, $params);
+        $rows = $this->db->fetchPairs($sql, $params);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false, true);
 
@@ -463,7 +470,7 @@ class CategoryExtractor
             $params[] = $categoryKey;
         }
 
-        $rows = Shopware()->Db()->fetchPairs($sql, $params);
+        $rows = $this->db->fetchPairs($sql, $params);
 
         return $rows;
     }
@@ -528,7 +535,7 @@ class CategoryExtractor
             $sql .= ' AND ar.connect_mapped_category IS NULL';
         }
 
-        $rows = Shopware()->Db()->fetchPairs($sql, array('%'.$query.'%', $parent.'%'));
+        $rows = $this->db->fetchPairs($sql, array('%'.$query.'%', $parent.'%'));
 
         return $rows;
     }
@@ -539,7 +546,7 @@ class CategoryExtractor
                 FROM `s_plugin_connect_categories` cat
                 WHERE cat.category_key LIKE ?';
 
-        $count = Shopware()->Db()->fetchOne($sql, array($categoryId.'/%'));
+        $count = $this->db->fetchOne($sql, array($categoryId.'/%'));
 
         return $count == 0;
     }

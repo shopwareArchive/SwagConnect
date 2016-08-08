@@ -140,8 +140,22 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
                 action: 'hide-mapped-categories',
                 checked: false,
                 boxLabel : me.snippets.hideMappedCategories
-            }]
+            }, '->',
+                me.getSearchFilter()
+            ]
         });
+    },
+
+    getSearchFilter: function() {
+        return {
+            xtype:'textfield',
+            anchor: '100%',
+            cls:'searchfield',
+            emptyText:'{s name=import/filter/search_empty}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500,
+            action: 'search-remote-categories'
+        }
     }
 });
 //{/block}

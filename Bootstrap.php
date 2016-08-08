@@ -252,7 +252,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                 new PDO(Shopware()->Db()->getConnection())
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
-                Shopware()->Db()
+                Shopware()->Models()
             ),
             new \ShopwarePlugins\Connect\Subscribers\Connect(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),

@@ -29,12 +29,33 @@ class Category extends BaseSubscriber
         /** @var $subject \Enlight_Controller_Action */
         $subject = $args->getSubject();
         $request = $subject->Request();
+        $expandedCategories = $request->getParam('expandedCategories', array());
 
         if ($request->getActionName() === 'getList') {
             $subject->View()->data = $this->extendTreeNodes(
                 $subject->View()->data
             );
+
+            $subject->View()->data = $this->expandCategories(
+                $subject->View()->data,
+                $expandedCategories
+            );
         }
+    }
+
+    private function expandCategories(array $nodes, $expandedCategories)
+    {
+        if (count($expandedCategories) === 0) {
+            return $nodes;
+        }
+
+        foreach ($nodes as $index => $node) {
+            if (in_array($node['id'], $expandedCategories)) {
+                $nodes[$index]['expanded'] = true;
+            }
+        }
+
+        return $nodes;
     }
 
     /**

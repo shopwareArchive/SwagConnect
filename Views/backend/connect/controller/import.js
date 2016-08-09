@@ -21,6 +21,13 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         { ref: 'remoteCategoryTree', selector: 'connect-remote-categories' }
     ],
 
+    snippets: {
+        messages: {
+            removeArticleTitle: '{s name=import/message/remove_article_title}Remove selected product?{/s}',
+            removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}'
+        }
+    },
+
     /**
      * Init component. Basically will create the app window and register to events
      */
@@ -70,7 +77,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 reloadRemoteCategories: me.onReloadRemoteCategories
             },
             'local-products': {
-                reloadOwnCategories: me.onReloadOwnCategories
+                reloadOwnCategories: me.onReloadOwnCategories,
+                deleteProduct: me.onUnAssignArticleFromCategory
             },
             'connect-import checkbox[action=show-only-connect-products]': {
                 change: me.showOnlyConnectProducts
@@ -86,6 +94,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import checkbox[action=hide-mapped-categories]': {
                 change: me.hideMappedCategories
+            },
+            'connect-import textfield[action=search-remote-categories]': {
+                change: me.searchRemoteCategories
+            },
+            'connect-import textfield[action=search-local-categories]': {
+                change: me.searchLocalCategories
             }
         });
 
@@ -280,6 +294,18 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.unAssignArticlesFromCategory(articleIds, true);
     },
 
+    onUnAssignArticleFromCategory: function(record) {
+        var me = this;
+
+        Ext.MessageBox.confirm(me.snippets.messages.removeArticleTitle, me.snippets.messages.removeArticle, function (response) {
+            if (response !== 'yes') {
+                return false;
+            }
+
+            me.unAssignArticlesFromCategory([record.get('Article_id')], true);
+        });
+    },
+
     unAssignArticlesFromCategory: function(articleIds, reload) {
         var me = this;
         var panel = me.getImportPanel();
@@ -370,10 +396,21 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
 
-                me.getRemoteCategoryTree().getStore().getRootNode().removeAll();
-                me.getRemoteCategoryTree().getStore().load();
-                me.getLocalCategoryTree().getStore().getRootNode().removeAll();
-                me.getLocalCategoryTree().getStore().load();
+                // get all currently expanded nodes and reload the tree with them being expanded
+                var expandedCategories = [];
+                me.getLocalCategoryTree().getStore().getRootNode().cascade(function (n) {
+                    if (n.data.expanded) {
+                        expandedCategories.push(n.data.id);
+                    }
+                });
+                me.reloadAndExpandLocalCategories(expandedCategories);
+
+                // remove the selected remote category as if dragged and dropped to local
+                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
+                if( remoteCategoryTreeSelection.length > 0) {
+                    remoteCategoryTreeSelection[0].remove(false);
+                }
+
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
@@ -572,6 +609,18 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         store.loadPage(1);
     },
 
+    reloadAndExpandLocalCategories: function (expandedCategories) {
+        var me = this;
+        var store = me.getLocalCategoryTree().getStore();
+
+        Ext.apply(store.getProxy().extraParams, {
+            'expandedCategories[]': expandedCategories
+        });
+
+        store.getRootNode().removeAll();
+        store.load();
+    },
+
     hideMappedProducts: function(checkbox, newValue, oldValue) {
         var me = this,
             store = me.getRemoteProductsGrid().getStore();
@@ -675,6 +724,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         rootNode.removeAll(false);
         tree.setLoading(true);
+
+        //reset the expanded categories on refresh
+        Ext.apply(store.getProxy().extraParams, {
+            'expandedCategories[]': []
+        });
+
         store.load({
             callback: function() {
                 tree.setLoading(false);
@@ -702,6 +757,45 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         });
 
         store.loadPage(1);
+    },
+
+    searchRemoteCategories: function (textField, newValue) {
+
+        if (newValue.length != 0 && newValue.length < 3) {
+            return;
+        }
+
+        var me = this,
+            treeView = me.getRemoteCategoryTree().getView(),
+            store = me.getRemoteCategoryTree().getStore();
+
+        me.resetTreeViewStyle(treeView);
+
+        Ext.apply(store.getProxy().extraParams, {
+            remoteCategoriesQuery: newValue
+        });
+
+        me.onReloadRemoteCategories();
+    },
+
+    searchLocalCategories: function (textField, newValue) {
+
+        if (newValue.length != 0 && newValue.length < 3) {
+            return;
+        }
+
+        var me = this,
+            treeView = me.getLocalCategoryTree().getView(),
+            store = me.getLocalCategoryTree().getStore();
+
+        me.resetTreeViewStyle(treeView);
+
+        Ext.apply(store.getProxy().extraParams, {
+            localCategoriesQuery: newValue
+        });
+
+        store.getRootNode().removeAll();
+        store.load();
     }
 });
 //{/block}

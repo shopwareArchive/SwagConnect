@@ -8,6 +8,7 @@ Ext.define('Shopware.apps.Connect', {
         'main.Window',
         'main.Panel',
 
+        'export.Window',
         'export.product.Panel',
         'export.product.List',
         'export.product.Filter',
@@ -49,7 +50,7 @@ Ext.define('Shopware.apps.Connect', {
         'config.marketplaceAttributes.Panel',
         'config.marketplaceAttributes.Mapping'
     ],
-    controllers: [ 'Main', 'Import'],
+    controllers: [ 'Main', 'Import' ],
 
     //views: [],
 

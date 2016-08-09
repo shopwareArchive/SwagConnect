@@ -49,6 +49,8 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     },
 
     getColumns: function() {
+        var me = this;
+
         return [
             {
                 header: 'Artikel Nr.',
@@ -89,6 +91,29 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 header: 'Steuersatz',
                 dataIndex: 'Tax_name',
                 flex: 2
+            }, {
+                xtype: 'actioncolumn',
+                width: 52,
+                items: [{
+                    action: 'edit',
+                    cls: 'editBtn',
+                    iconCls: 'sprite-pencil',
+                    handler: function(view, rowIndex, colIndex, item, opts, record) {
+                        Shopware.app.Application.addSubApplication({
+                            name: 'Shopware.apps.Article',
+                            action: 'detail',
+                            params: {
+                                articleId: record.get('Article_id')
+                            }
+                        });
+                    }
+                }, {
+                    iconCls: 'sprite-minus-circle-frame',
+                    action: 'delete',
+                    handler: function (view, rowIndex, colIndex, item, opts, record) {
+                        me.fireEvent('deleteProduct', record);
+                    }
+                }]
             }
         ];
     },

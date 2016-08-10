@@ -300,15 +300,41 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * Deactivates connect categories
+     */
+    public function deactivateCategoryAction()
+    {
+        $categoryId = $this->request->getParam('categoryId', 0);
+
+        if (!$categoryId) {
+            return $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Please select a category for deactivation',
+            ));
+        }
+
+        $categoryIds = $this->getCategoryExtractor()->getCategoryIdsCollection($categoryId);
+
+        if (count($categoryIds) > 1) {
+            $this->getImportService()->deactivateLocalCategoriesByIds($categoryIds);
+        }
+
+        $this->View()->assign(array(
+            'success' => true,
+        ));
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
+            $modelManager = Shopware()->Models();
             $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
-                Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute'),
+                $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
                 new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                    Shopware()->Models(),
-                    Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-                    Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                    $modelManager,
+                    $modelManager->getRepository('Shopware\Models\Category\Category'),
+                    $modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
                 ),
                 new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
                 new \ShopwarePlugins\Connect\Components\RandomStringGenerator()

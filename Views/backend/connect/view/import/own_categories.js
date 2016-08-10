@@ -150,6 +150,13 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
             dock: 'top',
             ui: 'shopware-ui',
             items: [
+                {
+                    xtype: 'button',
+                    iconCls: 'sprite-minus-circle-frame',
+                    action: 'deactivateCategory',
+                    margin: '0 10px 0 0',
+                    text: '{s name=import/action/deactivate_category}Deactivate categories{/s}'
+                },
                 '->',
                 me.getSearchFilter()
             ]

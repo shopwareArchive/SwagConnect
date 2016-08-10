@@ -181,6 +181,19 @@ class ImportService
     }
 
     /**
+     * @param array $categoryIds
+     */
+    public function deactivateLocalCategoriesByIds(array $categoryIds)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->update('s_categories', 'c')
+            ->set('c.active', 0)
+            ->where('c.id IN (:categoryIds)')
+            ->setParameter('categoryIds', $categoryIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+            ->execute();
+    }
+
+    /**
      * Collect all child categories by given
      * remote category key and create same
      * categories structure as Shopware Connect structure.

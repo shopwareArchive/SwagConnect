@@ -23,6 +23,7 @@
  */
 namespace ShopwarePlugins\Connect\Components;
 use Shopware\Connect\Gateway;
+use Shopware\Models\Category\Category;
 use Shopware\CustomModels\Connect\AttributeRepository;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
@@ -56,6 +57,8 @@ class CategoryExtractor
      * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
      */
     private $db;
+
+    private $categoryIds = array();
 
     /**
      * @param AttributeRepository $attributeRepository
@@ -92,6 +95,38 @@ class CategoryExtractor
         }
 
         return $this->convertTree($this->categoryResolver->generateTree($categories));
+    }
+
+    /**
+     * @param $parentId
+     * @return array
+     */
+    public function getCategoryIdsCollection($parentId)
+    {
+        $categoryRepository = $this->categoryResolver->getCategoryRepository();
+
+        $mainCategory = $categoryRepository->findOneBy(array('id' => $parentId));
+
+        $this->collectCategoryIds($mainCategory);
+
+        return $this->categoryIds;
+    }
+
+    /**
+     * Collects connect category ids
+     *
+     * @param Category $parentCategory
+     */
+    private function collectCategoryIds(Category $parentCategory)
+    {
+        //is connect category
+        if ($parentCategory->getAttribute()->getConnectImportedCategory()) {
+            $this->categoryIds[] = $parentCategory->getId();
+        }
+
+        foreach ($parentCategory->getChildren() as $category) {
+            $this->collectCategoryIds($category);
+        }
     }
 
     /**

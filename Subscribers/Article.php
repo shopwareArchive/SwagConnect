@@ -148,9 +148,11 @@ class Article extends BaseSubscriber
             return;
         }
 
+        $groupId = $attribute->getGroupId() ? $attribute->getGroupId() : $attribute->getArticleId();
+
         $mainVariant = new MakeMainVariant(array(
             'sourceId' => $attribute->getSourceId(),
-            'groupId' => $attribute->getGroupId()
+            'groupId' => $groupId
         ));
 
         try {

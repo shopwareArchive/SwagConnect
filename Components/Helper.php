@@ -170,8 +170,8 @@ class Helper
     {
         // Insert new articles
         $sql = "
-        INSERT INTO `s_plugin_connect_items` (article_id, article_detail_id, source_id, group_id)
-        SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID, a.id as groupId
+        INSERT INTO `s_plugin_connect_items` (article_id, article_detail_id, source_id)
+        SELECT a.id, ad.id, IF(ad.kind = 1, a.id, CONCAT(a.id, '-', ad.id)) as sourceID
 
         FROM s_articles a
 

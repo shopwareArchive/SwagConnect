@@ -63,6 +63,12 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
             scope: me
         });
 
+        Ext.applyIf(me, {
+            dockedItems: [
+                me.getToolbar()
+            ]
+        });
+
         me.callParent(arguments);
     },
 
@@ -133,6 +139,33 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
             items: menuElements
         });
         menu.showAt(event.getPageX(), event.getPageY());
+    },
+
+    getToolbar: function () {
+        var me = this;
+
+        return Ext.create('Ext.toolbar.Toolbar', {
+            padding: '2px 0 2px 10px',
+            cls: 'tree-table-toolbar',
+            dock: 'top',
+            ui: 'shopware-ui',
+            items: [
+                '->',
+                me.getSearchFilter()
+            ]
+        });
+    },
+
+    getSearchFilter: function() {
+        return {
+            xtype:'textfield',
+            anchor: '100%',
+            cls:'searchfield',
+            emptyText:'{s name=import/filter/search_empty}Search...{/s}',
+            enableKeyEvents:true,
+            checkChangeBuffer:500,
+            action: 'search-local-categories'
+        }
     }
 });
 //{/block}

@@ -338,6 +338,7 @@ final class SDK
     public function checkProducts(Struct\Order $order)
     {
         $this->verifySdkIfNecessary();
+
         $this->dependencies->getVerificator()->verify($order);
 
         return $this->dependencies->getShoppingService()->checkProducts($order);

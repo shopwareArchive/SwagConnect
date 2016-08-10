@@ -72,7 +72,9 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
         createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
-        advancedHeader: '{s name=config/advanced}Advanced{/s}'
+        advancedHeader: '{s name=config/advanced}Advanced{/s}',
+        showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
+        showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
 
     initComponent: function() {
@@ -316,23 +318,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         });
         items.push(leftContainer);
 
-        var bottomContainer = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
-            layout: 'anchor',
-            border: false,
-            items: [
-                {
-                    xtype: 'textfield',
-                    name: 'exportDomain',
-                    anchor: '100%',
-                    fieldLabel: me.snippets.exportDomainLabel,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/alternative_export_url}Use the given URL instead of default product export URL, e.g. http://shop.de/marketplace_product_gateway/product/id/{/s}'
-                }
-            ]
-        });
-        items.push(bottomContainer);
-
         var fieldset = Ext.create('Ext.form.FieldSet', {
             layout: 'anchor',
             title: me.snippets.advancedHeader,
@@ -367,7 +352,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     fieldLabel: me.snippets.detailPageHintLabel,
                     inputValue: 1,
                     uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintDetailsHelptext
                 }, {
                         xtype: 'checkbox',
                         name: 'showShippingCostsSeparately',
@@ -400,7 +386,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     fieldLabel: me.snippets.basketHintLabel,
                     inputValue: 1,
                     uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintBasketHelptext
                 }
             ]
         });

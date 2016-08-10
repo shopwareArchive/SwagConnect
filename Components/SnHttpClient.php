@@ -4,13 +4,13 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Firebase\JWT\JWT;
-use GuzzleHttp\ClientInterface;
+use Shopware\Components\HttpClient\HttpClientInterface;
 use Shopware\Connect\Gateway;
 
 class SnHttpClient
 {
     /**
-     * @var \GuzzleHttp\ClientInterface
+     * @var \Shopware\Components\HttpClient\HttpClientInterface
      */
     private $httpClient;
 
@@ -25,7 +25,7 @@ class SnHttpClient
     private $configComponent;
 
     public function __construct(
-        ClientInterface $httpClient,
+        HttpClientInterface $httpClient,
         Gateway $gateway,
         Config $config
     )

@@ -52,6 +52,18 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $parent = $this->request->getParam('categoryId', 'root');
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
 
+        $query = $this->request->getParam('remoteCategoriesQuery', "");
+
+        if (trim($query) !== "") {
+            $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent);
+            $this->View()->assign(array(
+                'success' => true,
+                'data' => $categories,
+            ));
+
+            return;
+        }
+
         switch ($parent) {
             case 'root':
                 $categories = $this->getCategoryExtractor()->getMainNodes($hideMapped);
@@ -61,7 +73,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 break;
             case strpos($parent, '_stream_') > 0:
                 list($shopId, $stream) = explode('_stream_', $parent);
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
                 break;
             default:
                 $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped);

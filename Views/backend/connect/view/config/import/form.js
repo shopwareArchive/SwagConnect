@@ -61,7 +61,8 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
-        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}'
+        productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
+        overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}'
     },
 
     initComponent: function() {
@@ -83,21 +84,6 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         });
 
         me.callParent(arguments);
-    },
-
-    /**
-     * Creates form elements
-     * @return Array
-     */
-    createElements: function() {
-
-        var me = this,
-            configFieldset = me.getConfigFieldset(),
-            elements = [];
-
-        elements.push(configFieldset);
-
-        return elements;
     },
 
     /**
@@ -128,26 +114,6 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
     },
 
     /**
-     * Creates the field set
-     * @return Ext.form.FieldSet
-     */
-    getConfigFieldset: function() {
-        var me = this,
-            items = [],
-            elements = me.createElements();
-
-        items.push(elements);
-
-        var fieldset = Ext.create('Ext.form.FieldSet', {
-            layout: 'column',
-            border: false,
-            items: items
-        });
-
-        return fieldset;
-    },
-
-    /**
      * Creates the field set items
      * @return Array
      */
@@ -175,20 +141,20 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             editable: false,
             valueField: 'value',
             displayField: 'value',
+            width: 250,
             store: numStore
         });
 
-        var container = Ext.create('Ext.container.Container', {
-            padding: '0 20 0 0',
+        var containerTop = Ext.create('Ext.form.FieldSet', {
             flex: 1,
+            title: me.snippets.productImportSettingsTitle,
             layout: 'vbox',
-            border: false,
             items: [
                 {
                     xtype: 'container',
-                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportSettingsTitle  + '</h1>',
-                    width: 400,
-                    height: 30
+                    margin: '0 0 20 0',
+                    width: 600,
+                    html: '<p>' + me.snippets.overwritePropertiesHelptext + '</p>'
                 },
                 {
                     xtype      : 'fieldcontainer',
@@ -224,17 +190,18 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             uncheckedValue: 0
                         }
                     ]
-                },
-                {
-                    xtype: 'container',
-                    html: '<h1 class="shopware-connect-color" style="font-size: large">' + me.snippets.productImportImageSettingsTitle  + '</h1>',
-                    width: 400,
-                    height: 30
-                },
+                }
+            ]
+        });
+
+        var containerBottom = Ext.create('Ext.form.FieldSet', {
+            flex: 1,
+            title: me.snippets.productImportImageSettingsTitle,
+            layout: 'vbox',
+            items: [
                 {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
-                    margin: '0 0 0 50',
                     labelWidth: me.defaults.labelWidth,
                     items: [
                         {
@@ -259,7 +226,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        return [ container ];
+        return [ containerTop, containerBottom ];
     },
 
     /**

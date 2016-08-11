@@ -34,7 +34,7 @@ use Shopware\CustomModels\Connect\Config as ConfigModel;
  */
 class Config
 {
-    const MARKETPLACE_URL = 'shopware.connect.com';
+    const MARKETPLACE_URL = 'connect.shopware.com';
     const SN_PREFIX = 'sn.';
 
     /**

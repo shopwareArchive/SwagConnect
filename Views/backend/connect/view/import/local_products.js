@@ -183,7 +183,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
         var me = this;
 
         return Ext.create('Ext.toolbar.Toolbar', {
-            padding: '0 0 0 10px',
+            padding: '2px 0 2px 10px',
             dock: 'top',
             ui: 'shopware-ui',
             items: [{

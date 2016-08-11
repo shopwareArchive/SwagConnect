@@ -47,6 +47,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 reloadOwnCategories: me.onReloadOwnCategories,
                 itemmousedown: me.onSelectLocalCategory
             },
+            'connect-own-categories button[action=deactivateCategory]': {
+                click: me.onDeactivateCategoy
+            },
             'connect-own-categories dataview': {
                 drop: me.onDropToLocalCategory
             },
@@ -172,6 +175,35 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
         store.getProxy().extraParams.categoryId = record.get('id');
         store.loadPage(1);
+    },
+
+    onDeactivateCategoy: function () {
+        var me = this;
+        var selected = me.getLocalCategoryTree().getSelectionModel().getSelection();
+
+        if (selected.length == 0) {
+            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=import/select_local_category}Please select category from your shop{/s}');
+            return;
+        }
+
+        Ext.Ajax.request({
+            url: '{url controller=Import action=deactivateCategory}',
+            method: 'POST',
+            params: {
+                categoryId: selected[0].get('id')
+            },
+            success: function (response, opts) {
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == true) {
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', data.message);
+                }
+            },
+            failure: function (response, opts) {
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
+            }
+        });
     },
 
     onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers) {

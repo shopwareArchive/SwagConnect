@@ -758,11 +758,15 @@ class ProductToShop implements ProductToShopBase
 
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
-        // find article detail id
+        // find article and detail id
         $result = $this->manager->getConnection()->fetchAssoc(
             'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
             array($sourceId, $shopId)
         );
+
+        if (empty($result['article_detail_id']) || empty($result['article_id'])) {
+            return;
+        }
 
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',

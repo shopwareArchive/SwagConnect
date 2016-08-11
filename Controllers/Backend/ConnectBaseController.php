@@ -856,7 +856,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }catch (\RuntimeException $e) {
             $this->View()->assign(array(
                 'success' => false,
-                'messages' => array($e->getMessage())
+                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
             ));
             return;
         }
@@ -1410,59 +1410,140 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         );
     }
 
-    public function exportStreamsAction()
+    public function getStreamProductsCountAction()
     {
-        $streamIds = $this->request->getParam('ids', array());
+        $streamId = $this->request->getParam('id', null);
+
+        if ($streamId === null) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => 'No stream selected'
+            ));
+        }
+
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+
+        try {
+            $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
+            ));
+            return;
+        }
+
+        $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+
+        $this->View()->assign(array(
+            'success' => true,
+            'sourceIds' => $sourceIds
+        ));
+    }
+
+    public function exportStreamAction()
+    {
+        $streamIds = $this->request->getParam('streamIds', array());
+        $currentStreamIndex = $this->request->getParam('currentStreamIndex', 0);
+        $offset = $this->request->getParam('offset', 0);
+        $limit = $this->request->getParam('limit', 1);
+        $articleDetailIds = $this->request->getParam('articleDetailIds', array());
+
+        $streamId = $streamIds[$currentStreamIndex];
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
         $connectExport = $this->getConnectExport();
 
-        $errors = array();
-        foreach ($streamIds as $streamId) {
+        try {
+            $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
+            ));
+            return;
+        }
+
+        $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+        $sliced = array_slice($sourceIds, $offset, $limit);
+
+        try {
+            $errorMessages = $connectExport->export($sliced, $streamsAssignments);
+        } catch (\RuntimeException $e) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
+            ));
+            return;
+        }
+
+        if (!empty($errorMessages)) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+
+            $errorMessagesText = "";
+            $displayedErrorTypes = array(
+                ErrorHandler::TYPE_DEFAULT_ERROR,
+                ErrorHandler::TYPE_PRICE_ERROR
+            );
+
+            foreach ($displayedErrorTypes as $displayedErrorType) {
+                $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
+            }
+
+            $productStreamService->log($streamId, $errorMessagesText);
+
+            $this->View()->assign(array(
+                'success' => false,
+                'messages' => $errorMessages
+            ));
+            return;
+        }
+
+        $nextStreamIndex = $currentStreamIndex;
+        $newArticleDetailIds = $articleDetailIds;
+        $newOffset = $offset + $limit;
+        $hasMoreIterations = true;
+
+        $processedStreams = $currentStreamIndex;
+
+        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->log($streamId, 'Success');
+            $nextStreamIndex = $currentStreamIndex + 1;
+
             try {
-                $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
+                $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamIds[$nextStreamIndex]);
             } catch (\Exception $e) {
                 $this->View()->assign(array(
                     'success' => false,
-                    'message' => $e->getMessage()
+                    'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
                 ));
                 return;
             }
 
             $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
-
-            try {
-                $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
-                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
-            } catch (\RuntimeException $e) {
-                $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-                $this->View()->assign(array(
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ));
-                return;
-            }
-
-            if (!empty($errorMessages)) {
-                $message = implode(";\n", $errorMessages);
-                $productStreamService->log($streamId, $message);
-                $errors[] = $message;
-            } else {
-                $productStreamService->log($streamId, 'Success');
-            }
+            $newArticleDetailIds = $sourceIds;
+            $newOffset = 0;
         }
 
-        if ($errors) {
-            $this->View()->assign(array(
-                'success' => false,
-                'messages' => $errors
-            ));
-            return;
+        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $hasMoreIterations = false;
+            $newOffset = count($articleDetailIds);
+            $processedStreams = count($streamIds);
         }
+
 
         $this->View()->assign(array(
-            'success' => true
+            'success' => true,
+            'articleDetailIds' => $newArticleDetailIds,
+            'nextStreamIndex' => $nextStreamIndex,
+            'newOffset' => $newOffset,
+            'hasMoreIterations' => $hasMoreIterations,
+            'processedStreams' => $processedStreams,
         ));
     }
 

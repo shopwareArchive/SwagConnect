@@ -185,6 +185,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-article-export-progress-window': {
                 startExport: me.startArticleExport
             },
+            'connect-stream-export-progress-window': {
+                startStreamExport: me.startStreamExport
+            },
             'connect-export-stream button[action=add]': {
                 click: me.onExportStream
             },
@@ -788,6 +791,80 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
     },
 
+    startStreamExport: function(streamIds, articleDetailIds, batchSize, window, currentStreamIndex, offset) {
+        offset = parseInt(offset) || 0;
+        var limit = batchSize;
+
+        var me = this,
+            list = me.getExportStreamList(),
+            messages = [];
+
+        Ext.Ajax.request({
+            url: '{url action=exportStream}',
+            method: 'POST',
+            params: {
+                'streamIds[]': streamIds,
+                'currentStreamIndex': currentStreamIndex,
+                'articleDetailIds[]': articleDetailIds,
+                'offset': offset,
+                'limit': limit
+            },
+            success: function(response, opts) {
+                var sticky = false;
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+                    if (operation) {
+                        if (!operation.success && operation.messages) {
+                            if(operation.messages.price && operation.messages.price.length > 0){
+                                var priceMsg = Ext.String.format(
+                                    me.messages.priceErrorMessage, operation.messages.price.length, articleDetailIds.length
+                                );
+                                me.createGrowlMessage(me.messages.exportStreamTitle, priceMsg, true);
+                            }
+
+                            if(operation.messages.default && operation.messages.default.length > 0){
+                                operation.messages.default.forEach( function(message){
+                                    me.createGrowlMessage(me.messages.exportStreamTitle, message, true);
+                                });
+                            }
+                        }
+
+                        window.progressFieldStream.updateText(Ext.String.format(window.snippets.processStream, operation.processedStreams, streamIds.length));
+                        window.progressFieldStream.updateProgress(
+                            operation.processedStreams / streamIds.length,
+                            Ext.String.format(window.snippets.processStream, operation.processedStreams, streamIds.length),
+                            true
+                        );
+
+                        window.progressField.updateText(Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length));
+                        window.progressField.updateProgress(
+                            operation.newOffset / articleDetailIds.length,
+                            Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length),
+                            true
+                        );
+
+
+
+                        if (operation.hasMoreIterations) {
+                            articleDetailIds = operation.articleDetailIds;
+                            currentStreamIndex = operation.nextStreamIndex;
+                            offset = operation.newOffset;
+                            me.startStreamExport(streamIds, articleDetailIds, batchSize, window, currentStreamIndex, offset);
+                        } else {
+                            window.inProcess = false;
+                            window.cancelButton.setDisabled(false);
+
+                            me.createGrowlMessage(me.messages.exportStreamTitle, me.messages.exportStreamMessage, sticky);
+
+                            list.setLoading(false);
+                            list.store.load();
+                        }
+                    }
+                }
+            }
+        });
+    },
+
     /**
      * Callback function that will delete a product from/for export
      *
@@ -852,10 +929,38 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             messages = [],
             title;
 
+        if (records.length == 0) {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            ids.push(record.get('id'));
+        });
+
         if(btn.action == 'add') {
-            url = '{url action=exportStreams}';
-            title = me.messages.exportStreamMessage;
-            message = me.messages.exportStreamMessage;
+            Ext.Ajax.request({
+                url: '{url action=getStreamProductsCount}',
+                method: 'POST',
+                params: {
+                    'id': ids[0]
+                },
+                success: function(response) {
+                    if (response.responseText) {
+                        var operation = Ext.decode(response.responseText);
+                        if (operation) {
+                            if (!operation.success) {
+                                me.createGrowlMessage(title, operation.message, true);
+                            } else {
+                                Ext.create('Shopware.apps.Connect.view.export.stream.Progress', {
+                                    streamIds: ids,
+                                    articleDetailIds: operation.sourceIds
+                                }).show();
+                            }
+                        }
+                    }
+                }
+            });
+            return;
         } else if(btn.action == 'remove') {
             url = '{url action=removeStreams}';
             title = me.messages.removeStreamTitle;
@@ -863,10 +968,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         } else {
             return;
         }
-
-        Ext.each(records, function(record) {
-            ids.push(record.get('id'));
-        });
 
         list.setLoading();
 

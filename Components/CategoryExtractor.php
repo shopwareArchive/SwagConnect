@@ -98,35 +98,34 @@ class CategoryExtractor
     }
 
     /**
-     * @param $parentId
+     * @param Category $category
      * @return array
      */
-    public function getCategoryIdsCollection($parentId)
+    public function getCategoryIdsCollection(Category $category)
     {
-        $categoryRepository = $this->categoryResolver->getCategoryRepository();
-
-        $mainCategory = $categoryRepository->findOneBy(array('id' => $parentId));
-
-        $this->collectCategoryIds($mainCategory);
-
-        return $this->categoryIds;
+        return $this->collectCategoryIds($category);
     }
 
     /**
+
      * Collects connect category ids
      *
      * @param Category $parentCategory
+     * @param array|null $categoryIds
+     * @return array
      */
-    private function collectCategoryIds(Category $parentCategory)
+    private function collectCategoryIds(Category $parentCategory, array $categoryIds = array())
     {
         //is connect category
         if ($parentCategory->getAttribute()->getConnectImportedCategory()) {
-            $this->categoryIds[] = $parentCategory->getId();
+            $categoryIds[] = $parentCategory->getId();
         }
 
         foreach ($parentCategory->getChildren() as $category) {
-            $this->collectCategoryIds($category);
+            $categoryIds =  $this->collectCategoryIds($category, $categoryIds);
         }
+
+        return $categoryIds;
     }
 
     /**

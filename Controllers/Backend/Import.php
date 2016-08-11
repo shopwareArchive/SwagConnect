@@ -314,9 +314,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             ));
         }
 
-        $categoryIds = $this->getCategoryExtractor()->getCategoryIdsCollection($categoryId);
+        /** @var \Shopware\Models\Category\Category $category */
+        $category = $this->getCategoryRepository()->findOneBy(array('id' => $categoryId));
 
-        if (count($categoryIds) > 1) {
+        if (!$category) {
+            $this->View()->assign(array(
+                'success' => false,
+                'error' => 'Please select a valid category for deactivation',
+            ));
+        }
+
+        $categoryIds = $this->getCategoryExtractor()->getCategoryIdsCollection($category);
+
+        if (count($categoryIds) > 0) {
             $this->getImportService()->deactivateLocalCategoriesByIds($categoryIds);
         }
 

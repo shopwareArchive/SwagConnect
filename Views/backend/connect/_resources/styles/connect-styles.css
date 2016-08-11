@@ -85,7 +85,6 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 .tree-table-toolbar {
     border-top: 1px solid #a3b5c1 !important;
     border-right: 1px solid #a3b5c1 !important;
-    /*border-left: 1px solid #a3b5c1 !important;*/
 }
 
 .unassign-arrow {

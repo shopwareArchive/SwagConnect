@@ -180,14 +180,6 @@ class AutoCategoryResolver implements CategoryResolver
     }
 
     /**
-     * @return CategoryRepository
-     */
-    public function getCategoryRepository()
-    {
-        return $this->categoryRepository;
-    }
-
-    /**
      * Generate category data array
      * it's used to create category and
      * attribute from array

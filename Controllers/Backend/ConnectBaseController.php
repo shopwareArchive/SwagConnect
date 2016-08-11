@@ -1421,16 +1421,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             ));
         }
 
-        /** @var ProductStreamService $productStreamService */
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $streamsAssignments = $this->getStreamAssignments($streamId);
 
-        try {
-            $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
-        } catch (\Exception $e) {
-            $this->View()->assign(array(
-                'success' => false,
-                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
-            ));
+        if (!$streamsAssignments) {
             return;
         }
 
@@ -1454,7 +1447,69 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         /** @var ProductStreamService $productStreamService */
         $productStreamService = $this->get('swagconnect.product_stream_service');
-        $connectExport = $this->getConnectExport();
+
+        $streamsAssignments = $this->getStreamAssignments($streamId);
+
+        if (!$streamsAssignments) {
+            return;
+        }
+
+        $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+        $sliced = array_slice($sourceIds, $offset, $limit);
+
+        $exported = $this->exportStreamProducts($streamId, $sliced, $streamsAssignments);
+
+        if (!$exported) {
+            return;
+        }
+
+        $nextStreamIndex = $currentStreamIndex;
+        $newArticleDetailIds = $articleDetailIds;
+        $newOffset = $offset + $limit;
+        $hasMoreIterations = true;
+
+        $processedStreams = $currentStreamIndex;
+
+        //In this case all the products from a single stream were exported successfully but there are still more streams to be processed.
+        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->log($streamId, 'Success');
+            $nextStreamIndex = $currentStreamIndex + 1;
+
+            $streamsAssignments = $this->getStreamAssignments($streamIds[$nextStreamIndex]);
+
+            if (!$streamsAssignments) {
+                return;
+            }
+
+            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+            $newArticleDetailIds = $sourceIds;
+            $newOffset = 0;
+        }
+
+        //In this case all the products from all streams were exported successfully.
+        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $hasMoreIterations = false;
+            $newOffset = count($articleDetailIds);
+            $processedStreams = count($streamIds);
+        }
+
+
+        $this->View()->assign(array(
+            'success' => true,
+            'articleDetailIds' => $newArticleDetailIds,
+            'nextStreamIndex' => $nextStreamIndex,
+            'newOffset' => $newOffset,
+            'hasMoreIterations' => $hasMoreIterations,
+            'processedStreams' => $processedStreams,
+        ));
+    }
+
+    private function getStreamAssignments($streamId)
+    {
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
 
         try {
             $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
@@ -1463,21 +1518,27 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
             ));
-            return;
+            return false;
         }
 
-        $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
-        $sliced = array_slice($sourceIds, $offset, $limit);
+        return $streamsAssignments;
+    }
+
+    private function exportStreamProducts($streamId, $sourceIds, $streamsAssignments)
+    {
+        /** @var ProductStreamService $productStreamService */
+        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $connectExport = $this->getConnectExport();
 
         try {
-            $errorMessages = $connectExport->export($sliced, $streamsAssignments);
+            $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
         } catch (\RuntimeException $e) {
             $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
             $this->View()->assign(array(
                 'success' => false,
                 'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
             ));
-            return;
+            return false;
         }
 
         if (!empty($errorMessages)) {
@@ -1499,52 +1560,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'messages' => $errorMessages
             ));
-            return;
+            return false;
         }
 
-        $nextStreamIndex = $currentStreamIndex;
-        $newArticleDetailIds = $articleDetailIds;
-        $newOffset = $offset + $limit;
-        $hasMoreIterations = true;
-
-        $processedStreams = $currentStreamIndex;
-
-        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
-            $productStreamService->log($streamId, 'Success');
-            $nextStreamIndex = $currentStreamIndex + 1;
-
-            try {
-                $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamIds[$nextStreamIndex]);
-            } catch (\Exception $e) {
-                $this->View()->assign(array(
-                    'success' => false,
-                    'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
-                ));
-                return;
-            }
-
-            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
-            $newArticleDetailIds = $sourceIds;
-            $newOffset = 0;
-        }
-
-        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
-            $hasMoreIterations = false;
-            $newOffset = count($articleDetailIds);
-            $processedStreams = count($streamIds);
-        }
-
-
-        $this->View()->assign(array(
-            'success' => true,
-            'articleDetailIds' => $newArticleDetailIds,
-            'nextStreamIndex' => $nextStreamIndex,
-            'newOffset' => $newOffset,
-            'hasMoreIterations' => $hasMoreIterations,
-            'processedStreams' => $processedStreams,
-        ));
+        return true;
     }
 
     /**

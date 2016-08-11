@@ -827,6 +827,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                                     me.createGrowlMessage(me.messages.exportStreamTitle, message, true);
                                 });
                             }
+
+                            window.inProcess = false;
+                            window.cancelButton.setDisabled(false);
+                            return;
                         }
 
                         window.progressFieldStream.updateText(Ext.String.format(window.snippets.processStream, operation.processedStreams, streamIds.length));

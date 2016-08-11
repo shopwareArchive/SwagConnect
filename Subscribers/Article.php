@@ -2,9 +2,11 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Models\Attribute\ArticlePrice;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
+use Shopware\Components\Model\ModelManager;
 
 /**
  * Class Article
@@ -17,10 +19,29 @@ class Article extends BaseSubscriber
      */
     private $connectGateway;
 
-    public function __construct(Gateway $connectGateway)
-    {
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
+    private $modelManager;
+
+    /**
+     * @var \Shopware\Models\Customer\Group
+     */
+    private $customerGroupRepository;
+
+    /**
+     * @var \Shopware\Models\Article\Detail
+     */
+    private $detailRepository;
+
+
+    public function __construct(
+        Gateway $connectGateway,
+        ModelManager $modelManager
+    ) {
         parent::__construct();
         $this->connectGateway = $connectGateway;
+        $this->modelManager = $modelManager;
     }
 
     public function getSubscribedEvents()
@@ -33,8 +54,17 @@ class Article extends BaseSubscriber
         );
     }
 
-    /** @var  Group */
-    protected $customerGroupRepository;
+    /**
+     * @return \Shopware\Models\Article\Detail
+     */
+    public function getDetailRepository()
+    {
+        if (!$this->detailRepository) {
+            $this->detailRepository = $this->modelManager->getRepository('Shopware\Models\Article\Detail');
+        }
+
+        return $this->detailRepository;
+    }
 
     /**
      * @return \Shopware\Components\Model\ModelRepository|Group
@@ -42,7 +72,7 @@ class Article extends BaseSubscriber
     public function getCustomerGroupRepository()
     {
         if (!$this->customerGroupRepository) {
-            $this->customerGroupRepository = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+            $this->customerGroupRepository = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         }
         return $this->customerGroupRepository;
     }
@@ -90,11 +120,47 @@ class Article extends BaseSubscriber
                     'backend/article/controller/detail_connect.js'
                 );
                 break;
+            case 'saveDetail':
+                if ($request->getParam('standard')) {
+                    $this->generateMainVariantChange($request->getParam('id'));
+                }
+                break;
             default:
                 break;
         }
     }
 
+    /**
+     * @param $detailId
+     */
+    public function generateMainVariantChange($detailId)
+    {
+        $detail = $this->getDetailRepository()->findOneBy(array('id' => $detailId));
+
+        if (!$detail instanceof \Shopware\Models\Article\Detail) {
+            return;
+        }
+
+        // Check if entity is a connect product
+        $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+
+        if (!$attribute) {
+            return;
+        }
+
+        $groupId = $attribute->getGroupId() ? $attribute->getGroupId() : $attribute->getArticleId();
+
+        $mainVariant = new MakeMainVariant(array(
+            'sourceId' => $attribute->getSourceId(),
+            'groupId' => $groupId
+        ));
+
+        try {
+            $this->getSDK()->makeMainVariant($mainVariant);
+        } catch (\Exception $e) {
+            // if sn is not available, proceed without exception
+        }
+    }
 
     /**
      * When saving prices make sure, that the connectPrice is stored in net

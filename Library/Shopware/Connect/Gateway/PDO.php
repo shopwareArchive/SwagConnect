@@ -36,6 +36,7 @@ class PDO extends Gateway
         self::PRODUCT_DELETE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
         self::PRODUCT_STOCK => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
+        self::MAIN_VARIANT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\MakeMainVariant',
         self::PAYMENT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus',
     );
 
@@ -48,7 +49,8 @@ class PDO extends Gateway
             self::PRODUCT_UPDATE,
             self::PRODUCT_DELETE,
             self::PRODUCT_STOCK,
-            self::STREAM_ASSIGNMENT
+            self::STREAM_ASSIGNMENT,
+            self::MAIN_VARIANT,
         ),
         self::TYPE_PAYMENT => array(
             self::PAYMENT_UPDATE
@@ -131,6 +133,10 @@ class PDO extends Gateway
                         break;
                     case self::PAYMENT_UPDATE:
                         $change->paymentStatus = unserialize($row['c_payload']);
+                        break;
+                    case self::MAIN_VARIANT:
+                        $payload = unserialize($row['c_payload']);
+                        $change->groupId = $payload['groupId'];
                         break;
                     default:
                         $change->product = unserialize($row['c_payload']);
@@ -345,6 +351,28 @@ class PDO extends Gateway
             );'
         );
         $query->execute(array($productId, self::STREAM_ASSIGNMENT, $revision, serialize($supplierStreams)));
+    }
+
+    /**
+     * @param $productId
+     * @param $revision
+     * @param $groupId
+     */
+    public function makeMainVariant($productId, $revision, $groupId)
+    {
+        $query = $this->connection->prepare(
+            'INSERT INTO
+                 sw_connect_change (
+                     `c_entity_id`,
+                     `c_operation`,
+                     `c_revision`,
+                     `c_payload`
+                 )
+             VALUES (
+                 ?, ?, ?, ?
+             );'
+        );
+        $query->execute(array($productId, self::MAIN_VARIANT, $revision, array('groupId' => $groupId)));
     }
 
     /**

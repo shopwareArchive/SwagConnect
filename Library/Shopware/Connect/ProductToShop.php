@@ -87,4 +87,14 @@ interface ProductToShop
      * @return void
      */
     public function commit();
+
+    /**
+     * Make main variant of a product with given sourceId and groupId.
+     *
+     * @param $shopId
+     * @param $sourceId
+     * @param $groupId
+     * @return void
+     */
+    public function makeMainVariant($shopId, $sourceId, $groupId);
 }

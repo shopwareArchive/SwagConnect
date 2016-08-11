@@ -49,7 +49,8 @@ class InMemory extends Gateway
             self::PRODUCT_UPDATE,
             self::PRODUCT_DELETE,
             self::PRODUCT_STOCK,
-            self::STREAM_ASSIGNMENT
+            self::STREAM_ASSIGNMENT,
+            self::MAIN_VARIANT,
         ),
         self::TYPE_PAYMENT => array(
             self::PAYMENT_UPDATE
@@ -191,6 +192,9 @@ class InMemory extends Gateway
             case self::STREAM_ASSIGNMENT:
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment';
                 break;
+            case self::MAIN_VARIANT:
+                $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\MakeMainVariant';
+                break;
             case self::PAYMENT_UPDATE:
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus';
                 break;
@@ -302,6 +306,23 @@ class InMemory extends Gateway
             'sourceId' => $id,
             'revision' => $revision,
             'supplierStreams' => $supplierStreams,
+        );
+    }
+
+    /**
+     * @param $id
+     * @param $revision
+     * @param $groupId
+     */
+    public function makeMainVariant($id, $revision, $groupId)
+    {
+        $this->checkRevisionExists($revision);
+
+        $this->changes[$revision] = array(
+            'type' => self::MAIN_VARIANT,
+            'sourceId' => $id,
+            'revision' => $revision,
+            'groupId' => $groupId,
         );
     }
 

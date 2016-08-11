@@ -61,7 +61,7 @@ class Address extends Verificator
     protected function verifyDefault(VerificatorDispatcher $dispatcher, Struct $struct)
     {
         $requiredFields = array('firstName', 'surName', 'street', 'zip', 'city', 'country', 'email');
-        $optionalStringFields = array('company', 'state', 'streetNumber', 'middleName');
+        $optionalStringFields = array('company', 'state', 'streetNumber', 'middleName', 'phone');
 
         foreach ($requiredFields as $required) {
             if (!is_string($struct->$required)) {

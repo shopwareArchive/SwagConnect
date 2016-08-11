@@ -8,6 +8,7 @@
 namespace Shopware\Connect\Service;
 
 use Shopware\Connect\ProductFromShop;
+use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Connect\Struct\PaymentStatus as PaymentStatusStruct;
 use Shopware\Connect\Struct\VerificatorDispatcher;
 use Shopware\Connect\Gateway;
@@ -135,6 +136,17 @@ class Export
             $productId,
             $this->revisionProvider->next(),
             $supplierStreams
+        );
+    }
+
+    public function makeMainVariant(MakeMainVariant $mainVariant)
+    {
+        $this->verificator->verify($mainVariant);
+
+        $this->gateway->makeMainVariant(
+            $mainVariant->sourceId,
+            $this->revisionProvider->next(),
+            $mainVariant->groupId
         );
     }
 

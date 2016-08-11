@@ -344,6 +344,8 @@ class DependencyResolver
                         new Struct\Verificator\Change\Availability(),
                     'Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment' =>
                         new Struct\Verificator\Change\StreamAssignment(),
+                    'Shopware\\Connect\\Struct\\Change\\FromShop\\MakeMainVariant' =>
+                        new Struct\Verificator\Change\MakeMainVariant(),
                     'Shopware\\Connect\\Struct\\Change\\ToShop\\InsertOrUpdate' =>
                         new Struct\Verificator\Change\InsertOrUpdate(),
                     'Shopware\\Connect\\Struct\\Change\\ToShop\\Delete' =>

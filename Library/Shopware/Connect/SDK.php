@@ -7,6 +7,7 @@
 
 namespace Shopware\Connect;
 
+use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Connect\Struct\RpcCall;
 use Shopware\Connect\Struct\Shop;
 
@@ -318,6 +319,16 @@ final class SDK
     }
 
     /**
+     * @param MakeMainVariant $mainVariant
+     */
+    public function makeMainVariant(MakeMainVariant $mainVariant)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->makeMainVariant($mainVariant);
+    }
+
+    /**
      * Check products still are in the state they are stored locally
      *
      * This method will verify with the remote shops that products are still in
@@ -338,7 +349,6 @@ final class SDK
     public function checkProducts(Struct\Order $order)
     {
         $this->verifySdkIfNecessary();
-
         $this->dependencies->getVerificator()->verify($order);
 
         return $this->dependencies->getShoppingService()->checkProducts($order);

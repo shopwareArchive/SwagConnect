@@ -187,6 +187,10 @@ class ProductService
                     $this->toShop->delete($change->shopId, $change->sourceId);
                     break;
 
+                case ($change instanceof Change\ToShop\MakeMainVariant):
+                    $this->toShop->makeMainVariant($change->shopId, $change->sourceId, $change->groupId);
+                    break;
+
                 default:
                     throw new \RuntimeException("Invalid change operation: $change");
             }

@@ -372,7 +372,7 @@ class PDO extends Gateway
                  ?, ?, ?, ?
              );'
         );
-        $query->execute(array($productId, self::MAIN_VARIANT, $revision, array('groupId' => $groupId)));
+        $query->execute(array($productId, self::MAIN_VARIANT, $revision, serialize(array('groupId' => $groupId))));
     }
 
     /**

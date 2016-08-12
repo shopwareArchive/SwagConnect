@@ -67,6 +67,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     private $snHttpClient;
 
     /**
+     * @var ProductStreamService
+     */
+    private $productStreamService;
+
+    /**
      * @return \Shopware\Components\Model\ModelManager
      */
     public function getModelManager()
@@ -1394,7 +1399,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
     public function getStreamListAction()
     {
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $productStreamService = $this->getProductStreamService();
 
         $result = $productStreamService->getList(
             $this->Request()->getParam('start', 0),
@@ -1445,8 +1450,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $streamId = $streamIds[$currentStreamIndex];
 
-        /** @var ProductStreamService $productStreamService */
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $productStreamService = $this->getProductStreamService();
 
         $streamsAssignments = $this->getStreamAssignments($streamId);
 
@@ -1508,8 +1512,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
     private function getStreamAssignments($streamId)
     {
-        /** @var ProductStreamService $productStreamService */
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $productStreamService = $this->getProductStreamService();
 
         try {
             $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
@@ -1526,8 +1529,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
     private function exportStreamProducts($streamId, $sourceIds, $streamsAssignments)
     {
-        /** @var ProductStreamService $productStreamService */
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();
 
         try {
@@ -1573,8 +1575,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     {
         $streamIds = $this->request->getParam('ids', array());
 
-        /** @var ProductStreamService $productStreamService */
-        $productStreamService = $this->get('swagconnect.product_stream_service');
+        $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();
 
         foreach ($streamIds as $streamId) {
@@ -1668,5 +1669,17 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         return $host;
+    }
+
+    /**
+     * @return ProductStreamService
+     */
+    protected function getProductStreamService()
+    {
+        if ($this->productStreamService === null) {
+            $this->productStreamService = $this->get('swagconnect.product_stream_service');
+        }
+
+        return $this->productStreamService;
     }
 }

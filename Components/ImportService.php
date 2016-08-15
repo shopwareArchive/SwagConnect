@@ -182,15 +182,18 @@ class ImportService
 
     /**
      * @param array $categoryIds
+     * @return integer
      */
     public function deactivateLocalCategoriesByIds(array $categoryIds)
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->update('s_categories', 'c')
+        $rowCount = $builder->update('s_categories', 'c')
             ->set('c.active', 0)
             ->where('c.id IN (:categoryIds)')
             ->setParameter('categoryIds', $categoryIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
             ->execute();
+
+        return $rowCount;
     }
 
     /**

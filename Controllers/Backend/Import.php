@@ -326,12 +326,14 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         $categoryIds = $this->getCategoryExtractor()->getCategoryIdsCollection($category);
 
+        $changedCount = 0;
         if (count($categoryIds) > 0) {
-            $this->getImportService()->deactivateLocalCategoriesByIds($categoryIds);
+            $changedCount = $this->getImportService()->deactivateLocalCategoriesByIds($categoryIds);
         }
 
         $this->View()->assign(array(
             'success' => true,
+            'deactivatedCategoriesCount' => $changedCount,
         ));
     }
 

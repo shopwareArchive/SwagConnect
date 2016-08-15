@@ -107,6 +107,10 @@ class Category extends BaseSubscriber
                 $nodes[$index]['cls'] = 'sc-tree-node';
                 $nodes[$index]['iconCls'] = 'sc-icon';
             }
+
+            if (!$node['active']) {
+                $nodes[$index]['cls'] .= ' inactive';
+            }
         }
 
         return $nodes;

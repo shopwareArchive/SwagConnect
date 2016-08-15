@@ -207,6 +207,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
         });
+
+        me.getLocalCategoryTree().getSelectionModel().deselectAll();
     },
 
     onBeforeDropLocalProduct: function(node, data, overModel, dropPosition, dropHandlers) {

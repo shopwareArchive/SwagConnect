@@ -24,7 +24,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     snippets: {
         messages: {
             removeArticleTitle: '{s name=import/message/remove_article_title}Remove selected product?{/s}',
-            removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}'
+            removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}',
+            deactivatedCategoriesSuccess: '{s name=deactivated_categories/success/message}[0] categories deactivated{/s}'
         }
     },
 
@@ -195,7 +196,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             success: function (response, opts) {
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                    var successMessage = Ext.String.format(me.snippets.messages.deactivatedCategoriesSuccess, data.deactivatedCategoriesCount);
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', successMessage);
+                    me.getLocalCategoryTree().getStore().load({ node: selected[0].parentNode });
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', data.message);
                 }

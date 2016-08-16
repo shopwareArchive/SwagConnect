@@ -131,6 +131,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     onSelectRemoteCategory: function(treePanel, record) {
         var me = this,
             localTreeView = me.getLocalCategoryTree().getView(),
+            stream = me.getStreamByNode(record),
             mainCategory = me.getMainCategoryByNode(record);
 
         me.resetTreeViewStyle(localTreeView);
@@ -140,6 +141,10 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         var remoteProductsStore = me.getRemoteProductsGrid().getStore();
         remoteProductsStore.getProxy().extraParams.shopId = mainCategory.get('categoryId');
+
+        if (stream && stream.get('categoryId') != record.get('categoryId')) {
+            remoteProductsStore.getProxy().extraParams.stream = stream.get('text');
+        }
 
         if (mainCategory.get('categoryId') != record.get('categoryId')) {
             remoteProductsStore.getProxy().extraParams.category = record.get('categoryId');
@@ -164,6 +169,26 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         }
 
         return me.getMainCategoryByNode(node.parentNode);
+    },
+
+    /**
+     * Find stream name
+     *
+     * @param node
+     * @returns node
+     */
+    getStreamByNode: function(node) {
+        var me = this;
+
+        if (!node) {
+            return null;
+        }
+
+        if (node.get('categoryId').indexOf('_stream_') > 0) {
+            return node;
+        }
+
+        return me.getStreamByNode(node.parentNode);
     },
 
     onSelectLocalCategory: function(treePanel, record) {

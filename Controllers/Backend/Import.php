@@ -94,7 +94,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
         $searchQuery = $this->request->getParam('remoteArticlesQuery', '');
 
-        $stream = null;
+        $stream = $this->request->getParam('stream', null);
 
         if (strpos($category, '_stream_') > 0) {
             $stream = explode('_stream_', $category);

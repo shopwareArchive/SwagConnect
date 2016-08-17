@@ -772,5 +772,10 @@ class ProductToShop implements ProductToShopBase
             'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',
             array($result['article_detail_id'], $result['article_id'])
         );
+
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles SET main_detail_id = ? WHERE articleID = ?',
+            array($result['article_detail_id'], $result['article_id'])
+        );
     }
 }

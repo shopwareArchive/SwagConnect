@@ -89,16 +89,12 @@ class Helper
         $builder->select(array('ba', 'a'));
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.article', 'a');
-        $builder->join('a.mainDetail', 'd');
-        $builder->leftJoin('d.attribute', 'at');
 
         $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
-        $builder->orWhere('d.number = :number');
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $product->shopId);
         $query->setParameter('sourceId', $product->sourceId);
-        $query->setParameter('number', 'SC-' . $product->shopId . '-' . $product->sourceId);
         $result = $query->getResult(
             $mode
         );

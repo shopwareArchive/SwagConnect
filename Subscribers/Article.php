@@ -141,10 +141,13 @@ class Article extends BaseSubscriber
             return;
         }
 
-        // Check if entity is a connect product
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
         if (!$attribute) {
+            return;
+        }
+        // Check if entity is a connect product
+        if (!$attribute->getExportStatus()) {
             return;
         }
 

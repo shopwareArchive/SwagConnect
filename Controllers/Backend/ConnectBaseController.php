@@ -1634,7 +1634,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                     }
                 }
 
-                $connectExport->updateConnectItemsStatus($removedRecords, ConnectExport::ITEM_STATUS_DELETE);
+                $connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
 
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
 

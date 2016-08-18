@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Attribute\ArticlePrice;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
@@ -141,10 +142,13 @@ class Article extends BaseSubscriber
             return;
         }
 
-        // Check if entity is a connect product
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
         if (!$attribute) {
+            return;
+        }
+        // Check if entity is a connect product
+        if (!$attribute->getExportStatus() || $attribute->getExportStatus() == Attribute::STATUS_DELETE) {
             return;
         }
 

@@ -10,8 +10,6 @@
 
 				{if $connectShopInfo}
 					<span class="connect--detail-product-headline is--strong">{s namespace="frontend/detail/connect" name=connect_detail_marketplace_article}Marktplatz-Artikel von {$connectShop->name}{/s}</span>
-				{else}
-					<span class="connect--detail-product-headline is--strong">{s namespace="frontend/detail/connect" name=connect_detail_marketplace_article_implicit}Marktplatz-Artikel von {$connectShop->id}{/s}</span>
 				{/if}
 			</div>
 		{/block}

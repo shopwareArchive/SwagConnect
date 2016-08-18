@@ -485,6 +485,7 @@ class Setup
             'priceGroupForPurchasePriceExport' => array('', null, 'export'),
             'priceFieldForPriceExport' => array('', null, 'export'),
             'priceFieldForPurchasePriceExport' => array('', null, 'export'),
+            'excludeInactiveProducts' => array('1', null, 'export'),
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),

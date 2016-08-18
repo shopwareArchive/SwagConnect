@@ -43,6 +43,7 @@ class Update
         $this->renameMenuOpenConnect();
         $this->changeMenuIcons();
         $this->createSyncRevision();
+        $this->createExcludeInactiveFlag();
 
         return true;
     }
@@ -152,6 +153,17 @@ class Update
             Shopware()->Db()->query("
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `revision` decimal(20,10) DEFAULT NULL
+            ");
+        }
+    }
+
+    private function createExcludeInactiveFlag()
+    {
+        if (version_compare($this->version, '0.0.13', '<=')) {
+            Shopware()->Db()->query("
+                INSERT INTO `s_plugin_connect_config`
+                (`name`, `value`, `groupName`)
+                VALUES  ('excludeInactiveProducts', 1, 'export')
             ");
         }
     }

@@ -97,12 +97,15 @@ class ConnectExport
             }
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
+            $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
+            if ($excludeInactiveProducts && !$model->getArticle()->getActive()) {
+                $connectAttribute->setExportStatus(Attribute::STATUS_INACTIVE);
+                $this->manager->persist($connectAttribute);
+                $this->manager->flush($connectAttribute);
+                continue;
+            }
 
-            $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
-            if (empty($item['exportStatus'])
-                || $item['exportStatus'] == Attribute::STATUS_DELETE
-                || $item['exportStatus'] == Attribute::STATUS_ERROR
-            ) {
+            if ($this->helper->isProductExported($connectAttribute)) {
                 $status = Attribute::STATUS_INSERT;
             } else {
                 $status = Attribute::STATUS_UPDATE;

@@ -42,6 +42,7 @@ class Attribute extends ModelEntity
     const STATUS_ERROR = 'error';
     const STATUS_ERROR_PRICE = 'error-price';
     const STATUS_DELETE = 'delete';
+    const STATUS_INACTIVE = 'inactive';
 
     /**
      * @var integer $id

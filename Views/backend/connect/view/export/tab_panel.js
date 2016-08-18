@@ -38,6 +38,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'synced': 'sprite-tick-circle',
             'error': 'sprite-minus-circle-frame',
             'error-price': 'icon-creative-commons-noncommercial-eu icon-size',
+            'inactive': 'sprite-ui-check-box-uncheck icon-size',
             'update': 'sprite-arrow-circle-135'
         };
     }

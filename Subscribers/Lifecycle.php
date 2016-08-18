@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Connect\Struct\PaymentStatus;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
@@ -133,16 +134,9 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-        // todo@dn: Check logic
-        $status = $attribute->getExportStatus();
-        $shopId = $attribute->getShopId();
-        if (empty($status) || !empty($shopId)) {
-            return;
-        }
-
-        // if status is delete,
-        // article should not be updated in connect
-        if ($status == 'delete') {
+        // if article is not exported to Connect
+        // don't need to generate changes
+        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
             return;
         }
 

@@ -96,7 +96,7 @@ class Sw41Query extends SwQuery
      */
     private function normalizeCategoryName($name)
     {
-        return preg_replace('(\P{L}+)u', '_', strtolower($name));
+        return preg_replace('/[^\p{L}\p{N}]+/u', '_', strtolower($name));
     }
 
     /**
@@ -105,7 +105,7 @@ class Sw41Query extends SwQuery
      * @param string $categoryName
      * @return string
      */
-    private function normalizeCategory($categoryName)
+    public function normalizeCategory($categoryName)
     {
         $path = preg_split('(\\s+>\\s+)', trim($categoryName));
         return '/' . implode(

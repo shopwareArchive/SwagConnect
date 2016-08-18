@@ -63,7 +63,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                 renderer: function(value, metaData, record) {
                     var isConnectProduct = record.get('Attribute_connectMappedCategory');
                     if (isConnectProduct) {
-                        return '<span class="connect-icon" style="padding: 2px 0 6px 20px">' + value + '</span>>';
+                        return '<span class="connect-icon" style="padding: 2px 0 6px 20px">' + value + '</span>';
                     }
                     return value;
                 }

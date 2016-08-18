@@ -15,7 +15,6 @@ use ShopwarePlugins\Connect\Components\ErrorHandler;
 class ConnectExport
 {
     const BATCH_SIZE = 200;
-    const ITEM_STATUS_DELETE = 'delete';
 
     /** @var  Helper */
     protected $helper;
@@ -100,10 +99,13 @@ class ConnectExport
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
             $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
-            if (empty($item['exportStatus']) || $item['exportStatus'] == self::ITEM_STATUS_DELETE || $item['exportStatus'] == 'error') {
-                $status = 'insert';
+            if (empty($item['exportStatus'])
+                || $item['exportStatus'] == Attribute::STATUS_DELETE
+                || $item['exportStatus'] == Attribute::STATUS_ERROR
+            ) {
+                $status = Attribute::STATUS_INSERT;
             } else {
-                $status = 'update';
+                $status = Attribute::STATUS_UPDATE;
             }
             $connectAttribute->setExportStatus($status);
             $connectAttribute->setExportMessage(null);
@@ -118,7 +120,7 @@ class ConnectExport
 
             try {
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
-                if ($status == 'insert') {
+                if ($status == Attribute::STATUS_INSERT) {
                     $this->sdk->recordInsert($item['sourceId']);
                 } else {
                     $this->sdk->recordUpdate($item['sourceId']);
@@ -251,7 +253,7 @@ class ConnectExport
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
-        $attribute->setExportStatus(self::ITEM_STATUS_DELETE);
+        $attribute->setExportStatus(Attribute::STATUS_DELETE);
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
     }
@@ -276,7 +278,7 @@ class ConnectExport
 
         $builder = Shopware()->Models()->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
-            ->set('at.exportStatus', $builder->expr()->literal(self::ITEM_STATUS_DELETE))
+            ->set('at.exportStatus', $builder->expr()->literal(Attribute::STATUS_DELETE))
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());
 

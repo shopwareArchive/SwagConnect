@@ -19,8 +19,6 @@
 
             {if $connectShopInfo}
                 <strong class="connect-detail-product-headline">{s namespace="frontend/detail/connect" name=connect_detail_marketplace_article}Marktplatz-Artikel von {$connectShop->name}{/s}</strong>
-            {else}
-                <strong class="connect-detail-product-headline">{s namespace="frontend/detail/connect" name=connect_detail_marketplace_article_implicit}Marktplatz-Artikel von {$connectShop->id}{/s}</strong>
             {/if}
 			{*<p class="connect-detail-product-desc">*}
 				{*{s name=connect/detail/dispatch_info}Die Versandkosten für diesen Artikel werden separat berechnet.{/s}*}

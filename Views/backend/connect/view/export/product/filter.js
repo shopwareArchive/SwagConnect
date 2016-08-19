@@ -97,6 +97,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
                     boxLabel  : '{s name=export/filter/status_delete}Delete{/s}',
                     name      : 'exportStatus',
                     inputValue: 'delete'
+                },  {
+                    boxLabel  : '{s name=export/filter/status_inactive}Inactive{/s}',
+                    name      : 'exportStatus',
+                    inputValue: 'inactive'
                 }
                 ]
             }]

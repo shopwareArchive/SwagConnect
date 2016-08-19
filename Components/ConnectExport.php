@@ -100,6 +100,13 @@ class ConnectExport
             $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
             if ($excludeInactiveProducts && !$model->getArticle()->getActive()) {
                 $connectAttribute->setExportStatus(Attribute::STATUS_INACTIVE);
+                $connectAttribute->setExportMessage(
+                    Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                        'export/message/error_product_is_not_active',
+                        'Produkt ist inaktiv',
+                        true
+                    )
+                );
                 $this->manager->persist($connectAttribute);
                 $this->manager->flush($connectAttribute);
                 continue;

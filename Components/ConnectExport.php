@@ -98,7 +98,7 @@ class ConnectExport
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
             $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
-            if ($excludeInactiveProducts && !$model->getArticle()->getActive()) {
+            if ($excludeInactiveProducts && !$model->getActive()) {
                 $connectAttribute->setExportStatus(Attribute::STATUS_INACTIVE);
                 $connectAttribute->setExportMessage(
                     Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(

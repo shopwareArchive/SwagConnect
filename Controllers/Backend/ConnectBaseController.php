@@ -174,6 +174,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     }
 
     /**
+     * When the backend module is being loaded, update connect products.
+     *
+     * It might be considerable to move this to e.g. the lifecycle events of the products
+     */
+    public function refreshConnectItemsAction()
+    {
+        $this->getHelper()->updateConnectProducts();
+    }
+
+    /**
      * If the price type is purchase or both
      * and shopware is 5.2 or greater
      * insert detailPurchasePrice in connect config table

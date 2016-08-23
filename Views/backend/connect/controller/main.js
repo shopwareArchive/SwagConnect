@@ -452,7 +452,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     redirectWindow.location = response.loginUrl;
                     location.reload();
                 } else {
-                    window.focus();
                     redirectWindow.close();
                 }
             },

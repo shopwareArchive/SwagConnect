@@ -234,8 +234,9 @@ class Config
      * @param array $config
      * @return array
      */
-    private function setConfigDefaults($config)
+    private function setConfigDefaults($configList)
     {
+        $config = $configList[0];
         if (false === array_key_exists('hasSsl', $config)) {
             // Get the first default shop and use it's SSL setting
             $shops = Shopware()->Container()->get('models')->getRepository('Shopware\Models\Shop\Shop')->findAll();
@@ -248,7 +249,7 @@ class Config
             }
         }
 
-        return $config;
+        return [$config];
     }
 
     /**

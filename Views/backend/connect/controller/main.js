@@ -419,10 +419,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     login: function(params, callback) {
-        var me = this,
-            redirectWindow = window.open('about:blank', '_blank');
-
-        redirectWindow.blur();
+        var me = this;
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -449,10 +446,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    redirectWindow.location = response.loginUrl;
+
+                    me.openLink(response.loginUrl);
                     location.reload();
-                } else {
-                    redirectWindow.close();
                 }
             },
             function(response) {
@@ -463,8 +459,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     register: function(params, callback) {
-        var me = this,
-            redirectWindow = window.open('about:blank', '_blank');
+        var me = this;
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -478,6 +473,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                 response.shopwareId = params.shopwareID;
                 me.splashScreen.close();
+                me.openLink('http://google.com');
 
                 if (response.success == true) {
                     Ext.create('Shopware.notification.SubscriptionWarning').checkSecret();
@@ -491,7 +487,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    redirectWindow.location = response.loginUrl;
+                    me.openLink(response.loginUrl);
                     location.reload();
                 }
             },
@@ -500,6 +496,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 me.displayErrorMessage(response, callback);
             }
         );
+    },
+
+    openLink: function(href) {
+        var linkEl = document.createElement('a');
+        linkEl.href = href;
+        linkEl.target = '_blank';
+        linkEl.click();
     },
 
     displayErrorMessage: function(response, callback) {

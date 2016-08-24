@@ -34,9 +34,15 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
 
     loadStore: function() {
         var me = this;
-        me.getStore().load({
-            callback: function(records, options, success) {
-                me.fireEvent('getExportStatus');
+        Ext.Ajax.request({
+            url: '{url action=refreshConnectItems}',
+            method: 'POST',
+            success: function (response, opts) {
+                me.getStore().load({
+                    callback: function(records, options, success) {
+                        me.fireEvent('getExportStatus');
+                    }
+                });
             }
         });
     },

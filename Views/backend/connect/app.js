@@ -61,7 +61,6 @@ Ext.define('Shopware.apps.Connect', {
      */
     launch: function(param) {
         var me = this;
-        console.log(param);
         me.controller = me.getController('Main');
         return me.controller.mainWindow;
     }

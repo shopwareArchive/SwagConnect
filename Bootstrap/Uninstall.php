@@ -26,6 +26,7 @@ class Uninstall
 
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
+        $this->setMenuItem();
 
         return true;
     }

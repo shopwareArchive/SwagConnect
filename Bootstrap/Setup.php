@@ -66,11 +66,20 @@ class Setup
             $models = Shopware()->Models();
             $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
 
-            //move help menu item after Connect
-            $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
-            $helpItem->setPosition(1);
-            Shopware()->Models()->persist($helpItem);
-            Shopware()->Models()->flush();
+            if ($this->bootstrap->assertMinimumVersion('5.2.6')) {
+                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+                if (null !== $connectInstallItem) {
+                    $connectInstallItem->setActive(0);
+                    Shopware()->Models()->persist($connectInstallItem);
+                    Shopware()->Models()->flush();
+                }
+            } else {
+                //move help menu item after Connect
+                $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
+                $helpItem->setPosition(1);
+                Shopware()->Models()->persist($helpItem);
+                Shopware()->Models()->flush();
+            }
 
             $parent = $this->bootstrap->createMenuItem(array(
                 'label' => 'Connect',

@@ -113,4 +113,27 @@ class Uninstall
             Shopware()->Models()->flush();
         }
     }
+
+    /**
+     * Re-Activate the connect install menu item, if version is >= 5.2.6
+     */
+    public function setMenuItem()
+    {
+        if ($this->bootstrap->assertMinimumVersion('5.2.6')) {
+            $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+            if (null !== $connectInstallItem) {
+                $connectInstallItem->setActive(1);
+                Shopware()->Models()->persist($connectInstallItem);
+                Shopware()->Models()->flush();
+            } else {
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Einstieg',
+                    'controller' => 'PluginManager',
+                    'class' => 'sprite-inbox-image contents--media-manager',
+                    'action' => 'ShopwareConnect',
+                    'active' => 1,
+                ));
+            }
+        }
+    }
 }

@@ -120,6 +120,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
+        me.initializeParams();
+
         switch (me.subApplication.action){
             case 'Export':
                 me.mainWindow = me.getView('export.Window').create({
@@ -381,6 +383,17 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         Shopware.app.Application.on(me.getEventListeners());
 
         me.callParent(arguments);
+    },
+
+    initializeParams: function() {
+        if (!marketplaceName) {
+            window.marketplaceName = '{$marketplaceName}';
+            window.marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
+            window.marketplaceLogo = '{$marketplaceLogo}';
+            window.defaultMarketplace = '{$defaultMarketplace}';
+            window.isFixedPriceAllowed = '{$isFixedPriceAllowed}';
+            window.purchasePriceInDetail = '{$purchasePriceInDetail}';
+        }
     },
 
     getEventListeners: function() {

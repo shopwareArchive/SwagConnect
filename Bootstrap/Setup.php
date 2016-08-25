@@ -15,10 +15,12 @@ use Shopware\Models\Customer\Group;
 class Setup
 {
     protected $bootstrap;
+    protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
     {
         $this->bootstrap = $bootstrap;
+        $this->shopware526installed = $shopware526installed;
     }
 
     public function run($fullSetup)
@@ -66,7 +68,7 @@ class Setup
             $models = Shopware()->Models();
             $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
 
-            if ($this->bootstrap->assertMinimumVersion('5.2.6')) {
+            if ($this->shopware526installed) {
                 $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
                 if (null !== $connectInstallItem) {
                     $connectInstallItem->setActive(0);
@@ -81,12 +83,15 @@ class Setup
                 Shopware()->Models()->flush();
             }
 
-            $parent = $this->bootstrap->createMenuItem(array(
-                'label' => 'Connect',
-                'controller' => 'Connect',
-                'class' => 'connect-icon',
-                'active' => 1,
-            ));
+            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect', 'class' => 'shopware-connect'));
+            if (null === $parent) {
+                $parent = $this->bootstrap->createMenuItem(array(
+                    'label' => 'Connect',
+                    'controller' => 'Connect',
+                    'class' => 'connect-icon',
+                    'active' => 1,
+                ));
+            }
 
             if ($configComponent->getConfig('apiKey', '') == '') {
                 $this->bootstrap->createMenuItem(array(

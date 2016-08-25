@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Connect', {
      * This method will be called when all dependencies are solved and
      * all member controllers, models, views and stores are initialized.
      */
-    launch: function(param) {
+    launch: function() {
         var me = this;
         me.controller = me.getController('Main');
         return me.controller.mainWindow;

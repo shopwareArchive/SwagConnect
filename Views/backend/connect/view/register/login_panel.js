@@ -176,7 +176,7 @@ Ext.define('Shopware.apps.Connect.view.register.loginPanel', {
         loginData.shopwareId = loginData.shopwareID;
 
         Shopware.app.Application.fireEvent(
-            'store-login',
+            'connect-login',
             loginData
         );
     }

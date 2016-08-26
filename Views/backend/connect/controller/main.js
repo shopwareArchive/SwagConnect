@@ -415,8 +415,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this;
 
         return {
-            'store-login': me.login,
-            'store-register': me.register,
+            'connect-login': me.login,
+            'connect-register': me.register,
             scope: me
         };
     },

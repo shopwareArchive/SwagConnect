@@ -35,9 +35,7 @@ class Setup
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
 
-
         $this->createConnectCustomerGroup();
-
 
         if ($fullSetup) {
             $this->createMyMenu();
@@ -64,7 +62,7 @@ class Setup
     {
         $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
         // check if shopware Connect menu item exists
-        if (!$connectItem) {
+        if (!$connectItem || $this->shopware526installed) {
             $models = Shopware()->Models();
             $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
 
@@ -98,7 +96,7 @@ class Setup
                     'label' => 'Register',
                     'controller' => 'Connect',
                     'action' => 'Register',
-                    'class' => 'contents--media-manager',
+                    'class' => 'sprite-mousepointer-click',
                     'active' => 1,
                     'parent' => $parent
                 ));
@@ -154,7 +152,7 @@ class Setup
             ('backend/index/view/main', 1, 2, 'Connect/Export', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Settings', 'Einstellungen', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Settings', 'Settings', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einrichtung', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Import', 'Produkte von Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),

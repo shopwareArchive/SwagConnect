@@ -1,4 +1,14 @@
 //{block name="backend/connect/application"}
+
+if (typeof marketplaceName == 'undefined') {
+    window.marketplaceName = '';
+    window.marketplaceNetworkUrl = '';
+    window.marketplaceLogo = '';
+    window.defaultMarketplace = '';
+    window.isFixedPriceAllowed = '';
+    window.purchasePriceInDetail = '';
+}
+
 Ext.define('Shopware.apps.Connect', {
     extend: 'Enlight.app.SubApplication',
 

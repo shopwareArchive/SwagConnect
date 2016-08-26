@@ -38,6 +38,8 @@ use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Doctrine\ORM\NoResultException;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Subscribers\Connect;
+use Shopware\Connect\SDK;
 
 /**
  * Class ConnectBaseController
@@ -486,6 +488,37 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         Shopware()->Models()->flush();
+    }
+
+    public function initParamsAction()
+    {
+        $marketplaceIcon = $this->getConfigComponent()->getConfig('marketplaceIcon', Connect::MARKETPLACE_ICON);
+        $marketplaceName = $this->getConfigComponent()->getConfig('marketplaceName', Connect::MARKETPLACE_NAME);
+        $marketplaceNetworkUrl = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl', Connect::MARKETPLACE_SOCIAL_NETWORK_URL);
+        $defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
+        $isFixedPriceAllowed = 0;
+        $priceType = Shopware()->Bootstrap()->getResource('ConnectSDK')->getPriceType();
+        if ($priceType === SDK::PRICE_TYPE_BOTH ||
+            $priceType === SDK::PRICE_TYPE_RETAIL) {
+            $isFixedPriceAllowed = 1;
+        }
+        $marketplaceIncomingIcon = ($marketplaceName == Connect::MARKETPLACE_NAME ? Connect::MARKETPLACE_GREEN_ICON : $marketplaceIcon);
+        $marketplaceLogo = $this->getConfigComponent()->getConfig('marketplaceLogo', Connect::MARKETPLACE_LOGO);
+        $purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
+
+        $this->View()->assign(array(
+            'success' => true,
+            'data' => [
+                'marketplaceName' => $marketplaceName,
+                'marketplaceNetworkUrl' => $marketplaceNetworkUrl,
+                'marketplaceIcon' => $marketplaceIcon,
+                'defaultMarketplace' => $defaultMarketplace,
+                'isFixedPriceAllowed' => $isFixedPriceAllowed,
+                'marketplaceIncomingIcon' => $marketplaceIncomingIcon,
+                'marketplaceLogo' => $marketplaceLogo,
+                'purchasePriceInDetail' => $purchasePriceInDetail,
+            ]
+        ));
     }
 
     /**

@@ -120,8 +120,33 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
-        me.initializeParams();
+        if (!window.marketplaceName) {
+            me.sendAjaxRequest(
+                '{url controller=Connect action=initParams}',
+                {},
+                function(response) {
 
+                    window.marketplaceName = response.data.marketplaceName;
+                    window.marketplaceNetworkUrl = response.data.marketplaceNetworkUrl;
+                    window.marketplaceLogo = response.data.marketplaceLogo;
+                    window.defaultMarketplace = response.data.defaultMarketplace;
+                    window.isFixedPriceAllowed = response.data.isFixedPriceAllowed;
+                    window.purchasePriceInDetail = response.data.purchasePriceInDetail;
+
+                    me.launchAction();
+                    me.setEventListeners();
+                }
+            );
+        } else {
+            me.launchAction();
+            me.setEventListeners();
+        }
+
+        me.callParent(arguments);
+    },
+
+    launchAction: function () {
+        var me = this;
         switch (me.subApplication.action){
             case 'Export':
                 me.mainWindow = me.getView('export.Window').create({
@@ -144,7 +169,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 }).show();
                 break;
         }
+    },
 
+    setEventListeners: function () {
+        var me = this;
         me.control({
             'connect-navigation': {
                 select: me.onSelectNavigationEntry
@@ -155,7 +183,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-config-form': {
                 calculateFinishTime: me.onCalculateFinishTime
             },
-			'connect-config-import-form button[action=save-import-config]': {
+            'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
             },
             'connect-import-unit button[action=save-unit]': {
@@ -184,7 +212,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-config-export-form combobox[name=priceFieldForPurchasePriceExport]': {
                 change: me.onChangePriceFieldForPurchasePrice
             },
-			'connect-mapping button[action=save]': {
+            'connect-mapping button[action=save]': {
                 click: me.onSaveMapping
             },
             'connect-export button[action=add]': {
@@ -220,7 +248,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 change: function(field, value) {
                     var table = me.getExportList(),
                         store = table.getStore();
-                        store.filters.removeAtKey('search');
+                    store.filters.removeAtKey('search');
                     if (value.length > 0 ) {
                         store.filters.add('search', new Ext.util.Filter({
                             property: 'search',
@@ -236,7 +264,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     var table = me.getExportList(),
                         store = table.getStore();
 
-                        store.filters.removeAtKey('supplierId');
+                    store.filters.removeAtKey('supplierId');
                     if (value) {
                         store.filters.add('supplierId', new Ext.util.Filter({
                             property: field.name,
@@ -381,19 +409,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
 
         Shopware.app.Application.on(me.getEventListeners());
-
-        me.callParent(arguments);
-    },
-
-    initializeParams: function() {
-        if (!marketplaceName) {
-            window.marketplaceName = '{$marketplaceName}';
-            window.marketplaceNetworkUrl = '{$marketplaceNetworkUrl}';
-            window.marketplaceLogo = '{$marketplaceLogo}';
-            window.defaultMarketplace = '{$defaultMarketplace}';
-            window.isFixedPriceAllowed = '{$isFixedPriceAllowed}';
-            window.purchasePriceInDetail = '{$purchasePriceInDetail}';
-        }
     },
 
     getEventListeners: function() {

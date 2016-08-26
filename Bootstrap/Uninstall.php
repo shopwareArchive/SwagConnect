@@ -26,9 +26,9 @@ class Uninstall
         // Currently this should not be done
         // $this->removeMyAttributes();
 
+        $this->setMenuItem();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
-        $this->setMenuItem();
 
         return true;
     }

@@ -1,8 +1,8 @@
 //{block name="backend/connect/application"}
 
 if (typeof marketplaceName == 'undefined') {
-    window.marketplaceName = '';
-    window.marketplaceNetworkUrl = '';
+    window.marketplaceName = 'Shopware Connect';
+    window.marketplaceNetworkUrl = 'http://sn.connect.shopware.com';
     window.marketplaceLogo = '';
     window.defaultMarketplace = '';
     window.isFixedPriceAllowed = '';

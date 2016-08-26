@@ -135,14 +135,14 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                     me.launchAction();
                     me.setEventListeners();
-                    me.callParent(arguments);
                 }
             );
         } else {
             me.launchAction();
             me.setEventListeners();
-            me.callParent(arguments);
         }
+
+        me.callParent(arguments);
     },
 
     launchAction: function () {

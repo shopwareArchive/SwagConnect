@@ -473,7 +473,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                 response.shopwareId = params.shopwareID;
                 me.splashScreen.close();
-                me.openLink('http://google.com');
 
                 if (response.success == true) {
                     Ext.create('Shopware.notification.SubscriptionWarning').checkSecret();

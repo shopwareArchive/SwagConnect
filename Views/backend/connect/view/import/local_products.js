@@ -85,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
             }, {
                 header: 'Preis (brutto)',
                 xtype: 'numbercolumn',
-                dataIndex: 'Price_basePrice',
+                dataIndex: 'Detail_purchasePrice',
                 flex: 2
             }, {
                 header: 'Steuersatz',

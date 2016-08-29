@@ -10,6 +10,7 @@ Ext.define('Shopware.apps.Connect.store.import.LocalProducts', {
         { name: 'Article_name',  type: 'string' },
         { name: 'Supplier_name',  type: 'string' },
         { name: 'Article_active',  type: 'boolean' },
+        { name: 'Detail_purchasePrice',  type: 'float' },
         { name: 'Price_basePrice',  type: 'float' },
         { name: 'Tax_name',  type: 'string' },
         { name: 'Attribute_connectMappedCategory',  type: 'int' }

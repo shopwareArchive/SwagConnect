@@ -161,7 +161,7 @@ class Update
 
     private function createExportedFlag()
     {
-        if (version_compare($this->version, '0.0.14', '<=')) {
+        if (version_compare($this->version, '1.0.1', '<=')) {
             Shopware()->Db()->query("
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `exported` TINYINT(1) DEFAULT 0

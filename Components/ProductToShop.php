@@ -774,7 +774,7 @@ class ProductToShop implements ProductToShopBase
         );
 
         $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles SET main_detail_id = ? WHERE articleID = ?',
+            'UPDATE s_articles SET main_detail_id = ? WHERE id = ?',
             array($result['article_detail_id'], $result['article_id'])
         );
     }

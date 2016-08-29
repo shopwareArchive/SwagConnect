@@ -114,6 +114,7 @@ class ConnectExport
 
             if (!$this->helper->isProductExported($connectAttribute)) {
                 $status = Attribute::STATUS_INSERT;
+                $connectAttribute->setExported(true);
             } else {
                 $status = Attribute::STATUS_UPDATE;
             }
@@ -264,6 +265,7 @@ class ConnectExport
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
         $attribute->setExportStatus(Attribute::STATUS_DELETE);
+        $attribute->setExported(false);
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
     }

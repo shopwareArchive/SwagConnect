@@ -100,6 +100,13 @@ class Attribute extends ModelEntity
      */
      protected $exportMessage;
 
+    /**
+     * @var boolean $exportStatus
+     *
+     * @ORM\Column(name="exported", type="boolean", nullable=true)
+     */
+    protected $exported;
+
 
     /**
      * @var string $category
@@ -344,6 +351,22 @@ class Attribute extends ModelEntity
     public function getExportStatus()
     {
         return $this->exportStatus;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isExported()
+    {
+        return $this->exported;
+    }
+
+    /**
+     * @param boolean $exported
+     */
+    public function setExported($exported)
+    {
+        $this->exported = $exported;
     }
 
     /**

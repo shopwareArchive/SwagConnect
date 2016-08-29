@@ -285,6 +285,7 @@ class Setup
              `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
              `export_status` text COLLATE utf8_unicode_ci,
              `export_message` text COLLATE utf8_unicode_ci,
+             `exported` TINYINT(1) DEFAULT 0,
              `category` text COLLATE utf8_unicode_ci,
              `purchase_price` double DEFAULT NULL,
              `fixed_price` int(1) DEFAULT NULL,

@@ -918,9 +918,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             foreach ($model->getDetails() as $detail) {
                 $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
                 $sdk->recordDelete($attribute->getSourceId());
-                $attribute->setExportStatus(
-                    'delete'
-                );
+                $attribute->setExportStatus(Attribute::STATUS_DELETE);
+                $attribute->setExported(false);
             }
         }
         Shopware()->Models()->flush();

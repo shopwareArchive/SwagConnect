@@ -44,6 +44,7 @@ class Update
         $this->changeMenuIcons();
         $this->createSyncRevision();
         $this->createExcludeInactiveFlag();
+        $this->createExportedFlag();
 
         return true;
     }
@@ -159,7 +160,24 @@ class Update
 
     private function createExcludeInactiveFlag()
     {
-        if (version_compare($this->version, '0.0.13', '<=')) {
+        if (version_compare($this->version, '0.0.14', '<=')) {
+            Shopware()->Db()->query("
+                ALTER TABLE `s_plugin_connect_items`
+                ADD COLUMN `exported` TINYINT(1) DEFAULT 0
+            ");
+
+            Shopware()->Db()->query("
+                UPDATE `s_plugin_connect_items`
+                SET `exported` = 1
+                WHERE `export_status` IN ('insert', 'update', 'synced')
+                      AND `shop_id` IS NULL
+            ");
+        }
+    }
+
+    private function createExportedFlag()
+    {
+        if (version_compare($this->version, '0.0.14', '<=')) {
             Shopware()->Db()->query("
                 INSERT INTO `s_plugin_connect_config`
                 (`name`, `value`, `groupName`)

@@ -2,6 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -79,7 +80,8 @@ class ConnectExportTest extends ConnectTestHelper
         Shopware()->Models()->persist($detail);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
-        $connectAttribute->setExportStatus('insert');
+        $connectAttribute->setExportStatus(Attribute::STATUS_INSERT);
+        $connectAttribute->setExported(true);
         Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
         Shopware()->Models()->clear();
@@ -87,11 +89,12 @@ class ConnectExportTest extends ConnectTestHelper
         $errors = $this->connectExport->export(array(3));
 
         $this->assertEmpty($errors);
-        $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE source_id = ?';
+        $sql = 'SELECT export_status, export_message, exported FROM s_plugin_connect_items WHERE source_id = ?';
         $row = Shopware()->Db()->fetchRow($sql, array(3));
 
         $this->assertEquals('update', $row['export_status']);
         $this->assertNull($row['export_message']);
+        $this->assertEquals(1, $row['exported']);
     }
 
     public function testExportErrors()

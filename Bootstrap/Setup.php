@@ -81,6 +81,12 @@ class Setup
                 Shopware()->Models()->flush();
             }
 
+            if ($connectItem) {
+                $connectItem->setActive(1);
+                Shopware()->Models()->persist($connectItem);
+                Shopware()->Models()->flush();
+            }
+
             $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect', 'class' => 'shopware-connect'));
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem(array(

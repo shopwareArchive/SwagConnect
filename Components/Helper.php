@@ -288,6 +288,10 @@ class Helper
     public function isProductExported(Attribute $connectAttribute)
     {
         $status = $connectAttribute->getExportStatus();
+        if ($connectAttribute->isExported()) {
+            return true;
+        }
+
         if ($status == Attribute::STATUS_INSERT) {
             return true;
         }

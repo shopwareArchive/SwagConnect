@@ -199,7 +199,10 @@ class ProductFromShop implements ProductFromShopBase
 
         foreach($order->products as $product) {
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
-            $connectAttribute = $connectAttributeRepository->findOneBy(array('sourceId' => $product->sourceId));
+            $connectAttribute = $connectAttributeRepository->findOneBy(array(
+                'sourceId' => $product->sourceId,
+                'shopId' => null,
+            ));
             if (!$connectAttribute) {
                 $this->logger->write(
                     true,

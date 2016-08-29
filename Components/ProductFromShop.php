@@ -195,20 +195,31 @@ class ProductFromShop implements ProductFromShopBase
             'orderTime' => 'now'
         ));
         $items = array();
+        $connectAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
+
         foreach($order->products as $product) {
+            /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+            $connectAttribute = $connectAttributeRepository->findOneBy(array('sourceId' => $product->sourceId));
+            if (!$connectAttribute) {
+                $this->logger->write(
+                    true,
+                    sprintf('Detail with sourceId: %s does not exist', $product->sourceId),
+                    null
+                );
+                continue;
+            }
+
+            /** @var $detail \Shopware\Models\Article\Detail */
+            $detail = $connectAttribute->getArticleDetail();
             /** @var $productModel \Shopware\Models\Article\Article */
-            $productModel = $this->manager->find(
-                '\Shopware\Models\Article\Article',
-                $product->product->sourceId
-            );
-            $productDetail = $productModel->getMainDetail();
+            $productModel = $detail->getArticle();
             $item = new OrderModel\Detail();
             $item->fromArray(array(
-                'articleId' => $product->product->sourceId,
+                'articleId' => $productModel->getId(),
                 'quantity' => $product->count,
                 'orderId' => $model->getId(),
                 'number' => $model->getNumber(),
-                'articleNumber' => $productDetail->getNumber(),
+                'articleNumber' => $detail->getNumber(),
                 'articleName' => $product->product->title,
                 'price' => $this->calculatePrice($product->product),
                 'taxRate' => $product->product->vat * 100,

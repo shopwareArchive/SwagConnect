@@ -112,7 +112,7 @@ class ConnectExport
                 continue;
             }
 
-            if ($this->helper->isProductExported($connectAttribute)) {
+            if (!$this->helper->isProductExported($connectAttribute)) {
                 $status = Attribute::STATUS_INSERT;
             } else {
                 $status = Attribute::STATUS_UPDATE;

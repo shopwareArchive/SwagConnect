@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
+        productSettingsLegend: '{s name=config/export/product_settings_legend}Product settings{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
         purchasePriceMode: '{s name=config/price/purchasePriceMode}Purchase price{/s}',
@@ -254,7 +254,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
 
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
-            title: me.snippets.productDescriptionLegend,
+            title: me.snippets.productSettingsLegend,
             layout: 'anchor',
             defaults: {
                 anchor: '100%'

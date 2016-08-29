@@ -1,6 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Bootstrap;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
@@ -43,6 +44,8 @@ class Update
         $this->renameMenuOpenConnect();
         $this->changeMenuIcons();
         $this->createSyncRevision();
+        $this->createExcludeInactiveFlag();
+        $this->createExportedFlag();
 
         return true;
     }
@@ -152,6 +155,35 @@ class Update
             Shopware()->Db()->query("
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `revision` decimal(20,10) DEFAULT NULL
+            ");
+        }
+    }
+
+    private function createExportedFlag()
+    {
+        if (version_compare($this->version, '1.0.1', '<=')) {
+            Shopware()->Db()->query("
+                ALTER TABLE `s_plugin_connect_items`
+                ADD COLUMN `exported` TINYINT(1) DEFAULT 0
+            ");
+
+            Shopware()->Db()->query("
+                UPDATE `s_plugin_connect_items`
+                SET `exported` = 1
+                WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL",
+                array(Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED)
+            );
+        }
+    }
+
+
+    private function createExcludeInactiveFlag()
+    {
+        if (version_compare($this->version, '0.0.14', '<=')) {
+            Shopware()->Db()->query("
+                INSERT INTO `s_plugin_connect_config`
+                (`name`, `value`, `groupName`)
+                VALUES  ('excludeInactiveProducts', 1, 'export')
             ");
         }
     }

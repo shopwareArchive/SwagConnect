@@ -28,6 +28,7 @@ use Shopware\Connect\Struct\Product,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Detail as ProductDetail;
 use Shopware\Models\Article\Unit;
 use Shopware\Models\Attribute\Media as MediaAttribute;
@@ -276,6 +277,34 @@ class Helper
         } elseif ($model instanceof ProductDetail) {
             return $repository->findOneBy(array('articleDetailId' => $model->getId()));
         }
+    }
+
+    /**
+     * Returns true when product is exported to Connect
+     *
+     * @param Attribute $connectAttribute
+     * @return bool
+     */
+    public function isProductExported(Attribute $connectAttribute)
+    {
+        $status = $connectAttribute->getExportStatus();
+        if ($connectAttribute->isExported()) {
+            return true;
+        }
+
+        if ($status == Attribute::STATUS_INSERT) {
+            return true;
+        }
+
+        if ($status == Attribute::STATUS_UPDATE) {
+            return true;
+        }
+
+        if ($status == Attribute::STATUS_SYNCED) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

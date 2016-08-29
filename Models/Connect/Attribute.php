@@ -42,6 +42,7 @@ class Attribute extends ModelEntity
     const STATUS_ERROR = 'error';
     const STATUS_ERROR_PRICE = 'error-price';
     const STATUS_DELETE = 'delete';
+    const STATUS_INACTIVE = 'inactive';
 
     /**
      * @var integer $id
@@ -98,6 +99,13 @@ class Attribute extends ModelEntity
      * @ORM\Column(name="export_message", type="text", nullable=true)
      */
      protected $exportMessage;
+
+    /**
+     * @var boolean $exportStatus
+     *
+     * @ORM\Column(name="exported", type="boolean", nullable=true)
+     */
+    protected $exported;
 
 
     /**
@@ -343,6 +351,22 @@ class Attribute extends ModelEntity
     public function getExportStatus()
     {
         return $this->exportStatus;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isExported()
+    {
+        return $this->exported;
+    }
+
+    /**
+     * @param boolean $exported
+     */
+    public function setExported($exported)
+    {
+        $this->exported = $exported;
     }
 
     /**

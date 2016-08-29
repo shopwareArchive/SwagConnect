@@ -52,7 +52,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     snippets: {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
+        productSettingsLegend: '{s name=config/export/product_settings_legend}Product settings{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionFieldHelp: Ext.String.format('{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu [0] exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',marketplaceName),
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
@@ -72,6 +72,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         yes: '{s name=connect/yes}Ja{/s}',
         no: '{s name=connect/no}Nein{/s}',
         edit: '{s name=connect/edit}Edit{/s}',
+        excludeInactiveProducts: '{s name=config/export/exclude_inactive_products}Exclude inactive products from export{/s}',
         purchasePriceHint: '{s name=export/price/purchase_price_hint}You have the option to export your purchase prices to connect and edit it there. They are only visible for you.{/s}'
     },
 
@@ -412,61 +413,84 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
 
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
-            title: me.snippets.productDescriptionLegend,
+            title: me.snippets.productSettingsLegend,
             defaultType: 'textfield',
-            layout: 'anchor',
+            layout: 'column',
             items: [
-                {
-                    xtype: 'combobox',
-                    fieldLabel: me.snippets.productDescriptionFieldLabel,
-                    emptyText: me.snippets.emptyText,
-                    helpText: me.snippets.productDescriptionFieldHelp,
-                    name: 'alternateDescriptionField',
-                    store: new Ext.data.SimpleStore({
-                        fields: [ 'value', 'text' ],
-                        data: [
-                            ['attribute.connectProductDescription', 'attribute.connectProductDescription'],
-                            ['a.description', 'Artikel-Kurzbeschreibung'],
-                            ['a.descriptionLong', 'Artikel-Langbeschreibung']
-                        ]
-                    }),
-                    queryMode: 'local',
-                    displayField: 'text',
-                    valueField: 'value',
-                    editable: false,
-                    labelWidth: me.defaults.labelWidth
-                }, {
-                    xtype: 'fieldcontainer',
-                    fieldLabel: me.snippets.autoProductSync,
-                    defaultType: 'combo',
-                    labelWidth: me.defaults.labelWidth,
+                Ext.create('Ext.container.Container', {
+                    columnWidth: 0.5,
+                    padding: '0 20 0 0',
+                    layout: 'anchor',
+                    border: false,
                     items: [
                         {
-                            xtype:'combo',
-                            name:'autoUpdateProducts',
-                            queryMode:'local',
-                            store: Ext.create('Ext.data.Store', {
-                                fields: ['value', 'display'],
+                            xtype: 'combobox',
+                            fieldLabel: me.snippets.productDescriptionFieldLabel,
+                            emptyText: me.snippets.emptyText,
+                            helpText: me.snippets.productDescriptionFieldHelp,
+                            name: 'alternateDescriptionField',
+                            store: new Ext.data.SimpleStore({
+                                fields: [ 'value', 'text' ],
                                 data: [
-                                    {
-                                        "display": me.snippets.yes,
-                                        "value": 1
-                                    },
-                                    {
-                                        "display": "Cronjob",
-                                        "value": 2
-                                    },
-                                    {
-                                        "display": me.snippets.no,
-                                        "value": 0
-                                    }
+                                    ['attribute.connectProductDescription', 'attribute.connectProductDescription'],
+                                    ['a.description', 'Artikel-Kurzbeschreibung'],
+                                    ['a.descriptionLong', 'Artikel-Langbeschreibung']
                                 ]
                             }),
-                            displayField:'display',
-                            valueField: 'value'
+                            queryMode: 'local',
+                            displayField: 'text',
+                            valueField: 'value',
+                            editable: false,
+                            labelWidth: me.defaults.labelWidth
+                        }, {
+                            xtype: 'fieldcontainer',
+                            fieldLabel: me.snippets.autoProductSync,
+                            defaultType: 'combo',
+                            labelWidth: me.defaults.labelWidth,
+                            items: [
+                                {
+                                    xtype:'combo',
+                                    name:'autoUpdateProducts',
+                                    queryMode:'local',
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['value', 'display'],
+                                        data: [
+                                            {
+                                                "display": me.snippets.yes,
+                                                "value": 1
+                                            },
+                                            {
+                                                "display": "Cronjob",
+                                                "value": 2
+                                            },
+                                            {
+                                                "display": me.snippets.no,
+                                                "value": 0
+                                            }
+                                        ]
+                                    }),
+                                    displayField:'display',
+                                    valueField: 'value'
+                                }
+                            ]
                         }
                     ]
-                }
+                }),
+                Ext.create('Ext.container.Container', {
+                    columnWidth: 0.5,
+                    layout: 'anchor',
+                    border: false,
+                    items: [
+                        {
+                            xtype: 'checkbox',
+                            fieldLabel: me.snippets.excludeInactiveProducts,
+                            name: 'excludeInactiveProducts',
+                            inputValue: 1,
+                            uncheckedValue: 0,
+                            labelWidth: me.defaults.labelWidth
+                        }
+                    ]
+                })
             ]
         });
     }

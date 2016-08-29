@@ -97,13 +97,24 @@ class ConnectExport
             }
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
+            $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
+            if ($excludeInactiveProducts && !$model->getActive()) {
+                $connectAttribute->setExportStatus(Attribute::STATUS_INACTIVE);
+                $connectAttribute->setExportMessage(
+                    Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                        'export/message/error_product_is_not_active',
+                        'Produkt ist inaktiv',
+                        true
+                    )
+                );
+                $this->manager->persist($connectAttribute);
+                $this->manager->flush($connectAttribute);
+                continue;
+            }
 
-            $prefix = $item['title'] ? $item['title'] . ' ('. $item['number'] .'): ' : '';
-            if (empty($item['exportStatus'])
-                || $item['exportStatus'] == Attribute::STATUS_DELETE
-                || $item['exportStatus'] == Attribute::STATUS_ERROR
-            ) {
+            if (!$this->helper->isProductExported($connectAttribute)) {
                 $status = Attribute::STATUS_INSERT;
+                $connectAttribute->setExported(true);
             } else {
                 $status = Attribute::STATUS_UPDATE;
             }
@@ -254,6 +265,7 @@ class ConnectExport
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         $this->sdk->recordDelete($attribute->getSourceId());
         $attribute->setExportStatus(Attribute::STATUS_DELETE);
+        $attribute->setExported(false);
         $this->manager->persist($attribute);
         $this->manager->flush($attribute);
     }

@@ -148,7 +148,7 @@ class Article extends BaseSubscriber
             return;
         }
         // Check if entity is a connect product
-        if (!$attribute->getExportStatus() || $attribute->getExportStatus() == Attribute::STATUS_DELETE) {
+        if (!$this->getHelper()->isProductExported($attribute)) {
             return;
         }
 

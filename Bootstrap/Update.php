@@ -1,6 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Bootstrap;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
@@ -158,7 +159,7 @@ class Update
         }
     }
 
-    private function createExcludeInactiveFlag()
+    private function createExportedFlag()
     {
         if (version_compare($this->version, '0.0.14', '<=')) {
             Shopware()->Db()->query("
@@ -169,13 +170,14 @@ class Update
             Shopware()->Db()->query("
                 UPDATE `s_plugin_connect_items`
                 SET `exported` = 1
-                WHERE `export_status` IN ('insert', 'update', 'synced')
-                      AND `shop_id` IS NULL
-            ");
+                WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL",
+                array(Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED)
+            );
         }
     }
 
-    private function createExportedFlag()
+
+    private function createExcludeInactiveFlag()
     {
         if (version_compare($this->version, '0.0.14', '<=')) {
             Shopware()->Db()->query("

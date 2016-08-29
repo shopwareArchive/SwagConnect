@@ -87,7 +87,7 @@ class Setup
                 Shopware()->Models()->flush();
             }
 
-            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect', 'class' => 'shopware-connect'));
+            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem(array(
                     'label' => 'Connect',

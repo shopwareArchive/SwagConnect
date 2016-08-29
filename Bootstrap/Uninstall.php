@@ -13,10 +13,12 @@ namespace ShopwarePlugins\Connect\Bootstrap;
 class Uninstall
 {
     protected $bootstrap;
+    protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
     {
         $this->bootstrap = $bootstrap;
+        $this->shopware526installed = $shopware526installed;
     }
 
     public function run()
@@ -24,6 +26,7 @@ class Uninstall
         // Currently this should not be done
         // $this->removeMyAttributes();
 
+        $this->setMenuItem();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
 
@@ -111,6 +114,29 @@ class Uninstall
         if ($element) {
             Shopware()->Models()->remove($element);
             Shopware()->Models()->flush();
+        }
+    }
+
+    /**
+     * Re-Activate the connect install menu item, if version is >= 5.2.6
+     */
+    public function setMenuItem()
+    {
+        if ($this->shopware526installed) {
+            $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+            if (null !== $connectInstallItem) {
+                $connectInstallItem->setActive(1);
+                Shopware()->Models()->persist($connectInstallItem);
+                Shopware()->Models()->flush();
+            } else {
+                $this->bootstrap->createMenuItem(array(
+                    'label' => 'Einstieg',
+                    'controller' => 'PluginManager',
+                    'class' => 'sprite-inbox-image contents--media-manager',
+                    'action' => 'ShopwareConnect',
+                    'active' => 1,
+                ));
+            }
         }
     }
 }

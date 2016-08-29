@@ -218,7 +218,7 @@ Ext.define('Shopware.apps.Connect.view.register.registerPanel', {
         formValues.registerDomain = formValues.registerDomain === "on";
 
         Shopware.app.Application.fireEvent(
-            'store-register',
+            'connect-register',
             formValues,
             function () {
                 if (me.callback && typeof me.callback === 'function') {

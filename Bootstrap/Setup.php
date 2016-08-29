@@ -15,10 +15,12 @@ use Shopware\Models\Customer\Group;
 class Setup
 {
     protected $bootstrap;
+    protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap)
+    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
     {
         $this->bootstrap = $bootstrap;
+        $this->shopware526installed = $shopware526installed;
     }
 
     public function run($fullSetup)
@@ -33,9 +35,7 @@ class Setup
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
 
-
         $this->createConnectCustomerGroup();
-
 
         if ($fullSetup) {
             $this->createMyMenu();
@@ -62,29 +62,47 @@ class Setup
     {
         $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
         // check if shopware Connect menu item exists
-        if (!$connectItem) {
+        if (!$connectItem || $this->shopware526installed) {
             $models = Shopware()->Models();
             $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
 
-            //move help menu item after Connect
-            $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
-            $helpItem->setPosition(1);
-            Shopware()->Models()->persist($helpItem);
-            Shopware()->Models()->flush();
+            if ($this->shopware526installed) {
+                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+                if (null !== $connectInstallItem) {
+                    $connectInstallItem->setActive(0);
+                    Shopware()->Models()->persist($connectInstallItem);
+                    Shopware()->Models()->flush();
+                }
+            } else {
+                //move help menu item after Connect
+                $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
+                $helpItem->setPosition(1);
+                Shopware()->Models()->persist($helpItem);
+                Shopware()->Models()->flush();
+            }
 
-            $parent = $this->bootstrap->createMenuItem(array(
-                'label' => 'Connect',
-                'controller' => 'Connect',
-                'class' => 'connect-icon',
-                'active' => 1,
-            ));
+            if ($connectItem) {
+                $connectItem->setActive(1);
+                Shopware()->Models()->persist($connectItem);
+                Shopware()->Models()->flush();
+            }
+
+            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect', 'class' => 'shopware-connect'));
+            if (null === $parent) {
+                $parent = $this->bootstrap->createMenuItem(array(
+                    'label' => 'Connect',
+                    'controller' => 'Connect',
+                    'class' => 'connect-icon',
+                    'active' => 1,
+                ));
+            }
 
             if ($configComponent->getConfig('apiKey', '') == '') {
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'Register',
                     'controller' => 'Connect',
                     'action' => 'Register',
-                    'class' => 'contents--media-manager',
+                    'class' => 'sprite-mousepointer-click',
                     'active' => 1,
                     'parent' => $parent
                 ));
@@ -140,7 +158,7 @@ class Setup
             ('backend/index/view/main', 1, 2, 'Connect/Export', 'Export', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Settings', 'Einstellungen', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Settings', 'Settings', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
-            ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einstieg', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
+            ('backend/index/view/main', 1, 1, 'Connect/Register', 'Einrichtung', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Register', 'Register', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Import', 'Produkte von Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect/Import', 'Import', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),

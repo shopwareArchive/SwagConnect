@@ -136,7 +136,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
         $this->registerMyLibrary();
 
-        $setup = new Setup($this);
+        $setup = new Setup($this, $this->assertMinimumVersion('5.2.6'));
         $setup->run($fullSetup);
     }
 
@@ -161,7 +161,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->registerMyLibrary();
 
-        $uninstall = new Uninstall($this);
+        $uninstall = new Uninstall($this, $this->assertMinimumVersion('5.2.6'));
         return $uninstall->run();
     }
 

@@ -483,7 +483,7 @@ class Helper
         // main variants should be collected first, because they
         // should be exported first. Connect uses first variant product with an unknown groupId as main one.
         $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT spci.source_id, sad.id FROM s_plugin_connect_items spci
+            'SELECT spci.source_id FROM s_plugin_connect_items spci
               RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
                WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind = 1 AND spci.shop_id IS NULL'
         );
@@ -493,7 +493,7 @@ class Helper
         }, $rows);
 
         $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT spci.source_id, sad.id FROM s_plugin_connect_items spci
+            'SELECT spci.source_id FROM s_plugin_connect_items spci
               RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
                WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind != 1 AND spci.shop_id IS NULL'
         );

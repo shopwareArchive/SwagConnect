@@ -503,33 +503,35 @@ class Helper
      */
     public function getArticleSourceIds(array $articleIds)
     {
-        $articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
-        $sourceIds = array();
+        $quotedArticleIds = array();
         foreach ($articleIds as $articleId) {
-
-            /** @var \Shopware\Models\Article\Article $article */
-            $article = $articleRepository->find($articleId);
-            if (!$article) {
-                continue;
-            }
-
-            $details = $article->getDetails();
-            if (count($details) == 0) {
-                continue;
-            }
-
-            /** @var \Shopware\Models\Article\Detail $detail */
-            foreach ($details as $detail) {
-                $connectAttribute = $this->getConnectAttributeByModel($detail);
-                if (!$connectAttribute) {
-                    continue;
-                }
-
-                $sourceIds[] = $connectAttribute->getSourceId();
-            }
+            $articleId = (int) $articleId;
+            $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
         }
 
-        return $sourceIds;
+        // main variants should be collected first, because they
+        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT spci.source_id FROM s_plugin_connect_items spci
+              RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
+               WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind = 1 AND spci.shop_id IS NULL'
+        );
+
+        $mainVariants = array_map(function($row) {
+            return $row['source_id'];
+        }, $rows);
+
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT spci.source_id FROM s_plugin_connect_items spci
+              RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
+               WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind != 1 AND spci.shop_id IS NULL'
+        );
+
+        $regularVariants = array_map(function($row) {
+            return $row['source_id'];
+        }, $rows);
+
+        return array_merge($mainVariants, $regularVariants);
     }
 
     /**
@@ -713,12 +715,24 @@ class Helper
             $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
         }
 
+        // main variants should be collected first, because they
+        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
         $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ')'
+            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind = 1'
         );
 
-        return array_map(function($row) {
+        $mainVariants = array_map(function($row) {
             return $row['id'];
         }, $rows);
+
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind != 1'
+        );
+
+        $regularVariants = array_map(function($row) {
+            return $row['id'];
+        }, $rows);
+
+        return array_merge($mainVariants, $regularVariants);
     }
 }

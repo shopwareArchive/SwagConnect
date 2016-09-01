@@ -50,34 +50,6 @@ abstract class BaseProductQuery
     }
 
     /**
-     * @param $id
-     * @return string[]
-     */
-    protected function getImagesById($id)
-    {
-        $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('i.path', 'i.extension', 'i.main', 'i.position'))
-            ->from('Shopware\Models\Article\Image', 'i')
-            ->where('i.articleId = :articleId')
-            ->andWhere('i.parentId IS NULL')
-            ->setParameter('articleId', $id)
-            ->orderBy('i.main', 'ASC')
-            ->addOrderBy('i.position', 'ASC');
-
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-
-        $images = $query->getArrayResult();
-
-        $images = array_map(function($image) {
-            return $this->getImagePath($image['path'] . '.' . $image['extension']);
-        }, $images);
-
-
-        return $images;
-    }
-
-    /**
      * Returns URL for the shopware image directory
      *
      * @param string $image

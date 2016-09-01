@@ -2,14 +2,14 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
-use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
+use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
@@ -18,6 +18,12 @@ class LocalProductQueryTest extends ConnectTestHelper
     protected $productTranslator;
 
     protected $mediaService;
+
+    protected $storeMediaService;
+
+    protected $contextService;
+
+    protected $productContext;
 
     public function setUp()
     {
@@ -54,6 +60,21 @@ class LocalProductQueryTest extends ConnectTestHelper
                     )
                 ),
             ));
+
+        $this->storeMediaService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\MediaService')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->contextService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\ContextService')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->productContext = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Struct\\ProductContext')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->contextService->expects($this->any())
+            ->method('createProductContext')
+            ->willReturn($this->productContext);
     }
 
     public function getLocalProductQuery()
@@ -69,6 +90,8 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $configComponent,
                 new MarketplaceGateway(Shopware()->Models()),
                 $this->productTranslator,
+                $this->contextService,
+                $this->storeMediaService,
                 $this->mediaService
             );
         }
@@ -105,6 +128,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     public function testGetConnectProduct()
     {
         $row = array (
+            'sku' => 'SW10005',
             'sourceId' => '22',
             'ean' => NULL,
             'title' => 'Glas -Teetasse 0,25l',
@@ -125,6 +149,13 @@ class LocalProductQueryTest extends ConnectTestHelper
             'deliveryWorkDays' => '',
             'shipping' => NULL,
         );
+
+        $productMedia = new Media();
+        $productMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_cover.jpg');
+        $this->storeMediaService->expects($this->once())
+            ->method('getProductMedia')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(array($productMedia));
 
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
@@ -151,6 +182,12 @@ class LocalProductQueryTest extends ConnectTestHelper
                 )
             ),
         );
+        $expectedProduct->images = array(
+            'http://myshop/media/image/2e/4f/tea_pavilion_cover.jpg'
+        );
+
+        $row['localId'] = 22;
+        $row['detailId'] = 28;
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];

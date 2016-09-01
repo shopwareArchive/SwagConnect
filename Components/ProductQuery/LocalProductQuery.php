@@ -3,15 +3,16 @@
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Doctrine\ORM\QueryBuilder;
+use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
+use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
+use Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService;
+use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
-use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
-use Shopware\Connect\Struct\Translation;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -36,6 +37,10 @@ class LocalProductQuery extends BaseProductQuery
      */
     protected $productTranslator;
 
+    protected $contextService;
+
+    protected $storeMediaService;
+
     public function __construct(
         ModelManager $manager,
         $productDescriptionField,
@@ -43,6 +48,8 @@ class LocalProductQuery extends BaseProductQuery
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
         ProductTranslatorInterface $productTranslator,
+        ContextServiceInterface $contextService,
+        MediaService $storeFrontMediaService,
         $mediaService = null
     )
     {
@@ -53,6 +60,8 @@ class LocalProductQuery extends BaseProductQuery
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
+        $this->contextService = $contextService;
+        $this->storeMediaService = $storeFrontMediaService;
     }
 
     /**
@@ -162,7 +171,21 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 
-        $row['images'] = $this->getImagesById($row['localId']);
+        $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
+        $context = $this->contextService->createProductContext(
+            1, //shopware shop id, default shop
+            null,
+            ContextService::FALLBACK_CUSTOMER_GROUP
+        );
+        $row['images'] = array();
+        $mediaFiles = $this->storeMediaService->getProductMedia($product, $context);
+        foreach ($mediaFiles as $media) {
+            $row['images'][] = $media->getFile();
+        }
+
+        if (empty($row['images']) && $cover = $this->storeMediaService->getCover($product, $context)) {
+            $row['images'][] = $cover->getFile();
+        }
 
         //todo@sb: find better way to collect configuration option translations
         $row = $this->applyConfiguratorOptions($row);

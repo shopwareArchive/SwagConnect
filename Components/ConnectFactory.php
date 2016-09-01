@@ -343,6 +343,8 @@ class ConnectFactory
                 $this->getModelManager(),
                 $this->getProductBaseUrl()
             ),
+            $this->getContainer()->get('shopware_storefront.context_service'),
+            $this->getContainer()->get('shopware_storefront.media_service'),
             $this->getMediaService()
         );
     }

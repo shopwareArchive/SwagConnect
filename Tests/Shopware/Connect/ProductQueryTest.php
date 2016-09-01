@@ -18,6 +18,10 @@ class ProductQueryTest extends ConnectTestHelper
 
     protected $productTranslator;
 
+    protected $storeMediaService;
+
+    protected $contextService;
+
     public function setUp()
     {
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
@@ -56,6 +60,21 @@ class ProductQueryTest extends ConnectTestHelper
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
+            $this->storeMediaService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\MediaService')
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $this->contextService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\ContextService')
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $productContext = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Struct\\ProductContext')
+                ->disableOriginalConstructor()
+                ->getMock();
+            $this->contextService->expects($this->any())
+                ->method('createProductContext')
+                ->willReturn($productContext);
+
             $this->productQuery = new ProductQuery(
                 new LocalProductQuery(
                     Shopware()->Models(),
@@ -63,7 +82,9 @@ class ProductQueryTest extends ConnectTestHelper
                     $this->getProductBaseUrl(),
                     $configComponent,
                     new MarketplaceGateway(Shopware()->Models()),
-                    $this->productTranslator
+                    $this->productTranslator,
+                    $this->contextService,
+                    $this->storeMediaService
                 ),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );

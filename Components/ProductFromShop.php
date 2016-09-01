@@ -197,7 +197,9 @@ class ProductFromShop implements ProductFromShopBase
         $items = array();
         $connectAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
 
-        foreach($order->products as $product) {
+        /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
+        foreach($order->products as $orderItem) {
+            $product = $orderItem->product;
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
             $connectAttribute = $connectAttributeRepository->findOneBy(array(
                 'sourceId' => $product->sourceId,
@@ -219,13 +221,13 @@ class ProductFromShop implements ProductFromShopBase
             $item = new OrderModel\Detail();
             $item->fromArray(array(
                 'articleId' => $productModel->getId(),
-                'quantity' => $product->count,
+                'quantity' => $orderItem->count,
                 'orderId' => $model->getId(),
                 'number' => $model->getNumber(),
                 'articleNumber' => $detail->getNumber(),
-                'articleName' => $product->product->title,
-                'price' => $this->calculatePrice($product->product),
-                'taxRate' => $product->product->vat * 100,
+                'articleName' => $product->title,
+                'price' => $this->calculatePrice($product),
+                'taxRate' => $product->vat * 100,
                 'status' => $detailStatus,
                 'attribute' => new OrderDetailAttributeModel()
             ));

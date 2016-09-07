@@ -756,7 +756,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         if (!operation.success) {
                             me.createGrowlMessage(title, operation.message, true);
                         } else {
-                            console.log(operation.sourceIds);
                             Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
                                 sourceIds: operation.sourceIds
                             }).show();

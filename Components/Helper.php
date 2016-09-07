@@ -714,37 +714,4 @@ class Helper
 
         return true;
     }
-
-    /**
-     * @param array $articleIds
-     * @return array
-     */
-    public function getArticleDetailIds(array $articleIds)
-    {
-        $quotedArticleIds = array();
-        foreach ($articleIds as $articleId) {
-            $articleId = (int) $articleId;
-            $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
-        }
-
-        // main variants should be collected first, because they
-        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind = 1'
-        );
-
-        $mainVariants = array_map(function($row) {
-            return $row['id'];
-        }, $rows);
-
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind != 1'
-        );
-
-        $regularVariants = array_map(function($row) {
-            return $row['id'];
-        }, $rows);
-
-        return array_merge($mainVariants, $regularVariants);
-    }
 }

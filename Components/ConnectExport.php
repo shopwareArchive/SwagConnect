@@ -173,18 +173,23 @@ class ConnectExport
     }
 
     /**
+     * Fetch connect items
+     * Default order is main variant first, after that regular variants.
+     * This is needed, because first received variant with an unknown groupId in Connect
+     * will be selected as main variant.
+     *
      * @param array $sourceIds
+     * @param boolean $orderByMainVariants
      * @return array
      */
-    public function fetchConnectItems(array $sourceIds)
+    public function fetchConnectItems(array $sourceIds, $orderByMainVariants = true)
     {
         if (count($sourceIds) == 0) {
             return array();
         }
 
         $implodedIds = '"' . implode('","', $sourceIds) . '"';
-        return Shopware()->Db()->fetchAll(
-            "SELECT bi.article_id as articleId,
+        $query = "SELECT bi.article_id as articleId,
                     bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
@@ -194,8 +199,18 @@ class ConnectExport
             FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
             LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
-            WHERE bi.source_id IN ($implodedIds);"
-        );
+            WHERE bi.source_id IN ($implodedIds)";
+
+        if ($orderByMainVariants === false) {
+            $query .= ';';
+            return Shopware()->Db()->fetchAll($query);
+        }
+
+        $query .= 'AND d.kind = ?;';
+        $mainVariants = Shopware()->Db()->fetchAll($query, array(1));
+        $regularVariants = Shopware()->Db()->fetchAll($query, array(2));
+
+        return array_merge($mainVariants, $regularVariants);
     }
 
     /**

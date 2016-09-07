@@ -160,7 +160,7 @@ class HelperTest extends ConnectTestHelper
     public function testIsMainVariant()
     {
         $this->assertTrue($this->getHelper()->isMainVariant('5'));
-        $this->assertFalse($this->getHelper()->isMainVariant('5-142'));
+        $this->assertFalse($this->getHelper()->isMainVariant('5-253'));
     }
 
     public function testGenerateSourceId()

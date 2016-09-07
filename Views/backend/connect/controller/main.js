@@ -744,7 +744,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
 
         Ext.Ajax.request({
-            url: '{url action=getDetailIds}',
+            url: '{url action=getArticleSourceIds}',
             method: 'POST',
             params: {
                 'ids[]': ids
@@ -756,8 +756,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         if (!operation.success) {
                             me.createGrowlMessage(title, operation.message, true);
                         } else {
+                            console.log(operation.sourceIds);
                             Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                                articleDetailIds: operation.detailIds
+                                sourceIds: operation.sourceIds
                             }).show();
                         }
                     }
@@ -769,12 +770,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     /**
      * Callback function that will insert from/for export
      *
-     * @param articleDetailIds
+     * @param sourceIds
      * @param batchSize
      * @param window
      * @param offset
      */
-    startArticleExport: function(articleDetailIds, batchSize, window, offset) {
+    startArticleExport: function(sourceIds, batchSize, window, offset) {
         offset = parseInt(offset) || 0;
         var limit = offset + batchSize;
 
@@ -787,7 +788,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             url: '{url action=insertOrUpdateProduct}',
             method: 'POST',
             params: {
-                'articleDetailIds[]': articleDetailIds.slice(offset, limit)
+                'sourceIds[]': sourceIds.slice(offset, limit)
             },
             success: function(response, opts) {
                 var doneDetails = limit;
@@ -797,7 +798,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
                     if(operation.messages.price && operation.messages.price.length > 0){
                         var priceMsg = Ext.String.format(
-                            me.messages.priceErrorMessage, operation.messages.price.length, articleDetailIds.length
+                            me.messages.priceErrorMessage, operation.messages.price.length, sourceIds.length
                         );
                         me.createGrowlMessage(title, priceMsg, true);
                     }
@@ -809,14 +810,14 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     }
                 }
 
-                window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, articleDetailIds.length));
+                window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, sourceIds.length));
                 window.progressField.updateProgress(
-                    limit / articleDetailIds.length,
-                    Ext.String.format(window.snippets.process, doneDetails, articleDetailIds.length),
+                    limit / sourceIds.length,
+                    Ext.String.format(window.snippets.process, doneDetails, sourceIds.length),
                     true
                 );
 
-                if (limit >= articleDetailIds.length) {
+                if (limit >= sourceIds.length) {
                     window.inProcess = false;
                     window.startButton.setDisabled(false);
                     window.destroy();
@@ -825,7 +826,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     me.onGetExportStatus();
                 } else {
                     //otherwise we have to call this function recursive with the next offset
-                    me.startArticleExport(articleDetailIds, batchSize, window, limit);
+                    me.startArticleExport(sourceIds, batchSize, window, limit);
                 }
             },
             failure: function(operation) {

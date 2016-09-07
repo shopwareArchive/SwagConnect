@@ -700,7 +700,19 @@ class Helper
      */
     public function isMainVariant($sourceId)
     {
-        return ctype_digit($sourceId);
+        $isMainVariant = $this->manager->getConnection()->fetchColumn(
+            'SELECT d.kind
+              FROM s_plugin_connect_items spci
+              LEFT JOIN s_articles_details d ON spci.article_detail_id = d.id
+              WHERE source_id = ?',
+            array($sourceId)
+        );
+
+        if ($isMainVariant != 1) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

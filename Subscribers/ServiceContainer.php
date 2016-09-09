@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Enlight\Event\SubscriberInterface;
@@ -22,6 +23,7 @@ class ServiceContainer extends BaseSubscriber
     {
         return array(
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
+            'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
         );
     }
 
@@ -38,4 +40,8 @@ class ServiceContainer extends BaseSubscriber
         return new ProductStreamService($productStreamQuery, $streamAttrRepository);
     }
 
+    public function onCreateFrontendQuery()
+    {
+        return new FrontendQuery($this->manager);
+    }
 }

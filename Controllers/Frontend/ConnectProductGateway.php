@@ -11,6 +11,9 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
     /** @var  ShopwarePlugins\Connect\Components\ConnectFactory */
     private $factory;
 
+    /** @var  \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery */
+    private $frontendQuery;
+
     /**
      * @return \ShopwarePlugins\Connect\Components\Helper
      */
@@ -23,6 +26,17 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         return $this->factory->getHelper();
     }
 
+    /**
+     * @return \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery
+     */
+    protected function getFrontendQuery()
+    {
+        if ($this->frontendQuery === null) {
+            $this->frontendQuery = $this->get('swagconnect.frontend_query');
+        }
+
+        return $this->frontendQuery;
+    }
     /**
      * Redirect the user to the best subshop with this product
      *
@@ -50,14 +64,8 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
             return;
         }
 
-        $queryBuilder = $this->getModelManager()->createQueryBuilder();
-        $queryBuilder->select('a')
-            ->from('Shopware\Models\Article\Article', 'a')
-            ->where('a.id = :articleId')
-            ->setParameter(':articleId', $articleId);
-
-        /** @var Shopware\Models\Article\Article $articleModel */
-        $articleModel = $queryBuilder->getQuery()->getOneOrNullResult();
+        /** @var \Shopware\Models\Article\Article $articleModel */
+        $articleModel = $this->getFrontendQuery()->getArticleById($articleId);
 
         if (!$articleModel) {
             $this->forward('index', 'index');
@@ -67,14 +75,8 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         // if sourceId contains detail id part get detail model
         // if not use main detail
         if ($detailId > 0) {
-            $queryBuilder = $this->getModelManager()->createQueryBuilder();
-            $queryBuilder->select('ad')
-                ->from('Shopware\Models\Article\Detail', 'ad')
-                ->where('ad.id = :detailId')
-                ->setParameter(':detailId', $detailId);
-
             /** @var \Shopware\Models\Article\Detail $articleDetailModel */
-            $articleDetailModel = $queryBuilder->getQuery()->getOneOrNullResult();
+            $articleDetailModel = $this->getFrontendQuery()->getArticleDetailById($detailId);
 
             if (!$articleDetailModel) {
                 $this->forward('index', 'index');
@@ -93,14 +95,8 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         $shopId = (int)$this->Request()->getParam('shId');
         if ($shopId > 0) {
-            $queryBuilder = $this->getModelManager()->createQueryBuilder();
-            $queryBuilder->select('s')
-                ->from('\Shopware\Models\Shop\Shop', 's')
-                ->where('s.id = :shopId')
-                ->setParameter(':shopId', $shopId);
-
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $queryBuilder->getQuery()->getOneOrNullResult();
+            $shop = $this->getFrontendQuery()->getShopById($shopId);
 
             if ($shop instanceof \Shopware\Models\Shop\Shop) {
                 $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
@@ -132,15 +128,8 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
      */
     private function forwardToArticle($shopId, $articleId, $articleDetailId = null)
     {
-        $queryBuilder = $this->getModelManager()->createQueryBuilder();
-        $queryBuilder->select('s')
-            ->from('\Shopware\Models\Shop\Shop', 's')
-            ->where('s.id = :shopId')
-            ->andWhere('s.active = 1')
-            ->setParameter(':shopId', $shopId);
-
         /** @var \Shopware\Models\Shop\Shop $shop */
-        $shop = $queryBuilder->getQuery()->getOneOrNullResult();
+        $shop = $this->getFrontendQuery()->getShopById($shopId, true);
 
         if (!$shop) {
             $this->forward('index', 'index');
@@ -170,24 +159,12 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         $mainCategory = array_slice($parts, -2, 1);
         if ($mainCategory[0] > 0) {
-            $queryBuilder = $this->getModelManager()->createQueryBuilder();
-            $queryBuilder->select('c')
-                ->from('Shopware\Models\Category\Category', 'c')
-                ->where('c.id = :categoryId')
-                ->setParameter(':categoryId', $mainCategory[0]);
-
             /** @var Shopware\Models\Category\Category $category */
-            $category = $queryBuilder->getQuery()->getOneOrNullResult();
+            $category = $this->getFrontendQuery()->getCategoryById($mainCategory[0]);
         }
 
-        $queryBuilder = $this->getModelManager()->createQueryBuilder();
-        $queryBuilder->select('s')
-            ->from('\Shopware\Models\Shop\Shop', 's')
-            ->where('s.categoryId = :categoryId')
-            ->setParameter(':categoryId', $category->getId());
-
         /** @var \Shopware\Models\Shop\Shop $shop */
-        $shop = $queryBuilder->getQuery()->getOneOrNullResult();
+        $shop = $this->getFrontendQuery()->getShopByCategoryId($category->getId());
         return $shop;
     }
 

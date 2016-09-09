@@ -89,6 +89,7 @@ class FrontendQuery
     /**
      * @param $categoryId
      * @return Shop|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getShopByCategoryId($categoryId)
     {
@@ -96,14 +97,9 @@ class FrontendQuery
         $queryBuilder->select('s')
             ->from('\Shopware\Models\Shop\Shop', 's')
             ->where('s.categoryId = :categoryId')
-            ->setParameter(':categoryId', $categoryId);
+            ->setParameter(':categoryId', $categoryId)
+            ->setMaxResults(1);
 
-        $results = $queryBuilder->getQuery()->execute();
-
-        foreach ($results as $result) {
-            return $result;
-        }
-
-        return null;
+        return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 }

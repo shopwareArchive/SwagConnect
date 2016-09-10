@@ -790,7 +790,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
-            '#onclick#' => 'window.open(\'connect/autoLogin\')',
+            '#onclick#' => 'window.open("connect/autoLogin")',
             '#action#' => 'OpenConnect'
         ]));
     }

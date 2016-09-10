@@ -69,7 +69,7 @@ class SDKTest extends ConnectTestHelper
         $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
         $message = $model->getExportMessage();
 
-        $this->assertContains('There is an empty price field', $message);
+        $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $message);
 
     }
 

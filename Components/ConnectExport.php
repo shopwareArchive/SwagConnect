@@ -81,11 +81,15 @@ class ConnectExport
     /**
      * Helper function to mark a given array of source ids for connect update
      *
+     * There is a problem with flush when is called from life cycle event in php7,
+     * this flag '$isEvent' is preventing the flush
+     *
      * @param array $ids
      * @param ProductStreamsAssignments|null $streamsAssignments
+     * @param boolean $isEvent
      * @return array
      */
-    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
+    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null, $isEvent = false)
     {
         $errors = array();
         $connectItems = $this->fetchConnectItems($ids);
@@ -108,7 +112,11 @@ class ConnectExport
                     )
                 );
                 $this->manager->persist($connectAttribute);
-                $this->manager->flush($connectAttribute);
+
+                //todo: Fix the flag $isEvent
+                if (!$isEvent) {
+                    $this->manager->flush($connectAttribute);
+                }
                 continue;
             }
 
@@ -127,7 +135,11 @@ class ConnectExport
             if (!$connectAttribute->getId()) {
                 $this->manager->persist($connectAttribute);
             }
-            $this->manager->flush($connectAttribute);
+
+            //todo: Fix the flag $isEvent
+            if (!$isEvent) {
+                $this->manager->flush($connectAttribute);
+            }
 
             try {
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
@@ -165,7 +177,10 @@ class ConnectExport
 
                 $this->errorHandler->handle($e);
 
-                $this->manager->flush($connectAttribute);
+                //todo: Fix the flag $isEvent
+                if (!$isEvent) {
+                    $this->manager->flush($connectAttribute);
+                }
             }
         }
 

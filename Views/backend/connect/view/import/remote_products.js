@@ -76,6 +76,12 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                     return Ext.util.Format.number(value, this.format);
                 }
             }, {
+                header: 'Preis',
+                dataIndex: 'Price_price',
+                xtype: 'numbercolumn',
+                format: '0.00',
+                flex: 2
+            }, {
                 header: 'Steuersatz',
                 dataIndex: 'Tax_name',
                 flex: 2

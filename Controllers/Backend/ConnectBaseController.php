@@ -786,12 +786,12 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
-            '#name#' => 'Open Connect',
+            '#name#' => 'OpenConnect',
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
-            '#onclick#' => 'window.open("http://' . $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
-            '#action#' => ''
+            '#onclick#' => 'window.open("connect/autoLogin")',
+            '#action#' => 'OpenConnect'
         ]));
     }
 

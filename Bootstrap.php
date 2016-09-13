@@ -91,7 +91,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
     /**
      * @param $version string
-     * @return bool
+     * @return array
      */
     public function update($version)
     {
@@ -103,9 +103,11 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         if ($this->isInstalled()) {
             $fullSetup = true;
         }
-        $this->doSetup($fullSetup);
 
-        return $this->doUpdate($version);
+        $this->doSetup($fullSetup);
+        $this->doUpdate($version);
+
+        return array('success' => true, 'invalidateCache' => array('backend', 'config'));
     }
 
     /**

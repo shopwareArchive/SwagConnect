@@ -46,6 +46,7 @@ class Update
         $this->createSyncRevision();
         $this->createExcludeInactiveFlag();
         $this->createExportedFlag();
+        $this->removeRedirectMenu();
 
         return true;
     }
@@ -185,6 +186,17 @@ class Update
                 (`name`, `value`, `groupName`)
                 VALUES  ('excludeInactiveProducts', 1, 'export')
             ");
+        }
+    }
+
+    private function removeRedirectMenu()
+    {
+        if (version_compare($this->version, '1.0.4', '<=')) {
+            $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Open Connect', 'action' => ''));
+            if ($connectItem) {
+                Shopware()->Models()->remove($connectItem);
+                Shopware()->Models()->flush();
+            }
         }
     }
 

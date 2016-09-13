@@ -170,7 +170,7 @@ class Setup
                         'label' => 'OpenConnect',
                         'controller' => 'Connect',
                         'action' => 'OpenConnect',
-                        'onclick' => 'window.open(\'connect/autoLogin\')',
+                        'onclick' => 'window.open("connect/autoLogin")',
                         'class' => 'connect-icon',
                         'active' => 1,
                         'parent' => $parent

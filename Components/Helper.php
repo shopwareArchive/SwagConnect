@@ -503,6 +503,10 @@ class Helper
      */
     public function getArticleSourceIds(array $articleIds)
     {
+        if (empty($articleIds)) {
+            return array();
+        }
+
         $quotedArticleIds = array();
         foreach ($articleIds as $articleId) {
             $articleId = (int) $articleId;

@@ -118,7 +118,7 @@ class ConnectExportTest extends ConnectTestHelper
         $modelManager = Shopware()->Models();
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
 
-        $this->connectExport->syncDeleteArticle($article);
+        $this->connectExport->setDeleteStatusForVariants($article);
         $result = Shopware()->Db()->executeQuery(
             'SELECT export_status
               FROM s_plugin_connect_items

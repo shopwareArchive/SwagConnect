@@ -311,6 +311,7 @@ class ConnectExport
         $builder->select(array('at.sourceId'))
             ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
+            ->andWhere('at.exported = 1')
             ->setParameter(':articleId', $article->getId());
         $connectItems = $builder->getQuery()->getArrayResult();
 

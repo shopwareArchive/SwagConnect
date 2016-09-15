@@ -547,7 +547,7 @@ class Helper
     public function getArticleDetailSourceId($articleDetailId)
     {
         $articleDetailId = (int) $articleDetailId;
-        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $articleDetailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
         $detail = $articleDetailRepository->find($articleDetailId);
         if (!$detail) {
             return null;
@@ -559,6 +559,24 @@ class Helper
         }
 
         return $connectAttribute->getSourceId();
+    }
+
+    /**
+     * Get sourceId by given article detail id
+     *
+     * @param int $articleDetailId
+     * @return string
+     */
+    public function getArticleDetailSourceIdDBAL($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('items.source_id')
+            ->from('s_plugin_connect_items', 'items')
+            ->where('items.article_detail_id = :articleDetailIds')
+            ->setParameter(':articleDetailIds', $articleDetailId);
+
+        return $builder->execute()->fetchColumn();
     }
 
     public function getArticleDetailSourceIds(array $articleDetailIds)
@@ -589,7 +607,7 @@ class Helper
     public function isRemoteArticleDetail($articleDetailId)
     {
         $articleDetailId = (int) $articleDetailId;
-        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $articleDetailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $articleDetailRepository->find($articleDetailId);
         if (!$detail) {
@@ -602,6 +620,24 @@ class Helper
         }
 
         return ($connectAttribute->getShopId() != null);
+    }
+
+    /**
+     * Check if given articleDetailId is remote product
+     *
+     * @param int $articleDetailId
+     * @return bool
+     */
+    public function isRemoteArticleDetailDBAL($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('items.shop_id')
+            ->from('s_plugin_connect_items', 'items')
+            ->where('items.article_detail_id = :articleDetailId')
+            ->setParameter(':articleDetailId', $articleDetailId);
+
+        return (bool) $builder->execute()->fetchColumn();
     }
 
     /**

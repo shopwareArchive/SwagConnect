@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\Product;
@@ -255,21 +256,26 @@ class ImportService
         }
     }
 
+    /**
+     * @param array $articleIds
+     */
     public function activateArticles(array $articleIds)
     {
-        $articles = $this->articleRepository->findBy(array('id' => $articleIds));
-        /** @var \Shopware\Models\Article\Article $article */
-        foreach ($articles as $article) {
-            $article->setActive(true);
-            $this->manager->persist($article);
-            /** @var \Shopware\Models\Article\Detail $detail */
-            foreach($article->getDetails() as $detail) {
-                $detail->setActive(1);
-                $this->manager->persist($detail);
-            }
-        }
+        $articleBuilder = $this->manager->createQueryBuilder();
+        $articleBuilder->update('\Shopware\Models\Article\Article', 'a')
+            ->set('a.active', 1)
+            ->where('a.id IN (:articleIds)')
+            ->setParameter(':articleIds', $articleIds, Connection::PARAM_STR_ARRAY);
 
-        $this->manager->flush();
+        $articleBuilder->getQuery()->execute();
+
+        $articleBuilder = $this->manager->createQueryBuilder();
+        $articleBuilder->update('\Shopware\Models\Article\Detail', 'd')
+            ->set('d.active', 1)
+            ->where('d.articleId IN (:articleIds)')
+            ->setParameter(':articleIds', $articleIds, Connection::PARAM_STR_ARRAY);
+
+        $articleBuilder->getQuery()->execute();
     }
 
     /**

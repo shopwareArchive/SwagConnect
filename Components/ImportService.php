@@ -269,13 +269,13 @@ class ImportService
 
         $articleBuilder->getQuery()->execute();
 
-        $articleBuilder = $this->manager->createQueryBuilder();
-        $articleBuilder->update('\Shopware\Models\Article\Detail', 'd')
+        $detailBuilder = $this->manager->createQueryBuilder();
+        $detailBuilder->update('\Shopware\Models\Article\Detail', 'd')
             ->set('d.active', 1)
             ->where('d.articleId IN (:articleIds)')
             ->setParameter(':articleIds', $articleIds, Connection::PARAM_STR_ARRAY);
 
-        $articleBuilder->getQuery()->execute();
+        $detailBuilder->getQuery()->execute();
     }
 
     /**

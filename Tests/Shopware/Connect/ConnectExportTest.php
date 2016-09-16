@@ -282,13 +282,14 @@ class ConnectExportTest extends ConnectTestHelper
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($article->getDetails() as $detail) {
             Shopware()->Db()->executeQuery(
-                'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
-                  VALUES (?, ?, ?, ?)',
+                'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category, exported)
+                  VALUES (?, ?, ?, ?, ?)',
                 array(
                     $article->getId(),
                     $detail->getId(),
                     $detail->getNumber(),
-                    '/bücher'
+                    '/bücher',
+                    1
                 ));
         }
 

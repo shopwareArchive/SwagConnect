@@ -232,6 +232,17 @@ class Setup
             array('name' => 'SwagConnect Update Products', 'action' => 'ShopwareConnectUpdateProducts')
         );
 
+        //after a run of the cron jobs
+        //shopware is changing the action name to Shopware_CronJob_ActionName
+        Shopware()->Db()->query(
+            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
+            array('name' => 'SwagConnect Import images', 'action' => 'Shopware_CronJob_ShopwareConnectImportImages')
+        );
+        Shopware()->Db()->query(
+            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
+            array('name' => 'SwagConnect Update Products', 'action' => 'Shopware_CronJob_ShopwareConnectUpdateProducts')
+        );
+
         $this->bootstrap->createCronJob(
             'SwagConnect Import images',
             'ShopwareConnectImportImages',

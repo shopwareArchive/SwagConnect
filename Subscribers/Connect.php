@@ -32,7 +32,10 @@ class Connect extends BaseSubscriber
 
     public function backendIndexEvent(\Enlight_Event_EventArgs $args)
     {
-        $this->checkPluginVersion($args);
+        if ($args->getRequest()->getActionName() === 'load') {
+            $this->checkPluginVersion($args);
+        }
+
         $this->injectBackendConnectMenuEntry($args);
     }
 
@@ -56,7 +59,7 @@ class Connect extends BaseSubscriber
         $baseUrl = 'https://api.shopware.com/pluginStore/updates';
         $shopVersion = Shopware::VERSION;
         $shopVersion = $shopVersion === '___VERSION___' ? '5.0.0' : $shopVersion;
-        $pluginName = 'SwagBepado';
+        $pluginName = 'SwagConnect';
         $apiResponse = json_decode(
             file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
         )[0];

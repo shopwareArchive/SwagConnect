@@ -298,6 +298,19 @@ class Product extends ShopItem
     public $images = array();
 
     /**
+     * List of specific variant image URLs
+     *
+     * Same images are also in $images property.
+     * If the image exists in both arrays then it should be used
+     * only for the given variant.
+     * If the image exists only in $images then it's global for all variants.
+     * This property does not affect products without variants.
+     *
+     * @var string[]
+     */
+    public $variantImages = array();
+
+    /**
      * Product categories.
      *
      * Categories are submitted as an associative array. Each key is the full

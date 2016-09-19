@@ -67,7 +67,7 @@ class Connect extends BaseSubscriber
         if($apiResponse->highestVersion > $info['currentVersion']) {
             $view->falseVersionTitle = $snippets->get('info/new_version_header');
             $view->falseVersionMessage = $snippets->get('info/new_version_text');
-            $view->extendsTemplate('backend/connect/plugin_version_check.tpl');
+            $view->extendsTemplate('backend/index/view/connect_menu.js');
         }
     }
 

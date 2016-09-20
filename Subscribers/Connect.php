@@ -56,6 +56,7 @@ class Connect extends BaseSubscriber
         $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'plugin.json'), true);
 
         // URL: https://api.shopware.com/pluginStore/updates?pluginNames%5B0%5D=SwagBepado&shopwareVersion=5.0.0
+        //This url will return plugin version information only if shopware version is 5.2.* or higher
         $baseUrl = 'https://api.shopware.com/pluginStore/updates';
         $shopVersion = Shopware::VERSION;
         $shopVersion = $shopVersion === '___VERSION___' ? '5.0.0' : $shopVersion;

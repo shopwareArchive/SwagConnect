@@ -786,12 +786,12 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $db->exec(strtr($insertSql, [
             '#parent#' => $row['parent'],
-            '#name#' => 'Open Connect',
+            '#name#' => 'OpenConnect',
             '#class#' => 'connect-icon',
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
-            '#onclick#' => 'window.open("http://' . $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com') . '")',
-            '#action#' => ''
+            '#onclick#' => 'window.open("connect/autoLogin")',
+            '#action#' => 'OpenConnect'
         ]));
     }
 
@@ -882,9 +882,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     }
 
     /**
-     * Collect all detail ids by given article ids
+     * Collect all source ids by given article ids
      */
-    public function getDetailIdsAction()
+    public function getArticleSourceIdsAction()
     {
         try {
             $articleIds = $this->Request()->getPost('ids', array());
@@ -892,11 +892,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 $articleIds = array($articleIds);
             }
 
-            $detailIds = $this->getHelper()->getArticleDetailIds($articleIds);
+            $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
 
             $this->View()->assign(array(
                 'success' => true,
-                'detailIds' => $detailIds
+                'sourceIds' => $sourceIds
             ));
         } catch (\Exception $e) {
             $this->View()->assign(array(
@@ -916,11 +916,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         // we need to set it because there isn't customer groups
         // purchasePrice is stored always in article detail
         $this->updatePurchasePriceField();
-
-        $articleDetailIds = $this->Request()->getPost('articleDetailIds');
-        $sourceIds = $this->getHelper()->getArticleDetailSourceIds($articleDetailIds);
-
+        $sourceIds = $this->Request()->getPost('sourceIds');
         $connectExport = $this->getConnectExport();
+
         try {
             $errors = $connectExport->export($sourceIds);
         }catch (\RuntimeException $e) {
@@ -1593,7 +1591,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
                 $assignments = $productStreamService->getStreamAssignments($streamId);
                 $sourceIds = $this->getHelper()->getArticleSourceIds($assignments->getArticleIds());
-                $items = $connectExport->fetchConnectItems($sourceIds);
+                $items = $connectExport->fetchConnectItems($sourceIds, false);
 
                 foreach ($items as $item) {
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {

@@ -159,8 +159,13 @@ class HelperTest extends ConnectTestHelper
 
     public function testIsMainVariant()
     {
+        $article = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->findOneBy(array('id' => 5));
+        $this->getHelper()->getOrCreateConnectAttributeByModel($article);
+        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('id' => 253));
+        $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+
         $this->assertTrue($this->getHelper()->isMainVariant('5'));
-        $this->assertFalse($this->getHelper()->isMainVariant('5-142'));
+        $this->assertFalse($this->getHelper()->isMainVariant('5-253'));
     }
 
     public function testGenerateSourceId()

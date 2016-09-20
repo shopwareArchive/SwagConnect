@@ -503,6 +503,10 @@ class Helper
      */
     public function getArticleSourceIds(array $articleIds)
     {
+        if (empty($articleIds)) {
+            return array();
+        }
+
         $quotedArticleIds = array();
         foreach ($articleIds as $articleId) {
             $articleId = (int) $articleId;
@@ -700,39 +704,18 @@ class Helper
      */
     public function isMainVariant($sourceId)
     {
-        return ctype_digit($sourceId);
-    }
+        $isMainVariant = $this->manager->getConnection()->fetchColumn(
+            'SELECT d.kind
+              FROM s_plugin_connect_items spci
+              LEFT JOIN s_articles_details d ON spci.article_detail_id = d.id
+              WHERE source_id = ?',
+            array($sourceId)
+        );
 
-    /**
-     * @param array $articleIds
-     * @return array
-     */
-    public function getArticleDetailIds(array $articleIds)
-    {
-        $quotedArticleIds = array();
-        foreach ($articleIds as $articleId) {
-            $articleId = (int) $articleId;
-            $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
+        if ($isMainVariant != 1) {
+            return false;
         }
 
-        // main variants should be collected first, because they
-        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind = 1'
-        );
-
-        $mainVariants = array_map(function($row) {
-            return $row['id'];
-        }, $rows);
-
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT id FROM s_articles_details WHERE articleID IN (' . implode(', ', $quotedArticleIds) . ') AND kind != 1'
-        );
-
-        $regularVariants = array_map(function($row) {
-            return $row['id'];
-        }, $rows);
-
-        return array_merge($mainVariants, $regularVariants);
+        return true;
     }
 }

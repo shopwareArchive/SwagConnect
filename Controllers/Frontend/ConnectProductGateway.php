@@ -8,61 +8,11 @@
  */
 class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Controller_Action
 {
-    /** @var  Shopware\Models\Shop\Repository */
-    private $shopRepository;
-
-    /** @var  Shopware\Models\Article\Repository */
-    private $articleRepository;
-
-    private $articleDetailRepository;
-
     /** @var  ShopwarePlugins\Connect\Components\ConnectFactory */
     private $factory;
 
-    /** @var  Shopware\Models\Category\Repository */
-    private $categoryRepository;
-
-    /**
-     * @return \Shopware\Components\Model\ModelRepository
-     */
-    private function getShopRepository()
-    {
-        if (!$this->shopRepository) {
-            $this->shopRepository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
-        }
-        return $this->shopRepository;
-    }
-
-    /**
-     * @return \Shopware\Components\Model\ModelRepository
-     */
-    private function getArticleRepository()
-    {
-        if (!$this->articleRepository) {
-            $this->articleRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
-        }
-        return $this->articleRepository;
-    }
-
-    public function getArticleDetailRepository()
-    {
-        if (!$this->articleDetailRepository) {
-            $this->articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
-        }
-
-        return $this->articleDetailRepository;
-    }
-
-    /**
-     * @return \Shopware\Models\Category\Repository
-     */
-    private function getCategoryRepository()
-    {
-        if (!$this->categoryRepository) {
-            $this->categoryRepository = Shopware()->Models()->getRepository('Shopware\Models\Category\Category');
-        }
-        return $this->categoryRepository;
-    }
+    /** @var  \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery */
+    private $frontendQuery;
 
     /**
      * @return \ShopwarePlugins\Connect\Components\Helper
@@ -77,6 +27,17 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
     }
 
     /**
+     * @return \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery
+     */
+    protected function getFrontendQuery()
+    {
+        if ($this->frontendQuery === null) {
+            $this->frontendQuery = $this->get('swagconnect.frontend_query');
+        }
+
+        return $this->frontendQuery;
+    }
+    /**
      * Redirect the user to the best subshop with this product
      *
      * - first the subshop of the category mapping is checked, so the user will be redirected to the subshop, the
@@ -88,7 +49,6 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
     public function productAction()
     {
         $sourceId = $this->Request()->getParam('id');
-        $attributeRepository = Shopware()->Models()->getRepository('Shopware\Models\Attribute\Category');
 
         // if no id was given, forward to start page
         if (!$sourceId) {
@@ -104,9 +64,10 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
             return;
         }
 
-        /** @var Shopware\Models\Article\Article $articleModel */
-        $articleModel = $this->getArticleRepository()->find($articleId);
-        if (!$articleModel){
+        /** @var \Shopware\Models\Article\Article $articleModel */
+        $articleModel = $this->getFrontendQuery()->getArticleById($articleId);
+
+        if (!$articleModel) {
             $this->forward('index', 'index');
             return;
         }
@@ -115,8 +76,9 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         // if not use main detail
         if ($detailId > 0) {
             /** @var \Shopware\Models\Article\Detail $articleDetailModel */
-            $articleDetailModel = $this->getArticleDetailRepository()->find($detailId);
-            if (!$articleDetailModel){
+            $articleDetailModel = $this->getFrontendQuery()->getArticleDetailById($detailId);
+
+            if (!$articleDetailModel) {
                 $this->forward('index', 'index');
                 return;
             }
@@ -133,36 +95,16 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         $shopId = (int)$this->Request()->getParam('shId');
         if ($shopId > 0) {
-            $shop = $this->getShopRepository()->find($shopId);
+            /** @var \Shopware\Models\Shop\Shop $shop */
+            $shop = $this->getFrontendQuery()->getShopById($shopId);
+
             if ($shop instanceof \Shopware\Models\Shop\Shop) {
                 $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
                 return;
             }
         }
 
-        // If we have a mapping and can resolve it to a local category, forward to the product
-        if (!empty($product->categories)) {
-            foreach ($product->categories as $mapping) {
-                /** @var Shopware\Models\Attribute\Category $attribute */
-                $attribute = $attributeRepository->findOneBy(array('connectExportMapping' => $mapping));
-                if ($attribute) {
-                    $category = $attribute->getCategory();
-                    if (!$this->doesArticleBelongToCategory($category, $articleId)) {
-                        continue;
-                    }
-
-                    $shop = $this->getShopFromCategory($category);
-                    if (!$shop) {
-                        continue;
-                    }
-
-                    $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
-                    return;
-                }
-            }
-        }
-
-        // If we don't have a mapping, find the first category which belongs to a shop and forward to this shop
+        // find the first category which belongs to a shop and forward to this shop
         $localCategories = $articleModel->getCategories();
         if (!empty($localCategories)) {
             foreach ($localCategories as $category) {
@@ -186,8 +128,9 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
      */
     private function forwardToArticle($shopId, $articleId, $articleDetailId = null)
     {
-        /** @var Shopware\Models\Shop\Shop $shop */
-        $shop = $this->getShopRepository()->getActiveById($shopId);
+        /** @var \Shopware\Models\Shop\Shop $shop */
+        $shop = $this->getFrontendQuery()->getShopById($shopId, true);
+
         if (!$shop) {
             $this->forward('index', 'index');
         }
@@ -216,10 +159,13 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         $mainCategory = array_slice($parts, -2, 1);
         if ($mainCategory[0] > 0) {
-            $category = $this->getCategoryRepository()->find($mainCategory[0]);
+            /** @var Shopware\Models\Category\Category $category */
+            $category = $this->getFrontendQuery()->getCategoryById($mainCategory[0]);
         }
 
-        return $this->getShopRepository()->findOneBy(array('category' => $category));
+        /** @var \Shopware\Models\Shop\Shop $shop */
+        $shop = $this->getFrontendQuery()->getShopByCategoryId($category->getId());
+        return $shop;
     }
 
     /**
@@ -235,24 +181,5 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
             return null;
         }
         return $products[0];
-    }
-
-    /**
-     * Checks if a given product belongs to a given category
-     *
-     * @param $category Shopware\Models\Category\Category
-     * @param $id
-     * @return bool
-     */
-    public function doesArticleBelongToCategory($category, $id)
-    {
-        $result = Shopware()->Db()->fetchOne(
-            'SELECT id FROM s_articles_categories_ro WHERE articleID = ? and categoryID = ?',
-            array(
-                $id,
-                $category->getId()
-        ));
-
-        return !empty($result);
     }
 }

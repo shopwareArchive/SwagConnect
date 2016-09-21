@@ -219,43 +219,34 @@ class Setup
             'onStartDispatch'
         );
 
-        Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name',
-            array('name' => 'SwagConnect')
-        );
-        Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect Import images', 'action' => 'ShopwareConnectImportImages')
-        );
-        Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect Update Products', 'action' => 'ShopwareConnectUpdateProducts')
+        $db = Shopware()->Db();
+        $connectImportImages = $db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ShopwareConnectImportImages')
         );
 
-        //after a run of the cron jobs
-        //shopware is changing the action name to Shopware_CronJob_ActionName
-        Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect Import images', 'action' => 'Shopware_CronJob_ShopwareConnectImportImages')
-        );
-        Shopware()->Db()->query(
-            'DELETE FROM s_crontab WHERE `name` = :name AND `action` = :action',
-            array('name' => 'SwagConnect Update Products', 'action' => 'Shopware_CronJob_ShopwareConnectUpdateProducts')
+        if (!$connectImportImages) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Import images',
+                'ShopwareConnectImportImages',
+                60 * 30,
+                false
+            );
+        }
+
+        $connectUpdateProducts = $db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ShopwareConnectUpdateProducts')
         );
 
-        $this->bootstrap->createCronJob(
-            'SwagConnect Import images',
-            'ShopwareConnectImportImages',
-            60 * 30,
-            true
-        );
-
-        $this->bootstrap->createCronJob(
-            'SwagConnect Update Products',
-            'ShopwareConnectUpdateProducts',
-            60 * 2,
-            true
-        );
+        if (!$connectUpdateProducts) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Update Products',
+                'ShopwareConnectUpdateProducts',
+                60 * 2,
+                false
+            );
+        }
     }
 
 

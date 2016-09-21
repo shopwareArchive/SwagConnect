@@ -3,6 +3,8 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Detail;
 use \Shopware\Models\Article\Image;
 use \Shopware\Models\Media\Media;
 use \Shopware\Models\Attribute\Media as MediaAttribute;
@@ -134,7 +136,7 @@ class ImageImport
      * @param array $images
      * @param $model \Shopware\Models\Article\Article
      */
-    public function importImagesForArticle($images, $model)
+    public function importImagesForArticle($images, Article $model)
     {
         // Build up an array of images imported from connect
         $positions = array(0);
@@ -215,6 +217,8 @@ class ImageImport
                 $image->setPath($media->getName());
                 $image->setExtension($media->getExtension());
 
+                $model->getImages()->add($image);
+
                 $this->manager->persist($image);
 
                 $this->thumbnailManager->createMediaThumbnail(
@@ -230,7 +234,215 @@ class ImageImport
         }
 
         $this->manager->flush();
-        $this->manager->clear();
+//        $this->manager->clear();
+    }
+
+    /**
+     * Handles the image import of a product. This will:
+     * - delete all images imported from connect before and not in the current import list
+     * - create new images which have not already been imported
+     * - set the main image, if there is no main image, yet
+     *
+     * Images are identified via the URL of the connect image. So we don't need to md5 the
+     * actual image content every time.
+     *
+     * @param array $variantImages
+     * @param $detail \Shopware\Models\Article\Detail
+     */
+    public function importImagesForDetail(array $variantImages, Detail $detail)
+    {
+        $article = $detail->getArticle();
+        $articleImages = $article->getImages();
+        $importedImages = array();
+
+        // Build up an array of images imported from connect
+        $positions = array(0);
+        // detail contains only his images which are mapped
+        $localImagesFromConnect = array();
+        // article contains all images
+        $localArticleImagesFromConnect = array();
+
+        foreach ($articleImages as $image) {
+            $media = $image->getMedia();
+
+            if (!$media || !$media->getAttribute()) {
+                continue;
+            }
+
+            $attribute = $media->getAttribute();
+
+            // If the image was not imported from connect, skip it
+            $connectHash = $attribute->getConnectHash();
+            if (!$connectHash) {
+                continue;
+            }
+
+            $localArticleImagesFromConnect[$connectHash] = array('image' => $image, 'media' => $media);
+        }
+
+        /** @var $media \Shopware\Models\Media\Media */
+        foreach ($detail->getImages() as $image) {
+            $image->setMain(2); //todo@sb isn't necessary
+            // Build a list of used position fields
+            $positions[] = $image->getPosition();
+
+            $media = $image->getMedia();
+            if (!$media || !$media->getAttribute()) {
+                continue;
+            }
+            $attribute = $media->getAttribute();
+
+            // If the image was not imported from connect, skip it
+            $connectHash = $attribute->getConnectHash();
+            if (!$connectHash) {
+                continue;
+            }
+
+            if (isset($variantImages[0]) && $connectHash == $variantImages[0]) {
+                $image->setMain(1); //todo@sb: check this
+            }
+
+            $localImagesFromConnect[$connectHash] = array('image' => $image, 'media' => $media);
+        }
+
+        $maxPosition = max($positions); // Get the highest position field
+        $remoteImagesFromConnect = array_flip($variantImages);
+
+        // Build up arrays of images to delete and images to create
+        $imagesToDelete = array_diff_key($localImagesFromConnect, $remoteImagesFromConnect);
+        $imagesToCreate = array_diff_key($remoteImagesFromConnect, $localImagesFromConnect);
+        // Delete old connect images and media objects
+        foreach ($imagesToDelete as $hash => $data) {
+            // todo@sb: if the image is used in another detail ?
+            $this->manager->remove($data['image']);
+            $this->manager->remove($data['media']);
+        }
+        $this->manager->flush();
+
+        // Check if we still have a main image
+        $hasMainImage = $this->hasArticleMainImage($detail->getArticle()->getId());
+
+        try {
+            /** @var \Shopware\Models\Media\Album $album */
+            $album = $this->manager->find('Shopware\Models\Media\Album', -1);
+            $tempDir = Shopware()->DocPath('media_temp');
+            foreach ($imagesToCreate as $imageUrl => $key) {
+                // check if image already exists in article images
+                // 1) if it exists skip import and it's global image
+//                if (array_key_exists($imageUrl, $localArticleImagesFromConnect)) { //todo@sb: is this check enough ?!?!
+//                    continue;
+//                }
+
+                // 2) if it has mapping, add new one for current detail
+                // todo@sb: test 2 variants with same images, mapping should exist for both variants
+                if ($localArticleImagesFromConnect[$imageUrl]) {
+                    /** @var \Shopware\Models\Article\Image $articleImage */
+                    $articleImage = $localArticleImagesFromConnect[$imageUrl]['image'];
+                    // add new mapping
+                    $mapping = new Image\Mapping();
+                    $mapping->setImage($articleImage);
+                    foreach ($detail->getConfiguratorOptions() as $option) {
+                        $rule = new Image\Rule();
+                        $rule->setMapping($mapping);
+                        $rule->setOption($option);
+                        $mapping->getRules()->add($rule);
+                    }
+                    $articleImage->getMappings()->add($mapping);
+                    $this->manager->persist($articleImage);
+
+                    // if image doesn't have mappings
+                    // it's global for all details
+                    // do nothing, just continue
+                    continue;
+                }
+
+                // 3) if it doesn't exist, import it
+                $tempFile = tempnam($tempDir, 'image');
+                copy($imageUrl, $tempFile);
+                $file = new File($tempFile);
+
+                // Create the media object
+                $media = new Media();
+                $media->setAlbum($album);
+                $media->setDescription('');
+                $media->setCreated(new \DateTime());
+                $media->setUserId(0);
+                $media->setFile($file);
+
+                $mediaAttribute = $media->getAttribute() ?: new MediaAttribute();
+                $mediaAttribute->setConnectHash($imageUrl);
+                $mediaAttribute->setMedia($media);
+
+                $media->setAttribute($mediaAttribute);
+
+                $this->manager->persist($media);
+                $this->manager->persist($mediaAttribute);
+
+                // Create the associated image object
+                $image = new Image();
+                // If there is no main image and we are in the first iteration, set the current image as main image
+                $image->setMain((!$hasMainImage && $key == 0) ? 1 : 2);
+                $image->setMedia($media);
+                $image->setPosition($maxPosition + $key + 1);
+                $image->setArticle($article);
+                $image->setPath($media->getName());
+                $image->setExtension($media->getExtension());
+
+                $articleImages->add($image);
+
+                if (in_array($imageUrl, $variantImages)) {
+                    // add new mapping
+                    $mapping = new Image\Mapping();
+                    $mapping->setImage($image);
+                    foreach ($detail->getConfiguratorOptions() as $option) {
+                        $rule = new Image\Rule();
+                        $rule->setMapping($mapping);
+                        $rule->setOption($option);
+                        $rules = $mapping->getRules();
+                        $rules->add($rule);
+                        $mapping->setRules($rules);
+                        $this->manager->persist($rule);
+                    }
+                    $this->manager->persist($mapping);
+
+                    $mappings = $image->getMappings();
+                    $mappings->add($mapping);
+                    $image->setMappings($mappings);
+//                $this->manager->persist($image);
+
+                    // add child image
+                    $childImage = new Image();
+                    // If there is no main image and we are in the first iteration, set the current image as main image
+                    $childImage->setMain(2);
+                    $childImage->setPosition($maxPosition + $key + 2);
+                    $childImage->setParent($image);
+                    $childImage->setArticleDetail($detail);
+                    $childImage->setExtension($media->getExtension());
+                    $detail->getImages()->add($childImage);
+
+                    $image->getChildren()->add($childImage);
+
+                    $this->manager->persist($childImage);
+                }
+
+                $this->manager->persist($image);
+
+                $this->thumbnailManager->createMediaThumbnail(
+                    $media,
+                    $this->getThumbnailSize($album),
+                    true
+                );
+            }
+        } catch (\Exception $e) {
+            // log exception message if for some reason
+            // image import fails
+            $this->logger->write(true, 'Import images', $e->getMessage());
+        }
+
+        $article->setImages($articleImages);
+        $this->manager->persist($article);
+        $this->manager->flush();
+//        $this->manager->clear();
     }
 
     /**

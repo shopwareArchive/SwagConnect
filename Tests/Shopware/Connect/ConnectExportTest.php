@@ -120,7 +120,7 @@ class ConnectExportTest extends ConnectTestHelper
 
         $this->connectExport->setDeleteStatusForVariants($article);
         $result = Shopware()->Db()->executeQuery(
-            'SELECT export_status
+            'SELECT export_status, exported
               FROM s_plugin_connect_items
               WHERE article_id = ?',
             array($articleId)
@@ -128,6 +128,7 @@ class ConnectExportTest extends ConnectTestHelper
 
         foreach ($result as $connectAttribute) {
             $this->assertEquals('delete', $connectAttribute['export_status']);
+            $this->assertEquals(0, $connectAttribute['exported']);
         }
 
         $this->assertEquals(4, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());

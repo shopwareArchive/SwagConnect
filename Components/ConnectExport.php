@@ -81,11 +81,15 @@ class ConnectExport
     /**
      * Helper function to mark a given array of source ids for connect update
      *
+     * There is a problem with flush when is called from life cycle event in php7,
+     * this flag '$isEvent' is preventing the flush
+     *
      * @param array $ids
      * @param ProductStreamsAssignments|null $streamsAssignments
+     * @param boolean $isEvent
      * @return array
      */
-    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
+    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null, $isEvent = false)
     {
         $errors = array();
         $connectItems = $this->fetchConnectItems($ids);
@@ -108,7 +112,11 @@ class ConnectExport
                     )
                 );
                 $this->manager->persist($connectAttribute);
-                $this->manager->flush($connectAttribute);
+
+                //todo: Fix the flag $isEvent
+                if (!$isEvent) {
+                    $this->manager->flush($connectAttribute);
+                }
                 continue;
             }
 
@@ -127,7 +135,11 @@ class ConnectExport
             if (!$connectAttribute->getId()) {
                 $this->manager->persist($connectAttribute);
             }
-            $this->manager->flush($connectAttribute);
+
+            //todo: Fix the flag $isEvent
+            if (!$isEvent) {
+                $this->manager->flush($connectAttribute);
+            }
 
             try {
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
@@ -165,7 +177,10 @@ class ConnectExport
 
                 $this->errorHandler->handle($e);
 
-                $this->manager->flush($connectAttribute);
+                //todo: Fix the flag $isEvent
+                if (!$isEvent) {
+                    $this->manager->flush($connectAttribute);
+                }
             }
         }
 
@@ -173,18 +188,23 @@ class ConnectExport
     }
 
     /**
+     * Fetch connect items
+     * Default order is main variant first, after that regular variants.
+     * This is needed, because first received variant with an unknown groupId in Connect
+     * will be selected as main variant.
+     *
      * @param array $sourceIds
+     * @param boolean $orderByMainVariants
      * @return array
      */
-    public function fetchConnectItems(array $sourceIds)
+    public function fetchConnectItems(array $sourceIds, $orderByMainVariants = true)
     {
         if (count($sourceIds) == 0) {
             return array();
         }
 
         $implodedIds = '"' . implode('","', $sourceIds) . '"';
-        return Shopware()->Db()->fetchAll(
-            "SELECT bi.article_id as articleId,
+        $query = "SELECT bi.article_id as articleId,
                     bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
@@ -194,8 +214,18 @@ class ConnectExport
             FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
             LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
-            WHERE bi.source_id IN ($implodedIds);"
-        );
+            WHERE bi.source_id IN ($implodedIds)";
+
+        if ($orderByMainVariants === false) {
+            $query .= ';';
+            return Shopware()->Db()->fetchAll($query);
+        }
+
+        $query .= 'AND d.kind = ?;';
+        $mainVariants = Shopware()->Db()->fetchAll($query, array(1));
+        $regularVariants = Shopware()->Db()->fetchAll($query, array(2));
+
+        return array_merge($mainVariants, $regularVariants);
     }
 
     /**

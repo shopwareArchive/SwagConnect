@@ -91,7 +91,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
     /**
      * @param $version string
-     * @return bool
+     * @return array
      */
     public function update($version)
     {

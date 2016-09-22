@@ -109,7 +109,7 @@ class ConnectExportTest extends ConnectTestHelper
         $row = Shopware()->Db()->fetchRow($sql, array(4));
 
         $this->assertEquals('error-price', $row['export_status']);
-        $this->assertContains('There is an empty price field', $row['export_message']);
+        $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $row['export_message']);
     }
 
     public function testSyncDeleteArticle()

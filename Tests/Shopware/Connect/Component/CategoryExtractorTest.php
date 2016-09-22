@@ -207,6 +207,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false,
             ),
             array(
                 'name' => 'Kleidung',
@@ -221,6 +222,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                         'leaf' => true,
                         'children' => array(),
                         'cls' => "sc-tree-node",
+                        'expanded' => false,
                     ),
                     array(
                         'name' => 'Hosentraeger',
@@ -229,6 +231,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                         'leaf' => true,
                         'children' => array(),
                         'cls' => "sc-tree-node",
+                        'expanded' => false,
                     ),
                     array(
                         'name' => 'Nahrung & Getraenke',
@@ -243,12 +246,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'leaf' => true,
                                 'children' => array(),
                                 'cls' => "sc-tree-node",
+                                'expanded' => false,
                             ),
                         ),
                         'cls' => "sc-tree-node",
+                        'expanded' => false,
                     )
                 ),
                 'cls' => "sc-tree-node",
+                'expanded' => false,
             ),
         );
 
@@ -282,6 +288,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'children' => array(),
                 'iconCls' => 'sc-tree-node-icon',
                 'cls' => "sc-tree-node",
+                'expanded' => false,
             ),
         );
         $result = $this->categoryExtractor->getMainNodes();
@@ -298,6 +305,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -306,6 +314,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
         $result = $this->categoryExtractor->getRemoteCategoriesTree();
@@ -322,6 +331,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -342,12 +352,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'leaf' => true,
                                 'children' => array(),
                                 'cls' => "sc-tree-node",
+                                'expanded' => false
                             ),
                         ),
                         'cls' => "sc-tree-node",
+                        'expanded' => false
                     ),
                 ),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
         $parent = null;
@@ -366,6 +379,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -386,12 +400,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'leaf' => true,
                                 'children' => array(),
                                 'cls' => "sc-tree-node",
+                                'expanded' => false
                             ),
                         ),
                         'cls' => "sc-tree-node",
+                        'expanded' => false
                     ),
                 ),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
         $parent = null;
@@ -411,6 +428,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
         $parent = '/Kleidung-unit';
@@ -434,9 +452,11 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                         'leaf' => true,
                         'children' => array(),
                         'cls' => "sc-tree-node",
+                        'expanded' => false
                     ),
                 ),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
         $parent = '/Kleidung-unit';
@@ -475,6 +495,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -483,6 +504,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
 
@@ -511,6 +533,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -531,12 +554,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                                 'leaf' => true,
                                 'children' => array(),
                                 'cls' => "sc-tree-node",
+                                'expanded' => false
                             ),
                         ),
                         'cls' => "sc-tree-node",
+                        'expanded' => false
                     ),
                 ),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
 
@@ -573,6 +599,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'children' => array(),
                 'iconCls' => 'sprite-product-streams',
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -582,6 +609,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'children' => array(),
                 'iconCls' => 'sprite-product-streams',
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
 
@@ -615,6 +643,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => true,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
             array(
                 'id' => self::RANDOM_STRING,
@@ -623,6 +652,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 'leaf' => false,
                 'children' => array(),
                 'cls' => "sc-tree-node",
+                'expanded' => false
             ),
         );
 

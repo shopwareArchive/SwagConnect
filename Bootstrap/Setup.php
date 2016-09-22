@@ -98,57 +98,84 @@ class Setup
             }
 
             if ($configComponent->getConfig('apiKey', '') == '') {
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'Register',
+                $registerItem  = $this->bootstrap->Menu()->findOneBy(array(
                     'controller' => 'Connect',
-                    'action' => 'Register',
-                    'class' => 'sprite-mousepointer-click',
-                    'active' => 1,
-                    'parent' => $parent
+                    'action' => 'Register'
                 ));
+                if (!$registerItem) {
+                    $this->bootstrap->createMenuItem(array(
+                        'label' => 'Register',
+                        'controller' => 'Connect',
+                        'action' => 'Register',
+                        'class' => 'sprite-mousepointer-click',
+                        'active' => 1,
+                        'parent' => $parent
+                    ));
+                }
             } else {
-
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'Import',
+                // check if menu item already exists
+                // this is possible when start update,
+                // because setup function is called
+                $importItem  = $this->bootstrap->Menu()->findOneBy(array(
                     'controller' => 'Connect',
-                    'action' => 'Import',
-                    'class' => 'sc-icon-import',
-                    'active' => 1,
-                    'parent' => $parent
+                    'action' => 'Import'
                 ));
-
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'Export',
-                    'controller' => 'Connect',
-                    'action' => 'Export',
-                    'class' => 'sc-icon-export',
-                    'active' => 1,
-                    'parent' => $parent
-                ));
-
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'Settings',
-                    'controller' => 'Connect',
-                    'action' => 'Settings',
-                    'class' => 'sprite-gear',
-                    'active' => 1,
-                    'parent' => $parent
-                ));
-
-                $targetConnectUrlFragement = $configComponent->getConfig('connectDebugHost', '');
-                if (empty($targetConnectUrlFragement)) {
-                    $targetConnectUrlFragement = 'connect.shopware.com';
+                if (!$importItem) {
+                    $this->bootstrap->createMenuItem(array(
+                        'label' => 'Import',
+                        'controller' => 'Connect',
+                        'action' => 'Import',
+                        'class' => 'sc-icon-import',
+                        'active' => 1,
+                        'parent' => $parent
+                    ));
                 }
 
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'OpenConnect',
+                $exportItem  = $this->bootstrap->Menu()->findOneBy(array(
                     'controller' => 'Connect',
-                    'action' => 'OpenConnect',
-                    'onclick' => 'window.open(\'connect/autoLogin\')',
-                    'class' => 'connect-icon',
-                    'active' => 1,
-                    'parent' => $parent
+                    'action' => 'Export'
                 ));
+                if (!$exportItem) {
+                    $this->bootstrap->createMenuItem(array(
+                        'label' => 'Export',
+                        'controller' => 'Connect',
+                        'action' => 'Export',
+                        'class' => 'sc-icon-export',
+                        'active' => 1,
+                        'parent' => $parent
+                    ));
+                }
+
+                $settingsItem  = $this->bootstrap->Menu()->findOneBy(array(
+                    'controller' => 'Connect',
+                    'action' => 'Settings'
+                ));
+                if (!$settingsItem) {
+                    $this->bootstrap->createMenuItem(array(
+                        'label' => 'Settings',
+                        'controller' => 'Connect',
+                        'action' => 'Settings',
+                        'class' => 'sprite-gear',
+                        'active' => 1,
+                        'parent' => $parent
+                    ));
+                }
+
+                $openConnectItem  = $this->bootstrap->Menu()->findOneBy(array(
+                    'controller' => 'Connect',
+                    'action' => 'OpenConnect'
+                ));
+                if (!$openConnectItem) {
+                    $this->bootstrap->createMenuItem(array(
+                        'label' => 'OpenConnect',
+                        'controller' => 'Connect',
+                        'action' => 'OpenConnect',
+                        'onclick' => 'window.open("connect/autoLogin")',
+                        'class' => 'connect-icon',
+                        'active' => 1,
+                        'parent' => $parent
+                    ));
+                }
             }
 
             $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES

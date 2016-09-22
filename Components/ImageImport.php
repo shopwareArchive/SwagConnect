@@ -203,7 +203,7 @@ class ImageImport
                 $mediaAttribute = $media->getAttribute() ?: new MediaAttribute();
                 $mediaAttribute->setConnectHash($imageUrl);
                 $mediaAttribute->setMedia($media);
-
+                $media->setAttribute($mediaAttribute);
                 $this->manager->persist($media);
                 $this->manager->persist($mediaAttribute);
 

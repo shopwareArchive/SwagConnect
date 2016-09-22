@@ -52,7 +52,7 @@ class ImageImportTest extends ConnectTestHelper
             $variantImages[] = 'http://loremflickr.com/200/100' . '?' . $i;
         }
 
-        $expectedImages = $variantImages; //todo@sb: why?!?!
+        $expectedVariantImages = $variantImages;
         /** @var \Shopware\Models\Article\Article $article */
         $article = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
         $article->getImages()->clear();
@@ -71,23 +71,27 @@ class ImageImportTest extends ConnectTestHelper
 
         // reload article model after image import otherwise model contains only old images
         $article = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
+        // article must contain 1 global and 9 specific variant images
         $this->assertEquals(10, $article->getImages()->count());
 
-        $articleImages = $article->getImages();
+        $importedArticleImages = $article->getImages();
         /** @var \Shopware\Models\Article\Image $mainImage */
-        $mainImage = $articleImages[0];
+        $mainImage = $importedArticleImages[0];
         $this->assertEmpty($mainImage->getMappings());
+        $media = $mainImage->getMedia();
+        $mediaAttribute = $media->getAttribute();
 
-        unset($articleImages[0]);
-        foreach ($articleImages as $image) {
+        $this->assertEquals($articleImages[0], $mediaAttribute->getConnectHash());
+
+        unset($importedArticleImages[0]);
+        foreach ($importedArticleImages as $image) {
             /** @var \Shopware\Models\Article\Image $image */
             $this->assertNotEmpty($image->getMappings());
+            $this->assertEquals(array_shift($expectedVariantImages), $image->getMedia()->getAttribute()->getConnectHash());
         }
 
         /** @var \Shopware\Models\Article\Detail $detail */
-
         foreach ($article->getDetails() as $detail) {
-            $detailImages = $detail->getImages();
             $this->assertEquals(3, $detail->getImages()->count());
         }
     }

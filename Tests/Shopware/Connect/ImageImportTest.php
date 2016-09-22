@@ -43,13 +43,11 @@ class ImageImportTest extends ConnectTestHelper
     public function testImportDifferentImagesForEachVariant()
     {
         $articleImages = array(
-            'http://loremflickr.com/200/200?0'
+            self::IMAGE_PROVIDER_URL . '?0'
         );
         $variantImages = array();
         for ($i=1; $i<10; $i++) {
-//            $images[] = self::IMAGE_PROVIDER_URL . '?' . $i;
-//            $images[] = 'http://pipsum.com/200x100.jpg' . '?' . $i;
-            $variantImages[] = 'http://loremflickr.com/200/100' . '?' . $i;
+            $variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $i;
         }
 
         $expectedVariantImages = $variantImages;

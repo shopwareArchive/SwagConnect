@@ -108,7 +108,7 @@ class Helper
         return null;
     }
 
-    public function getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
+    public function  getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));

@@ -645,9 +645,7 @@ class ProductToShop implements ProductToShopBase
      */
     private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
     {
-        // Set the configured attribute so users can easily check if a given product is a connect attribute
-        $setter = 'setAttr' . $this->config->getConfig('connectAttribute', 19);
-        $detailAttribute->$setter($product->sourceId);
+        $detailAttribute->setConnectReference($product->sourceId);
         $detailAttribute->setConnectArticleShipping($product->shipping);
         //todo@sb: check if connectAttribute matches position of the marketplace attribute
         array_walk($product->attributes, function($value, $key) use ($detailAttribute) {

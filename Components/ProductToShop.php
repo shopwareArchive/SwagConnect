@@ -342,6 +342,7 @@ class ProductToShop implements ProductToShopBase
             'longDescription' => $product->longDescription,
             'purchasePrice' => $product->purchasePrice,
             'image' => $product->images,
+            'variantImages' => $product->variantImages,
             'price' => $product->price * ($product->vat + 1),
             'name' => $product->title,
             'vat' => $product->vat

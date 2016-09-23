@@ -8,7 +8,7 @@ class ImageImportTest extends ConnectTestHelper
 {
     public function testGetProductsNeedingImageImport()
     {
-        $ids = $this->insertOrUpdateProducts(10, false);
+        $ids = $this->insertOrUpdateProducts(10, false, false);
 
         $result = $this->getImageImport()->getProductsNeedingImageImport();
 
@@ -105,4 +105,24 @@ class ImageImportTest extends ConnectTestHelper
         $this->assertNotEmpty($supplier->getImage());
     }
 
+    public function testBatchImport()
+    {
+        Shopware()->Db()->executeQuery('UPDATE s_plugin_connect_items SET last_update_flag = 0');
+        $this->insertOrUpdateProducts(1, true, true);
+
+        $result = $this->getImageImport()->getProductsNeedingImageImport();
+        $articleId = reset($result);
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = Shopware()->Models()->find('Shopware\Models\Article\Article', $articleId);
+
+        $this->assertEmpty($article->getImages());
+        $this->getImageImport()->import(1);
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = Shopware()->Models()->find('Shopware\Models\Article\Article', $articleId);
+        $this->assertEquals(2, $article->getImages()->count());
+        $this->assertEquals(1, $article->getMainDetail()->getImages()->count());
+
+        $this->assertEmpty($this->getImageImport()->getProductsNeedingImageImport());
+    }
 }

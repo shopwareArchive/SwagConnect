@@ -280,6 +280,27 @@ class Helper
     }
 
     /**
+     * Returns connectAttributes for all article details by given article object
+     *
+     * @param ProductModel $article
+     * @return \Shopware\CustomModels\Connect\Attribute[]
+     */
+    public function getConnectAttributesByArticle(ProductModel $article)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('connectAttribute', 'detail'));
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'connectAttribute');
+        $builder->innerJoin('connectAttribute.articleDetail', 'detail');
+
+        $builder->where('connectAttribute.articleId = :articleId');
+        $query = $builder->getQuery();
+
+        $query->setParameter('articleId', $article->getId());
+
+        return $query->getResult();
+    }
+
+    /**
      * Returns true when product is exported to Connect
      *
      * @param Attribute $connectAttribute

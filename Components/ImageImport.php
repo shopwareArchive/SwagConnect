@@ -98,9 +98,9 @@ class ImageImport
     /**
      * Batch import images for new products without images
      *
-     * @param null $limit
+     * @param int|null $limit
      */
-    public function import($limit=null)
+    public function import($limit = null)
     {
         $articleRepository = $this->manager->getRepository('Shopware\Models\Article\Article');
 
@@ -110,15 +110,17 @@ class ImageImport
         $ids = $this->getProductsNeedingImageImport($limit);
 
         foreach ($ids as $id) {
-            /** @var \Shopware\Models\Article\Article $model */
-            $model = $articleRepository->find($id);
-            $connectAttribute = $this->helper->getConnectAttributeByModel($model);
+            /** @var \Shopware\Models\Article\Article $article */
+            $article = $articleRepository->find($id);
+            $connectAttributes = $this->helper->getConnectAttributesByArticle($article);
 
-            $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-
-            $this->importImagesForArticle($lastUpdate['image'], $model);
-
-            $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+            /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+            foreach ($connectAttributes as $connectAttribute) {
+                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $article);
+                $this->importImagesForDetail($lastUpdate['variantImages'], $connectAttribute->getArticleDetail());
+                $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+            }
 
             $this->manager->flush();
         }

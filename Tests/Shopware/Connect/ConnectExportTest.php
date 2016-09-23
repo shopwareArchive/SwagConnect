@@ -118,9 +118,9 @@ class ConnectExportTest extends ConnectTestHelper
         $modelManager = Shopware()->Models();
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
 
-        $this->connectExport->syncDeleteArticle($article);
+        $this->connectExport->setDeleteStatusForVariants($article);
         $result = Shopware()->Db()->executeQuery(
-            'SELECT export_status
+            'SELECT export_status, exported
               FROM s_plugin_connect_items
               WHERE article_id = ?',
             array($articleId)
@@ -128,6 +128,7 @@ class ConnectExportTest extends ConnectTestHelper
 
         foreach ($result as $connectAttribute) {
             $this->assertEquals('delete', $connectAttribute['export_status']);
+            $this->assertEquals(0, $connectAttribute['exported']);
         }
 
         $this->assertEquals(4, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
@@ -282,13 +283,14 @@ class ConnectExportTest extends ConnectTestHelper
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($article->getDetails() as $detail) {
             Shopware()->Db()->executeQuery(
-                'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category)
-                  VALUES (?, ?, ?, ?)',
+                'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, category, exported)
+                  VALUES (?, ?, ?, ?, ?)',
                 array(
                     $article->getId(),
                     $detail->getId(),
                     $detail->getNumber(),
-                    '/bücher'
+                    '/bücher',
+                    1
                 ));
         }
 

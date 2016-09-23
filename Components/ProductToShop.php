@@ -398,19 +398,22 @@ class ProductToShop implements ProductToShopBase
         }
 
         $this->manager->flush();
-        $this->manager->clear();
-
-        $this->addArticleTranslations($model, $product);
-
-        //clear cache for that article
-        $this->helper->clearArticleCache($model->getId());
 
         if ($updateFields['image']) {
             // Reload the model in order to not to work an the already flushed model
             $model = $this->helper->getArticleModelByProduct($product);
-            $this->imageImport->importImagesForArticle($product->images, $model);
+            // import only global images for article
+            $this->imageImport->importImagesForArticle(array_diff($product->images, $product->variantImages), $model);
+            // import only specific images for variant
+            $this->imageImport->importImagesForDetail($product->variantImages, $detail);
         }
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
+
+        $this->manager->clear();
+
+        $this->addArticleTranslations($model, $product);
+        //clear cache for that article
+        $this->helper->clearArticleCache($model->getId());
     }
 
     /**

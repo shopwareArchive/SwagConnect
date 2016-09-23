@@ -18,7 +18,7 @@ class ProductQueryTest extends ConnectTestHelper
 
     protected $productTranslator;
 
-    protected $storeMediaService;
+    protected $localMediaService;
 
     protected $contextService;
 
@@ -60,7 +60,7 @@ class ProductQueryTest extends ConnectTestHelper
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
-            $this->storeMediaService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\MediaService')
+            $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
                 ->disableOriginalConstructor()
                 ->getMock();
 
@@ -84,7 +84,7 @@ class ProductQueryTest extends ConnectTestHelper
                     new MarketplaceGateway(Shopware()->Models()),
                     $this->productTranslator,
                     $this->contextService,
-                    $this->storeMediaService
+                    $this->localMediaService
                 ),
                 new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
             );

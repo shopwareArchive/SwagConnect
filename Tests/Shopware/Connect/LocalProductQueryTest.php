@@ -19,7 +19,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     protected $mediaService;
 
-    protected $storeMediaService;
+    protected $localMediaService;
 
     protected $contextService;
 
@@ -61,7 +61,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 ),
             ));
 
-        $this->storeMediaService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\MediaService')
+        $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -91,7 +91,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 new MarketplaceGateway(Shopware()->Models()),
                 $this->productTranslator,
                 $this->contextService,
-                $this->storeMediaService,
+                $this->localMediaService,
                 $this->mediaService
             );
         }
@@ -151,11 +151,18 @@ class LocalProductQueryTest extends ConnectTestHelper
         );
 
         $productMedia = new Media();
-        $productMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_cover.jpg');
-        $this->storeMediaService->expects($this->once())
+        $productMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg');
+        $variantMedia = new Media();
+        $variantMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg');
+        $this->localMediaService->expects($this->once())
             ->method('getProductMedia')
             ->with($this->anything(), $this->productContext)
-            ->willReturn(array($productMedia));
+            ->willReturn(array($productMedia, $variantMedia));
+
+        $this->localMediaService->expects($this->once())
+            ->method('getVariantMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(array($row['sku'] => array($variantMedia)));
 
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
@@ -183,7 +190,11 @@ class LocalProductQueryTest extends ConnectTestHelper
             ),
         );
         $expectedProduct->images = array(
-            'http://myshop/media/image/2e/4f/tea_pavilion_cover.jpg'
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
+        );
+        $expectedProduct->variantImages = array(
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
         );
 
         $row['localId'] = 22;

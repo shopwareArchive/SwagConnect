@@ -5,17 +5,15 @@ namespace ShopwarePlugins\Connect\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
-use Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService;
+//use Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService;
 use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
-use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\MediaService;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
-use Shopware\Connect\Struct\Translation;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -48,7 +46,7 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * @var \Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService
      */
-    protected $storeMediaService;
+    protected $localMediaService;
 
     /**
      * @var \Shopware\Bundle\StoreFrontBundle\Struct\ProductContext
@@ -75,7 +73,7 @@ class LocalProductQuery extends BaseProductQuery
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
         $this->contextService = $contextService;
-        $this->storeMediaService = $storeFrontMediaService;
+        $this->localMediaService = $storeFrontMediaService;
 
         // products context is needed to load product media
         // it's used for image translations
@@ -198,13 +196,18 @@ class LocalProductQuery extends BaseProductQuery
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
         $row['images'] = array();
-        $mediaFiles = $this->storeMediaService->getProductMedia($product, $this->productContext);
+        $mediaFiles = $this->localMediaService->getProductMedia($product, $this->productContext);
+
         foreach ($mediaFiles as $media) {
             $row['images'][] = $media->getFile();
         }
 
-        if (empty($row['images']) && $cover = $this->storeMediaService->getCover($product, $this->productContext)) {
-            $row['images'][] = $cover->getFile();
+        $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
+        $sku = $row['sku'];
+        if ($variantMediaFiles[$sku]) {
+            foreach ($variantMediaFiles[$sku] as $media) {
+                $row['variantImages'][] = $media->getFile();
+            }
         }
 
         //todo@sb: find better way to collect configuration option translations

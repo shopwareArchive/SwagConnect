@@ -66,7 +66,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 dataIndex: 'Supplier_name',
                 flex: 3
             }, {
-                header: 'HEK',
+                header: 'HEK (netto)',
                 dataIndex: 'Price_basePrice',
                 xtype: 'numbercolumn',
                 format: '0.00',

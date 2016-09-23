@@ -85,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                     return '<span style="display:block; margin: 0 auto; height:25px; width:25px;" class="' + checked + '"></span>';
                 }
             }, {
-                header: 'HEK',
+                header: 'HEK (netto)',
                 xtype: 'numbercolumn',
                 dataIndex: 'Detail_purchasePrice',
                 flex: 2,

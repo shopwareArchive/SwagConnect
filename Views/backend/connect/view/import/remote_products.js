@@ -1,5 +1,7 @@
 //{namespace name=backend/connect/view/main}
 
+Ext.tip.QuickTipManager.init();
+
 //{block name="backend/connect/view/import/remote_products"}
 Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     extend: 'Ext.grid.Panel',
@@ -64,8 +66,18 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                 dataIndex: 'Supplier_name',
                 flex: 3
             }, {
-                header: 'Preis (brutto)',
+                header: 'HEK (netto)',
                 dataIndex: 'Price_basePrice',
+                xtype: 'numbercolumn',
+                format: '0.00',
+                flex: 2,
+                renderer: function (value, meta) {
+                    meta.tdAttr = 'data-qtip="Händlereinkaufspreis"';
+                    return Ext.util.Format.number(value, this.format);
+                }
+            }, {
+                header: 'Preis',
+                dataIndex: 'Price_price',
                 xtype: 'numbercolumn',
                 format: '0.00',
                 flex: 2

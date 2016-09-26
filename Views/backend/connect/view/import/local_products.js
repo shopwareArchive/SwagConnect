@@ -1,5 +1,7 @@
 //{namespace name=backend/connect/view/main}
 
+Ext.tip.QuickTipManager.init();
+
 //{block name="backend/connect/view/import/local_products"}
 Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     extend: 'Ext.grid.Panel',
@@ -83,9 +85,18 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                     return '<span style="display:block; margin: 0 auto; height:25px; width:25px;" class="' + checked + '"></span>';
                 }
             }, {
-                header: 'Preis (brutto)',
+                header: 'HEK (netto)',
                 xtype: 'numbercolumn',
                 dataIndex: 'Detail_purchasePrice',
+                flex: 2,
+                renderer: function (value, meta) {
+                    meta.tdAttr = 'data-qtip="Händlereinkaufspreis"';
+                    return Ext.util.Format.number(value, this.format);
+                }
+            }, {
+                header: 'Preis',
+                xtype: 'numbercolumn',
+                dataIndex: 'Price_price',
                 flex: 2
             }, {
                 header: 'Steuersatz',

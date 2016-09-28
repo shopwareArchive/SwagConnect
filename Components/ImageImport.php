@@ -149,6 +149,12 @@ class ImageImport
 
         // Delete old connect images and media objects
         foreach ($imagesToDelete as $hash => $data) {
+            /** @var \Shopware\Models\Article\Image $image */
+            $image = $data['image'];
+            // if the image has mapping, it's variant image and shouldn't be deleted
+            if (!empty($image->getMappings())) {
+                continue;
+            }
             $this->manager->remove($data['image']);
             $this->manager->remove($data['media']);
         }

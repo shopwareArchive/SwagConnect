@@ -272,20 +272,6 @@ class ConnectExport
     }
 
     /**
-     * Mark connect product for delete
-     *
-     * @param \Shopware\Models\Article\Article $article
-     */
-    public function syncDeleteArticle(Article $article)
-    {
-        $details = $article->getDetails();
-        /** @var \Shopware\Models\Article\Detail $detail */
-        foreach ($details as $detail) {
-            $this->syncDeleteDetail($detail);
-        }
-    }
-
-    /**
      * Mark single connect product detail for delete
      *
      * @param \Shopware\Models\Article\Detail $detail
@@ -311,6 +297,7 @@ class ConnectExport
         $builder->select(array('at.sourceId'))
             ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
+            ->andWhere('at.exported = 1')
             ->setParameter(':articleId', $article->getId());
         $connectItems = $builder->getQuery()->getArrayResult();
 
@@ -321,6 +308,7 @@ class ConnectExport
         $builder = Shopware()->Models()->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
             ->set('at.exportStatus', $builder->expr()->literal(Attribute::STATUS_DELETE))
+            ->set('at.exported', 0)
             ->where('at.articleId = :articleId')
             ->setParameter(':articleId', $article->getId());
 

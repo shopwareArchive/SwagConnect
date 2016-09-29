@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -71,6 +72,10 @@ class CronJob extends BaseSubscriber
             'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 LIMIT 100'
         );
 
+        if (empty($sourceIds)) {
+            return true;
+        }
+
         $this->getConnectExport()->export($sourceIds);
 
         $quotedSourceIds = Shopware()->Db()->quote($sourceIds);
@@ -93,7 +98,8 @@ class CronJob extends BaseSubscriber
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            $this->getConfigComponent()
+            $this->getConfigComponent(),
+            new ErrorHandler()
         );
     }
 

@@ -76,7 +76,7 @@ class Lifecycle extends BaseSubscriber
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-        $this->getConnectExport()->syncDeleteArticle($entity);
+        $this->getConnectExport()->setDeleteStatusForVariants($entity);
     }
 
     /**
@@ -89,10 +89,7 @@ class Lifecycle extends BaseSubscriber
     {
         /** @var \Shopware\Models\Article\Detail $entity */
         $entity = $eventArgs->get('entity');
-        if ($entity->getKind() == 1) {
-            $article = $entity->getArticle();
-            $this->getConnectExport()->setDeleteStatusForVariants($article, 'delete');
-        } else {
+        if ($entity->getKind() !== 1) {
             $this->getConnectExport()->syncDeleteDetail($entity);
         }
     }

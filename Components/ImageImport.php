@@ -8,6 +8,7 @@ use Shopware\Models\Article\Detail;
 use \Shopware\Models\Article\Image;
 use \Shopware\Models\Media\Media;
 use \Shopware\Models\Attribute\Media as MediaAttribute;
+use \Shopware\Models\Attribute\ArticleImage as ImageAttribute;
 use Symfony\Component\HttpFoundation\File\File;
 use Shopware\Models\Article\Supplier;
 use Shopware\Components\Thumbnail\Manager as ThumbnailManager;
@@ -196,10 +197,35 @@ class ImageImport
         // Build up arrays of images to delete and images to create
         $imagesToDelete = array_diff_key($localImagesFromConnect, $remoteImagesFromConnect);
         $imagesToCreate = array_diff_key($remoteImagesFromConnect, $localImagesFromConnect);
+
+        $mappingRepository = $this->manager->getRepository('Shopware\Models\Article\Image\Mapping');
         // Delete old connect images and media objects
         foreach ($imagesToDelete as $hash => $data) {
-            $this->manager->remove($data['image']);
-            $this->manager->remove($data['media']);
+            /** @var \Shopware\Models\Article\Image $image */
+            $image = $data['image'];
+            /** @var \Shopware\Models\Article\Image $child */
+            foreach ($image->getChildren() as $child) {
+                if ($detail->getId() == $child->getArticleDetail()->getId()) {
+                    $childAttribute = $child->getAttribute();
+                    if (!$childAttribute) {
+                        break;
+                    }
+
+                    $mapping = $mappingRepository->find($childAttribute->getConnectDetailMappingId());
+                    if (!$mapping) {
+                        break;
+                    }
+
+                    $this->manager->remove($mapping);
+                    $this->manager->remove($child);
+                    break;
+                }
+            }
+
+            if (count($image->getChildren()) == 1) {
+                $this->manager->remove($image);
+                $this->manager->remove($data['media']);
+            }
         }
         $this->manager->flush();
 
@@ -224,10 +250,11 @@ class ImageImport
                 }
 
                 // 2) if it has mapping, add new one for current detail
-                // todo@sb: test 2 variants with same images, mapping should exist for both variants
                 if ($localArticleImagesFromConnect[$imageUrl]) {
                     /** @var \Shopware\Models\Article\Image $articleImage */
                     $articleImage = $localArticleImagesFromConnect[$imageUrl]['image'];
+                    $articleMedia = $localArticleImagesFromConnect[$imageUrl]['media'];
+
                     // add new mapping
                     $mapping = new Image\Mapping();
                     $mapping->setImage($articleImage);
@@ -237,7 +264,27 @@ class ImageImport
                         $rule->setOption($option);
                         $mapping->getRules()->add($rule);
                     }
+                    $this->manager->persist($mapping);
+                    // mapping should have id, because it should be stored as child image attribute
+                    $this->manager->flush($mapping);
                     $articleImage->getMappings()->add($mapping);
+
+                    // add child image
+                    $childImage = new Image();
+                    $childImage->setMain(2);
+                    $childImage->setPosition($maxPosition + $key + 1);
+                    $childImage->setParent($articleImage);
+                    $childImage->setArticleDetail($detail);
+                    $childImage->setExtension($articleMedia->getExtension());
+                    $childImageAttribute = $childImage->getAttribute() ?: new ImageAttribute();
+                    $childImageAttribute->setArticleImage($childImage);
+                    $childImageAttribute->setConnectDetailMappingId($mapping->getId());
+
+                    $detail->getImages()->add($childImage);
+                    $articleImage->getChildren()->add($childImage);
+
+                    $this->manager->persist($childImage);
+                    $this->manager->persist($childImageAttribute);
                     $this->manager->persist($articleImage);
 
                     continue;
@@ -261,6 +308,8 @@ class ImageImport
                     $this->manager->persist($rule);
                 }
                 $this->manager->persist($mapping);
+                // mapping should have id, because it should be stored as child image attribute
+                $this->manager->flush($mapping);
 
                 $mappings = $image->getMappings();
                 $mappings->add($mapping);
@@ -273,12 +322,15 @@ class ImageImport
                 $childImage->setParent($image);
                 $childImage->setArticleDetail($detail);
                 $childImage->setExtension($media->getExtension());
+                $childImageAttribute = $childImage->getAttribute() ?: new ImageAttribute();
+                $childImageAttribute->setArticleImage($childImage);
+                $childImageAttribute->setConnectDetailMappingId($mapping->getId());
                 $detail->getImages()->add($childImage);
 
                 $image->getChildren()->add($childImage);
 
                 $this->manager->persist($childImage);
-
+                $this->manager->persist($childImageAttribute);
                 $this->manager->persist($image);
 
                 $this->thumbnailManager->createMediaThumbnail(
@@ -394,13 +446,16 @@ class ImageImport
 
         $localArticleImagesFromConnect = array();
 
+        /** @var \Shopware\Models\Article\Image $image */
         foreach ($model->getImages() as $image) {
+            if ($model instanceof Detail && $model->getId() == $image->getArticleDetail()->getId()) {
+                $image = $image->getParent();
+            }
             $media = $image->getMedia();
 
             if (!$media || !$media->getAttribute()) {
                 continue;
             }
-
             $attribute = $media->getAttribute();
 
             // If the image was not imported from connect, skip it

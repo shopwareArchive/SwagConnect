@@ -500,6 +500,13 @@ class Setup
             true
         );
 
+        $modelManager->addAttribute(
+            's_articles_img_attributes',
+            'connect', 'detail_mapping_id',
+            'int(11)',
+            true
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',
@@ -509,6 +516,7 @@ class Setup
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
+            's_articles_img_attributes',
             's_media_attributes'
         ));
     }

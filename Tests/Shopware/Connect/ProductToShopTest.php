@@ -224,7 +224,7 @@ class ProductToShopTest extends ConnectTestHelper
         $variants[1]->longDescription = $newLongDesc;
         $variants[1]->shortDescription = $newShortDesc;
         $variants[1]->images[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
-        $variants[1]->variantImages[] = self::IMAGE_PROVIDER_URL . '?1' . $variants[1]->sourceId;
+        $variants[1]->variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->vat = $newVat;
 
         $this->productToShop->insertOrUpdate($variants[1]);
@@ -246,7 +246,8 @@ class ProductToShopTest extends ConnectTestHelper
         } else {
             $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
         }
-        $this->assertEquals(3, $connectAttribute->getArticle()->getImages()->count());
+
+        $this->assertEquals(5, $connectAttribute->getArticle()->getImages()->count());
         $this->assertEquals(1, $detail->getImages()->count());
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
     }

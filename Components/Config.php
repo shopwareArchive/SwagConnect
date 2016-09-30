@@ -27,6 +27,7 @@ namespace ShopwarePlugins\Connect\Components;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Config as ConfigModel;
+use Shopware\Connect\Gateway\PDO;
 
 /**
  * @category  Shopware
@@ -56,6 +57,8 @@ class Config
     private $customerGroupRepository;
 
     private $priceGateway;
+
+    private $connectGateway;
 
     /**
      * @param ModelManager $manager
@@ -248,6 +251,7 @@ class Config
                 $config['hasSsl'] = $mainShopList[0]->getSecure();
             }
         }
+        $config['shopId'] = $this->getConnectPDOGateway()->getShopId();
 
         return [$config];
     }
@@ -260,6 +264,10 @@ class Config
      */
     public function setGeneralConfigs($data)
     {
+        // shopware must not be overwritten in config table
+        // it can be set only during login/register
+        unset($data['shopwareId']);
+
         foreach ($data as $key => $configItem) {
 
             /** @var \Shopware\CustomModels\Connect\Config $model */
@@ -589,5 +597,17 @@ class Config
         }
 
         return $this->staticPagesRepository;
+    }
+
+    /**
+     * @return \Shopware\Connect\Gateway\PDO
+     */
+    private function getConnectPDOGateway()
+    {
+        if (!$this->connectGateway) {
+            $this->connectGateway = new PDO($this->manager->getConnection());
+        }
+
+        return $this->connectGateway;
     }
 } 

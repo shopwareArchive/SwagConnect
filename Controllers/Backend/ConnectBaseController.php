@@ -632,6 +632,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->removeConnectMenuEntry();
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
 
@@ -686,6 +687,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
             $this->removeConnectMenuEntry();

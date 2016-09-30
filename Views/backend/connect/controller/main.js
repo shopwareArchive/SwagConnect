@@ -448,6 +448,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     login: function(params, callback) {
         var me = this;
+        var connectBtn = me.createConnectLoginBtn();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -475,7 +476,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         callback(response);
                     }
 
-                    me.openLink(response.loginUrl);
+                    connectBtn.click();
                     location.reload();
                 }
             },
@@ -488,6 +489,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     register: function(params, callback) {
         var me = this;
+        var connectBtn = me.createConnectLoginBtn();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
@@ -514,7 +516,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    me.openLink(response.loginUrl);
+
+                    connectBtn.click();
                     location.reload();
                 }
             },
@@ -525,11 +528,15 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         );
     },
 
-    openLink: function(href) {
-        var linkEl = document.createElement('a');
-        linkEl.href = href;
-        linkEl.target = '_blank';
-        linkEl.click();
+    /**
+     * Creates a login button
+     *
+     * @returns { Element }
+     */
+    createConnectLoginBtn: function() {
+        document.body.innerHTML += '<a href="connect/autoLogin" id="connectButtonLogin" target="_blank"></a>';
+
+        return document.getElementById('connectButtonLogin');
     },
 
     displayErrorMessage: function(response, callback) {

@@ -267,6 +267,8 @@ class Config
         // shopware must not be overwritten in config table
         // it can be set only during login/register
         unset($data['shopwareId']);
+        // do not store shopId in plugin config table
+        unset($data['shopId']);
 
         foreach ($data as $key => $configItem) {
 

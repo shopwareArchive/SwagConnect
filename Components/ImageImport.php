@@ -153,10 +153,10 @@ class ImageImport
             /** @var \Shopware\Models\Article\Image $image */
             $image = $data['image'];
             // if the image has mapping, it's variant image and shouldn't be deleted
-            if (!empty($image->getMappings())) {
+            if (count($image->getMappings()) > 0) {
                 continue;
             }
-            $this->manager->remove($data['image']);
+            $this->manager->remove($image);
             $this->manager->remove($data['media']);
         }
         $this->manager->flush();

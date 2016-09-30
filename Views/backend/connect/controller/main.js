@@ -448,13 +448,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     login: function(params, callback) {
         var me = this;
+        var connectBtn = me.createConnectLoginBtn();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
             me.messages.login.waitTitle
         );
 
-        var connectBtn = me.createConnectLoginBtn();
         me.sendAjaxRequest(
             '{url controller=Connect action=login}',
             params,
@@ -489,13 +489,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     register: function(params, callback) {
         var me = this;
+        var connectBtn = me.createConnectLoginBtn();
 
         me.splashScreen = Ext.Msg.wait(
             me.messages.login.waitMessage,
             me.messages.login.waitTitle
         );
 
-        var connectBtn = me.createConnectLoginBtn();
         me.sendAjaxRequest(
             '{url controller=Connect action=register}',
             params,
@@ -534,10 +534,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @returns { Element }
      */
     createConnectLoginBtn: function() {
-        var linkEl = document.createElement('a');
-        linkEl.href = 'connect/autoLogin';
-        linkEl.target = '_blank';
-        return linkEl;
+        document.body.innerHTML += '<a href="connect/autoLogin" id="connectButtonLogin" target="_blank"></a>';
+
+        return document.getElementById('connectButtonLogin');
     },
 
     displayErrorMessage: function(response, callback) {

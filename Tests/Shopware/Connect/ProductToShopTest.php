@@ -247,7 +247,7 @@ class ProductToShopTest extends ConnectTestHelper
             $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
         }
 
-        $this->assertEquals(5, $connectAttribute->getArticle()->getImages()->count());
+        $this->assertEquals(2, $connectAttribute->getArticle()->getImages()->count());
         $this->assertEquals(1, $detail->getImages()->count());
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
     }

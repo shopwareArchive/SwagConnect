@@ -51,9 +51,6 @@ class Config
     /** @var  \Shopware\Models\Shop\Shop */
     private $shopRepository;
 
-    /** @var  \Shopware\Models\Site\Repository */
-    private $staticPagesRepository;
-
     private $customerGroupRepository;
 
     private $priceGateway;
@@ -587,18 +584,6 @@ class Config
         }
 
         return $this->customerGroupRepository;
-    }
-
-    /**
-     * @return \Shopware\Models\Site\Repository
-     */
-    private function getStaticPagesRepository()
-    {
-        if (!$this->staticPagesRepository) {
-            $this->staticPagesRepository = $this->manager->getRepository('Shopware\Models\Site\Site');
-        }
-
-        return $this->staticPagesRepository;
     }
 
     /**

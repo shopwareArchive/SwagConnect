@@ -592,7 +592,7 @@ class Config
     private function getConnectPDOGateway()
     {
         if (!$this->connectGateway) {
-            $this->connectGateway = new PDO($this->manager->getConnection());
+            $this->connectGateway = new PDO(Shopware()->Db()->getConnection());
         }
 
         return $this->connectGateway;

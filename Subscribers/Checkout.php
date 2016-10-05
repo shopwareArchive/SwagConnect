@@ -321,10 +321,10 @@ class Checkout extends BaseSubscriber
             }
 
             $articleDetailId = $row['additional_details']['articleDetailsID'];
-            if ($helper->isRemoteArticleDetail($articleDetailId) === false) {
+            if ($helper->isRemoteArticleDetailDBAL($articleDetailId) === false) {
                 continue;
             }
-            $sourceId = $helper->getArticleDetailSourceId($articleDetailId);
+            $sourceId = $helper->getArticleDetailSourceIdDBAL($articleDetailId);
 
             $products = $helper->getRemoteProducts(array($sourceId));
             $products = $this->getHelper()->prepareConnectUnit($products);

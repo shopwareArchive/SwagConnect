@@ -814,6 +814,9 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
     public function adoptUnitsAction()
     {
+        $connection = $this->getModelManager()->getConnection();
+        $connection->beginTransaction();
+
         try {
             $units = array_filter($this->getConfigComponent()->getUnitsMappings(), function($unit) {
                 return strlen($unit) == 0;
@@ -822,8 +825,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $models = $this->getUnitMapper()->createUnits(array_keys($units));
             foreach ($models as $unit) {
                 $this->getHelper()->updateUnitInRelatedProducts($unit, $unit->getUnit());
+                $connection->commit();
             }
         } catch(\Exception $e) {
+            $connection->rollBack();
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(
                 array(

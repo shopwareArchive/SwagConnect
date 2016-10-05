@@ -382,7 +382,7 @@ class ProductFromShop implements ProductFromShopBase
     public function calculateShippingCosts(Order $order)
     {
         $countryIso3 = $order->deliveryAddress->country;
-        $country = Shopware()->Models()->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
+        $country = $this->manager->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
 
         if (!$country) {
             return new Shipping(array('isShippable' => false));
@@ -395,17 +395,19 @@ class ProductFromShop implements ProductFromShopBase
         }
 
         /* @var \Shopware\Models\Shop\Shop $shop */
-        $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
+        $shop = $this->manager->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
         if (!$shop) {
             return new Shipping(array('isShippable' => false));
         }
         $shop->registerResources(Shopware()->Bootstrap());
 
+        /** @var /Enlight_Components_Session_Namespace $session */
+        $session = Shopware()->Session();
         $sessionId = uniqid('connect_remote');
-        Shopware()->System()->sSESSION_ID = $sessionId;
+        $session->offsetSet('sSESSION_ID', $sessionId);
 
         /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
-        $shipping = Shopware()->Models()->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy(array(
+        $shipping = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy(array(
             'type' => 0 // standard shipping
         ));
 
@@ -415,9 +417,9 @@ class ProductFromShop implements ProductFromShopBase
             return new Shipping(array('isShippable' => false));
         }
 
-        Shopware()->System()->_SESSION['sDispatch'] = $shipping->getId();
+        $session->offsetSet('sDispatch', $shipping->getId());
 
-        $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
+        $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
         $products = array();
         /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
         foreach ($order->orderItems as $orderItem) {

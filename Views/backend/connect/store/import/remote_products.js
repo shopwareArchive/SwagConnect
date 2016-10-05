@@ -10,7 +10,8 @@ Ext.define('Shopware.apps.Connect.store.import.RemoteProducts', {
         { name: 'Article_name',  type: 'string' },
         { name: 'Supplier_name',  type: 'string' },
         { name: 'Article_active',  type: 'boolean' },
-        { name: 'Price_basePrice',  type: 'string' },
+        { name: 'Price_basePrice',  type: 'float' },
+        { name: 'Price_price',  type: 'float' },
         { name: 'Tax_name',  type: 'string' }
     ],
     proxy : {

@@ -235,6 +235,8 @@ class Update
                     SET `connect_reference` = `attr" . $row['value'] . "` 
                     WHERE connect_reference IS NULL;
                 ");
+
+                Shopware()->Db()->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
             }
         }
     }

@@ -108,6 +108,11 @@ class Helper
         return null;
     }
 
+    /**
+     * @param Product $product
+     * @param int $mode
+     * @return null|ProductDetail
+     */
     public function  getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
@@ -115,12 +120,12 @@ class Helper
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
-
         $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
-        $query = $builder->getQuery();
 
+        $query = $builder->getQuery();
         $query->setParameter('shopId', $product->shopId);
         $query->setParameter('sourceId', $product->sourceId);
+
         $result = $query->getResult(
             $mode
         );

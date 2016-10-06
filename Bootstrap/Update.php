@@ -229,15 +229,18 @@ class Update
         if (version_compare($this->version, '1.0.6', '<=')) {
             $result = Shopware()->Db()->query("SELECT value FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
             $row = $result->fetch();
+            $attr = 19;
             if ($row) {
-                Shopware()->Db()->query("
+                $attr = $row['value'];
+            }
+
+            Shopware()->Db()->query("
                     UPDATE `s_articles_attributes` 
-                    SET `connect_reference` = `attr" . $row['value'] . "` 
+                    SET `connect_reference` = `attr" . $attr . "` 
                     WHERE connect_reference IS NULL;
                 ");
 
-                Shopware()->Db()->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
-            }
+            Shopware()->Db()->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
         }
     }
 }

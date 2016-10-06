@@ -284,32 +284,75 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getExportListAction()
     {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-        $builder->addSelect(array(
-            'at.exportStatus as exportStatus',
-            'at.exportMessage as exportMessage',
-            'at.category'
-        ));
-        $builder->andWhere('at.shopId IS NULL');
+        $filter = (array)$this->Request()->getParam('filter', array());
+        $order = reset($this->Request()->getParam('sort', array()));
 
-        $query = $builder->getQuery();
+        $builder = $this->getModelManager()->getConnection()->createQueryBuilder();
+        $builder->select(array(
+            'a.id',
+            'd.ordernumber as number',
+            'd.inStock as inStock',
+            'a.name as name',
+            's.name as supplier',
+            'a.active as active',
+            't.tax as tax',
+            'p.price * (100 + t.tax) / 100 as price',
+            'i.category',
+            'i.export_status as exportStatus',
+            'i.export_message as exportMessage'
+        ))
+            ->from('s_plugin_connect_items', 'i')
+            ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')
+            ->innerJoin('a', 's_articles_details', 'd', 'a.main_detail_id = d.id')
+            ->leftJoin('d', 's_articles_prices', 'p', 'd.id = p.articledetailsID')
+            ->leftJoin('a', 's_core_tax', 't', 'a.taxID = t.id')
+            ->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id')
+            ->groupBy('i.article_id')
+            ->where('i.shop_id IS NULL');
 
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
+        foreach($filter as $key => $rule) {
+            switch($rule['property']) {
+                case 'search':
+                    $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR supplier.name LIKE :search')
+                        ->setParameter('search', $rule['value']);
+                    break;
+                case 'categoryId':
+                    $builder->innerJoin('a', 's_articles_categories', 'sac', 'a.id = sac.articleID')
+                            ->andWhere('sac.categoryID = :categoryId')
+                            ->setParameter('categoryId', $rule['value']);
+                    break;
+                case 'supplierId':
+                    $builder->andWhere('a.supplierID = :supplierId')
+                            ->setParameter('supplierId', $rule['value']);
+                    break;
+                case 'exportStatus':
+                    $builder->andWhere('items.export_status LIKE :status')
+                            ->setParameter('status', $rule['value']);
+                    break;
+                case 'active':
+                    $builder->andWhere('a.active = :active')
+                            ->setParameter('active', $rule['value']);
+                    break;
+                default:
+                    continue;
+            }
+        }
 
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
-        $total = array_sum($countResult);
-        // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
-//        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
+        if (!empty($order)) {
+            $builder->orderBy($order['property'], $order['direction']);
+        }
+
+        $total = $builder->execute()->rowCount();
+
+        $builder->setFirstResult((int)$this->Request()->getParam('start'));
+        $builder->setMaxResults((int)$this->Request()->getParam('limit'));
+
+        $data = $builder->execute()->fetchAll();
 
         $this->View()->assign(array(
             'success' => true,
             'data' => $data,
-            'total' => $total
+            'total' => $total,
         ));
     }
 

@@ -611,9 +611,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getHost();
-
-        $loginUrl = $host . '/sdk/pluginCommunication/login';
+        $loginUrl = $this->getHost() . '/sdk/pluginCommunication/login';
 
         // Try to login into connect
         $response = $client->post(
@@ -626,27 +624,34 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $responseObject = json_decode($response->getBody());
 
-        if($responseObject->success) {
-            // Save the data
-            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->removeConnectMenuEntry();
-            $this->getSDK()->verifySdk();
-            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
-            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
-            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
-
+        if(!$responseObject->success) {
             $this->View()->assign([
-                'success' => true,
-                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
+                'success' => false,
+                'message' => $responseObject->reason
             ]);
 
             return;
         }
 
+        try {
+            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $this->getSDK()->verifySdk();
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
+            $this->removeConnectMenuEntry();
+            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
+        } catch (\Exception $e) {
+            $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
+
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
         $this->View()->assign([
-            'success' => false,
-            'message' => $responseObject->reason
+            'success' => true
         ]);
     }
 
@@ -682,26 +687,34 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $responseObject = json_decode($response->getBody());
 
-        if($responseObject->success) {
-            // Save the data
-            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->getSDK()->verifySdk();
-            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
-            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
-            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
-            $this->removeConnectMenuEntry();
+        if(!$responseObject->success) {
             $this->View()->assign([
-                'success' => true,
-                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
+                'success' => false,
+                'message' => $responseObject->reason
             ]);
 
             return;
         }
 
+        try {
+            $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
+            $this->getSDK()->verifySdk();
+            $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
+            $this->removeConnectMenuEntry();
+            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
+        } catch (\Exception $e) {
+            $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
+
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
         $this->View()->assign([
-            'success' => false,
-            'message' => $responseObject->reason
+            'success' => true
         ]);
     }
 

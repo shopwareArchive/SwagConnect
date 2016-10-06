@@ -30,10 +30,10 @@ class ProductStreams extends BaseSubscriber
 
         switch($request->getActionName()) {
             case 'delete':
-                $stream = $this->getProductStreamService()->isStreamExported($request->get('id'));
+                $streamId = $request->get('id');
 
-                if ($stream) {
-                    //todo: call SDK to create stream delete change here
+                if ($this->getProductStreamService()->isStreamExported($streamId)) {
+                    $this->getSDK()->recordStreamDelete($streamId);
                 }
                 break;
             default:

@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Doctrine\DBAL\DBALException;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -346,6 +347,20 @@ class ConnectExport
      */
     public function getExportList(SearchCriteria $criteria)
     {
+        $customProductsTableExists = false;
+        try {
+            $builder = $this->manager->getConnection()->createQueryBuilder();
+            $builder->select('id');
+            $builder->from('s_plugin_custom_products_template');
+            $builder->setMaxResults(1);
+            $builder->execute()->fetch();
+
+            $customProductsTableExists = true;
+        } catch (DBALException $e) {
+            // ignore it
+            // custom products is not installed
+        }
+
         $builder = $this->manager->getConnection()->createQueryBuilder();
         $builder->select(array(
             'a.id',
@@ -368,6 +383,11 @@ class ConnectExport
             ->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id')
             ->groupBy('i.article_id')
             ->where('i.shop_id IS NULL');
+
+        if ($customProductsTableExists) {
+            $builder->addSelect("IF(spcptpr.template_id > 0, 1, 0) as customProduct")
+                    ->leftJoin('a', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'a.id = spcptpr.article_id');
+        }
 
         if ($criteria->search) {
             $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR supplier.name LIKE :search')

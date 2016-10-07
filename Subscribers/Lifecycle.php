@@ -26,6 +26,7 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
+            'Shopware\Models\Article\Detail::postPersist' => 'onPersistDetail',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
@@ -144,6 +145,48 @@ class Lifecycle extends BaseSubscriber
             } elseif ($model instanceof \Shopware\Models\Article\Article){
                 $this->generateChangesForArticle($model, $autoUpdate);
             }
+        } catch (\Exception $e) {
+            // If the update fails due to missing requirements
+            // (e.g. category assignment), continue without error
+        }
+    }
+
+    /**
+     * Callback method to insert new article details in Connect system
+     * Used when article is exported and after that variants are generated
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onPersistDetail(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
+        $configComponent = new Config(Shopware()->Models());
+
+        $autoUpdate = $configComponent->getConfig('autoUpdateProducts', 1);
+        if (!$autoUpdate) {
+            return;
+        }
+
+        $detail = $eventArgs->get('entity');
+
+        // Check if entity is a connect product
+        $attribute = $this->getHelper()->getConnectAttributeByModel($detail->getArticle());
+        if (!$attribute) {
+            return;
+        }
+
+        // if article is not exported to Connect
+        // don't need to generate changes
+        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+            return;
+        }
+
+        // Mark the product for connect update
+        try {
+            $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+            $this->getConnectExport()->export(
+                array($detailAttribute->getSourceId()), null, true
+            );
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

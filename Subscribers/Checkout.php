@@ -473,10 +473,9 @@ class Checkout extends BaseSubscriber
         /** \Shopware\Connect\Struct\Product */
         foreach ($products as $product) {
             $messages[] = new Message(array(
-                'message' => 'Availability of product %product changed to %availability',
+                'message' => 'Due the technical reasons, product %product is not available.',
                 'values' => array(
                     'product' => $product->title,
-                    'availability' => 0
                 )
             ));
         }

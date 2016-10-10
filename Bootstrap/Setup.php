@@ -401,6 +401,8 @@ class Setup
      */
     private function createMyAttributes()
     {
+        //todo: refactor "addAttribute", we need to use \Shopware\Bundle\AttributeBundle\Service\CrudService::update instead
+
         /** @var \Shopware\Components\Model\ModelManager $modelManager */
         $modelManager =Shopware()->Models();
 
@@ -502,8 +504,16 @@ class Setup
             true
         );
 
+        $modelManager->addAttribute(
+            's_articles_supplier_attributes',
+            'connect', 'is_remote',
+            'int(1)',
+            true
+        );
+
         $modelManager->generateAttributeModels(array(
             's_articles_attributes',
+            's_articles_supplier_attributes',
             's_order_attributes',
             's_core_customergroups_attributes',
             's_articles_prices_attributes',

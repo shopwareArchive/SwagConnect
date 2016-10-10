@@ -29,8 +29,8 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 ('frontend/connect/shipping_costs', 1, 1, 'connect_dispatch_shop_id', 'Versand für Lager {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_shop_id', 'Shipping from storage {$item.shopInfo.id}', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 
-('frontend/checkout/connect', 1, 1, 'due_the_technical_reasons__product__product_is_not_available_', 'Bestellung von Artikel %product kann aus technischen Gründen nicht abgeschlossen werden', '2016-10-07 18:32:48', '2016-10-07 18:32:48'),
-('frontend/checkout/connect', 1, 2, 'due_the_technical_reasons__product__product_is_not_available_', 'Due to technical reasons, product %product is not available.', '2016-10-07 18:32:48', '2016-10-07 18:32:48'),
+('frontend/checkout/connect', 1, 1, 'due_to_technical_reasons__product__product_is_not_available_', 'Bestellung von Artikel %product kann aus technischen Gründen nicht abgeschlossen werden', '2016-10-07 18:32:48', '2016-10-07 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'due_to_technical_reasons__product__product_is_not_available_', 'Due to technical reasons, product %product is not available.', '2016-10-07 18:32:48', '2016-10-07 18:32:48'),
 
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_tax_info', 'Tax rate for gross prices might be smaller', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_country_label', 'Dispatch by country', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),

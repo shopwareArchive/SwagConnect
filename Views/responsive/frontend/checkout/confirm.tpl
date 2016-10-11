@@ -14,17 +14,7 @@
 {block name="frontend_checkout_confirm_submit"}
 	{block name="frontend_checkout_connect_submit_message"}
 		{if $connectMessages}
-			{foreach from=$connectMessages item=connectShop}
-				{foreach from=$connectShop item=connectmessage}
-					{$message = $connectmessage->message}
-					{foreach from=$connectmessage->values key=key item=value}
-						{$message = "%{$key}"|str_replace:$value:$message}
-					{/foreach}
-					{$messages[] = $message}
-				{/foreach}
-			{/foreach}
-
-			{include file="frontend/_includes/messages.tpl" type="error" list=$messages}
+			{* do not show submit button when $connectMessages is not empty *}
 		{elseif $phoneMissing}
 			{include file="frontend/_includes/messages.tpl" type="error" content="<a href='{url controller=account action=billing sTarget=checkout}'>{s namespace="frontend/checkout/connect" name="frontend_checkout_cart_connect_phone"}You need to leave your phone number in order to purchase these products. Click here in order to change your phone number now.{/s}</a>"}
 		{else}

@@ -58,7 +58,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
         basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
-        connectAttributeLabel: Ext.String.format('{s name=config/connect_attribute_label}[0]-Attribut{/s}', marketplaceName),
         alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
@@ -168,8 +167,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     uncheckedValue: 0,
                     labelWidth: me.defaults.labelWidth,
                     helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
-                },
-                me.createAttributeCombo()
+                }
             ]
         });
     },
@@ -406,63 +404,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     },
 
     /**
-     * Creates the Shopware Connect attribute combo field which is displayed only for default shop
-     * @return Ext.container.Container
-     */
-    createAttributeCombo: function() {
-        var me = this;
-
-        var attributeStore = new Ext.data.ArrayStore({
-            fields: ['id', 'name'],
-            data: [
-                [1, 'attr1'],
-                [2, 'attr2'],
-                [3, 'attr3'],
-                [4, 'attr4'],
-                [5, 'attr5'],
-                [6, 'attr6'],
-                [7, 'attr7'],
-                [8, 'attr8'],
-                [9, 'attr9'],
-                [10, 'attr10'],
-                [11, 'attr11'],
-                [12, 'attr12'],
-                [13, 'attr13'],
-                [14, 'attr14'],
-                [15, 'attr15'],
-                [16, 'attr16'],
-                [17, 'attr17'],
-                [18, 'attr18'],
-                [19, 'attr19'],
-                [20, 'attr20']
-            ]
-        });
-
-        var defaultContainer = Ext.create('Ext.container.Container', {
-            columnWidth: 1,
-            layout: 'anchor',
-            border: false,
-            items: [
-                {
-                    xtype: 'combo',
-                    name: 'connectAttribute',
-                    anchor: '100%',
-                    required: true,
-                    editable: false,
-                    valueField: 'id',
-                    displayField: 'name',
-                    fieldLabel: me.snippets.connectAttributeLabel,
-                    store: attributeStore,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: Ext.String.format('{s name=config/help/connect_attribute}Schreibe die Quell-Id jedes [0]-Produktes in dieses Attribut. Über dieses Attribut kann im Risiko-Managment oder dem Versandkosten-Modul auf [0]-Produkte geprüft werden.{/s}', marketplaceName)
-                }
-            ]
-        });
-
-        return defaultContainer;
-    },
-
-    /**
      * Find general config record by id
      * and load into form
      */
@@ -476,10 +417,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         if (!record.get('shopwareId')) {
             me.shopwareIdField.hide();
-        }
-
-        if (record.get('connectAttribute') < 1) {
-            record.set('connectAttribute', 19);
         }
 
         me.loadRecord(record);

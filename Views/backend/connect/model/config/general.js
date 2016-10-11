@@ -35,6 +35,8 @@ Ext.define('Shopware.apps.Connect.model.config.General', {
         //{block name="backend/connect/model/config/general/fields"}{/block}
         { name: 'isDefaultShop', type: 'boolean' },
         { name: 'apiKey', type: 'string' },
+        { name: 'shopId', type: 'int' },
+        { name: 'shopwareId', type: 'string' },
         { name: 'connectDebugHost', type: 'string' },
         { name: 'logRequest', type: 'string' },
         { name: 'detailShopInfo', type: 'string' },

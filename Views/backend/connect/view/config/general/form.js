@@ -48,7 +48,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         anchor: '100%'
     },
 
-
     snippets: {
         apiKeyHeader: '{s name=config/main/api_key}API-Key{/s}',
         apiKeyDescription: Ext.String.format('{s name=config/api-key-description}Du findest deinen API-Key in [0] unter Einstellungen und Synchronisation.<br><br>{/s}', marketplaceName),
@@ -299,11 +298,22 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             items = me.getApiKeyItems();
 
+        me.shopwareIdField = Ext.create('Ext.form.field.Display', {
+            fieldLabel: 'Shopware ID',
+            name: 'shopwareId'
+        });
+
         var leftContainer = Ext.create('Ext.container.Container', {
             columnWidth: 0.5,
             layout: 'anchor',
             border: false,
             items: [
+                {
+                    xtype: 'displayfield',
+                    fieldLabel: 'Shop ID',
+                    name: 'shopId'
+                },
+                me.shopwareIdField,
                 {
                     xtype: 'checkbox',
                     name: 'detailProductNoIndex',
@@ -403,6 +413,10 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         if (!record) {
             record = Ext.create('Shopware.apps.Connect.model.config.General');
+        }
+
+        if (!record.get('shopwareId')) {
+            me.shopwareIdField.hide();
         }
 
         me.loadRecord(record);

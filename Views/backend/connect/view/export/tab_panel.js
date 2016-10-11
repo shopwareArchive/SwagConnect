@@ -40,6 +40,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'error-price': 'icon-creative-commons-noncommercial-eu icon-size',
             'inactive': 'sc-icon-inactive icon-size',
             'update': 'sprite-arrow-circle-135',
+            'custom-product': 'sc-icon-custom-product',
             'export': 'sprite-arrow-circle-135'
         };
     }

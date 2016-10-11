@@ -112,6 +112,11 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     height: 100%;
 }
 
+.sc-icon-custom-product {
+    background: url("../images/icon-custom-product.png") no-repeat;
+    height: 100%;
+}
+
 .local-product-color {
     color: #000000;
 }

@@ -38,6 +38,7 @@ use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Doctrine\ORM\NoResultException;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use Shopware\Connect\SDK;
 
@@ -284,32 +285,28 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getExportListAction()
     {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-        $builder->addSelect(array(
-            'at.exportStatus as exportStatus',
-            'at.exportMessage as exportMessage',
-            'at.category'
+        $filter = (array)$this->Request()->getParam('filter', array());
+        $order = reset($this->Request()->getParam('sort', array()));
+
+        $criteria = new SearchCriteria(array(
+            'offset' => (int)$this->Request()->getParam('start'),
+            'limit' => (int)$this->Request()->getParam('limit'),
+            'orderBy' => $order['property'],
+            'orderByDirection' => $order['direction'],
+
         ));
-        $builder->andWhere('at.shopId IS NULL');
 
-        $query = $builder->getQuery();
+        foreach($filter as $key => $rule) {
+            $field = $rule['property'];
+            $criteria->{$field} = $rule['value'];
+        }
 
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
-
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
-        $total = array_sum($countResult);
-        // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
-//        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
+        $exportList = $this->getConnectExport()->getExportList($criteria);
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => $data,
-            'total' => $total
+            'data' => $exportList->articles,
+            'total' => $exportList->count,
         ));
     }
 

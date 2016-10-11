@@ -508,7 +508,8 @@ class Setup
             's_articles_supplier_attributes',
             'connect', 'is_remote',
             'int(1)',
-            true
+            true,
+            0
         );
 
         $modelManager->generateAttributeModels(array(

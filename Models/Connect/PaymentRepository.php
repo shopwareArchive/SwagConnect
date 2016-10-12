@@ -43,8 +43,8 @@ class PaymentRepository
     }
 
     /**
-     * @param $paymentId
-     * @param $connectIsAllowed
+     * @param int $paymentId
+     * @param int $connectIsAllowed
      */
     public function updateConnectIsAllowed($paymentId, $connectIsAllowed)
     {

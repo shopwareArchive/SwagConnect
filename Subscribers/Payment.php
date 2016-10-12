@@ -70,8 +70,8 @@ class Payment extends BaseSubscriber
                 );
                 break;
             case 'updatePayments':
-                $paymentId = $request->getParam('id', null);
-                $isAllowed = $request->getParam('connectIsAllowed', false);
+                $paymentId = (int) $request->getParam('id', null);
+                $isAllowed = (int) $request->getParam('connectIsAllowed', false);
 
                 $this->getPaymentService()->updateConnectAllowed($paymentId, $isAllowed);
                 break;

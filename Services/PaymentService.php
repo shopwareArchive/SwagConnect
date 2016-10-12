@@ -3,42 +3,42 @@
 namespace ShopwarePlugins\Connect\Services;
 
 use Shopware\Models\Payment\Repository as PaymentRepository;
-use Shopware\CustomModels\Connect\PaymentRepository as CustomPaymentRepository;
+use Shopware\CustomModels\Connect\PaymentRepository as ConnectPaymentRepository;
 
 class PaymentService
 {
     private $paymentRepository;
-    private $customPaymentRepository;
+    private $connectPaymentRepository;
 
     public function __construct(
         PaymentRepository $paymentRepository,
-        CustomPaymentRepository $customPaymentRepository
+        ConnectPaymentRepository $connectPaymentRepository
     ) {
         $this->paymentRepository = $paymentRepository;
-        $this->customPaymentRepository = $customPaymentRepository;
+        $this->connectPaymentRepository = $connectPaymentRepository;
     }
 
     /**
-     * @param $payments
+     * @param array $payments
      * @return array
      */
-    public function allowConnect($payments)
+    public function allowConnect(array $payments)
     {
-        $connectSuppliers = $this->customPaymentRepository->getConnectAllowedPayments();
+        $connectSuppliers = $this->connectPaymentRepository->getConnectAllowedPayments();
 
-        foreach ($payments as $index => $supplier) {
-            $payments[$index]['connectIsAllowed'] = in_array($supplier['id'], $connectSuppliers);
+        foreach ($payments as $index => $payment) {
+            $payments[$index]['connectIsAllowed'] = in_array($payment['id'], $connectSuppliers);
         }
 
         return $payments;
     }
 
     /**
-     * @param $paymentId
-     * @param $connectIsAllowed
+     * @param int $paymentId
+     * @param int $connectIsAllowed
      */
     public function updateConnectAllowed($paymentId, $connectIsAllowed)
     {
-        $this->customPaymentRepository->updateConnectIsAllowed($paymentId, $connectIsAllowed);
+        $this->connectPaymentRepository->updateConnectIsAllowed($paymentId, $connectIsAllowed);
     }
 }

@@ -52,7 +52,7 @@ class PaymentRepository
         $builder = $this->connection->createQueryBuilder();
         $builder->update('s_core_paymentmeans_attributes', 'pa')
             ->set('pa.connect_is_allowed', $connectIsAllowed)
-            ->where('pa.connect_is_allowed = :paymentId')
+            ->where('pa.paymentmeanID = :paymentId')
             ->setParameter('paymentId', $paymentId);
 
         $builder->execute();

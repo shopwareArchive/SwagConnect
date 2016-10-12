@@ -167,10 +167,11 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
+        /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $eventArgs->get('entity');
-
+        $article = $detail->getArticle();
         // Check if entity is a connect product
-        $attribute = $this->getHelper()->getConnectAttributeByModel($detail->getArticle());
+        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
         if (!$attribute) {
             return;
         }
@@ -184,8 +185,13 @@ class Lifecycle extends BaseSubscriber
         // Mark the product for connect update
         try {
             $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+            // main detail should be updated as well, because shopware won't call lifecycle event
+            // even postUpdate of Detail. By this way Connect will generate change for main variant,
+            // otherwise $product->variant property is an empty array
+            // if main detail is not changed, Connect SDK won't generate change for it
+            $mainDetailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($article->getMainDetail());
             $this->getConnectExport()->export(
-                array($detailAttribute->getSourceId()), null, true
+                array($mainDetailAttribute->getSourceId(), $detailAttribute->getSourceId()), null, true
             );
         } catch (\Exception $e) {
             // If the update fails due to missing requirements

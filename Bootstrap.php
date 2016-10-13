@@ -132,7 +132,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function doSetup($fullSetup = true)
     {
-        if (!$this->assertMinimumVersion('5.2.0')) {
+        if (!$this->assertMinimumVersion('5.0.0')) {
             throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
         };
 

@@ -58,12 +58,11 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
         basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
-        alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
         basicHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
-        unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}',marketplaceName),
+        unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}', marketplaceName),
         importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
         createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
         activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
@@ -74,20 +73,20 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.createElements();
         me.dockedItems = [{
-                xtype: 'toolbar',
-                dock: 'bottom',
-                ui: 'shopware-ui',
-                cls: 'shopware-toolbar',
-                items: me.getFormButtons()
-            }];
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'shopware-ui',
+            cls: 'shopware-toolbar',
+            items: me.getFormButtons()
+        }];
 
         me.generalConfigStore = Ext.create('Shopware.apps.Connect.store.config.General').load({
-            callback:function() {
+            callback: function () {
                 me.populateForm();
             }
         });
@@ -99,19 +98,20 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      * Creates form elements
      * @return Array
      */
-    createElements: function() {
-        var me = this;
-            basicConfigFieldset = me.getBasicConfigFieldset(),
-            advancedConfigFieldset = me.getAdvancedConfigFieldset(),
+    createElements: function () {
+        var me = this,
             elements = [];
+
+        elements.push(me.getBasicFieldset());
 
         if (defaultMarketplace == false) {
             // extended import settings are available
             // only for SEM shops
             elements.push(me.getImportSettingsFieldset());
         }
-        elements.push(basicConfigFieldset);
-        elements.push(advancedConfigFieldset);
+
+        elements.push(me.getBasicConfigFieldset());
+        elements.push(me.getAdvancedConfigFieldset());
 
         return elements;
     },
@@ -120,7 +120,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      * Returns form buttons, save and cancel
      * @returns Array
      */
-    getFormButtons: function() {
+    getFormButtons: function () {
         var me = this,
             buttons = ['->'];
 
@@ -132,7 +132,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         var cancelButton = Ext.create('Ext.button.Button', {
             text: me.snippets.cancel,
-            handler: function(btn) {
+            handler: function (btn) {
                 btn.up('window').close();
             }
         });
@@ -144,10 +144,37 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     },
 
     /**
+     * Returns API key field set
+     *
+     * @return Ext.form.FieldSet
+     */
+    getBasicFieldset: function () {
+        var me = this;
+
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.basicSettings,
+            defaultType: 'textfield',
+            layout: 'anchor',
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'hasSsl',
+                    fieldLabel: me.snippets.hasSslLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
+                }
+            ]
+        });
+    },
+
+    /**
      * Creates basic configuration field set
      * @return Ext.form.FieldSet
      */
-    getBasicConfigFieldset: function() {
+    getBasicConfigFieldset: function () {
         var me = this,
             items = [],
             leftElements = me.createLeftElements(),
@@ -156,7 +183,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         items.push(leftElements);
         items.push(rightElements);
 
-        var fieldset = Ext.create('Ext.form.FieldSet', {
+        return Ext.create('Ext.form.FieldSet', {
             layout: 'column',
             title: me.snippets.basicHeader,
             defaults: {
@@ -165,8 +192,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             },
             items: items
         });
-
-        return fieldset;
     },
 
     /**
@@ -174,10 +199,10 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      *
      * @return Ext.form.FieldSet
      */
-    getImportSettingsFieldset: function() {
+    getImportSettingsFieldset: function () {
         var me = this;
 
-        var importSettingsFieldset = Ext.create('Ext.form.FieldSet', {
+        return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.importSettingsHeader,
             defaultType: 'checkbox',
@@ -207,8 +232,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 }
             ]
         });
-
-        return importSettingsFieldset;
     },
 
     getApiKeyItems: function () {
@@ -235,24 +258,28 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                         flex: 1,
                         height: 27,
                         text: me.snippets.apiKeyCheck,
-                        handler: function(btn) {
+                        handler: function (btn) {
                             var apiField = btn.up('form').down('textfield[name=apiKey]'),
                                 apiKey = apiField.getValue();
                             Ext.Ajax.request({
                                 scope: this,
                                 url: '{url module=backend controller=Connect action=verifyApiKey}',
-                                success: function(result, request) {
+                                success: function (result, request) {
                                     var response = Ext.JSON.decode(result.responseText);
                                     Ext.get(apiField.inputEl).setStyle('background-color', response.success ? '#C7F5AA' : '#FFB0AD');
-                                    if(response.message) {
+                                    if (response.message) {
                                         Shopware.Notification.createGrowlMessage(
                                             btn.title,
                                             response.message
                                         );
                                     }
                                 },
-                                failure: function() { },
-                                params: { apiKey: apiKey }
+                                failure: function () {
+
+                                },
+                                params: {
+                                    apiKey: apiKey
+                                }
                             });
                         }
                     }
@@ -265,7 +292,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      * Creates advanced configuration field set
      * @return Ext.form.FieldSet
      */
-    getAdvancedConfigFieldset: function() {
+    getAdvancedConfigFieldset: function () {
         var me = this,
             items = me.getApiKeyItems();
 
@@ -274,7 +301,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             name: 'shopwareId'
         });
 
-        var leftContainer = Ext.create('Ext.container.Container', {
+        items.push(Ext.create('Ext.container.Container', {
             columnWidth: 0.5,
             layout: 'anchor',
             border: false,
@@ -294,10 +321,9 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     labelWidth: me.defaults.labelWidth
                 }
             ]
-        });
-        items.push(leftContainer);
+        }));
 
-        var fieldset = Ext.create('Ext.form.FieldSet', {
+        return Ext.create('Ext.form.FieldSet', {
             layout: 'anchor',
             title: me.snippets.advancedHeader,
             collapsible: true,
@@ -308,8 +334,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             },
             items: items
         });
-
-        return fieldset;
     },
 
     /**
@@ -319,7 +343,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     createLeftElements: function () {
         var me = this;
 
-        var leftContainer = Ext.create('Ext.container.Container', {
+        return Ext.create('Ext.container.Container', {
             columnWidth: 0.5,
             padding: '0 20 0 0',
             layout: 'anchor',
@@ -334,17 +358,15 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     labelWidth: me.defaults.labelWidth,
                     helpText: me.snippets.showDropshippingHintDetailsHelptext
                 }, {
-                        xtype: 'checkbox',
-                        name: 'showShippingCostsSeparately',
-                        fieldLabel: me.snippets.separateShippingLabel,
-                        labelWidth: me.defaults.labelWidth,
-                        inputValue: 1,
-                        uncheckedValue: 0
+                    xtype: 'checkbox',
+                    name: 'showShippingCostsSeparately',
+                    fieldLabel: me.snippets.separateShippingLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    inputValue: 1,
+                    uncheckedValue: 0
                 }
             ]
         });
-
-        return leftContainer;
     },
 
     /**
@@ -354,7 +376,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     createRightElements: function () {
         var me = this;
 
-        var rightContainer = Ext.create('Ext.container.Container', {
+        return Ext.create('Ext.container.Container', {
             columnWidth: 0.5,
             layout: 'anchor',
             border: false,
@@ -370,15 +392,13 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 }
             ]
         });
-
-        return rightContainer;
     },
 
     /**
      * Find general config record by id
      * and load into form
      */
-    populateForm: function() {
+    populateForm: function () {
         var me = this,
             record = me.generalConfigStore.getAt(0);
 
@@ -391,7 +411,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         }
 
         me.loadRecord(record);
-
     }
 });
 //{/block}

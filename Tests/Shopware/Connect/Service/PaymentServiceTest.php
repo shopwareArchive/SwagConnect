@@ -63,13 +63,12 @@ class PaymentServiceTest extends ConnectTestHelper
 
     public function testConnectIsAllow()
     {
-        $connectIsAllowed = 0;
-        $this->paymentService->updateConnectAllowed($this->paymentId, $connectIsAllowed);
+        $this->paymentService->updateConnectAllowed($this->paymentId, false);
 
         $sql = 'SELECT connect_is_allowed FROM s_core_paymentmeans_attributes WHERE paymentmeanID = ?';
         $result = $this->db->fetchRow($sql, array($this->paymentId));
 
-        $this->assertEquals($result['connectIsAllowed'], $connectIsAllowed);
+        $this->assertEquals(0, $result['connectIsAllowed']);
     }
 
     public function tearDown()

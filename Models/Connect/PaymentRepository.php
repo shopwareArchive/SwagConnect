@@ -48,13 +48,12 @@ class PaymentRepository
      */
     public function updateConnectIsAllowed($paymentId, $connectIsAllowed)
     {
-        $connectIsAllowed = $connectIsAllowed == true ? 1 : 0;
-
         /** @var \Doctrine\DBAL\Connection $conn */
         $builder = $this->connection->createQueryBuilder();
         $builder->update('s_core_paymentmeans_attributes', 'pa')
-            ->set('pa.connect_is_allowed', $connectIsAllowed)
+            ->set('pa.connect_is_allowed', ':connectIsAllowed')
             ->where('pa.paymentmeanID = :paymentId')
+            ->setParameter('connectIsAllowed', $connectIsAllowed)
             ->setParameter('paymentId', $paymentId);
 
         $builder->execute();

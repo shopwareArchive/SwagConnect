@@ -368,6 +368,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $connectExport = $this->getConnectExport();
 
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+            //removes all hashes from from sw_connect_product
+            //and resets all item status
+            $connectExport->clearConnectItems();
+        }
+
         try {
             $data = !isset($data[0]) ? array($data) : $data;
             $response = $this->getSnHttpClient()->sendRequestToConnect(

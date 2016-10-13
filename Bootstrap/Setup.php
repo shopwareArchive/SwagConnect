@@ -474,6 +474,12 @@ class Setup
         );
 
         $modelManager->addAttribute(
+            's_articles_attributes',
+            'connect', 'reference',
+            'varchar(500)'
+        );
+
+        $modelManager->addAttribute(
             's_premium_dispatch_attributes',
             'connect', 'allowed',
             'int(1)',
@@ -538,7 +544,6 @@ class Setup
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
             'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
-            'connectAttribute' => array('19', null, 'general'),
             'importImagesOnFirstImport' => array('0', null, 'import'),
             'autoUpdateProducts' => array('1', null, 'export'),
             'overwriteProductName' => array('1', null, 'import'),

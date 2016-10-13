@@ -35,7 +35,7 @@ class PaymentService
 
     /**
      * @param int $paymentId
-     * @param int $connectIsAllowed
+     * @param boolean $connectIsAllowed
      */
     public function updateConnectAllowed($paymentId, $connectIsAllowed)
     {

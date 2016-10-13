@@ -71,7 +71,7 @@ class Payment extends BaseSubscriber
                 break;
             case 'updatePayments':
                 $paymentId = (int) $request->getParam('id', null);
-                $isAllowed = (int) $request->getParam('connectIsAllowed', false);
+                $isAllowed = (boolean) $request->getParam('connectIsAllowed', false);
 
                 $this->getPaymentService()->updateConnectAllowed($paymentId, $isAllowed);
                 break;

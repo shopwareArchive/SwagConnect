@@ -64,7 +64,7 @@ class ConnectFactory
     public function getSDK()
     {
         if(!$this->sdk) {
-            $this->sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+            $this->sdk = Shopware()->Container()->get('ConnectSDK');
         }
 
         return $this->sdk;

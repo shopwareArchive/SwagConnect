@@ -443,7 +443,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        return Shopware()->Container()->get('ConnectSDK');
     }
 
     /**

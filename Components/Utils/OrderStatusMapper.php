@@ -38,7 +38,7 @@ class OrderStatusMapper
                 '4' => OrderStatusStruct::STATE_ERROR, // 4 = Storno / Rejected
             );
 
-            $this->mapping = Enlight()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
+            $this->mapping = Shopware()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;

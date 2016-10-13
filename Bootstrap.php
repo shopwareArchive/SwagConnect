@@ -26,6 +26,9 @@ use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use Shopware\Connect\Gateway\PDO;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\ConnectExport;
 
 /**
  * @category  Shopware
@@ -255,7 +258,15 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($db->getConnection()),
-                $modelManager
+                $modelManager,
+                new ConnectExport(
+                    $this->getHelper(),
+                    $this->getSDK(),
+                    $modelManager,
+                    new ProductsAttributesValidator(),
+                    $this->getConfigComponents(),
+                    new ErrorHandler()
+                )
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $modelManager

@@ -51,7 +51,7 @@ class PaymentRepository
         /** @var \Doctrine\DBAL\Connection $conn */
         $builder = $this->connection->createQueryBuilder();
         $builder->update('s_core_paymentmeans_attributes', 'pa')
-            ->set('pa.connect_is_allowed', $connectIsAllowed)
+            ->set('pa.connect_is_allowed', (bool) $connectIsAllowed)
             ->where('pa.paymentmeanID = :paymentId')
             ->setParameter('paymentId', $paymentId);
 

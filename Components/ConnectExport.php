@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\DBALException;
+use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -36,6 +37,9 @@ class ConnectExport
 
     /** @var ErrorHandler */
     protected $errorHandler;
+
+    /** @var  ContainerAwareEventManager */
+    protected $eventHandler;
 
     /**
      * @var Config

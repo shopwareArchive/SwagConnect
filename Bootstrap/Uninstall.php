@@ -13,7 +13,14 @@ use Shopware\Bundle\AttributeBundle\Service\CrudService;
  */
 class Uninstall
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var bool
+     */
     protected $shopware526installed;
 
     /**
@@ -23,7 +30,7 @@ class Uninstall
 
     /**
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
-     * @param $shopware526installed
+     * @param boolean $shopware526installed
      * @param CrudService $crudService
      */
     public function __construct(

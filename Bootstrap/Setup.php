@@ -18,7 +18,14 @@ class Setup
 {
     const ATTRIBUTE_PREFIX = 'connect_';
 
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var bool
+     */
     protected $shopware526installed;
 
     /**
@@ -28,7 +35,7 @@ class Setup
 
     /**
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
-     * @param $shopware526installed
+     * @param bool $shopware526installed
      * @param CrudService $crudService
      */
     public function __construct(
@@ -726,19 +733,15 @@ class Setup
      */
     public function generateConnectPaymentAttribute()
     {
-        Shopware()->Models()->addAttribute(
+        $this->crudService->update(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed',
+            self::ATTRIBUTE_PREFIX . 'is_allowed',
             'int(1)',
-            true,
+            [],
+            null,
+            false,
             1
         );
-
-        Shopware()->Models()->generateAttributeModels(array(
-            's_core_paymentmeans_attributes'
-        ));
-
-        Shopware()->Models()->regenerateProxies();
     }
 
     public function populateConnectPaymentAttribute()

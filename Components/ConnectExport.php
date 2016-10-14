@@ -38,9 +38,6 @@ class ConnectExport
     /** @var ErrorHandler */
     protected $errorHandler;
 
-    /** @var  ContainerAwareEventManager */
-    protected $eventHandler;
-
     /**
      * @var Config
      */

@@ -191,9 +191,18 @@ class ProductStreamService
         );
     }
 
+    /**
+     * @param $streamId
+     * @return bool
+     */
     public function isStreamExported($streamId)
     {
-        return (bool) $this->streamAttrRepository->findOneBy(array('streamId' => (int) $streamId));
+        return (bool) $this->streamAttrRepository->findOneBy(
+            array(
+                'streamId' => (int) $streamId,
+                'exportStatus' => self::STATUS_SUCCESS
+            )
+        );
     }
 
     /**

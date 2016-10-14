@@ -2,6 +2,8 @@
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 use Shopware\Models\Article\Element;
 use Shopware\Models\Customer\Group;
 
@@ -14,13 +16,29 @@ use Shopware\Models\Customer\Group;
  */
 class Setup
 {
+    const ATTRIBUTE_PREFIX = 'connect_';
+
     protected $bootstrap;
     protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
-    {
+    /**
+     * @var CrudService
+     */
+    private $crudService;
+
+    /**
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param $shopware526installed
+     * @param CrudService $crudService
+     */
+    public function __construct(
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        $shopware526installed,
+        CrudService $crudService
+    ) {
         $this->bootstrap = $bootstrap;
         $this->shopware526installed = $shopware526installed;
+        $this->crudService = $crudService;
     }
 
     public function run($fullSetup)
@@ -401,124 +419,113 @@ class Setup
      */
     private function createMyAttributes()
     {
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager =Shopware()->Models();
-
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_order_attributes',
-            'connect', 'shop_id',
+            self::ATTRIBUTE_PREFIX . 'shop_id',
             'int(11)'
         );
-        $modelManager->addAttribute(
+        
+        $this->crudService->update(
             's_order_attributes',
-            'connect', 'order_id',
+            'shop_id',
             'int(11)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_categories_attributes',
-            'connect', 'import_mapping',
+            self::ATTRIBUTE_PREFIX . 'import_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_categories_attributes',
-            'connect', 'export_mapping',
+            self::ATTRIBUTE_PREFIX . 'export_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_categories_attributes',
-            'connect', 'imported',
+            self::ATTRIBUTE_PREFIX . 'imported',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_media_attributes',
-            'connect', 'hash',
+            self::ATTRIBUTE_PREFIX . 'hash',
             'varchar(255)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_premium_dispatch_attributes',
-            'connect', 'allowed',
+            self::ATTRIBUTE_PREFIX . 'allowed',
             'int(1)',
-            true,
+            [],
+            null,
+            false,
             1
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_attributes',
-            'connect', 'product_description',
+            self::ATTRIBUTE_PREFIX . 'product_description',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_prices_attributes',
-            'connect', 'price',
+            self::ATTRIBUTE_PREFIX . 'price',
             'double',
-            true,
+            [],
+            null,
+            false,
             0
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_core_customergroups_attributes',
-            'connect', 'group',
+            self::ATTRIBUTE_PREFIX . 'group',
             'int(1)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_attributes',
-            'connect', 'article_shipping',
+            self::ATTRIBUTE_PREFIX . 'article_shipping',
             'varchar(1000)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_attributes',
-            'connect', 'reference',
+            self::ATTRIBUTE_PREFIX . 'reference',
             'varchar(500)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_premium_dispatch_attributes',
-            'connect', 'allowed',
+            self::ATTRIBUTE_PREFIX . 'allowed',
             'int(1)',
-            true,
+            [],
+            null,
+            false,
             1
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_categories_attributes',
-            'connect', 'imported_category',
-            'int(1)',
-            true
+            self::ATTRIBUTE_PREFIX . 'imported_category',
+            'int(1)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_attributes',
-            'connect', 'mapped_category',
-            'int(1)',
-            true
+            self::ATTRIBUTE_PREFIX . 'mapped_category',
+            'int(1)'
         );
 
-        $modelManager->addAttribute(
+        $this->crudService->update(
             's_articles_attributes',
-            'connect', 'remote_unit',
-            'varchar(32)',
-            true
+            self::ATTRIBUTE_PREFIX . 'remote_unit',
+            'varchar(32)'
         );
-
-        $modelManager->generateAttributeModels(array(
-            's_articles_attributes',
-            's_order_attributes',
-            's_core_customergroups_attributes',
-            's_articles_prices_attributes',
-            's_premium_dispatch_attributes',
-            's_categories_attributes',
-            's_order_details_attributes',
-            's_order_basket_attributes',
-            's_media_attributes'
-        ));
     }
 
 

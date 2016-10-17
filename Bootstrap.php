@@ -132,13 +132,17 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function doSetup($fullSetup = true)
     {
-        if (!$this->assertVersionGreaterThen('4.1.0')) {
-            throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
+        if (!$this->assertMinimumVersion('5.2.0')) {
+            throw new \RuntimeException('Shopware version 5.2.0 or later is required.');
         };
 
         $this->registerMyLibrary();
 
-        $setup = new Setup($this, $this->assertMinimumVersion('5.2.6'));
+        $setup = new Setup(
+            $this,
+            $this->assertMinimumVersion('5.2.6'),
+            $this->get('shopware_attribute.crud_service')
+        );
         $setup->run($fullSetup);
     }
 
@@ -163,7 +167,11 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->registerMyLibrary();
 
-        $uninstall = new Uninstall($this, $this->assertMinimumVersion('5.2.6'));
+        $uninstall = new Uninstall(
+            $this,
+            $this->assertMinimumVersion('5.2.6'),
+            $this->get('shopware_attribute.crud_service')
+        );
         return $uninstall->run();
     }
 

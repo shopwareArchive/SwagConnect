@@ -399,7 +399,7 @@ class ProductFromShop implements ProductFromShopBase
         if (!$shop) {
             return new Shipping(array('isShippable' => false));
         }
-        $shop->registerResources(Shopware()->Bootstrap());
+        $shop->registerResources();
 
         /** @var /Enlight_Components_Session_Namespace $session */
         $session = Shopware()->Session();

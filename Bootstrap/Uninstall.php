@@ -1,6 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Bootstrap;
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 
 /**
  * Uninstaller of the plugin.
@@ -12,13 +13,34 @@ namespace ShopwarePlugins\Connect\Bootstrap;
  */
 class Uninstall
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var bool
+     */
     protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
-    {
+    /**
+     * @var CrudService
+     */
+    private $crudService;
+
+    /**
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param boolean $shopware526installed
+     * @param CrudService $crudService
+     */
+    public function __construct(
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        $shopware526installed,
+        CrudService $crudService
+    ) {
         $this->bootstrap = $bootstrap;
         $this->shopware526installed = $shopware526installed;
+        $this->crudService = $crudService;
     }
 
     public function run()
@@ -38,54 +60,40 @@ class Uninstall
      */
     public function removeMyAttributes()
     {
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = Shopware()->Models();
+        $this->crudService->delete(
+            's_order_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'shop_id'
+        );
 
-        try {
-            $modelManager->removeAttribute(
-                's_order_attributes',
-                'connect', 'shop_id'
-            );
-            $modelManager->removeAttribute(
-                's_order_attributes',
-                'connect', 'order_id'
-            );
+        $this->crudService->delete(
+            's_order_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'order_id'
+        );
 
-            $modelManager->removeAttribute(
-                's_categories_attributes',
-                'connect', 'import_mapping'
-            );
+        $this->crudService->delete(
+            's_categories_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'import_mapping'
+        );
 
-            $modelManager->removeAttribute(
-                's_categories_attributes',
-                'connect', 'export_mapping'
-            );
+        $this->crudService->delete(
+            's_categories_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'export_mapping'
+        );
 
-            $modelManager->removeAttribute(
-                's_categories_attributes',
-                'connect', 'imported'
-            );
+        $this->crudService->delete(
+            's_categories_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'imported'
+        );
 
-            $modelManager->removeAttribute(
-                's_premium_dispatch_attributes',
-                'connect', 'allowed'
-            );
+        $this->crudService->delete(
+            's_premium_dispatch_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'allowed'
+        );
 
-            $modelManager->removeAttribute(
-                's_media_attributes',
-                'connect', 'hash'
-            );
-
-            $modelManager->generateAttributeModels(array(
-                's_premium_dispatch_attributes',
-                's_categories_attributes',
-                's_order_details_attributes',
-                's_order_basket_attributes',
-                's_media_attributes'
-            ));
-        } catch (\Exception $e) {
-        }
-
+        $this->crudService->delete(
+            's_media_attributes',
+            Setup::ATTRIBUTE_PREFIX . 'hash'
+        );
     }
 
     /**

@@ -434,7 +434,7 @@ class Setup
         
         $this->crudService->update(
             's_order_attributes',
-            'shop_id',
+            self::ATTRIBUTE_PREFIX . 'order_id',
             'int(11)'
         );
 

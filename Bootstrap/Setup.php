@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Models\Article\Element;
 use Shopware\Models\Customer\Group;
 
@@ -395,120 +396,128 @@ class Setup
         }
     }
 
+    public function getCrudService()
+    {
+        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+    }
 
     /**
      * Creates product, order and category attributes
      */
     private function createMyAttributes()
     {
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager =Shopware()->Models();
+        /** @var CrudService $crudService */
+        $crudService = $this->getCrudService();
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_order_attributes',
-            'connect', 'shop_id',
-            'int(11)'
+            'connect_shop_id',
+            'integer'
         );
-        $modelManager->addAttribute(
+
+        $crudService->update(
             's_order_attributes',
-            'connect', 'order_id',
-            'int(11)'
+            'connect_order_id',
+            'integer'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'import_mapping',
+            'connect_import_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'export_mapping',
+            'connect_export_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'imported',
+            'connect_imported',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_media_attributes',
-            'connect', 'hash',
-            'varchar(255)'
+            'connect_hash',
+            'string'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_premium_dispatch_attributes',
-            'connect', 'allowed',
-            'int(1)',
-            true,
+            'connect_allowed',
+            'boolean',
+            array(),
+            null,
+            false,
             1
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'product_description',
+            'connect_product_description',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_prices_attributes',
-            'connect', 'price',
-            'double',
-            true,
+            'connect_price',
+            'float',
+            array(),
+            null,
+            false,
             0
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_core_customergroups_attributes',
-            'connect', 'group',
-            'int(1)'
+            'connect_group',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'article_shipping',
-            'varchar(1000)'
+            'connect_article_shipping',
+            'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'reference',
-            'varchar(500)'
+            'connect_reference',
+            'string'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_premium_dispatch_attributes',
-            'connect', 'allowed',
-            'int(1)',
-            true,
+            'connect_allowed',
+            'boolean',
+            array(),
+            null,
+            false,
             1
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'imported_category',
-            'int(1)',
-            true
+            'connect_imported_category',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'mapped_category',
-            'int(1)',
-            true
+            'connect_mapped_category',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'remote_unit',
-            'varchar(32)',
-            true
+            'connect_remote_unit',
+            'string'
         );
 
-        $modelManager->generateAttributeModels(array(
+        Shopware()->Models()->generateAttributeModels(array(
             's_articles_attributes',
             's_order_attributes',
             's_core_customergroups_attributes',
@@ -719,11 +728,16 @@ class Setup
      */
     public function generateConnectPaymentAttribute()
     {
-        Shopware()->Models()->addAttribute(
+        /** @var CrudService $crudService */
+        $crudService = $this->getCrudService();
+
+        $crudService->update(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed',
-            'int(1)',
-            true,
+            'connect_is_allowed',
+            'boolean',
+            array(),
+            null,
+            false,
             1
         );
 

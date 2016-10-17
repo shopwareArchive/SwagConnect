@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 /**
  * Uninstaller of the plugin.
  * Currently attribute columns will never be removed, as well as the plugin tables. This can be changed once
@@ -24,7 +25,7 @@ class Uninstall
     public function run()
     {
         // Currently this should not be done
-        // $this->removeMyAttributes();
+//         $this->removeMyAttributes();
 
         $this->setMenuItem();
         $this->deactivateConnectProducts();
@@ -34,49 +35,56 @@ class Uninstall
     }
 
     /**
+     * @return CrudService
+     */
+    public function getCrudService()
+    {
+        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+    }
+
+    /**
      * Remove the attributes when uninstalling the plugin
      */
     public function removeMyAttributes()
     {
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = Shopware()->Models();
+        $crudService = $this->getCrudService();
 
         try {
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_order_attributes',
-                'connect', 'shop_id'
+                'connect_shop_id'
             );
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_order_attributes',
-                'connect', 'order_id'
+                'connect_order_id'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'import_mapping'
+                'connect_import_mapping'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'export_mapping'
+                'connect_export_mapping'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'imported'
+                'connect_imported'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_premium_dispatch_attributes',
-                'connect', 'allowed'
+                'connect_allowed'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_media_attributes',
-                'connect', 'hash'
+                'connect_hash'
             );
 
-            $modelManager->generateAttributeModels(array(
+            Shopware()->Models()->generateAttributeModels(array(
                 's_premium_dispatch_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',

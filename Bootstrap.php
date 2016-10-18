@@ -153,7 +153,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->registerMyLibrary();
 
-        $update = new Update($this, $version);
+        $update = new Update(
+            $this,
+            Shopware()->Models(),
+            Shopware()->Db(),
+            $version
+        );
         return $update->run();
     }
 

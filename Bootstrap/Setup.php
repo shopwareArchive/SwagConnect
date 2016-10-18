@@ -17,11 +17,33 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
  */
 class Setup
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var Pdo
+     */
     protected $db;
+
+    /**
+     * @var ModelManager
+     */
     protected $modelManager;
+
+    /**
+     * @var string
+     */
     protected $shopware526installed;
 
+    /**
+     * Setup constructor.
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param ModelManager $modelManager
+     * @param Pdo $db
+     * @param $shopware526installed
+     */
     public function __construct
     (
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,

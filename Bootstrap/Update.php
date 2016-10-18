@@ -1,11 +1,10 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Bootstrap;
+
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\CategoryExtractor;
-use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
-use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
-use Shopware\Models\Order\Status;
+use Shopware\Components\Model\ModelManager;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 
 /**
  * Updates existing versions of the plugin
@@ -16,13 +15,43 @@ use Shopware\Models\Order\Status;
 class Update
 {
 
-    /** @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap */
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var Pdo
+     */
+    protected $db;
+
+    /**
+     * @var ModelManager
+     */
+    protected $modelManager;
+
+    /**
+     * @var string
+     */
     protected $version;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $version)
-    {
+    /**
+     * Setup constructor.
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param ModelManager $modelManager
+     * @param Pdo $db
+     * @param $version
+     */
+    public function __construct
+    (
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        ModelManager $modelManager,
+        Pdo $db,
+        $version
+    ) {
         $this->bootstrap = $bootstrap;
+        $this->modelManager = $modelManager;
+        $this->db = $db;
         $this->version = $version;
     }
 
@@ -43,7 +72,7 @@ class Update
      */
     public function reVerifySDK()
     {
-        Shopware()->Db()->query('
+        $this->db->query('
             UPDATE sw_connect_shop_config
             SET s_config = ?
             WHERE s_shop = "_last_update_"
@@ -55,12 +84,12 @@ class Update
     private function createExportedFlag()
     {
         if (version_compare($this->version, '1.0.1', '<=')) {
-            Shopware()->Db()->query("
+            $this->db->query("
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `exported` TINYINT(1) DEFAULT 0
             ");
 
-            Shopware()->Db()->query("
+            $this->db->query("
                 UPDATE `s_plugin_connect_items`
                 SET `exported` = 1
                 WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL",
@@ -74,28 +103,28 @@ class Update
         if (version_compare($this->version, '1.0.4', '<=')) {
             $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Open Connect', 'action' => ''));
             if ($connectItem) {
-                Shopware()->Models()->remove($connectItem);
-                Shopware()->Models()->flush();
+                $this->modelManager->remove($connectItem);
+                $this->modelManager->flush();
             }
         }
     }
 
     private function updateConnectAttribute(){
         if (version_compare($this->version, '1.0.6', '<=')) {
-            $result = Shopware()->Db()->query("SELECT value FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
+            $result = $this->db->query("SELECT value FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
             $row = $result->fetch();
             $attr = 19;
             if ($row) {
                 $attr = $row['value'];
             }
 
-            Shopware()->Db()->query("
+            $this->db->query("
                     UPDATE `s_articles_attributes` 
                     SET `connect_reference` = `attr" . $attr . "` 
                     WHERE connect_reference IS NULL;
                 ");
 
-            Shopware()->Db()->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
+            $this->db->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
         }
     }
 }

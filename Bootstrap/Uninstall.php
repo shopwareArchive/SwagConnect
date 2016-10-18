@@ -3,6 +3,8 @@
 namespace ShopwarePlugins\Connect\Bootstrap;
 
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Shopware\Components\Model\ModelManager;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 /**
  * Uninstaller of the plugin.
  * Currently attribute columns will never be removed, as well as the plugin tables. This can be changed once
@@ -13,12 +15,43 @@ use Shopware\Bundle\AttributeBundle\Service\CrudService;
  */
 class Uninstall
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var Pdo
+     */
+    protected $db;
+
+    /**
+     * @var ModelManager
+     */
+    protected $modelManager;
+
+    /**
+     * @var string
+     */
     protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
-    {
+    /**
+     * Setup constructor.
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param ModelManager $modelManager
+     * @param Pdo $db
+     * @param $shopware526installed
+     */
+    public function __construct
+    (
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        ModelManager $modelManager,
+        Pdo $db,
+        $shopware526installed
+    ) {
         $this->bootstrap = $bootstrap;
+        $this->modelManager = $modelManager;
+        $this->db = $db;
         $this->shopware526installed = $shopware526installed;
     }
 
@@ -84,7 +117,7 @@ class Uninstall
                 'connect_hash'
             );
 
-            Shopware()->Models()->generateAttributeModels(array(
+            $this->modelManager->generateAttributeModels(array(
                 's_premium_dispatch_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',
@@ -108,7 +141,7 @@ class Uninstall
           AND shop_id IS NOT NULL
         SET s_articles.active = false
         ';
-        Shopware()->Db()->exec($sql);
+        $this->db->exec($sql);
     }
 
     /**
@@ -116,12 +149,12 @@ class Uninstall
      */
     public function removeEngineElement()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
         $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
 
         if ($element) {
-            Shopware()->Models()->remove($element);
-            Shopware()->Models()->flush();
+            $this->modelManager->remove($element);
+            $this->modelManager->flush();
         }
     }
 
@@ -134,8 +167,8 @@ class Uninstall
             $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
             if (null !== $connectInstallItem) {
                 $connectInstallItem->setActive(1);
-                Shopware()->Models()->persist($connectInstallItem);
-                Shopware()->Models()->flush();
+                $this->modelManager->persist($connectInstallItem);
+                $this->modelManager->flush();
             } else {
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'Einstieg',

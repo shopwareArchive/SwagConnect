@@ -580,7 +580,15 @@ class ProductToShopTest extends ConnectTestHelper
             array('supplierName' => $product->vendor)
         )->fetchObject();
 
+        $supplierAttr = $this->db->query(
+            'SELECT *
+              FROM s_articles_supplier_attributes as sa
+              WHERE sa.supplierID = :supplierId',
+            array('supplierId' => $supplier->id)
+        )->fetchObject();
+
         $this->assertEquals($product->vendor, $supplier->name);
+        $this->assertEquals(1, $supplierAttr->connect_is_remote);
     }
 
     public function testAutomaticallyActivateArticles()

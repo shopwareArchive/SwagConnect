@@ -319,6 +319,16 @@ final class SDK
     }
 
     /**
+     * @param  $streamDeleteId
+     */
+    public function recordStreamDelete($streamDeleteId)
+    {
+        $this->verifySdkIfNecessary();
+
+        $this->dependencies->getExportService()->recordStreamDelete($streamDeleteId);
+    }
+
+    /**
      * @param MakeMainVariant $mainVariant
      */
     public function makeMainVariant(MakeMainVariant $mainVariant)

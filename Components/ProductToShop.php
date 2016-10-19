@@ -683,6 +683,12 @@ class ProductToShop implements ProductToShopBase
             $supplier->setName($vendor);
         }
 
+        //sets supplier attributes
+        $attr = new \Shopware\Models\Attribute\ArticleSupplier();
+        $attr->setConnectIsRemote(true);
+
+        $supplier->setAttribute($attr);
+
         return $supplier;
     }
 

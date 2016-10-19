@@ -50,6 +50,7 @@ class InMemory extends Gateway
             self::PRODUCT_DELETE,
             self::PRODUCT_STOCK,
             self::STREAM_ASSIGNMENT,
+            self::STREAM_DELETE,
             self::MAIN_VARIANT,
         ),
         self::TYPE_PAYMENT => array(
@@ -192,6 +193,9 @@ class InMemory extends Gateway
             case self::STREAM_ASSIGNMENT:
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment';
                 break;
+            case self::STREAM_DELETE:
+                $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamDelete';
+                break;
             case self::MAIN_VARIANT:
                 $class = '\\Shopware\\Connect\\Struct\\Change\\FromShop\\MakeMainVariant';
                 break;
@@ -306,6 +310,21 @@ class InMemory extends Gateway
             'sourceId' => $id,
             'revision' => $revision,
             'supplierStreams' => $supplierStreams,
+        );
+    }
+
+    /**
+     * @param $streamId
+     * @param $revision
+     */
+    public function recordStreamDelete($streamId, $revision)
+    {
+        $this->checkRevisionExists($revision);
+
+        $this->changes[$revision] = array(
+            'type'     => self::STREAM_DELETE,
+            'sourceId' => $streamId,
+            'revision' => $revision,
         );
     }
 

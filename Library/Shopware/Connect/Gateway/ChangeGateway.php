@@ -25,6 +25,7 @@ interface ChangeGateway
     const PRODUCT_DELETE = 'delete';
     const PRODUCT_STOCK = 'stock';
     const STREAM_ASSIGNMENT = 's-assign';
+    const STREAM_DELETE = 's-delete';
     const MAIN_VARIANT = 'mvariant';
     const PAYMENT_UPDATE = 'pmnt-u';
 
@@ -121,6 +122,12 @@ interface ChangeGateway
      * @param array $supplierStreams
      */
     public function recordStreamAssignment($productId, $revision, array $supplierStreams);
+
+    /**
+     * @param $streamId
+     * @param $revision
+     */
+    public function recordStreamDelete($streamId, $revision);
 
     /**
      * Makes variant to be main

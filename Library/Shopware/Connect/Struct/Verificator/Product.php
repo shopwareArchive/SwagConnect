@@ -23,6 +23,11 @@ use Shopware\Connect\SDK;
 class Product extends Verificator
 {
     /**
+     * Product descriptions must be less than 16 000 000 bytes long
+     */
+    const DESCRIPTION_SIZE_LIMIT = 16000000;
+
+    /**
      * Shipping rule parser
      *
      * @var ShippingRuleParser
@@ -255,6 +260,10 @@ class Product extends Verificator
 
         if (array_key_exists(Struct\Product::ATTRIBUTE_UNIT, $struct->attributes)) {
             $this->validateUnit($struct);
+        }
+
+        if ((strlen($struct->shortDescription) + strlen($struct->longDescription)) > self::DESCRIPTION_SIZE_LIMIT) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product short and long description must be under 5 000 000 characters.");
         }
     }
 

@@ -85,9 +85,19 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
         $logger = $this->getLogger();
 
         try {
+            $this->get('events')->notify(
+                'Shopware_Connect_SDK_Handle_Before',
+                [ $request ]
+            );
+
             $sdk = $this->getSDK();
             $result = $sdk->handle(
                 $request
+            );
+
+            $this->get('events')->notify(
+                'Shopware_Connect_SDK_Handle_After',
+                [ $request, $result ]
             );
         } catch (\Exception $e) {
             // Always write errors to the log

@@ -23,6 +23,7 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
+use Doctrine\DBAL\DBALException;
 use Shopware\Connect\Struct\Product,
     Shopware\Models\Article\Article as ProductModel,
     Shopware\Components\Model\ModelManager,
@@ -108,19 +109,24 @@ class Helper
         return null;
     }
 
-    public function getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
+    /**
+     * @param Product $product
+     * @param int $mode
+     * @return null|ProductDetail
+     */
+    public function  getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
         $builder->select(array('ba', 'd'));
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
-
         $builder->where('ba.shopId = :shopId AND ba.sourceId = :sourceId');
-        $query = $builder->getQuery();
 
+        $query = $builder->getQuery();
         $query->setParameter('shopId', $product->shopId);
         $query->setParameter('sourceId', $product->sourceId);
+
         $result = $query->getResult(
             $mode
         );
@@ -507,35 +513,44 @@ class Helper
             return array();
         }
 
-        $quotedArticleIds = array();
-        foreach ($articleIds as $articleId) {
-            $articleId = (int) $articleId;
-            $quotedArticleIds[] = $this->manager->getConnection()->quote($articleId);
+        return array_merge(
+            $this->getSourceIds($articleIds, 1),
+            $this->getSourceIds($articleIds, 2)
+        );
+    }
+
+    private function getSourceIds(array $articleIds, $kind)
+    {
+        $customProductsTableExists = false;
+        try {
+            $builder = $this->manager->getConnection()->createQueryBuilder();
+            $builder->select('id');
+            $builder->from('s_plugin_custom_products_template');
+            $builder->setMaxResults(1);
+            $builder->execute()->fetch();
+
+            $customProductsTableExists = true;
+        } catch (DBALException $e) {
+            // ignore it
+            // custom products is not installed
         }
 
         // main variants should be collected first, because they
         // should be exported first. Connect uses first variant product with an unknown groupId as main one.
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT spci.source_id FROM s_plugin_connect_items spci
-              RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
-               WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind = 1 AND spci.shop_id IS NULL'
-        );
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('spci.source_id')
+            ->from('s_plugin_connect_items', 'spci')
+            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
+            ->where('sad.articleID IN (:articleIds) AND sad.kind = :kind AND spci.shop_id IS NULL')
+            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
+            ->setParameter('kind', $kind, \PDO::PARAM_INT);
 
-        $mainVariants = array_map(function($row) {
-            return $row['source_id'];
-        }, $rows);
+        if ($customProductsTableExists) {
+            $builder->leftJoin('spci', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'spci.article_id = spcptpr.article_id')
+                ->andWhere('spcptpr.template_id IS NULL');
+        }
 
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT spci.source_id FROM s_plugin_connect_items spci
-              RIGHT JOIN s_articles_details sad ON spci.article_detail_id = sad.id
-               WHERE sad.articleID IN (' . implode(', ', $quotedArticleIds) . ') AND sad.kind != 1 AND spci.shop_id IS NULL'
-        );
-
-        $regularVariants = array_map(function($row) {
-            return $row['source_id'];
-        }, $rows);
-
-        return array_merge($mainVariants, $regularVariants);
+        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -547,7 +562,7 @@ class Helper
     public function getArticleDetailSourceId($articleDetailId)
     {
         $articleDetailId = (int) $articleDetailId;
-        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $articleDetailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
         $detail = $articleDetailRepository->find($articleDetailId);
         if (!$detail) {
             return null;
@@ -559,6 +574,24 @@ class Helper
         }
 
         return $connectAttribute->getSourceId();
+    }
+
+    /**
+     * Get sourceId by given article detail id
+     *
+     * @param int $articleDetailId
+     * @return string
+     */
+    public function getArticleDetailSourceIdDBAL($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('items.source_id')
+            ->from('s_plugin_connect_items', 'items')
+            ->where('items.article_detail_id = :articleDetailIds')
+            ->setParameter(':articleDetailIds', $articleDetailId);
+
+        return $builder->execute()->fetchColumn();
     }
 
     public function getArticleDetailSourceIds(array $articleDetailIds)
@@ -589,7 +622,7 @@ class Helper
     public function isRemoteArticleDetail($articleDetailId)
     {
         $articleDetailId = (int) $articleDetailId;
-        $articleDetailRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+        $articleDetailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $articleDetailRepository->find($articleDetailId);
         if (!$detail) {
@@ -602,6 +635,24 @@ class Helper
         }
 
         return ($connectAttribute->getShopId() != null);
+    }
+
+    /**
+     * Check if given articleDetailId is remote product
+     *
+     * @param int $articleDetailId
+     * @return bool
+     */
+    public function isRemoteArticleDetailDBAL($articleDetailId)
+    {
+        $articleDetailId = (int) $articleDetailId;
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('items.shop_id')
+            ->from('s_plugin_connect_items', 'items')
+            ->where('items.article_detail_id = :articleDetailId')
+            ->setParameter(':articleDetailId', $articleDetailId);
+
+        return (bool) $builder->execute()->fetchColumn();
     }
 
     /**

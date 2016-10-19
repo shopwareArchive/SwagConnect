@@ -87,3 +87,17 @@ shopware Connect will automatically register a CronJob so images can automatical
 - In "overwrite" mode, updates will always recreate all the shopware Connect images which have changed since the last update
 - In "non-overwrite" mode, images will imported only once at initial import
 
+# Manipulating and extending the plugin
+
+Overwriting parts of the plugin will make the plugin unable to be updated, so it is best practice to use a seperate custom plugin, that makes use of events and hooks, to extend the Shopware Connect Plugin. We are using the same kind of events as Shopware, so you can define listeners in the exact same way.
+
+## Events
+
+The SDK is accessed by RPC calls over a single route, this is handled by the Connect Gateway. We will throw events before the request is handled, and after it has been handled. These are the two event names:
+
+- 'Shopware_Connect_SDK_Handle_Before'
+- 'Shopware_Connect_SDK_Handle_After'
+
+Both events will receive the request as their first parameter. The request contains the XML document that is used by the RPC call. It contains the service and the command that will be executed. You can find the available services and commands in the [DependencyResolver in the Plugin Library](https://github.com/shopware/SwagConnect/blob/master/Library/Shopware/Connect/DependencyResolver.php#L267).
+
+The After Event will also contain the response that will be sent back to Connect. The Events will be fired on any time Connect calls the shop for any function.

@@ -193,6 +193,20 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @return bool
+     */
+    public function isStreamExported($streamId)
+    {
+        return (bool) $this->streamAttrRepository->findOneBy(
+            array(
+                'streamId' => (int) $streamId,
+                'exportStatus' => self::STATUS_SUCCESS
+            )
+        );
+    }
+
+    /**
+     * @param $streamId
      * @param $status
      */
     public function changeStatus($streamId, $status)

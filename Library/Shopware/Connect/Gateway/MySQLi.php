@@ -36,6 +36,7 @@ class MySQLi extends Gateway
         self::PRODUCT_DELETE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Delete',
         self::PRODUCT_STOCK => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\Availability',
         self::STREAM_ASSIGNMENT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamAssignment',
+        self::STREAM_DELETE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\StreamDelete',
         self::MAIN_VARIANT => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\MakeMainVariant',
         self::PAYMENT_UPDATE => '\\Shopware\\Connect\\Struct\\Change\\FromShop\\UpdatePaymentStatus',
     );
@@ -50,6 +51,7 @@ class MySQLi extends Gateway
             self::PRODUCT_DELETE,
             self::PRODUCT_STOCK,
             self::STREAM_ASSIGNMENT,
+            self::STREAM_DELETE,
             self::MAIN_VARIANT,
         ),
         self::TYPE_PAYMENT => array(
@@ -350,6 +352,27 @@ class MySQLi extends Gateway
                 "' . self::STREAM_ASSIGNMENT . '",
                 "' . $this->connection->real_escape_string($revision) . '",
                 "' . $this->connection->real_escape_string(serialize($supplierStreams)) . '"
+            );'
+        );
+    }
+
+    /**
+     * @param $streamId
+     * @param $revision
+     */
+    public function recordStreamDelete($streamId, $revision)
+    {
+        $this->connection->query(
+            'INSERT INTO
+                sw_connect_change (
+                    `c_entity_id`,
+                    `c_operation`,
+                    `c_revision`
+                )
+            VALUES (
+                "' . $this->connection->real_escape_string($streamId) . '",
+                "' . self::STREAM_DELETE . '",
+                "' . $this->connection->real_escape_string($revision) . '"
             );'
         );
     }

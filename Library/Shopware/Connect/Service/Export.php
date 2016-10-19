@@ -139,6 +139,14 @@ class Export
         );
     }
 
+    public function recordStreamDelete($streamId)
+    {
+        $this->gateway->recordStreamDelete(
+            $streamId,
+            $this->revisionProvider->next()
+        );
+    }
+
     public function makeMainVariant(MakeMainVariant $mainVariant)
     {
         $this->verificator->verify($mainVariant);

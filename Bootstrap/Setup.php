@@ -548,8 +548,19 @@ class Setup
             'string'
         );
 
+        $crudService->update(
+            's_articles_supplier_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
+            's_articles_supplier_attributes',
             's_order_attributes',
             's_core_customergroups_attributes',
             's_articles_prices_attributes',

@@ -124,16 +124,9 @@ class Config
      */
     public function hasSsl()
     {
-        $shops = $this->manager->getRepository('Shopware\Models\Shop\Shop')->findAll();
-        $mainShopList = array_filter($shops, function($shop){
-            return $shop->getDefault();
-        });
-
-        if (empty($mainShopList)) {
-            return false;
-        }
-
-        return $mainShopList[0]->getSecure();
+        $shopRepo = $this->manager->getRepository('Shopware\Models\Shop\Shop');
+        $mainShop = $shopRepo->findOneBy(['default' => true ]);
+        return $mainShop->getSecure();
     }
 
     /**

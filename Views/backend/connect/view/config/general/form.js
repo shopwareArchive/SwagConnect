@@ -61,7 +61,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         alternativeHostLabel: Ext.String.format('{s name=config/connect_alternative_host}Alternativer [0]-Host (nur für Testzwecke){/s}', marketplaceName),
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
-        hasSslLabel: '{s name=config/has_ssl_label}My shop has SSL{/s}',
         basicHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
         unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}',marketplaceName),
@@ -106,7 +105,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
             advancedConfigFieldset = me.getAdvancedConfigFieldset(),
             elements = [];
 
-        elements.push(me.getBasicFieldset());
         if (defaultMarketplace == false) {
             // extended import settings are available
             // only for SEM shops
@@ -143,33 +141,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         buttons.push(saveButton);
 
         return buttons;
-    },
-
-    /**
-     * Returns API key field set
-     *
-     * @return Ext.form.FieldSet
-     */
-    getBasicFieldset: function() {
-        var me = this;
-
-        return Ext.create('Ext.form.FieldSet', {
-            columnWidth: 1,
-            title: me.snippets.basicSettings,
-            defaultType: 'textfield',
-            layout: 'anchor',
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'hasSsl',
-                    fieldLabel: me.snippets.hasSslLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
-                }
-            ]
-        });
     },
 
     /**

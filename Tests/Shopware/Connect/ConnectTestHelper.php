@@ -25,6 +25,14 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
     const IMAGE_PROVIDER_URL = 'http://www.shopware.de/ShopwareCommunityCenter/img/logo.png';
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        set_error_handler(null);
+        set_exception_handler(null);
+    }
+
     /**
      * @return \Shopware\Connect\SDK
      */

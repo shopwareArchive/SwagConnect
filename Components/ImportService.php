@@ -24,7 +24,7 @@ class ImportService
     private $productResource;
 
     /**
-     * @var \Shopware\Models\Article\Repository
+     * @var \Shopware\Models\Category\Repository
      */
     private $categoryRepository;
 

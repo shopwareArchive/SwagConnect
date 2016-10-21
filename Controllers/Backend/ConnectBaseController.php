@@ -645,6 +645,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+
+            return;
         }
 
         $this->View()->assign([
@@ -708,6 +710,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+
+            return;
         }
 
         $this->View()->assign([

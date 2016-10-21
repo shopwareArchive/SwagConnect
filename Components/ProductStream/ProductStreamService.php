@@ -10,9 +10,10 @@ class ProductStreamService
 {
     const DYNAMIC_STREAM = 1;
     const STATIC_STREAM = 2;
-    const STATUS_SUCCESS = 'export';
+    const STATUS_EXPORT = 'export';
     const STATUS_DELETE = 'delete';
     const STATUS_ERROR = 'error';
+    const STATUS_SYNCED = 'synced';
 
     /**
      * @var ProductStreamRepository
@@ -197,12 +198,7 @@ class ProductStreamService
      */
     public function isStreamExported($streamId)
     {
-        return (bool) $this->streamAttrRepository->findOneBy(
-            array(
-                'streamId' => (int) $streamId,
-                'exportStatus' => self::STATUS_SUCCESS
-            )
-        );
+        return $this->streamAttrRepository->isStreamExported($streamId);
     }
 
     /**

@@ -143,7 +143,8 @@ class ConfigTest extends ConnectTestHelper
 
         $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE groupName = ?';
         $exportConfig = Shopware()->Db()->fetchPairs($sql, array('export'));
-
+        $exportConfig['exportPriceMode'] = json_decode($exportConfig['exportPriceMode'], true);
+        
         $this->assertFalse(
             $this->getConfigComponent()->compareExportConfiguration($exportConfig)
         );

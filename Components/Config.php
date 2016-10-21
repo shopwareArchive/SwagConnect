@@ -84,9 +84,8 @@ class Config
         $query = $this->getConfigRepository()->getConfigsQuery($name, $shopId);
         $query->setMaxResults(1);
         $result = $query->getResult();
-        $model = $result[0];
 
-        if ($model) {
+        if (count($result) > 0 && $model = reset($result)) {
             $decodedString = json_decode($model->getValue(), true);
             if ($decodedString !== null) {
                 return $decodedString;

@@ -54,7 +54,7 @@ class ImportServiceTest extends ConnectTestHelper
         $this->importService = new ImportService(
             $this->manager,
             Shopware()->Container()->get('multi_edit.product'),
-            $this->remoteCategoryRepository,
+            $this->categoryRepository,
             $this->articleRepository,
             $this->remoteCategoryRepository,
             $this->manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),

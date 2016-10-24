@@ -311,7 +311,7 @@ class LocalProductQuery extends BaseProductQuery
     public function hasVariants($productId)
     {
         $result = $this->manager->getConnection()->fetchColumn(
-            'SELECT d.id FROM s_articles_details d WHERE d.kind = 2 AND articleID = ?',
+            'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
             array((int)$productId)
         );
 

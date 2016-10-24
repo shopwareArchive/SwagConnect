@@ -102,8 +102,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             elements = [];
 
-        elements.push(me.getBasicFieldset());
-
         if (defaultMarketplace == false) {
             // extended import settings are available
             // only for SEM shops
@@ -121,53 +119,22 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      * @returns Array
      */
     getFormButtons: function () {
-        var me = this,
-            buttons = ['->'];
-
-        var saveButton = Ext.create('Ext.button.Button', {
-            text: me.snippets.save,
-            action: 'save-general-config',
-            cls: 'primary'
-        });
-
-        var cancelButton = Ext.create('Ext.button.Button', {
-            text: me.snippets.cancel,
-            handler: function (btn) {
-                btn.up('window').close();
-            }
-        });
-
-        buttons.push(cancelButton);
-        buttons.push(saveButton);
-
-        return buttons;
-    },
-
-    /**
-     * Returns API key field set
-     *
-     * @return Ext.form.FieldSet
-     */
-    getBasicFieldset: function () {
         var me = this;
 
-        return Ext.create('Ext.form.FieldSet', {
-            columnWidth: 1,
-            title: me.snippets.basicSettings,
-            defaultType: 'textfield',
-            layout: 'anchor',
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'hasSsl',
-                    fieldLabel: me.snippets.hasSslLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: '{s name=config/help/has_ssl_help_text}If your store has installed SSL certificate please select the checkbox and save your changes. Then verify the API key.{/s}'
+        return [
+            '->',
+            Ext.create('Ext.button.Button', {
+                text: me.snippets.cancel,
+                handler: function (btn) {
+                    btn.up('window').close();
                 }
-            ]
-        });
+            }),
+            Ext.create('Ext.button.Button', {
+                text: me.snippets.save,
+                action: 'save-general-config',
+                cls: 'primary'
+            })
+        ];
     },
 
     /**

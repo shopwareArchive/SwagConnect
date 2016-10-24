@@ -100,6 +100,11 @@ class ConnectExportTest extends ConnectTestHelper
     public function testExportErrors()
     {
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(4);
+        $detail = $model->getMainDetail();
+        $detail->setPurchasePrice(0);
+        Shopware()->Models()->persist($detail);
+        Shopware()->Models()->flush();
+
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $errors = $this->connectExport->export(array(4));
 

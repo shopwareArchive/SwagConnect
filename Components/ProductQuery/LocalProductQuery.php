@@ -272,11 +272,11 @@ class LocalProductQuery extends BaseProductQuery
      */
     private function addMarketplaceAttributeSelect(QueryBuilder $builder, $alias)
     {
-        array_walk($this->marketplaceGateway->getMappings(), function($mapping) use ($builder, $alias) {
+        foreach ($this->marketplaceGateway->getMappings() as $mapping) {
             if (strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0) {
                 $builder->addSelect("{$alias}.{$mapping['shopwareAttributeKey']}");
             }
-        });
+        }
 
         return $builder;
     }

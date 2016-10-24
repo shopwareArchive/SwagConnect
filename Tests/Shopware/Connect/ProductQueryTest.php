@@ -79,6 +79,14 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function testGetLocal()
     {
+        $article = $this->getShopProduct(3);
+        /** @var \Shopware\Models\Article\Detail $detail */
+        $detail = $article->getMainDetail();
+        $detail->setMinPurchase(2);
+
+        Shopware()->Models()->persist($detail);
+        Shopware()->Models()->flush($detail);
+
         $result = $this->getProductQuery()->getLocal(array(3));
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
@@ -86,6 +94,7 @@ class ProductQueryTest extends ConnectTestHelper
         $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
         $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
         $this->assertEquals(12.56, round($product->price, 2));
+        $this->assertEquals(2, $product->minPurchaseQuantity);
     }
 
     public function testGetRemoteShouldReturnEmptyArray()
@@ -97,6 +106,8 @@ class ProductQueryTest extends ConnectTestHelper
     public function testGetRemote()
     {
         $newProduct = $this->getProduct();
+        $newProduct->minPurchaseQuantity = 4;
+
         $this->dispatchRpcCall('products', 'toShop', array(
             array(
                 new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
@@ -117,6 +128,7 @@ class ProductQueryTest extends ConnectTestHelper
         $this->assertEquals($newProduct->purchasePrice, $product->purchasePrice);
         $this->assertEquals($newProduct->purchasePriceHash, $product->purchasePriceHash);
         $this->assertEquals($newProduct->offerValidUntil, $product->offerValidUntil);
+        $this->assertEquals($newProduct->minPurchaseQuantity, $product->minPurchaseQuantity);
 
     }
 

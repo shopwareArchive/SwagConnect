@@ -95,6 +95,7 @@ class LocalProductQuery extends BaseProductQuery
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
+            'd.minPurchase as minPurchaseQuantity',
 
             $this->productDescriptionField . ' as longDescription',
 

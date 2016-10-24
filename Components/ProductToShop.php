@@ -285,6 +285,7 @@ class ProductToShop implements ProductToShopBase
         $releaseDate = new \DateTime();
         $releaseDate->setTimestamp($product->deliveryDate);
         $detail->setReleaseDate($releaseDate);
+        $detail->setMinPurchase($product->minPurchaseQuantity);
 
         // some shops have feature "sell not in stock",
         // then end customer should be able to by the product with stock = 0

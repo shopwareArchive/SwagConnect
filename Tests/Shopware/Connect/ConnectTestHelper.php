@@ -38,7 +38,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        return Shopware()->Container()->get('ConnectSDK');
     }
 
     /**
@@ -134,7 +134,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     public static function dispatchRpcCall($service, $command, array $args)
     {
-        $sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+        $sdk = Shopware()->Container()->get('ConnectSDK');
         $refl = new \ReflectionObject($sdk);
         $property = $refl->getProperty('dependencies');
         $property->setAccessible(true);

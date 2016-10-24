@@ -35,6 +35,6 @@ class Shopware_Controllers_Frontend_Connect extends Enlight_Controller_Action
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        return Shopware()->Container()->get('ConnectSDK');
     }
 }

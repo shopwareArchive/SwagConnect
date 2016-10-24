@@ -175,12 +175,6 @@ class ConnectExportTest extends ConnectTestHelper
             ),
             'mainDetail' => array(
                 'number' => '1919',
-                'prices' => array(
-                    array(
-                        'customerGroupKey' => 'EK',
-                        'price' => 999,
-                    ),
-                )
             ),
         );
 
@@ -224,12 +218,6 @@ class ConnectExportTest extends ConnectTestHelper
                         array('group' => 'Größe', 'option' => 'L'),
                         array('group' => 'Farbe', 'option' => 'Schwarz'),
                     ),
-                    'prices' => array(
-                        array(
-                            'customerGroupKey' => 'EK',
-                            'price' => 1999,
-                        ),
-                    )
                 ),
                 array(
                     'isMain' => false,
@@ -240,12 +228,6 @@ class ConnectExportTest extends ConnectTestHelper
                         array('group' => 'Größe', 'option' => 'S'),
                         array('group' => 'Farbe', 'option' => 'Schwarz'),
                     ),
-                    'prices' => array(
-                        array(
-                            'customerGroupKey' => 'EK',
-                            'price' => 999,
-                        ),
-                    )
                 ),
                 array(
                     'isMain' => false,
@@ -256,12 +238,6 @@ class ConnectExportTest extends ConnectTestHelper
                         array('group' => 'Größe', 'option' => 'S'),
                         array('group' => 'Farbe', 'option' => 'Rot'),
                     ),
-                    'prices' => array(
-                        array(
-                            'customerGroupKey' => 'EK',
-                            'price' => 999,
-                        ),
-                    )
                 ),
                 array(
                     'isMain' => false,
@@ -272,12 +248,6 @@ class ConnectExportTest extends ConnectTestHelper
                         array('group' => 'Größe', 'option' => 'XL'),
                         array('group' => 'Farbe', 'option' => 'Rot'),
                     ),
-                    'prices' => array(
-                        array(
-                            'customerGroupKey' => 'EK',
-                            'price' => 999,
-                        ),
-                    )
                 )
             )
         );

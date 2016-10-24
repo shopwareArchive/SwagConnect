@@ -298,7 +298,7 @@ class ProductToShop implements ProductToShopBase
         // if connect product has unit
         // find local unit with units mapping
         // and add to detail model
-        if ($product->attributes['unit']) {
+        if (array_key_exists('unit', $product->attributes)) {
             $detailAttribute->setConnectRemoteUnit($product->attributes['unit']);
             if ($this->config->getConfig($product->attributes['unit']) == null) {
                 $this->config->setConfig($product->attributes['unit'], '', null, 'units');
@@ -321,7 +321,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // set dimension
-        if ($product->attributes['dimension']) {
+        if (array_key_exists('dimension', $product->attributes)) {
             $dimension = explode('x', $product->attributes['dimension']);
             $detail->setLen($dimension[0]);
             $detail->setWidth($dimension[1]);
@@ -333,7 +333,9 @@ class ProductToShop implements ProductToShopBase
         }
 
         // set weight
-        $detail->setWeight($product->attributes['weight']);
+        if (array_key_exists('weight', $product->attributes)) {
+            $detail->setWeight($product->attributes['weight']);
+        }
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later

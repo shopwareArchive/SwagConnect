@@ -30,12 +30,6 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             ),
             'mainDetail' => array(
                 'number' => '9898',
-                'prices' => array(
-                    array(
-                        'customerGroupKey' => 'EK',
-                        'price' => 999,
-                    ),
-                )
             ),
         );
 
@@ -56,12 +50,6 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             ),
             'mainDetail' => array(
                 'number' => '9897',
-                'prices' => array(
-                    array(
-                        'customerGroupKey' => 'EK',
-                        'price' => 999,
-                    ),
-                )
             ),
         );
 
@@ -268,7 +256,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $this->configurationGateway->expects($this->once())
             ->method('getConnectedShopIds')
-            ->willReturn(array(1, 2, 3,));
+            ->willReturn(array(1, 2, 5,));
 
         $this->configurationGateway->expects($this->at(1))
             ->method('getShopConfiguration')

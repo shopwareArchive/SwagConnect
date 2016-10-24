@@ -124,6 +124,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $attribute->setConnectImportMapping($mapping);
         $attribute->setConnectExportMapping($mapping);
         $category->setAttribute($attribute);
+        $attribute->setCategory($category);
+
+        $modelManager->persist($category);
+        $modelManager->persist($attribute);
 
         $modelManager->flush();
     }

@@ -3,6 +3,7 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\CustomModels\Connect\Attribute;
+use Shopware\Models\Article\Configurator\Group;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -20,6 +21,11 @@ class ConnectExportTest extends ConnectTestHelper
      */
     private $config;
 
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
+    private $manager;
+
     public static function setUpBeforeClass()
     {
         $conn = Shopware()->Db();
@@ -29,13 +35,14 @@ class ConnectExportTest extends ConnectTestHelper
 
     public function setUp()
     {
-        $this->config = new Config(Shopware()->Models());
+        $this->manager = Shopware()->Models();
+        $this->config = new Config($this->manager);
         $this->connectExport = new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
-            Shopware()->Models(),
+            $this->manager,
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models()),
+            new Config($this->manager),
             new ErrorHandler()
         );
 
@@ -66,7 +73,7 @@ class ConnectExportTest extends ConnectTestHelper
     public function testExport()
     {
         /** @var \Shopware\Models\Article\Article $model */
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(3);
+        $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(3);
         $detail = $model->getMainDetail();
         /** @var \Shopware\Models\Article\Price $prices */
         $prices = $detail->getPrices();
@@ -77,14 +84,14 @@ class ConnectExportTest extends ConnectTestHelper
             $detail->setPrices($prices);
         }
 
-        Shopware()->Models()->persist($detail);
+        $this->manager->persist($detail);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $connectAttribute->setExportStatus(Attribute::STATUS_INSERT);
         $connectAttribute->setExported(true);
-        Shopware()->Models()->persist($connectAttribute);
-        Shopware()->Models()->flush();
-        Shopware()->Models()->clear();
+        $this->manager->persist($connectAttribute);
+        $this->manager->flush();
+        $this->manager->clear();
 
         $errors = $this->connectExport->export(array(3));
 
@@ -99,11 +106,11 @@ class ConnectExportTest extends ConnectTestHelper
 
     public function testExportErrors()
     {
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(4);
+        $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(4);
         $detail = $model->getMainDetail();
         $detail->setPurchasePrice(0);
-        Shopware()->Models()->persist($detail);
-        Shopware()->Models()->flush();
+        $this->manager->persist($detail);
+        $this->manager->flush();
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $errors = $this->connectExport->export(array(4));
@@ -120,7 +127,7 @@ class ConnectExportTest extends ConnectTestHelper
     public function testSyncDeleteArticle()
     {
         $articleId = $this->insertVariants();
-        $modelManager = Shopware()->Models();
+        $modelManager = $this->manager;
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
 
         $this->connectExport->setDeleteStatusForVariants($article);
@@ -142,7 +149,7 @@ class ConnectExportTest extends ConnectTestHelper
     public function testDeleteVariant()
     {
         $articleId = $this->insertVariants();
-        $modelManager = Shopware()->Models();
+        $modelManager = $this->manager;
         /** @var \Shopware\Models\Article\Article $article */
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
         $detail = $article->getMainDetail();
@@ -213,40 +220,44 @@ class ConnectExportTest extends ConnectTestHelper
                     'isMain' => true,
                     'number' => '1919',
                     'inStock' => 15,
+                    'standard' => null,
                     'additionaltext' => 'L / Schwarz',
                     'configuratorOptions' => array(
-                        array('group' => 'Größe', 'option' => 'L'),
-                        array('group' => 'Farbe', 'option' => 'Schwarz'),
+                        array('group' => 'Größe', 'groupId' => null, 'optionId' => null, 'option' => 'L'),
+                        array('group' => 'Farbe', 'groupId' => null, 'optionId' => null, 'option' => 'Schwarz'),
                     ),
                 ),
                 array(
                     'isMain' => false,
                     'number' => '1919-1',
                     'inStock' => 15,
+                    'standard' => null,
                     'additionnaltext' => 'S / Schwarz',
                     'configuratorOptions' => array(
-                        array('group' => 'Größe', 'option' => 'S'),
-                        array('group' => 'Farbe', 'option' => 'Schwarz'),
+                        array('group' => 'Größe', 'groupId' => null, 'optionId' => null,'option' => 'S'),
+                        array('group' => 'Farbe', 'groupId' => null, 'optionId' => null, 'option' => 'Schwarz'),
                     ),
                 ),
                 array(
                     'isMain' => false,
                     'number' => '1919-2',
                     'inStock' => 15,
+                    'standard' => null,
                     'additionnaltext' => 'S / Rot',
                     'configuratorOptions' => array(
-                        array('group' => 'Größe', 'option' => 'S'),
-                        array('group' => 'Farbe', 'option' => 'Rot'),
+                        array('group' => 'Größe', 'groupId' => null, 'optionId' => null,'option' => 'S'),
+                        array('group' => 'Farbe', 'groupId' => null, 'optionId' => null,'option' => 'Rot'),
                     ),
                 ),
                 array(
                     'isMain' => false,
                     'number' => '1919-3',
                     'inStock' => 15,
+                    'standard' => null,
                     'additionnaltext' => 'XL / Rot',
                     'configuratorOptions' => array(
-                        array('group' => 'Größe', 'option' => 'XL'),
-                        array('group' => 'Farbe', 'option' => 'Rot'),
+                        array('group' => 'Größe', 'groupId' => null, 'optionId' => null, 'option' => 'XL'),
+                        array('group' => 'Farbe', 'groupId' => null, 'optionId' => null,'option' => 'Rot'),
                     ),
                 )
             )

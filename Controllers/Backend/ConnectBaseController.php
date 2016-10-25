@@ -616,7 +616,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             [
                 'content-type' => 'application/x-www-form-urlencoded'
             ],
-            'username=' . $shopwareId . '&password=' . $password
+            [
+                'username' => urlencode($shopwareId),
+                'password' => urlencode($password)
+            ]
         );
 
         $responseObject = json_decode($response->getBody());
@@ -679,9 +682,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             [
                 'content-type' => 'application/x-www-form-urlencoded'
             ],
-            'username=' . $shopwareId .
-            '&password=' . $password .
-            '&email=' . $email
+            [
+                'username'  => urlencode($shopwareId),
+                'password'  => urlencode($password),
+                'email'     => urlencode($email)
+            ]
         );
 
         $responseObject = json_decode($response->getBody());

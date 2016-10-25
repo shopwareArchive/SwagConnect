@@ -521,16 +521,6 @@ class Setup
         );
 
         $crudService->update(
-            's_premium_dispatch_attributes',
-            'connect_allowed',
-            'boolean',
-            array(),
-            null,
-            false,
-            1
-        );
-
-        $crudService->update(
             's_categories_attributes',
             'connect_imported_category',
             'boolean'

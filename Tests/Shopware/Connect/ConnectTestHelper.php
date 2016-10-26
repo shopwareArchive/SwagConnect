@@ -289,18 +289,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'articleDetail' => $mainDetail,
         ));
 
+        /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group')->findOneByKey('EK');
-
-        $price = new Price();
-        $price->fromArray(array(
-            'article' => $article,
-            'detail' => $mainDetail,
-            'customerGroup' => $customerGroup,
-            'from' => 1,
-            'price' => 8.99,
-            'basePrice' => 3.99,
-        ));
-        $mainDetail->setPrices(array($price));
 
         $connectAttribute = new Attribute();
         $connectAttribute->fromArray(array(
@@ -317,9 +307,15 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
         Shopware()->Models()->persist($mainDetail);
         Shopware()->Models()->persist($detailAtrribute);
-        Shopware()->Models()->persist($price);
         Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
+
+        // set price via plain SQL because shopware throws exception
+        // undefined index: key when error handler is disabled
+        Shopware()->Db()->executeQuery(
+            'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
+              VALUES (?, 1, "beliebig", ?, ?, ?, ?)
+              ', [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]);
 
         return $article;
     }

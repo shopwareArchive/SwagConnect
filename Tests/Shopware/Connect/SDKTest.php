@@ -2,10 +2,53 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Product;
+use Shopware\Connect\SDK;
 
 class SDKTest extends ConnectTestHelper
 {
+    public static function setUpBeforeClass()
+    {
+        $conn = Shopware()->Db();
+        $conn->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
+        $conn->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH));
+
+        $conn->executeQuery(
+            'DELETE FROM `s_plugin_connect_config` WHERE `name` = "priceFieldForPurchasePriceExport"'
+        );
+
+        $conn->executeQuery(
+            'INSERT INTO `s_plugin_connect_config`(`name`, `value`, `groupName`)
+            VALUES ("priceFieldForPurchasePriceExport", "detailPurchasePrice", "export")'
+        );
+
+        parent::setUpBeforeClass();
+    }
+
+    public function testExportProductWithoutPurchasePrice()
+    {
+        $article = $this->getLocalArticle();
+        $prices = $article->getMainDetail()->getPrices();
+        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $article->getMainDetail()->setPurchasePrice(null);
+            Shopware()->Models()->persist($article->getMainDetail());
+        } else {
+            $prices[0]->setBasePrice(null);
+            Shopware()->Models()->persist($prices[0]);
+        }
+
+        Shopware()->Models()->flush();
+
+        $this->getConnectExport()->export(array($article->getId()));
+
+
+        /** @var \Shopware\CustomModels\Connect\Attribute $model */
+        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
+        $message = $model->getExportMessage();
+
+        $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $message);
+
+    }
+
     public function testHandleProductUpdates()
     {
         // pseudo verify SDK
@@ -46,31 +89,6 @@ class SDKTest extends ConnectTestHelper
                 ))
             )
         ));
-    }
-
-    public function testExportProductWithoutPurchasePrice()
-    {
-        $article = $this->getLocalArticle();
-        $prices = $article->getMainDetail()->getPrices();
-        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
-            $article->getMainDetail()->setPurchasePrice(null);
-            Shopware()->Models()->persist($article->getMainDetail());
-        } else {
-            $prices[0]->setBasePrice(null);
-            Shopware()->Models()->persist($prices[0]);
-        }
-
-        Shopware()->Models()->flush();
-
-        $this->getConnectExport()->export(array($article->getId()));
-
-
-        /** @var \Shopware\CustomModels\Connect\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
-        $message = $model->getExportMessage();
-
-        $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $message);
-
     }
 
     public function testExportProductWithPurchasePrice()

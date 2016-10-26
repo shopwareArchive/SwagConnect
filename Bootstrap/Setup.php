@@ -50,8 +50,9 @@ class Setup
         $form->setElement('text',
             'connectDebugHost',
             array(
-                'label' => 'Alternativer Shopware Connect-Host (nur für Testzwecke)',
-                'required' => false
+                'label' => 'Shopware Connect Host',
+                'required' => false,
+                'value'    => 'connect.shopware.com'
             ));
     }
 

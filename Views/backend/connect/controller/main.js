@@ -876,17 +876,15 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         window.progressFieldStream.updateProgress(
                             operation.processedStreams / streamIds.length,
                             Ext.String.format(window.snippets.processStream, operation.processedStreams, streamIds.length),
-                            true
+                            false
                         );
 
                         window.progressField.updateText(Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length));
                         window.progressField.updateProgress(
                             operation.newOffset / articleDetailIds.length,
                             Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length),
-                            true
+                            false
                         );
-
-
 
                         if (operation.hasMoreIterations) {
                             articleDetailIds = operation.articleDetailIds;

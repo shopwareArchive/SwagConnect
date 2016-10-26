@@ -2,8 +2,11 @@
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Models\Article\Element;
 use Shopware\Models\Customer\Group;
+use Shopware\Components\Model\ModelManager;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 
 /**
  * The setup class does the basic setup of the shopware Connect plugin. All operations should be implemented in a way
@@ -14,12 +17,43 @@ use Shopware\Models\Customer\Group;
  */
 class Setup
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var Pdo
+     */
+    protected $db;
+
+    /**
+     * @var ModelManager
+     */
+    protected $modelManager;
+
+    /**
+     * @var string
+     */
     protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
-    {
+    /**
+     * Setup constructor.
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param ModelManager $modelManager
+     * @param Pdo $db
+     * @param $shopware526installed
+     */
+    public function __construct
+    (
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        ModelManager $modelManager,
+        Pdo $db,
+        $shopware526installed
+    ) {
         $this->bootstrap = $bootstrap;
+        $this->modelManager = $modelManager;
+        $this->db = $db;
         $this->shopware526installed = $shopware526installed;
     }
 
@@ -64,28 +98,27 @@ class Setup
         $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
         // check if shopware Connect menu item exists
         if (!$connectItem || $this->shopware526installed) {
-            $models = Shopware()->Models();
-            $configComponent = new \ShopwarePlugins\Connect\Components\Config($models);
+            $configComponent = new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
 
             if ($this->shopware526installed) {
                 $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
                 if (null !== $connectInstallItem) {
                     $connectInstallItem->setActive(0);
-                    Shopware()->Models()->persist($connectInstallItem);
-                    Shopware()->Models()->flush();
+                    $this->modelManager->persist($connectInstallItem);
+                    $this->modelManager->flush();
                 }
             } else {
                 //move help menu item after Connect
                 $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
                 $helpItem->setPosition(1);
-                Shopware()->Models()->persist($helpItem);
-                Shopware()->Models()->flush();
+                $this->modelManager->persist($helpItem);
+                $this->modelManager->flush();
             }
 
             if ($connectItem) {
                 $connectItem->setActive(1);
-                Shopware()->Models()->persist($connectItem);
-                Shopware()->Models()->flush();
+                $this->modelManager->persist($connectItem);
+                $this->modelManager->flush();
             }
 
             $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
@@ -200,7 +233,7 @@ class Setup
               `localeID` = VALUES(`localeID`),
               `value` = VALUES(`value`)
               ;";
-            Shopware()->Db()->exec($sql);
+            $this->db->exec($sql);
         }
     }
 
@@ -220,8 +253,7 @@ class Setup
             'onStartDispatch'
         );
 
-        $db = Shopware()->Db();
-        $connectImportImages = $db->fetchOne(
+        $connectImportImages = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
             array('action' => '%ShopwareConnectImportImages')
         );
@@ -235,7 +267,7 @@ class Setup
             );
         }
 
-        $connectUpdateProducts = $db->fetchOne(
+        $connectUpdateProducts = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
             array('action' => '%ShopwareConnectUpdateProducts')
         );
@@ -392,134 +424,132 @@ class Setup
             ");
 
         foreach ($queries as $query) {
-            Shopware()->Db()->exec($query);
+            $this->db->exec($query);
         }
     }
 
+    public function getCrudService()
+    {
+        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+    }
 
     /**
      * Creates product, order and category attributes
      */
     private function createMyAttributes()
     {
-        //todo: refactor "addAttribute", we need to use \Shopware\Bundle\AttributeBundle\Service\CrudService::update instead
+        /** @var CrudService $crudService */
+        $crudService = $this->getCrudService();
 
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager =Shopware()->Models();
-
-        $modelManager->addAttribute(
+        $crudService->update(
             's_order_attributes',
-            'connect', 'shop_id',
-            'int(11)'
+            'connect_shop_id',
+            'integer'
         );
-        $modelManager->addAttribute(
+
+        $crudService->update(
             's_order_attributes',
-            'connect', 'order_id',
-            'int(11)'
+            'connect_order_id',
+            'integer'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'import_mapping',
+            'connect_import_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'export_mapping',
+            'connect_export_mapping',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'imported',
+            'connect_imported',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_media_attributes',
-            'connect', 'hash',
-            'varchar(255)'
+            'connect_hash',
+            'string'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_premium_dispatch_attributes',
-            'connect', 'allowed',
-            'int(1)',
-            true,
+            'connect_allowed',
+            'boolean',
+            array(),
+            null,
+            false,
             1
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'product_description',
+            'connect_product_description',
             'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_prices_attributes',
-            'connect', 'price',
-            'double',
-            true,
+            'connect_price',
+            'float',
+            array(),
+            null,
+            false,
             0
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_core_customergroups_attributes',
-            'connect', 'group',
-            'int(1)'
+            'connect_group',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'article_shipping',
-            'varchar(1000)'
+            'connect_article_shipping',
+            'text'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'reference',
-            'varchar(500)'
+            'connect_reference',
+            'string'
         );
 
-        $modelManager->addAttribute(
-            's_premium_dispatch_attributes',
-            'connect', 'allowed',
-            'int(1)',
-            true,
-            1
-        );
-
-        $modelManager->addAttribute(
+        $crudService->update(
             's_categories_attributes',
-            'connect', 'imported_category',
-            'int(1)',
-            true
+            'connect_imported_category',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'mapped_category',
-            'int(1)',
-            true
+            'connect_mapped_category',
+            'boolean'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_attributes',
-            'connect', 'remote_unit',
-            'varchar(32)',
-            true
+            'connect_remote_unit',
+            'string'
         );
 
-        $modelManager->addAttribute(
+        $crudService->update(
             's_articles_supplier_attributes',
-            'connect', 'is_remote',
-            'int(1)',
-            true,
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
             0
         );
 
-        $modelManager->generateAttributeModels(array(
+        $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
             's_order_attributes',
@@ -592,7 +622,7 @@ class Setup
     public function importSnippets()
     {
         $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
-        Shopware()->Db()->exec($sql);
+        $this->db->exec($sql);
     }
 
 
@@ -601,7 +631,7 @@ class Setup
      */
     public function createEngineElement()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
         $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
 
         if (!$element) {
@@ -612,8 +642,8 @@ class Setup
             $element->setTranslatable(1);
             $element->setHelp('Falls Sie die Langbeschreibung ihres Artikels in diesem Attribut-Feld pflegen, wird statt der Langbeschreibung der Inhalt dieses Feldes exportiert');
 
-            Shopware()->Models()->persist($element);
-            Shopware()->Models()->flush();
+            $this->modelManager->persist($element);
+            $this->modelManager->flush();
         }
     }
 
@@ -625,12 +655,11 @@ class Setup
      */
     public function createConnectCustomerGroup()
     {
-        $db = Shopware()->Db();
         $connectGroupAttributeId = $this->getConnectCustomerGroupId();
         if (!$this->connectCustomerGroupExists($connectGroupAttributeId)) {
 
             // Create Customer Group
-            $db->insert(
+            $this->db->insert(
                 's_core_customergroups',
                 [
                     'groupkey' => $this->getAvailableCustomerGroupName(),
@@ -641,10 +670,10 @@ class Setup
                 ]
             );
 
-            $customerGroupID = $db->fetchOne('SELECT MAX(id) FROM s_core_customergroups');
+            $customerGroupID = $this->db->fetchOne('SELECT MAX(id) FROM s_core_customergroups');
 
             // Create Customer Group Attributes
-            $db->insert(
+            $this->db->insert(
                 's_core_customergroups_attributes',
                 [
                   'customerGroupID' => $customerGroupID,
@@ -656,9 +685,7 @@ class Setup
 
     private function getConnectCustomerGroupId()
     {
-        $db = Shopware()->Db();
-
-        return $db->fetchOne(
+        return $this->db->fetchOne(
             'SELECT customerGroupID
             FROM `s_core_customergroups_attributes`
             WHERE connect_group = 1'
@@ -667,8 +694,7 @@ class Setup
 
     private function connectCustomerGroupExists($attributeId)
     {
-        $db = Shopware()->Db();
-        $result = $db->fetchOne(
+        $result = $this->db->fetchOne(
             'SELECT COUNT(*)
             FROM `s_core_customergroups`
             WHERE id = :id',
@@ -691,7 +717,7 @@ class Setup
     {
         $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
 
-        $repo = $repo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group');
+        $repo = $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
             $model = $repo->findOneBy(array('key' => $name));
             if (is_null($model)) {
@@ -720,7 +746,7 @@ class Setup
      */
     public function populateDispatchAttributes()
     {
-        Shopware()->Db()->exec('
+        $this->db->exec('
             INSERT IGNORE INTO `s_premium_dispatch_attributes` (`dispatchID`)
             SELECT `id` FROM `s_premium_dispatch`
         ');
@@ -731,24 +757,29 @@ class Setup
      */
     public function generateConnectPaymentAttribute()
     {
-        Shopware()->Models()->addAttribute(
+        /** @var CrudService $crudService */
+        $crudService = $this->getCrudService();
+
+        $crudService->update(
             's_core_paymentmeans_attributes',
-            'connect', 'is_allowed',
-            'int(1)',
-            true,
+            'connect_is_allowed',
+            'boolean',
+            array(),
+            null,
+            false,
             1
         );
 
-        Shopware()->Models()->generateAttributeModels(array(
+        $this->modelManager->generateAttributeModels(array(
             's_core_paymentmeans_attributes'
         ));
 
-        Shopware()->Models()->regenerateProxies();
+        $this->modelManager->regenerateProxies();
     }
 
     public function populateConnectPaymentAttribute()
     {
-        Shopware()->Db()->exec('
+        $this->db->exec('
             INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)
             SELECT `id` FROM `s_core_paymentmeans`
         ');
@@ -770,7 +801,7 @@ class Setup
             'sc_error' => 'SC error',
         );
 
-        $query = Shopware()->Models()->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+        $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
         $query->select('MAX(s.id)');
 
         $maxId = $query->getQuery()->getOneOrNullResult();
@@ -785,7 +816,7 @@ class Setup
         }
 
         foreach ($states as $name => $description) {
-            $isExists = Shopware()->Db()->query('
+            $isExists = $this->db->query('
                 SELECT `id` FROM `s_core_states`
                 WHERE `name` = ?
                 ', array($name)
@@ -796,7 +827,7 @@ class Setup
             }
 
             $currentId++;
-            Shopware()->Db()->query('
+            $this->db->query('
                 INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)

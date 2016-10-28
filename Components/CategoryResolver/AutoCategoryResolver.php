@@ -164,11 +164,12 @@ class AutoCategoryResolver implements CategoryResolver
         }
 
         foreach ($filteredCategories as $key => $categoryName) {
-            $localPrefix = $key;
-            $name = $categoryName;
-            $tree[$localPrefix] = array(
-                'name' => $name,
-                'children' => $this->generateTree($categories, $localPrefix),
+            $children = $this->generateTree($categories, $key);
+            $tree[$key] = array(
+                'name' => $categoryName,
+                'children' => $children,
+                'categoryId' => $key,
+                'leaf' => empty($children) ? true : false,
             );
         }
         return $tree;

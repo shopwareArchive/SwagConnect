@@ -11,6 +11,8 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->categoryResolver = new AutoCategoryResolver(
             Shopware()->Models(),
             Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),

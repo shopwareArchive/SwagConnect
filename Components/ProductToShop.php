@@ -32,6 +32,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
 use Shopware\Connect\Struct\ProductUpdate;
+use Shopware\Models\Customer\Group;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -349,31 +350,6 @@ class ProductToShop implements ProductToShopBase
             'vat' => $product->vat
         )));
 
-        // The basePrice (purchasePrice) needs to be updated in any case
-        $basePrice = $product->purchasePrice;
-
-        // Only set prices, if fixedPrice is active or price updates are configured
-        if (count($detail->getPrices()) == 0 || $connectAttribute->getFixedPrice() || $updateFields['price']) {
-            $customerGroup = $this->helper->getDefaultCustomerGroup();
-
-            $detail->getPrices()->clear();
-            $price = new Price();
-            $price->fromArray(array(
-                'from' => 1,
-                'price' => $product->price,
-                'customerGroup' => $customerGroup,
-                'article' => $model
-            ));
-
-            $this->setPurchasePrice($detail, $price, $basePrice);
-            $detail->setPrices(array($price));
-            // If the price is not being update, update the basePrice anyway
-        } else {
-            /** @var \Shopware\Models\Article\Price $price */
-            $price = $detail->getPrices()->first();
-            $this->setPurchasePrice($detail, $price, $basePrice);
-        }
-
         if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
         }
@@ -390,7 +366,7 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($detail);
 
         // some articles from connect have long sourceId
-        // like OXID articles. They use md5 has, but it is not supported
+        // like OXID articles. They use md5 hash, but it is not supported
         // in shopware.
         if (strlen($detail->getNumber()) > 30) {
             $detail->setNumber('SC-' . $product->shopId . '-' . $detail->getId());
@@ -400,6 +376,16 @@ class ProductToShop implements ProductToShopBase
         }
 
         $this->manager->flush();
+
+        $defaultCustomerGroup = $this->helper->getDefaultCustomerGroup();
+        // Only set prices, if fixedPrice is active or price updates are configured
+        if (count($detail->getPrices()) == 0 || $connectAttribute->getFixedPrice() || $updateFields['price']) {
+            $this->setPrice($model, $detail, $product);
+            $model = $this->helper->getArticleModelByProduct($product);
+        }
+        // If the price is not being update, update the purchasePrice anyway
+        $this->setPurchasePrice($detail, $product->purchasePrice, $defaultCustomerGroup);
+
         $this->manager->clear();
 
         $this->addArticleTranslations($model, $product);
@@ -413,6 +399,42 @@ class ProductToShop implements ProductToShopBase
             $this->imageImport->importImagesForArticle($product->images, $model);
         }
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
+    }
+
+    /**
+     * Set detail purchase price with plain SQL
+     * Entity usage throws exception when error handlers are disabled
+     *
+     * @param ProductModel $article
+     * @param DetailModel $detail
+     * @param Product $product
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function setPrice(ProductModel $article, DetailModel $detail, Product $product)
+    {
+        // set price via plain SQL because shopware throws exception
+        // undefined index: key when error handler is disabled
+        $customerGroup = $this->helper->getDefaultCustomerGroup();
+
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM `s_articles_prices`
+              WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
+            [$customerGroup->getKey(), 1, "beliebig", $article->getId(), $detail->getId()]
+        );
+
+        // todo@sb: test update prices
+        if ($id > 0) {
+            $this->manager->getConnection()->executeQuery(
+                'UPDATE `s_articles_prices` SET `price` = ?, `baseprice` = ? WHERE `id` = ?',
+                [$product->price, $product->purchasePrice, $id]
+            );
+        } else {
+            $this->manager->getConnection()->executeQuery(
+                'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
+              VALUES (?, 1, "beliebig", ?, ?, ?, ?);',
+                [$customerGroup->getKey(), $article->getId(), $detail->getId(), $product->price, $product->purchasePrice]
+            );
+        }
     }
 
     /**
@@ -589,6 +611,8 @@ class ProductToShop implements ProductToShopBase
                 }
                 return $prices->first()->getPrice() != $product->price;
         }
+
+        throw new \InvalidArgumentException('Unrecognized field');
     }
 
     /**
@@ -694,12 +718,41 @@ class ProductToShop implements ProductToShopBase
         return $supplier;
     }
 
-    private function setPurchasePrice(DetailModel $detail, Price $price, $purchasePrice)
+    /**
+     * Set detail purchase price with plain SQL
+     * Entity usage throws exception when error handlers are disabled
+     *
+     * @param DetailModel $detail
+     * @param float $purchasePrice
+     * @param Group $defaultGroup
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function setPurchasePrice(DetailModel $detail, $purchasePrice, Group $defaultGroup)
     {
         if (method_exists($detail, 'setPurchasePrice')) {
-            $detail->setPurchasePrice($purchasePrice);
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE `s_articles_details` SET `purchaseprice` = ? WHERE `id` = ?',
+                    [$purchasePrice, $detail->getId()]
+                );
         } else {
-            $price->setBasePrice($purchasePrice);
+            $id = $this->manager->getConnection()->fetchColumn(
+                'SELECT id FROM `s_articles_prices`
+              WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
+                [$defaultGroup->getKey(), 1, "beliebig", $detail->getArticleId(), $detail->getId()]
+            );
+
+            if ($id > 0) {
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE `s_articles_prices` SET `baseprice` = ? WHERE `id` = ?',
+                    [$purchasePrice, $id]
+                );
+            } else {
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `baseprice`)
+              VALUES (?, 1, "beliebig", ?, ?, ?);',
+                    [$defaultGroup->getKey(), $detail->getArticleId(), $detail->getId(), $purchasePrice]
+                );
+            }
         }
     }
 

@@ -3,25 +3,39 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Product;
 
 class SDKTest extends ConnectTestHelper
 {
-    public static function setUpBeforeClass()
-    {
-        $conn = Shopware()->Db();
-        $conn->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH));
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
+    private $manager;
 
-        $conn->executeQuery(
+    /**
+     * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->manager = Shopware()->Models();
+        $this->db = Shopware()->Db();
+        $this->db->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
+        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH));
+
+        $this->db->executeQuery(
             'DELETE FROM `s_plugin_connect_config` WHERE `name` = "priceFieldForPurchasePriceExport"'
         );
 
-        $conn->executeQuery(
+        $this->db->executeQuery(
             'INSERT INTO `s_plugin_connect_config`(`name`, `value`, `groupName`)
             VALUES ("priceFieldForPurchasePriceExport", "detailPurchasePrice", "export")'
         );
 
-        parent::setUpBeforeClass();
+        parent::setUp();
     }
 
     public function testExportProductWithoutPurchasePrice()
@@ -30,19 +44,19 @@ class SDKTest extends ConnectTestHelper
         $prices = $article->getMainDetail()->getPrices();
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
             $article->getMainDetail()->setPurchasePrice(null);
-            Shopware()->Models()->persist($article->getMainDetail());
+            $this->manager->persist($article->getMainDetail());
         } else {
             $prices[0]->setBasePrice(null);
-            Shopware()->Models()->persist($prices[0]);
+            $this->manager->Models()->persist($prices[0]);
         }
 
-        Shopware()->Models()->flush();
+        $this->manager->flush();
 
         $this->getConnectExport()->export(array($article->getId()));
 
 
         /** @var \Shopware\CustomModels\Connect\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
         $message = $model->getExportMessage();
 
         $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $message);
@@ -52,11 +66,10 @@ class SDKTest extends ConnectTestHelper
     public function testHandleProductUpdates()
     {
         // pseudo verify SDK
-        $conn = Shopware()->Db();
-        $conn->delete('sw_connect_shop_config', array());
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_self_', 's_config' => -1));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
+        $this->db->delete('sw_connect_shop_config', array());
+        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_self_', 's_config' => -1));
+        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
+        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
 
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $purchasePrice = 6.99;
@@ -93,30 +106,31 @@ class SDKTest extends ConnectTestHelper
 
     public function testExportProductWithPurchasePrice()
     {
-        // Assign a category mapping
-//        $this->changeCategoryConnectMappingForCategoryTo(14, '/bücher');
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
+        $model->setExportMessage(null);
+        $this->manager->persist($model);
+        $this->manager->flush();
 
         $article = $this->getLocalArticle();
         $detail = $article->getMainDetail();
 
         if (method_exists($detail, 'setPurchasePrice')) {
             $detail->setPurchasePrice(5.99);
-            Shopware()->Models()->persist($detail);
+            $this->manager->persist($detail);
         } else {
             $prices = $detail->getPrices();
             $prices[0]->setBasePrice(5.99);
-            Shopware()->Models()->persist($prices[0]);
+            $this->manager->persist($prices[0]);
         }
-        Shopware()->Models()->flush();
+        $this->manager->flush();
 
         // Insert the product
         $this->getConnectExport()->export(array($article->getId()));
 
         /** @var \Shopware\CustomModels\Connect\Attribute $model */
-        $model = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
         $message = $model->getExportMessage();
 
         $this->assertNull($message);
     }
-
 }

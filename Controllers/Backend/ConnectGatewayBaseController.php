@@ -75,7 +75,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
     /**
      * Main connect interface
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function indexAction()
     {

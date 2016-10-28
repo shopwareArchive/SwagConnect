@@ -39,12 +39,18 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         $expected = array(
             '/Kleidung' => array(
                 'name' => 'Kleidung',
+                'categoryId' => '/Kleidung',
+                'leaf' => false,
                 'children' => array(
                     '/Kleidung/Hosen' => array(
                         'name' => 'Hosen',
+                        'categoryId' => '/Kleidung/Hosen',
+                        'leaf' => false,
                         'children' => array(
                             '/Kleidung/Hosen/Hosentraeger' => array(
                                 'name' => 'Hosenträger',
+                                'categoryId' => '/Kleidung/Hosen/Hosentraeger',
+                                'leaf' => true,
                                 'children' => array(),
                             )
                         ),
@@ -53,12 +59,18 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
             ),
             '/Nahrung & Getraenke' => array(
                 'name' => 'Nahrung & Getränke',
+                'categoryId' => '/Nahrung & Getraenke',
+                'leaf' => false,
                 'children' => array(
                     '/Nahrung & Getraenke/Alkoholische Getraenke' => array(
                         'name' => 'Alkoholische Getränke',
+                        'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke',
+                        'leaf' => false,
                         'children' => array(
                             '/Nahrung & Getraenke/Alkoholische Getraenke/Bier' => array(
                                 'name' => 'Bier',
+                                'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke/Bier',
+                                'leaf' => true,
                                 'children' => array(),
                             ),
                         ),

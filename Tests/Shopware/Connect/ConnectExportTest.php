@@ -35,6 +35,8 @@ class ConnectExportTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->manager = Shopware()->Models();
         $this->config = new Config($this->manager);
         $this->connectExport = new ConnectExport(
@@ -96,8 +98,8 @@ class ConnectExportTest extends ConnectTestHelper
         $errors = $this->connectExport->export(array(3));
 
         $this->assertEmpty($errors);
-        $sql = 'SELECT export_status, export_message, exported FROM s_plugin_connect_items WHERE source_id = ?';
-        $row = Shopware()->Db()->fetchRow($sql, array(3));
+        $sql = 'SELECT export_status, export_message, exported FROM s_plugin_connect_items WHERE article_detail_id = ?';
+        $row = Shopware()->Db()->fetchRow($sql, array($detail->getId()));
 
         $this->assertEquals('update', $row['export_status']);
         $this->assertNull($row['export_message']);

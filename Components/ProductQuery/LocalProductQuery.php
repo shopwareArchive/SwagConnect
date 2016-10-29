@@ -183,7 +183,7 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailKind']);
 
         if ((array_key_exists('unit', $row['attributes']) && $row['attributes']['unit'])
-            && (array_key_exists('quantit', $row['attributes']) && $row['attributes']['quantity'])
+            && (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity'])
             && (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])
         ) {
             //Map local unit to connect unit

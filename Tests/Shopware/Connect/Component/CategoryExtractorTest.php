@@ -60,6 +60,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->db = Shopware()->Db();
         $this->em = Shopware()->Models();
 

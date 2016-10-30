@@ -21,6 +21,8 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->translations = array(
             'en' => new Translation(
                 array(

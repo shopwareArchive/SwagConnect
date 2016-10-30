@@ -3,8 +3,9 @@
 namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
+class AutoCategoryResolverTest extends ConnectTestHelper
 {
     /** @var  \ShopwarePlugins\Connect\Components\CategoryResolver */
     private $categoryResolver;

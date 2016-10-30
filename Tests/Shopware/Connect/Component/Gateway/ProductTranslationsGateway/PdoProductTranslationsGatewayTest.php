@@ -1,6 +1,10 @@
 <?php
 
-class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
+namespace Tests\ShopwarePlugins\Connect\Component\Gateway\ProductTranslationsGateway;
+
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
+
+class PdoProductTranslationsGatewayTest extends ConnectTestHelper
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway
@@ -13,6 +17,8 @@ class PdoProductTranslationsGatewayTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->mockDbStatement = $this->getMockBuilder('Zend_Db_Statement_Pdo')
             ->disableOriginalConstructor()
             ->getMock();

@@ -28,6 +28,8 @@ class ConnectExportTest extends ConnectTestHelper
 
     public static function setUpBeforeClass()
     {
+        parent::setUpBeforeClass();
+
         $conn = Shopware()->Db();
         $conn->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
         $conn->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => 3));

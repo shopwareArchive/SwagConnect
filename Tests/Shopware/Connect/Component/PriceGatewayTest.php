@@ -3,8 +3,9 @@
 namespace Tests\ShopwarePlugins\Connect\Component;
 
 use ShopwarePlugins\Connect\Components\PriceGateway;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class PriceGatewayTest extends \PHPUnit_Framework_TestCase
+class PriceGatewayTest extends ConnectTestHelper
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\PriceGateway
@@ -15,6 +16,8 @@ class PriceGatewayTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->priceGateway = new PriceGateway(
             Shopware()->Db()
         );

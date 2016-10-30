@@ -25,6 +25,8 @@ class ProductTranslatorTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->configComponent = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Config')
             ->disableOriginalConstructor()
             ->getMock();

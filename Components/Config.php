@@ -119,6 +119,16 @@ class Config
     }
 
     /**
+     * @return bool
+     */
+    public function hasSsl()
+    {
+        $shopRepo = $this->manager->getRepository('Shopware\Models\Shop\Shop');
+        $mainShop = $shopRepo->findOneBy(['default' => true ]);
+        return $mainShop->getSecure();
+    }
+
+    /**
      * @param $name
      * @param null $default
      * @return mixed
@@ -216,40 +226,13 @@ class Config
      */
     public function getGeneralConfig()
     {
-        $configsArray = array();
-
         $query = "SELECT `name`, `value` FROM s_plugin_connect_config
         WHERE `shopId` IS NULL AND `groupName` = 'general'";
 
         $result = Shopware()->Db()->fetchPairs($query);
-        $configsArray[] = $result;
+        $result['shopId'] = $this->getConnectPDOGateway()->getShopId();
 
-        return $this->setConfigDefaults($configsArray);
-    }
-
-    /**
-     * Get default values from shopware config or other sources.
-     *
-     * @param array $config
-     * @return array
-     */
-    private function setConfigDefaults($configList)
-    {
-        $config = $configList[0];
-        if (false === array_key_exists('hasSsl', $config)) {
-            // Get the first default shop and use it's SSL setting
-            $shops = Shopware()->Container()->get('models')->getRepository('Shopware\Models\Shop\Shop')->findAll();
-            $mainShopList = array_filter($shops, function($shop){
-                return $shop->getDefault();
-            });
-
-            if (false === empty($mainShopList)) {
-                $config['hasSsl'] = $mainShopList[0]->getSecure();
-            }
-        }
-        $config['shopId'] = $this->getConnectPDOGateway()->getShopId();
-
-        return [$config];
+        return array($result);
     }
 
     /**

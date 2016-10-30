@@ -5,6 +5,7 @@ use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\ConnectExport;
 
 /**
  * Class Article
@@ -32,14 +33,20 @@ class Article extends BaseSubscriber
      */
     private $detailRepository;
 
+    /**
+     * @var \ShopwarePlugins\Connect\Components\ConnectExport
+     */
+    private $connectExport;
 
     public function __construct(
         Gateway $connectGateway,
-        ModelManager $modelManager
+        ModelManager $modelManager,
+        ConnectExport $connectExport
     ) {
         parent::__construct();
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
+        $this->connectExport = $connectExport;
     }
 
     public function getSubscribedEvents()
@@ -121,6 +128,16 @@ class Article extends BaseSubscriber
             case 'saveDetail':
                 if ($request->getParam('standard')) {
                     $this->generateMainVariantChange($request->getParam('id'));
+                }
+                break;
+            case 'createConfiguratorVariants':
+                // main detail should be updated as well, because shopware won't call lifecycle event
+                // even postUpdate of Detail. By this way Connect will generate change for main variant,
+                // otherwise $product->variant property is an empty array
+                // if main detail is not changed, Connect SDK won't generate change for it.
+                // ticket CON-3747
+                if ($request->getParam('articleId')) {
+                    $this->exportMainVariant($request->getParam('articleId'));
                 }
                 break;
             default:
@@ -338,5 +355,40 @@ class Article extends BaseSubscriber
     {
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
         return Shopware()->Db()->fetchOne($sql, array($id));
+    }
+
+    /**
+     * Marks main variant for export
+     *
+     * @param int $articleId
+     */
+    private function exportMainVariant($articleId)
+    {
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->find((int)$articleId);
+
+        if (!$article) {
+            return;
+        }
+
+        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
+
+        if (!$attribute) {
+            return;
+        }
+        // Check if entity is a connect product
+        if (!$this->getHelper()->isProductExported($attribute)) {
+            return;
+        }
+
+        $detail = $article->getMainDetail();
+        $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+
+        try {
+            $this->connectExport->export([$detailAttribute->getSourceId()], null, true);
+        } catch (\Exception $e) {
+            // If the update fails due to missing requirements
+            // (e.g. category assignment), continue without error
+        }
     }
 }

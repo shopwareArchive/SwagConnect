@@ -85,6 +85,8 @@ class ProductToShopTest extends ConnectTestHelper
     public function testInsertArticle()
     {
         $product = $this->getProduct();
+        $product->minPurchaseQuantity = 5;
+
         $this->productToShop->insertOrUpdate($product);
 
         $articlesCount = Shopware()->Db()->query(
@@ -96,6 +98,14 @@ class ProductToShopTest extends ConnectTestHelper
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
+
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
+            ->findOneBy(array('sourceId' => $product->sourceId));
+        $detail = $connectAttribute->getArticleDetail();
+        
+        $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
     }
 
     public function testInsertArticleTranslations()

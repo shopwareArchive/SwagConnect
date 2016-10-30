@@ -12,7 +12,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
     },
 
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.getConnectContent();
@@ -20,60 +20,58 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         me.callParent();
     },
 
-    getConnectContent: function() {
+    getConnectContent: function () {
         var me = this;
 
         return [
             me.getFixedPriceFieldSet(),
             me.getConnectImportConfigFieldSet()
         ];
-
     },
 
-    getFixedPriceFieldSet: function() {
+    getFixedPriceFieldSet: function () {
         var me = this;
 
         me.connectFixedPriceFieldset = Ext.create('Ext.form.FieldSet', {
             defaults: me.defaults,
             title: '{s name=connect/fixedPriceConfig}Fixed price configuration{/s}',
-            items:
-                [
-                    {
-                        xtype: 'label',
-                        html: '{s name=connect/fixedPriceWarning}<strong>Warning:</strong> Fixed prices may only be used for products which are subject to price fixing by law.{/s}'
-                    },
-                    me.getFixedPriceCombo()
-                ]
+            items: [
+                {
+                    xtype: 'label',
+                    html: '{s name=connect/fixedPriceWarning}<strong>Warning:</strong> Fixed prices may only be used for products which are subject to price fixing by law.{/s}'
+                },
+                me.getFixedPriceCombo()
+            ]
         });
 
         return me.connectFixedPriceFieldset;
     },
 
 
-    getConnectImportConfigFieldSet: function() {
+    getConnectImportConfigFieldSet: function () {
         var me = this;
 
         me.connectLeftContainer = Ext.create('Ext.container.Container', {
-            columnWidth:0.5,
+            columnWidth: 0.5,
             defaults: {
                 labelWidth: 155,
                 anchor: '100%'
             },
             padding: '0 20 0 0',
             layout: 'anchor',
-            border:false,
-            items:me.getLeftContainer()
+            border: false,
+            items: me.getLeftContainer()
         });
 
         me.connectRightContainer = Ext.create('Ext.container.Container', {
-            columnWidth:0.5,
+            columnWidth: 0.5,
             layout: 'anchor',
             defaults: {
                 labelWidth: 155,
                 anchor: '100%'
             },
-            border:false,
-            items:me.getRightContainer()
+            border: false,
+            items: me.getRightContainer()
         });
 
         return {
@@ -81,15 +79,14 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
             layout: 'column',
             defaults: me.defaults,
             title: '{s name=connect/overrideConfig}Field update configuration{/s}',
-            items:
-                [
-                    me.connectLeftContainer,
-                    me.connectRightContainer
-                ]
+            items: [
+                me.connectLeftContainer,
+                me.connectRightContainer
+            ]
         };
     },
 
-    getLeftContainer: function() {
+    getLeftContainer: function () {
         var me = this;
 
         return [
@@ -99,7 +96,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         ];
     },
 
-    getRightContainer: function() {
+    getRightContainer: function () {
         var me = this;
 
         return [
@@ -108,7 +105,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         ];
     },
 
-    getOverwriteCombo: function(text, dataField) {
+    getOverwriteCombo: function (text, dataField) {
         var me = this;
 
         return {
@@ -123,28 +120,33 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         };
     },
 
-    getOverwriteStore: function() {
-        var me = this;
-
+    getOverwriteStore: function () {
         return Ext.create('Ext.data.Store', {
-            fields: [ { name: 'value', useNull: true }, { name: 'description' } ],
-            data: [
-                { value: 'overwrite', description: '{s name=connect/automatically}Automatic{/s}' },
-                { value: 'no-overwrite', description: '{s name=connect/manually}Manual{/s}' }
-            ]
+            fields: [{
+                name: 'value',
+                useNull: true
+            }, {
+                name: 'description'
+            }],
+            data: [{
+                value: 'overwrite',
+                description: '{s name=connect/automatically}Automatic{/s}'
+            }, {
+                value: 'no-overwrite',
+                description: '{s name=connect/manually}Manual{/s}'
+            }]
         });
-
     },
 
-    getFixedPriceCombo: function() {
+    getFixedPriceCombo: function () {
         var me = this;
 
         return me.connectFixedPrice = Ext.create('Ext.form.field.Checkbox', {
             labelWidth: 155,
             name: 'fixedPrice',
-            fieldLabel: '{s name=connectFixedPrice}Enable price fixing{/s}',
+            fieldLabel: '{s name=connect/connectFixedPrice}Enable price fixing{/s}',
             inputValue: true,
-            uncheckedValue:false
+            uncheckedValue: false
         })
     }
 });

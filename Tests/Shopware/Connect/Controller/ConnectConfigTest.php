@@ -67,7 +67,6 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'logRequest' => '1',
             'connectDebugHost' => 'stage.connect.de',
             'apiKey' => '58dfcc22-0ab7-4bf6-8eff-e0d2c9455019',
-            'hasSsl' => '0',
             'showShippingCostsSeparately' => '0',
             'articleImagesLimitImport' => '10',
         );

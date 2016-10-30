@@ -3,6 +3,7 @@
 namespace Shopware\CustomModels\Connect;
 
 use \Shopware\Components\Model\ModelRepository;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
  * Class ProductStreamAttributeRepository
@@ -25,5 +26,28 @@ class ProductStreamAttributeRepository extends ModelRepository
     public function create()
     {
         return new ProductStreamAttribute();
+    }
+
+    /**
+     * @param $streamId
+     * @return bool
+     */
+    public function isStreamExported($streamId)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $qb = $connection->createQueryBuilder();
+        $qb->select('pcs.id')
+            ->from('s_plugin_connect_streams', 'pcs')
+            ->where('pcs.stream_id = :streamId')
+            ->setParameter('streamId', $streamId)
+            ->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->eq('pcs.export_status', ':exportedStatus'),
+                    $qb->expr()->eq('pcs.export_status', ':syncedStatus')
+                ))
+            ->setParameter('exportedStatus', ProductStreamService::STATUS_EXPORT)
+            ->setParameter('syncedStatus', ProductStreamService::STATUS_SYNCED);
+
+        return (bool)$qb->execute()->fetchColumn();
     }
 }

@@ -2,6 +2,9 @@
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Shopware\Components\Model\ModelManager;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 /**
  * Uninstaller of the plugin.
  * Currently attribute columns will never be removed, as well as the plugin tables. This can be changed once
@@ -12,19 +15,50 @@ namespace ShopwarePlugins\Connect\Bootstrap;
  */
 class Uninstall
 {
+    /**
+     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
+     */
     protected $bootstrap;
+
+    /**
+     * @var Pdo
+     */
+    protected $db;
+
+    /**
+     * @var ModelManager
+     */
+    protected $modelManager;
+
+    /**
+     * @var string
+     */
     protected $shopware526installed;
 
-    public function __construct(\Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap, $shopware526installed)
-    {
+    /**
+     * Setup constructor.
+     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * @param ModelManager $modelManager
+     * @param Pdo $db
+     * @param $shopware526installed
+     */
+    public function __construct
+    (
+        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
+        ModelManager $modelManager,
+        Pdo $db,
+        $shopware526installed
+    ) {
         $this->bootstrap = $bootstrap;
+        $this->modelManager = $modelManager;
+        $this->db = $db;
         $this->shopware526installed = $shopware526installed;
     }
 
     public function run()
     {
         // Currently this should not be done
-        // $this->removeMyAttributes();
+//         $this->removeMyAttributes();
 
         $this->setMenuItem();
         $this->deactivateConnectProducts();
@@ -34,49 +68,56 @@ class Uninstall
     }
 
     /**
+     * @return CrudService
+     */
+    public function getCrudService()
+    {
+        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+    }
+
+    /**
      * Remove the attributes when uninstalling the plugin
      */
     public function removeMyAttributes()
     {
-        /** @var \Shopware\Components\Model\ModelManager $modelManager */
-        $modelManager = Shopware()->Models();
+        $crudService = $this->getCrudService();
 
         try {
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_order_attributes',
-                'connect', 'shop_id'
+                'connect_shop_id'
             );
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_order_attributes',
-                'connect', 'order_id'
+                'connect_order_id'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'import_mapping'
+                'connect_import_mapping'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'export_mapping'
+                'connect_export_mapping'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_categories_attributes',
-                'connect', 'imported'
+                'connect_imported'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_premium_dispatch_attributes',
-                'connect', 'allowed'
+                'connect_allowed'
             );
 
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_media_attributes',
-                'connect', 'hash'
+                'connect_hash'
             );
 
-            $modelManager->generateAttributeModels(array(
+            $this->modelManager->generateAttributeModels(array(
                 's_premium_dispatch_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',
@@ -100,7 +141,7 @@ class Uninstall
           AND shop_id IS NOT NULL
         SET s_articles.active = false
         ';
-        Shopware()->Db()->exec($sql);
+        $this->db->exec($sql);
     }
 
     /**
@@ -108,12 +149,12 @@ class Uninstall
      */
     public function removeEngineElement()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Article\Element');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
         $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
 
         if ($element) {
-            Shopware()->Models()->remove($element);
-            Shopware()->Models()->flush();
+            $this->modelManager->remove($element);
+            $this->modelManager->flush();
         }
     }
 
@@ -126,8 +167,8 @@ class Uninstall
             $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
             if (null !== $connectInstallItem) {
                 $connectInstallItem->setActive(1);
-                Shopware()->Models()->persist($connectInstallItem);
-                Shopware()->Models()->flush();
+                $this->modelManager->persist($connectInstallItem);
+                $this->modelManager->flush();
             } else {
                 $this->bootstrap->createMenuItem(array(
                     'label' => 'Einstieg',

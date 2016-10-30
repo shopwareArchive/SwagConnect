@@ -1,8 +1,8 @@
 /**
  * Extends the payment attribute
  */
-//{block name="backend/payment/model/attribute/fields" append}
-    { name: 'connectIsAllowed', type: 'int', useNull: true },
+//{block name="backend/payment/model/payment/fields" append}
+    { name: 'connectIsAllowed', type: 'boolean', useNull: true },
 // {/block}
 
 

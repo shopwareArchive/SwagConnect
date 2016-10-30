@@ -57,14 +57,14 @@ class Configuration
             return;
         }
 
-        $disallowChange = array(SDK::PRICE_TYPE_PURCHASE, SDK::PRICE_TYPE_RETAIL, SDK::PRICE_TYPE_BOTH);
-        $validPriceTypes = $disallowChange + array(SDK::PRICE_TYPE_NONE);
+        $validPriceTypes = array(
+            SDK::PRICE_TYPE_PURCHASE,
+            SDK::PRICE_TYPE_RETAIL,
+            SDK::PRICE_TYPE_BOTH,
+            SDK::PRICE_TYPE_NONE,
+        );
 
         if (!in_array($priceType, $validPriceTypes)) {
-            return;
-        }
-
-        if (in_array($this->configuration->getConfig(SDK::CONFIG_PRICE_TYPE), $disallowChange)) {
             return;
         }
 

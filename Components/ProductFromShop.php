@@ -39,6 +39,8 @@ use Shopware\Connect\Struct\Change\FromShop\Insert;
 use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Shipping;
+use Shopware\CustomModels\Connect\Attribute;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
  * The interface for products exported *to* connect *from* the local shop
@@ -493,6 +495,50 @@ class ProductFromShop implements ProductFromShopBase
             $this->manager->getConnection()->commit();
         } catch (\Exception $e) {
             $this->manager->getConnection()->rollBack();
+        }
+
+        try {
+            $this->markStreamsAsSynced();
+        } catch (\Exception $e) {
+            $this->logger->write(
+                true,
+                sprintf('Failed to mark streams as synced! Message: "%s". Trace: "%s"', $e->getMessage(), $e->getTraceAsString()),
+                null
+            );
+        }
+
+    }
+
+    private function markStreamsAsSynced()
+    {
+        $streamIds = $this->manager->getConnection()->executeQuery(
+            "SELECT pcs.stream_id as streamId
+             FROM s_plugin_connect_streams as pcs
+             WHERE export_status = ?",
+            array(ProductStreamService::STATUS_EXPORT)
+        )->fetchAll();
+
+        foreach ($streamIds as $stream) {
+            $streamId = $stream['streamId'];
+
+            $notExported = $this->manager->getConnection()->executeQuery(
+                "SELECT pss.id
+                 FROM s_product_streams_selection as pss
+                 JOIN s_plugin_connect_items as pci
+                 ON pss.article_id = pci.article_id
+                 WHERE pss.stream_id = ?
+                 AND pci.export_status != ?",
+                array($streamId, Attribute::STATUS_SYNCED)
+            )->fetchAll();
+
+            if (count($notExported) === 0) {
+                $this->manager->getConnection()->executeQuery(
+                    "UPDATE s_plugin_connect_streams
+                     SET export_status = ?
+                     WHERE stream_id = ?",
+                    array(ProductStreamService::STATUS_SYNCED, $streamId)
+                );
+            }
         }
     }
 

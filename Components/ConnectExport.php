@@ -68,7 +68,7 @@ class ConnectExport
      */
     public function getArticleModelById($id)
     {
-        return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
+        return $this->manager->getRepository('Shopware\Models\Article\Article')->find($id);
     }
 
     /**
@@ -79,7 +79,7 @@ class ConnectExport
      */
     public function getArticleDetailById($id)
     {
-        return Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->find($id);
+        return $this->manager->getRepository('Shopware\Models\Article\Detail')->find($id);
     }
 
     /**
@@ -238,7 +238,7 @@ class ConnectExport
      */
     public function getExportArticlesIds()
     {
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
@@ -297,7 +297,7 @@ class ConnectExport
      */
     public function setDeleteStatusForVariants(Article $article)
     {
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->select(array('at.sourceId'))
             ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
@@ -309,7 +309,7 @@ class ConnectExport
             $this->sdk->recordDelete($item['sourceId']);
         }
 
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
             ->set('at.exportStatus', $builder->expr()->literal(Attribute::STATUS_DELETE))
             ->set('at.exported', 0)
@@ -431,6 +431,38 @@ class ConnectExport
             'articles' => $data,
             'count' => $total,
         ));
+    }
+
+    public function clearConnectItems()
+    {
+        $this->deleteAllConnectProducts();
+        $this->resetConnectItemsStatus();
+    }
+
+    /**
+     * Deletes products hash
+     */
+    private function deleteAllConnectProducts()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->delete('sw_connect_product');
+        $builder->execute();
+    }
+
+    /**
+     * Resets all item status
+     */
+    private function resetConnectItemsStatus()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->update('s_plugin_connect_items', 'ci')
+            ->set('export_status', ':exportStatus')
+            ->set('revision', ':revision')
+            ->set('exported', 0)
+            ->setParameter('exportStatus', null)
+            ->setParameter('revision', null);
+
+        $builder->execute();
     }
 
     private function getMarketplaceGateway()

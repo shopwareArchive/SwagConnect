@@ -634,7 +634,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
-            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
@@ -645,6 +645,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+
+            return;
         }
 
         $this->View()->assign([
@@ -697,7 +699,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
-            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
@@ -708,6 +710,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+
+            return;
         }
 
         $this->View()->assign([
@@ -1495,7 +1499,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         //In this case all the products from a single stream were exported successfully but there are still more streams to be processed.
         if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $productStreamService->log($streamId, 'Success');
             $nextStreamIndex = $currentStreamIndex + 1;
 
@@ -1512,7 +1516,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         //In this case all the products from all streams were exported successfully.
         if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $hasMoreIterations = false;
             $newOffset = count($articleDetailIds);
             $processedStreams = count($streamIds);

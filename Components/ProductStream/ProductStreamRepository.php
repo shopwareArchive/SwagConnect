@@ -73,7 +73,7 @@ class ProductStreamRepository extends Repository
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pss.article_id IN (:articleIds)')
             ->andWhere('es.export_status = (:status)')
-            ->setParameter(':status', ProductStreamService::STATUS_SUCCESS)
+            ->setParameter(':status', ProductStreamService::STATUS_EXPORT)
             ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);

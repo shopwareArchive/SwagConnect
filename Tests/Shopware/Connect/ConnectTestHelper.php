@@ -6,6 +6,7 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\ImageImport;
@@ -17,8 +18,6 @@ use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
-use Shopware\Models\Article\Price;
-use Shopware\Models\Tax\Tax;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
@@ -34,11 +33,27 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     */
+    public function getConnectFactory()
+    {
+        if (!$this->connectFactory) {
+            $this->connectFactory = new ConnectFactory();
+        }
+
+        return $this->connectFactory;
+    }
+
+    /**
      * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
-        return Shopware()->Container()->get('ConnectSDK');
+        if (!$this->sdk) {
+            $this->sdk = $this->getConnectFactory()->createSdk();
+        }
+
+        return $this->sdk;
     }
 
     /**
@@ -229,10 +244,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $mainVariantColor['de'] => $mainVariantColor['en'],
         );
 
-        for ($i=0; $i < 4 - 1; $i++) {
+        for ($i = 0; $i < 4 - 1; $i++) {
             $variant = $this->getProduct(true);
             $variantSourceId = $mainVariant->sourceId . '-' . $i;
-            $variant->title = 'MassImport #'. $variantSourceId;
+            $variant->title = 'MassImport #' . $variantSourceId;
             $variant->sourceId = $variantSourceId;
             $variant->ean = $variantSourceId;
             $variantColor = array_pop($color);
@@ -240,9 +255,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $variant->groupId = $groupId;
             $variant->translations = array(
                 'en' => new Translation(array(
-                   'title' =>  'MassImport #'. $variantSourceId . ' EN',
-                   'longDescription' =>  $mainVariant->longDescription . ' EN',
-                   'shortDescription' =>  $mainVariant->shortDescription . ' EN',
+                    'title' => 'MassImport #' . $variantSourceId . ' EN',
+                    'longDescription' => $mainVariant->longDescription . ' EN',
+                    'shortDescription' => $mainVariant->shortDescription . ' EN',
                     'variantLabels' => array(
                         'Farbe' => 'Color',
                     ),
@@ -314,8 +329,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         // undefined index: key when error handler is disabled
         Shopware()->Db()->executeQuery(
             'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
-              VALUES (?, 1, "beliebig", ?, ?, ?, ?)
-              ', [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]);
+          VALUES (?, 1, "beliebig", ?, ?, ?, ?)
+          ', [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]);
 
         return $article;
     }

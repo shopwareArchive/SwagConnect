@@ -419,7 +419,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
 
         $enLocale = new Locale();
-        $enLocale->setLocale('en-EN');
+        $enLocale->setLocale('en_EN');
 
         $nlLocale = new Locale();
         $nlLocale->setLocale('nl_NL');
@@ -443,6 +443,9 @@ class ProductTranslatorTest extends ConnectTestHelper
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
                     'longDescription' => 'shopware Connect Local Product long description EN',
+                    'variantLabels' => array(
+                        'farbe' => 'color',
+                    ),
                     'url' => $this->getProductBaseUrl() . '35/shId/2',
                 )
             ),

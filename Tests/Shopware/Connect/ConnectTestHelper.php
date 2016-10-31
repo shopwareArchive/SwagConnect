@@ -374,4 +374,68 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
         return array_keys($commands);
     }
+
+    protected function getRandomUser()
+    {
+        $user = Shopware()->Db()->fetchRow("SELECT * FROM s_user WHERE id = 1 LIMIT 1");
+
+        $billing = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_user_billingaddress WHERE userID = :id",
+            array(':id' => $user['id'])
+        );
+        $billing['stateID'] = isset($billing['stateId'])?$billing['stateID']:'1';
+        $shipping = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_user_shippingaddress WHERE userID = :id",
+            array(':id' => $user['id'])
+        );
+        $shipping['stateID'] = isset($shipping['stateId'])?$shipping['stateID']:'1';
+        $country = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries WHERE id = :id",
+            array(':id' => $billing['countryID'])
+        );
+        $state = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries_states WHERE id = :id",
+            array(':id' => $billing['stateID'])
+        );
+        $countryShipping = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries WHERE id = :id",
+            array(':id' => $shipping['countryID'])
+        );
+        $payment = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_paymentmeans WHERE id = :id",
+            array(':id' => $user['paymentID'])
+        );
+        $customerGroup = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_customergroups WHERE groupkey = :key",
+            array(':key' => $user['customergroup'])
+        );
+
+        $taxFree = (bool) ($countryShipping['taxfree']);
+        if ($countryShipping['taxfree_ustid']) {
+            if ($countryShipping['id'] == $country['id'] && $billing['ustid']) {
+                $taxFree = true;
+            }
+        }
+
+        if ($taxFree) {
+            $customerGroup['tax'] = 0;
+        }
+
+        Shopware()->Session()->sUserGroupData = $customerGroup;
+
+        return array(
+            'user' => $user,
+            'billingaddress' => $billing,
+            'shippingaddress' => $shipping,
+            'customerGroup' => $customerGroup,
+            'additional' => array(
+                'country' => $country,
+                'state'   => $state,
+                'user'    => $user,
+                'countryShipping' => $countryShipping,
+                'payment' => $payment,
+                'charge_vat' => !$taxFree
+            )
+        );
+    }
 }

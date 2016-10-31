@@ -211,7 +211,8 @@ class ProductFromShop implements ProductFromShopBase
                 $this->logger->write(
                     true,
                     sprintf('Detail with sourceId: %s does not exist', $product->sourceId),
-                    null
+                    null,
+                    true
                 );
                 continue;
             }
@@ -383,6 +384,10 @@ class ProductFromShop implements ProductFromShopBase
 
     public function calculateShippingCosts(Order $order)
     {
+        if (!$order->deliveryAddress) {
+            return new Shipping(array('isShippable' => false));
+        }
+
         $countryIso3 = $order->deliveryAddress->country;
         $country = $this->manager->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
 

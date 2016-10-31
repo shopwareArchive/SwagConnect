@@ -291,15 +291,19 @@ class ImageImport
         $sizesArray = array();
         $requiredSizeExists = false;
         foreach ($thumbnailSizes as $size) {
+            if (strlen($size) == 0) {
+                continue;
+            }
+
             $sizes = explode('x', $size);
             if ($sizes[0] == 140 && $sizes[1] == 140) {
                 $requiredSizeExists = true;
             }
-            $sizesArray[] = $sizes;
+            $sizesArray[] = $size;
         }
 
         if ($requiredSizeExists === false) {
-            $sizesArray[] = array(140, 140);
+            $sizesArray[] = '140x140';
         }
 
         return $sizesArray;

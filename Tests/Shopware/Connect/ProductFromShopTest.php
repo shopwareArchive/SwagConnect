@@ -8,6 +8,7 @@ use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
+use Shopware\Models\Article\Article;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
@@ -210,7 +211,24 @@ class ProductFromShopTest extends ConnectTestHelper
             new Logger(Shopware()->Db())
         );
 
-        $order = $this->createOrder();
+        $localArticle = $this->getLocalArticle();
+        $order = $this->createOrder($localArticle);
+        Shopware()->Db()->executeQuery(
+            'INSERT INTO `s_order_basket`(`sessionID`, `userID`, `articlename`, `articleID`, `ordernumber`, `quantity`, `price`, `netprice`, `tax_rate`, `currencyFactor`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                Shopware()->Session()->get('sessionId'),
+                $this->user['user']['id'],
+                $localArticle->getName(),
+                $localArticle->getId(),
+                $localArticle->getMainDetail()->getNumber(),
+                1,
+                49.99,
+                42.008403361345,
+                19,
+                1,
+            ]
+        );
 
         $request = new \Enlight_Controller_Request_RequestTestCase();
         Shopware()->Front()->setRequest($request);
@@ -268,9 +286,12 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->assertFalse($shippingCosts->isShippable);
     }
 
-    private function createOrder()
+    private function createOrder(Article $localArticle = null)
     {
-        $localArticle = $this->getLocalArticle();
+        if (!$localArticle) {
+            $localArticle = $this->getLocalArticle();
+        }
+
         $address = new Address(array(
             'firstName' => 'John',
             'surName' => 'Doe',

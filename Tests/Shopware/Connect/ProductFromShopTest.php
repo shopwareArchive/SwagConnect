@@ -11,10 +11,33 @@ use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
     private $user;
+
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+
+        $manager = Shopware()->Models();
+        /** @var \Shopware\Models\Shop\Shop $defaultShop */
+        $defaultShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(1);
+        /** @var \Shopware\Models\Shop\Shop $fallbackShop */
+        $fallbackShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(2);
+        $defaultShop->setFallback($fallbackShop);
+        $manager->persist($defaultShop);
+        $manager->flush();
+
+        $translator = new \Shopware_Components_Translation();
+        $translationData = array (
+            'dispatch_name' => 'Standard delivery',
+            'dispatch_status_link' => 'http://track.me',
+            'dispatch_description' => 'Standard delivery description',
+        );
+        $translator->write(2, 'config_dispatch', 9, $translationData, true);
+    }
 
     public function setUp()
     {
@@ -23,17 +46,6 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->user = $this->getRandomUser();
         $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
-
-        $manager = Shopware()->Models();
-        /** @var \Shopware\Models\Shop\Shop $defaultShop */
-        $defaultShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(1);
-        /** @var \Shopware\Models\Shop\Shop $fallbackShop */
-        $fallbackShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(2);
-        if (!$defaultShop->getFallback()) {
-            $defaultShop->setFallback($fallbackShop);
-            $manager->persist($defaultShop);
-            $manager->flush();
-        }
     }
 
     public function onGetUserData(\Enlight_Event_EventArgs $args)

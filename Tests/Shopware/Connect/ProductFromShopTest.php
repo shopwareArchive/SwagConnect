@@ -16,20 +16,6 @@ class ProductFromShopTest extends ConnectTestHelper
 {
     private $user;
 
-    public static function setUpBeforeClass()
-    {
-        parent::setUpBeforeClass();
-
-        $manager = Shopware()->Models();
-        /** @var \Shopware\Models\Shop\Shop $defaultShop */
-        $defaultShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(1);
-        /** @var \Shopware\Models\Shop\Shop $fallbackShop */
-        $fallbackShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(2);
-        $defaultShop->setFallback($fallbackShop);
-        $manager->persist($defaultShop);
-        $manager->flush();
-    }
-
     public function setUp()
     {
         parent::setUp();
@@ -37,6 +23,17 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->user = $this->getRandomUser();
         $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
+
+        $manager = Shopware()->Models();
+        /** @var \Shopware\Models\Shop\Shop $defaultShop */
+        $defaultShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(1);
+        /** @var \Shopware\Models\Shop\Shop $fallbackShop */
+        $fallbackShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(2);
+        if (!$defaultShop->getFallback()) {
+            $defaultShop->setFallback($fallbackShop);
+            $manager->persist($defaultShop);
+            $manager->flush();
+        }
     }
 
     public function onGetUserData(\Enlight_Event_EventArgs $args)

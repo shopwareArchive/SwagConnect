@@ -211,6 +211,10 @@ class ProductFromShopTest extends ConnectTestHelper
             new Logger(Shopware()->Db())
         );
 
+        // hack for static variable $cache in sAdmin::sGetCountry
+        // undefined index countryId when it's called for the first time
+        @Shopware()->Modules()->Admin()->sGetCountry(2);
+
         $localArticle = $this->getLocalArticle();
         $order = $this->createOrder($localArticle);
         Shopware()->Db()->executeQuery(

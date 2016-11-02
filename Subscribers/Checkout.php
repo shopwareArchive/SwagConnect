@@ -321,10 +321,10 @@ class Checkout extends BaseSubscriber
             }
 
             $articleDetailId = $row['additional_details']['articleDetailsID'];
-            if ($helper->isRemoteArticleDetail($articleDetailId) === false) {
+            if ($helper->isRemoteArticleDetailDBAL($articleDetailId) === false) {
                 continue;
             }
-            $sourceId = $helper->getArticleDetailSourceId($articleDetailId);
+            $sourceId = $helper->getArticleDetailSourceIdDBAL($articleDetailId);
 
             $products = $helper->getRemoteProducts(array($sourceId));
             $products = $this->getHelper()->prepareConnectUnit($products);
@@ -473,10 +473,9 @@ class Checkout extends BaseSubscriber
         /** \Shopware\Connect\Struct\Product */
         foreach ($products as $product) {
             $messages[] = new Message(array(
-                'message' => 'Availability of product %product changed to %availability',
+                'message' => 'Due to technical reasons, product %product is not available.',
                 'values' => array(
                     'product' => $product->title,
-                    'availability' => 0
                 )
             ));
         }

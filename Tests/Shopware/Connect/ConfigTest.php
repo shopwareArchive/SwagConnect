@@ -16,7 +16,7 @@ class ConfigTest extends ConnectTestHelper
 
     public function testGetConfig()
     {
-        $configValue = $this->getConfigComponent()->getConfig('connectAttribute', null, 'general');
+        $configValue = $this->getConfigComponent()->getConfig('detailShopInfo', null, 'general');
         $this->assertNotEmpty($configValue);
     }
 

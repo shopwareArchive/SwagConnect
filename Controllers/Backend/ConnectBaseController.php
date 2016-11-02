@@ -38,6 +38,7 @@ use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Doctrine\ORM\NoResultException;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use Shopware\Connect\SDK;
 
@@ -284,32 +285,28 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getExportListAction()
     {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-        $builder->addSelect(array(
-            'at.exportStatus as exportStatus',
-            'at.exportMessage as exportMessage',
-            'at.category'
+        $filter = (array)$this->Request()->getParam('filter', array());
+        $order = reset($this->Request()->getParam('sort', array()));
+
+        $criteria = new SearchCriteria(array(
+            'offset' => (int)$this->Request()->getParam('start'),
+            'limit' => (int)$this->Request()->getParam('limit'),
+            'orderBy' => $order['property'],
+            'orderByDirection' => $order['direction'],
+
         ));
-        $builder->andWhere('at.shopId IS NULL');
 
-        $query = $builder->getQuery();
+        foreach($filter as $key => $rule) {
+            $field = $rule['property'];
+            $criteria->{$field} = $rule['value'];
+        }
 
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
-
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
-        $total = array_sum($countResult);
-        // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
-//        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
+        $exportList = $this->getConnectExport()->getExportList($criteria);
 
         $this->View()->assign(array(
             'success' => true,
-            'data' => $data,
-            'total' => $total
+            'data' => $exportList->articles,
+            'total' => $exportList->count,
         ));
     }
 
@@ -611,9 +608,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $shopwareId = $this->Request()->getParam('shopwareId');
         $password = $this->Request()->getParam('password');
-        $host = $this->getHost();
-
-        $loginUrl = $host . '/sdk/pluginCommunication/login';
+        $loginUrl = $this->getHost() . '/sdk/pluginCommunication/login';
 
         // Try to login into connect
         $response = $client->post(
@@ -626,26 +621,36 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $responseObject = json_decode($response->getBody());
 
-        if($responseObject->success) {
-            // Save the data
+        if(!$responseObject->success) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseObject->reason
+            ]);
+
+            return;
+        }
+
+        try {
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->removeConnectMenuEntry();
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
+            $this->removeConnectMenuEntry();
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
+        } catch (\Exception $e) {
+            $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
 
             $this->View()->assign([
-                'success' => true,
-                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
+                'success' => false,
+                'message' => $e->getMessage()
             ]);
 
             return;
         }
 
         $this->View()->assign([
-            'success' => false,
-            'message' => $responseObject->reason
+            'success' => true
         ]);
     }
 
@@ -681,25 +686,36 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $responseObject = json_decode($response->getBody());
 
-        if($responseObject->success) {
-            // Save the data
+        if(!$responseObject->success) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseObject->reason
+            ]);
+
+            return;
+        }
+
+        try {
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
+            $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
+            $this->removeConnectMenuEntry();
             $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
-            $this->removeConnectMenuEntry();
+        } catch (\Exception $e) {
+            $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
+
             $this->View()->assign([
-                'success' => true,
-                'loginUrl' => 'http://' . $host . '/login/' . $responseObject->loginToken
+                'success' => false,
+                'message' => $e->getMessage()
             ]);
 
             return;
         }
 
         $this->View()->assign([
-            'success' => false,
-            'message' => $responseObject->reason
+            'success' => true
         ]);
     }
 
@@ -1490,7 +1506,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         //In this case all the products from a single stream were exported successfully but there are still more streams to be processed.
         if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $productStreamService->log($streamId, 'Success');
             $nextStreamIndex = $currentStreamIndex + 1;
 
@@ -1507,7 +1523,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         //In this case all the products from all streams were exported successfully.
         if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_SUCCESS);
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $hasMoreIterations = false;
             $newOffset = count($articleDetailIds);
             $processedStreams = count($streamIds);

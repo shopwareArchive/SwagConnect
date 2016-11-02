@@ -27,6 +27,7 @@ namespace ShopwarePlugins\Connect\Components;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Config as ConfigModel;
+use Shopware\Connect\Gateway\PDO;
 
 /**
  * @category  Shopware
@@ -50,12 +51,11 @@ class Config
     /** @var  \Shopware\Models\Shop\Shop */
     private $shopRepository;
 
-    /** @var  \Shopware\Models\Site\Repository */
-    private $staticPagesRepository;
-
     private $customerGroupRepository;
 
     private $priceGateway;
+
+    private $connectGateway;
 
     /**
      * @param ModelManager $manager
@@ -117,6 +117,16 @@ class Config
         }
 
         return $this->getMainConfig($name, $default);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSsl()
+    {
+        $shopRepo = $this->manager->getRepository('Shopware\Models\Shop\Shop');
+        $mainShop = $shopRepo->findOneBy(['default' => true ]);
+        return $mainShop->getSecure();
     }
 
     /**
@@ -217,39 +227,13 @@ class Config
      */
     public function getGeneralConfig()
     {
-        $configsArray = array();
-
         $query = "SELECT `name`, `value` FROM s_plugin_connect_config
         WHERE `shopId` IS NULL AND `groupName` = 'general'";
 
         $result = Shopware()->Db()->fetchPairs($query);
-        $configsArray[] = $result;
+        $result['shopId'] = $this->getConnectPDOGateway()->getShopId();
 
-        return $this->setConfigDefaults($configsArray);
-    }
-
-    /**
-     * Get default values from shopware config or other sources.
-     *
-     * @param array $config
-     * @return array
-     */
-    private function setConfigDefaults($configList)
-    {
-        $config = $configList[0];
-        if (false === array_key_exists('hasSsl', $config)) {
-            // Get the first default shop and use it's SSL setting
-            $shops = Shopware()->Container()->get('models')->getRepository('Shopware\Models\Shop\Shop')->findAll();
-            $mainShopList = array_filter($shops, function($shop){
-                return $shop->getDefault();
-            });
-
-            if (false === empty($mainShopList)) {
-                $config['hasSsl'] = $mainShopList[0]->getSecure();
-            }
-        }
-
-        return [$config];
+        return array($result);
     }
 
     /**
@@ -260,6 +244,12 @@ class Config
      */
     public function setGeneralConfigs($data)
     {
+        // shopware must not be overwritten in config table
+        // it can be set only during login/register
+        unset($data['shopwareId']);
+        // do not store shopId in plugin config table
+        unset($data['shopId']);
+
         foreach ($data as $key => $configItem) {
 
             /** @var \Shopware\CustomModels\Connect\Config $model */
@@ -580,14 +570,14 @@ class Config
     }
 
     /**
-     * @return \Shopware\Models\Site\Repository
+     * @return \Shopware\Connect\Gateway\PDO
      */
-    private function getStaticPagesRepository()
+    private function getConnectPDOGateway()
     {
-        if (!$this->staticPagesRepository) {
-            $this->staticPagesRepository = $this->manager->getRepository('Shopware\Models\Site\Site');
+        if (!$this->connectGateway) {
+            $this->connectGateway = new PDO(Shopware()->Db()->getConnection());
         }
 
-        return $this->staticPagesRepository;
+        return $this->connectGateway;
     }
 } 

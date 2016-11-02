@@ -2,6 +2,8 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Doctrine\DBAL\DBALException;
+use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -11,6 +13,8 @@ use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Struct\ExportList;
+use ShopwarePlugins\Connect\Struct\SearchCriteria;
 
 class ConnectExport
 {
@@ -64,7 +68,7 @@ class ConnectExport
      */
     public function getArticleModelById($id)
     {
-        return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
+        return $this->manager->getRepository('Shopware\Models\Article\Article')->find($id);
     }
 
     /**
@@ -75,7 +79,7 @@ class ConnectExport
      */
     public function getArticleDetailById($id)
     {
-        return Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->find($id);
+        return $this->manager->getRepository('Shopware\Models\Article\Detail')->find($id);
     }
 
     /**
@@ -234,7 +238,7 @@ class ConnectExport
      */
     public function getExportArticlesIds()
     {
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
         $builder->join('at.article', 'a');
         $builder->join('a.mainDetail', 'd');
@@ -293,7 +297,7 @@ class ConnectExport
      */
     public function setDeleteStatusForVariants(Article $article)
     {
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->select(array('at.sourceId'))
             ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
@@ -305,7 +309,7 @@ class ConnectExport
             $this->sdk->recordDelete($item['sourceId']);
         }
 
-        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder = $this->manager->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'at')
             ->set('at.exportStatus', $builder->expr()->literal(Attribute::STATUS_DELETE))
             ->set('at.exported', 0)
@@ -336,6 +340,129 @@ class ConnectExport
                 ->setParameter('status', $status)
                 ->execute();
         }
+    }
+
+    /**
+     * @param SearchCriteria $criteria
+     * @return ExportList
+     */
+    public function getExportList(SearchCriteria $criteria)
+    {
+        $customProductsTableExists = false;
+        try {
+            $builder = $this->manager->getConnection()->createQueryBuilder();
+            $builder->select('id');
+            $builder->from('s_plugin_custom_products_template');
+            $builder->setMaxResults(1);
+            $builder->execute()->fetch();
+
+            $customProductsTableExists = true;
+        } catch (DBALException $e) {
+            // ignore it
+            // custom products is not installed
+        }
+
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select(array(
+            'a.id',
+            'd.ordernumber as number',
+            'd.inStock as inStock',
+            'a.name as name',
+            's.name as supplier',
+            'a.active as active',
+            't.tax as tax',
+            'p.price * (100 + t.tax) / 100 as price',
+            'i.category',
+            'i.export_status as exportStatus',
+            'i.export_message as exportMessage'
+        ))
+            ->from('s_plugin_connect_items', 'i')
+            ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')
+            ->innerJoin('a', 's_articles_details', 'd', 'a.main_detail_id = d.id')
+            ->leftJoin('d', 's_articles_prices', 'p', 'd.id = p.articledetailsID')
+            ->leftJoin('a', 's_core_tax', 't', 'a.taxID = t.id')
+            ->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id')
+            ->groupBy('i.article_id')
+            ->where('i.shop_id IS NULL');
+
+        if ($customProductsTableExists) {
+            $builder->addSelect("IF(spcptpr.template_id > 0, 1, 0) as customProduct")
+                    ->leftJoin('a', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'a.id = spcptpr.article_id');
+        }
+
+        if ($criteria->search) {
+            $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR supplier.name LIKE :search')
+                ->setParameter('search', $criteria->search);
+        }
+
+        if ($criteria->categoryId) {
+            $builder->innerJoin('a', 's_articles_categories', 'sac', 'a.id = sac.articleID')
+                ->andWhere('sac.categoryID = :categoryId')
+                ->setParameter('categoryId', $criteria->categoryId);
+        }
+
+        if ($criteria->supplierId) {
+            $builder->andWhere('a.supplierID = :supplierId')
+                ->setParameter('supplierId', $criteria->supplierId);
+        }
+
+        if ($criteria->exportStatus) {
+            $builder->andWhere('items.export_status LIKE :status')
+                ->setParameter('status', $criteria->exportStatus);
+        }
+
+        if ($criteria->active) {
+            $builder->andWhere('a.active = :active')
+                ->setParameter('active', $criteria->active);
+        }
+
+        if ($criteria->orderBy) {
+            $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
+        }
+
+        $total = $builder->execute()->rowCount();
+
+        $builder->setFirstResult($criteria->offset);
+        $builder->setMaxResults($criteria->limit);
+
+        $data = $builder->execute()->fetchAll();
+
+        return new ExportList(array(
+            'articles' => $data,
+            'count' => $total,
+        ));
+    }
+
+    public function clearConnectItems()
+    {
+        $this->deleteAllConnectProducts();
+        $this->resetConnectItemsStatus();
+    }
+
+    /**
+     * Deletes products hash
+     */
+    private function deleteAllConnectProducts()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->delete('sw_connect_product');
+        $builder->execute();
+    }
+
+    /**
+     * Resets all item status
+     */
+    private function resetConnectItemsStatus()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->update('s_plugin_connect_items', 'ci')
+            ->set('export_status', ':exportStatus')
+            ->set('revision', ':revision')
+            ->set('exported', 0)
+            ->setParameter('exportStatus', null)
+            ->setParameter('revision', null);
+
+        $builder->execute();
     }
 
     private function getMarketplaceGateway()

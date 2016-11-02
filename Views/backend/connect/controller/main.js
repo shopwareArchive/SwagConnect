@@ -475,7 +475,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         callback(response);
                     }
 
-                    me.openLink(response.loginUrl);
+                    document.cookie = 'connectLogin=true';
                     location.reload();
                 }
             },
@@ -514,7 +514,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
-                    me.openLink(response.loginUrl);
+
+                    document.cookie = 'connectLogin=true';
                     location.reload();
                 }
             },
@@ -523,13 +524,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 me.displayErrorMessage(response, callback);
             }
         );
-    },
-
-    openLink: function(href) {
-        var linkEl = document.createElement('a');
-        linkEl.href = href;
-        linkEl.target = '_blank';
-        linkEl.click();
     },
 
     displayErrorMessage: function(response, callback) {
@@ -882,17 +876,15 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         window.progressFieldStream.updateProgress(
                             operation.processedStreams / streamIds.length,
                             Ext.String.format(window.snippets.processStream, operation.processedStreams, streamIds.length),
-                            true
+                            false
                         );
 
                         window.progressField.updateText(Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length));
                         window.progressField.updateProgress(
                             operation.newOffset / articleDetailIds.length,
                             Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length),
-                            true
+                            false
                         );
-
-
 
                         if (operation.hasMoreIterations) {
                             articleDetailIds = operation.articleDetailIds;

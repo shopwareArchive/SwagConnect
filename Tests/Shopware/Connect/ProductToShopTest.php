@@ -83,6 +83,8 @@ class ProductToShopTest extends ConnectTestHelper
     public function testInsertArticle()
     {
         $product = $this->getProduct();
+        $product->minPurchaseQuantity = 5;
+
         $this->productToShop->insertOrUpdate($product);
 
         $articlesCount = Shopware()->Db()->query(
@@ -94,6 +96,14 @@ class ProductToShopTest extends ConnectTestHelper
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
+
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
+            ->findOneBy(array('sourceId' => $product->sourceId));
+        $detail = $connectAttribute->getArticleDetail();
+        
+        $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
     }
 
     public function testInsertArticleTranslations()
@@ -573,7 +583,15 @@ class ProductToShopTest extends ConnectTestHelper
             array('supplierName' => $product->vendor)
         )->fetchObject();
 
+        $supplierAttr = $this->db->query(
+            'SELECT *
+              FROM s_articles_supplier_attributes as sa
+              WHERE sa.supplierID = :supplierId',
+            array('supplierId' => $supplier->id)
+        )->fetchObject();
+
         $this->assertEquals($product->vendor, $supplier->name);
+        $this->assertEquals(1, $supplierAttr->connect_is_remote);
     }
 
     public function testAutomaticallyActivateArticles()

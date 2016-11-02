@@ -400,6 +400,13 @@ class Product extends ShopItem
     public $translations = array();
 
     /**
+     * Minimum quantity to purchase this product
+     *
+     * @var int
+     */
+    public $minPurchaseQuantity = 1;
+
+    /**
      * Restores a product from a previously stored state array.
      *
      * @param array $state

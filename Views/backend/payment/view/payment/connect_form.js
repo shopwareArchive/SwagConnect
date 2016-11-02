@@ -40,7 +40,7 @@ Ext.define('Shopware.apps.payment.view.payment.Connect', {
             fieldLabel: Ext.String.format('{s name=payment/connectAllowed}Freigegeben für [0]{/s}', marketplaceName),
             inputValue: 1,
             uncheckedValue: 0,
-            name: 'attribute[connectIsAllowed]'
+            name: 'connectIsAllowed'
         });
 
         return result;

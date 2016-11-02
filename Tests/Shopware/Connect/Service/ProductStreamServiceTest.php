@@ -47,11 +47,11 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
         $this->db->insert(
             's_plugin_connect_streams',
-            array('stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_SUCCESS)
+            array('stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_EXPORT)
         );
         $this->db->insert(
             's_plugin_connect_streams',
-            array('stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_SUCCESS)
+            array('stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_EXPORT)
         );
 
         $articleAIds = array(33, 34, 35, 36);

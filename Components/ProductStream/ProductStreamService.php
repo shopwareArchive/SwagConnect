@@ -10,9 +10,10 @@ class ProductStreamService
 {
     const DYNAMIC_STREAM = 1;
     const STATIC_STREAM = 2;
-    const STATUS_SUCCESS = 'export';
+    const STATUS_EXPORT = 'export';
     const STATUS_DELETE = 'delete';
     const STATUS_ERROR = 'error';
+    const STATUS_SYNCED = 'synced';
 
     /**
      * @var ProductStreamRepository
@@ -189,6 +190,15 @@ class ProductStreamService
             'data' => $streams,
             'count' => $stmt->rowCount()
         );
+    }
+
+    /**
+     * @param $streamId
+     * @return bool
+     */
+    public function isStreamExported($streamId)
+    {
+        return $this->streamAttrRepository->isStreamExported($streamId);
     }
 
     /**

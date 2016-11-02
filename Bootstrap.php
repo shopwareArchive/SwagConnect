@@ -26,6 +26,9 @@ use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use Shopware\Connect\Gateway\PDO;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\ConnectExport;
 
 /**
  * @category  Shopware
@@ -132,13 +135,14 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function doSetup($fullSetup = true)
     {
-        if (!$this->assertVersionGreaterThen('4.1.0')) {
-            throw new \RuntimeException('Shopware version 4.1.0 or later is required.');
-        };
-
         $this->registerMyLibrary();
 
-        $setup = new Setup($this, $this->assertMinimumVersion('5.2.6'));
+        $setup = new Setup(
+            $this,
+            Shopware()->Models(),
+            Shopware()->Db(),
+            $this->assertMinimumVersion('5.2.6')
+        );
         $setup->run($fullSetup);
     }
 
@@ -152,7 +156,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->registerMyLibrary();
 
-        $update = new Update($this, $version);
+        $update = new Update(
+            $this,
+            Shopware()->Models(),
+            Shopware()->Db(),
+            $version
+        );
         return $update->run();
     }
 
@@ -163,7 +172,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->registerMyLibrary();
 
-        $uninstall = new Uninstall($this, $this->assertMinimumVersion('5.2.6'));
+        $uninstall = new Uninstall(
+            $this,
+            Shopware()->Models(),
+            Shopware()->Db(),
+            $this->assertMinimumVersion('5.2.6')
+        );
         return $uninstall->run();
     }
 
@@ -255,7 +269,15 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($db->getConnection()),
-                $modelManager
+                $modelManager,
+                new ConnectExport(
+                    $this->getHelper(),
+                    $this->getSDK(),
+                    $modelManager,
+                    new ProductsAttributesValidator(),
+                    $this->getConfigComponents(),
+                    new ErrorHandler()
+                )
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $modelManager
@@ -265,6 +287,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $modelManager
             ),
+            new \ShopwarePlugins\Connect\Subscribers\Supplier(),
+            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(),
         );
     }
 

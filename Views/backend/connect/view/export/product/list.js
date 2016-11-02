@@ -14,6 +14,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
         mode: 'MULTI'
     },
 
+    snippets: {
+        customProductHint: '{s name=export/list/customProduct}Custom products are excluded from export{/s}'
+    },
+
     initComponent: function() {
         var me = this;
 
@@ -91,7 +95,13 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
             dataIndex: 'exportStatus',
             flex: 1,
             renderer: function(value, metaData, record) {
-                var className;
+                var className,
+                    label,
+                    isCustomProduct = record.get('customProduct');
+
+                if (isCustomProduct == true) {
+                    value = 'custom-product';
+                }
 
                 if (!value) {
                     return;
@@ -102,9 +112,16 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
                 }
 
                 if(record.get('exportMessage')) {
-                    metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
+                    metaData.tdAttr = 'data-qtip="' + record.get('exportMessage') + '"';
+                } else if (isCustomProduct) {
+                    metaData.tdAttr = 'data-qtip="' + me.snippets.customProductHint + '"';
                 } else {
-                    metaData.tdAttr = 'data-qtip="' +  value + '"';
+                    label = value;
+                    if (me.iconLabelMapping.hasOwnProperty(value)) {
+                        label = me.iconLabelMapping[value];
+                    }
+
+                    metaData.tdAttr = 'data-qtip="' +  label + '"';
                 }
 
                 return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';

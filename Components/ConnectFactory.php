@@ -217,8 +217,8 @@ class ConnectFactory
             'controller' => 'connect_gateway',
             'fullPath' => true
         ));
-        $hasSSL = $this->getConfigComponent()->getConfig('hasSSL', 0);
-        if ($hasSSL) {
+
+        if ($this->getConfigComponent()->hasSsl()) {
             $url = str_replace('http://', 'https://', $url);
         }
 

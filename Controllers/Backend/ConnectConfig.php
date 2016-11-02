@@ -203,10 +203,9 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
-        $isPricingMappingAllowed = !count($this->getConnectExport()->getExportArticlesIds()) > 0
-            && empty($this->getConfigComponent()->getConfig('exportPriceMode', array()));
+        $isPricingMappingAllowed = $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE;
 
-        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+        if ($isPricingMappingAllowed) {
             $this->View()->assign(
                 array(
                     'success' => true,
@@ -369,6 +368,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $connectExport = $this->getConnectExport();
 
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+            //removes all hashes from from sw_connect_product
+            //and resets all item status
+            $connectExport->clearConnectItems();
+        }
+
         try {
             $data = !isset($data[0]) ? array($data) : $data;
             $response = $this->getSnHttpClient()->sendRequestToConnect(
@@ -397,9 +402,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         if (!empty($errors)) {
+            $msg = null;
+            foreach ($errors as $type) {
+                $msg .= implode("<br>\n", $type);
+            }
+
             $this->View()->assign(array(
                     'success' => false,
-                    'message' => implode("<br>\n", $errors)
+                    'message' => $msg
                 ));
             return;
         }
@@ -780,7 +790,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
 
-        if (array_key_exists('exportPriceMode', $exportConfigArray) && count($exportConfigArray['exportPriceMode']) > 0) {
+        if (array_key_exists('exportPriceMode', $exportConfigArray)
+            && count($exportConfigArray['exportPriceMode']) > 0
+            && $this->getSDK()->getPriceType() != \Shopware\Connect\SDK::PRICE_TYPE_NONE
+        ) {
             $groups[] = $this->getConfigComponent()->collectExportPrice($priceExportMode, $customerGroupKey);
         } else {
 
@@ -814,6 +827,9 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
     public function adoptUnitsAction()
     {
+        $connection = $this->getModelManager()->getConnection();
+        $connection->beginTransaction();
+
         try {
             $units = array_filter($this->getConfigComponent()->getUnitsMappings(), function($unit) {
                 return strlen($unit) == 0;
@@ -822,8 +838,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $models = $this->getUnitMapper()->createUnits(array_keys($units));
             foreach ($models as $unit) {
                 $this->getHelper()->updateUnitInRelatedProducts($unit, $unit->getUnit());
+                $connection->commit();
             }
         } catch(\Exception $e) {
+            $connection->rollBack();
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(
                 array(

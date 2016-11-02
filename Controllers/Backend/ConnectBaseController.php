@@ -100,11 +100,19 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getHelper()
     {
+        return $this->getConnectFactory()->getHelper();
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     */
+    public function getConnectFactory()
+    {
         if ($this->factory === null) {
             $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
-        return $this->factory->getHelper();
+        return $this->factory;
     }
 
     /**
@@ -586,7 +594,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->View()->assign(array(
                 'success' => true
             ));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $entityManager->getConnection()->rollback();
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
@@ -631,12 +639,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         try {
+            // set apiKey in Connect config table
+            // after that create completely new SDK instance,
+            // because correct apiKey should be used during creation
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->getSDK()->verifySdk();
+            $sdk = $this->getConnectFactory()->createSDK();
+            $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
             $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
@@ -696,12 +708,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         try {
+            // set apiKey in Connect config table
+            // after that create completely new SDK instance,
+            // because correct apiKey should be used during creation
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->getSDK()->verifySdk();
+            $sdk = $this->getConnectFactory()->createSDK();
+            $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
             $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
@@ -987,9 +1003,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function verifyApiKeyAction()
     {
-        /** @var \Shopware\CustomModels\Connect\ConfigRepository $repo */
-        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Config');
-
         $sdk = $this->getSDK();
         try {
             $key = $this->Request()->getPost('apiKey');

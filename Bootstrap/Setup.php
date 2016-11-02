@@ -549,11 +549,10 @@ class Setup
             0
         );
 
-		$modelManager->addAttribute(
+        $crudService->update(
             's_articles_img_attributes',
-            'connect', 'detail_mapping_id',
-            'int(11)',
-            true
+            'connect_detail_mapping_id',
+            'integer'
         );
 
         $this->modelManager->generateAttributeModels(array(

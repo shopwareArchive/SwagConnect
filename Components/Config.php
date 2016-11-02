@@ -124,9 +124,13 @@ class Config
      */
     public function hasSsl()
     {
-        $shopRepo = $this->manager->getRepository('Shopware\Models\Shop\Shop');
-        $mainShop = $shopRepo->findOneBy(['default' => true ]);
-        return $mainShop->getSecure();
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cs.secure')
+            ->from('s_core_shops', 'cs')
+            ->where('cs.default = :default')
+            ->setParameter('default', true);
+
+        return (bool) $builder->execute()->fetchColumn();
     }
 
     /**

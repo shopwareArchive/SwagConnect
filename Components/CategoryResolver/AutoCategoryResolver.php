@@ -169,7 +169,7 @@ class AutoCategoryResolver implements CategoryResolver
                 'name' => $categoryName,
                 'children' => $children,
                 'categoryId' => $key,
-                'leaf' => empty($children) ? true : false,
+                'leaf' => empty($children),
             );
         }
         return $tree;

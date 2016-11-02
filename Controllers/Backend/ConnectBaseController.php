@@ -494,7 +494,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $marketplaceNetworkUrl = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl', Connect::MARKETPLACE_SOCIAL_NETWORK_URL);
         $defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
         $isFixedPriceAllowed = 0;
-        $priceType = Shopware()->Container()->get('ConnectSDK')->getPriceType();
+        $priceType = $this->getSDK()->getPriceType();
         if ($priceType === SDK::PRICE_TYPE_BOTH ||
             $priceType === SDK::PRICE_TYPE_RETAIL) {
             $isFixedPriceAllowed = 1;

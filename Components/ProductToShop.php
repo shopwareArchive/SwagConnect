@@ -300,7 +300,7 @@ class ProductToShop implements ProductToShopBase
         // if connect product has unit
         // find local unit with units mapping
         // and add to detail model
-        if (array_key_exists('unit', $product->attributes)) {
+        if (array_key_exists('unit', $product->attributes) && $product->attributes['unit']) {
             $detailAttribute->setConnectRemoteUnit($product->attributes['unit']);
             if ($this->config->getConfig($product->attributes['unit']) == null) {
                 $this->config->setConfig($product->attributes['unit'], '', null, 'units');
@@ -323,7 +323,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // set dimension
-        if (array_key_exists('dimension', $product->attributes)) {
+        if (array_key_exists('dimension', $product->attributes) && $product->attributes['dimension']) {
             $dimension = explode('x', $product->attributes['dimension']);
             $detail->setLen($dimension[0]);
             $detail->setWidth($dimension[1]);
@@ -335,7 +335,7 @@ class ProductToShop implements ProductToShopBase
         }
 
         // set weight
-        if (array_key_exists('weight', $product->attributes)) {
+        if (array_key_exists('weight', $product->attributes) && $product->attributes['weight']) {
             $detail->setWeight($product->attributes['weight']);
         }
 
@@ -382,7 +382,6 @@ class ProductToShop implements ProductToShopBase
         // Only set prices, if fixedPrice is active or price updates are configured
         if (count($detail->getPrices()) == 0 || $connectAttribute->getFixedPrice() || $updateFields['price']) {
             $this->setPrice($model, $detail, $product);
-            $model = $this->helper->getArticleModelByProduct($product);
         }
         // If the price is not being update, update the purchasePrice anyway
         $this->setPurchasePrice($detail, $product->purchasePrice, $defaultCustomerGroup);

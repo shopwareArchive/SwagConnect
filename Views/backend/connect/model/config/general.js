@@ -46,8 +46,7 @@ Ext.define('Shopware.apps.Connect.model.config.General', {
         { name: 'createCategoriesAutomatically', type: 'string' },
         { name: 'activateProductsAutomatically', type: 'string' },
         { name: 'createUnitsAutomatically', type: 'string' },
-        { name: 'showShippingCostsSeparately', type: 'string' },
-        { name: 'hasSsl', type: 'string' }
+        { name: 'showShippingCostsSeparately', type: 'string' }
     ],
 
     proxy: {

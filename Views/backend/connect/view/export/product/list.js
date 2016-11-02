@@ -96,6 +96,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
             flex: 1,
             renderer: function(value, metaData, record) {
                 var className,
+                    label,
                     isCustomProduct = record.get('customProduct');
 
                 if (isCustomProduct == true) {
@@ -115,7 +116,12 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
                 } else if (isCustomProduct) {
                     metaData.tdAttr = 'data-qtip="' + me.snippets.customProductHint + '"';
                 } else {
-                    metaData.tdAttr = 'data-qtip="' +  value + '"';
+                    label = value;
+                    if (me.iconLabelMapping.hasOwnProperty(value)) {
+                        label = me.iconLabelMapping[value];
+                    }
+
+                    metaData.tdAttr = 'data-qtip="' +  label + '"';
                 }
 
                 return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';

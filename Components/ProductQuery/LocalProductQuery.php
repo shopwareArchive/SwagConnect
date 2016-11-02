@@ -95,6 +95,7 @@ class LocalProductQuery extends BaseProductQuery
 
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
+            'd.minPurchase as minPurchaseQuantity',
 
             $this->productDescriptionField . ' as longDescription',
 
@@ -311,7 +312,7 @@ class LocalProductQuery extends BaseProductQuery
     public function hasVariants($productId)
     {
         $result = $this->manager->getConnection()->fetchColumn(
-            'SELECT d.id FROM s_articles_details d WHERE d.kind = 2 AND articleID = ?',
+            'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
             array((int)$productId)
         );
 

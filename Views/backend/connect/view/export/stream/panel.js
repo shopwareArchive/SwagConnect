@@ -15,6 +15,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Panel', {
             items: [{
                 xtype: 'connect-export-stream-list',
                 iconMapping: me.iconMapping,
+                iconLabelMapping: me.iconLabelMapping,
                 region: 'center'
             }],
             dockedItems: [

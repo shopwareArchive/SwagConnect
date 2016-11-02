@@ -15,12 +15,32 @@ class Payment extends BaseSubscriber
      */
     private $repository;
 
+    /**
+     * @var \ShopwarePlugins\Connect\Services\PaymentService
+     */
+    private $paymentService;
+
+    /**
+     * @return array
+     */
     public function getSubscribedEvents()
     {
         return array(
             'Enlight_Controller_Action_PostDispatch_Backend_Payment' => 'extendBackendPayment',
             'Shopware_Modules_Admin_GetPaymentMeans_DataFilter' => 'onFilterPaymentMethods',
         );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentService()
+    {
+        if ($this->paymentService == null) {
+            $this->paymentService = $this->Application()->Container()->get('swagconnect.payment_service');
+        }
+
+        return $this->paymentService;
     }
 
     /**
@@ -32,16 +52,31 @@ class Payment extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        if ($request->getActionName() == 'load') {
-            $this->registerMyTemplateDir();
+        switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
 
-            $subject->View()->extendsTemplate(
-                'backend/payment/model/connect_attribute.js'
-            );
+                $subject->View()->extendsTemplate(
+                    'backend/payment/model/connect_attribute.js'
+                );
 
-            $subject->View()->extendsTemplate(
-                'backend/payment/view/payment/connect_form.js'
-            );
+                $subject->View()->extendsTemplate(
+                    'backend/payment/view/payment/connect_form.js'
+                );
+                break;
+            case 'getPayments':
+                $subject->View()->data = $this->getPaymentService()->allowConnect(
+                    $subject->View()->data
+                );
+                break;
+            case 'updatePayments':
+                $paymentId = (int) $request->getParam('id', null);
+                $isAllowed = (boolean) $request->getParam('connectIsAllowed', false);
+
+                $this->getPaymentService()->updateConnectAllowed($paymentId, $isAllowed);
+                break;
+            default:
+                break;
         }
     }
 

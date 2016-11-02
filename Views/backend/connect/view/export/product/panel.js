@@ -20,6 +20,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Panel', {
             },{
                 xtype: 'connect-export-list',
                 iconMapping: me.iconMapping,
+                iconLabelMapping: me.iconLabelMapping,
                 region: 'center'
             }],
             dockedItems: [

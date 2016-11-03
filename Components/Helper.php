@@ -769,4 +769,24 @@ class Helper
 
         return true;
     }
+
+    /**
+     * @return array
+     */
+    public function getAllNonConnectArticleIds()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('DISTINCT spci.article_id');
+        $builder->from('s_plugin_connect_items', 'spci');
+        $builder->where('spci.shop_id IS NULL');
+
+        $result = $builder->execute()->fetchAll();
+
+        $ids = array();
+        foreach ($result as $row) {
+            $ids[] = $row['article_id'];
+        }
+
+        return $ids;
+    }
 }

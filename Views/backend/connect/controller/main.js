@@ -947,25 +947,29 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 'exportAll': true
             },
             success: function (response, opts) {
-                if (response.responseText) {
-                    var operation = Ext.decode(response.responseText);
-                    if (operation) {
-                        if (!operation.success) {
-                            me.createGrowlMessage(title, operation.message, true);
-                        } else {
-                            if (operation.sourceIds.length > 1000) {
+                if (!response.responseText) {
+                    return;
+                }
 
-                                Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
-                                    sourceIds: operation.sourceIds
-                                }).show();
-                                return;
-                            }
+                var operation = Ext.decode(response.responseText);
+                if (!operation) {
+                    return;
+                }
 
-                            Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                                sourceIds: operation.sourceIds
-                            }).show();
-                        }
+                if (!operation.success) {
+                    me.createGrowlMessage(title, operation.message, true);
+                } else {
+                    if (operation.sourceIds.length > 1000) {
+
+                        Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
+                            sourceIds: operation.sourceIds
+                        }).show();
+                        return;
                     }
+
+                    Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
+                        sourceIds: operation.sourceIds
+                    }).show();
                 }
             }
         });

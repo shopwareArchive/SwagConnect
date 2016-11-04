@@ -782,11 +782,8 @@ class Helper
 
         $result = $builder->execute()->fetchAll();
 
-        $ids = array();
-        foreach ($result as $row) {
-            $ids[] = $row['article_id'];
-        }
-
-        return $ids;
+        return array_map(function ($row) {
+            return $row['article_id'];
+        }, $result);
     }
 }

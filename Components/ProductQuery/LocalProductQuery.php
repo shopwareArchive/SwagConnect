@@ -229,7 +229,10 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailId']);
         unset($row['detailKind']);
 
-        if ($row['attributes']['unit'] && $row['attributes']['quantity'] && $row['attributes']['ref_quantity']) {
+        if ((array_key_exists('unit', $row['attributes']) && $row['attributes']['unit'])
+            && (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity'])
+            && (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])
+        ) {
             //Map local unit to connect unit
             if ($row['attributes']['unit']) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
@@ -319,11 +322,11 @@ class LocalProductQuery extends BaseProductQuery
      */
     private function addMarketplaceAttributeSelect(QueryBuilder $builder, $alias)
     {
-        array_walk($this->marketplaceGateway->getMappings(), function($mapping) use ($builder, $alias) {
+        foreach ($this->marketplaceGateway->getMappings() as $mapping) {
             if (strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0) {
                 $builder->addSelect("{$alias}.{$mapping['shopwareAttributeKey']}");
             }
-        });
+        }
 
         return $builder;
     }

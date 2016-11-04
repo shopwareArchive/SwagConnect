@@ -89,7 +89,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function getSDK()
     {
         if ($this->sdk === null) {
-            $this->sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+            $this->sdk = Shopware()->Container()->get('ConnectSDK');
         }
 
         return $this->sdk;
@@ -100,11 +100,19 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getHelper()
     {
+        return $this->getConnectFactory()->getHelper();
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     */
+    public function getConnectFactory()
+    {
         if ($this->factory === null) {
             $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
         }
 
-        return $this->factory->getHelper();
+        return $this->factory;
     }
 
     /**
@@ -494,7 +502,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $marketplaceNetworkUrl = $this->getConfigComponent()->getConfig('marketplaceNetworkUrl', Connect::MARKETPLACE_SOCIAL_NETWORK_URL);
         $defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
         $isFixedPriceAllowed = 0;
-        $priceType = Shopware()->Bootstrap()->getResource('ConnectSDK')->getPriceType();
+        $priceType = $this->getSDK()->getPriceType();
         if ($priceType === SDK::PRICE_TYPE_BOTH ||
             $priceType === SDK::PRICE_TYPE_RETAIL) {
             $isFixedPriceAllowed = 1;
@@ -586,7 +594,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->View()->assign(array(
                 'success' => true
             ));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $entityManager->getConnection()->rollback();
             $this->View()->assign(array(
                 'message' => $e->getMessage(),
@@ -616,7 +624,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             [
                 'content-type' => 'application/x-www-form-urlencoded'
             ],
-            'username=' . $shopwareId . '&password=' . $password
+            [
+                'username' => urlencode($shopwareId),
+                'password' => urlencode($password)
+            ]
         );
 
         $responseObject = json_decode($response->getBody());
@@ -631,12 +642,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         try {
+            // set apiKey in Connect config table
+            // after that create completely new SDK instance,
+            // because correct apiKey should be used during creation
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->getSDK()->verifySdk();
+            $sdk = $this->getConnectFactory()->createSDK();
+            $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
             $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
@@ -679,9 +694,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             [
                 'content-type' => 'application/x-www-form-urlencoded'
             ],
-            'username=' . $shopwareId .
-            '&password=' . $password .
-            '&email=' . $email
+            [
+                'username'  => urlencode($shopwareId),
+                'password'  => urlencode($password),
+                'email'     => urlencode($email)
+            ]
         );
 
         $responseObject = json_decode($response->getBody());
@@ -696,12 +713,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         try {
+            // set apiKey in Connect config table
+            // after that create completely new SDK instance,
+            // because correct apiKey should be used during creation
             $this->getConfigComponent()->setConfig('apiKey', $responseObject->apiKey, null, 'general');
-            $this->getSDK()->verifySdk();
+            $sdk = $this->getConnectFactory()->createSDK();
+            $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
             $this->removeConnectMenuEntry();
-            $marketplaceSettings = $this->getSDK()->getMarketplaceSettings();
+            $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
             $this->getConfigComponent()->setConfig('apiKey', null, null, 'general');
@@ -987,9 +1008,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function verifyApiKeyAction()
     {
-        /** @var \Shopware\CustomModels\Connect\ConfigRepository $repo */
-        $repo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Config');
-
         $sdk = $this->getSDK();
         try {
             $key = $this->Request()->getPost('apiKey');

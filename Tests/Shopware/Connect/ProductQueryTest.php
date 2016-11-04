@@ -24,6 +24,8 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
             $purchasePriceField = 'detailPurchasePrice';
         } else {
@@ -55,6 +57,14 @@ class ProductQueryTest extends ConnectTestHelper
 
             $this->productTranslator->expects($this->any())
                 ->method('translate')
+                ->willReturn(array());
+
+            $this->productTranslator->expects($this->any())
+                ->method('translateConfiguratorGroup')
+                ->willReturn(array());
+
+            $this->productTranslator->expects($this->any())
+                ->method('translateConfiguratorOption')
                 ->willReturn(array());
 
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
@@ -187,7 +197,7 @@ class ProductQueryTest extends ConnectTestHelper
         $product = $result[0];
 
         $this->assertEquals('Münsterländer Aperitif Präsent Box', $product->title);
-        $this->assertEmpty($product->attributes['unit']);
+        $this->assertArrayNotHasKey('unit', $product->attributes);
         $this->assertNull($product->attributes['quantity']);
         $this->assertNull($product->attributes['ref_quantity']);
     }

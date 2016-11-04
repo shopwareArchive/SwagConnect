@@ -2,10 +2,10 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
-
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class RandomStringGeneratorTest extends \PHPUnit_Framework_TestCase
+class RandomStringGeneratorTest extends ConnectTestHelper
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\RandomStringGenerator
@@ -14,6 +14,8 @@ class RandomStringGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->randomStringGenerator = new RandomStringGenerator();
     }
 

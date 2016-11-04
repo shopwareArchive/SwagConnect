@@ -25,8 +25,31 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     protected $productContext;
 
+    private $translations;
+
     public function setUp()
     {
+        parent::setUp();
+
+        $this->translations = array(
+            'en' => new Translation(
+                array(
+                    'title' => 'Glas -Teetasse 0,25l EN',
+                    'shortDescription' => 'shopware Connect local product short description EN',
+                    'longDescription' => 'shopware Connect local product long description EN',
+                    'url' => $this->getProductBaseUrl() . '22/shId/2'
+                )
+            ),
+            'nl' => new Translation(
+                array(
+                    'title' => 'Glas -Teetasse 0,25l NL',
+                    'shortDescription' => 'shopware Connect local product short description NL',
+                    'longDescription' => 'shopware Connect local product long description NL',
+                    'url' => $this->getProductBaseUrl() . '22/shId/176'
+                )
+            ),
+        );
+
         $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
             ->getMock();
@@ -42,24 +65,15 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->productTranslator->expects($this->any())
             ->method('translate')
-            ->willReturn(array(
-                'en' => new Translation(
-                    array(
-                        'title' => 'Glas -Teetasse 0,25l EN',
-                        'shortDescription' => 'shopware Connect local product short description EN',
-                        'longDescription' => 'shopware Connect local product long description EN',
-                        'url' => $this->getProductBaseUrl() . '22/shId/2'
-                    )
-                ),
-                'nl' => new Translation(
-                    array(
-                        'title' => 'Glas -Teetasse 0,25l NL',
-                        'shortDescription' => 'shopware Connect local product short description NL',
-                        'longDescription' => 'shopware Connect local product long description NL',
-                        'url' => $this->getProductBaseUrl() . '22/shId/176'
-                    )
-                ),
-            ));
+            ->willReturn($this->translations);
+
+        $this->productTranslator->expects($this->any())
+            ->method('translateConfiguratorGroup')
+            ->willReturn($this->translations);
+
+        $this->productTranslator->expects($this->any())
+            ->method('translateConfiguratorOption')
+            ->willReturn($this->translations);		
 
         $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
             ->disableOriginalConstructor()
@@ -145,9 +159,15 @@ class LocalProductQueryTest extends ConnectTestHelper
             'price' => 10.924369747899,
             'purchasePrice' => 0,
             'longDescription' => '<p>Reficio congratulor simplex Ile familia mire hae Prosequor in pro St quae Muto,, St Texo aer Cornu ferox lex inconsiderate propitius, animus ops nos haero vietus Subdo qui Gemo ipse somniculosus. Non Apertio ops, per Repere torpeo penintentiarius Synagoga res mala caelestis praestigiator. Ineo via consectatio Gemitus sui domus ludio is vulgariter, hic ut legens nox Falx nos cui vaco insudo tero, tollo valde emo. deprecativus fio redigo probabiliter pacificus sem Nequequam, suppliciter dis Te summisse Consuesco cur Desolo sis insolesco expeditus pes Curo aut Crocotula Trimodus. Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius. Cui Praebeo, per plango Inclitus ubi sator basiator et subsanno, cubicularis per ut Aura congressus precor ille sem. aro quid ius Praedatio vitupero Tractare nos premo procurator. Ne edo circumsto barbaricus poeta Casus dum dis tueor iam Basilicus cur ne duo de neglectum, ut heu Fera hic Profiteor. Ius Perpetuus stilla co.</p>',
-            'fixedPrice' => NULL,
+            'fixedPrice' => null,
             'deliveryWorkDays' => '',
-            'shipping' => NULL,
+            'shipping' => null,
+            'translations' => [],
+            'attributes' => [
+                'unit' => null,
+                'quantity' => null,
+                'ref_quantity' => null,
+            ],
         );
 
         $productMedia = new Media();
@@ -171,25 +191,9 @@ class LocalProductQueryTest extends ConnectTestHelper
             'quantity' => NULL,
             'ref_quantity' => NULL,
         );
-        $expectedProduct->translations = array(
-            'en' => new Translation(
-                array(
-                    'title' => 'Glas -Teetasse 0,25l EN',
-                    'shortDescription' => 'shopware Connect local product short description EN',
-                    'longDescription' => 'shopware Connect local product long description EN',
-                    'url' => $this->getProductBaseUrl() . '22/shId/2'
-                )
-            ),
-            'nl' => new Translation(
-                array(
-                    'title' => 'Glas -Teetasse 0,25l NL',
-                    'shortDescription' => 'shopware Connect local product short description NL',
-                    'longDescription' => 'shopware Connect local product long description NL',
-                    'url' => $this->getProductBaseUrl() . '22/shId/176'
-                )
-            ),
-        );
-        $expectedProduct->images = array(
+        $expectedProduct->translations = $this->translations;
+
+		$expectedProduct->images = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
         );
@@ -206,6 +210,11 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row['vendorDescription'] = $row['vendor']['description'];
         $row['vendorMetaTitle'] = $row['vendor']['page_title'];
         unset($row['vendor']);
+        $row['category'] = '';
+        $row['weight'] = null;
+        $row['unit'] = null;
+        $row['localId'] = 2549876542;
+        $row['detailId'] = 254987684;
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));
     }

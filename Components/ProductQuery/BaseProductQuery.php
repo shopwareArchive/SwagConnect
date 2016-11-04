@@ -95,12 +95,12 @@ abstract class BaseProductQuery
 
         // The SDK expects the weight to be numeric. So if it is NULL, we unset it here
         if ($row['weight'] === null) {
-            unset ($row['weight']);
+            unset($row['weight']);
         }
 
         // Make sure that there is a unit
         if ($row['unit'] === null) {
-            unset ($row['unit']);
+            unset($row['unit']);
         }
 
         // Fix attributes

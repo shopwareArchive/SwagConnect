@@ -39,6 +39,8 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->db = Shopware()->Db();
         $this->db->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
         $this->db->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
@@ -195,8 +197,8 @@ class ProductToShopTest extends ConnectTestHelper
         // check group options
         $groupOptionValues = $articleOptionValues = array('Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot');
         foreach ($group->getOptions() as $option) {
-            foreach ($articleOptionValues as $key => $articleOptionValue) {
-                if (strpos($option->getName(), $groupOptionValues) == 0) {
+            foreach ($groupOptionValues as $key => $groupOptionValue) {
+                if (strpos($option->getName(), $groupOptionValue) == 0) {
                     unset($groupOptionValues[$key]);
                 }
             }

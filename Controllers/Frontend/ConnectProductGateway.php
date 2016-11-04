@@ -134,7 +134,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         if (!$shop) {
             $this->forward('index', 'index');
         }
-        $shop->registerResources(Shopware()->Bootstrap());
+        $shop->registerResources(Shopware()->Container()->get('bootstrap'));
 
         $this->Response()->setCookie('shop', $shopId, 0, $shop->getBasePath());
 

@@ -23,6 +23,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('priceGroupForPurchasePriceExport', 'EK', 'export'),
             ('priceFieldForPriceExport', 'price', 'export'),
             ('priceFieldForPurchasePriceExport', 'basePrice', 'export'),
+            ('exportPriceMode', '[\"price\", \"purchasePrice\"]', 'export'),
             ('detailProductNoIndex', '1', 'general'),
             ('detailShopInfo', '1', 'general'),
             ('checkoutShopInfo', '1', 'general'),

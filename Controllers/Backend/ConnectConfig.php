@@ -453,7 +453,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        return Shopware()->Container()->get('ConnectSDK');
     }
 
     /**
@@ -838,8 +838,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $models = $this->getUnitMapper()->createUnits(array_keys($units));
             foreach ($models as $unit) {
                 $this->getHelper()->updateUnitInRelatedProducts($unit, $unit->getUnit());
-                $connection->commit();
             }
+            $connection->commit();
         } catch(\Exception $e) {
             $connection->rollBack();
             $this->getLogger()->write(true, $e->getMessage(), $e);

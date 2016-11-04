@@ -24,6 +24,8 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $manager = Shopware()->Models();
         $this->productStreamService = new ProductStreamService(
             new ProductStreamRepository($manager),

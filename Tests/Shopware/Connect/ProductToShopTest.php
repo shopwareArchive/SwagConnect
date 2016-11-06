@@ -19,6 +19,9 @@ class ProductToShopTest extends ConnectTestHelper
     /** @var  \ShopwarePlugins\Connect\Components\ProductToShop */
     private $productToShop;
 
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
     private $modelManager;
 
     private $db;
@@ -433,6 +436,10 @@ class ProductToShopTest extends ConnectTestHelper
             ->findOneBy(array('sourceId' => $variants[3]->sourceId));
 
         $this->assertEquals(1, $connectAttribute->getArticleDetail()->getKind());
+        $this->assertEquals(
+            $connectAttribute->getArticleDetailId(),
+            $connectAttribute->getArticle()->getMainDetail()->getId()
+        );
     }
 
     public function testInsertArticleAndAutomaticallyCreateCategories()

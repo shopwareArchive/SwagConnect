@@ -234,14 +234,14 @@ class ImageImport
             foreach ($article->getImages() as $image) {
                 $positions[] = $image->getPosition();
             }
-            $maxPosition = max($positions);
+            $maxPosition = count($positions) > 0 ? max($positions) : 0;
 
             /** @var \Shopware\Models\Media\Album $album */
             $album = $this->manager->find('Shopware\Models\Media\Album', -1);
             foreach ($imagesToCreate as $imageUrl => $key) {
                 // check if image already exists in article images
                 // 1) if it exists skip import and it's global image
-                if ($localArticleImagesFromConnect[$imageUrl]
+                if (array_key_exists($imageUrl, $localArticleImagesFromConnect)
                     && empty($localArticleImagesFromConnect[$imageUrl]['image']->getMappings())) {
                     // if image doesn't have mappings
                     // it's global for all details
@@ -250,7 +250,7 @@ class ImageImport
                 }
 
                 // 2) if it has mapping, add new one for current detail
-                if ($localArticleImagesFromConnect[$imageUrl]) {
+                if (array_key_exists($imageUrl, $localArticleImagesFromConnect)) {
                     /** @var \Shopware\Models\Article\Image $articleImage */
                     $articleImage = $localArticleImagesFromConnect[$imageUrl]['image'];
                     $articleMedia = $localArticleImagesFromConnect[$imageUrl]['media'];
@@ -369,7 +369,7 @@ class ImageImport
             foreach ($model->getImages() as $image) {
                 $positions[] = $image->getPosition();
             }
-            $maxPosition = max($positions);
+            $maxPosition = count($positions) > 0 ? max($positions) : 0;
         }
 
         if ($model instanceof Detail) {

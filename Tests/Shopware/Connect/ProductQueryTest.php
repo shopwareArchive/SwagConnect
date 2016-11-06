@@ -74,6 +74,14 @@ class ProductQueryTest extends ConnectTestHelper
                 ->disableOriginalConstructor()
                 ->getMock();
 
+            $this->localMediaService->expects($this->any())
+                ->method('getProductMedia')
+                ->willReturn([]);
+
+            $this->localMediaService->expects($this->any())
+                ->method('getVariantMediaList')
+                ->willReturn([]);
+
             $this->contextService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\ContextService')
                 ->disableOriginalConstructor()
                 ->getMock();

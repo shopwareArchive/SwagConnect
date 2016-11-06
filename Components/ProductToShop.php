@@ -248,6 +248,7 @@ class ProductToShop implements ProductToShopBase
 
         if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+            /** @var \Shopware\Models\Tax\Tax $tax */
             $tax = round($product->vat * 100, 2);
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
@@ -399,6 +400,8 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             // import only global images for article
             $this->imageImport->importImagesForArticle(array_diff($product->images, $product->variantImages), $model);
+            // Reload the article detail model in order to not to work an the already flushed model
+            $detail = $this->helper->getArticleDetailModelByProduct($product);
             // import only specific images for variant
             $this->imageImport->importImagesForDetail($product->variantImages, $detail);
         }
@@ -819,26 +822,28 @@ class ProductToShop implements ProductToShopBase
         );
     }
 
+    /**
+     * @inheritDoc
+     */
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
-        // find article and detail id
-        $result = $this->manager->getConnection()->fetchAssoc(
-            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
-            array($sourceId, $shopId)
-        );
-
-        if (empty($result['article_detail_id']) || empty($result['article_id'])) {
-            return;
+        //find article detail which should be selected as main one
+        $newMainDetail = $this->helper->getConnectArticleDetailModel($sourceId, $shopId);
+        if (!$newMainDetail) {
+           return;
         }
 
-        $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',
-            array($result['article_detail_id'], $result['article_id'])
-        );
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $newMainDetail->getArticle();
+        // replace current main detail with new one
+        $currentMainDetail = $article->getMainDetail();
+        $currentMainDetail->setKind(2);
+        $newMainDetail->setKind(1);
+        $article->setMainDetail($newMainDetail);
 
-        $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles SET main_detail_id = ? WHERE id = ?',
-            array($result['article_detail_id'], $result['article_id'])
-        );
+        $this->manager->persist($newMainDetail);
+        $this->manager->persist($currentMainDetail);
+        $this->manager->persist($article);
+        $this->manager->flush();
     }
 }

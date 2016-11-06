@@ -205,7 +205,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
         $sku = $row['sku'];
-        if ($variantMediaFiles[$sku]) {
+        if (array_key_exists($sku, $variantMediaFiles) && $variantMediaFiles[$sku]) {
             foreach ($variantMediaFiles[$sku] as $media) {
                 $row['variantImages'][] = $media->getFile();
             }

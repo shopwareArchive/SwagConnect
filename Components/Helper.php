@@ -167,6 +167,21 @@ class Helper
     }
 
     /**
+     * Returns article detail model by
+     * given sourceId and shopId
+     *
+     * @param string $sourceId
+     * @param int $shopId
+     * @return null|ProductDetail
+     */
+    public function getConnectArticleDetailModel($sourceId, $shopId)
+    {
+        $product = new Product(['sourceId' => $sourceId, 'shopId' => $shopId]);
+
+        return $this->getArticleDetailModelByProduct($product);
+    }
+
+    /**
      * Helper to update the connect_items table
      */
     public function updateConnectProducts()

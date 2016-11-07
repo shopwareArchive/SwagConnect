@@ -31,9 +31,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                 me.minimizable = false;
                 me.resizable = false;
                 break;
-            case 'Import':
-                me.setSize(1366, 768);
-                break;
         }
 
         Ext.applyIf(me, {
@@ -73,11 +70,6 @@ Ext.define('Shopware.apps.Connect.view.main.Window', {
                     action : me.action,
                     width: 200
                 })];
-            case 'Import':
-                return {
-                    xtype: 'import-tab-panel',
-                    region: 'center'
-                };
             default:
                 return [
                     Ext.create('Shopware.apps.Connect.view.main.Panel', {

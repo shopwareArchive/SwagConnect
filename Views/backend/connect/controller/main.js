@@ -45,6 +45,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     ],
 
     messages: {
+        accessDenied: '{s name=connect/accessDenied}Access denied{/s}',
+        contactAdministrator: '{s name=connect/contactAdministrator}Please contact your administrator{/s}',
         login: {
             successTitle: '{s name=login/successTitle}Shopware ID{/s}',
             successMessage: '{s name=login/successMessage}Login successful{/s}',
@@ -148,12 +150,26 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     launchAction: function () {
         var me = this;
         switch (me.subApplication.action){
+            case 'Import':
+                /*{if {acl_is_allowed privilege=import}} */
+                me.mainWindow = me.getView('import.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
+                break;
             case 'Export':
+                /*{if {acl_is_allowed privilege=export}} */
                 me.mainWindow = me.getView('export.Window').create({
                     'action': me.subApplication.action
                 }).show();
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
                 break;
             case 'Settings':
+                /*{if {acl_is_allowed privilege=settings}} */
                 me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
                     callback: function(){
                         me.mainWindow = me.getView('config.Window').create({
@@ -162,6 +178,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.populateLogCommandFilter();
                     }
                 });
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
                 break;
             default:
                 me.mainWindow = me.getView('main.Window').create({

@@ -35,7 +35,7 @@ class HelperTest extends ConnectTestHelper
         /** @var \Shopware\Models\Shop\Repository $repo */
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $shop = $repo->getActiveDefault();
-        $shop->registerResources(Shopware()->Bootstrap());
+        $shop->registerResources(Shopware()->Container()->get('bootstrap'));
 
         // todo@sb: Fix unit test
 //        $id = $this->getConnectProductArticleId();

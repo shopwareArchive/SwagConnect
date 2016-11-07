@@ -139,6 +139,9 @@ class ProductTranslator implements ProductTranslatorInterface
             }
 
             $groupTranslation = isset($groupTranslations[$shopId]) ? $groupTranslations[$shopId] : $groupName;
+            if (!array_key_exists($localeCode[0], $translations)) {
+                continue;
+            }
             $translationStruct = $translations[$localeCode[0]];
             if (!$translationStruct instanceof Translation) {
                 continue;

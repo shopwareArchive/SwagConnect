@@ -59,8 +59,8 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         return array(
             'title' => $translation['txtArtikel'] ?: '',
-            'shortDescription' => $translation['txtshortdescription'] ?: '',
-            'longDescription' => $translation['txtlangbeschreibung'] ?: '',
+            'shortDescription' => array_key_exists('txtshortdescription', $translation) ? $translation['txtshortdescription']: '',
+            'longDescription' => array_key_exists('txtlangbeschreibung', $translation) ? $translation['txtlangbeschreibung'] : '',
         );
     }
 
@@ -93,10 +93,11 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
         foreach ($translations as $translation) {
             $languageId = $translation['objectlanguage'];
             $data = unserialize($translation['objectdata']);
+
             $result[$languageId] = array(
                 'title' => $data['txtArtikel'] ?: '',
-                'shortDescription' => $data['txtshortdescription'] ?: '',
-                'longDescription' => $data['txtlangbeschreibung'] ?: '',
+                'shortDescription' => array_key_exists('txtshortdescription', $data) ? $data['txtshortdescription']: '',
+                'longDescription' => array_key_exists('txtlangbeschreibung', $data) ? $data['txtlangbeschreibung'] : '',
             );
         }
 

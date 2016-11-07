@@ -30,7 +30,7 @@ class Logger
      * @param $response
      * @param $custom
      */
-    public function write($isError, $request, $response, $custom=null)
+    public function write($isError, $request, $response, $custom = null)
     {
         if ($response instanceof \Exception) {
             $this->formatException($response);

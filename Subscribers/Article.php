@@ -1,10 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
-use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
-use Shopware\CustomModels\Connect\Attribute;
-use Shopware\Models\Attribute\ArticlePrice;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;

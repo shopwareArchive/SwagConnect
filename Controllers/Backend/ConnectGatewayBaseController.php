@@ -60,7 +60,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        return Shopware()->Container()->get('ConnectSDK');
     }
 
     public function getConfigComponent()
@@ -75,7 +75,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
     /**
      * Main connect interface
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function indexAction()
     {

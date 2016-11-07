@@ -9,4 +9,4 @@ if (file_exists('./../../../../../../tests/Shopware/TestHelper.php')) {
 }
 Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__  . '/');
 
-Shopware()->Bootstrap()->getResource('ConnectSDK');
+Shopware()->Container()->get('ConnectSDK');

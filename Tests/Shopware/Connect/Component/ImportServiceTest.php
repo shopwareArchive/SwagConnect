@@ -32,6 +32,8 @@ class ImportServiceTest extends ConnectTestHelper
 
     public static function setUpBeforeClass()
     {
+        parent::setUpBeforeClass();
+
         $conn = Shopware()->Db();
         $conn->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
         $conn->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => 3));
@@ -39,6 +41,8 @@ class ImportServiceTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->manager = Shopware()->Models();
 
         $this->categoryRepository = $this->manager->getRepository('Shopware\Models\Category\Category');
@@ -54,7 +58,7 @@ class ImportServiceTest extends ConnectTestHelper
         $this->importService = new ImportService(
             $this->manager,
             Shopware()->Container()->get('multi_edit.product'),
-            $this->remoteCategoryRepository,
+            $this->categoryRepository,
             $this->articleRepository,
             $this->remoteCategoryRepository,
             $this->manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),

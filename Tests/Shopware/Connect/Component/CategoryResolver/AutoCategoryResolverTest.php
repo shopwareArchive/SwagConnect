@@ -3,14 +3,17 @@
 namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
+class AutoCategoryResolverTest extends ConnectTestHelper
 {
     /** @var  \ShopwarePlugins\Connect\Components\CategoryResolver */
     private $categoryResolver;
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->categoryResolver = new AutoCategoryResolver(
             Shopware()->Models(),
             Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
@@ -37,12 +40,18 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         $expected = array(
             '/Kleidung' => array(
                 'name' => 'Kleidung',
+                'categoryId' => '/Kleidung',
+                'leaf' => false,
                 'children' => array(
                     '/Kleidung/Hosen' => array(
                         'name' => 'Hosen',
+                        'categoryId' => '/Kleidung/Hosen',
+                        'leaf' => false,
                         'children' => array(
                             '/Kleidung/Hosen/Hosentraeger' => array(
                                 'name' => 'Hosenträger',
+                                'categoryId' => '/Kleidung/Hosen/Hosentraeger',
+                                'leaf' => true,
                                 'children' => array(),
                             )
                         ),
@@ -51,12 +60,18 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
             ),
             '/Nahrung & Getraenke' => array(
                 'name' => 'Nahrung & Getränke',
+                'categoryId' => '/Nahrung & Getraenke',
+                'leaf' => false,
                 'children' => array(
                     '/Nahrung & Getraenke/Alkoholische Getraenke' => array(
                         'name' => 'Alkoholische Getränke',
+                        'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke',
+                        'leaf' => false,
                         'children' => array(
                             '/Nahrung & Getraenke/Alkoholische Getraenke/Bier' => array(
                                 'name' => 'Bier',
+                                'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke/Bier',
+                                'leaf' => true,
                                 'children' => array(),
                             ),
                         ),

@@ -8,12 +8,52 @@ use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
+use Shopware\Models\Article\Article;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
+    private $user;
+
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+
+        $manager = Shopware()->Models();
+        /** @var \Shopware\Models\Shop\Shop $defaultShop */
+        $defaultShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(1);
+        /** @var \Shopware\Models\Shop\Shop $fallbackShop */
+        $fallbackShop = $manager->getRepository('Shopware\Models\Shop\Shop')->find(2);
+        $defaultShop->setFallback($fallbackShop);
+        $manager->persist($defaultShop);
+        $manager->flush();
+
+        $translator = new \Shopware_Components_Translation();
+        $translationData = array (
+            'dispatch_name' => 'Standard delivery',
+            'dispatch_status_link' => 'http://track.me',
+            'dispatch_description' => 'Standard delivery description',
+        );
+        $translator->write(2, 'config_dispatch', 9, $translationData, true);
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->user = $this->getRandomUser();
+        $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
+        Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
+    }
+
+    public function onGetUserData(\Enlight_Event_EventArgs $args)
+    {
+        $args->setReturn($this->user);
+    }
+
     public function testBuy()
     {
         $fromShop = new ProductFromShop(
@@ -171,12 +211,34 @@ class ProductFromShopTest extends ConnectTestHelper
             new Logger(Shopware()->Db())
         );
 
-        $order = $this->createOrder();
+        // hack for static variable $cache in sAdmin::sGetCountry
+        // undefined index countryId when it's called for the first time
+        @Shopware()->Modules()->Admin()->sGetCountry(2);
+
+        $localArticle = $this->getLocalArticle();
+        $order = $this->createOrder($localArticle);
+        Shopware()->Db()->executeQuery(
+            'INSERT INTO `s_order_basket`(`sessionID`, `userID`, `articlename`, `articleID`, `ordernumber`, `quantity`, `price`, `netprice`, `tax_rate`, `currencyFactor`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                Shopware()->Session()->get('sessionId'),
+                $this->user['user']['id'],
+                $localArticle->getName(),
+                $localArticle->getId(),
+                $localArticle->getMainDetail()->getNumber(),
+                1,
+                49.99,
+                42.008403361345,
+                19,
+                1,
+            ]
+        );
 
         $request = new \Enlight_Controller_Request_RequestTestCase();
         Shopware()->Front()->setRequest($request);
 
         Shopware()->Session()->offsetSet('sDispatch', 9);
+        Shopware()->Session()->offsetSet('sRegister', ['billing' => $this->user['billingaddress']]);
 
         $result = $fromShop->calculateShippingCosts($order);
 
@@ -228,9 +290,12 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->assertFalse($shippingCosts->isShippable);
     }
 
-    private function createOrder()
+    private function createOrder(Article $localArticle = null)
     {
-        $localArticle = $this->getLocalArticle();
+        if (!$localArticle) {
+            $localArticle = $this->getLocalArticle();
+        }
+
         $address = new Address(array(
             'firstName' => 'John',
             'surName' => 'Doe',

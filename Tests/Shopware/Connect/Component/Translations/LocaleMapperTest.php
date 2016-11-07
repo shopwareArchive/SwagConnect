@@ -2,10 +2,10 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component\Translations;
 
-
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class LocaleMapperTest extends \PHPUnit_Framework_TestCase
+class LocaleMapperTest extends ConnectTestHelper
 {
     public function testGetIso639()
     {

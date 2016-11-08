@@ -172,6 +172,23 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         );
     }
 
+    protected function initAcl()
+    {
+        //read
+        $this->addAclPermission("getStreamList", "read", "Insufficient Permissions (getStreamList)");
+        $this->addAclPermission("refreshConnectItems", "read", "Insufficient Permissions (refreshConnectItems)");
+        $this->addAclPermission("getExportList", "read", "Insufficient Permissions (getExportList)");
+        $this->addAclPermission("getExportStatus", "read", "Insufficient Permissions (getExportStatus)");
+        $this->addAclPermission("getExportList", "read", "Insufficient Permissions (getExportList)");
+        $this->addAclPermission("getChangedProducts", "read", "Insufficient Permissions (getChangedProducts)");
+        $this->addAclPermission("getLogs", "read", "Insufficient Permissions (getLogs)");
+        $this->addAclPermission("getStreamProductsCount", "read", "Insufficient Permissions (getStreamProductsCount)");
+
+        //export
+        $this->addAclPermission("insertOrUpdateProduct", "export", "Insufficient Permissions (insertOrUpdateProduct)");
+        $this->addAclPermission("exportStream", "export", "Insufficient Permissions (exportStream)");
+    }
+
     /**
      * When the backend module is being loaded, update connect products.
      *

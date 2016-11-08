@@ -73,6 +73,22 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      */
     private $snHttpClient;
 
+    protected function initAcl()
+    {
+        //read
+        $this->addAclPermission("getUnits", "read", "Insufficient Permissions (getUnits)");
+        $this->addAclPermission("getConnectUnits", "read", "Insufficient Permissions (getConnectUnits)");
+        $this->addAclPermission("isPricingMappingAllowed", "read", "Insufficient Permissions (isPricingMappingAllowed)");
+        $this->addAclPermission("getExportCustomerGroups", "read", "Insufficient Permissions (getExportCustomerGroups)");
+        $this->addAclPermission("getGeneral", "read", "Insufficient Permissions (getGeneral)");
+        $this->addAclPermission("getImport", "read", "Insufficient Permissions (getGeneral)");
+        $this->addAclPermission("getExport", "read", "Insufficient Permissions (getExport)");
+
+        //settings
+        $this->addAclPermission("saveGeneral", "settings", "Insufficient Permissions (saveGeneral)");
+        $this->addAclPermission("saveExport", "settings", "Insufficient Permissions (saveExport)");
+        $this->addAclPermission("saveImport", "settings", "Insufficient Permissions (saveImport)");
+    }
     /**
      * The getGeneralAction function is an ExtJs event listener method of the
      * connect module. The function is used to load store

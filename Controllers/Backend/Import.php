@@ -47,6 +47,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $logger;
 
+    protected function initAcl()
+    {
+        //read
+        $this->addAclPermission("getImportedProductCategoriesTree", "read", "Insufficient Permissions (getImportedProductCategoriesTree)");
+        $this->addAclPermission("loadArticlesByRemoteCategory", "read", "Insufficient Permissions (loadArticlesByRemoteCategory)");
+
+        //import
+        $this->addAclPermission("unassignRemoteArticlesFromLocalCategory", "import", "Insufficient Permissions (unassignRemoteArticlesFromLocalCategory)");
+        $this->addAclPermission("assignArticlesToCategory", "import", "Insufficient Permissions (assignArticlesToCategory)");
+        $this->addAclPermission("assignRemoteToLocalCategory", "import", "Insufficient Permissions (assignRemoteToLocalCategory)");
+        $this->addAclPermission("deactivateCategory", "import", "Insufficient Permissions (deactivateCategory)");
+    }
+
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('categoryId', 'root');

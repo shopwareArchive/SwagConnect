@@ -47,7 +47,8 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'inactive': 'sc-icon-inactive icon-size',
             'update': 'sprite-arrow-circle-135',
             'custom-product': 'sc-icon-custom-product',
-            'export': 'sprite-arrow-circle-135'
+            'export': 'sprite-arrow-circle-135',
+            'cron-update': 'sprite-arrow-circle-135'
         };
     },
 
@@ -62,7 +63,8 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'inactive': 'inactive',
             'update': 'update',
             'custom-product': 'custom-product',
-            'export': me.snippets.statuses.statusExport
+            'export': me.snippets.statuses.statusExport,
+            'cron-update': 'Cron update'
         };
     }
 });

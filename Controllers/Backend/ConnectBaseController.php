@@ -1560,9 +1560,16 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function exportAllWithCronAction()
     {
         try {
+            $db = Shopware()->Db();
             $this->getConfigComponent()->setConfig('autoUpdateProducts', 2, null, 'export');
 
-            Shopware()->Db()->update(
+            $db->update(
+                's_crontab',
+                array('active' => 1),
+                "action = 'ShopwareConnectUpdateProducts' OR action = 'Shopware_CronJob_ShopwareConnectUpdateProducts'"
+            );
+
+            $db->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
                 "shop_id IS NULL"

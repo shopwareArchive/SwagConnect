@@ -43,7 +43,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dataIndex: 'exportStatus',
             flex: 1,
             renderer: function(value, metaData, record) {
-                var className,
+                var className = '',
                     label;
 
                 if (!value) {
@@ -57,10 +57,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                 if(record.get('exportMessage')) {
                     metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
                 } else {
-                    label = value;
-                    if (me.iconLabelMapping.hasOwnProperty(value)) {
-                        label = me.iconLabelMapping[value];
-                    }
+                    label = (value in me.iconLabelMapping) ? me.iconLabelMapping[value] : value;
 
                     metaData.tdAttr = 'data-qtip="' +  label + '"';
                 }

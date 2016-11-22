@@ -122,6 +122,35 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
+        me.sendAjaxRequest(
+            '{url controller=Connect action=checkPermissions}',
+            {},
+            function(response) {
+                if (response.success == true) {
+                    me.initApplication();
+                }
+            },
+            function(response) {
+
+                if (Shopware.app.Application.loadingMask) {
+                    Shopware.app.Application.loadingMask.destroy();
+                }
+
+                Shopware.Notification.createStickyGrowlMessage({
+                    title: me.messages.accessDenied,
+                    text: response.message,
+                    width: 350
+                });
+            }
+        );
+
+
+        me.callParent(arguments);
+    },
+
+    initApplication: function() {
+        var me = this;
+
         if (!window.marketplaceName) {
             me.sendAjaxRequest(
                 '{url controller=Connect action=initParams}',
@@ -143,8 +172,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             me.launchAction();
             me.setEventListeners();
         }
-
-        me.callParent(arguments);
     },
 
     launchAction: function () {

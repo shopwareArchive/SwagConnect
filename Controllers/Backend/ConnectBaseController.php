@@ -201,6 +201,34 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         parent::loadAction();
     }
 
+    public function checkPermissionsAction()
+    {
+        $identity = Shopware()->Container()->get('Auth')->getIdentity();
+        $allowed = $this->_isAllowed(
+            'read',
+            'category',
+            $identity->role
+        );
+
+        if($allowed){
+            return $this->View()->assign(array(
+                'success' => true,
+
+            ));
+        }
+
+        $message = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+            'connect/categoryPermission',
+            'To use Connect Import/Export you must have READ permission to category. Please contact your administrator',
+            true
+        );
+
+        return $this->View()->assign(array(
+            'success' => false,
+            'message' => $message
+        ));
+    }
+
     /**
      * When the backend module is being loaded, update connect products.
      *

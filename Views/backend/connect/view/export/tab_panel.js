@@ -40,21 +40,21 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'update': 'sprite-arrow-circle-135',
             'custom-product': 'sc-icon-custom-product',
             'export': 'sprite-arrow-circle-135',
-            'delete': 'sprite­bin­metal­full'
+            'delete': 'sprite-bin-metal-full'
         };
     },
 
     getIconLabelMapping: function() {
         return {
-            'insert': '{s name=export/filter/status_insert}Inserting{/s}',
-            'synced': '{s name=export/statusSynced}Synced{/s}',
-            'error': '{s name=export/filter/status_error}Error{/s}',
+            'insert': '{s name=export/statusInsert}Product will be inserted{/s}',
+            'synced': '{s name=export/statusSynced}Synchronisation complete{/s}',
+            'error': '{s name=export/statusError}Product has errors{/s}',
             'error-price': '{s name=export/message/error_price_status}There is an empty price field{/s}',
-            'inactive': '{s name=export/filter/status_inactive}Inactive{/s}',
-            'update': '{s name=export/filter/status_update}Updating{/s}',
+            'inactive': '{s name=export/statusInactive}Product is inactive{/s}',
+            'update': '{s name=export/statusUpdate}Product will be updated{/s}',
             'custom-product': '{s name=export/list/customProduct}Custom products are excluded from export{/s}',
-            'export': '{s name=export/statusExport}Export{/s}',
-            'delete': '{s name=export/filter/status_delete}Delete{/s}'
+            'export': '{s name=export/statusExport}Exported{/s}',
+            'delete': '{s name=export/statusDelete}Product was deleted{/s}'
         };
     }
 });

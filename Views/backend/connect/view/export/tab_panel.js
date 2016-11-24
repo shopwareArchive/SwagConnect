@@ -7,14 +7,6 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
 
     border: false,
     layout: 'card',
-    snippets: {
-        products: "{s name=export/tab/products}Products{/s}",
-        streams: "{s name=export/tab/streams}Product Streams{/s}",
-        statuses: {
-            statusExport: "{s name=export/statusExport}Export{/s}",
-            statusSynced: "{s name=export/statusSynced}Syncedd{/s}"
-        }
-    },
 
     initComponent: function () {
         var me = this;
@@ -22,13 +14,13 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
         Ext.applyIf(me, {
             items: [{
                 xtype: 'connect-export',
-                title: me.snippets.products,
+                title: '{s name=export/tab/products}Products{/s}',
                 iconMapping: me.getStatusIconMapping(),
                 iconLabelMapping: me.getIconLabelMapping(),
                 itemId: 'export'
             }, {
                 xtype: 'connect-export-stream',
-                title: me.snippets.streams,
+                title: '{s name=export/tab/streams}Product Streams{/s}',
                 iconMapping: me.getStatusIconMapping(),
                 iconLabelMapping: me.getIconLabelMapping(),
                 itemId: 'stream'
@@ -47,22 +39,22 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'inactive': 'sc-icon-inactive icon-size',
             'update': 'sprite-arrow-circle-135',
             'custom-product': 'sc-icon-custom-product',
-            'export': 'sprite-arrow-circle-135'
+            'export': 'sprite-arrow-circle-135',
+            'delete': 'sprite-bin-metal-full'
         };
     },
 
     getIconLabelMapping: function() {
-        var me = this;
-
         return {
-            'insert': 'insert',
-            'synced': me.snippets.statuses.statusSynced,
-            'error': 'error',
-            'error-price': 'error-price',
-            'inactive': 'inactive',
-            'update': 'update',
-            'custom-product': 'custom-product',
-            'export': me.snippets.statuses.statusExport
+            'insert': '{s name=export/statusInsert}Product will be inserted{/s}',
+            'synced': '{s name=export/statusSynced}Synchronisation complete{/s}',
+            'error': '{s name=export/statusError}Product has errors{/s}',
+            'error-price': '{s name=export/message/error_price_status}There is an empty price field{/s}',
+            'inactive': '{s name=export/statusInactive}Product is inactive{/s}',
+            'update': '{s name=export/statusUpdate}Product will be updated{/s}',
+            'custom-product': '{s name=export/list/customProduct}Custom products are excluded from export{/s}',
+            'export': '{s name=export/statusExport}Exported{/s}',
+            'delete': '{s name=export/statusDelete}Product was deleted{/s}'
         };
     }
 });

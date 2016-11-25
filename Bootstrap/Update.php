@@ -63,6 +63,7 @@ class Update
         $this->createExportedFlag();
         $this->removeRedirectMenu();
         $this->updateConnectAttribute();
+        $this->addConnectDescriptionElement();
 
         return true;
     }
@@ -125,6 +126,17 @@ class Update
                 ");
 
             $this->db->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
+        }
+    }
+
+    private function addConnectDescriptionElement()
+    {
+        if (version_compare($this->version, '1.0.9', '<=')) {
+            $this->db->query("
+                INSERT INTO `s_attribute_configuration`
+                (`table_name`, `column_name`, `column_type`, `translatable`, `display_in_backend`, `label`)
+                VALUES ('s_articles_attributes', 'connect_product_description', 'html', 1, 1, 'Connect Beschreibung')
+            ");
         }
     }
 }

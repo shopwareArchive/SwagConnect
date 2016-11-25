@@ -73,7 +73,6 @@ class Setup
 
         if ($fullSetup) {
             $this->createMyMenu();
-            $this->createEngineElement();
             $this->populatePaymentStates();
         }
     }
@@ -490,7 +489,12 @@ class Setup
         $crudService->update(
             's_articles_attributes',
             'connect_product_description',
-            'text'
+            'html',
+            [
+                'translatable' => 1,
+                'displayInBackend' => 1,
+                'label' => 'Connect Beschreibung'
+            ]
         );
 
         $crudService->update(
@@ -624,36 +628,6 @@ class Setup
         $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
         $this->db->exec($sql);
     }
-
-
-    /**
-     * Creates an engine element so that the connectProductDescription is displayed in the article
-     */
-    public function createEngineElement()
-    {
-        $tableName = $this->modelManager->getClassMetadata('Shopware\Models\Attribute\Article')->getTableName();
-        $columnName = 'connect_product_description';
-
-        $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\Configuration');
-        $element = $repo->findOneBy([
-            'tableName' => $tableName,
-            'columnName' => $columnName,
-        ]);
-
-        if (!$element) {
-            $element = new Configuration();
-            $element->setTableName($tableName);
-            $element->setColumnName($columnName);
-            $element->setColumnType('html');
-            $element->setTranslatable(1);
-            $element->setLabel('Connect Beschreibung');
-            $element->setDisplayInBackend(true);
-
-            $this->modelManager->persist($element);
-            $this->modelManager->flush();
-        }
-    }
-
 
     /**
      * Creates a shopware Connect customer group - this can be used by the shop owner to manage the Connect product prices

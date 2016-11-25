@@ -3,7 +3,7 @@
 namespace ShopwarePlugins\Connect\Bootstrap;
 
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
-use Shopware\Models\Article\Element;
+use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
@@ -631,16 +631,23 @@ class Setup
      */
     public function createEngineElement()
     {
-        $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
-        $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
+        $tableName = $this->modelManager->getClassMetadata('Shopware\Models\Attribute\Article')->getTableName();
+        $columnName = 'connect_product_description';
+
+        $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\Configuration');
+        $element = $repo->findOneBy([
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+        ]);
 
         if (!$element) {
-            $element = new Element();
-            $element->setName('connectProductDescription');
-            $element->setType('html');
-            $element->setLabel('SC Beschreibung');
+            $element = new Configuration();
+            $element->setTableName($tableName);
+            $element->setColumnName($columnName);
+            $element->setColumnType('html');
             $element->setTranslatable(1);
-            $element->setHelp('Falls Sie die Langbeschreibung ihres Artikels in diesem Attribut-Feld pflegen, wird statt der Langbeschreibung der Inhalt dieses Feldes exportiert');
+            $element->setLabel('Connect Beschreibung');
+            $element->setDisplayInBackend(true);
 
             $this->modelManager->persist($element);
             $this->modelManager->flush();

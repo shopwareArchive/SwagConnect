@@ -100,7 +100,7 @@ class Connect extends BaseSubscriber
         $view->marketplaceIcon = $marketplaceIcon;
         $view->defaultMarketplace = $this->getConfigComponent()->getConfig('isDefault', true);
         $isFixedPriceAllowed = 0;
-        $priceType = Shopware()->Bootstrap()->getResource('ConnectSDK')->getPriceType();
+        $priceType = Shopware()->Container()->get('ConnectSDK')->getPriceType();
         if ($priceType === SDK::PRICE_TYPE_BOTH ||
             $priceType === SDK::PRICE_TYPE_RETAIL) {
             $isFixedPriceAllowed = 1;

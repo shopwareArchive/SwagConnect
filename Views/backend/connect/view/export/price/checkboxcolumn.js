@@ -95,7 +95,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Checkboxcolumn', {
         var configuredProducts = record.get(columnType + 'ConfiguredProducts');
         var totalProducts = record.get('productCount');
 
-        var counterText = Ext.String.format('{s name=config/checkboxes/product_count}[0] from [1] products{/s}', configuredProducts, totalProducts);
+        var counterText = Ext.String.format('{s name=config/checkboxes/product_counts}[0] from [1] products{/s}', configuredProducts, totalProducts);
 
         var productCounter = "<span style='position: absolute; left: 20px'>" + counterText + "</span>";
 

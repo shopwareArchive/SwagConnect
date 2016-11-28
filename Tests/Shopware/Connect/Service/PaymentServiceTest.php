@@ -27,6 +27,8 @@ class PaymentServiceTest extends ConnectTestHelper
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->db = Shopware()->Db();
         $this->manager = Shopware()->Models();
         $this->paymentRepo = $this->manager->getRepository('Shopware\Models\Payment\Payment');
@@ -65,7 +67,7 @@ class PaymentServiceTest extends ConnectTestHelper
     {
         $this->paymentService->updateConnectAllowed($this->paymentId, false);
 
-        $sql = 'SELECT connect_is_allowed FROM s_core_paymentmeans_attributes WHERE paymentmeanID = ?';
+        $sql = 'SELECT connect_is_allowed as connectIsAllowed FROM s_core_paymentmeans_attributes WHERE paymentmeanID = ?';
         $result = $this->db->fetchRow($sql, array($this->paymentId));
 
         $this->assertEquals(0, $result['connectIsAllowed']);

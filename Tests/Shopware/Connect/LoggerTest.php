@@ -5,7 +5,7 @@ namespace Tests\ShopwarePlugins\Connect;
 use ShopwarePlugins\Connect\Components\Logger;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class loggerTest extends ConnectTestHelper
+class LoggerTest extends ConnectTestHelper
 {
     protected $logger;
 

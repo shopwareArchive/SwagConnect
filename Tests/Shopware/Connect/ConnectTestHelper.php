@@ -6,6 +6,7 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\ImageImport;
@@ -17,20 +18,42 @@ use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
-use Shopware\Models\Article\Price;
-use Shopware\Models\Tax\Tax;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
     const IMAGE_PROVIDER_URL = 'http://www.shopware.de/ShopwareCommunityCenter/img/logo.png';
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        set_error_handler(null);
+        set_exception_handler(null);
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     */
+    public function getConnectFactory()
+    {
+        if (!$this->connectFactory) {
+            $this->connectFactory = new ConnectFactory();
+        }
+
+        return $this->connectFactory;
+    }
+
     /**
      * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
-        return Shopware()->Bootstrap()->getResource('ConnectSDK');
+        if (!$this->sdk) {
+            $this->sdk = $this->getConnectFactory()->createSdk();
+        }
+
+        return $this->sdk;
     }
 
     /**
@@ -116,13 +139,17 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $attribute->setConnectImportMapping($mapping);
         $attribute->setConnectExportMapping($mapping);
         $category->setAttribute($attribute);
+        $attribute->setCategory($category);
+
+        $modelManager->persist($category);
+        $modelManager->persist($attribute);
 
         $modelManager->flush();
     }
 
     public static function dispatchRpcCall($service, $command, array $args)
     {
-        $sdk = Shopware()->Bootstrap()->getResource('ConnectSDK');
+        $sdk = Shopware()->Container()->get('ConnectSDK');
         $refl = new \ReflectionObject($sdk);
         $property = $refl->getProperty('dependencies');
         $property->setAccessible(true);
@@ -217,10 +244,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $mainVariantColor['de'] => $mainVariantColor['en'],
         );
 
-        for ($i=0; $i < 4 - 1; $i++) {
+        for ($i = 0; $i < 4 - 1; $i++) {
             $variant = $this->getProduct(true);
             $variantSourceId = $mainVariant->sourceId . '-' . $i;
-            $variant->title = 'MassImport #'. $variantSourceId;
+            $variant->title = 'MassImport #' . $variantSourceId;
             $variant->sourceId = $variantSourceId;
             $variant->ean = $variantSourceId;
             $variantColor = array_pop($color);
@@ -228,9 +255,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $variant->groupId = $groupId;
             $variant->translations = array(
                 'en' => new Translation(array(
-                   'title' =>  'MassImport #'. $variantSourceId . ' EN',
-                   'longDescription' =>  $mainVariant->longDescription . ' EN',
-                   'shortDescription' =>  $mainVariant->shortDescription . ' EN',
+                    'title' => 'MassImport #' . $variantSourceId . ' EN',
+                    'longDescription' => $mainVariant->longDescription . ' EN',
+                    'shortDescription' => $mainVariant->shortDescription . ' EN',
                     'variantLabels' => array(
                         'Farbe' => 'Color',
                     ),
@@ -277,18 +304,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'articleDetail' => $mainDetail,
         ));
 
+        /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group')->findOneByKey('EK');
-
-        $price = new Price();
-        $price->fromArray(array(
-            'article' => $article,
-            'detail' => $mainDetail,
-            'customerGroup' => $customerGroup,
-            'from' => 1,
-            'price' => 8.99,
-            'basePrice' => 3.99,
-        ));
-        $mainDetail->setPrices(array($price));
 
         $connectAttribute = new Attribute();
         $connectAttribute->fromArray(array(
@@ -305,9 +322,15 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
         Shopware()->Models()->persist($mainDetail);
         Shopware()->Models()->persist($detailAtrribute);
-        Shopware()->Models()->persist($price);
         Shopware()->Models()->persist($connectAttribute);
         Shopware()->Models()->flush();
+
+        // set price via plain SQL because shopware throws exception
+        // undefined index: key when error handler is disabled
+        Shopware()->Db()->executeQuery(
+            'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
+          VALUES (?, 1, "beliebig", ?, ?, ?, ?)
+          ', [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]);
 
         return $article;
     }
@@ -350,5 +373,69 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         ));
 
         return array_keys($commands);
+    }
+
+    protected function getRandomUser()
+    {
+        $user = Shopware()->Db()->fetchRow("SELECT * FROM s_user WHERE id = 1 LIMIT 1");
+
+        $billing = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_user_billingaddress WHERE userID = :id",
+            array(':id' => $user['id'])
+        );
+        $billing['stateID'] = isset($billing['stateId'])?$billing['stateID']:'1';
+        $shipping = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_user_shippingaddress WHERE userID = :id",
+            array(':id' => $user['id'])
+        );
+        $shipping['stateID'] = isset($shipping['stateId'])?$shipping['stateID']:'1';
+        $country = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries WHERE id = :id",
+            array(':id' => $billing['countryID'])
+        );
+        $state = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries_states WHERE id = :id",
+            array(':id' => $billing['stateID'])
+        );
+        $countryShipping = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_countries WHERE id = :id",
+            array(':id' => $shipping['countryID'])
+        );
+        $payment = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_paymentmeans WHERE id = :id",
+            array(':id' => $user['paymentID'])
+        );
+        $customerGroup = Shopware()->Db()->fetchRow(
+            "SELECT * FROM s_core_customergroups WHERE groupkey = :key",
+            array(':key' => $user['customergroup'])
+        );
+
+        $taxFree = (bool) ($countryShipping['taxfree']);
+        if ($countryShipping['taxfree_ustid']) {
+            if ($countryShipping['id'] == $country['id'] && $billing['ustid']) {
+                $taxFree = true;
+            }
+        }
+
+        if ($taxFree) {
+            $customerGroup['tax'] = 0;
+        }
+
+        Shopware()->Session()->sUserGroupData = $customerGroup;
+
+        return array(
+            'user' => $user,
+            'billingaddress' => $billing,
+            'shippingaddress' => $shipping,
+            'customerGroup' => $customerGroup,
+            'additional' => array(
+                'country' => $country,
+                'state'   => $state,
+                'user'    => $user,
+                'countryShipping' => $countryShipping,
+                'payment' => $payment,
+                'charge_vat' => !$taxFree
+            )
+        );
     }
 }

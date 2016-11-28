@@ -269,11 +269,10 @@ class Helper
      */
     public function getConnectAttributeByModel($model)
     {
-        $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
-
         if (!$model->getId()) {
             return false;
         }
+        $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
 
         if ($model instanceof ProductModel) {
             if (!$model->getMainDetail()) {
@@ -283,6 +282,8 @@ class Helper
         } elseif ($model instanceof ProductDetail) {
             return $repository->findOneBy(array('articleDetailId' => $model->getId()));
         }
+
+        return false;
     }
 
     /**

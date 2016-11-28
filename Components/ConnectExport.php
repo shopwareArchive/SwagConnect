@@ -391,7 +391,7 @@ class ConnectExport
         }
 
         if ($criteria->search) {
-            $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR supplier.name LIKE :search')
+            $builder->andWhere('d.ordernumber LIKE :search OR a.name LIKE :search OR s.name LIKE :search')
                 ->setParameter('search', $criteria->search);
         }
 

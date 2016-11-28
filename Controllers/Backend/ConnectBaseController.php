@@ -213,7 +213,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         if($allowed){
             return $this->View()->assign(array(
                 'success' => true,
-
             ));
         }
 

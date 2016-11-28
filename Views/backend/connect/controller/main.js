@@ -144,7 +144,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         );
 
-
         me.callParent(arguments);
     },
 

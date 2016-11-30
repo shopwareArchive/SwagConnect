@@ -55,12 +55,22 @@ abstract class BaseProductQuery
      */
     protected function getPriceRanges($detailId)
     {
-        //todo: check which price should we export (price or pseudo) and which price group !
+        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport');
+
+        $columns = ['p.from', 'p.to', 'p.customerGroupKey'];
+
+        if ($exportPriceColumn) {
+            $columns[] = "p.{$exportPriceColumn} as price";
+        }
+
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(['p.from', 'p.to', 'p.price', 'p.customerGroupKey'])
+        $builder->select($columns)
             ->from('Shopware\Models\Article\Price', 'p')
             ->where('p.articleDetailsId = :detailId')
-            ->setParameter('detailId', $detailId);
+            ->andWhere('p.customerGroupKey = :groupKey')
+            ->setParameter('detailId', $detailId)
+            ->setParameter('groupKey', $exportPriceCustomerGroup);
 
         return $builder->getQuery()->getArrayResult();
     }

@@ -31,6 +31,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Models\Customer\Group;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
@@ -416,6 +417,11 @@ class ProductToShop implements ProductToShopBase
         // undefined index: key when error handler is disabled
         $customerGroup = $this->helper->getDefaultCustomerGroup();
 
+        if (!empty($product->priceRanges)) {
+            $this->setPriceRange($article, $detail, $product->priceRanges, $customerGroup);
+            return;
+        }
+
         $id = $this->manager->getConnection()->fetchColumn(
             'SELECT id FROM `s_articles_prices`
               WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
@@ -434,6 +440,49 @@ class ProductToShop implements ProductToShopBase
               VALUES (?, 1, "beliebig", ?, ?, ?, ?);',
                 [$customerGroup->getKey(), $article->getId(), $detail->getId(), $product->price, $product->purchasePrice]
             );
+        }
+    }
+
+    /**
+     * @param ProductModel $article
+     * @param DetailModel $detail
+     * @param array $priceRanges
+     * @param Group $group
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    private function setPriceRange(ProductModel $article, DetailModel $detail, array $priceRanges, Group $group)
+    {
+        $this->manager->getConnection()->beginTransaction();
+
+        try {
+            // We always delete the prices,
+            // because we can not know which record is update
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_prices` WHERE `articleID` = ? AND `articledetailsID` = ?',
+                [$article->getId(), $detail->getId()]
+            );
+
+            /** @var PriceRange $priceRange */
+            foreach ($priceRanges as $priceRange) {
+                //todo: maybe batch insert if possible?
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`)
+                      VALUES (?, ?, ?, ?, ?, ?);',
+                    [
+                        $group->getKey(),
+                        $priceRange->from,
+                        $priceRange->to,
+                        $article->getId(),
+                        $detail->getId(),
+                        $priceRange->price
+                    ]
+                );
+            }
+            $this->manager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -664,7 +713,7 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * Read product attributes mapping and set to shopware attribute model
-     * 
+     *
      * @param AttributeModel $detailAttribute
      * @param Product $product
      * @return AttributeModel

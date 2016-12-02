@@ -52,6 +52,11 @@ Ext.define('Shopware.apps.Connect.view.export.product.Panel', {
             text:'{s name=export/options/Export}Export{/s}',
             action:'add'
         });
+        items.push({
+            cls: 'primary',
+            text:'{s name=export/btn/export_all}Export All{/s}',
+            action:'exportAll'
+        });
 
         return items;
     }

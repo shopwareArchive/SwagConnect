@@ -374,7 +374,8 @@ class ConnectExport
             'p.price * (100 + t.tax) / 100 as price',
             'i.category',
             'i.export_status as exportStatus',
-            'i.export_message as exportMessage'
+            'i.export_message as exportMessage',
+            'i.cron_update as cronUpdate'
         ))
             ->from('s_plugin_connect_items', 'i')
             ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')

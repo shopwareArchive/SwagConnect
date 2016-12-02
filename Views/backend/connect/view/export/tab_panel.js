@@ -40,11 +40,14 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'update': 'sprite-arrow-circle-135',
             'custom-product': 'sc-icon-custom-product',
             'export': 'sprite-arrow-circle-135',
-            'delete': 'sprite-bin-metal-full'
+            'delete': 'sprite-bin-metal-full',
+            'cron-update': 'sprite-arrow-circle-135'
         };
     },
 
     getIconLabelMapping: function() {
+        var me = this;
+
         return {
             'insert': '{s name=export/statusInsert}Product will be inserted{/s}',
             'synced': '{s name=export/statusSynced}Synchronisation complete{/s}',
@@ -54,7 +57,8 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'update': '{s name=export/statusUpdate}Product will be updated{/s}',
             'custom-product': '{s name=export/list/customProduct}Custom products are excluded from export{/s}',
             'export': '{s name=export/statusExport}Exported{/s}',
-            'delete': '{s name=export/statusDelete}Product was deleted{/s}'
+            'delete': '{s name=export/statusDelete}Product was deleted{/s}',
+            'cron-update': 'Cron update'
         };
     }
 });

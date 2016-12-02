@@ -335,7 +335,15 @@ class LocalProductQuery extends BaseProductQuery
 
         $priceRanges = array();
         foreach ($prices as $price) {
-            $priceRanges[] = new PriceRange($price);
+            $clonePrice = $price;
+
+            if ($price['to'] == 'beliebig') {
+                $clonePrice['to'] = PriceRange::ANY;
+            } else {
+                $clonePrice['to'] = (int) $price['to'];
+            }
+
+            $priceRanges[] = new PriceRange($clonePrice);
         }
 
         return $priceRanges;

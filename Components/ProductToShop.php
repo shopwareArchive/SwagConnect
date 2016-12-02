@@ -85,7 +85,9 @@ class ProductToShop implements ProductToShopBase
      */
     private $productTranslationsGateway;
 
-    /** @var  \Shopware\Models\Shop\Repository */
+    /**
+     * @var \Shopware\Models\Shop\Repository
+     */
     private $shopRepository;
 
     private $localeRepository;
@@ -101,6 +103,11 @@ class ProductToShop implements ProductToShopBase
     private $connectGateway;
 
     /**
+     * @var \Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -108,8 +115,9 @@ class ProductToShop implements ProductToShopBase
      * @param VariantConfigurator $variantConfigurator
      * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param \ShopwarePlugins\Connect\Components\CategoryResolver
-     * @param \Shopware\Connect\Gateway
+     * @param CategoryResolver $categoryResolver
+     * @param Gateway $connectGateway
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         Helper $helper,
@@ -120,7 +128,8 @@ class ProductToShop implements ProductToShopBase
         MarketplaceGateway $marketplaceGateway,
         ProductTranslationsGateway $productTranslationsGateway,
         CategoryResolver $categoryResolver,
-        Gateway $connectGateway
+        Gateway $connectGateway,
+        \Enlight_Event_EventManager $eventManager
     )
     {
         $this->helper = $helper;
@@ -132,6 +141,7 @@ class ProductToShop implements ProductToShopBase
         $this->productTranslationsGateway = $productTranslationsGateway;
         $this->categoryResolver = $categoryResolver;
         $this->connectGateway = $connectGateway;
+        $this->eventManager = $eventManager;
     }
 
     /**

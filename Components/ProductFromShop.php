@@ -23,6 +23,7 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
+use Enlight_Event_EventManager;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductFromShop as ProductFromShopBase,
     Shopware\Connect\Struct\Order,
@@ -71,20 +72,30 @@ class ProductFromShop implements ProductFromShopBase
     private $logger;
 
     /**
+     * @var Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
+     * @param Gateway $gateway
+     * @param Logger $logger
+     * @param Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         Helper $helper,
         ModelManager $manager,
         Gateway $gateway,
-        Logger $logger
+        Logger $logger,
+        Enlight_Event_EventManager $eventManager
     )
     {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->gateway = $gateway;
         $this->logger = $logger;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -98,6 +109,14 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $sourceIds)
     {
+        $sourceIds = $this->eventManager->filter(
+            'Connect_Supplier_Get_Products_Before',
+            $sourceIds,
+            [
+                'subject' => $this
+            ]
+        );
+
         return $this->helper->getLocalProduct($sourceIds);
     }
 
@@ -121,6 +140,13 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function reserve(Order $order)
     {
+        $this->eventManager->notify(
+            'Connect_Supplier_Reservation_Before',
+            [
+                'subject' => $this,
+                'order' => $order
+            ]
+        );
     }
 
     /**
@@ -142,6 +168,7 @@ class ProductFromShop implements ProductFromShopBase
         try {
             $this->validateBilling($order->billingAddress);
             $orderNumber = $this->doBuy($order);
+
             $this->manager->getConnection()->commit();
         } catch (\Exception $e) {
             $this->manager->getConnection()->rollBack();
@@ -295,6 +322,14 @@ class ProductFromShop implements ProductFromShopBase
             $model->setDispatch($dispatch);
         }
 
+        $model = $this->eventManager->filter(
+            'Connect_Supplier_Buy_Before',
+            $model,
+            [
+                'subject' => $this
+            ]
+        );
+
         $this->manager->flush();
 
         return $model->getNumber();
@@ -354,6 +389,14 @@ class ProductFromShop implements ProductFromShopBase
 
             if ($orderPaymentStatus) {
                 $order->setPaymentStatus($orderPaymentStatus);
+
+                $this->eventManager->filter(
+                    'Connect_Supplier_Update_PaymentStatus_Before',
+                    $order,
+                    [
+                        'subject' => $this
+                    ]
+                );
 
                 $this->manager->persist($order);
                 $this->manager->flush();
@@ -456,12 +499,22 @@ class ProductFromShop implements ProductFromShopBase
             $sessionId,
         ));
 
-        return new Shipping(array(
+        $shippingReturn = new Shipping(array(
             'shopId' => $this->gateway->getShopId(),
             'service' => $shipping->getName(),
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
         ));
+
+        $shippingReturn = $this->eventManager->filter(
+            'Connect_Supplier_Get_Shipping_After',
+            $shippingReturn,
+            [
+                'subject' => $this
+            ]
+        );
+
+        return $shippingReturn;
     }
 
     /**

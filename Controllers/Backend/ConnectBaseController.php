@@ -1669,7 +1669,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
                         $this->getSDK()->recordStreamAssignment(
                             $item['sourceId'],
-                            array()
+                            array(),
+                            $item['groupId']
                         );
                     } else {
                         //updates items with the new streams
@@ -1683,7 +1684,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
                         $this->getSDK()->recordStreamAssignment(
                             $item['sourceId'],
-                            $streamCollection
+                            $streamCollection,
+                            $item['groupId']
                         );
                     }
                 }

@@ -10,7 +10,7 @@ namespace Shopware\Connect\Struct\Change\FromShop;
 use Shopware\Connect\Struct\Change;
 
 /**
- * Availability change struct
+ * StreamAssignment change struct
  *
  * The SDK is licensed under MIT license. (c) Shopware AG and Qafoo GmbH
  * @api

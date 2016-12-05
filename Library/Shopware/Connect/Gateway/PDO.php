@@ -132,8 +132,12 @@ class PDO extends Gateway
                         break;
                     case self::STREAM_ASSIGNMENT:
                         $payload = unserialize($row['c_payload']);
-                        $change->supplierStreams = $payload['supplierStreams'];
-                        $change->groupId = $payload['groupId'];
+                        if (isset($payload['supplierStreams']) && isset($payload['groupId'])) {
+                            $change->supplierStreams = $payload['supplierStreams'];
+                            $change->groupId = $payload['groupId'];
+                        } else {
+                            $change->supplierStreams = $payload;
+                        }
                         break;
                     case self::PAYMENT_UPDATE:
                         $change->paymentStatus = unserialize($row['c_payload']);

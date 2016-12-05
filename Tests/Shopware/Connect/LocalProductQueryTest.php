@@ -166,13 +166,13 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'customerGroupKey' => 'EK',
                 'from' => 1,
                 'to' => 5,
-                'price' => 123,
+                'price' => 123.99,
             ]),
             new PriceRange([
                 'customerGroupKey' => 'EK',
                 'from' => 6,
                 'to' => PriceRange::ANY,
-                'price' => 113,
+                'price' => 113.99,
             ]),
         ];
 
@@ -213,7 +213,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'pricegroup' => 'EK',
                 'from' => 1,
                 'to' => 5,
-                'price' => 123,
+                'price' => 123.99,
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
                 'pseudoprice' => 0
@@ -226,7 +226,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'pricegroup' => 'EK',
                 'from' => 6,
                 'to' => 'beliebig',
-                'price' => 113,
+                'price' => 113.99,
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
                 'pseudoprice' => 0

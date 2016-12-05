@@ -60,7 +60,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         $address = new Address(array(
@@ -208,7 +209,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             $mockGateway,
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         // hack for static variable $cache in sAdmin::sGetCountry
@@ -256,7 +258,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         $order = new Order();
@@ -274,7 +277,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         $order = $this->createOrder();
@@ -346,7 +350,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         $address = new Address(array());
@@ -362,7 +367,8 @@ class ProductFromShopTest extends ConnectTestHelper
             $this->getHelper(),
             Shopware()->Models(),
             new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db())
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
         );
 
         $time = microtime(true);

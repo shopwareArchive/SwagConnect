@@ -221,7 +221,7 @@ class Helper
      * Returns a local connectProduct for export
      *
      * @param array $sourceIds
-     * @return array
+     * @return Product[]
      */
     public function getLocalProduct(array $sourceIds)
     {

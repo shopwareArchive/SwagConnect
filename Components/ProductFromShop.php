@@ -322,11 +322,11 @@ class ProductFromShop implements ProductFromShopBase
             $model->setDispatch($dispatch);
         }
 
-        $model = $this->eventManager->filter(
+        $this->eventManager->notify(
             'Connect_Supplier_Buy_Before',
-            $model,
             [
-                'subject' => $this
+                'subject' => $this,
+                'order' => $order
             ]
         );
 
@@ -390,11 +390,12 @@ class ProductFromShop implements ProductFromShopBase
             if ($orderPaymentStatus) {
                 $order->setPaymentStatus($orderPaymentStatus);
 
-                $this->eventManager->filter(
+                $this->eventManager->notify(
                     'Connect_Supplier_Update_PaymentStatus_Before',
-                    $order,
                     [
-                        'subject' => $this
+                        'subject' => $this,
+                        'paymentStatus' => $status,
+                        'order' => $order
                     ]
                 );
 
@@ -506,11 +507,12 @@ class ProductFromShop implements ProductFromShopBase
             'grossShippingCosts' => floatval($result['brutto']),
         ));
 
-        $shippingReturn = $this->eventManager->filter(
+        $this->eventManager->notify(
             'Connect_Supplier_Get_Shipping_After',
-            $shippingReturn,
             [
-                'subject' => $this
+                'subject' => $this,
+                'shipping' => $shippingReturn,
+                'order' => $order
             ]
         );
 

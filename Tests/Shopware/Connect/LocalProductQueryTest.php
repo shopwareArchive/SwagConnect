@@ -185,7 +185,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row['category'] = '';
         $row['weight'] = null;
         $row['unit'] = null;
-        $row['localId'] = 2549876542;
+        $row['localId'] = $this->article->getId();
         $row['detailId'] = $this->article->getMainDetail()->getId();
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));

@@ -69,7 +69,7 @@ class ProductService
      * @param ShopConfiguration $configurationGateway
      * @param ProductToShop $toShop
      * @param ProductFromShop $fromShop
-     * @return void
+     * @param Export $export
      */
     public function __construct(
         ChangeGateway $changes,

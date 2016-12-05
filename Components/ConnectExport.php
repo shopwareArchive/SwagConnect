@@ -157,7 +157,6 @@ class ConnectExport
                     $streamsAssignments !== null &&
                     $streamsAssignments->getStreamsByArticleId($item['articleId']) !== null
                 ) {
-
                     $this->sdk->recordStreamAssignment(
                         $item['sourceId'],
                         $streamsAssignments->getStreamsByArticleId($item['articleId']),

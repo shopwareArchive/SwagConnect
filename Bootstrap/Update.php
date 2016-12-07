@@ -6,6 +6,7 @@ use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use Shopware\Models\Attribute\Configuration;
+use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 
 /**
  * Updates existing versions of the plugin
@@ -65,6 +66,7 @@ class Update
         $this->removeRedirectMenu();
         $this->updateConnectAttribute();
         $this->addConnectDescriptionElement();
+        $this->updateProductDescriptionSetting();
 
         return true;
     }
@@ -156,6 +158,30 @@ class Update
 
             $this->modelManager->persist($element);
             $this->modelManager->flush();
+        }
+    }
+
+    private function updateProductDescriptionSetting()
+    {
+        if (version_compare($this->version, '1.0.10', '<=')) {
+            $result = $this->db->query("SELECT `value` FROM s_plugin_connect_config WHERE name = 'alternateDescriptionField'");
+            $row = $result->fetch();
+
+            if ($row) {
+                $mapper = [
+                    'a.description' => BaseProductQuery::SHORT_DESCRIPTION_FIELD,
+                    'a.descriptionLong' => BaseProductQuery::LONG_DESCRIPTION_FIELD,
+                    'attribute.connectProductDescription' => BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
+                ];
+
+                $newValue = $mapper[$row['value']];
+                $this->db->query("
+                    UPDATE `s_plugin_connect_config`
+                    SET `value` = '[\"$newValue\"]'
+                    WHERE `name` = 'alternateDescriptionField'
+                ");
+            }
+
         }
     }
 }

@@ -186,6 +186,32 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $exportConfigArray['exportPriceMode'] = array();
         }
 
+
+        //Resets the exportPriceMode and alternateDescriptionField
+        if (!array_key_exists('alternateDescriptionField', $exportConfigArray)
+            || empty($exportConfigArray['alternateDescriptionField'])
+            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE
+        ) {
+            $exportConfigArray['alternateDescriptionField'] = ['longDescriptionField'];
+            $exportConfigArray['exportPriceMode'] = [];
+        }
+
+        $descriptions = [
+            'longDescriptionField',
+            'shortDescriptionField',
+            'connectDescriptionField',
+        ];
+
+        foreach ($descriptions as $description) {
+            $checked = false;
+
+            if (in_array($description, $exportConfigArray['alternateDescriptionField'])){
+                $checked = true;
+            }
+
+            $exportConfigArray[$description] = $checked;
+        }
+
         $this->View()->assign(
             array(
                 'success' => true,
@@ -251,7 +277,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
 
-        if ($isModified === false) {
+        if ($isModified === false && $this->getSDK()->getPriceType() !== \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
             $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
             $this->View()->assign(

@@ -53,6 +53,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         productSettingsLegend: '{s name=config/export/product_settings_legend}Product settings{/s}',
+        productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionFieldHelp: Ext.String.format('{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu [0] exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',marketplaceName),
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
@@ -132,6 +133,13 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
 
                     me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
                 }
+
+                model.data.alternateDescriptionField = [];
+                me.articleDescriptions.forEach(function(value) {
+                    if (value.getValue()) {
+                        model.data.alternateDescriptionField.push(value.getName());
+                    }
+                });
 
                 me.fireEvent('saveExportSettings', model.data, btn);
             },
@@ -324,8 +332,51 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             me.createPriceContainer(me.purchasePriceTabPanel, me.snippets.purchasePriceMode),
             me.createPriceContainer(me.priceTabPanel, me.snippets.priceMode),
             container,
+            me.createProductDescription(),
             me.languagesExportFieldset
         ];
+    },
+
+    createProductDescription: function () {
+        var me = this;
+
+        me.articleDescriptions = [
+            Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Artikel-Kurzbeschreibung',
+                name: 'longDescriptionField',
+                inputValue: 1,
+                checked: true,
+                uncheckedValue: 0
+            }), Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Artikel-Langbeschreibung',
+                name: 'shortDescriptionField',
+                inputValue: 1,
+                uncheckedValue: 0
+            }), Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Connect-Beschreibung',
+                name: 'connectDescriptionField',
+                inputValue: 1,
+                uncheckedValue: 0
+            })
+        ];
+
+        return Ext.create('Ext.form.FieldSet', {
+            columnWidth: 1,
+            title: me.snippets.productDescriptionLegend,
+            layout: 'anchor',
+            defaults: {
+                anchor: '100%'
+            },
+            defaultType: 'textfield',
+            items: me.articleDescriptions
+        });
+
     },
 
     createLanguagesCombo: function() {
@@ -415,8 +466,23 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             columnWidth: 1,
             title: me.snippets.productSettingsLegend,
             defaultType: 'textfield',
-            layout: 'column',
+            layout: 'anchor',
             items: [
+                Ext.create('Ext.container.Container', {
+                    columnWidth: 0.5,
+                    layout: 'anchor',
+                    border: false,
+                    items: [
+                        {
+                            xtype: 'checkbox',
+                            fieldLabel: me.snippets.excludeInactiveProducts,
+                            name: 'excludeInactiveProducts',
+                            inputValue: 1,
+                            uncheckedValue: 0,
+                            labelWidth: me.defaults.labelWidth
+                        }
+                    ]
+                }),
                 Ext.create('Ext.container.Container', {
                     columnWidth: 0.5,
                     padding: '0 20 0 0',
@@ -424,25 +490,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                     border: false,
                     items: [
                         {
-                            xtype: 'combobox',
-                            fieldLabel: me.snippets.productDescriptionFieldLabel,
-                            emptyText: me.snippets.emptyText,
-                            helpText: me.snippets.productDescriptionFieldHelp,
-                            name: 'alternateDescriptionField',
-                            store: new Ext.data.SimpleStore({
-                                fields: [ 'value', 'text' ],
-                                data: [
-                                    ['attribute.connectProductDescription', 'Connect Beschreibung'],
-                                    ['a.description', 'Artikel-Kurzbeschreibung'],
-                                    ['a.descriptionLong', 'Artikel-Langbeschreibung']
-                                ]
-                            }),
-                            queryMode: 'local',
-                            displayField: 'text',
-                            valueField: 'value',
-                            editable: false,
-                            labelWidth: me.defaults.labelWidth
-                        }, {
                             xtype: 'fieldcontainer',
                             fieldLabel: me.snippets.autoProductSync,
                             defaultType: 'combo',
@@ -473,21 +520,6 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                     valueField: 'value'
                                 }
                             ]
-                        }
-                    ]
-                }),
-                Ext.create('Ext.container.Container', {
-                    columnWidth: 0.5,
-                    layout: 'anchor',
-                    border: false,
-                    items: [
-                        {
-                            xtype: 'checkbox',
-                            fieldLabel: me.snippets.excludeInactiveProducts,
-                            name: 'excludeInactiveProducts',
-                            inputValue: 1,
-                            uncheckedValue: 0,
-                            labelWidth: me.defaults.labelWidth
                         }
                     ]
                 })

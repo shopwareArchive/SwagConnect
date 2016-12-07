@@ -17,8 +17,9 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
         productSettingsLegend: '{s name=config/export/product_settings_legend}Product settings{/s}',
+        productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
-        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_export_not_selected}Please select product description{/s}',
         purchasePriceMode: '{s name=config/price/purchasePriceMode}Purchase price{/s}',
         priceMode: '{s name=config/config/price/priceMode}End customer price{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
@@ -232,35 +233,48 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
     createProductContainer: function () {
         var me = this;
 
-        me.productDescriptionCombo = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: me.snippets.productDescriptionFieldLabel,
-            emptyText: me.snippets.emptyText,
-            helpText: me.snippets.productDescriptionFieldHelp,
-            name: 'alternateDescriptionField',
-            labelWidth: 200,
-            store: new Ext.data.SimpleStore({
-                fields: ['value', 'text'],
-                data: [
-                    ['attribute.connectProductDescription', 'Connect Beschreibung'],
-                    ['a.description', 'Artikel-Kurzbeschreibung'],
-                    ['a.descriptionLong', 'Artikel-Langbeschreibung']
-                ]
-            }),
-            queryMode: 'local',
-            displayField: 'text',
-            valueField: 'value',
-            editable: false
-        });
+        me.articleDescriptions = [
+            Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Artikel-Kurzbeschreibung',
+                name: 'longDescriptionField',
+                inputValue: 1,
+                checked: true,
+                uncheckedValue: 0
+            }), Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Artikel-Langbeschreibung',
+                name: 'shortDescriptionField',
+                inputValue: 1,
+                uncheckedValue: 0
+            }), Ext.create('Ext.form.field.Checkbox', {
+                xtype: 'checkbox',
+                labelWidth: 150,
+                fieldLabel: 'Connect-Beschreibung',
+                name: 'connectDescriptionField',
+                inputValue: 1,
+                uncheckedValue: 0
+            })
+        ];
 
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
-            title: me.snippets.productSettingsLegend,
+            title: me.snippets.productDescriptionLegend,
             layout: 'anchor',
             defaults: {
                 anchor: '100%'
             },
             defaultType: 'textfield',
-            items: [me.productDescriptionCombo]
+            items: [
+                {
+                    xtype: 'container',
+                    layout: 'anchor',
+                    border: false,
+                    items: me.articleDescriptions
+                }
+            ]
         });
     },
 
@@ -268,7 +282,8 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         return {
             'autoUpdateProducts' : 1,
             'exportLanguages': [],
-            'exportPriceMode': []
+            'exportPriceMode': [],
+            'alternateDescriptionField': []
         };
     },
 
@@ -300,9 +315,11 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
 
                 me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', priceParams);
 
-                if (me.productDescriptionCombo.getValue()) {
-                    priceParams.alternateDescriptionField = me.productDescriptionCombo.getValue();
-                }
+                me.articleDescriptions.forEach(function(value) {
+                    if (value.getValue()) {
+                        priceParams.alternateDescriptionField.push(value.getName());
+                    }
+                });
 
                 me.fireEvent('saveExportSettings', priceParams, btn);
             },

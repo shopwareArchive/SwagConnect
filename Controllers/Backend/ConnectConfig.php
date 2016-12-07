@@ -30,6 +30,7 @@ use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use Firebase\JWT\JWT;
 
 /**
@@ -192,14 +193,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             || empty($exportConfigArray['alternateDescriptionField'])
             || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE
         ) {
-            $exportConfigArray['alternateDescriptionField'] = ['longDescriptionField'];
+            $exportConfigArray['alternateDescriptionField'] = [BaseProductQuery::LONG_DESCRIPTION_FIELD];
             $exportConfigArray['exportPriceMode'] = [];
         }
 
         $descriptions = [
-            'longDescriptionField',
-            'shortDescriptionField',
-            'connectDescriptionField',
+            BaseProductQuery::LONG_DESCRIPTION_FIELD,
+            BaseProductQuery::SHORT_DESCRIPTION_FIELD,
+            BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
         ];
 
         foreach ($descriptions as $description) {

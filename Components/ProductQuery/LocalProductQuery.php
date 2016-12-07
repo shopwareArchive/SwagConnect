@@ -22,7 +22,7 @@ use Shopware\Connect\Struct\Translation;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    protected $productDescriptionField;
+    protected $productDescriptionFields;
 
     protected $baseProductUrl;
 
@@ -38,7 +38,7 @@ class LocalProductQuery extends BaseProductQuery
 
     public function __construct(
         ModelManager $manager,
-        $productDescriptionField,
+        $productDescriptionFields,
         $baseProductUrl,
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
@@ -48,7 +48,7 @@ class LocalProductQuery extends BaseProductQuery
     {
         parent::__construct($manager, $mediaService);
 
-        $this->productDescriptionField = $productDescriptionField;
+        $this->productDescriptionFields = $productDescriptionFields;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
@@ -97,8 +97,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.inStock as availability',
             'd.minPurchase as minPurchaseQuantity',
 
-            $this->productDescriptionField . ' as longDescription',
-
             'd.width',
             'd.height',
             'd.len as length',
@@ -111,6 +109,18 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
         );
+
+        if (in_array(self::SHORT_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+            $selectColumns[] = 'a.description as shortDescription';
+        }
+
+        if (in_array(self::LONG_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+            $selectColumns[] = 'a.descriptionLong as longDescription';
+        }
+
+        if (in_array(self::CONNECT_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+            $selectColumns[] = 'attribute.connectProductDescription as connectDescription';
+        }
 
         if ($exportPriceColumn) {
             $selectColumns[] = "exportPrice.{$exportPriceColumn} as price";

@@ -85,7 +85,9 @@ class ProductToShop implements ProductToShopBase
      */
     private $productTranslationsGateway;
 
-    /** @var  \Shopware\Models\Shop\Repository */
+    /**
+     * @var \Shopware\Models\Shop\Repository
+     */
     private $shopRepository;
 
     private $localeRepository;
@@ -101,6 +103,11 @@ class ProductToShop implements ProductToShopBase
     private $connectGateway;
 
     /**
+     * @var \Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -108,8 +115,9 @@ class ProductToShop implements ProductToShopBase
      * @param VariantConfigurator $variantConfigurator
      * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param \ShopwarePlugins\Connect\Components\CategoryResolver
-     * @param \Shopware\Connect\Gateway
+     * @param CategoryResolver $categoryResolver
+     * @param Gateway $connectGateway
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         Helper $helper,
@@ -120,7 +128,8 @@ class ProductToShop implements ProductToShopBase
         MarketplaceGateway $marketplaceGateway,
         ProductTranslationsGateway $productTranslationsGateway,
         CategoryResolver $categoryResolver,
-        Gateway $connectGateway
+        Gateway $connectGateway,
+        \Enlight_Event_EventManager $eventManager
     )
     {
         $this->helper = $helper;
@@ -132,6 +141,7 @@ class ProductToShop implements ProductToShopBase
         $this->productTranslationsGateway = $productTranslationsGateway;
         $this->categoryResolver = $categoryResolver;
         $this->connectGateway = $connectGateway;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -248,8 +258,8 @@ class ProductToShop implements ProductToShopBase
 
         if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
-            /** @var \Shopware\Models\Tax\Tax $tax */
             $tax = round($product->vat * 100, 2);
+			/** @var \Shopware\Models\Tax\Tax $tax */
             $tax = $repo->findOneBy(array('tax' => $tax));
             $model->setTax($tax);
         }
@@ -364,6 +374,15 @@ class ProductToShop implements ProductToShopBase
 
         $connectAttribute->setArticle($model);
         $connectAttribute->setArticleDetail($detail);
+
+        $this->eventManager->notify(
+            'Connect_Merchant_Saving_ArticleAttribute_Before',
+            [
+                'subject' => $this,
+                'connectAttribute' => $connectAttribute
+            ]
+        );
+
         $this->manager->persist($connectAttribute);
 
         $this->manager->persist($detail);
@@ -511,6 +530,16 @@ class ProductToShop implements ProductToShopBase
         if($detail === null) {
             return;
         }
+
+
+        $this->eventManager->notify(
+            'Connect_Merchant_Delete_Product_Before',
+            [
+                'subject' => $this,
+                'articleDetail' => $detail
+            ]
+        );
+
 
         $article = $detail->getArticle();
         $isOnlyOneVariant = false;
@@ -771,6 +800,16 @@ class ProductToShop implements ProductToShopBase
             array($sourceId, $shopId)
         );
 
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_GeneralProductInformation',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleDetailId' => $articleDetailId
+            ]
+        );
+
         // update purchasePriceHash, offerValidUntil and purchasePrice in connect attribute
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_plugin_connect_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
@@ -794,7 +833,6 @@ class ProductToShop implements ProductToShopBase
                 'UPDATE s_articles_details SET instock = ?, purchaseprice = ? WHERE id = ?',
                 array($product->availability, $product->purchasePrice, $articleDetailId)
             );
-
         } else {
             $this->manager->getConnection()->executeUpdate(
                 'UPDATE s_articles_details SET instock = ? WHERE id = ?',
@@ -815,6 +853,16 @@ class ProductToShop implements ProductToShopBase
             array($sourceId, $shopId)
         );
 
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_GeneralProductInformation',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleDetailId' => $articleDetailId
+            ]
+        );
+
         // update stock in article detail
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_articles_details SET instock = ? WHERE id = ?',
@@ -827,23 +875,35 @@ class ProductToShop implements ProductToShopBase
      */
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
-        //find article detail which should be selected as main one
-        $newMainDetail = $this->helper->getConnectArticleDetailModel($sourceId, $shopId);
-        if (!$newMainDetail) {
-           return;
+        // find article and detail id
+        $result = $this->manager->getConnection()->fetchAssoc(
+            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            array($sourceId, $shopId)
+        );
+
+        if (empty($result['article_detail_id']) || empty($result['article_id'])) {
+            return;
         }
 
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $newMainDetail->getArticle();
-        // replace current main detail with new one
-        $currentMainDetail = $article->getMainDetail();
-        $currentMainDetail->setKind(2);
-        $newMainDetail->setKind(1);
-        $article->setMainDetail($newMainDetail);
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_ProductMainVariant_Before',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleId' => $result['article_id'],
+                'articleDetailId' => $result['article_detail_id']
+            ]
+        );
 
-        $this->manager->persist($newMainDetail);
-        $this->manager->persist($currentMainDetail);
-        $this->manager->persist($article);
-        $this->manager->flush();
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',
+            array($result['article_detail_id'], $result['article_id'])
+        );
+
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE s_articles SET main_detail_id = ? WHERE id = ?',
+            array($result['article_detail_id'], $result['article_id'])
+        );
     }
 }

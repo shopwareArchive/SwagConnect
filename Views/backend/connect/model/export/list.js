@@ -6,7 +6,8 @@ Ext.define('Shopware.apps.Connect.model.export.List', {
         //{block name="backend/connect/model/export/list/fields"}{/block}
         { name: 'customProduct', type: 'int', useNull: true },
         { name: 'exportStatus', type: 'string', useNull: true },
-        { name: 'exportMessage', type: 'string', useNull: true }
+        { name: 'exportMessage', type: 'string', useNull: true },
+        { name: 'cronUpdate', type: 'int', useNull: true }
     ]
 });
 //{/block}

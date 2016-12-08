@@ -924,7 +924,13 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function getArticleSourceIdsAction()
     {
         try {
+            $exportAll = (bool)$this->Request()->getPost('exportAll', false);
             $articleIds = $this->Request()->getPost('ids', array());
+
+            if ($exportAll) {
+                $articleIds = $this->getHelper()->getAllNonConnectArticleIds();
+            }
+
             if (!is_array($articleIds)) {
                 $articleIds = array($articleIds);
             }
@@ -1558,6 +1564,35 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         ));
     }
 
+    public function exportAllWithCronAction()
+    {
+        try {
+            $db = Shopware()->Db();
+            $this->getConfigComponent()->setConfig('autoUpdateProducts', 2, null, 'export');
+
+            $db->update(
+                's_crontab',
+                array('active' => 1),
+                "action = 'ShopwareConnectUpdateProducts' OR action = 'Shopware_CronJob_ShopwareConnectUpdateProducts'"
+            );
+
+            $db->update(
+                's_plugin_connect_items',
+                array('cron_update' => 1),
+                "shop_id IS NULL"
+            );
+
+            $this->View()->assign(array(
+                'success' => true,
+            ));
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
+    }
+
     private function getStreamAssignments($streamId)
     {
         $productStreamService = $this->getProductStreamService();
@@ -1641,7 +1676,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
                         $this->getSDK()->recordStreamAssignment(
                             $item['sourceId'],
-                            array()
+                            array(),
+                            $item['groupId']
                         );
                     } else {
                         //updates items with the new streams
@@ -1655,7 +1691,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
                         $this->getSDK()->recordStreamAssignment(
                             $item['sourceId'],
-                            $streamCollection
+                            $streamCollection,
+                            $item['groupId']
                         );
                     }
                 }

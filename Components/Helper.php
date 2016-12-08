@@ -236,7 +236,7 @@ class Helper
      * Returns a local connectProduct for export
      *
      * @param array $sourceIds
-     * @return array
+     * @return Product[]
      */
     public function getLocalProduct(array $sourceIds)
     {
@@ -805,5 +805,22 @@ class Helper
         }
 
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllNonConnectArticleIds()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('DISTINCT spci.article_id');
+        $builder->from('s_plugin_connect_items', 'spci');
+        $builder->where('spci.shop_id IS NULL');
+
+        $result = $builder->execute()->fetchAll();
+
+        return array_map(function ($row) {
+            return $row['article_id'];
+        }, $result);
     }
 }

@@ -358,7 +358,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             ),
-            new PDO(Shopware()->Db()->getConnection())
+            new PDO(Shopware()->Db()->getConnection()),
+            Shopware()->Container()->get('events')
         );
     }
 

@@ -8,6 +8,7 @@ use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
@@ -26,10 +27,24 @@ use Shopware\Components\DependencyInjection\Container;
  */
 class ConnectFactory
 {
+    /**
+     * @var Helper
+     */
     private $helper;
+
+    /**
+     * @var SDK
+     */
     private $sdk;
 
+    /**
+     * @var ModelManager
+     */
     private $modelManager;
+
+    /**
+     * @var string
+     */
     private $pluginVersion;
 
     /**
@@ -37,15 +52,29 @@ class ConnectFactory
      */
     private $container;
 
-    /** @var  \ShopwarePlugins\Connect\Components\Config */
+    /** @var
+     * \ShopwarePlugins\Connect\Components\Config
+     */
     private $configComponent;
 
+    /**
+     * @var MarketplaceGateway
+     */
     private $marketplaceGateway;
 
+    /**
+     * @var ProductTranslationsGateway
+     */
     private $productTranslationsGateway;
 
+    /**
+     * @var MarketplaceSettingsApplier
+     */
     private $marketplaceSettingsApplier;
 
+    /**
+     * @var MediaService
+     */
     private $mediaService;
 
     private $localMediaService;
@@ -149,6 +178,7 @@ class ConnectFactory
         }
 
         $logger = new Logger(Shopware()->Db());
+        $eventManager = $this->getContainer()->get('events');
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
             new AutoCategoryResolver(
                 $manager,
@@ -173,13 +203,15 @@ class ConnectFactory
                 $this->getMarketplaceGateway(),
                 $this->getProductTranslationsGateway(),
                 $categoryResolver,
-                $this->getConnectPDOGateway()
+                $this->getConnectPDOGateway(),
+                $eventManager
             ),
             new ProductFromShop(
                 $helper,
                 $manager,
                 $gateway,
-                $logger
+                $logger,
+                $eventManager
             ),
             new ShopwareErrorHandler($logger),
             null,

@@ -114,7 +114,13 @@ class MySQLi extends Gateway
                         $change->availability = intval($row['c_payload']);
                         break;
                     case self::STREAM_ASSIGNMENT:
-                        $change->supplierStreams = unserialize($row['c_payload']);
+                        $payload = unserialize($row['c_payload']);
+                        if (isset($payload['supplierStreams']) && isset($payload['groupId'])) {
+                            $change->supplierStreams = $payload['supplierStreams'];
+                            $change->groupId = $payload['groupId'];
+                        } else {
+                            $change->supplierStreams = $payload;
+                        }
                         break;
                     case self::PAYMENT_UPDATE:
                         $change->paymentStatus = unserialize($row['c_payload']);
@@ -336,8 +342,9 @@ class MySQLi extends Gateway
      * @param string $productId
      * @param string $revision
      * @param array $supplierStreams
+     * @param string|null $groupId
      */
-    public function recordStreamAssignment($productId, $revision, array $supplierStreams)
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams, $groupId = null)
     {
         $this->connection->query(
             'INSERT INTO
@@ -351,7 +358,7 @@ class MySQLi extends Gateway
                 "' . $this->connection->real_escape_string($productId) . '",
                 "' . self::STREAM_ASSIGNMENT . '",
                 "' . $this->connection->real_escape_string($revision) . '",
-                "' . $this->connection->real_escape_string(serialize($supplierStreams)) . '"
+                "' . $this->connection->real_escape_string(serialize(array('groupId' => $groupId, 'supplierStreams' => $supplierStreams))) . '"
             );'
         );
     }

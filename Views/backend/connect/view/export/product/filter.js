@@ -68,7 +68,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
         return {
             xtype: 'form',
             title: '{s name=export/filter/status_title}Status filter{/s}',
-            //bodyPadding: 5,
+            bodyPadding: 5,
             items: [{
                 xtype: 'fieldcontainer',
                 defaultType: 'radiofield',
@@ -101,8 +101,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Filter', {
                     boxLabel  : '{s name=export/filter/status_inactive}Inactive{/s}',
                     name      : 'exportStatus',
                     inputValue: 'inactive'
-                }
-                ]
+                }]
             }]
         }
     },

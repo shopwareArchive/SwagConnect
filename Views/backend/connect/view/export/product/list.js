@@ -14,10 +14,6 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
         mode: 'MULTI'
     },
 
-    snippets: {
-        customProductHint: '{s name=export/list/customProduct}Custom products are excluded from export{/s}'
-    },
-
     initComponent: function() {
         var me = this;
 
@@ -94,12 +90,12 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
             header: '{s name=export/columns/status}Status{/s}',
             dataIndex: 'exportStatus',
             flex: 1,
-            renderer: function(value, metaData, record) {
+            renderer: function (value, metaData, record) {
                 var className,
                     label,
-                    isCustomProduct = record.get('customProduct');
+                    exportMessage = record.get('exportMessage');
 
-                if (isCustomProduct == true) {
+                if (record.get('customProduct') == true) {
                     value = 'custom-product';
                 }
 
@@ -107,17 +103,20 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
                     return;
                 }
 
+                if (record.get('cronUpdate') == 1) {
+                    value = 'cron-update';
+                }
+
                 if (me.iconMapping.hasOwnProperty(value)) {
                     className = me.iconMapping[value];
                 }
 
-                if(record.get('exportMessage')) {
-                    metaData.tdAttr = 'data-qtip="' + record.get('exportMessage') + '"';
-                } else if (isCustomProduct) {
-                    metaData.tdAttr = 'data-qtip="' + me.snippets.customProductHint + '"';
+                if(exportMessage) {
+                    metaData.tdAttr = 'data-qtip="' + exportMessage + '"';
                 } else {
                     label = value;
-                    if (me.iconLabelMapping.hasOwnProperty(value)) {
+
+                    if (value in me.iconLabelMapping) {
                         label = me.iconLabelMapping[value];
                     }
 

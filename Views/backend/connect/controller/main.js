@@ -100,7 +100,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
-        importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}'
+        importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}',
+        allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}'
     },
 
 
@@ -221,8 +222,14 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-export button[action=delete]': {
                 click: me.onRemoveArticleAction
             },
+            'connect-export button[action=exportAll]': {
+                click: me.onExportAllAction
+            },
             'connect-article-export-progress-window': {
                 startExport: me.startArticleExport
+            },
+            'connect-many-products-dialog': {
+                cronExportAll: me.cronExportAll
             },
             'connect-stream-export-progress-window': {
                 startStreamExport: me.startStreamExport
@@ -830,6 +837,25 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
     },
 
+    cronExportAll: function () {
+        var me = this;
+
+        Ext.Ajax.request({
+            url: '{url action=exportAllWithCron}',
+            method: 'POST',
+
+            success: function (response, opts) {
+                var operation = Ext.decode(response.responseText);
+                if (operation.success) {
+                    me.createGrowlMessage("{s name=connect/success}Success{/s}", me.messages.allProductsMarkedForExportWithCron, true);
+                    me.getExportList().getStore().reload();
+                } else {
+                    me.createGrowlMessage("{s name=connect/error}Error{/s}", operation.message, true);
+                }
+            }
+        });
+    },
+
     startStreamExport: function(streamIds, articleDetailIds, batchSize, window, currentStreamIndex, offset) {
         offset = parseInt(offset) || 0;
         var limit = batchSize;
@@ -901,6 +927,50 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             list.store.load();
                         }
                     }
+                }
+            }
+        });
+    },
+
+    /**
+     * Callback function that will start the export all dialog
+     *
+     * @param btn
+     */
+    onExportAllAction: function (btn) {
+        var me = this,
+            title = me.messages.insertOrUpdateProductTitle;
+
+        Ext.Ajax.request({
+            url: '{url action=getArticleSourceIds}',
+            method: 'POST',
+            params: {
+                'exportAll': true
+            },
+            success: function (response, opts) {
+                if (!response.responseText) {
+                    return;
+                }
+
+                var operation = Ext.decode(response.responseText);
+                if (!operation) {
+                    return;
+                }
+
+                if (!operation.success) {
+                    me.createGrowlMessage(title, operation.message, true);
+                } else {
+                    if (operation.sourceIds.length > 1000) {
+
+                        Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
+                            sourceIds: operation.sourceIds
+                        }).show();
+                        return;
+                    }
+
+                    Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
+                        sourceIds: operation.sourceIds
+                    }).show();
                 }
             }
         });

@@ -85,7 +85,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.kind as detailKind',
             'd.ean',
             'a.name as title',
-            'a.description as shortDescription',
             's.name as vendorName',
             's.image as vendorImage',
             's.link as vendorLink',
@@ -119,7 +118,7 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         if (in_array(self::CONNECT_DESCRIPTION_FIELD, $this->productDescriptionFields)){
-            $selectColumns[] = 'attribute.connectProductDescription as connectDescription';
+            $selectColumns[] = 'attribute.connectProductDescription as additionalDescription';
         }
 
         if ($exportPriceColumn) {

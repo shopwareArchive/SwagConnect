@@ -71,6 +71,7 @@ class RemoteProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'attribute.connectArticleShipping as shipping',
+            'attribute.connectProductDescription as additionalDescription',
         ));
 
         return $builder;

@@ -164,6 +164,7 @@ class Update
     private function updateProductDescriptionSetting()
     {
         if (version_compare($this->version, '1.0.10', '<=')) {
+            //migrates to the new export settings
             $result = $this->db->query("SELECT `value` FROM s_plugin_connect_config WHERE name = 'alternateDescriptionField'");
             $row = $result->fetch();
 
@@ -174,14 +175,19 @@ class Update
                     'attribute.connectProductDescription' => BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
                 ];
 
-                $newValue = $mapper[$row['value']];
-                $this->db->query("
-                    UPDATE `s_plugin_connect_config`
-                    SET `value` = '[\"$newValue\"]'
-                    WHERE `name` = 'alternateDescriptionField'
-                ");
+                if ($newValue = $mapper[$row['value']]) {
+                    $this->db->query("
+                        UPDATE `s_plugin_connect_config`
+                        SET `value` = '[\"$newValue\"]'
+                        WHERE `name` = 'alternateDescriptionField'
+                    ");
+                }
             }
 
+            $this->db->query("
+                ALTER TABLE `s_plugin_connect_items`
+                ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
+            ");
         }
     }
 }

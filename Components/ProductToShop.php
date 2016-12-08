@@ -875,15 +875,14 @@ class ProductToShop implements ProductToShopBase
      */
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
-        // find article and detail id
-        $result = $this->manager->getConnection()->fetchAssoc(
-            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
-            array($sourceId, $shopId)
-        );
-
-        if (empty($result['article_detail_id']) || empty($result['article_id'])) {
+        //find article detail which should be selected as main one
+        $newMainDetail = $this->helper->getConnectArticleDetailModel($sourceId, $shopId);
+        if (!$newMainDetail) {
             return;
         }
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $newMainDetail->getArticle();
 
         $this->eventManager->notify(
             'Connect_Merchant_Update_ProductMainVariant_Before',
@@ -891,19 +890,20 @@ class ProductToShop implements ProductToShopBase
                 'subject' => $this,
                 'shopId' => $shopId,
                 'sourceId' => $sourceId,
-                'articleId' => $result['article_id'],
-                'articleDetailId' => $result['article_detail_id']
+                'articleId' => $article->getId(),
+                'articleDetailId' => $newMainDetail->getId()
             ]
         );
 
-        $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',
-            array($result['article_detail_id'], $result['article_id'])
-        );
+        // replace current main detail with new one
+        $currentMainDetail = $article->getMainDetail();
+        $currentMainDetail->setKind(2);
+        $newMainDetail->setKind(1);
+        $article->setMainDetail($newMainDetail);
 
-        $this->manager->getConnection()->executeUpdate(
-            'UPDATE s_articles SET main_detail_id = ? WHERE id = ?',
-            array($result['article_detail_id'], $result['article_id'])
-        );
+        $this->manager->persist($newMainDetail);
+        $this->manager->persist($currentMainDetail);
+        $this->manager->persist($article);
+        $this->manager->flush();
     }
 }

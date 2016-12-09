@@ -142,6 +142,15 @@ class Product extends ShopItem
     public $longDescription;
 
     /**
+     * An additional description of the product
+     *
+     * May contain simple HTML
+     *
+     * @var string
+     */
+    public $additionalDescription;
+
+    /**
      * Name of the product vendor
      *
      * @var array (can be the string name only, for legacy reasons)
@@ -249,6 +258,11 @@ class Product extends ShopItem
      * @var boolean
      */
     public $fixedPrice = false;
+
+    /**
+     * @var \Shopware\Connect\Struct\PriceRange[]
+     */
+    public $priceRanges = array();
 
     /**
      * Currency of the price

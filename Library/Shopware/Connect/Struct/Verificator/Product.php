@@ -43,7 +43,7 @@ class Product extends Verificator
      * __construct
      *
      * @param ShippingRuleParser $parser
-     * @return void
+     * @param $priceType
      */
     public function __construct(ShippingRuleParser $parser, $priceType)
     {
@@ -55,11 +55,11 @@ class Product extends Verificator
     {
         switch ($this->priceType) {
             case SDK::PRICE_TYPE_PURCHASE:
-                $this->verifyPurchasePrice($dispatcher, $struct);
+                $this->verifyPurchasePrice($struct);
                 break;
 
             case SDK::PRICE_TYPE_RETAIL:
-                $this->verifyRetailPrice($dispatcher, $struct);
+                $this->verifyRetailPrice($struct);
                 break;
 
             case SDK::PRICE_TYPE_BOTH:
@@ -70,33 +70,77 @@ class Product extends Verificator
                 $this->fail("Exporting products is not allowed without a price type selected.");
                 break;
         }
-        $this->verifyFixedPrice($dispatcher, $struct);
+        $this->verifyFixedPrice($struct);
+        $this->verifyPriceRanges($struct);
     }
 
+    /**
+     * @param VerificatorDispatcher $dispatcher
+     * @param Struct $struct
+     */
     protected function verifyPrice(VerificatorDispatcher $dispatcher, Struct $struct)
     {
-        $this->verifyPurchasePrice($dispatcher, $struct);
-        $this->verifyRetailPrice($dispatcher, $struct);
+        $this->verifyPurchasePrice($struct);
+        $this->verifyRetailPrice($struct);
     }
 
-    protected function verifyPurchasePrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    /**
+     * @param Struct $struct
+     */
+    protected function verifyPurchasePrice(Struct $struct)
     {
         if (empty($struct->purchasePrice) || $struct->purchasePrice <= 0) {
             $this->fail("The purchasePrice is not allowed to be 0 or smaller.");
         }
     }
 
-    protected function verifyRetailPrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    /**
+     * @param Struct $struct
+     */
+    protected function verifyRetailPrice(Struct $struct)
     {
         if (empty($struct->price) || $struct->price <= 0) {
             $this->fail("The price is not allowed to be 0 or smaller.");
         }
     }
 
-    protected function verifyFixedPrice(VerificatorDispatcher $dispatcher, Struct $struct)
+    /**
+     * @param Struct $struct
+     */
+    protected function verifyFixedPrice(Struct $struct)
     {
         if ($struct->fixedPrice === true && $this->priceType == SDK::PRICE_TYPE_PURCHASE) {
             $this->fail("Fixed price is not allowed when export purchasePrice only");
+        }
+    }
+
+    /**
+     * @param Struct $struct
+     */
+    protected function verifyPriceRanges(Struct $struct)
+    {
+        if (empty($struct->priceRanges)) {
+            return;
+        }
+
+        /** @var Struct\PriceRange $priceRange */
+        foreach ($struct->priceRanges as $priceRange) {
+
+            if (!is_int($priceRange->from) || $priceRange->from <= 0) {
+                $this->fail("The price range 'from' must be int and is not allowed to be 0 or smaller.");
+            }
+
+            if (is_string($priceRange->to) && $priceRange->to !== Struct\PriceRange::ANY){
+                $this->fail("The price range 'to' must be int bigger from 0 or string with value 'any'.");
+            } elseif(is_int($priceRange->to) && $priceRange->to <= 0) {
+                $this->fail("The price range 'to' is not allowed to be 0 or smaller.");
+            } elseif(!is_string($priceRange->to) && !is_int($priceRange->to)){
+                $this->fail("The price range 'to' must be int or string.");
+            }
+
+            if (empty($priceRange->price) || $priceRange->price <= 0) {
+                $this->fail("The price is not allowed to be 0 or smaller.");
+            }
         }
     }
 
@@ -262,8 +306,8 @@ class Product extends Verificator
             $this->validateUnit($struct);
         }
 
-        if ((strlen($struct->shortDescription) + strlen($struct->longDescription)) > self::DESCRIPTION_SIZE_LIMIT) {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Product short and long description must be under 5 000 000 characters.");
+        if ((strlen($struct->shortDescription) + strlen($struct->longDescription) + strlen($struct->additionalDescription)) > self::DESCRIPTION_SIZE_LIMIT) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product short, long and additional description must be under 5 000 000 characters.");
         }
 
         if ($struct->minPurchaseQuantity < 1) {
@@ -271,6 +315,9 @@ class Product extends Verificator
         }
     }
 
+    /**
+     * @param $struct
+     */
     private function validateUnit($struct)
     {
         if (!Units::exists($struct->attributes[Struct\Product::ATTRIBUTE_UNIT])) {
@@ -305,6 +352,9 @@ class Product extends Verificator
         }
     }
 
+    /**
+     * @param array $categories
+     */
     private function verifyCategories(array $categories)
     {
         $parentCategoryMap = array();
@@ -325,10 +375,7 @@ class Product extends Verificator
         foreach ($parentCategoryMap as $category => $parentCategory) {
             if (!isset($categories[$category])) {
                 throw new \Shopware\Connect\Exception\VerificationFailedException(
-                    sprintf(
-                        'Product#categories must contain all parent categories. Parent category of "/Kleidung/Hosen" missing.',
-                        $category
-                    )
+                    'Product#categories must contain all parent categories. Parent category of '.$category.' missing.'
                 );
             }
         }

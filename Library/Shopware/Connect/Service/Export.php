@@ -130,12 +130,13 @@ class Export
         );
     }
 
-    public function recordStreamAssignment($productId, array $supplierStreams)
+    public function recordStreamAssignment($productId, array $supplierStreams, $groupId = null)
     {
         $this->gateway->recordStreamAssignment(
             $productId,
             $this->revisionProvider->next(),
-            $supplierStreams
+            $supplierStreams,
+            $groupId
         );
     }
 

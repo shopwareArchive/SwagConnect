@@ -373,6 +373,7 @@ class Setup
              `update_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_long_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_short_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_additional_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `last_update` longtext COLLATE utf8_unicode_ci,
              `last_update_flag` int(11) DEFAULT NULL,

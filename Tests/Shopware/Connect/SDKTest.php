@@ -85,7 +85,7 @@ class SDKTest extends ConnectTestHelper
                         'title' => 'shopware Connect Test-Produkt',
                         'shortDescription' => 'Ein Produkt aus shopware Connect',
                         'longDescription' => 'Ein Produkt aus shopware Connect',
-                        'additional' => 'Ein Produkt aus shopware Connect',
+                        'additionalDescription' => 'Ein Produkt aus shopware Connect',
                         'vendor' => 'shopware Connect',
                         'stream' => 'Awesome products',
                         'price' => 9.99,

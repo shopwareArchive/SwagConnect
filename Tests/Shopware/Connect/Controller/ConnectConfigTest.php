@@ -38,6 +38,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('overwriteProductImage', '1', 'import'),
             ('overwriteProductShortDescription', '1', 'import'),
             ('overwriteProductLongDescription', '1', 'import'),
+            ('overwriteProductAdditionalDescription', '1', 'import'),
             ('logRequest', '1', 'general'),
             ('showShippingCostsSeparately', '0', 'general'),
             ('articleImagesLimitImport', '10', 'import');

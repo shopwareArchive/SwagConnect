@@ -103,6 +103,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.List', {
                     return;
                 }
 
+                if (record.get('cronUpdate') == 1) {
+                    value = 'cron-update';
+                }
+
                 if (me.iconMapping.hasOwnProperty(value)) {
                     className = me.iconMapping[value];
                 }

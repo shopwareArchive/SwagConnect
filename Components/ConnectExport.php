@@ -159,7 +159,8 @@ class ConnectExport
                 ) {
                     $this->sdk->recordStreamAssignment(
                         $item['sourceId'],
-                        $streamsAssignments->getStreamsByArticleId($item['articleId'])
+                        $streamsAssignments->getStreamsByArticleId($item['articleId']),
+                        $item['groupId']
                     );
                 }
             } catch (\Exception $e) {
@@ -214,6 +215,7 @@ class ConnectExport
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
                     a.name as title,
+                    IF (a.configurator_set_id IS NOT NULL, a.id, NULL) as groupId,
                     d.ordernumber as number
             FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
@@ -374,7 +376,8 @@ class ConnectExport
             'p.price * (100 + t.tax) / 100 as price',
             'i.category',
             'i.export_status as exportStatus',
-            'i.export_message as exportMessage'
+            'i.export_message as exportMessage',
+            'i.cron_update as cronUpdate'
         ))
             ->from('s_plugin_connect_items', 'i')
             ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')
@@ -391,7 +394,7 @@ class ConnectExport
         }
 
         if ($criteria->search) {
-            $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR supplier.name LIKE :search')
+            $builder->andWhere('d.ordernumber LIKE :search OR a.name LIKE :search OR s.name LIKE :search')
                 ->setParameter('search', $criteria->search);
         }
 

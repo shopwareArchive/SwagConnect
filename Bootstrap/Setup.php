@@ -3,7 +3,7 @@
 namespace ShopwarePlugins\Connect\Bootstrap;
 
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
-use Shopware\Models\Article\Element;
+use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
@@ -73,7 +73,6 @@ class Setup
 
         if ($fullSetup) {
             $this->createMyMenu();
-            $this->createEngineElement();
             $this->populatePaymentStates();
         }
     }
@@ -490,7 +489,12 @@ class Setup
         $crudService->update(
             's_articles_attributes',
             'connect_product_description',
-            'text'
+            'html',
+            [
+                'translatable' => 1,
+                'displayInBackend' => 1,
+                'label' => 'Connect Beschreibung'
+            ]
         );
 
         $crudService->update(
@@ -624,29 +628,6 @@ class Setup
         $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
         $this->db->exec($sql);
     }
-
-
-    /**
-     * Creates an engine element so that the connectProductDescription is displayed in the article
-     */
-    public function createEngineElement()
-    {
-        $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
-        $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
-
-        if (!$element) {
-            $element = new Element();
-            $element->setName('connectProductDescription');
-            $element->setType('html');
-            $element->setLabel('SC Beschreibung');
-            $element->setTranslatable(1);
-            $element->setHelp('Falls Sie die Langbeschreibung ihres Artikels in diesem Attribut-Feld pflegen, wird statt der Langbeschreibung der Inhalt dieses Feldes exportiert');
-
-            $this->modelManager->persist($element);
-            $this->modelManager->flush();
-        }
-    }
-
 
     /**
      * Creates a shopware Connect customer group - this can be used by the shop owner to manage the Connect product prices

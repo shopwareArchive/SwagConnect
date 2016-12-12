@@ -410,7 +410,7 @@ class ConnectExport
         }
 
         if ($criteria->exportStatus) {
-            $builder->andWhere('items.export_status LIKE :status')
+            $builder->andWhere('i.export_status LIKE :status')
                 ->setParameter('status', $criteria->exportStatus);
         }
 

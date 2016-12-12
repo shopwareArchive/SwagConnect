@@ -31,6 +31,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Models\Customer\Group;
@@ -465,6 +466,9 @@ class ProductToShop implements ProductToShopBase
 
             /** @var PriceRange $priceRange */
             foreach ($priceRanges as $priceRange) {
+
+                $priceTo = $priceRange->to == PriceRange::ANY ? 'beliebig' : $priceRange->to;
+
                 //todo: maybe batch insert if possible?
                 $this->manager->getConnection()->executeQuery(
                     'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`)
@@ -472,7 +476,7 @@ class ProductToShop implements ProductToShopBase
                     [
                         $group->getKey(),
                         $priceRange->from,
-                        $priceRange->to,
+                        $priceTo,
                         $article->getId(),
                         $detail->getId(),
                         $priceRange->price

@@ -34,6 +34,8 @@ final class SDK
     const PRICE_TYPE_BOTH = 3;
     const PRICE_TYPE_NONE = 4;
 
+    const WRONG_CREDENTIALS_MESSAGE = "Wrong username or password";
+
     /**
      * API key for this SDK
      *

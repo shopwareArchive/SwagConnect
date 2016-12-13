@@ -101,7 +101,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}',
-        allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}'
+        allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}',
+        error: '{s name=connect/error}error{/s}'
     },
 
 
@@ -538,10 +539,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     displayErrorMessage: function(response, callback) {
-        var message = response.message;
+        var me = this,
+            message = response.message;
 
         Shopware.Notification.createStickyGrowlMessage({
-            title: 'Error',
+            title: me.messages.error,
             text: message,
             width: 350
         });

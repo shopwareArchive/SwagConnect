@@ -633,9 +633,20 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $responseObject = json_decode($response->getBody());
 
         if(!$responseObject->success) {
+            $message = $responseObject->reason;
+
+            if ($responseObject->reason == SDK::WRONG_CREDENTIALS_MESSAGE) {
+                $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
+                $message = $snippets->get(
+                    'error/wrong_credentials',
+                    SDK::WRONG_CREDENTIALS_MESSAGE,
+                    true
+                );
+            };
+
             $this->View()->assign([
                 'success' => false,
-                'message' => $responseObject->reason
+                'message' => $message
             ]);
 
             return;

@@ -437,6 +437,38 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
+     * It will make a call to SocialNetwork to reset the price type,
+     * if this call return success true, then it will reset the export settings locally
+     */
+    public function resetPriceTypeAction()
+    {
+        $response = $this->getSnHttpClient()->sendRequestToConnect(array(), 'account/reset/price-type');
+        $responseBody = json_decode($response->getBody());
+
+        if(!$responseBody->success) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseBody->message
+            ]);
+
+            return;
+        }
+
+        $this->getConfigComponent()->setExportConfigs([[
+            'priceGroupForPriceExport' => '',
+            'priceFieldForPriceExport' => '',
+            'priceGroupForPurchasePriceExport' => '',
+            'priceFieldForPurchasePriceExport' => '',
+            'exportPriceMode' => '',
+        ]]);
+
+        $this->View()->assign([
+            'success' => true,
+            'message' => 'Price type was reset successfully'
+        ]);
+    }
+
+    /**
      * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
@@ -868,6 +900,21 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         return $this->factory;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getHost()
+    {
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
+        if ($host) {
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
+        } else {
+            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
+        }
+
+        return $host;
     }
 
     /**

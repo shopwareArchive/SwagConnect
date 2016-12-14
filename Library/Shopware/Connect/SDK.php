@@ -311,21 +311,11 @@ final class SDK
         $this->dependencies->getExportService()->recordDelete($productId);
     }
 
-    /**
-     * Assign stream to product
-     *
-     * $supplierStreams should have following structure
-     * array("streamIdentifier" => "streamName")
-     *
-     * @param string $productId
-     * @param array $supplierStreams
-     * @param string|null $groupId
-     */
-    public function recordStreamAssignment($productId, array $supplierStreams, $groupId = null)
+    public function recordStreamAssignment($productId, array $supplierStreams)
     {
         $this->verifySdkIfNecessary();
 
-        $this->dependencies->getExportService()->recordStreamAssignment($productId, $supplierStreams, $groupId);
+        $this->dependencies->getExportService()->recordStreamAssignment($productId, $supplierStreams);
     }
 
     /**

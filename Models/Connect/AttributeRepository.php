@@ -69,4 +69,23 @@ class AttributeRepository extends ModelRepository
 
         return $builder->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * Resets the exported items
+     */
+    public function resetExportedItemsStatus()
+    {
+        $builder = $this->_em->createQueryBuilder();
+        $builder->update('Shopware\CustomModels\Connect\Attribute', 'a')
+            ->set('a.exportStatus', '(:newStatus)')
+            ->where('a.exportStatus IN (:status)')
+            ->setParameter('newStatus', null)
+            ->setParameter(
+                'status',
+                [Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED],
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+
+        $builder->getQuery()->execute();
+    }
 } 

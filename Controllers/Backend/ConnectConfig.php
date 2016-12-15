@@ -454,13 +454,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
-        $this->getConfigComponent()->setExportConfigs([[
-            'priceGroupForPriceExport' => '',
-            'priceFieldForPriceExport' => '',
-            'priceGroupForPurchasePriceExport' => '',
-            'priceFieldForPurchasePriceExport' => '',
-            'exportPriceMode' => '',
-        ]]);
+        $itemRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Attribute');
+        $itemRepo->resetExportedItemsStatus();
 
         $this->View()->assign([
             'success' => true,

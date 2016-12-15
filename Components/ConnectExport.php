@@ -410,8 +410,15 @@ class ConnectExport
         }
 
         if ($criteria->exportStatus) {
-            $builder->andWhere('i.export_status LIKE :status')
-                ->setParameter('status', $criteria->exportStatus);
+            $errorStatuses = [Attribute::STATUS_ERROR, Attribute::STATUS_ERROR_PRICE];
+
+            if (in_array($criteria->exportStatus, $errorStatuses)) {
+                $builder->andWhere('i.export_status IN (:status)')
+                    ->setParameter('status', $errorStatuses, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            } else {
+                $builder->andWhere('i.export_status LIKE :status')
+                    ->setParameter('status', $criteria->exportStatus);
+            }
         }
 
         if ($criteria->active) {

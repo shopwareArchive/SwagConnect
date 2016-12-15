@@ -72,7 +72,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         priceResetBtn: '{s name=config/price_reset_btn}reset{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
         priceResetMessage: '{s name=config/price_reset_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
-        priceResetSuccess: '{s name=config/price_reset_success}The exported prices were successfully reset{/s}',
+        priceResetSuccess: '{s name=config/price_reset_success}The exported prices were successfully reset. It will take up to 10min for the changes to take effect. When this operation is done, you will get the option to set the price type again when you reopen "Export" in the Connect menu.{/s}',
         showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },

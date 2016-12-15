@@ -530,10 +530,11 @@ class ProductFromShop implements ProductFromShopBase
     {
         $this->manager->getConnection()->beginTransaction();
 
+        $status = Attribute::STATUS_SYNCED;
         try {
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
-                SET export_status = 'synced'
+                SET export_status = $status
                 WHERE revision <= ?",
                 array($since)
             );

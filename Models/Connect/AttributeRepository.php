@@ -78,8 +78,11 @@ class AttributeRepository extends ModelRepository
         $builder = $this->_em->createQueryBuilder();
         $builder->update('Shopware\CustomModels\Connect\Attribute', 'a')
             ->set('a.exportStatus', '(:newStatus)')
+            ->set('a.exported', 0)
+            ->set('a.revision', '(:revision)')
             ->where('a.exportStatus IN (:status)')
             ->setParameter('newStatus', null)
+            ->setParameter('revision', null)
             ->setParameter(
                 'status',
                 [Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED],

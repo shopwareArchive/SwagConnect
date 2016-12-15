@@ -30,6 +30,7 @@ use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
+use Shopware\Connect\Gateway\ChangeGateway;
 use Firebase\JWT\JWT;
 
 /**
@@ -454,12 +455,29 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
+        // WARNING This code remove the current product changes
+        // This is a single call operation and its danger one
+        // This code should not be used anywhere
+        $builder = $this->getModelManager()->getConnection()->createQueryBuilder();
+        $builder->delete('sw_connect_change')
+            ->where('c_operation IN (:changes)')
+            ->setParameter(
+                'changes',
+                [
+                    ChangeGateway::PRODUCT_INSERT,
+                    ChangeGateway::PRODUCT_UPDATE,
+                    ChangeGateway::PRODUCT_DELETE,
+                    ChangeGateway::PRODUCT_STOCK,
+                ],
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+        $builder->execute();
+
         $itemRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Attribute');
         $itemRepo->resetExportedItemsStatus();
 
         $this->View()->assign([
             'success' => true,
-            'message' => 'Price type was reset successfully'
         ]);
     }
 

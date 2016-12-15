@@ -262,7 +262,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             value: '%' + value + '%'
                         }));
                     }
-                    store.load();
+                    store.load({
+                        page: 1,
+                        start: 0
+                    });
+                    store.currentPage = 1;
                 }
             },
 

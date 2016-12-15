@@ -534,7 +534,7 @@ class ProductFromShop implements ProductFromShopBase
         try {
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
-                SET export_status = $status
+                SET export_status = '$status'
                 WHERE revision <= ?",
                 array($since)
             );

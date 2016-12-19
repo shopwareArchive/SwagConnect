@@ -120,9 +120,8 @@ interface ChangeGateway
      * @param string $productId
      * @param string $revision
      * @param array $supplierStreams
-     * @param string|null $groupId
      */
-    public function recordStreamAssignment($productId, $revision, array $supplierStreams, $groupId = null);
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams);
 
     /**
      * @param $streamId

@@ -131,13 +131,7 @@ class PDO extends Gateway
                         $change->availability = intval($row['c_payload']);
                         break;
                     case self::STREAM_ASSIGNMENT:
-                        $payload = unserialize($row['c_payload']);
-                        if (isset($payload['supplierStreams']) && isset($payload['groupId'])) {
-                            $change->supplierStreams = $payload['supplierStreams'];
-                            $change->groupId = $payload['groupId'];
-                        } else {
-                            $change->supplierStreams = $payload;
-                        }
+                        $change->supplierStreams = unserialize($row['c_payload']);
                         break;
                     case self::PAYMENT_UPDATE:
                         $change->paymentStatus = unserialize($row['c_payload']);
@@ -343,9 +337,8 @@ class PDO extends Gateway
      * @param string $productId
      * @param string $revision
      * @param array $supplierStreams
-     * @param string|null $groupId
      */
-    public function recordStreamAssignment($productId, $revision, array $supplierStreams, $groupId = null)
+    public function recordStreamAssignment($productId, $revision, array $supplierStreams)
     {
         $query = $this->connection->prepare(
             'INSERT INTO
@@ -359,14 +352,7 @@ class PDO extends Gateway
                 ?, ?, ?, ?
             );'
         );
-        $query->execute(
-            array(
-                $productId,
-                self::STREAM_ASSIGNMENT,
-                $revision,
-                serialize(array('groupId' => $groupId, 'supplierStreams' => $supplierStreams))
-            )
-        );
+        $query->execute(array($productId, self::STREAM_ASSIGNMENT, $revision, serialize($supplierStreams)));
     }
 
     /**

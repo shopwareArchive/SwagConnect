@@ -531,11 +531,21 @@ class ProductFromShop implements ProductFromShopBase
         $this->manager->getConnection()->beginTransaction();
 
         try {
+
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
                 SET export_status = 'synced'
-                WHERE revision <= ?",
+                WHERE revision <= ?
+                AND export_status != 'delete'",
                 array($since)
+            );
+
+            $this->manager->getConnection()->executeQuery(
+                "UPDATE s_plugin_connect_items
+                SET export_status = ?
+                WHERE revision <= ?
+                AND export_status = 'delete'",
+                array(NULL, $since)
             );
 
             /** @var \Shopware\Connect\Struct\Change $change */

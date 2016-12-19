@@ -85,7 +85,6 @@ class LocalProductQueryTest extends ConnectTestHelper
 
             $this->localProductQuery = new LocalProductQuery(
                 Shopware()->Models(),
-                $configComponent->getConfig('alternateDescriptionField'),
                 $this->getProductBaseUrl(),
                 $configComponent,
                 new MarketplaceGateway(Shopware()->Models()),

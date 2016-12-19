@@ -353,8 +353,7 @@ class ConnectFactory
     private function getRemoteProductQuery()
     {
         return new RemoteProductQuery(
-            $this->getModelManager(),
-            $this->getConfigComponent()->getConfig('alternateDescriptionField')
+            $this->getModelManager()
         );
     }
 
@@ -365,7 +364,6 @@ class ConnectFactory
     {
         return new LocalProductQuery(
             $this->getModelManager(),
-            $this->getConfigComponent()->getConfig('alternateDescriptionField'),
             $this->getProductBaseUrl(),
             $this->getConfigComponent(),
             $this->getMarketplaceGateway(),

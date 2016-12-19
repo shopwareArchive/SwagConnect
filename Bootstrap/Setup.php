@@ -590,7 +590,7 @@ class Setup
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
-            'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
+            'longDescriptionField' => array('1', null, 'export'),
             'importImagesOnFirstImport' => array('0', null, 'import'),
             'autoUpdateProducts' => array('1', null, 'export'),
             'overwriteProductName' => array('1', null, 'import'),

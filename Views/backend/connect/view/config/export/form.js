@@ -134,10 +134,10 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                     me.fireEvent('collectPriceParams', me.priceTabPanel, 'price', model.data);
                 }
 
-                model.data.alternateDescriptionField = [];
+                model.data.descriptionField = [];
                 me.articleDescriptions.forEach(function(value) {
                     if (value.getValue()) {
-                        model.data.alternateDescriptionField.push(value.getName());
+                        model.data.descriptionField.push(value.getName());
                     }
                 });
 

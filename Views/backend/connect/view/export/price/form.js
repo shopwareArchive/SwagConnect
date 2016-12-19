@@ -283,7 +283,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             'autoUpdateProducts' : 1,
             'exportLanguages': [],
             'exportPriceMode': [],
-            'alternateDescriptionField': []
+            'descriptionField': []
         };
     },
 
@@ -317,7 +317,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
 
                 me.articleDescriptions.forEach(function(value) {
                     if (value.getValue()) {
-                        priceParams.alternateDescriptionField.push(value.getName());
+                        priceParams.descriptionField.push(value.getName());
                     }
                 });
 

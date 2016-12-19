@@ -23,8 +23,6 @@ use Shopware\Connect\Struct\Translation;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    protected $productDescriptionFields;
-
     protected $baseProductUrl;
 
     /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
@@ -39,7 +37,6 @@ class LocalProductQuery extends BaseProductQuery
 
     public function __construct(
         ModelManager $manager,
-        $productDescriptionFields,
         $baseProductUrl,
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
@@ -49,7 +46,6 @@ class LocalProductQuery extends BaseProductQuery
     {
         parent::__construct($manager, $mediaService);
 
-        $this->productDescriptionFields = $productDescriptionFields;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
@@ -110,15 +106,15 @@ class LocalProductQuery extends BaseProductQuery
             'd.shippingTime as deliveryWorkDays',
         );
 
-        if (in_array(self::SHORT_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+        if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)){
             $selectColumns[] = 'a.description as shortDescription';
         }
 
-        if (in_array(self::LONG_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+        if ($this->configComponent->getConfig(self::LONG_DESCRIPTION_FIELD, false)){
             $selectColumns[] = 'a.descriptionLong as longDescription';
         }
 
-        if (in_array(self::CONNECT_DESCRIPTION_FIELD, $this->productDescriptionFields)){
+        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)){
             $selectColumns[] = 'attribute.connectProductDescription as additionalDescription';
         }
 

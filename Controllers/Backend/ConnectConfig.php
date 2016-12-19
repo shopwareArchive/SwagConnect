@@ -188,29 +188,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
 
-        //Resets the exportPriceMode and alternateDescriptionField
-        if (!array_key_exists('alternateDescriptionField', $exportConfigArray)
-            || empty($exportConfigArray['alternateDescriptionField'])
-            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE
-        ) {
-            $exportConfigArray['alternateDescriptionField'] = [BaseProductQuery::LONG_DESCRIPTION_FIELD];
+        //Resets the exportPriceMode
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
             $exportConfigArray['exportPriceMode'] = [];
         }
 
-        $descriptions = [
-            BaseProductQuery::LONG_DESCRIPTION_FIELD,
-            BaseProductQuery::SHORT_DESCRIPTION_FIELD,
-            BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
-        ];
-
-        foreach ($descriptions as $description) {
-            $checked = false;
-
-            if (in_array($description, $exportConfigArray['alternateDescriptionField'])){
-                $checked = true;
-            }
-
-            $exportConfigArray[$description] = $checked;
+        if (!array_key_exists(BaseProductQuery::LONG_DESCRIPTION_FIELD, $exportConfigArray)) {
+            $exportConfigArray[BaseProductQuery::LONG_DESCRIPTION_FIELD] = true;
         }
 
         $this->View()->assign(

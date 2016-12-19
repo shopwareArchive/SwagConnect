@@ -14,13 +14,9 @@ use Shopware\Components\Model\ModelManager;
  */
 class RemoteProductQuery extends BaseProductQuery
 {
-    protected $productDescriptionFields;
-
-    public function __construct(ModelManager $manager, $productDescriptionFields)
+    public function __construct(ModelManager $manager)
     {
         parent::__construct($manager);
-
-        $this->productDescriptionFields = $productDescriptionFields;
     }
 
     /**

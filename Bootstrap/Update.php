@@ -175,12 +175,16 @@ class Update
                     'attribute.connectProductDescription' => BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
                 ];
 
-                if ($newValue = $mapper[$row['value']]) {
+                if ($name = $mapper[$row['value']]) {
+                    $result = $this->db->query("SELECT `id` FROM s_plugin_connect_config WHERE name = '$name'");
+                    $id = $result->fetch()['id'];
+
                     $this->db->query("
-                        UPDATE `s_plugin_connect_config`
-                        SET `value` = '[\"$newValue\"]'
-                        WHERE `name` = 'alternateDescriptionField'
-                    ");
+                        REPLACE INTO `s_plugin_connect_config`
+                        (`id`, `name`, `value`, `shopId`, `groupName`)
+                        VALUES
+                        ($id, '$name', 1, null, 'export')
+                     ");
                 }
             }
 

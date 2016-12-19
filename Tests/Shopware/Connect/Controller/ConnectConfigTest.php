@@ -30,7 +30,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('detailProductNoIndex', '1', 'general'),
             ('detailShopInfo', '1', 'general'),
             ('checkoutShopInfo', '1', 'general'),
-            ('alternateDescriptionField', '[\"$longDescription\"]', 'export'),
+            ('$longDescription', '1', 'export'),
             ('importImagesOnFirstImport', '0', 'import'),
             ('autoUpdateProducts', '1', 'export'),
             ('overwriteProductName', '1', 'import'),

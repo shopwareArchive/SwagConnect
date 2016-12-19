@@ -69,13 +69,12 @@ class ProductQueryTest extends ConnectTestHelper
             $this->productQuery = new ProductQuery(
                 new LocalProductQuery(
                     Shopware()->Models(),
-                    $configComponent->getConfig('alternateDescriptionField'),
                     $this->getProductBaseUrl(),
                     $configComponent,
                     new MarketplaceGateway(Shopware()->Models()),
                     $this->productTranslator
                 ),
-                new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
+                new RemoteProductQuery(Shopware()->Models())
             );
         }
         return $this->productQuery;

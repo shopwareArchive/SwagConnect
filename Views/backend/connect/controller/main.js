@@ -1306,7 +1306,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.priceModeNotSelected);
         }
 
-        if (!data.hasOwnProperty('alternateDescriptionField') || data.alternateDescriptionField.length == 0) {
+        if (!data.hasOwnProperty('descriptionField') || data.descriptionField.length == 0) {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.productDescriptionNotSelected);
         }
 

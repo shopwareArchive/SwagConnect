@@ -531,7 +531,6 @@ class ProductFromShop implements ProductFromShopBase
         $this->manager->getConnection()->beginTransaction();
 
         try {
-
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
                 SET export_status = 'synced'

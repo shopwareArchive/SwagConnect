@@ -177,7 +177,12 @@ class Update
 
                 if ($name = $mapper[$row['value']]) {
                     $result = $this->db->query("SELECT `id` FROM s_plugin_connect_config WHERE name = '$name'");
-                    $id = $result->fetch()['id'];
+                    $row = $result->fetch();
+
+                    $id = null;
+                    if (isset($row['id'])) {
+                        $id = $row['id'];
+                    }
 
                     $this->db->query("
                         REPLACE INTO `s_plugin_connect_config`

@@ -1424,12 +1424,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 var response = Ext.JSON.decode(result.responseText);
                 if (response.success) {
                     me.createGrowlMessage(
-                        me.snippets.priceResetLabel,
-                        me.snippets.priceResetSuccess
+                        me.messages.priceResetLabel,
+                        me.messages.priceResetSuccess
                     );
                 } else {
                     me.createGrowlMessage(
-                        me.snippets.priceResetLabel,
+                        me.messages.priceResetLabel,
                         response.message
                     );
                 }

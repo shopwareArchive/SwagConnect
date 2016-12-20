@@ -97,6 +97,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
 
         priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Price field is not maintained. Some of the products have price = 0{/s}',
+        priceResetSuccess: '{s name=config/price_reset_success}The exported prices were successfully reset. It will take up to 10min for the changes to take effect. When this operation is done, you will get the option to set the price type again when you reopen "Export" in the Connect menu.{/s}',
+        priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
@@ -182,7 +184,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onSaveConfigForm
             },
             'connect-config-form': {
-                calculateFinishTime: me.onCalculateFinishTime
+                calculateFinishTime: me.onCalculateFinishTime,
+                resetPriceType: me.onResetPriceType,
             },
             'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
@@ -1409,6 +1412,29 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
 
+    },
+
+    onResetPriceType: function () {
+        var me = this;
+
+        Ext.Ajax.request({
+            scope: this,
+            url: '{url module=backend controller=ConnectConfig action=resetPriceType}',
+            success: function (result) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success) {
+                    me.createGrowlMessage(
+                        me.snippets.priceResetLabel,
+                        me.snippets.priceResetSuccess
+                    );
+                } else {
+                    me.createGrowlMessage(
+                        me.snippets.priceResetLabel,
+                        response.message
+                    );
+                }
+            }
+        });
     },
 
     onChangeLogging: function(checkbox, newValue, oldValue) {

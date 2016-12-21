@@ -535,7 +535,7 @@ class ProductFromShop implements ProductFromShopBase
                 "UPDATE s_plugin_connect_items
                 SET export_status = 'synced'
                 WHERE revision <= ?
-                AND export_status != 'delete'",
+                AND ( export_status = 'insert' OR export_status = 'update' )" ,
                 array($since)
             );
 

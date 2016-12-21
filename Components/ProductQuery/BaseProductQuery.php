@@ -49,6 +49,60 @@ abstract class BaseProductQuery
         return $this->getConnectProducts($query->getArrayResult());
     }
 
+	/**
+     * @param $detailId
+     * @return array
+     */
+    protected function getPriceRanges($detailId)
+    {
+        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport');
+
+        $columns = ['p.from', 'p.to', 'p.customerGroupKey'];
+
+        if ($exportPriceColumn) {
+            $columns[] = "p.{$exportPriceColumn} as price";
+        }
+
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select($columns)
+            ->from('Shopware\Models\Article\Price', 'p')
+            ->where('p.articleDetailsId = :detailId')
+            ->andWhere('p.customerGroupKey = :groupKey')
+            ->setParameter('detailId', $detailId)
+            ->setParameter('groupKey', $exportPriceCustomerGroup);
+
+        return $builder->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $id
+     * @return string[]
+     */
+    protected function getImagesById($id)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('i.path', 'i.extension', 'i.main', 'i.position'))
+            ->from('Shopware\Models\Article\Image', 'i')
+            ->where('i.articleId = :articleId')
+            ->andWhere('i.parentId IS NULL')
+            ->setParameter('articleId', $id)
+            ->orderBy('i.main', 'ASC')
+            ->addOrderBy('i.position', 'ASC');
+
+        $query = $builder->getQuery();
+        $query->setHydrationMode($query::HYDRATE_OBJECT);
+
+        $images = $query->getArrayResult();
+
+        $images = array_map(function($image) {
+            return $this->getImagePath($image['path'] . '.' . $image['extension']);
+        }, $images);
+
+
+        return $images;
+    }
+
     /**
      * Returns URL for the shopware image directory
      *

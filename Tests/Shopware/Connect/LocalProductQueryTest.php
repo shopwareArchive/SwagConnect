@@ -2,7 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
+use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\Config;
@@ -19,17 +19,25 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     protected $mediaService;
 
+    private $translations;
+
     protected $localMediaService;
 
     protected $contextService;
 
-    protected $productContext;
+    /** @var \Shopware\Models\Article\Article $article */
+    private $article;
 
-    private $translations;
+    private $db;
+
+    protected $productContext;
 
     public function setUp()
     {
         parent::setUp();
+
+        $this->db = Shopware()->Db();
+        $this->createArticle();
 
         $this->translations = array(
             'en' => new Translation(
@@ -160,7 +168,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             'purchasePrice' => 0,
             'longDescription' => '<p>Reficio congratulor simplex Ile familia mire hae Prosequor in pro St quae Muto,, St Texo aer Cornu ferox lex inconsiderate propitius, animus ops nos haero vietus Subdo qui Gemo ipse somniculosus. Non Apertio ops, per Repere torpeo penintentiarius Synagoga res mala caelestis praestigiator. Ineo via consectatio Gemitus sui domus ludio is vulgariter, hic ut legens nox Falx nos cui vaco insudo tero, tollo valde emo. deprecativus fio redigo probabiliter pacificus sem Nequequam, suppliciter dis Te summisse Consuesco cur Desolo sis insolesco expeditus pes Curo aut Crocotula Trimodus. Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius. Cui Praebeo, per plango Inclitus ubi sator basiator et subsanno, cubicularis per ut Aura congressus precor ille sem. aro quid ius Praedatio vitupero Tractare nos premo procurator. Ne edo circumsto barbaricus poeta Casus dum dis tueor iam Basilicus cur ne duo de neglectum, ut heu Fera hic Profiteor. Ius Perpetuus stilla co.</p>',
             'fixedPrice' => null,
-            'deliveryWorkDays' => '',
+            'deliveryWorkDays' => null,
             'shipping' => null,
             'translations' => [],
             'attributes' => [
@@ -192,6 +200,20 @@ class LocalProductQueryTest extends ConnectTestHelper
             'ref_quantity' => NULL,
         );
         $expectedProduct->translations = $this->translations;
+        $expectedProduct->priceRanges = [
+            new PriceRange([
+                'customerGroupKey' => 'EK',
+                'from' => 1,
+                'to' => 5,
+                'price' => 123.99,
+            ]),
+            new PriceRange([
+                'customerGroupKey' => 'EK',
+                'from' => 6,
+                'to' => PriceRange::ANY,
+                'price' => 113.99,
+            ]),
+        ];
 
 		$expectedProduct->images = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
@@ -200,9 +222,6 @@ class LocalProductQueryTest extends ConnectTestHelper
         $expectedProduct->variantImages = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
         );
-
-        $row['localId'] = 22;
-        $row['detailId'] = 28;
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];
@@ -213,9 +232,61 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row['category'] = '';
         $row['weight'] = null;
         $row['unit'] = null;
-        $row['localId'] = 2549876542;
-        $row['detailId'] = 254987684;
+        $row['localId'] = $this->article->getId();
+        $row['detailId'] = $this->article->getMainDetail()->getId();
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));
+    }
+
+    private function createArticle()
+    {
+        $minimalTestArticle = array(
+            'name' => 'Glas -Teetasse 0,25l',
+            'active' => true,
+            'tax' => 19,
+            'supplier' => 'Teapavilion',
+            'mainDetail' => array(
+                'number' => '9898',
+            ),
+        );
+
+        $articleResource = \Shopware\Components\Api\Manager::getResource('article');
+        /** @var \Shopware\Models\Article\Article $article */
+        $this->article = $articleResource->create($minimalTestArticle);
+
+        $this->db->insert(
+            's_articles_prices',
+            array(
+                'pricegroup' => 'EK',
+                'from' => 1,
+                'to' => 5,
+                'price' => 123.99,
+                'articleID' => $this->article->getId(),
+                'articledetailsID' => $this->article->getMainDetail()->getId(),
+                'pseudoprice' => 0
+            )
+        );
+
+        $this->db->insert(
+            's_articles_prices',
+            array(
+                'pricegroup' => 'EK',
+                'from' => 6,
+                'to' => 'beliebig',
+                'price' => 113.99,
+                'articleID' => $this->article->getId(),
+                'articledetailsID' => $this->article->getMainDetail()->getId(),
+                'pseudoprice' => 0
+            )
+        );
+    }
+
+
+    public function tearDown()
+    {
+        $articleId = $this->article->getId();
+        $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
+        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
+        $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
     }
 }

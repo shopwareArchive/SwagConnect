@@ -643,5 +643,51 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->assertFalse($article->getLastStock());
     }
+
+    /**
+     * Test inserting variant with same values (Black for example)
+     * for 1st and 2nd color
+     */
+    public function testInsertVariantWithSameValues()
+    {
+        $variants = $this->getVariants();
+        // duplicate color value
+        $variants[0]->variant['Farbe2'] = $variants[0]->variant['Farbe'];
+        // insert variants
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $group = $this->modelManager
+            ->getRepository('Shopware\Models\Article\Configurator\Group')
+            ->findOneBy(array('name' => 'Farbe'));
+        $this->assertNotNull($group);
+
+        $group2 = $this->modelManager
+            ->getRepository('Shopware\Models\Article\Configurator\Group')
+            ->findOneBy(array('name' => 'Farbe2'));
+        $this->assertNotNull($group2);
+
+        // check group options
+        $colorValue = null;
+        foreach ($group->getOptions() as $option) {
+            if ($option->getName() == $variants[0]->variant['Farbe']) {
+                $colorValue = $variants[0]->variant['Farbe2'];
+            }
+        }
+
+        $colorValue2 = null;
+        foreach ($group2->getOptions() as $option) {
+            if ($option->getName() == $variants[0]->variant['Farbe2']) {
+                $colorValue2 = $variants[0]->variant['Farbe2'];
+            }
+        }
+
+        $this->assertNotNull($colorValue);
+        $this->assertNotNull($colorValue2);
+        $this->assertEquals($colorValue, $colorValue2);
+        $this->assertEquals(0, strpos($colorValue, 'Schwarz-Rot'));
+        $this->assertEquals(0, strpos($colorValue2, 'Schwarz-Rot'));
+    }
 }
  

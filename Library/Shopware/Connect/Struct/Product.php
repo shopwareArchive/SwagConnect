@@ -251,6 +251,11 @@ class Product extends ShopItem
     public $fixedPrice = false;
 
     /**
+     * @var \Shopware\Connect\Struct\PriceRange[]
+     */
+    public $priceRanges = array();
+
+    /**
      * Currency of the price
      *
      * Currently only the default "EUR" is supported.

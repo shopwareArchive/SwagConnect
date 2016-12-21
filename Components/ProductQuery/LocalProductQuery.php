@@ -5,7 +5,6 @@ namespace ShopwarePlugins\Connect\Components\ProductQuery;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
-//use Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService;
 use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
@@ -14,6 +13,7 @@ use ShopwarePlugins\Connect\Components\MediaService;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
+use Shopware\Connect\Struct\PriceRange;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -193,6 +193,7 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
+		$row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
 
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
@@ -366,6 +367,30 @@ class LocalProductQuery extends BaseProductQuery
         );
 
         return $result > 0;
+    }
+
+    /**
+     * @param $detailId
+     * @return PriceRange[]
+     */
+    protected function preparePriceRanges($detailId)
+    {
+        $prices = $this->getPriceRanges($detailId);
+
+        $priceRanges = array();
+        foreach ($prices as $price) {
+            $clonePrice = $price;
+
+            if ($price['to'] == 'beliebig') {
+                $clonePrice['to'] = PriceRange::ANY;
+            } else {
+                $clonePrice['to'] = (int) $price['to'];
+            }
+
+            $priceRanges[] = new PriceRange($clonePrice);
+        }
+
+        return $priceRanges;
     }
 
     /**

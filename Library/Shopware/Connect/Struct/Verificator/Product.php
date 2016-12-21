@@ -71,6 +71,7 @@ class Product extends Verificator
                 break;
         }
         $this->verifyFixedPrice($struct);
+        $this->verifyPriceRanges($struct);
     }
 
     /**
@@ -110,6 +111,36 @@ class Product extends Verificator
     {
         if ($struct->fixedPrice === true && $this->priceType == SDK::PRICE_TYPE_PURCHASE) {
             $this->fail("Fixed price is not allowed when export purchasePrice only");
+        }
+    }
+
+    /**
+     * @param Struct $struct
+     */
+    protected function verifyPriceRanges(Struct $struct)
+    {
+        if (empty($struct->priceRanges)) {
+            return;
+        }
+
+        /** @var Struct\PriceRange $priceRange */
+        foreach ($struct->priceRanges as $priceRange) {
+
+            if (!is_int($priceRange->from) || $priceRange->from <= 0) {
+                $this->fail("The price range 'from' must be int and is not allowed to be 0 or smaller.");
+            }
+
+            if (is_string($priceRange->to) && $priceRange->to !== Struct\PriceRange::ANY){
+                $this->fail("The price range 'to' must be int bigger from 0 or string with value 'any'.");
+            } elseif(is_int($priceRange->to) && $priceRange->to <= 0) {
+                $this->fail("The price range 'to' is not allowed to be 0 or smaller.");
+            } elseif(!is_string($priceRange->to) && !is_int($priceRange->to)){
+                $this->fail("The price range 'to' must be int or string.");
+            }
+
+            if (empty($priceRange->price) || $priceRange->price <= 0) {
+                $this->fail("The price is not allowed to be 0 or smaller.");
+            }
         }
     }
 

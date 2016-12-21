@@ -390,6 +390,13 @@ class ProductFromShopTest extends ConnectTestHelper
 
         for ($i = 0; $i < 5; $i++) {
             $product = $this->getLocalArticle();
+            Shopware()->Db()->executeQuery(
+                'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+                [
+                    Attribute::STATUS_INSERT,
+                    $product->getId()
+                ]
+            );
             $changes[] = new Insert([
                 'product' => $product,
                 'sourceId' => $product->getId(),

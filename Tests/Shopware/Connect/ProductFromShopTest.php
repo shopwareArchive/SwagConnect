@@ -8,6 +8,7 @@ use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Article;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
@@ -377,9 +378,10 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $syncedProduct = $this->getLocalArticle();
         Shopware()->Db()->executeQuery(
-            'UPDATE s_plugin_connect_items SET revision = ? WHERE source_id = ? AND shop_id IS NULL',
+            'UPDATE s_plugin_connect_items SET revision = ?, export_status = ? WHERE source_id = ? AND shop_id IS NULL',
             [
                 sprintf('%.5f%05d', $time, $iteration++),
+                Attribute::STATUS_INSERT,
                 $syncedProduct->getId()
             ]
         );
@@ -396,6 +398,13 @@ class ProductFromShopTest extends ConnectTestHelper
         }
 
         $product = $this->getLocalArticle();
+        Shopware()->Db()->executeQuery(
+            'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+            [
+                Attribute::STATUS_UPDATE,
+                $product->getId()
+            ]
+        );
         $changes[] = new Update([
             'product' => $product,
             'sourceId' => $product->getId(),
@@ -403,6 +412,13 @@ class ProductFromShopTest extends ConnectTestHelper
         ]);
 
         $product = $this->getLocalArticle();
+        Shopware()->Db()->executeQuery(
+            'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+            [
+                Attribute::STATUS_UPDATE,
+                $product->getId()
+            ]
+        );
         $changes[] = new Availability([
             'availability' => 5,
             'sourceId' => $product->getId(),

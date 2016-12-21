@@ -300,8 +300,9 @@ class InMemory extends Gateway
      * @param string $id
      * @param string $revision
      * @param array $supplierStreams
+     * @param string|null $groupId
      */
-    public function recordStreamAssignment($id, $revision, array $supplierStreams)
+    public function recordStreamAssignment($id, $revision, array $supplierStreams, $groupId = null)
     {
         $this->checkRevisionExists($revision);
 
@@ -310,6 +311,7 @@ class InMemory extends Gateway
             'sourceId' => $id,
             'revision' => $revision,
             'supplierStreams' => $supplierStreams,
+            'groupId' => $groupId,
         );
     }
 

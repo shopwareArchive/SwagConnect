@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Doctrine\ORM\QueryBuilder;
+use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
 use ShopwarePlugins\Connect\Components\Logger;
@@ -165,6 +166,8 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = $this->getImagesById($row['localId']);
 
+        $row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
+
         //todo@sb: find better way to collect configuration option translations
         $row = $this->applyConfiguratorOptions($row);
         $row = $this->prepareVendor($row);
@@ -320,6 +323,30 @@ class LocalProductQuery extends BaseProductQuery
         );
 
         return $result > 0;
+    }
+
+    /**
+     * @param $detailId
+     * @return PriceRange[]
+     */
+    protected function preparePriceRanges($detailId)
+    {
+        $prices = $this->getPriceRanges($detailId);
+
+        $priceRanges = array();
+        foreach ($prices as $price) {
+            $clonePrice = $price;
+
+            if ($price['to'] == 'beliebig') {
+                $clonePrice['to'] = PriceRange::ANY;
+            } else {
+                $clonePrice['to'] = (int) $price['to'];
+            }
+
+            $priceRanges[] = new PriceRange($clonePrice);
+        }
+
+        return $priceRanges;
     }
 
     /**

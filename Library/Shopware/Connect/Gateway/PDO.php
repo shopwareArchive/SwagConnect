@@ -132,7 +132,7 @@ class PDO extends Gateway
                         break;
                     case self::STREAM_ASSIGNMENT:
                         $payload = unserialize($row['c_payload']);
-                        if (isset($payload['supplierStreams']) && isset($payload['groupId'])) {
+                        if (array_key_exists('supplierStreams', $payload) && array_key_exists('groupId', $payload)) {
                             $change->supplierStreams = $payload['supplierStreams'];
                             $change->groupId = $payload['groupId'];
                         } else {

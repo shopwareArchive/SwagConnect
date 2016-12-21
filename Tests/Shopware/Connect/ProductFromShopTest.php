@@ -365,6 +365,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testOnPerformSync()
     {
+        // reset export_status for all local products
         Shopware()->Db()->executeQuery(
             'UPDATE s_plugin_connect_items SET export_status = NULL WHERE shop_id IS NULL'
         );
@@ -381,6 +382,10 @@ class ProductFromShopTest extends ConnectTestHelper
         $iteration = 0;
         $changes = [];
 
+        // create local product and set revision lower than $since
+        // that means the product is already exported to Connect
+        // and his status is "insert".
+        // When onPerformSync method is called, this product should be with status "synced"
         $syncedProduct = $this->getLocalArticle();
         Shopware()->Db()->executeQuery(
             'UPDATE s_plugin_connect_items SET revision = ?, export_status = ? WHERE source_id = ? AND shop_id IS NULL',
@@ -391,6 +396,10 @@ class ProductFromShopTest extends ConnectTestHelper
             ]
         );
 
+        // create local product and set revision lower than $since
+        // that means the product is already synced with connect.
+        // current status is "delete".
+        // When onPerformSync method is called, this product should be with status "NULL"
         $deletedProduct = $this->getLocalArticle();
         Shopware()->Db()->executeQuery(
             'UPDATE s_plugin_connect_items SET revision = ?, export_status = ? WHERE source_id = ? AND shop_id IS NULL',
@@ -403,6 +412,9 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $since = sprintf('%.5f%05d', $time, $iteration++);
 
+        // generate 5 changes
+        // their status is "insert" or "update"
+        // and it won't be changed, because revision is greater than $since
         for ($i = 0; $i < 5; $i++) {
             $product = $this->getLocalArticle();
             Shopware()->Db()->executeQuery(
@@ -454,9 +466,13 @@ class ProductFromShopTest extends ConnectTestHelper
                 FROM s_plugin_connect_items
                 WHERE shop_id IS NULL AND export_status = "synced"'
         );
+
+        // verify that only 1 product has status "synced"
         $this->assertEquals(1, count($result));
+        // verify that this product is exactly the same
         $this->assertEquals($syncedProduct->getId(), $result[0]['source_id']);
 
+        // verify that deleted product has export_status NULL
         $result = Shopware()->Db()->fetchCol(
             'SELECT export_status
                 FROM s_plugin_connect_items
@@ -465,6 +481,9 @@ class ProductFromShopTest extends ConnectTestHelper
         );
         $this->assertEmpty(reset($result));
 
+        // verify that each of these 5 changes have
+        // correct revision in s_plugin_connect_items table
+        // after onPerformSync
         foreach ($changes as $change) {
             $result = Shopware()->Db()->fetchCol(
                 'SELECT revision

@@ -5,6 +5,7 @@ namespace Tests\ShopwarePlugins\Connect;
 use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\Change\FromShop\Availability;
 use Shopware\Connect\Struct\Change\FromShop\Update;
+use Shopware\Connect\Struct\Change\FromShop\Delete;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
@@ -364,6 +365,10 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testOnPerformSync()
     {
+        Shopware()->Db()->executeQuery(
+            'UPDATE s_plugin_connect_items SET export_status = NULL WHERE shop_id IS NULL'
+        );
+
         $fromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
@@ -383,6 +388,16 @@ class ProductFromShopTest extends ConnectTestHelper
                 sprintf('%.5f%05d', $time, $iteration++),
                 Attribute::STATUS_INSERT,
                 $syncedProduct->getId()
+            ]
+        );
+
+        $deletedProduct = $this->getLocalArticle();
+        Shopware()->Db()->executeQuery(
+            'UPDATE s_plugin_connect_items SET revision = ?, export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+            [
+                sprintf('%.5f%05d', $time, $iteration++),
+                Attribute::STATUS_DELETE,
+                $deletedProduct->getId()
             ]
         );
 
@@ -420,7 +435,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $product = $this->getLocalArticle();
         Shopware()->Db()->executeQuery(
-            'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+                'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
             [
                 Attribute::STATUS_UPDATE,
                 $product->getId()
@@ -434,13 +449,21 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $fromShop->onPerformSync($since, $changes);
 
-        $result = Shopware()->Db()->fetchCol(
-            'SELECT COUNT(*)
+        $result = Shopware()->Db()->fetchAll(
+            'SELECT source_id
                 FROM s_plugin_connect_items
-                WHERE source_id = ? AND shop_id IS NULL AND export_status = "synced"',
-            [$syncedProduct->getId()]
+                WHERE shop_id IS NULL AND export_status = "synced"'
         );
-        $this->assertEquals(1, reset($result));
+        $this->assertEquals(1, count($result));
+        $this->assertEquals($syncedProduct->getId(), $result[0]['source_id']);
+
+        $result = Shopware()->Db()->fetchCol(
+            'SELECT export_status
+                FROM s_plugin_connect_items
+                WHERE source_id = ? AND shop_id IS NULL',
+            [$deletedProduct->getId()]
+        );
+        $this->assertEmpty(reset($result));
 
         foreach ($changes as $change) {
             $result = Shopware()->Db()->fetchCol(

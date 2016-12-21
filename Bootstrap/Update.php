@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Bootstrap;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use Shopware\Models\Attribute\Configuration;
 
 /**
  * Updates existing versions of the plugin
@@ -63,6 +64,7 @@ class Update
         $this->createExportedFlag();
         $this->removeRedirectMenu();
         $this->updateConnectAttribute();
+        $this->addConnectDescriptionElement();
 
         return true;
     }
@@ -125,6 +127,35 @@ class Update
                 ");
 
             $this->db->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
+        }
+    }
+
+    private function addConnectDescriptionElement()
+    {
+        if (version_compare($this->version, '1.0.9', '<=')) {
+
+            $tableName = $this->modelManager->getClassMetadata('Shopware\Models\Attribute\Article')->getTableName();
+            $columnName = 'connect_product_description';
+
+            $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\Configuration');
+            $element = $repo->findOneBy([
+                'tableName' => $tableName,
+                'columnName' => $columnName,
+            ]);
+
+            if (!$element) {
+                $element = new Configuration();
+                $element->setTableName($tableName);
+                $element->setColumnName($columnName);
+            }
+
+            $element->setColumnType('html');
+            $element->setTranslatable(true);
+            $element->setLabel('Connect Beschreibung');
+            $element->setDisplayInBackend(true);
+
+            $this->modelManager->persist($element);
+            $this->modelManager->flush();
         }
     }
 }

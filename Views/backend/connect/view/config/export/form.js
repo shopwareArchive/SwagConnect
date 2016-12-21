@@ -432,7 +432,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                             store: new Ext.data.SimpleStore({
                                 fields: [ 'value', 'text' ],
                                 data: [
-                                    ['attribute.connectProductDescription', 'attribute.connectProductDescription'],
+                                    ['attribute.connectProductDescription', 'Connect Beschreibung'],
                                     ['a.description', 'Artikel-Kurzbeschreibung'],
                                     ['a.descriptionLong', 'Artikel-Langbeschreibung']
                                 ]

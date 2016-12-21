@@ -64,6 +64,10 @@ class VariantConfigurator
      */
     public function configureVariantAttributes(Product $product, Detail $detail)
     {
+        if (count($product->variant) === 0) {
+            return;
+        }
+
         $article = $detail->getArticle();
         $detailOptions = $detail->getConfiguratorOptions();
         if (!$article->getConfiguratorSet()) {
@@ -88,13 +92,11 @@ class VariantConfigurator
             $detailOptions[] = $option;
         }
 
-        if (count($product->variant) > 0) {
-            $detail->setConfiguratorOptions($detailOptions);
-            $this->manager->persist($article);
-            $this->manager->persist($detail);
-            $this->manager->flush();
-        }
+        $detail->setConfiguratorOptions($detailOptions);
+        $this->manager->persist($detail);
+        $this->manager->persist($article);
 
+        $this->manager->flush();
 
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);
@@ -137,19 +139,16 @@ class VariantConfigurator
     private function addGroupToConfiguratorSet(Set $set, Group $group)
     {
         $configuratorGroups = $set->getGroups();
-        $isExists = false;
         /** @var \Shopware\Models\Article\Configurator\Group $configuratorGroup */
         foreach ($configuratorGroups as $configuratorGroup) {
             if ($configuratorGroup->getName() === $group->getName()) {
-                $isExists = true;
+                return $set;
             }
         }
 
-        if ($isExists === false) {
-            $configuratorGroups[] = $group;
-            $set->setGroups($configuratorGroups);
-            $this->manager->persist($set);
-        }
+        $configuratorGroups[] = $group;
+        $set->setGroups($configuratorGroups);
+        $this->manager->persist($set);
 
         return $set;
     }
@@ -164,18 +163,16 @@ class VariantConfigurator
     private function addOptionToConfiguratorSet(Set $set, Option $option)
     {
         $configSetOptions = $set->getOptions();
-        $isExists = false;
         /** @var \Shopware\Models\Article\Configurator\Option $option */
         foreach($configSetOptions as $configSetOption) {
-            if ($configSetOption->getName() === $option->getName()) {
-                $isExists = true;
+            if ($configSetOption->getName() === $option->getName()
+                && $configSetOption->getGroup()->getName() === $option->getGroup()->getName()) {
+                return $set;
             }
         }
 
-        if ($isExists === false) {
-            $configSetOptions[] = $option;
-            $set->setOptions($configSetOptions);
-        }
+        $configSetOptions[] = $option;
+        $set->setOptions($configSetOptions);
 
         return $set;
     }
@@ -223,7 +220,7 @@ class VariantConfigurator
         /** @var \Shopware\Models\Article\Configurator\Option $configSetOption */
         foreach ($configSetOptions as $configSetOption) {
             if ($configSetOption->getName() === $optionName
-                && $configSetOption->getGroup()->getId() == $group->getId()
+                && $configSetOption->getGroup()->getName() == $group->getName()
             ) {
                 return $configSetOption;
             }

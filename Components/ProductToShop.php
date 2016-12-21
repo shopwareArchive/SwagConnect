@@ -31,6 +31,8 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Models\Attribute\Article as AttributeModel,
     Shopware\Components\Model\ModelManager,
     Doctrine\ORM\Query;
+use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Models\Customer\Group;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
@@ -85,7 +87,9 @@ class ProductToShop implements ProductToShopBase
      */
     private $productTranslationsGateway;
 
-    /** @var  \Shopware\Models\Shop\Repository */
+    /**
+     * @var \Shopware\Models\Shop\Repository
+     */
     private $shopRepository;
 
     private $localeRepository;
@@ -101,6 +105,11 @@ class ProductToShop implements ProductToShopBase
     private $connectGateway;
 
     /**
+     * @var \Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -108,8 +117,9 @@ class ProductToShop implements ProductToShopBase
      * @param VariantConfigurator $variantConfigurator
      * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
      * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param \ShopwarePlugins\Connect\Components\CategoryResolver
-     * @param \Shopware\Connect\Gateway
+     * @param CategoryResolver $categoryResolver
+     * @param Gateway $connectGateway
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         Helper $helper,
@@ -120,7 +130,8 @@ class ProductToShop implements ProductToShopBase
         MarketplaceGateway $marketplaceGateway,
         ProductTranslationsGateway $productTranslationsGateway,
         CategoryResolver $categoryResolver,
-        Gateway $connectGateway
+        Gateway $connectGateway,
+        \Enlight_Event_EventManager $eventManager
     )
     {
         $this->helper = $helper;
@@ -132,6 +143,7 @@ class ProductToShop implements ProductToShopBase
         $this->productTranslationsGateway = $productTranslationsGateway;
         $this->categoryResolver = $categoryResolver;
         $this->connectGateway = $connectGateway;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -362,8 +374,16 @@ class ProductToShop implements ProductToShopBase
 
         $connectAttribute->setArticle($model);
         $connectAttribute->setArticleDetail($detail);
-        $this->manager->persist($connectAttribute);
 
+        $this->eventManager->notify(
+            'Connect_Merchant_Saving_ArticleAttribute_Before',
+            [
+                'subject' => $this,
+                'connectAttribute' => $connectAttribute
+            ]
+        );
+
+        $this->manager->persist($connectAttribute);
         $this->manager->persist($detail);
 
         // some articles from connect have long sourceId
@@ -416,6 +436,11 @@ class ProductToShop implements ProductToShopBase
         // undefined index: key when error handler is disabled
         $customerGroup = $this->helper->getDefaultCustomerGroup();
 
+        if (!empty($product->priceRanges)) {
+            $this->setPriceRange($article, $detail, $product->priceRanges, $customerGroup);
+            return;
+        }
+
         $id = $this->manager->getConnection()->fetchColumn(
             'SELECT id FROM `s_articles_prices`
               WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
@@ -434,6 +459,52 @@ class ProductToShop implements ProductToShopBase
               VALUES (?, 1, "beliebig", ?, ?, ?, ?);',
                 [$customerGroup->getKey(), $article->getId(), $detail->getId(), $product->price, $product->purchasePrice]
             );
+        }
+    }
+
+    /**
+     * @param ProductModel $article
+     * @param DetailModel $detail
+     * @param array $priceRanges
+     * @param Group $group
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    private function setPriceRange(ProductModel $article, DetailModel $detail, array $priceRanges, Group $group)
+    {
+        $this->manager->getConnection()->beginTransaction();
+
+        try {
+            // We always delete the prices,
+            // because we can not know which record is update
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_prices` WHERE `articleID` = ? AND `articledetailsID` = ?',
+                [$article->getId(), $detail->getId()]
+            );
+
+            /** @var PriceRange $priceRange */
+            foreach ($priceRanges as $priceRange) {
+
+                $priceTo = $priceRange->to == PriceRange::ANY ? 'beliebig' : $priceRange->to;
+
+                //todo: maybe batch insert if possible?
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`)
+                      VALUES (?, ?, ?, ?, ?, ?);',
+                    [
+                        $group->getKey(),
+                        $priceRange->from,
+                        $priceTo,
+                        $article->getId(),
+                        $detail->getId(),
+                        $priceRange->price
+                    ]
+                );
+            }
+            $this->manager->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -504,6 +575,16 @@ class ProductToShop implements ProductToShopBase
         if($detail === null) {
             return;
         }
+
+
+        $this->eventManager->notify(
+            'Connect_Merchant_Delete_Product_Before',
+            [
+                'subject' => $this,
+                'articleDetail' => $detail
+            ]
+        );
+
 
         $article = $detail->getArticle();
         $isOnlyOneVariant = false;
@@ -664,7 +745,7 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * Read product attributes mapping and set to shopware attribute model
-     * 
+     *
      * @param AttributeModel $detailAttribute
      * @param Product $product
      * @return AttributeModel
@@ -764,6 +845,16 @@ class ProductToShop implements ProductToShopBase
             array($sourceId, $shopId)
         );
 
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_GeneralProductInformation',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleDetailId' => $articleDetailId
+            ]
+        );
+
         // update purchasePriceHash, offerValidUntil and purchasePrice in connect attribute
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_plugin_connect_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
@@ -787,7 +878,6 @@ class ProductToShop implements ProductToShopBase
                 'UPDATE s_articles_details SET instock = ?, purchaseprice = ? WHERE id = ?',
                 array($product->availability, $product->purchasePrice, $articleDetailId)
             );
-
         } else {
             $this->manager->getConnection()->executeUpdate(
                 'UPDATE s_articles_details SET instock = ? WHERE id = ?',
@@ -808,6 +898,16 @@ class ProductToShop implements ProductToShopBase
             array($sourceId, $shopId)
         );
 
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_GeneralProductInformation',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleDetailId' => $articleDetailId
+            ]
+        );
+
         // update stock in article detail
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_articles_details SET instock = ? WHERE id = ?',
@@ -826,6 +926,17 @@ class ProductToShop implements ProductToShopBase
         if (empty($result['article_detail_id']) || empty($result['article_id'])) {
             return;
         }
+
+        $this->eventManager->notify(
+            'Connect_Merchant_Update_ProductMainVariant_Before',
+            [
+                'subject' => $this,
+                'shopId' => $shopId,
+                'sourceId' => $sourceId,
+                'articleId' => $result['article_id'],
+                'articleDetailId' => $result['article_detail_id']
+            ]
+        );
 
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_articles_details SET kind = IF(id = ?, 1, 2) WHERE articleID = ?',

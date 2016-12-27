@@ -53,6 +53,14 @@ abstract class BaseSubscriber extends SubscribeManager
     }
 
     /**
+     * @return \ShopwarePlugins\Connect\Components\Config
+     */
+    public function getConnectConfig()
+    {
+        return $this->bootstrap->getConfigComponents();
+    }
+
+    /**
      * @return \ShopwarePlugins\Connect\Components\BasketHelper
      */
     public function getBasketHelper()

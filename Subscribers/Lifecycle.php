@@ -19,7 +19,6 @@ use Shopware\Models\Order\Order;
  */
 class Lifecycle extends BaseSubscriber
 {
-
     public function getSubscribedEvents()
     {
         return array(
@@ -30,6 +29,7 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
+            'Shopware\Models\Shop\Shop::preRemove' => 'onDeleteShop',
         );
     }
 
@@ -43,7 +43,7 @@ class Lifecycle extends BaseSubscriber
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models()),
+            $this->getConnectConfig(),
             new ErrorHandler()
         );
     }
@@ -192,6 +192,27 @@ class Lifecycle extends BaseSubscriber
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
         }
+    }
+
+    /**
+     * Callback function to shop from export languages
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onDeleteShop(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Shop\Shop $shop */
+        $shop = $eventArgs->get('entity');
+        $shopId = $shop->getId();
+        $exportLanguages = $this->getConnectConfig()->getConfig('exportLanguages');
+        $exportLanguages = $exportLanguages ?: array();
+
+        if (!in_array($shopId, $exportLanguages)) {
+           return;
+        }
+
+        $exportLanguages = array_splice($exportLanguages, array_search($shopId, $exportLanguages), 1);
+        $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages);
     }
 
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)

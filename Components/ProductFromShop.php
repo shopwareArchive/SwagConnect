@@ -530,13 +530,25 @@ class ProductFromShop implements ProductFromShopBase
     {
         $this->manager->getConnection()->beginTransaction();
 
-        $status = Attribute::STATUS_SYNCED;
+        $statusSynced = Attribute::STATUS_SYNCED;
+        $statusInsert = Attribute::STATUS_INSERT;
+        $statusUpdate = Attribute::STATUS_UPDATE;
+        $statusDelete = Attribute::STATUS_DELETE;
         try {
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
-                SET export_status = '$status'
-                WHERE revision <= ?",
+                SET export_status = '$statusSynced'
+                WHERE revision <= ?
+                AND ( export_status = '$statusInsert' OR export_status = '$statusUpdate' )" ,
                 array($since)
+            );
+
+            $this->manager->getConnection()->executeQuery(
+                "UPDATE s_plugin_connect_items
+                SET export_status = ?
+                WHERE revision <= ?
+                AND export_status = '$statusDelete'",
+                array(NULL, $since)
             );
 
             /** @var \Shopware\Connect\Struct\Change $change */
@@ -560,6 +572,7 @@ class ProductFromShop implements ProductFromShopBase
 
         try {
             $this->markStreamsAsSynced();
+            $this->markStreamsAsNotExported();
         } catch (\Exception $e) {
             $this->logger->write(
                 true,
@@ -568,6 +581,39 @@ class ProductFromShop implements ProductFromShopBase
             );
         }
 
+    }
+
+    private function markStreamsAsNotExported()
+    {
+        $streamIds = $this->manager->getConnection()->executeQuery(
+            "SELECT pcs.stream_id as streamId
+             FROM s_plugin_connect_streams as pcs
+             WHERE export_status = ?",
+            array(ProductStreamService::STATUS_DELETE)
+        )->fetchAll();
+
+        foreach ($streamIds as $stream) {
+            $streamId = $stream['streamId'];
+
+            $notDeleted = $this->manager->getConnection()->executeQuery(
+                "SELECT pss.id
+                 FROM s_product_streams_selection as pss
+                 JOIN s_plugin_connect_items as pci
+                 ON pss.article_id = pci.article_id
+                 WHERE pss.stream_id = ?
+                 AND pci.export_status != ?",
+                array($streamId, null)
+            )->fetchAll();
+
+            if (count($notDeleted) === 0) {
+                $this->manager->getConnection()->executeQuery(
+                    "UPDATE s_plugin_connect_streams
+                     SET export_status = ?
+                     WHERE stream_id = ?",
+                    array(null, $streamId)
+                );
+            }
+        }
     }
 
     private function markStreamsAsSynced()

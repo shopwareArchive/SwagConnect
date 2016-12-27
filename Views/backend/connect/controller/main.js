@@ -266,7 +266,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             value: '%' + value + '%'
                         }));
                     }
-                    store.load();
+                    store.load({
+                        page: 1,
+                        start: 0
+                    });
+                    store.currentPage = 1;
                 }
             },
 
@@ -282,7 +286,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             value: value
                         }));
                     }
-                    store.load();
+                    store.load({
+                        page: 1,
+                        start: 0
+                    });
+                    store.currentPage = 1;
                 }
             },
             'connect-export-filter [name=exportStatus]': {
@@ -299,7 +307,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             value: field.inputValue
                         }));
                     }
-                    store.load();
+                    store.load({
+                        page: 1,
+                        start: 0
+                    });
+                    store.currentPage = 1;
                 }
             },
             'connect-export-filter treepanel': {
@@ -316,7 +328,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             value:  node.get('id')
                         }));
                     }
-                    store.load();
+                    store.load({
+                        page: 1,
+                        start: 0
+                    });
+                    store.currentPage = 1;
                 }
             },
             'connect-changed-products-list': {

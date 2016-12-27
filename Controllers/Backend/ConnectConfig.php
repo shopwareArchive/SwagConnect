@@ -928,21 +928,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
-     * @return string
-     */
-    protected function getHost()
-    {
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
-        if ($host) {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
-        } else {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
-        }
-
-        return $host;
-    }
-
-    /**
      * @return UnitMapper
      */
     private function getUnitMapper()

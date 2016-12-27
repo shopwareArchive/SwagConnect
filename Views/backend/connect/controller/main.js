@@ -98,6 +98,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Price field is not maintained. Some of the products have price = 0{/s}',
         priceResetSuccess: '{s name=config/price_reset_success}The exported prices were successfully reset. It will take up to 10min for the changes to take effect. When this operation is done, you will get the option to set the price type again when you reopen "Export" in the Connect menu.{/s}',
+        priceResetError: '{s name=config/price_reset_error}A problem occur in price type reset. Please try again later or contact our support team.{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
@@ -1430,7 +1431,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 } else {
                     me.createGrowlMessage(
                         me.messages.priceResetLabel,
-                        response.message
+                        me.messages.priceResetError
                     );
                 }
             }

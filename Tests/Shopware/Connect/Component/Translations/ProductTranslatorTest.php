@@ -586,6 +586,15 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->assertEquals($translations, $this->productTranslator->translateConfiguratorGroup(15, 'red', $translations));
     }
 
+    public function testTranslateConfiguratorOptionWithInvalidShop()
+    {
+        $this->modelManager->expects($this->at(0))->method('getRepository')->with('Shopware\Models\Shop\Shop')->willReturn($this->shopRepository);
+        $this->shopRepository->expects($this->at(0))->method('find')->with(6)->willReturn(null);
+
+        $this->configComponent->expects($this->any())->method('getConfig')->with('exportLanguages')->willReturn([1, 6]);
+        $this->assertEmpty($this->productTranslator->translateConfiguratorGroup(15, 'red', []));
+    }
+
     public function testTranslateConfiguratorOptionWhenLocaleNotFound()
     {
         $optionTranslations = array(

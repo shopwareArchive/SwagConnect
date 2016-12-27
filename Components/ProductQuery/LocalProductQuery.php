@@ -6,13 +6,10 @@ use Doctrine\ORM\QueryBuilder;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
-use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
-use Shopware\Connect\Struct\Translation;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product

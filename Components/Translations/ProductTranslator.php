@@ -127,6 +127,10 @@ class ProductTranslator implements ProductTranslatorInterface
             }
             /** @var \Shopware\Models\Shop\Shop $shop */
             $shop = $this->getShopRepository()->find($shopId);
+            if (!$shop) {
+                continue;
+            }
+
             /** @var \Shopware\Models\Shop\Locale $locale */
             $locale = $shop->getLocale();
             if (!$locale) {

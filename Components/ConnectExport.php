@@ -399,9 +399,25 @@ class ConnectExport
         }
 
         if ($criteria->categoryId) {
+
+            // Get all children categories
+            $qBuilder = $this->manager->getConnection()->createQueryBuilder();
+            $qBuilder->select('c.id');
+            $qBuilder->from('s_categories', 'c');
+            $qBuilder->where('c.path LIKE :categoryIdSearch');
+            $qBuilder->orWhere('c.id = :categoryId');
+            $qBuilder->setParameter(':categoryId', $criteria->categoryId);
+            $qBuilder->setParameter(':categoryIdSearch', "%|$criteria->categoryId|%");
+
+            $categoryIds = $qBuilder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+
+            if (count($categoryIds) === 0) {
+                $categoryIds = array($criteria->categoryId);
+            }
+
             $builder->innerJoin('a', 's_articles_categories', 'sac', 'a.id = sac.articleID')
-                ->andWhere('sac.categoryID = :categoryId')
-                ->setParameter('categoryId', $criteria->categoryId);
+                ->andWhere('sac.categoryID IN (:categoryIds)')
+                ->setParameter('categoryIds', $categoryIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
 
         if ($criteria->supplierId) {

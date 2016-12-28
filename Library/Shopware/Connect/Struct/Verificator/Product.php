@@ -256,6 +256,14 @@ class Product extends Verificator
             throw new \Shopware\Connect\Exception\VerificationFailedException("Product#images must be numerically indexed starting with 0.");
         }
 
+        if (!is_array($struct->variantImages)) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product#variantImages must be an array.");
+        }
+
+        if (is_array($struct->variantImages) && array_values($struct->variantImages) !== $struct->variantImages) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product#variantImages must be numerically indexed starting with 0.");
+        }
+
         if (!is_array($struct->translations)) {
             throw new \Shopware\Connect\Exception\VerificationFailedException("Product#translations must be an array.");
         }

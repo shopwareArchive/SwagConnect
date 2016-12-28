@@ -167,6 +167,21 @@ class Helper
     }
 
     /**
+     * Returns article detail model by
+     * given sourceId and shopId
+     *
+     * @param string $sourceId
+     * @param int $shopId
+     * @return null|ProductDetail
+     */
+    public function getConnectArticleDetailModel($sourceId, $shopId)
+    {
+        $product = new Product(['sourceId' => $sourceId, 'shopId' => $shopId]);
+
+        return $this->getArticleDetailModelByProduct($product);
+    }
+
+    /**
      * Helper to update the connect_items table
      */
     public function updateConnectProducts()
@@ -284,6 +299,27 @@ class Helper
         }
 
         return false;
+    }
+
+    /**
+     * Returns connectAttributes for all article details by given article object
+     *
+     * @param ProductModel $article
+     * @return \Shopware\CustomModels\Connect\Attribute[]
+     */
+    public function getConnectAttributesByArticle(ProductModel $article)
+    {
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select(array('connectAttribute', 'detail'));
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'connectAttribute');
+        $builder->innerJoin('connectAttribute.articleDetail', 'detail');
+
+        $builder->where('connectAttribute.articleId = :articleId');
+        $query = $builder->getQuery();
+
+        $query->setParameter('articleId', $article->getId());
+
+        return $query->getResult();
     }
 
     /**

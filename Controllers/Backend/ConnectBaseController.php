@@ -1091,7 +1091,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     /**
      * Apply given changes to product
      *
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     public function applyChangesAction()
     {
@@ -1123,8 +1123,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             case 'name':
                 break;
             case 'image':
-                $images = explode('|', $value);
-                $this->getImageImport()->importImagesForArticle($images, $articleModel);
+                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                $this->getImageImport()->importImagesForArticle(
+                    array_diff($lastUpdate['image'], $lastUpdate['variantImages']),
+                    $articleModel
+                );
+                $this->getImageImport()->importImagesForDetail(
+                    $lastUpdate['variantImages'],
+                    $connectAttribute->getArticleDetail()
+                );
                 break;
             case 'price':
                 $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));

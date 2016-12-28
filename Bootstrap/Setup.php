@@ -553,6 +553,12 @@ class Setup
             0
         );
 
+        $crudService->update(
+            's_articles_img_attributes',
+            'connect_detail_mapping_id',
+            'integer'
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -563,6 +569,7 @@ class Setup
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
+            's_articles_img_attributes',
             's_media_attributes'
         ));
     }

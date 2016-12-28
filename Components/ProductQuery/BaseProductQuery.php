@@ -49,7 +49,7 @@ abstract class BaseProductQuery
         return $this->getConnectProducts($query->getArrayResult());
     }
 
-    /**
+	/**
      * @param $detailId
      * @return array
      */

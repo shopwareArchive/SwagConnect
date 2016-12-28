@@ -12,7 +12,7 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
-use ShopwarePlugins\Connect\Components\OrderQuery\RemoteOrderQuery;
+use ShopwarePlugins\Connect\Components\MediaService\LocalMediaService;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
@@ -77,6 +77,8 @@ class ConnectFactory
      */
     private $mediaService;
 
+    private $localMediaService;
+
     /**
      * @var \Shopware\Connect\Gateway
      */
@@ -133,6 +135,19 @@ class ConnectFactory
         }
 
         return $this->mediaService;
+    }
+
+    private function getLocalMediaService()
+    {
+        if ($this->localMediaService === null) {
+            $this->localMediaService = new LocalMediaService(
+                $this->getContainer()->get('shopware_storefront.product_media_gateway'),
+                $this->getContainer()->get('shopware_storefront.variant_media_gateway'),
+                $this->getContainer()->get('shopware_storefront.media_service')
+            );
+        }
+
+        return $this->localMediaService;
     }
 
     /**
@@ -375,6 +390,8 @@ class ConnectFactory
                 $this->getModelManager(),
                 $this->getProductBaseUrl()
             ),
+            $this->getContainer()->get('shopware_storefront.context_service'),
+            $this->getLocalMediaService(),
             $this->getMediaService()
         );
     }

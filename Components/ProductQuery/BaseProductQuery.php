@@ -76,6 +76,33 @@ abstract class BaseProductQuery
     }
 
     /**
+     * @param $articleId
+     * @return array
+     */
+    protected function getProperties($articleId)
+    {
+        $columns = [
+            'v.value',
+            'o.name as option',
+            'o.filterable',
+            'g.name as groupName',
+            'g.comparable',
+            'g.sortMode',
+        ];
+
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select($columns)
+            ->from('Shopware\Models\Property\Value', 'v')
+            ->leftJoin('v.option', 'o')
+            ->leftJoin('v.articles', 'a')
+            ->leftJoin('a.propertyGroup', 'g')
+            ->where('a.id = :articleId')
+            ->setParameter('articleId', $articleId);
+
+        return $builder->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param $id
      * @return string[]
      */

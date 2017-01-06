@@ -91,7 +91,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
         exportStatusCount:  '{s name=export/message/status_count}Sync-Status: [0] from [1] products{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
-        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_export_not_selected}Please select product description{/s}',
 
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
@@ -1320,7 +1320,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.priceModeNotSelected);
         }
 
-        if (!data.hasOwnProperty('alternateDescriptionField') || data.alternateDescriptionField.length == 0) {
+        if (!data.hasOwnProperty('descriptionField') || data.descriptionField.length == 0) {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.productDescriptionNotSelected);
         }
 

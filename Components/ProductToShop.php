@@ -258,6 +258,10 @@ class ProductToShop implements ProductToShopBase
             $model->setDescriptionLong($product->longDescription);
         }
 
+        if ($updateFields['additionalDescription']) {
+            $detailAttribute->setConnectProductDescription($product->additionalDescription);
+        }
+
         if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
             $tax = round($product->vat * 100, 2);
@@ -357,6 +361,7 @@ class ProductToShop implements ProductToShopBase
         $connectAttribute->setLastUpdate(json_encode(array(
             'shortDescription' => $product->shortDescription,
             'longDescription' => $product->longDescription,
+            'additionalDescription' => $product->additionalDescription,
             'purchasePrice' => $product->purchasePrice,
             'image' => $product->images,
             'variantImages' => $product->variantImages,
@@ -720,6 +725,7 @@ class ProductToShop implements ProductToShopBase
         $allowed = array(
             'ShortDescription',
             'LongDescription',
+            'AdditionalDescription',
             'Image',
             'Price',
             'Name',

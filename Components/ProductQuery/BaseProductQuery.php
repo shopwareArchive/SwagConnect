@@ -9,6 +9,9 @@ use Shopware\Components\Model\ModelManager;
 abstract class BaseProductQuery
 {
     const IMAGE_PATH = '/media/image/';
+    const LONG_DESCRIPTION_FIELD = 'longDescriptionField';
+    const SHORT_DESCRIPTION_FIELD = 'shortDescriptionField';
+    const CONNECT_DESCRIPTION_FIELD = 'connectDescriptionField';
 
     protected $manager;
 

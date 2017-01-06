@@ -142,6 +142,15 @@ class Product extends ShopItem
     public $longDescription;
 
     /**
+     * An additional description of the product
+     *
+     * May contain simple HTML
+     *
+     * @var string
+     */
+    public $additionalDescription;
+
+    /**
      * Name of the product vendor
      *
      * @var array (can be the string name only, for legacy reasons)

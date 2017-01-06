@@ -9,6 +9,7 @@ use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
+use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
@@ -20,10 +21,16 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     private $translations;
 
+    protected $localMediaService;
+
+    protected $contextService;
+
     /** @var \Shopware\Models\Article\Article $article */
     private $article;
 
     private $db;
+
+    protected $productContext;
 
     public function setUp()
     {
@@ -74,7 +81,22 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->productTranslator->expects($this->any())
             ->method('translateConfiguratorOption')
-            ->willReturn($this->translations);
+            ->willReturn($this->translations);		
+
+        $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->contextService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\ContextService')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->productContext = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Struct\\ProductContext')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->contextService->expects($this->any())
+            ->method('createProductContext')
+            ->willReturn($this->productContext);
     }
 
     public function getLocalProductQuery()
@@ -85,11 +107,12 @@ class LocalProductQueryTest extends ConnectTestHelper
 
             $this->localProductQuery = new LocalProductQuery(
                 Shopware()->Models(),
-                $configComponent->getConfig('alternateDescriptionField'),
                 $this->getProductBaseUrl(),
                 $configComponent,
                 new MarketplaceGateway(Shopware()->Models()),
                 $this->productTranslator,
+                $this->contextService,
+                $this->localMediaService,
                 $this->mediaService
             );
         }
@@ -126,6 +149,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     public function testGetConnectProduct()
     {
         $row = array (
+            'sku' => 'SW10005',
             'sourceId' => '22',
             'ean' => NULL,
             'title' => 'Glas -Teetasse 0,25l',
@@ -153,6 +177,20 @@ class LocalProductQueryTest extends ConnectTestHelper
             ],
         );
 
+        $productMedia = new Media();
+        $productMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg');
+        $variantMedia = new Media();
+        $variantMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg');
+        $this->localMediaService->expects($this->once())
+            ->method('getProductMedia')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(array($productMedia, $variantMedia));
+
+        $this->localMediaService->expects($this->once())
+            ->method('getVariantMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(array($row['sku'] => array($variantMedia)));
+
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         $expectedProduct->url = $this->getProductBaseUrl() . '22';
@@ -175,6 +213,14 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'price' => 113.99,
             ]),
         ];
+
+		$expectedProduct->images = array(
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
+        );
+        $expectedProduct->variantImages = array(
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
+        );
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];

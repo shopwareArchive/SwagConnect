@@ -18,6 +18,10 @@ class ProductQueryTest extends ConnectTestHelper
 
     protected $productTranslator;
 
+    protected $localMediaService;
+
+    protected $contextService;
+
     public function setUp()
     {
         parent::setUp();
@@ -66,16 +70,40 @@ class ProductQueryTest extends ConnectTestHelper
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
 
+            $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $this->localMediaService->expects($this->any())
+                ->method('getProductMedia')
+                ->willReturn([]);
+
+            $this->localMediaService->expects($this->any())
+                ->method('getVariantMediaList')
+                ->willReturn([]);
+
+            $this->contextService = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Service\\Core\\ContextService')
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $productContext = $this->getMockBuilder('\\Shopware\\Bundle\\StoreFrontBundle\\Struct\\ProductContext')
+                ->disableOriginalConstructor()
+                ->getMock();
+            $this->contextService->expects($this->any())
+                ->method('createProductContext')
+                ->willReturn($productContext);
+
             $this->productQuery = new ProductQuery(
                 new LocalProductQuery(
                     Shopware()->Models(),
-                    $configComponent->getConfig('alternateDescriptionField'),
                     $this->getProductBaseUrl(),
                     $configComponent,
                     new MarketplaceGateway(Shopware()->Models()),
-                    $this->productTranslator
+                    $this->productTranslator,
+                    $this->contextService,
+                    $this->localMediaService
                 ),
-                new RemoteProductQuery(Shopware()->Models(), $configComponent->getConfig('alternateDescriptionField'))
+                new RemoteProductQuery(Shopware()->Models())
             );
         }
         return $this->productQuery;

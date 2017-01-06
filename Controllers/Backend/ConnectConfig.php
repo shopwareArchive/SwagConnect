@@ -31,6 +31,7 @@ use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Gateway\ChangeGateway;
+use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use Firebase\JWT\JWT;
 
 /**
@@ -187,6 +188,16 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $exportConfigArray['exportPriceMode'] = array();
         }
 
+
+        //Resets the exportPriceMode
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+            $exportConfigArray['exportPriceMode'] = [];
+        }
+
+        if (!array_key_exists(BaseProductQuery::LONG_DESCRIPTION_FIELD, $exportConfigArray)) {
+            $exportConfigArray[BaseProductQuery::LONG_DESCRIPTION_FIELD] = true;
+        }
+
         $this->View()->assign(
             array(
                 'success' => true,
@@ -261,7 +272,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
         $isPriceTypeReset = $this->isPriceTypeReset();
 
-        if ($isModified === false && $isPriceTypeReset === false) {
+        if ($isModified === false && $this->getSDK()->getPriceType() !== \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+
             $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
             $this->View()->assign(

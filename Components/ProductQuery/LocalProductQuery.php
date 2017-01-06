@@ -3,16 +3,17 @@
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Doctrine\ORM\QueryBuilder;
-use Shopware\Connect\Struct\PriceRange;
+use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
+use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
+use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
-use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
+use ShopwarePlugins\Connect\Components\MediaService;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
-use Shopware\Connect\Struct\Translation;
+use Shopware\Connect\Struct\PriceRange;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -23,8 +24,6 @@ use Shopware\Connect\Struct\Translation;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    protected $productDescriptionField;
-
     protected $baseProductUrl;
 
     /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
@@ -37,23 +36,50 @@ class LocalProductQuery extends BaseProductQuery
      */
     protected $productTranslator;
 
+    /**
+     * @var \Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface
+     */
+    protected $contextService;
+
+    /**
+     * @var \Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService
+     */
+    protected $localMediaService;
+
+    /**
+     * @var \Shopware\Bundle\StoreFrontBundle\Struct\ProductContext
+     */
+    protected $productContext;
+
     public function __construct(
         ModelManager $manager,
-        $productDescriptionField,
         $baseProductUrl,
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
         ProductTranslatorInterface $productTranslator,
+        ContextServiceInterface $contextService,
+        MediaService $storeFrontMediaService,
         $mediaService = null
     )
     {
         parent::__construct($manager, $mediaService);
 
-        $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
+        $this->contextService = $contextService;
+        $this->localMediaService = $storeFrontMediaService;
+
+        // products context is needed to load product media
+        // it's used for image translations
+        // in our case translations are not used
+        // so we don't care about shop language
+        $this->productContext = $this->contextService->createProductContext(
+            $this->manager->getRepository('Shopware\Models\Shop\Shop')->getDefault()->getId(),
+            null,
+            ContextService::FALLBACK_CUSTOMER_GROUP
+        );
     }
 
     /**
@@ -86,7 +112,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.kind as detailKind',
             'd.ean',
             'a.name as title',
-            'a.description as shortDescription',
             's.name as vendorName',
             's.image as vendorImage',
             's.link as vendorLink',
@@ -97,8 +122,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
             'd.minPurchase as minPurchaseQuantity',
-
-            $this->productDescriptionField . ' as longDescription',
 
             'd.width',
             'd.height',
@@ -112,6 +135,18 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
         );
+
+        if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'a.description as shortDescription';
+        }
+
+        if ($this->configComponent->getConfig(self::LONG_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'a.descriptionLong as longDescription';
+        }
+
+        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'attribute.connectProductDescription as additionalDescription';
+        }
 
         if ($exportPriceColumn) {
             $selectColumns[] = "exportPrice.{$exportPriceColumn} as price";
@@ -163,10 +198,24 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
+		$row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
 
-        $row['images'] = $this->getImagesById($row['localId']);
+        $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
-        $row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
+        $row['images'] = array();
+        $mediaFiles = $this->localMediaService->getProductMedia($product, $this->productContext);
+
+        foreach ($mediaFiles as $media) {
+            $row['images'][] = $media->getFile();
+        }
+
+        $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
+        $sku = $row['sku'];
+        if (array_key_exists($sku, $variantMediaFiles) && $variantMediaFiles[$sku]) {
+            foreach ($variantMediaFiles[$sku] as $media) {
+                $row['variantImages'][] = $media->getFile();
+            }
+        }
 
         //todo@sb: find better way to collect configuration option translations
         $row = $this->applyConfiguratorOptions($row);

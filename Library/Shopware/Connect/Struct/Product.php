@@ -142,6 +142,15 @@ class Product extends ShopItem
     public $longDescription;
 
     /**
+     * An additional description of the product
+     *
+     * May contain simple HTML
+     *
+     * @var string
+     */
+    public $additionalDescription;
+
+    /**
      * Name of the product vendor
      *
      * @var array (can be the string name only, for legacy reasons)
@@ -301,6 +310,19 @@ class Product extends ShopItem
      * @var string[]
      */
     public $images = array();
+
+    /**
+     * List of specific variant image URLs
+     *
+     * Same images are also in $images property.
+     * If the image exists in both arrays then it should be used
+     * only for the given variant.
+     * If the image exists only in $images then it's global for all variants.
+     * This property does not affect products without variants.
+     *
+     * @var string[]
+     */
+    public $variantImages = array();
 
     /**
      * Product categories.

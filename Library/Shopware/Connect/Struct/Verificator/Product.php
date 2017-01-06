@@ -256,6 +256,14 @@ class Product extends Verificator
             throw new \Shopware\Connect\Exception\VerificationFailedException("Product#images must be numerically indexed starting with 0.");
         }
 
+        if (!is_array($struct->variantImages)) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product#variantImages must be an array.");
+        }
+
+        if (is_array($struct->variantImages) && array_values($struct->variantImages) !== $struct->variantImages) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product#variantImages must be numerically indexed starting with 0.");
+        }
+
         if (!is_array($struct->translations)) {
             throw new \Shopware\Connect\Exception\VerificationFailedException("Product#translations must be an array.");
         }
@@ -306,8 +314,8 @@ class Product extends Verificator
             $this->validateUnit($struct);
         }
 
-        if ((strlen($struct->shortDescription) + strlen($struct->longDescription)) > self::DESCRIPTION_SIZE_LIMIT) {
-            throw new \Shopware\Connect\Exception\VerificationFailedException("Product short and long description must be under 5 000 000 characters.");
+        if ((strlen($struct->shortDescription) + strlen($struct->longDescription) + strlen($struct->additionalDescription)) > self::DESCRIPTION_SIZE_LIMIT) {
+            throw new \Shopware\Connect\Exception\VerificationFailedException("Product short, long and additional description must be under 5 000 000 characters.");
         }
 
         if ($struct->minPurchaseQuantity < 1) {

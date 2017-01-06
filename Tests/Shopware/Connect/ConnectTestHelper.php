@@ -160,7 +160,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return call_user_func_array(array($callable['provider'], $callable['command']), $args);
     }
 
-    protected function getProduct($withImage=false)
+    protected function getProduct($withImage = false, $withVariantImages = false)
     {
         $purchasePrice = 6.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
@@ -174,6 +174,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'title' => 'MassImport #'. $number,
             'shortDescription' => 'Ein Produkt aus shopware Connect',
             'longDescription' => 'Ein Produkt aus shopware Connect',
+            'additionalDescription' => 'Ein Produkt aus shopware Connect',
             'vendor' => array(
                 'url' => 'http://connect.shopware.de/',
                 'name' => 'shopware Connect',
@@ -207,14 +208,18 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $product->images = array(self::IMAGE_PROVIDER_URL . '?' . $number);
         }
 
+        if ($withVariantImages) {
+            $product->variantImages = array(self::IMAGE_PROVIDER_URL . '?' . $number . '-variantImage');
+        }
+
         return $product;
     }
 
-    protected function getProducts($number=10, $withImage=false)
+    protected function getProducts($number = 10, $withImage = false, $withVariantImages = false)
     {
         $products = array();
         for($i=0; $i<$number; $i++) {
-            $products[] = $this->getProduct($withImage);
+            $products[] = $this->getProduct($withImage, $withVariantImages);
         }
         return $products;
     }
@@ -359,10 +364,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         );
     }
 
-    protected function insertOrUpdateProducts($number, $withImage)
+    protected function insertOrUpdateProducts($number, $withImage, $withVariantImages)
     {
         $commands = array();
-        foreach ($this->getProducts($number, $withImage) as $product) {
+        foreach ($this->getProducts($number, $withImage, $withVariantImages) as $product) {
             $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
                 'product' => $product,
                 'revision' => time(),

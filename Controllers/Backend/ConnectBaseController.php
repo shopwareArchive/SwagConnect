@@ -633,9 +633,20 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $responseObject = json_decode($response->getBody());
 
         if(!$responseObject->success) {
+            $message = $responseObject->reason;
+
+            if ($responseObject->reason == SDK::WRONG_CREDENTIALS_MESSAGE) {
+                $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
+                $message = $snippets->get(
+                    'error/wrong_credentials',
+                    SDK::WRONG_CREDENTIALS_MESSAGE,
+                    true
+                );
+            };
+
             $this->View()->assign([
                 'success' => false,
-                'message' => $responseObject->reason
+                'message' => $message
             ]);
 
             return;
@@ -1080,7 +1091,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     /**
      * Apply given changes to product
      *
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     public function applyChangesAction()
     {
@@ -1112,8 +1123,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             case 'name':
                 break;
             case 'image':
-                $images = explode('|', $value);
-                $this->getImageImport()->importImagesForArticle($images, $articleModel);
+                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                $this->getImageImport()->importImagesForArticle(
+                    array_diff($lastUpdate['image'], $lastUpdate['variantImages']),
+                    $articleModel
+                );
+                $this->getImageImport()->importImagesForDetail(
+                    $lastUpdate['variantImages'],
+                    $connectAttribute->getArticleDetail()
+                );
                 break;
             case 'price':
                 $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));
@@ -1666,12 +1684,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
                         $this->getSDK()->recordDelete($item['sourceId']);
                         $removedRecords[] = $item['sourceId'];
-
-                        $this->getSDK()->recordStreamAssignment(
-                            $item['sourceId'],
-                            array(),
-                            $item['groupId']
-                        );
                     } else {
                         //updates items with the new streams
                         $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
@@ -1691,7 +1703,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 }
 
                 $connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
-
+                $this->getSDK()->recordStreamDelete($streamId);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
 
             } catch (\Exception $e) {

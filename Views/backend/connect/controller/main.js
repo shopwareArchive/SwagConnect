@@ -91,7 +91,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
         exportStatusCount:  '{s name=export/message/status_count}Sync-Status: [0] from [1] products{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
-        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_export_not_selected}Please select product description{/s}',
 
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
@@ -104,7 +104,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}',
-        allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}'
+        allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}',
+        error: '{s name=connect/error}error{/s}'
     },
 
 
@@ -554,10 +555,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     displayErrorMessage: function(response, callback) {
-        var message = response.message;
+        var me = this,
+            message = response.message;
 
         Shopware.Notification.createStickyGrowlMessage({
-            title: 'Error',
+            title: me.messages.error,
             text: message,
             width: 350
         });
@@ -1322,7 +1324,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.priceModeNotSelected);
         }
 
-        if (!data.hasOwnProperty('alternateDescriptionField') || data.alternateDescriptionField.length == 0) {
+        if (!data.hasOwnProperty('descriptionField') || data.descriptionField.length == 0) {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.productDescriptionNotSelected);
         }
 

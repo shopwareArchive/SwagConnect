@@ -76,7 +76,7 @@ class ImportServiceTest extends ConnectTestHelper
     {
         Shopware()->Db()->exec("DELETE FROM `s_plugin_connect_categories`");
 
-        $sourceIds = $this->insertOrUpdateProducts(3, false);
+        $sourceIds = $this->insertOrUpdateProducts(3, false, false);
 
         // find articles by sourceId
         $connectAttributes = $this->connectAttributeRepository->findBy(array('sourceId' => $sourceIds));
@@ -134,7 +134,7 @@ class ImportServiceTest extends ConnectTestHelper
     public function testFindRemoteArticleIdsByCategoryId()
     {
         // insert 3 articles
-        $sourceIds = $this->insertOrUpdateProducts(3, false);
+        $sourceIds = $this->insertOrUpdateProducts(3, false, false);
 
         // find articles by sourceId
         $connectAttributes = $this->connectAttributeRepository->findBy(array('sourceId' => $sourceIds));

@@ -373,6 +373,7 @@ class Setup
              `update_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_long_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_short_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
+             `update_additional_description` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `last_update` longtext COLLATE utf8_unicode_ci,
              `last_update_flag` int(11) DEFAULT NULL,
@@ -553,6 +554,12 @@ class Setup
             0
         );
 
+        $crudService->update(
+            's_articles_img_attributes',
+            'connect_detail_mapping_id',
+            'integer'
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -563,6 +570,7 @@ class Setup
             's_categories_attributes',
             's_order_details_attributes',
             's_order_basket_attributes',
+            's_articles_img_attributes',
             's_media_attributes'
         ));
     }
@@ -589,7 +597,7 @@ class Setup
             'detailProductNoIndex' => array('1', null, 'general'),
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
-            'alternateDescriptionField' => array('a.descriptionLong', null, 'export'),
+            'longDescriptionField' => array('1', null, 'export'),
             'importImagesOnFirstImport' => array('0', null, 'import'),
             'autoUpdateProducts' => array('1', null, 'export'),
             'overwriteProductName' => array('1', null, 'import'),
@@ -597,6 +605,7 @@ class Setup
             'overwriteProductImage' => array('1', null, 'import'),
             'overwriteProductShortDescription' => array('1', null, 'import'),
             'overwriteProductLongDescription' => array('1', null, 'import'),
+            'overwriteProductAdditionalDescription' => array('1', null, 'import'),
             'logRequest' => array('1', null, 'general'),
             'showShippingCostsSeparately' => array('0', null, 'general'),
             'articleImagesLimitImport' => array(5, null, 'import'),

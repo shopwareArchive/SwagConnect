@@ -2,6 +2,8 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
+
 class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 {
     public  function setUp()
@@ -15,6 +17,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 
     public function tearDown()
     {
+        $longDescription = BaseProductQuery::LONG_DESCRIPTION_FIELD;
         Shopware()->Db()->exec('DELETE FROM s_plugin_connect_config');
         Shopware()->Db()->executeQuery(
             "INSERT INTO `s_plugin_connect_config`
@@ -27,7 +30,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('detailProductNoIndex', '1', 'general'),
             ('detailShopInfo', '1', 'general'),
             ('checkoutShopInfo', '1', 'general'),
-            ('alternateDescriptionField', 'a.descriptionLong', 'export'),
+            ('$longDescription', '1', 'export'),
             ('importImagesOnFirstImport', '0', 'import'),
             ('autoUpdateProducts', '1', 'export'),
             ('overwriteProductName', '1', 'import'),
@@ -35,6 +38,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('overwriteProductImage', '1', 'import'),
             ('overwriteProductShortDescription', '1', 'import'),
             ('overwriteProductLongDescription', '1', 'import'),
+            ('overwriteProductAdditionalDescription', '1', 'import'),
             ('logRequest', '1', 'general'),
             ('showShippingCostsSeparately', '0', 'general'),
             ('articleImagesLimitImport', '10', 'import');

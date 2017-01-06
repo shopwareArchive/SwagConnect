@@ -165,6 +165,13 @@ class Attribute extends ModelEntity
 
 
     /**
+     * @var string $updateAdditionalDescription
+     *
+     * @ORM\Column(name="update_additional_description", type="string", nullable=true)
+     */
+     protected $updateAdditionalDescription;
+
+    /**
      * @var string $updateName
      *
      * @ORM\Column(name="update_name", type="string", nullable=true)
@@ -513,6 +520,22 @@ class Attribute extends ModelEntity
     public function getUpdateLongDescription()
     {
         return $this->updateLongDescription;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdateAdditionalDescription()
+    {
+        return $this->updateAdditionalDescription;
+    }
+
+    /**
+     * @param string $updateAdditionalDescription
+     */
+    public function setUpdateAdditionalDescription($updateAdditionalDescription)
+    {
+        $this->updateAdditionalDescription = $updateAdditionalDescription;
     }
 
     /**

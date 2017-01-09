@@ -163,7 +163,7 @@ class Update
 
     private function updateProductDescriptionSetting()
     {
-        if (version_compare($this->version, '1.0.10', '<=')) {
+        if (version_compare($this->version, '1.0.9', '<=')) {
             //migrates to the new export settings
             $result = $this->db->query("SELECT `value` FROM s_plugin_connect_config WHERE name = 'alternateDescriptionField'");
             $row = $result->fetch();
@@ -184,12 +184,13 @@ class Update
                         $id = $row['id'];
                     }
 
-                    $this->db->query("
-                        REPLACE INTO `s_plugin_connect_config`
+                    $this->db->query(
+                        "REPLACE INTO `s_plugin_connect_config`
                         (`id`, `name`, `value`, `shopId`, `groupName`)
                         VALUES
-                        ($id, '$name', 1, null, 'export')
-                     ");
+                        (?, ?, 1, null, 'export')",
+                        [$id, $name]
+                    );
                 }
             }
 

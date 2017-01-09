@@ -24,8 +24,8 @@
 
 namespace Shopware\CustomModels\Connect;
 
-use \Shopware\Components\Model\ModelRepository;
-use \Doctrine\ORM\Query\Expr\Join;
+use Shopware\Components\Model\ModelRepository,
+    Doctrine\ORM\Query\Expr\Join;
 
 /**
  * Class ProductToRemoteCategoryRepository

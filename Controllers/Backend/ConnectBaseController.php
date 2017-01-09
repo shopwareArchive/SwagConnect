@@ -760,7 +760,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $responseBody = json_decode($response->getBody());
         if (!$responseBody->success) {
-                throw new \RuntimeException($responseBody->message);
+            throw new \RuntimeException($responseBody->message);
         }
 
         return $this->redirect('http://' . $this->getHost() . '/login/' . $responseBody->loginToken);

@@ -479,6 +479,20 @@ class Config
     }
 
     /**
+     * @return int
+     */
+    public function getDefaultShopId()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cs.id')
+            ->from('s_core_shops', 'cs')
+            ->where('cs.default = :default')
+            ->setParameter('default', true);
+
+        return (int)$builder->execute()->fetchColumn();
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Connect\ConfigRepository
      */
     private function getConfigRepository()

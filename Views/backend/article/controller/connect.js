@@ -58,10 +58,9 @@ Ext.define('Shopware.apps.Article.controller.Connect', {
             return;
         }
 
-        connectForm.getForm().updateRecord(me.record);
+        connectForm.getForm().updateRecord(article);
 
-
-        me.record.save({
+        article.save({
                 failure: function(record, operation) {
                     var rawData = record.getProxy().getReader().rawData,
                         message = rawData.message;

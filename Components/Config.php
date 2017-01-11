@@ -479,8 +479,8 @@ class Config
     }
 
     /**
-     * @return int
-     */
+     * @return int
+     */
     public function getDefaultShopId()
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();

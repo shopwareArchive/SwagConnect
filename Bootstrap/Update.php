@@ -199,5 +199,17 @@ class Update
                 ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
             ");
         }
+
+        // for some reason update_additional_description column is missing in 1.0.10
+        if (version_compare($this->version, '1.0.10', '<=')) {
+            try {
+                $this->db->query("
+                        ALTER TABLE `s_plugin_connect_items`
+                        ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
+                    ");
+            } catch (\Exception $e) {
+                // ignore it if the column already exists
+            }
+        }
     }
 }

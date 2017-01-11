@@ -50,4 +50,26 @@ class ProductStreamAttributeRepository extends ModelRepository
 
         return (bool)$qb->execute()->fetchColumn();
     }
+
+    public function resetExportedStatus()
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $builder = $connection->createQueryBuilder();
+
+        $builder->update('s_plugin_connect_streams', 'pcs')
+            ->set('pcs.export_status', '(:newStatus)')
+            ->where('pcs.export_status IN (:status)')
+            ->setParameter('newStatus', null)
+            ->setParameter(
+                'status',
+                [
+                    ProductStreamService::STATUS_EXPORT,
+                    ProductStreamService::STATUS_SYNCED,
+                    ProductStreamService::STATUS_DELETE
+                ],
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+
+        $builder->execute();
+    }
 }

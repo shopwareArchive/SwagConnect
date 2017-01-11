@@ -530,12 +530,16 @@ class ProductFromShop implements ProductFromShopBase
     {
         $this->manager->getConnection()->beginTransaction();
 
+        $statusSynced = Attribute::STATUS_SYNCED;
+        $statusInsert = Attribute::STATUS_INSERT;
+        $statusUpdate = Attribute::STATUS_UPDATE;
+        $statusDelete = Attribute::STATUS_DELETE;
         try {
             $this->manager->getConnection()->executeQuery(
                 "UPDATE s_plugin_connect_items
-                SET export_status = 'synced'
+                SET export_status = '$statusSynced'
                 WHERE revision <= ?
-                AND ( export_status = 'insert' OR export_status = 'update' )" ,
+                AND ( export_status = '$statusInsert' OR export_status = '$statusUpdate' )" ,
                 array($since)
             );
 
@@ -543,7 +547,7 @@ class ProductFromShop implements ProductFromShopBase
                 "UPDATE s_plugin_connect_items
                 SET export_status = ?
                 WHERE revision <= ?
-                AND export_status = 'delete'",
+                AND export_status = '$statusDelete'",
                 array(NULL, $since)
             );
 

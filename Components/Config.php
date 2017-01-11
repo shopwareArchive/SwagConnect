@@ -78,18 +78,44 @@ class Config
             return $result;
         }
 
-        $query = $this->getConfigRepository()->getConfigsQuery($name);
+        if (is_null($shopId)) {
+            return $this->getMainConfig($name, $default);
+        }
+        $query = $this->getConfigRepository()->getConfigsQuery($name, $shopId);
         $query->setMaxResults(1);
         $result = $query->getResult();
-        if (count($result) === 0) {
-            return $default;
+
+        if (count($result) > 0 && $model = reset($result)) {
+            $decodedString = json_decode($model->getValue(), true);
+            if ($decodedString !== null) {
+                return $decodedString;
+            }
+            return $model->getValue();
         }
 
-        $decodedString = json_decode($result[0]->getValue(), true);
-        if ($decodedString !== null) {
-            return $decodedString;
+        $shop = $this->getShopRepository()->find($shopId);
+        if (!$shop) {
+            return $this->getMainConfig($name, $default);
         }
-        return $result[0]->getValue();
+
+        $mainShop = $shop->getMain();
+        if ($mainShop) {
+            $mainShopId = $mainShop->getId();
+            $query = $this->getConfigRepository()->getConfigsQuery($name, $mainShopId);
+            $query->setMaxResults(1);
+            $result = $query->getResult();
+            $model = $result[0];
+
+            if ($model) {
+                $decodedString = json_decode($model->getValue(), true);
+                if ($decodedString !== null) {
+                    return $decodedString;
+                }
+                return $model->getValue();
+            }
+        }
+
+        return $this->getMainConfig($name, $default);
     }
 
     /**
@@ -114,6 +140,27 @@ class Config
     private function getPluginConfig($name, $default = null)
     {
         return Shopware()->Config()->getByNamespace('SwagConnect', $name, $default);
+    }
+
+    /**
+     * @param $name
+     * @param null $default
+     * @return null
+     */
+    private function getMainConfig($name, $default = null)
+    {
+        $query = $this->getConfigRepository()->getConfigsQuery($name);
+        $query->setMaxResults(1);
+        $result = $query->getResult();
+        if (count($result) === 0) {
+            return $default;
+        }
+
+        $decodedString = json_decode($result[0]->getValue(), true);
+        if ($decodedString !== null) {
+            return $decodedString;
+        }
+        return $result[0]->getValue();
     }
 
     /**

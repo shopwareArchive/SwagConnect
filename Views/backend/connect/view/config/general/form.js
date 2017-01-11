@@ -69,6 +69,9 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}',
+        priceResetBtn: '{s name=config/price_reset_btn}reset{/s}',
+        priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
+        priceResetMessage: '{s name=config/price_reset_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
         showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
@@ -255,6 +258,49 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         ];
     },
 
+    registerEvents: function() {
+        this.addEvents('resetPriceType');
+    },
+
+    /**
+     *
+     */
+    getResetPriceTypeFields: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            layout: 'column',
+            columnWidth: 1,
+            items: [
+                {
+                    xtype: 'container',
+                    margin: '10 30 0 0 ',
+                    style: {
+                        'color': '#475c6a',
+                        'font-weight': 'bold',
+                        'font-size': '11px'
+                    },
+                    html: me.snippets.priceResetLabel
+                }, {
+                    xtype: 'button',
+                    flex: 1,
+                    height: 27,
+                    width: 100,
+                    text: me.snippets.priceResetBtn,
+                    handler: function (btn) {
+                        Ext.MessageBox.confirm(me.snippets.priceResetLabel, me.snippets.priceResetMessage, function (response) {
+                            if (response !== 'yes') {
+                                return false;
+                            }
+
+                            me.fireEvent('resetPriceType');
+                        });
+                    }
+                }
+            ]
+        });
+    },
+
     /**
      * Creates advanced configuration field set
      * @return Ext.form.FieldSet
@@ -289,6 +335,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 }
             ]
         }));
+
+        items.push(me.getResetPriceTypeFields());
 
         return Ext.create('Ext.form.FieldSet', {
             layout: 'anchor',

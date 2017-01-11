@@ -30,6 +30,7 @@ use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
+use Shopware\Connect\Gateway\ChangeGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use Firebase\JWT\JWT;
 
@@ -183,7 +184,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function getExportAction()
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
-        if (!array_key_exists('exportPriceMode', $exportConfigArray)) {
+        if (!array_key_exists('exportPriceMode', $exportConfigArray) || $this->isPriceTypeReset()) {
             $exportConfigArray['exportPriceMode'] = array();
         }
 
@@ -206,6 +207,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
+     * @return bool
+     */
+    public function isPriceTypeReset()
+    {
+        return $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE;
+    }
+
+    /**
      * ExtJS uses this action to check is price mapping allowed.
      * If there is at least one exported product to connect,
      * price mapping cannot be changed.
@@ -214,7 +223,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $isPriceModeEnabled = false;
         $isPurchasePriceModeEnabled = false;
-        $isPricingMappingAllowed = $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE;
+        $isPricingMappingAllowed = $this->isPriceTypeReset();
 
         if ($isPricingMappingAllowed) {
             $this->View()->assign(
@@ -261,8 +270,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $exportPurchasePrice = in_array('purchasePrice', $data['exportPriceMode']);
 
         $isModified = $this->getConfigComponent()->compareExportConfiguration($data);
+        $isPriceTypeReset = $this->isPriceTypeReset();
 
         if ($isModified === false && $this->getSDK()->getPriceType() !== \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+
             $data = !isset($data[0]) ? array($data) : $data;
             $this->getConfigComponent()->setExportConfigs($data);
             $this->View()->assign(
@@ -379,7 +390,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $connectExport = $this->getConnectExport();
 
-        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
+        if ($isPriceTypeReset) {
             //removes all hashes from from sw_connect_product
             //and resets all item status
             $connectExport->clearConnectItems();
@@ -445,6 +456,53 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getConfigComponent(),
             new ErrorHandler()
         );
+    }
+
+    /**
+     * It will make a call to SocialNetwork to reset the price type,
+     * if this call return success true, then it will reset the export settings locally
+     */
+    public function resetPriceTypeAction()
+    {
+        $response = $this->getSnHttpClient()->sendRequestToConnect(array(), 'account/reset/price-type');
+        $responseBody = json_decode($response->getBody());
+
+        if(!$responseBody->success) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseBody->message
+            ]);
+
+            return;
+        }
+
+        // WARNING This code remove the current product changes
+        // This is a single call operation and its danger one
+        // This code should not be used anywhere
+        $builder = $this->getModelManager()->getConnection()->createQueryBuilder();
+        $builder->delete('sw_connect_change')
+            ->where('c_operation IN (:changes)')
+            ->setParameter(
+                'changes',
+                [
+                    ChangeGateway::PRODUCT_INSERT,
+                    ChangeGateway::PRODUCT_UPDATE,
+                    ChangeGateway::PRODUCT_DELETE,
+                    ChangeGateway::PRODUCT_STOCK,
+                ],
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+        $builder->execute();
+
+        $itemRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Attribute');
+        $itemRepo->resetExportedItemsStatus();
+
+        $streamRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+        $streamRepo->resetExportedStatus();
+
+        $this->View()->assign([
+            'success' => true,
+        ]);
     }
 
     /**

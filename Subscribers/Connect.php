@@ -65,7 +65,7 @@ class Connect extends BaseSubscriber
             file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
         )[0];
 
-        if($apiResponse->highestVersion > $info['currentVersion']) {
+        if(version_compare($apiResponse->highestVersion, $info['currentVersion'], '>')) {
             $view->falseVersionTitle = $snippets->get('info/new_version_header');
             $view->falseVersionMessage = $snippets->get('info/new_version_text');
             $view->extendsTemplate('backend/index/view/connect_menu.js');

@@ -76,7 +76,7 @@ class LocalProductQuery extends BaseProductQuery
         // in our case translations are not used
         // so we don't care about shop language
         $this->productContext = $this->contextService->createProductContext(
-            $this->manager->getRepository('Shopware\Models\Shop\Shop')->getDefault()->getId(),
+            $this->configComponent->getDefaultShopId(),
             null,
             ContextService::FALLBACK_CUSTOMER_GROUP
         );

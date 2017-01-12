@@ -24,8 +24,8 @@
 
 namespace Shopware\CustomModels\Connect;
 
-use \Doctrine\ORM\Mapping as ORM,
-    \Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM,
+    Shopware\Components\Model\ModelEntity;
 
 /**
  * As writing config values in SW is quite hard, we use our own little configs

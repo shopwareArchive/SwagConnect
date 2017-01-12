@@ -33,7 +33,9 @@ Ext.define('Shopware.apps.Connect.model.config.Export', {
 
     fields: [
         //{block name="backend/connect/model/config/import/fields"}{/block}
-        { name: 'alternateDescriptionField', type: 'string' },
+        { name: 'longDescriptionField', type: 'string' },
+        { name: 'shortDescriptionField', type: 'string' },
+        { name: 'connectDescriptionField', type: 'string' },
         { name: 'autoUpdateProducts', type: 'int' },
         { name: 'excludeInactiveProducts', type: 'string' },
         { name: 'priceGroupForPriceExport', type: 'string' },

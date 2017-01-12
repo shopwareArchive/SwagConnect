@@ -25,8 +25,6 @@ use Shopware\Connect\Struct\PriceRange;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    protected $productDescriptionField;
-
     protected $baseProductUrl;
 
     /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
@@ -56,7 +54,6 @@ class LocalProductQuery extends BaseProductQuery
 
     public function __construct(
         ModelManager $manager,
-        $productDescriptionField,
         $baseProductUrl,
         $configComponent,
         MarketplaceGateway $marketplaceGateway,
@@ -68,7 +65,6 @@ class LocalProductQuery extends BaseProductQuery
     {
         parent::__construct($manager, $mediaService);
 
-        $this->productDescriptionField = $productDescriptionField;
         $this->baseProductUrl = $baseProductUrl;
         $this->configComponent = $configComponent;
         $this->marketplaceGateway = $marketplaceGateway;
@@ -81,7 +77,7 @@ class LocalProductQuery extends BaseProductQuery
         // in our case translations are not used
         // so we don't care about shop language
         $this->productContext = $this->contextService->createProductContext(
-            $this->manager->getRepository('Shopware\Models\Shop\Shop')->getDefault()->getId(),
+            $this->configComponent->getDefaultShopId(),
             null,
             ContextService::FALLBACK_CUSTOMER_GROUP
         );
@@ -117,7 +113,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.kind as detailKind',
             'd.ean',
             'a.name as title',
-            'a.description as shortDescription',
             's.name as vendorName',
             's.image as vendorImage',
             's.link as vendorLink',
@@ -128,8 +123,6 @@ class LocalProductQuery extends BaseProductQuery
             'd.releaseDate as deliveryDate',
             'd.inStock as availability',
             'd.minPurchase as minPurchaseQuantity',
-
-            $this->productDescriptionField . ' as longDescription',
 
             'd.width',
             'd.height',
@@ -143,6 +136,18 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
         );
+
+        if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'a.description as shortDescription';
+        }
+
+        if ($this->configComponent->getConfig(self::LONG_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'a.descriptionLong as longDescription';
+        }
+
+        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)){
+            $selectColumns[] = 'attribute.connectProductDescription as additionalDescription';
+        }
 
         if ($exportPriceColumn) {
             $selectColumns[] = "exportPrice.{$exportPriceColumn} as price";

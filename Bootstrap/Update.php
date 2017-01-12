@@ -6,6 +6,7 @@ use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use Shopware\Models\Attribute\Configuration;
+use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 
 /**
  * Updates existing versions of the plugin
@@ -65,6 +66,7 @@ class Update
         $this->removeRedirectMenu();
         $this->updateConnectAttribute();
         $this->addConnectDescriptionElement();
+        $this->updateProductDescriptionSetting();
 
         return true;
     }
@@ -156,6 +158,58 @@ class Update
 
             $this->modelManager->persist($element);
             $this->modelManager->flush();
+        }
+    }
+
+    private function updateProductDescriptionSetting()
+    {
+        if (version_compare($this->version, '1.0.9', '<=')) {
+            //migrates to the new export settings
+            $result = $this->db->query("SELECT `value` FROM s_plugin_connect_config WHERE name = 'alternateDescriptionField'");
+            $row = $result->fetch();
+
+            if ($row) {
+                $mapper = [
+                    'a.description' => BaseProductQuery::SHORT_DESCRIPTION_FIELD,
+                    'a.descriptionLong' => BaseProductQuery::LONG_DESCRIPTION_FIELD,
+                    'attribute.connectProductDescription' => BaseProductQuery::CONNECT_DESCRIPTION_FIELD,
+                ];
+
+                if ($name = $mapper[$row['value']]) {
+                    $result = $this->db->query("SELECT `id` FROM s_plugin_connect_config WHERE name = '$name'");
+                    $row = $result->fetch();
+
+                    $id = null;
+                    if (isset($row['id'])) {
+                        $id = $row['id'];
+                    }
+
+                    $this->db->query(
+                        "REPLACE INTO `s_plugin_connect_config`
+                        (`id`, `name`, `value`, `shopId`, `groupName`)
+                        VALUES
+                        (?, ?, 1, null, 'export')",
+                        [$id, $name]
+                    );
+                }
+            }
+
+            $this->db->query("
+                ALTER TABLE `s_plugin_connect_items`
+                ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
+            ");
+        }
+
+        // for some reason update_additional_description column is missing in 1.0.10
+        if (version_compare($this->version, '1.0.10', '<=')) {
+            try {
+                $this->db->query("
+                        ALTER TABLE `s_plugin_connect_items`
+                        ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
+                    ");
+            } catch (\Exception $e) {
+                // ignore it if the column already exists
+            }
         }
     }
 }

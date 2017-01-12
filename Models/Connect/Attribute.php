@@ -24,8 +24,8 @@
 
 namespace Shopware\CustomModels\Connect;
 
-use \Doctrine\ORM\Mapping as ORM,
-    \Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM,
+    Shopware\Components\Model\ModelEntity;
 
 /**
  * Connect specific attributes for shopware Connect products
@@ -163,6 +163,13 @@ class Attribute extends ModelEntity
      */
      protected $updateShortDescription;
 
+
+    /**
+     * @var string $updateAdditionalDescription
+     *
+     * @ORM\Column(name="update_additional_description", type="string", nullable=true)
+     */
+     protected $updateAdditionalDescription;
 
     /**
      * @var string $updateName
@@ -513,6 +520,22 @@ class Attribute extends ModelEntity
     public function getUpdateLongDescription()
     {
         return $this->updateLongDescription;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdateAdditionalDescription()
+    {
+        return $this->updateAdditionalDescription;
+    }
+
+    /**
+     * @param string $updateAdditionalDescription
+     */
+    public function setUpdateAdditionalDescription($updateAdditionalDescription)
+    {
+        $this->updateAdditionalDescription = $updateAdditionalDescription;
     }
 
     /**

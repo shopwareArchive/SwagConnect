@@ -44,6 +44,13 @@ class Translation extends Struct
     public $longDescription;
 
     /**
+     * An additional description of the product in the specific language
+     *
+     * @var string
+     */
+    public $additionalDescription;
+
+    /**
      * Translations for the keys used in Product::$variant.
      *
      * Map variant keys to a language specific label. For example "size" =>

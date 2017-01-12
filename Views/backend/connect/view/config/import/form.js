@@ -59,6 +59,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
+        overwriteProductAdditionalDescription: '{s name=config/import/overwrite_product_additional_description}Connect description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
@@ -186,6 +187,11 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                         }, {
                             boxLabel  : me.snippets.overwriteProductLongDescription,
                             name      : 'overwriteProductLongDescription',
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }, {
+                            boxLabel  : me.snippets.overwriteProductAdditionalDescription,
+                            name      : 'overwriteProductAdditionalDescription',
                             inputValue: 1,
                             uncheckedValue: 0
                         }

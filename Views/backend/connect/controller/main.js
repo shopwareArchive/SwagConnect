@@ -91,12 +91,15 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportTitle: '{s name=connect/tab_panel/export}Export{/s}',
         exportStatusCount:  '{s name=export/message/status_count}Sync-Status: [0] from [1] products{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
-        productDescriptionNotSelected: '{s name=config/export/product_description_not_selected}Please select product description{/s}',
+        productDescriptionNotSelected: '{s name=config/export/product_description_export_not_selected}Please select product description{/s}',
 
         adoptUnitsTitle: '{s name=config/import/adopt_units_confirm_title}Maßeinheiten übernehmen{/s}',
         adoptUnitsMessage: '{s name=config/import/adopt_units_confirm_message}Möchten Sie die importieren Maßeinheiten in Ihren Shop übernehmen?{/s}',
 
         priceFieldIsNotSupported: '{s name=config/export/priceFieldIsNotSupported}Price field is not maintained. Some of the products have price = 0{/s}',
+        priceResetSuccess: '{s name=config/price_reset_success}The exported prices were successfully reset. It will take up to 10min for the changes to take effect. When this operation is done, you will get the option to set the price type again when you reopen "Export" in the Connect menu.{/s}',
+        priceResetError: '{s name=config/price_reset_error}A problem occur in price type reset. Please try again later or contact our support team.{/s}',
+        priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
@@ -183,7 +186,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onSaveConfigForm
             },
             'connect-config-form': {
-                calculateFinishTime: me.onCalculateFinishTime
+                calculateFinishTime: me.onCalculateFinishTime,
+                resetPriceType: me.onResetPriceType,
             },
             'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
@@ -1320,7 +1324,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.priceModeNotSelected);
         }
 
-        if (!data.hasOwnProperty('alternateDescriptionField') || data.alternateDescriptionField.length == 0) {
+        if (!data.hasOwnProperty('descriptionField') || data.descriptionField.length == 0) {
             return me.createGrowlMessage(me.messages.exportTitle, me.messages.productDescriptionNotSelected);
         }
 
@@ -1427,6 +1431,29 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
 
+    },
+
+    onResetPriceType: function () {
+        var me = this;
+
+        Ext.Ajax.request({
+            scope: this,
+            url: '{url module=backend controller=ConnectConfig action=resetPriceType}',
+            success: function (result) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success) {
+                    me.createGrowlMessage(
+                        me.messages.priceResetLabel,
+                        me.messages.priceResetSuccess
+                    );
+                } else {
+                    me.createGrowlMessage(
+                        me.messages.priceResetLabel,
+                        me.messages.priceResetError
+                    );
+                }
+            }
+        });
     },
 
     onChangeLogging: function(checkbox, newValue, oldValue) {

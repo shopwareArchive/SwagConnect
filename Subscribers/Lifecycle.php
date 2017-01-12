@@ -243,7 +243,7 @@ class Lifecycle extends BaseSubscriber
         }
 
         $exportLanguages = array_splice($exportLanguages, array_search($shopId, $exportLanguages), 1);
-        $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages);
+        $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)

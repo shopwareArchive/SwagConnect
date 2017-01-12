@@ -23,8 +23,8 @@
  */
 namespace Shopware\CustomModels\Connect;
 
-use \Doctrine\ORM\Mapping as ORM,
-    \Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM,
+    Shopware\Components\Model\ModelEntity;
 
 /**
  * @ORM\Table(name="s_plugin_connect_marketplace_attr")

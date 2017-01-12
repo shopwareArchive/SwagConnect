@@ -24,8 +24,8 @@
 
 namespace Shopware\CustomModels\Connect;
 
-use \Doctrine\ORM\Mapping as ORM;
-use \Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM,
+    Shopware\Components\Model\ModelEntity;
 
 /**
  * Describes Shopware Connect categories

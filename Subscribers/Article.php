@@ -1,11 +1,14 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use Shopware\Models\Article\Article as Product;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Class Article
@@ -130,6 +133,45 @@ class Article extends BaseSubscriber
                     $this->generateMainVariantChange($request->getParam('id'));
                 }
                 break;
+            case 'setPropertyList':
+                // property values are saved in different ajax call than
+                // property group and this will generate wrong Connect changes.
+                // after the property values are saved, the temporary property group is no needed
+                // and it will generate right Connect changes
+                if ($articleId = $request->getParam('articleId')) {
+
+                    /** @var Product $article */
+                    $article = $this->modelManager->find(Product::class, $articleId);
+
+                    // Check if entity is a connect product
+                    $attribute = $this->getHelper()->getConnectAttributeByModel($article);
+                    if (!$attribute) {
+                        return;
+                    }
+
+                    // if article is not exported to Connect
+                    // don't need to generate changes
+                    if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+                        return;
+                    }
+
+                    // if property group does not exists than don't generate changes
+                    if (!$article->getAttribute()->getConnectPropertyGroup()) {
+                        return;
+                    }
+
+                    $article->getAttribute()->setConnectPropertyGroup(null);
+                    $this->modelManager->persist($article);
+                    $this->modelManager->flush();
+
+                    $sourceIds = Shopware()->Db()->fetchCol(
+                        'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
+                        array($article->getId())
+                    );
+
+                    $this->getConnectExport()->export($sourceIds, null, true);
+                }
+                break;
             case 'createConfiguratorVariants':
                 // main detail should be updated as well, because shopware won't call lifecycle event
                 // even postUpdate of Detail. By this way Connect will generate change for main variant,
@@ -178,6 +220,21 @@ class Article extends BaseSubscriber
         } catch (\Exception $e) {
             // if sn is not available, proceed without exception
         }
+    }
+
+    /**
+     * @return ConnectExport
+     */
+    public function getConnectExport()
+    {
+        return new ConnectExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            Shopware()->Models(),
+            new ProductsAttributesValidator(),
+            $this->getConnectConfig(),
+            new ErrorHandler()
+        );
     }
 
     /**

@@ -4,6 +4,7 @@ namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Shopware\Connect\Struct\Product;
 use Shopware\Components\Model\ModelManager;
+use Doctrine\ORM\Query\Expr\Join;
 
 
 abstract class BaseProductQuery
@@ -100,6 +101,23 @@ abstract class BaseProductQuery
             ->setParameter('articleId', $articleId);
 
         return $builder->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $articleId
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    protected function attributeGroup($articleId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        return $builder->select('g')
+            ->from('Shopware\Models\Attribute\Article', 'attr')
+            ->leftJoin('Shopware\Models\Property\Group','g', Join::WITH, 'g.id = attr.connectPropertyGroup')
+            ->where('attr.articleId = :articleId')
+            ->setParameter(':articleId', $articleId)
+            ->getQuery()->getOneOrNullResult();
     }
 
     /**

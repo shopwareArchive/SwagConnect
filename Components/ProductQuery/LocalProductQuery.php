@@ -403,10 +403,21 @@ class LocalProductQuery extends BaseProductQuery
     protected function prepareProperties($articleId)
     {
         $properties = $this->getProperties($articleId);
+        $attrGroup = $this->attributeGroup($articleId);
+
+        file_put_contents(__DIR__ . '/tmp', var_export($properties,1), FILE_APPEND);
+
+        // if product property group exist then the
+        // property values are still old by that
+        // this will not generate wrong Connect changes
+        $property = reset($properties);
+        $groupName = $attrGroup ? $attrGroup->getName() : $property['groupName'];
 
         $propertyArray = array();
         foreach ($properties as $property) {
-            $propertyArray[] = new Property($property);
+            $cloneProperty = $property;
+            $cloneProperty['groupName'] = $groupName;
+            $propertyArray[] = new Property($cloneProperty);
         }
 
         return $propertyArray;

@@ -22,6 +22,7 @@ class Lifecycle extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
@@ -47,6 +48,36 @@ class Lifecycle extends BaseSubscriber
             new ErrorHandler()
         );
     }
+
+    public function onPreUpdate(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Article\Article $entity */
+        $entity = $eventArgs->get('entity');
+        $articleId = $entity->getId();
+        $db = Shopware()->Db();
+
+        if (!$entity instanceof \Shopware\Models\Article\Article
+        ) {
+            return;
+        }
+
+        $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($entity);
+
+        // If product propertyGroup is changed we need to store the old one,
+        // because product property value are still not changed and
+        // this will generate wrong Connect changes
+        if ($changeSet['propertyGroup']) {
+            $filterGroupId = $db->fetchOne(
+                "SELECT filtergroupID FROM s_articles WHERE id = ?", [$articleId]
+            );
+
+            $db->executeUpdate(
+                'UPDATE `s_articles_attributes` SET `connect_property_group` = ? WHERE `articleID` = ?',
+                [$filterGroupId, $articleId]
+            );
+        }
+    }
+
 
     /**
      * @param \Enlight_Event_EventArgs $eventArgs

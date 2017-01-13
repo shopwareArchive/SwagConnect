@@ -143,6 +143,14 @@ class Article extends BaseSubscriber
                     /** @var Product $article */
                     $article = $this->modelManager->find(Product::class, $articleId);
 
+                    if (!$article) {
+                        return;
+                    }
+
+                    if (!$article->getPropertyGroup()) {
+                        return;
+                    }
+
                     // Check if entity is a connect product
                     $attribute = $this->getHelper()->getConnectAttributeByModel($article);
                     if (!$attribute) {
@@ -155,14 +163,11 @@ class Article extends BaseSubscriber
                         return;
                     }
 
-                    // if property group does not exists than don't generate changes
-                    if (!$article->getAttribute()->getConnectPropertyGroup()) {
-                        return;
+                    if ($article->getAttribute()->getConnectPropertyGroup()) {
+                        $article->getAttribute()->setConnectPropertyGroup(null);
+                        $this->modelManager->persist($article);
+                        $this->modelManager->flush();
                     }
-
-                    $article->getAttribute()->setConnectPropertyGroup(null);
-                    $this->modelManager->persist($article);
-                    $this->modelManager->flush();
 
                     $sourceIds = Shopware()->Db()->fetchCol(
                         'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',

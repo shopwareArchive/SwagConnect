@@ -410,8 +410,6 @@ class LocalProductQuery extends BaseProductQuery
         $properties = $this->getProperties($articleId);
         $attrGroup = $this->attributeGroup($articleId);
 
-        file_put_contents(__DIR__ . '/tmp', var_export($properties,1), FILE_APPEND);
-
         // if product property group exist then the
         // property values are still old by that
         // this will not generate wrong Connect changes

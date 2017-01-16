@@ -19,6 +19,22 @@ use Shopware\Models\Order\Order;
  */
 class Lifecycle extends BaseSubscriber
 {
+    /**
+     * @var int
+     */
+    private $autoUpdateProducts;
+
+    /**
+     * Lifecycle constructor.
+     * @param int $autoUpdateProducts
+     */
+    public function __construct($autoUpdateProducts)
+    {
+        parent::__construct();
+
+        $this->autoUpdateProducts = $autoUpdateProducts;
+    }
+
     public function getSubscribedEvents()
     {
         return array(
@@ -102,14 +118,6 @@ class Lifecycle extends BaseSubscriber
      */
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config(Shopware()->Models());
-
-        $autoUpdate = $configComponent->getConfig('autoUpdateProducts', 1);
-        if (!$autoUpdate) {
-            return;
-        }
-
         $entity = $eventArgs->get('entity');
 
         if (!$entity instanceof \Shopware\Models\Article\Article
@@ -141,9 +149,9 @@ class Lifecycle extends BaseSubscriber
         // Mark the product for connect update
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
-                $this->generateChangesForDetail($model, $autoUpdate);
+                $this->generateChangesForDetail($model);
             } elseif ($model instanceof \Shopware\Models\Article\Article){
-                $this->generateChangesForArticle($model, $autoUpdate);
+                $this->generateChangesForArticle($model);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
@@ -159,14 +167,6 @@ class Lifecycle extends BaseSubscriber
      */
     public function onPersistDetail(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config(Shopware()->Models());
-
-        $autoUpdate = $configComponent->getConfig('autoUpdateProducts', 1);
-        if (!$autoUpdate) {
-            return;
-        }
-
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $eventArgs->get('entity');
         $article = $detail->getArticle();
@@ -182,12 +182,9 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-        // Mark the product for connect update
+        // Mark the article detail for connect export
         try {
-            $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
-            $this->getConnectExport()->export(
-                array($detailAttribute->getSourceId()), null, true
-            );
+            $this->generateChangesForDetail($detail);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
@@ -215,31 +212,31 @@ class Lifecycle extends BaseSubscriber
         $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
-    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)
+    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
-        if ($autoUpdate == 1) {
+        if ($this->autoUpdateProducts == 1) {
             $this->getConnectExport()->export(
                 array($attribute->getSourceId()), null, true
             );
-        } elseif ($autoUpdate == 2) {
+        } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
             Shopware()->Models()->persist($attribute);
             Shopware()->Models()->flush();
         }
     }
 
-    private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $autoUpdate)
+    private function generateChangesForArticle(\Shopware\Models\Article\Article $article)
     {
-        if ($autoUpdate == 1) {
+        if ($this->autoUpdateProducts == 1) {
             $sourceIds = Shopware()->Db()->fetchCol(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                 array($article->getId())
             );
 
             $this->getConnectExport()->export($sourceIds, null, true);
-        } elseif ($autoUpdate == 2) {
+        } elseif ($this->autoUpdateProducts == 2) {
             Shopware()->Db()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),

@@ -87,9 +87,11 @@ abstract class BaseProductQuery
     {
         $columns = [
             'v.value',
+            'v.position as valuePosition',
             'o.name as option',
             'o.filterable',
             'g.name as groupName',
+            'g.position as groupPosition',
             'g.comparable',
             'g.sortMode',
         ];

@@ -414,12 +414,19 @@ class LocalProductQuery extends BaseProductQuery
         // property values are still old by that
         // this will not generate wrong Connect changes
         $property = reset($properties);
-        $groupName = $attrGroup ? $attrGroup->getName() : $property['groupName'];
+        if ($attrGroup) {
+            $groupName = $attrGroup->getName();
+            $groupPosition = $attrGroup->getPosition();
+        } else {
+            $groupName = $property['groupName'];
+            $groupPosition = $property['groupPosition'];
+        }
 
         $propertyArray = array();
         foreach ($properties as $property) {
             $cloneProperty = $property;
             $cloneProperty['groupName'] = $groupName;
+            $cloneProperty['groupPosition'] = $groupPosition;
             $propertyArray[] = new Property($cloneProperty);
         }
 

@@ -451,6 +451,7 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
+        /** @var Property $firstProperty */
         $firstProperty = reset($product->properties);
         $groupRepo = $this->manager->getRepository(PropertyGroup::class);
         $group = $groupRepo->findOneBy(['name' => $firstProperty->groupName]);
@@ -460,7 +461,7 @@ class ProductToShop implements ProductToShopBase
             $group->setName($firstProperty->groupName);
             $group->setComparable($firstProperty->comparable);
             $group->setSortMode($firstProperty->sortMode);
-            $group->setPosition(0);
+            $group->setPosition($firstProperty->groupPosition);
         }
 
         $article->setPropertyGroup($group);
@@ -468,9 +469,6 @@ class ProductToShop implements ProductToShopBase
         $valueCollection = [];
         $optionRepo = $this->manager->getRepository(PropertyOption::class);
         $valueRepo = $this->manager->getRepository(PropertyValue::class);
-
-        file_put_contents("/tmp/myfile", $product->title . "\n", FILE_APPEND);
-        file_put_contents("/tmp/myfile", print_r($product->properties, 1), FILE_APPEND);
 
         foreach ($product->properties as $property) {
 
@@ -488,6 +486,7 @@ class ProductToShop implements ProductToShopBase
 
             if (!$value) {
                 $value = new PropertyValue($option, $property->value);
+                $value->setPosition($property->valuePosition);
                 $this->manager->persist($value);
             }
 

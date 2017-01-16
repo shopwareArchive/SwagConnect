@@ -169,16 +169,18 @@ class Lifecycle extends BaseSubscriber
     {
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $eventArgs->get('entity');
+        $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+
+        /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
-        // Check if entity is a connect product
-        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
-        if (!$attribute) {
+        $articleAttribute = $this->getHelper()->getConnectAttributeByModel($article);
+        if (!$articleAttribute) {
             return;
         }
 
         // if article is not exported to Connect
         // don't need to generate changes
-        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+        if (!$this->getHelper()->isProductExported($articleAttribute) || !empty($articleAttribute->getShopId())) {
             return;
         }
 

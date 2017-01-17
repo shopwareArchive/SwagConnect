@@ -67,6 +67,7 @@ class Update
         $this->updateConnectAttribute();
         $this->addConnectDescriptionElement();
         $this->updateProductDescriptionSetting();
+        $this->createUpdateAdditionalDescriptionColumn();
 
         return true;
     }
@@ -199,9 +200,12 @@ class Update
                 ADD `update_additional_description` VARCHAR(255) NULL DEFAULT 'inherit' AFTER `update_short_description`;
             ");
         }
+    }
 
-        // for some reason update_additional_description column is missing in 1.0.10
-        if (version_compare($this->version, '1.0.10', '<=')) {
+    private function createUpdateAdditionalDescriptionColumn()
+    {
+        // for some reason update_additional_description column is missing in 1.0.11
+        if (version_compare($this->version, '1.0.11', '<=')) {
             try {
                 $this->db->query("
                         ALTER TABLE `s_plugin_connect_items`

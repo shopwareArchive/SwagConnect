@@ -219,9 +219,7 @@ class Lifecycle extends BaseSubscriber
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
         if ($this->autoUpdateProducts == 1) {
-            $this->getConnectExport()->export(
-                array($attribute->getSourceId()), null, true
-            );
+            $this->getConnectExport()->export(array($attribute->getSourceId()));
         } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
             Shopware()->Models()->persist($attribute);
@@ -237,7 +235,7 @@ class Lifecycle extends BaseSubscriber
                 array($article->getId())
             );
 
-            $this->getConnectExport()->export($sourceIds, null, true);
+            $this->getConnectExport()->export($sourceIds);
         } elseif ($this->autoUpdateProducts == 2) {
             Shopware()->Db()->update(
                 's_plugin_connect_items',

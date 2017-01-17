@@ -95,8 +95,9 @@ class ConnectExport
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null, $isEvent = false)
     {
-        $errors = array();
         $connectItems = $this->fetchConnectItems($ids);
+
+        $this->manager->beginTransaction();
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
@@ -105,45 +106,46 @@ class ConnectExport
             }
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
+
             $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
             if ($excludeInactiveProducts && !$model->getActive()) {
-                $connectAttribute->setExportStatus(Attribute::STATUS_INACTIVE);
-                $connectAttribute->setExportMessage(
-                    Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-                        'export/message/error_product_is_not_active',
-                        'Produkt ist inaktiv',
-                        true
+                $this->updateLocalConnectItem(
+                    $connectAttribute->getSourceId(),
+                    array(
+                        'export_status' => Attribute::STATUS_INACTIVE,
+                        'exported' => false,
+                        'export_message' =>  Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                            'export/message/error_product_is_not_active',
+                            'Produkt ist inaktiv',
+                            true
+                        ),
                     )
                 );
-                $this->manager->persist($connectAttribute);
 
-                //todo: Fix the flag $isEvent
-                if (!$isEvent) {
-                    $this->manager->flush($connectAttribute);
-                }
                 continue;
             }
 
             if (!$this->helper->isProductExported($connectAttribute)) {
                 $status = Attribute::STATUS_INSERT;
-                $connectAttribute->setExported(true);
             } else {
                 $status = Attribute::STATUS_UPDATE;
             }
-            $connectAttribute->setExportStatus($status);
-            $connectAttribute->setExportMessage(null);
 
             $categories = $this->helper->getConnectCategoryForProduct($item['articleId']);
-            $connectAttribute->setCategory($categories);
-
-            if (!$connectAttribute->getId()) {
-                $this->manager->persist($connectAttribute);
+            if (is_string($categories)) {
+                $categories = array($categories);
             }
+            $categories = json_encode($categories);
 
-            //todo: Fix the flag $isEvent
-            if (!$isEvent) {
-                $this->manager->flush($connectAttribute);
-            }
+            $this->updateLocalConnectItem(
+                $connectAttribute->getSourceId(),
+                array(
+                    'export_status' => $status,
+                    'export_message' => null,
+                    'exported' => true,
+                    'category' => $categories,
+                )
+            );
 
             try {
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
@@ -165,31 +167,80 @@ class ConnectExport
                 }
             } catch (\Exception $e) {
                 if ($this->errorHandler->isPriceError($e)) {
-                    $connectAttribute->setExportStatus(Attribute::STATUS_ERROR_PRICE);
-                    $connectAttribute->setExportMessage(
-                        Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-                            'export/message/error_price_status',
-                            'There is an empty price field',
-                            true
+                    $this->updateLocalConnectItem(
+                        $connectAttribute->getSourceId(),
+                        array(
+                            'export_status' => Attribute::STATUS_ERROR_PRICE,
+                            'export_message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                                'export/message/error_price_status',
+                                'There is an empty price field',
+                                true
+                            ),
                         )
                     );
                 } else {
-                    $connectAttribute->setExportStatus(Attribute::STATUS_ERROR);
-                    $connectAttribute->setExportMessage(
-                        $e->getMessage() . "\n" . $e->getTraceAsString()
+                    $this->updateLocalConnectItem(
+                        $connectAttribute->getSourceId(),
+                        array(
+                            'export_status' => Attribute::STATUS_ERROR,
+                            'export_message' => $e->getMessage() . "\n" . $e->getTraceAsString(),
+                        )
                     );
                 }
 
                 $this->errorHandler->handle($e);
-
-                //todo: Fix the flag $isEvent
-                if (!$isEvent) {
-                    $this->manager->flush($connectAttribute);
-                }
             }
         }
 
+        try {
+            $this->manager->commit();
+        } catch (\Exception $e) {
+            $this->manager->rollback();
+            $this->errorHandler->handle($e);
+        }
+
+
         return $this->errorHandler->getMessages();
+    }
+
+    /**
+     * Update connect attribute data
+     *
+     * @param string $sourceId
+     * @param array $params
+     */
+    private function updateLocalConnectItem($sourceId, $params = array())
+    {
+        $possibleValues = array(
+            Attribute::STATUS_DELETE,
+            Attribute::STATUS_INSERT,
+            Attribute::STATUS_UPDATE,
+            Attribute::STATUS_ERROR,
+            Attribute::STATUS_ERROR_PRICE,
+            Attribute::STATUS_INACTIVE,
+            Attribute::STATUS_SYNCED,
+            null,
+        );
+
+        if (isset($params['export_status']) && !in_array($params['export_status'], $possibleValues)) {
+            throw new \InvalidArgumentException('Invalid export status');
+        }
+
+        if (isset($params['exported']) && !is_bool($params['exported'])) {
+            throw new \InvalidArgumentException('Parameter $exported must be boolean.');
+        }
+
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->update('s_plugin_connect_items', 'ci');
+        array_walk($params, function($param, $name) use ($builder) {
+            $builder->set('ci.' . $name, ':' . $name)
+                    ->setParameter($name, $param);
+        });
+
+        $builder->where('source_id = :sourceId')
+                ->setParameter('sourceId', $sourceId)
+                ->andWhere('shop_id IS NULL')
+                ->execute();
     }
 
     /**

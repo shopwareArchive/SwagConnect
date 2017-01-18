@@ -29,12 +29,26 @@ class ProductStreams extends BaseSubscriber
         $request = $subject->Request();
 
         switch($request->getActionName()) {
+            case 'load':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/controller/connect_main.js'
+                );
+                break;
             case 'delete':
                 $streamId = $request->get('id');
 
                 if ($this->getProductStreamService()->isStreamExported($streamId)) {
                     $this->getSDK()->recordStreamDelete($streamId);
                 }
+                break;
+            case 'update':
+                $streamId = $request->get('id');
+                    $data = $subject->View()->data;
+                    $data['isExported'] = $this->getProductStreamService()->isStreamExported($streamId);
+                    $subject->View()->data = $data;
                 break;
             default:
                 break;

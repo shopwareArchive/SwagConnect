@@ -175,15 +175,15 @@ class ProductStreamService
     public function getList($start = null, $limit = null)
     {
         $streamBuilder = $this->productStreamRepository->getStreamsBuilder($start, $limit);
+        $streamBuilder->andWhere('ps.type = :type')
+            ->setParameter('type', self::STATIC_STREAM);
 
         $stmt = $streamBuilder->execute();
         $streams = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($streams as $index => $stream) {
-            if ($stream['type'] == self::STATIC_STREAM) {
-                $productCount = $this->productStreamRepository->countProductsInStream($stream['id']);
-                $streams[$index]['productCount'] = $productCount['productCount'];
-            }
+            $productCount = $this->productStreamRepository->countProductsInStream($stream['id']);
+            $streams[$index]['productCount'] = $productCount['productCount'];
         }
 
         return array(

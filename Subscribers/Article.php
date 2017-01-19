@@ -7,7 +7,7 @@ use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
-use Shopware\Models\Article\Article as Product;
+use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
@@ -134,48 +134,47 @@ class Article extends BaseSubscriber
                 }
                 break;
             case 'setPropertyList':
-                // property values are saved in different ajax call than
+                // property values are saved in different ajax call then
                 // property group and this will generate wrong Connect changes.
                 // after the property values are saved, the temporary property group is no needed
                 // and it will generate right Connect changes
-                if ($articleId = $request->getParam('articleId')) {
+                $articleId = $request->getParam('articleId', null);
 
-                    /** @var Product $article */
-                    $article = $this->modelManager->find(Product::class, $articleId);
+                /** @var ArticleModel $article */
+                $article = $this->modelManager->find(ArticleModel::class, $articleId);
 
-                    if (!$article) {
-                        return;
-                    }
-
-                    if (!$article->getPropertyGroup()) {
-                        return;
-                    }
-
-                    // Check if entity is a connect product
-                    $attribute = $this->getHelper()->getConnectAttributeByModel($article);
-                    if (!$attribute) {
-                        return;
-                    }
-
-                    // if article is not exported to Connect
-                    // don't need to generate changes
-                    if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
-                        return;
-                    }
-
-                    if ($article->getAttribute()->getConnectPropertyGroup()) {
-                        $article->getAttribute()->setConnectPropertyGroup(null);
-                        $this->modelManager->persist($article);
-                        $this->modelManager->flush();
-                    }
-
-                    $sourceIds = Shopware()->Db()->fetchCol(
-                        'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-                        array($article->getId())
-                    );
-
-                    $this->getConnectExport()->export($sourceIds, null, true);
+                if (!$article) {
+                    return;
                 }
+
+                if (!$article->getPropertyGroup()) {
+                    return;
+                }
+
+                // Check if entity is a connect product
+                $attribute = $this->getHelper()->getConnectAttributeByModel($article);
+                if (!$attribute) {
+                    return;
+                }
+
+                // if article is not exported to Connect
+                // don't need to generate changes
+                if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+                    return;
+                }
+
+                if ($article->getAttribute()->getConnectPropertyGroup()) {
+                    $article->getAttribute()->setConnectPropertyGroup(null);
+                    $this->modelManager->persist($article);
+                    $this->modelManager->flush();
+                }
+
+                $sourceIds = Shopware()->Db()->fetchCol(
+                    'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
+                    array($article->getId())
+                );
+
+                $this->getConnectExport()->export($sourceIds, null, true);
                 break;
             case 'createConfiguratorVariants':
                 // main detail should be updated as well, because shopware won't call lifecycle event

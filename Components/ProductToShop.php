@@ -471,7 +471,6 @@ class ProductToShop implements ProductToShopBase
         $valueRepo = $this->manager->getRepository(PropertyValue::class);
 
         foreach ($product->properties as $property) {
-
             $option = $optionRepo->findOneBy(['name' => $property->option]);
 
             if (!$option) {

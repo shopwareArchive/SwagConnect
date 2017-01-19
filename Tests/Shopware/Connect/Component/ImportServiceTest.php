@@ -166,10 +166,13 @@ class ImportServiceTest extends ConnectTestHelper
             $this->manager->persist($attribute);
             $this->manager->persist($article);
 
+            // each entity is flushed separately, otherwise
+            // $articleIds and $articleIds have same values, but different order
+            $this->manager->flush($article);
+            $this->manager->flush($attribute);
+
             $articleIds[] = $article->getId();
         }
-
-        $this->manager->flush();
 
         //call findRemoteArticleIdsByCategoryId
         // and compare returned array of ids

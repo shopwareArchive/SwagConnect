@@ -756,14 +756,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function autoLoginAction()
     {
-        $response = $this->getSnHttpClient()->sendRequestToConnect(array(), 'account/generate-token');
-
-        $responseBody = json_decode($response->getBody());
-        if (!$responseBody->success) {
-            throw new \RuntimeException($responseBody->message);
-        }
-
-        return $this->redirect('http://' . $this->getHost() . '/login/' . $responseBody->loginToken);
+        return $this->redirect('http://' . $this->getHost() . '/login');
     }
 
     /**

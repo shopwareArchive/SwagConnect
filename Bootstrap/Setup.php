@@ -604,7 +604,7 @@ class Setup
             'detailShopInfo' => array('1', null, 'general'),
             'checkoutShopInfo' => array('1', null, 'general'),
             'longDescriptionField' => array('1', null, 'export'),
-            'importImagesOnFirstImport' => array('0', null, 'import'),
+            'importImagesOnFirstImport' => array('1', null, 'import'),
             'autoUpdateProducts' => array('1', null, 'export'),
             'overwriteProductName' => array('1', null, 'import'),
             'overwriteProductPrice' => array('1', null, 'import'),

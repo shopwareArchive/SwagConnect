@@ -3,6 +3,7 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
@@ -12,21 +13,27 @@ class ProductStreams extends BaseSubscriber
     /** @var ConnectExport */
     protected $connectExport;
 
+    /** @var Config */
+    protected $config;
+
     /** @var  Helper */
     protected $helper;
 
     /**
      * ProductStreams constructor.
      * @param ConnectExport $connectExport
+     * @param Config $config
      * @param Helper $helper
      */
     public function __construct(
         ConnectExport $connectExport,
+        Config $config,
         Helper $helper
 
     ) {
         parent::__construct();
         $this->connectExport = $connectExport;
+        $this->config = $config;
         $this->helper = $helper;
     }
 
@@ -76,6 +83,11 @@ class ProductStreams extends BaseSubscriber
                     return;
                 }
 
+                $autoUpdate = $this->config->getConfig('autoUpdateProducts', 1);
+                if (!$autoUpdate) {
+                    return;
+                }
+
                 $sourceIds = $this->helper->getSourceIdsFromArticleId($articleId);
                 $streamAssignments = $this->getProductStreamService()->prepareStreamsAssignments($streamId);
 
@@ -84,7 +96,15 @@ class ProductStreams extends BaseSubscriber
                     return;
                 }
 
-                $this->connectExport->export($sourceIds, $streamAssignments);
+                if ($autoUpdate == 1) {
+                    $this->connectExport->export($sourceIds, $streamAssignments);
+                } elseif ($autoUpdate == 2) {
+                    Shopware()->Db()->update(
+                        's_plugin_connect_items',
+                        array('cron_update' => 1),
+                        array('article_id' => $articleId)
+                    );
+                }
                 break;
             default:
                 break;

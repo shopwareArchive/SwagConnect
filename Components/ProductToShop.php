@@ -23,6 +23,7 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
+use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Connect\Struct\Product,
@@ -468,7 +469,7 @@ class ProductToShop implements ProductToShopBase
 
         $article->setPropertyGroup($group);
 
-        $valueCollection = [];
+        $valueCollection = new ArrayCollection();
         $optionRepo = $this->manager->getRepository(PropertyOption::class);
         $valueRepo = $this->manager->getRepository(PropertyValue::class);
 
@@ -491,7 +492,7 @@ class ProductToShop implements ProductToShopBase
                 $this->manager->persist($value);
             }
 
-            $valueCollection[] = $value;
+            $valueCollection->add($value);
 
             $filters = [
                 ['property' => "options.name", 'expression' => '=', 'value' => $property->option],

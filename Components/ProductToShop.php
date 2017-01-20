@@ -462,6 +462,8 @@ class ProductToShop implements ProductToShopBase
             $group->setComparable($firstProperty->comparable);
             $group->setSortMode($firstProperty->sortMode);
             $group->setPosition($firstProperty->groupPosition);
+            $this->manager->persist($group);
+            $this->manager->flush();
         }
 
         $article->setPropertyGroup($group);

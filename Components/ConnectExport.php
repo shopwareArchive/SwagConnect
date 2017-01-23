@@ -90,7 +90,6 @@ class ConnectExport
      *
      * @param array $ids
      * @param ProductStreamsAssignments|null $streamsAssignments
-     * @param boolean $isEvent
      * @return array
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)

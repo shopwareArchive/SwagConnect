@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
+use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -20,18 +21,26 @@ use Shopware\Models\Order\Order;
 class Lifecycle extends BaseSubscriber
 {
     /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
+    private $manager;
+
+    /**
      * @var int
      */
     private $autoUpdateProducts;
 
     /**
      * Lifecycle constructor.
+     *
+     * @param ModelManager $modelManager
      * @param int $autoUpdateProducts
      */
-    public function __construct($autoUpdateProducts)
+    public function __construct(ModelManager $modelManager, $autoUpdateProducts)
     {
         parent::__construct();
 
+        $this->manager = $modelManager;
         $this->autoUpdateProducts = $autoUpdateProducts;
     }
 
@@ -57,7 +66,7 @@ class Lifecycle extends BaseSubscriber
         return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
-            Shopware()->Models(),
+            $this->manager,
             new ProductsAttributesValidator(),
             $this->getConnectConfig(),
             new ErrorHandler()
@@ -119,7 +128,7 @@ class Lifecycle extends BaseSubscriber
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-
+\Doctrine\Common\Util\Debug::dump($entity);
         if (!$entity instanceof \Shopware\Models\Article\Article
             && !$entity instanceof \Shopware\Models\Article\Detail
         ) {
@@ -128,7 +137,7 @@ class Lifecycle extends BaseSubscriber
 
         $id = $entity->getId();
         $className = get_class($entity);
-        $model = Shopware()->Models()->getRepository($className)->find($id);
+        $model = $this->manager->getRepository($className)->find($id);
         // Check if we have a valid model
         if (!$model) {
             return;
@@ -146,12 +155,20 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
+        $forceExport = false;
+        if ($entity instanceof \Shopware\Models\Article\Detail
+            && $model->getNumber() != $entity->getNumber()) {
+            // if detail number has been changed
+            // sc plugin must generate & sync the change immediately
+            $forceExport = true;
+        }
+
         // Mark the product for connect update
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
-                $this->generateChangesForDetail($model);
+                $this->generateChangesForDetail($model, $forceExport);
             } elseif ($model instanceof \Shopware\Models\Article\Article){
-                $this->generateChangesForArticle($model);
+                $this->generateChangesForArticle($model, $forceExport);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
@@ -184,9 +201,19 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
+        /** @var \Shopware\Models\Article\Detail $oldDetail */
+        $oldDetail = $this->manager->getRepository('Shopware\Models\Article\Detail')->find($detail->getId());
+
         // Mark the article detail for connect export
         try {
-            $this->generateChangesForDetail($detail);
+            $forceExport = false;
+            if ($oldDetail && $oldDetail->getNumber() != $detail->getNumber()) {
+                // if detail number has been changed
+                // sc plugin must generate & sync the change immediately
+                $forceExport = true;
+            }
+
+            $this->generateChangesForDetail($detail, $forceExport);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
@@ -214,12 +241,14 @@ class Lifecycle extends BaseSubscriber
         $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
-    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail)
+    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $force = false)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
-        if ($this->autoUpdateProducts == 1) {
-            $this->getConnectExport()->export(array($attribute->getSourceId()));
+        if ($this->autoUpdateProducts == 1 || $force === true) {
+            $this->getConnectExport()->export(
+                array($attribute->getSourceId()), null, true
+            );
         } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
             Shopware()->Models()->persist($attribute);
@@ -227,17 +256,17 @@ class Lifecycle extends BaseSubscriber
         }
     }
 
-    private function generateChangesForArticle(\Shopware\Models\Article\Article $article)
+    private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $force = false)
     {
-        if ($this->autoUpdateProducts == 1) {
-            $sourceIds = Shopware()->Db()->fetchCol(
+        if ($this->autoUpdateProducts == 1 || $force === true) {
+            $sourceIds = $this->manager->fetchCol(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                 array($article->getId())
             );
 
-            $this->getConnectExport()->export($sourceIds);
+            $this->getConnectExport()->export($sourceIds, null, true);
         } elseif ($this->autoUpdateProducts == 2) {
-            Shopware()->Db()->update(
+            $this->manager->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
                 array('article_id' => $article->getId())

@@ -128,7 +128,7 @@ class Lifecycle extends BaseSubscriber
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-\Doctrine\Common\Util\Debug::dump($entity);
+
         if (!$entity instanceof \Shopware\Models\Article\Article
             && !$entity instanceof \Shopware\Models\Article\Detail
         ) {

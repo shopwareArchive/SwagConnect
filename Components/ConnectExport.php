@@ -335,6 +335,9 @@ class ConnectExport
     public function syncDeleteDetail(Detail $detail)
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
+        if (!$this->helper->isProductExported($attribute)) {
+            return;
+        }
         $this->sdk->recordDelete($attribute->getSourceId());
         $attribute->setExportStatus(Attribute::STATUS_DELETE);
         $attribute->setExported(false);

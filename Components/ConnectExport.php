@@ -121,7 +121,7 @@ class ConnectExport
                         ),
                     )
                 );
-
+                $this->manager->refresh($connectAttribute);
                 continue;
             }
 
@@ -190,6 +190,7 @@ class ConnectExport
 
                 $this->errorHandler->handle($e);
             }
+            $this->manager->refresh($connectAttribute);
         }
 
         try {
@@ -198,7 +199,6 @@ class ConnectExport
             $this->manager->rollback();
             $this->errorHandler->handle($e);
         }
-
 
         return $this->errorHandler->getMessages();
     }

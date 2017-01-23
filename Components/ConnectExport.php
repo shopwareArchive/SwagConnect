@@ -93,7 +93,7 @@ class ConnectExport
      * @param boolean $isEvent
      * @return array
      */
-    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null, $isEvent = false)
+    public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
         $connectItems = $this->fetchConnectItems($ids);
 

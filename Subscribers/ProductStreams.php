@@ -84,17 +84,18 @@ class ProductStreams extends BaseSubscriber
                 }
 
                 $autoUpdate = $this->config->getConfig('autoUpdateProducts', 1);
-                if (!$autoUpdate) {
+                if ($autoUpdate == 0) {
                     return;
                 }
 
                 $sourceIds = $this->helper->getSourceIdsFromArticleId($articleId);
-                $streamAssignments = $this->getProductStreamService()->prepareStreamsAssignments($streamId);
 
                 //it can timeout if products are more than a 100
                 if (count($sourceIds) > ProductStreamService::PRODUCT_LIMIT) {
                     return;
                 }
+
+                $streamAssignments = $this->getProductStreamService()->prepareStreamsAssignments($streamId);
 
                 if ($autoUpdate == 1) {
                     $this->connectExport->export($sourceIds, $streamAssignments);

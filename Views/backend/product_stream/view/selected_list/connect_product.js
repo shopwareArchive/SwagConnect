@@ -11,7 +11,7 @@ Ext.define('Shopware.apps.ProductStream.controller.ConnectProduct', {
     addRecord: function (record) {
         var me = this;
         me.callOverridden(arguments);
-        me.hasManyVariants(record)
+        me.hasManyVariants(record);
     },
 
     hasManyVariants: function(record) {

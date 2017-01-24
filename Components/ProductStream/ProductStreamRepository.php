@@ -4,6 +4,7 @@ namespace ShopwarePlugins\Connect\Components\ProductStream;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
+use Doctrine\ORM\Query\Expr\Join;
 
 class ProductStreamRepository extends Repository
 {
@@ -88,7 +89,12 @@ class ProductStreamRepository extends Repository
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
 
-        $builder->select(array('ps.id', 'ps.name', 'ps.type', 'pcs.export_status as exportStatus', 'pcs.export_message as exportMessage'))
+        $columns = [
+            'ps.id', 'ps.name', 'ps.type', 'ps.conditions',
+            'pcs.export_status as exportStatus', 'pcs.export_message as exportMessage'
+        ];
+
+        $builder->select($columns)
             ->from('s_product_streams', 'ps')
             ->leftJoin('ps', 's_plugin_connect_streams', 'pcs', 'ps.id = pcs.stream_id');
 
@@ -111,7 +117,7 @@ class ProductStreamRepository extends Repository
             ->from('s_product_streams_selection')
             ->where('stream_id = :streamId')
             ->setParameter('streamId', $streamId)
-            ->execute()->fetch(\PDO::FETCH_ASSOC);
+            ->execute()->fetchColumn();
     }
 
 }

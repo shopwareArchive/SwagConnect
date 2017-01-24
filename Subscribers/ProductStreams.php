@@ -84,7 +84,7 @@ class ProductStreams extends BaseSubscriber
                 }
 
                 $autoUpdate = $this->config->getConfig('autoUpdateProducts', 1);
-                if ($autoUpdate == 0) {
+                if ($autoUpdate == Config::UPDATE_MANUAL) {
                     return;
                 }
 
@@ -97,9 +97,9 @@ class ProductStreams extends BaseSubscriber
 
                 $streamAssignments = $this->getProductStreamService()->prepareStreamsAssignments($streamId);
 
-                if ($autoUpdate == 1) {
+                if ($autoUpdate == Config::UPDATE_AUTO) {
                     $this->connectExport->export($sourceIds, $streamAssignments);
-                } elseif ($autoUpdate == 2) {
+                } elseif ($autoUpdate == Config::UPDATE_CRON) {
                     Shopware()->Db()->update(
                         's_plugin_connect_items',
                         array('cron_update' => 1),

@@ -83,7 +83,7 @@ class ProductStreams extends BaseSubscriber
                     return;
                 }
 
-                $autoUpdate = $this->config->getConfig('autoUpdateProducts', 1);
+                $autoUpdate = $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO);
                 if ($autoUpdate == Config::UPDATE_MANUAL) {
                     return;
                 }

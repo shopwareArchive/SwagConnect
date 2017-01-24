@@ -123,6 +123,7 @@ class Transaction
         $toShopConfiguration = $this->shopConfiguration->getShopConfiguration($buyerShopId);
 
         $checkResult = new Struct\CheckResult();
+        /** @var Struct\OrderItem $orderItem */
         foreach ($order->products as $orderItem) {
             $remoteProduct = $orderItem->product;
             if (!isset($localProducts[$remoteProduct->sourceId])) {
@@ -144,20 +145,32 @@ class Transaction
                 $currentNotAvailable = clone $localProduct;
                 $currentNotAvailable->availability = 0;
 
-                $checkResult->changes[] = new Struct\Change\InterShop\Unavailable(
+                $checkResult->changes[] = new Struct\Change\InterShop\Update(
                     array(
                         'sourceId' => $remoteProduct->sourceId,
                         'shopId' => $myShopId,
+                        'product' => $currentNotAvailable,
+                        'oldProduct' => $remoteProduct,
                     )
                 );
 
-            } elseif ($this->fixedPriceChanged($localProduct, $remoteProduct) || $this->productUnavailable($localProduct)) {
-
-                // Price or availability changed
+            } elseif ($this->fixedPriceChanged($localProduct, $remoteProduct)) {
+                // Price changed
+                $checkResult->changes[] = new Struct\Change\InterShop\Update(
+                    array(
+                        'sourceId' => $remoteProduct->sourceId,
+                        'shopId' => $myShopId,
+                        'product' => $localProduct,
+                        'oldProduct' => $remoteProduct,
+                    )
+                );
+            } elseif ($this->productUnavailable($localProduct, $orderItem->count)) {
+                // Availability changed
                 $checkResult->changes[] = new Struct\Change\InterShop\Unavailable(
                     array(
                         'sourceId' => $remoteProduct->sourceId,
                         'shopId' => $myShopId,
+                        'availability' => $localProduct->availability,
                     )
                 );
             }
@@ -316,9 +329,9 @@ class Transaction
         return ($localProduct->fixedPrice && ! $this->floatsEqual($localProduct->price, $remoteProduct->price));
     }
 
-    private function productUnavailable($localProduct)
+    private function productUnavailable($localProduct, $requestedCount)
     {
-        return $localProduct->availability <= 0 && !$this->shopConfiguration->isFeatureEnabled('sellNotInStock');
+        return ($localProduct->availability <= 0 || $localProduct->availability < $requestedCount) && !$this->shopConfiguration->isFeatureEnabled('sellNotInStock');
     }
 
     private function floatsEqual($a, $b)

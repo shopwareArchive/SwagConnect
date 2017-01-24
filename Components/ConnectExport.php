@@ -210,6 +210,9 @@ class ConnectExport
      */
     private function updateLocalConnectItem($sourceId, $params = array())
     {
+        if (empty($params)) {
+            return;
+        }
         $possibleValues = array(
             Attribute::STATUS_DELETE,
             Attribute::STATUS_INSERT,

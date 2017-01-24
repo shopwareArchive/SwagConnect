@@ -251,8 +251,8 @@ class Lifecycle extends BaseSubscriber
             );
         } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
-            Shopware()->Models()->persist($attribute);
-            Shopware()->Models()->flush();
+            $this->manager->persist($attribute);
+            $this->manager->flush();
         }
     }
 

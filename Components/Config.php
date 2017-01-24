@@ -37,7 +37,7 @@ class Config
 {
     const UPDATE_MANUAL = 0;
     const UPDATE_AUTO = 1;
-    const UPDATE_CRON = 2;
+    const UPDATE_CRON_JOB = 2;
     const MARKETPLACE_URL = 'connect.shopware.com';
     const SN_PREFIX = 'sn.';
 

@@ -362,7 +362,7 @@ class Helper
         $builder = $this->manager->getConnection()->createQueryBuilder();
         $builder->select('COUNT(spci.id)')
             ->from('s_plugin_connect_items', 'spci')
-            ->where('spci.article_id = :articleIds AND spci.export_status IN (:exportStatus) AND spci.shop_id IS NULL')
+            ->where('spci.article_id = :articleId AND spci.export_status IN (:exportStatus) AND spci.shop_id IS NULL')
             ->setParameter('articleId', $connectAttribute->getArticleId(), \PDO::PARAM_INT)
             ->setParameter(
                 ':exportStatus',

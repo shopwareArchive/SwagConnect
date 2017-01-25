@@ -109,13 +109,14 @@ class ProductStreamRepository extends Repository
         return $builder;
     }
 
-    public function countProductsInStream($streamId)
+    public function countProductsInStaticStream($streamId)
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
 
-        return $builder->select('COUNT(id) as productCount')
-            ->from('s_product_streams_selection')
-            ->where('stream_id = :streamId')
+        return $builder->select('COUNT(ad.id) as productCount')
+            ->from('s_articles_details', 'ad')
+            ->leftJoin('ad', 's_product_streams_selection', 'pss', 'ad.articleID = pss.article_id')
+            ->where('pss.stream_id = :streamId')
             ->setParameter('streamId', $streamId)
             ->execute()->fetchColumn();
     }

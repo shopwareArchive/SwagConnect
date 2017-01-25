@@ -208,7 +208,7 @@ class ProductStreamService
 
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
-                $streams[$index]['productCount'] = $this->productStreamRepository->countProductsInStream($stream['id']);
+                $streams[$index]['productCount'] = $this->productStreamRepository->countProductsInStaticStream($stream['id']);
             } else {
                 $productStream = $this->productStreamRepository->findById($stream['id']);
                 $result = $this->getProductFromConditionStream($productStream);

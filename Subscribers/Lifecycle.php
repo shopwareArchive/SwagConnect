@@ -135,11 +135,10 @@ class Lifecycle extends BaseSubscriber
         // if article is not exported to Connect
         // or at least one article detail from same article is not exported
         // don't need to generate changes
-        if (
-            (!$this->getHelper()->isProductExported($attribute) && !$this->getHelper()->hasExportedVariants($attribute))
-            || !empty($attribute->getShopId())
-        ) {
-            return;
+        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+            if (!$this->getHelper()->hasExportedVariants($attribute)) {
+                return;
+            }
         }
 
         // Mark the product for connect update

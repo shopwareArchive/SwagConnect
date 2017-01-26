@@ -100,10 +100,10 @@ class ProductTranslator implements ProductTranslatorInterface
 
             $result[$localeCode[0]] = new Translation(
                 array(
-                    'title' => $translation['title'],
-                    'shortDescription' => $translation['shortDescription'],
-                    'longDescription' => $translation['longDescription'],
-                    'additionalDescription' => $translation['additionalDescription'],
+                    'title' => isset($translation['title']) ? $translation['title'] : '',
+                    'shortDescription' => isset($translation['shortDescription']) ? $translation['shortDescription'] : '',
+                    'longDescription' => isset($translation['longDescription']) ? $translation['longDescription'] : '',
+                    'additionalDescription' => isset($translation['additionalDescription']) ? $translation['additionalDescription'] : '',
                     'url' => $this->getUrlForProduct($sourceId, $shop->getId()),
                 )
             );

@@ -56,6 +56,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionFieldHelp: Ext.String.format('{s name=config/export/product_description_field_help}Wählen Sie aus, welches Textfeld als Produkt-Beschreibung zu [0] exportiert werden soll und anderen Händlern zur Verfügung gestellt wird.{/s}',marketplaceName),
+        longDescription: '{s name=config/export/product_long_description}Product long description{/s}',
+        shortDescription: '{s name=config/export/product_short_description}Product short description{/s}',
+        additionalDescription: '{s name=config/export/product_additional_description}Connect description{/s}',
         autoProductSync: '{s name=config/export/auto_product_sync_label}Geänderte Produkte automatisch synchronisieren{/s}',
         autoPlayedChanges: Ext.String.format('{s name=config/export/changes_auto_played_label}Änderungen automatisch mit [0] synchronsieren{/s}', marketplaceName),
         emptyText: '{s name=config/export/empty_text_combo}Please choose{/s}',
@@ -344,7 +347,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Artikel-Kurzbeschreibung',
+                fieldLabel: me.snippets.longDescription,
                 name: 'longDescriptionField',
                 inputValue: 1,
                 checked: true,
@@ -352,14 +355,14 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
             }), Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Artikel-Langbeschreibung',
+                fieldLabel: me.snippets.shortDescription,
                 name: 'shortDescriptionField',
                 inputValue: 1,
                 uncheckedValue: 0
             }), Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Connect-Beschreibung',
+                fieldLabel: me.snippets.additionalDescription,
                 name: 'connectDescriptionField',
                 inputValue: 1,
                 uncheckedValue: 0

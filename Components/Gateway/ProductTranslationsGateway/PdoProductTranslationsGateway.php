@@ -29,6 +29,8 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 
 class PdoProductTranslationsGateway implements ProductTranslationsGateway
 {
+    const CONNECT_DESCRIPTION = '__attribute_connect_product_description';
+
     private $db;
 
     public function __construct(\Enlight_Components_Db_Adapter_Pdo_Mysql $db)
@@ -61,6 +63,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
             'title' => $translation['txtArtikel'] ?: '',
             'shortDescription' => array_key_exists('txtshortdescription', $translation) ? $translation['txtshortdescription']: '',
             'longDescription' => array_key_exists('txtlangbeschreibung', $translation) ? $translation['txtlangbeschreibung'] : '',
+            'additionalDescription' => array_key_exists(self::CONNECT_DESCRIPTION, $translation) ? $translation[self::CONNECT_DESCRIPTION] : '',
         );
     }
 
@@ -98,6 +101,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
                 'title' => $data['txtArtikel'] ?: '',
                 'shortDescription' => array_key_exists('txtshortdescription', $data) ? $data['txtshortdescription']: '',
                 'longDescription' => array_key_exists('txtlangbeschreibung', $data) ? $data['txtlangbeschreibung'] : '',
+                'additionalDescription' => array_key_exists(self::CONNECT_DESCRIPTION, $data) ? $data[self::CONNECT_DESCRIPTION] : '',
             );
         }
 
@@ -257,6 +261,10 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
         }
         if (strlen($translation->shortDescription)) {
             $objectData['txtshortdescription'] = $translation->shortDescription;
+        }
+
+        if (strlen($translation->additionalDescription)) {
+            $objectData[self::CONNECT_DESCRIPTION] = $translation->additionalDescription;
         }
 
         $this->db->query('

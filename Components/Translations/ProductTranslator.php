@@ -103,6 +103,7 @@ class ProductTranslator implements ProductTranslatorInterface
                     'title' => $translation['title'],
                     'shortDescription' => $translation['shortDescription'],
                     'longDescription' => $translation['longDescription'],
+                    'additionalDescription' => $translation['additionalDescription'],
                     'url' => $this->getUrlForProduct($sourceId, $shop->getId()),
                 )
             );

@@ -2,6 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component\Gateway\ProductTranslationsGateway;
 
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class PdoProductTranslationsGatewayTest extends ConnectTestHelper
@@ -32,7 +33,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
 
     public function testGetSingleTranslation()
     {
-        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:3:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";}');
+        $this->mockDbStatement->expects($this->any())->method('fetchColumn')->willReturn('a:4:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";s:39:"__attribute_connect_product_description";s:50:"shopware Connect local article connect description";}');
 
         $sql = 'SELECT objectdata
                 FROM s_core_translations
@@ -45,6 +46,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
             'title' => 'shopware Connect local article',
             'shortDescription' => 'shopware Connect local article short description',
             'longDescription' => 'shopware Connect local article long description',
+            'additionalDescription' => 'shopware Connect local article connect description',
         );
         $this->assertEquals($expected, $this->gateway->getSingleTranslation(105, 3));
     }
@@ -64,6 +66,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
             'title' => 'shopware Connect local article',
             'shortDescription' => '',
             'longDescription' => '',
+            'additionalDescription' => '',
         );
         $this->assertEquals($expected, $this->gateway->getSingleTranslation(105, 3));
     }
@@ -88,11 +91,11 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
             ->method('fetchAll')
             ->willReturn(array(
                 0 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";}',
+                    'objectdata' => 'a:4:{s:10:"txtArtikel";s:30:"shopware Connect local article";s:19:"txtshortdescription";s:48:"shopware Connect local article short description";s:19:"txtlangbeschreibung";s:47:"shopware Connect local article long description";s:39:"__attribute_connect_product_description";s:50:"shopware Connect local article connect description";}',
                     'objectlanguage' => 2,
                 ),
                 1 => array(
-                    'objectdata' => 'a:3:{s:10:"txtArtikel";s:33:"shopware Connect local article EN";s:19:"txtshortdescription";s:51:"shopware Connect local article short description EN";s:19:"txtlangbeschreibung";s:50:"shopware Connect local article long description EN";}',
+                    'objectdata' => 'a:4:{s:10:"txtArtikel";s:33:"shopware Connect local article EN";s:19:"txtshortdescription";s:51:"shopware Connect local article short description EN";s:19:"txtlangbeschreibung";s:50:"shopware Connect local article long description EN";s:39:"__attribute_connect_product_description";s:53:"shopware Connect local article connect description EN";}',
                     'objectlanguage' => 3,
                 ),
             ));
@@ -110,11 +113,13 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
                 'title' => 'shopware Connect local article',
                 'shortDescription' => 'shopware Connect local article short description',
                 'longDescription' => 'shopware Connect local article long description',
+                'additionalDescription' => 'shopware Connect local article connect description',
             ),
             3 => array(
                 'title' => 'shopware Connect local article EN',
                 'shortDescription' => 'shopware Connect local article short description EN',
                 'longDescription' => 'shopware Connect local article long description EN',
+                'additionalDescription' => 'shopware Connect local article connect description EN',
             ),
         );
 
@@ -149,11 +154,13 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
                 'title' => 'shopware Connect local article',
                 'shortDescription' => '',
                 'longDescription' => '',
+                'additionalDescription' => '',
             ),
             3 => array(
                 'title' => 'shopware Connect local article EN',
                 'shortDescription' => '',
                 'longDescription' => '',
+                'additionalDescription' => '',
             ),
         );
 
@@ -380,11 +387,13 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
             'title' => 'shopware Connect remote article EN',
             'longDescription' => 'Long description EN',
             'shortDescription' => 'Short description EN',
+            'additionalDescription' => 'Connect description EN',
         ));
         $objectData = array(
             'txtArtikel' => $translation->title,
             'txtlangbeschreibung' => $translation->longDescription,
             'txtshortdescription' => $translation->shortDescription,
+            PdoProductTranslationsGateway::CONNECT_DESCRIPTION => $translation->additionalDescription,
         );
         $sql = '
                 INSERT IGNORE INTO `s_core_translations`

@@ -199,6 +199,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                     'title' => 'MassImport #'. $number . ' EN',
                     'longDescription' => 'Ein Produkt aus shopware Connect EN',
                     'shortDescription' => 'Ein Produkt aus shopware Connect short EN',
+                    'additionalDescription' => 'Ein Produkt aus shopware Verbinden Sie mit zusätzlicher Beschreibung EN',
                     'url' => 'http://shopware.de',
                 ))
             )

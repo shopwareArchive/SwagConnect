@@ -29,6 +29,7 @@ use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\Config;
 
 /**
  * @category  Shopware
@@ -288,7 +289,11 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                 $modelManager
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),
-            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(),
+            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
+                $this->getConnectFactory()->getConnectExport(),
+                new Config($modelManager),
+                $this->getConnectFactory()->getHelper()
+            ),
         );
     }
 

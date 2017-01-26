@@ -763,6 +763,22 @@ class Helper
     }
 
     /**
+     * @param $articleId
+     * @return array
+     */
+    public function getSourceIdsFromArticleId($articleId)
+    {
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
+            array($articleId)
+        );
+
+        return array_map(function($row) {
+            return $row['source_id'];
+        }, $rows);
+    }
+
+    /**
      * @param Unit $localUnit
      * @param string $remoteUnit
      */

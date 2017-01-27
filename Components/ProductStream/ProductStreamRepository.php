@@ -42,6 +42,22 @@ class ProductStreamRepository extends Repository
     }
 
     /**
+     * @param array $streamIds
+     * @return \Shopware\Models\ProductStream\ProductStream[]
+     */
+    public function findByIds(array $streamIds)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        return $builder->select('ps')
+            ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
+            ->where("ps.id IN (:streamIds)")
+            ->setParameter('streamIds', $streamIds)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @param $streamId
      * @return array
      */

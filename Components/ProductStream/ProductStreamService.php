@@ -117,6 +117,15 @@ class ProductStreamService
     }
 
     /**
+     * @param array $streamIds
+     * @return \Shopware\Models\ProductStream\ProductStream[]
+     */
+    public function findStreams(array $streamIds)
+    {
+        return $this->productStreamRepository->findByIds($streamIds);
+    }
+
+    /**
      * @param $articleIds
      * @return array
      */
@@ -208,7 +217,7 @@ class ProductStreamService
 
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
-                $streams[$index]['productCount'] = $this->productStreamRepository->countProductsInStaticStream($stream['id']);
+                $streams[$index]['productCount'] = $this->countProductsInStaticStream($stream['id']);
             } else {
                 $productStream = $this->productStreamRepository->findById($stream['id']);
                 $result = $this->getProductFromConditionStream($productStream);
@@ -220,6 +229,31 @@ class ProductStreamService
             'data' => $streams,
             'count' => $stmt->rowCount()
         ];
+    }
+
+    /**
+     * @param ProductStream $stream
+     * @return ProductStreamAttribute
+     */
+    public function createStreamAttribute(ProductStream $stream)
+    {
+        $streamAttribute = $this->streamAttrRepository->findOneBy(['streamId' => $stream->getId()]);
+
+        if (!$streamAttribute) {
+            $streamAttribute = $this->streamAttrRepository->create();
+            $streamAttribute->setStreamId($stream->getId());
+        }
+
+        return $streamAttribute;
+    }
+
+    /**
+     * @param $streamId
+     * @return string
+     */
+    public function countProductsInStaticStream($streamId)
+    {
+        return $this->productStreamRepository->countProductsInStaticStream($streamId);
     }
 
     /**

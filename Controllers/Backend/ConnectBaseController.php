@@ -1426,6 +1426,44 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     }
 
     /**
+     * Saves the dynamic streams to the db.
+     * Cronjob will looks for those streams to process them
+     */
+    public function prepareDynamicStreamsAction()
+    {
+        $streamIds = $this->Request()->getParam('streamIds',[]);
+
+        try {
+            $streamService = $this->getProductStreamService();
+            $streams = $streamService->findStreams($streamIds);
+
+            if (!$streams) {
+                //todo: translate this
+                throw new \Exception('No streams were selected');
+            }
+
+            $modelManager = $this->getModelManager();
+
+
+            foreach ($streams as $stream) {
+                $streamAttr = $streamService->createStreamAttribute($stream);
+                $modelManager->persist($streamAttr);
+            }
+
+            $modelManager->flush();
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
+
+        $this->View()->assign(array(
+            'success' => true,
+        ));
+    }
+
+    /**
      * Add given category to products
      */
     public function assignProductsToCategoryAction()

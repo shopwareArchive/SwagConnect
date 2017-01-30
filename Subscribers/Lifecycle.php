@@ -133,9 +133,12 @@ class Lifecycle extends BaseSubscriber
         }
 
         // if article is not exported to Connect
+        // or at least one article detail from same article is not exported
         // don't need to generate changes
         if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
-            return;
+            if (!$this->getHelper()->hasExportedVariants($attribute)) {
+                return;
+            }
         }
 
         // Mark the product for connect update
@@ -184,10 +187,8 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the product for connect update
         try {
-            $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
-            $this->getConnectExport()->export(
-                array($detailAttribute->getSourceId()), null, true
-            );
+            $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+            $this->generateChangesForDetail($detail, $autoUpdate);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
@@ -218,6 +219,10 @@ class Lifecycle extends BaseSubscriber
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+        if (!$detail->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
+            $this->getConnectExport()->syncDeleteDetail($detail);
+            return;
+        }
 
         if ($autoUpdate == 1) {
             $this->getConnectExport()->export(
@@ -232,6 +237,11 @@ class Lifecycle extends BaseSubscriber
 
     private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $autoUpdate)
     {
+        if (!$article->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
+            $this->getConnectExport()->setDeleteStatusForVariants($article);
+            return;
+        }
+
         if ($autoUpdate == 1) {
             $sourceIds = Shopware()->Db()->fetchCol(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',

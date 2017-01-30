@@ -7,6 +7,7 @@ use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Connect\Struct\Product;
+use Shopware\Connect\Struct\Property;
 use ShopwarePlugins\Connect\Components\Exceptions\NoLocalProductException;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\MediaService;
@@ -199,6 +200,8 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
 		$row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
+
+        $row['properties'] = $this->prepareProperties($row['localId']);
 
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
@@ -396,6 +399,38 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         return $priceRanges;
+    }
+
+    /**
+     * @param $articleId
+     * @return Property[]
+     */
+    protected function prepareProperties($articleId)
+    {
+        $properties = $this->getProperties($articleId);
+        $attrGroup = $this->attributeGroup($articleId);
+
+        // if product property group exist then the
+        // property values are still old by that
+        // this will not generate wrong Connect changes
+        $property = reset($properties);
+        if ($attrGroup) {
+            $groupName = $attrGroup->getName();
+            $groupPosition = $attrGroup->getPosition();
+        } else {
+            $groupName = $property['groupName'];
+            $groupPosition = $property['groupPosition'];
+        }
+
+        $propertyArray = array();
+        foreach ($properties as $property) {
+            $cloneProperty = $property;
+            $cloneProperty['groupName'] = $groupName;
+            $cloneProperty['groupPosition'] = $groupPosition;
+            $propertyArray[] = new Property($cloneProperty);
+        }
+
+        return $propertyArray;
     }
 
     /**

@@ -119,8 +119,10 @@ abstract class BaseProductQuery
 
         return $builder->select('g')
             ->from('Shopware\Models\Attribute\Article', 'attr')
+            ->leftJoin('Shopware\Models\Article\Detail','d', Join::WITH, 'd.id = attr.articleDetailId')
             ->leftJoin('Shopware\Models\Property\Group','g', Join::WITH, 'g.id = attr.connectPropertyGroup')
-            ->where('attr.articleId = :articleId')
+            ->where('d.articleId = :articleId')
+            ->andWhere('d.kind = 1')
             ->setParameter(':articleId', $articleId)
             ->getQuery()->getOneOrNullResult();
     }

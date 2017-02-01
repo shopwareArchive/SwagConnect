@@ -23,6 +23,7 @@ class ProductStreamService
     const STATUS_DELETE = 'delete';
     const STATUS_ERROR = 'error';
     const STATUS_SYNCED = 'synced';
+    const PRODUCT_LIMIT = 100;
 
     /**
      * @var ProductStreamRepository

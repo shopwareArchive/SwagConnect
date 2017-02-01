@@ -1606,6 +1606,29 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         ));
     }
 
+    public function hasManyVariantsAction()
+    {
+        $streamId = $this->request->getParam('streamId');
+        $articleId = $this->request->getParam('articleId');
+
+        if (!$this->getProductStreamService()->isStreamExported($streamId)) {
+            return;
+        }
+
+        $sourceIds = $this->getHelper()->getSourceIdsFromArticleId($articleId);
+
+        $hasManyVariants = false;
+
+        if (count($sourceIds) > ProductStreamService::PRODUCT_LIMIT) {
+            $hasManyVariants = true;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+            'hasManyVariants' => $hasManyVariants
+        ]);
+    }
+
     public function exportAllWithCronAction()
     {
         try {

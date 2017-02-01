@@ -10,6 +10,7 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bundle\StoreFrontBundle\Struct\Media;
+use Shopware\Models\Property;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
@@ -29,6 +30,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     private $article;
 
     private $db;
+    private $manager;
 
     protected $productContext;
 
@@ -37,6 +39,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         parent::setUp();
 
         $this->db = Shopware()->Db();
+        $this->manager = Shopware()->Models();
         $this->createArticle();
 
         $this->translations = array(
@@ -214,6 +217,39 @@ class LocalProductQueryTest extends ConnectTestHelper
             ]),
         ];
 
+        $expectedProduct->properties = [
+            new \Shopware\Connect\Struct\Property([
+                'groupName' => 'Nike',
+                'groupPosition' => 3,
+                'comparable' => false,
+                'sortMode' => 2,
+                'option' => 'color',
+                'filterable' => false,
+                'value' => 'green',
+                'valuePosition' => 0,
+            ]),
+            new \Shopware\Connect\Struct\Property([
+                'groupName' => 'Nike',
+                'groupPosition' => 3,
+                'comparable' => false,
+                'sortMode' => 2,
+                'option' => 'size',
+                'filterable' => false,
+                'value' => '2xl',
+                'valuePosition' => 0,
+            ]),
+            new \Shopware\Connect\Struct\Property([
+                'groupName' => 'Nike',
+                'groupPosition' => 3,
+                'comparable' => false,
+                'sortMode' => 2,
+                'option' => 'size',
+                'filterable' => false,
+                'value' => '3xl',
+                'valuePosition' => 0,
+            ]),
+        ];
+
 		$expectedProduct->images = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
@@ -239,6 +275,20 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     private function createArticle()
     {
+        $group = $this->manager->getRepository(Property\Group::class)->findOneBy(
+            ['name' => 'Nike']
+        );
+
+        if (!$group) {
+            $group = new Property\Group();
+            $group->setName('Nike');
+            $group->setPosition(3);
+            $group->setSortMode(2);
+            $group->setComparable(0);
+            $this->manager->persist($group);
+            $this->manager->flush();
+        }
+
         $minimalTestArticle = array(
             'name' => 'Glas -Teetasse 0,25l',
             'active' => true,
@@ -247,6 +297,27 @@ class LocalProductQueryTest extends ConnectTestHelper
             'mainDetail' => array(
                 'number' => '9898',
             ),
+            'filterGroupId' => $group->getId(),
+            'propertyValues' => array(
+                array(
+                    'option' => array(
+                        'name' => 'color',
+                    ),
+                    'value' => 'green'
+                ),
+                array(
+                    'option' => array(
+                        'name' => 'size',
+                    ),
+                    'value' => '2xl'
+                ),
+                array(
+                    'option' => array(
+                        'name' => 'size',
+                    ),
+                    'value' => '3xl'
+                )
+            )
         );
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');

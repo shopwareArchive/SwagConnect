@@ -95,10 +95,16 @@ class Order extends Struct
     public $billingAddress;
 
     /**
+     * This property is for external devs to add some extra data
+     *
+     * @var string
+     */
+    public $customAttribute;
+
+    /**
      * __construct
      *
      * @param array $values
-     * @return void
      */
     public function __construct(array $values = array())
     {

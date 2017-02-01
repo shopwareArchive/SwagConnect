@@ -534,6 +534,12 @@ class Setup
         );
 
         $crudService->update(
+            's_articles_attributes',
+            'connect_property_group',
+            'string'
+        );
+
+        $crudService->update(
             's_categories_attributes',
             'connect_imported_category',
             'boolean'

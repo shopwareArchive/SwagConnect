@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Components\ProductStream;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
 use Doctrine\ORM\Query\Expr\Join;
+use Shopware\Models\ProductStream\ProductStream;
 
 class ProductStreamRepository extends Repository
 {
@@ -25,7 +26,7 @@ class ProductStreamRepository extends Repository
 
     /**
      * @param $streamId
-     * @return mixed
+     * @return ProductStream
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -43,7 +44,7 @@ class ProductStreamRepository extends Repository
 
     /**
      * @param array $streamIds
-     * @return \Shopware\Models\ProductStream\ProductStream[]
+     * @return ProductStream[]
      */
     public function findByIds(array $streamIds)
     {
@@ -58,21 +59,41 @@ class ProductStreamRepository extends Repository
     }
 
     /**
-     * @param $streamId
+     * @param ProductStream $stream
      * @return array
      */
-    public function fetchArticlesIds($streamId)
+    public function fetchArticleIdsFromStaticStream(ProductStream $stream)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
         $build->select(array('product.id'))
             ->from('s_articles', 'product')
             ->innerJoin('product', 's_product_streams_selection', 'streamProducts', 'streamProducts.article_id = product.id')
             ->where('streamProducts.stream_id = :streamId')
-            ->setParameter(':streamId', $streamId);
+            ->setParameter(':streamId', $stream->getId());
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
        return array_map(function($item){
+            return $item['id'];
+        }, $items);
+    }
+
+    /**
+     * @param ProductStream $stream
+     * @return array
+     */
+    public function fetchArticleIdsFromDynamicStream(ProductStream $stream)
+    {
+        $build = $this->manager->getConnection()->createQueryBuilder();
+        $build->select(['product.id'])
+            ->from('s_articles', 'product')
+            ->leftJoin('product', 's_plugin_connect_streams_relation', 'streamProducts', 'streamProducts.article_id = product.id')
+            ->where('streamProducts.stream_id = :streamId')
+            ->setParameter(':streamId', $stream->getId());
+
+        $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function($item){
             return $item['id'];
         }, $items);
     }
@@ -83,17 +104,65 @@ class ProductStreamRepository extends Repository
      */
     public function fetchAllPreviousExportedStreams(array $articleIds)
     {
+        $staticStreams = $this->fetchPreviousExportStaticStreams($articleIds);
+        $dynamicStreams = $this->fetchPreviousExportDynamicStreams($articleIds);
+
+        return array_merge($staticStreams, $dynamicStreams);
+    }
+
+    /**
+     * @param array $articleIds
+     * @return array
+     */
+    public function fetchPreviousExportStaticStreams(array $articleIds)
+    {
         $build = $this->manager->getConnection()->createQueryBuilder();
         $build->select(array('es.stream_id as streamId', 'pss.article_id as articleId', 'ps.name'))
             ->from('s_plugin_connect_streams', 'es')
             ->leftJoin('es', 's_product_streams_selection', 'pss', 'pss.stream_id = es.stream_id')
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pss.article_id IN (:articleIds)')
-            ->andWhere('es.export_status = (:status)')
-            ->setParameter(':status', ProductStreamService::STATUS_EXPORT)
+            ->andWhere('es.export_status IN (:status)')
+            ->setParameter(':status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
             ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param array $articleIds
+     * @return array
+     */
+    public function fetchPreviousExportDynamicStreams(array $articleIds)
+    {
+        $build = $this->manager->getConnection()->createQueryBuilder();
+        $build->select(array('es.stream_id as streamId', 'pcsr.article_id as articleId', 'ps.name'))
+            ->from('s_plugin_connect_streams', 'es')
+            ->leftJoin('es', 's_plugin_connect_streams_relation', 'pcsr', 'pcsr.stream_id = es.stream_id')
+            ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
+            ->where('pcsr.article_id IN (:articleIds)')
+            ->andWhere('es.export_status IN (:status)')
+            ->setParameter(':status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+
+        return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param $type
+     * @return ProductStream[]
+     */
+    public function fetchExportedStreams($type)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        return $builder->select('ps')
+            ->from('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa')
+            ->leftJoin('Shopware\Models\ProductStream\ProductStream', 'ps', \Doctrine\ORM\Query\Expr\Join::WITH, 'ps.id = psa.streamId')
+            ->where('ps.type = :type')
+            ->setParameter('type', $type)
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -125,6 +194,53 @@ class ProductStreamRepository extends Repository
         return $builder;
     }
 
+    /**
+     * @param $streamId
+     * @param array $articleIds
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function createStreamRelation($streamId, array $articleIds)
+    {
+        //remove all relations before insert
+        $this->removeStreamRelation($streamId);
+
+        $queryValues = [];
+        $insertData = [];
+
+        $conn = $this->manager->getConnection();
+        $sql = 'INSERT INTO `s_plugin_connect_streams_relation` (`stream_id`, `article_id`) VALUES';
+
+        foreach ($articleIds as $index => $articleId) {
+            $queryValues[] = '(:streamId' . $index . ', :articleId' . $index . ')';
+            $insertData['streamId' . $index] = $streamId;
+            $insertData['articleId' . $index] = $articleId;
+        }
+
+        //batch insert
+        $sql .= implode(', ', $queryValues);
+        $stmt = $conn->prepare($sql);
+        return $stmt->execute($insertData);
+    }
+
+    /**
+     * @param $streamId
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function removeStreamRelation($streamId)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+
+        return $builder->delete('s_plugin_connect_streams_relation')
+            ->where('stream_id = :streamId')
+            ->setParameter('streamId', $streamId)
+            ->execute();
+    }
+
+    /**
+     * @param $streamId
+     * @return bool|string
+     */
     public function countProductsInStaticStream($streamId)
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();

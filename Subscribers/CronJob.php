@@ -1,11 +1,13 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
@@ -21,12 +23,27 @@ class CronJob extends BaseSubscriber
      */
     private $configComponent;
 
+    /** @var ConnectExport */
+    protected $connectExport;
+
+    /**
+     * CronJob constructor.
+     * @param ConnectExport $connectExport
+     */
+    public function __construct(
+        ConnectExport $connectExport
+    ) {
+        parent::__construct();
+        $this->connectExport = $connectExport;
+    }
+
     public function getSubscribedEvents()
     {
         //todo@sb: fix cronjobs via bin/console
         return array(
             'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
             'Shopware_CronJob_ShopwareConnectUpdateProducts' => 'updateProducts',
+            'Shopware_CronJob_ConnectExportDynamicStreams' => 'exportDynamicStreams',
         );
     }
 
@@ -76,7 +93,7 @@ class CronJob extends BaseSubscriber
             return true;
         }
 
-        $this->getConnectExport()->export($sourceIds);
+        $this->connectExport->export($sourceIds);
 
         $quotedSourceIds = Shopware()->Db()->quote($sourceIds);
         Shopware()->Db()->query("
@@ -88,19 +105,59 @@ class CronJob extends BaseSubscriber
         return true;
     }
 
-    /**
-     * @return ConnectExport
-     */
-    private function getConnectExport()
+    public function exportDynamicStreams(\Shopware_Components_Cron_CronJob $job)
     {
-        return new ConnectExport(
-            $this->getHelper(),
-            $this->getSDK(),
-            Shopware()->Models(),
-            new ProductsAttributesValidator(),
-            $this->getConfigComponent(),
-            new ErrorHandler()
-        );
+        /** @var ProductStreamService $streamService */
+        $streamService = $this->Application()->Container()->get('swagconnect.product_stream_service');
+        $streams = $streamService->getAllExportedStreams(ProductStreamService::DYNAMIC_STREAM);
+
+        /** @var ProductStream $stream */
+        foreach ($streams as $stream) {
+            $productSearchResult = $streamService->getProductFromConditionStream($stream);
+            $orderNumbers = array_keys($productSearchResult->getProducts());
+
+            //no products found
+            if (!$orderNumbers) {
+                continue;
+            }
+
+            $streamId = $stream->getId();
+            $articleIds = $this->getHelper()->getArticleIdsByNumber($orderNumbers);
+            $streamService->createStreamRelation($stream->getId(), $articleIds);
+
+            $streamsAssignments = $streamService->prepareStreamsAssignments($streamId);
+
+            if (!$streamsAssignments) {
+                return;
+            }
+
+            $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+
+            try {
+                $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
+                $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
+            } catch (\RuntimeException $e) {
+                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+                $streamService->log($streamId, $e->getMessage());
+                continue;
+            }
+
+            if ($errorMessages) {
+                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
+
+                $errorMessagesText = "";
+                $displayedErrorTypes = array(
+                    ErrorHandler::TYPE_DEFAULT_ERROR,
+                    ErrorHandler::TYPE_PRICE_ERROR
+                );
+
+                foreach ($displayedErrorTypes as $displayedErrorType) {
+                    $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
+                }
+
+                $streamService->log($streamId, $errorMessagesText);
+            }
+        }
     }
 
     private function getConfigComponent()

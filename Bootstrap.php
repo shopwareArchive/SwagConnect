@@ -266,7 +266,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
             new \ShopwarePlugins\Connect\Subscribers\ControllerPath($this->assertMinimumVersion('5.2')),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(),
+            new \ShopwarePlugins\Connect\Subscribers\CronJob(
+                $this->getConnectFactory()->getConnectExport()
+            ),
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($db->getConnection()),

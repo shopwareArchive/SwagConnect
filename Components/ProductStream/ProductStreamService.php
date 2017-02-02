@@ -168,18 +168,14 @@ class ProductStreamService
     /**
      * @param ProductStream $stream
      * @return array
-     * @throws \Exception
      */
     public function getArticlesIds(ProductStream $stream)
     {
         if ($this->isStatic($stream)) {
-            $sourceIds = $this->extractSourceIdsFromStaticStream($stream);
-        } else {
-            //todo: extract product from dynamic stream
-            throw new \Exception('Not allow to export articles ids from dynamic stream');
+            return $this->productStreamRepository->fetchArticleIdsFromStaticStream($stream);
         }
 
-        return $sourceIds;
+        return $this->productStreamRepository->fetchArticleIdsFromDynamicStream($stream);
     }
 
     /**
@@ -193,15 +189,6 @@ class ProductStreamService
         }
 
         return false;
-    }
-
-    /**
-     * @param ProductStream $productStream
-     * @return array
-     */
-    public function extractSourceIdsFromStaticStream(ProductStream $productStream)
-    {
-        return $this->productStreamRepository->fetchArticlesIds($productStream->getId());
     }
 
     /**
@@ -230,6 +217,15 @@ class ProductStreamService
             'data' => $streams,
             'count' => $stmt->rowCount()
         ];
+    }
+
+    /**
+     * @param $type
+     * @return array
+     */
+    public function getAllExportedStreams($type)
+    {
+        return $this->productStreamRepository->fetchExportedStreams($type);
     }
 
     /**
@@ -300,6 +296,16 @@ class ProductStreamService
     public function isStreamExported($streamId)
     {
         return $this->streamAttrRepository->isStreamExported($streamId);
+    }
+
+    /**
+     * @param $streamId
+     * @param array $articleIds
+     * @return array
+     */
+    public function createStreamRelation($streamId, array $articleIds)
+    {
+        return $this->productStreamRepository->createStreamRelation($streamId, $articleIds);
     }
 
     /**

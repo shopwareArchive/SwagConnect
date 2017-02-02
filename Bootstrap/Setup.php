@@ -279,6 +279,20 @@ class Setup
                 false
             );
         }
+
+        $connectExportDynamicStreams = $this->db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ConnectExportDynamicStreams')
+        );
+
+        if (!$connectExportDynamicStreams) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Export Dynamic Streams',
+                'Shopware_CronJob_ConnectExportDynamicStreams',
+                12 * 3600, //12hours
+                true
+            );
+        }
     }
 
 

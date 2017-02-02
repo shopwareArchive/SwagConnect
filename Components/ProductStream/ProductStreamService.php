@@ -203,13 +203,12 @@ class ProductStreamService
         $stmt = $streamBuilder->execute();
         $streams = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+        $isCronActive = $this->config->isCronActive();
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
                 $streams[$index]['productCount'] = $this->countProductsInStaticStream($stream['id']);
-            } else {
-                $productStream = $this->productStreamRepository->findById($stream['id']);
-                $result = $this->getProductFromConditionStream($productStream);
-                $streams[$index]['productCount'] = $result->getTotalCount();
+            } elseif (!$isCronActive) {
+                unset($streams[$index]);
             }
         }
 

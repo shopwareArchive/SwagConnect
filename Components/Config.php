@@ -136,6 +136,22 @@ class Config
     }
 
     /**
+     * @return bool
+     */
+    public function isCronActive()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cp.active')
+            ->from('s_core_plugins', 'cp')
+            ->where('cp.namespace = :namespace')
+            ->andWhere('cp.name = :name')
+            ->setParameter('namespace', 'Core')
+            ->setParameter('name', 'Cron');
+
+        return (bool) $builder->execute()->fetchColumn();
+    }
+
+    /**
      * @param $name
      * @param null $default
      * @return mixed

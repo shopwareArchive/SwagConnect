@@ -45,10 +45,8 @@ class SnHttpClient
     public function sendRequestToConnect(array $data, $path)
     {
         $host = $this->configComponent->getConfig('connectDebugHost');
-        if ($host) {
-            $host = $this->configComponent->getSocialNetworkPrefix() . $host;
-        } else {
-            $host = $this->configComponent->getSocialNetworkPrefix() . $this->configComponent->getMarketplaceUrl();
+        if (!$host || $host == "") {
+            $host = $this->configComponent->getMarketplaceUrl();
         }
 
         $shopId = $this->gateway->getShopId();

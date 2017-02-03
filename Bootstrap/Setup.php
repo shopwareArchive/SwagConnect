@@ -85,7 +85,7 @@ class Setup
             array(
                 'label' => 'Shopware Connect Host',
                 'required' => false,
-                'value'    => 'connect.shopware.com'
+                'value'    => 'sn.connect.shopware.com'
             ));
     }
 

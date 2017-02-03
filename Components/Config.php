@@ -35,8 +35,7 @@ use Shopware\Connect\Gateway\PDO;
  */
 class Config
 {
-    const MARKETPLACE_URL = 'connect.shopware.com';
-    const SN_PREFIX = 'sn.';
+    const MARKETPLACE_URL = 'sn.connect.shopware.com';
 
     /**
      * @var ModelManager
@@ -518,11 +517,6 @@ class Config
         }
 
         return self::MARKETPLACE_URL;
-    }
-
-    public function getSocialNetworkPrefix()
-    {
-        return self::SN_PREFIX;
     }
 
     /**

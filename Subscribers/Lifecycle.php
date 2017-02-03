@@ -53,7 +53,6 @@ class Lifecycle extends BaseSubscriber
     {
         /** @var \Shopware\Models\Article\Article $entity */
         $entity = $eventArgs->get('entity');
-        $articleId = $entity->getId();
         $db = Shopware()->Db();
 
         // Check if entity is a connect product
@@ -75,12 +74,12 @@ class Lifecycle extends BaseSubscriber
         // this will generate wrong Connect changes
         if ($changeSet['propertyGroup']) {
             $filterGroupId = $db->fetchOne(
-                "SELECT filtergroupID FROM s_articles WHERE id = ?", [$articleId]
+                "SELECT filtergroupID FROM s_articles WHERE id = ?", [$entity->getId()]
             );
 
             $db->executeUpdate(
-                'UPDATE `s_articles_attributes` SET `connect_property_group` = ? WHERE `articleID` = ?',
-                [$filterGroupId, $articleId]
+                'UPDATE `s_articles_attributes` SET `connect_property_group` = ? WHERE `articledetailsID` = ?',
+                [$filterGroupId, $entity->getMainDetail()->getId()]
             );
         }
     }

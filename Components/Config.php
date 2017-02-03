@@ -35,6 +35,9 @@ use Shopware\Connect\Gateway\PDO;
  */
 class Config
 {
+    const UPDATE_MANUAL = 0;
+    const UPDATE_AUTO = 1;
+    const UPDATE_CRON_JOB = 2;
     const MARKETPLACE_URL = 'sn.connect.shopware.com';
 
     /**

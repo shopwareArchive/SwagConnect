@@ -91,9 +91,9 @@ interface ProductToShop
     /**
      * Make main variant of a product with given sourceId and groupId.
      *
-     * @param int $shopId
-     * @param string $sourceId
-     * @param string $groupId
+     * @param $shopId
+     * @param $sourceId
+     * @param $groupId
      * @return void
      */
     public function makeMainVariant($shopId, $sourceId, $groupId);

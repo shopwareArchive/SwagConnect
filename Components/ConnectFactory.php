@@ -17,6 +17,7 @@ use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\Components\DependencyInjection\Container;
 
 /**
@@ -469,5 +470,20 @@ class ConnectFactory
         }
 
         return $this->marketplaceSettingsApplier;
+    }
+
+    /**
+     * @return ConnectExport
+     */
+    public function getConnectExport()
+    {
+        return new ConnectExport(
+            $this->getHelper(),
+            $this->getSDK(),
+            Shopware()->Models(),
+            new ProductsAttributesValidator(),
+            $this->getConfigComponent(),
+            new ErrorHandler()
+        );
     }
 }

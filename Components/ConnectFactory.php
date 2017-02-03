@@ -380,7 +380,7 @@ class ConnectFactory
     /**
      * @return LocalProductQuery
      */
-    public function getLocalProductQuery()
+    private function getLocalProductQuery()
     {
         return new LocalProductQuery(
             $this->getModelManager(),

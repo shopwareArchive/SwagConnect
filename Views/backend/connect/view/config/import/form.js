@@ -63,7 +63,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
-        overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}'
+        overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Shopware Connect.{/s}'
     },
 
     initComponent: function() {

@@ -163,9 +163,11 @@ class Article extends BaseSubscriber
                     return;
                 }
 
-                if ($article->getAttribute()->getConnectPropertyGroup()) {
-                    $article->getAttribute()->setConnectPropertyGroup(null);
-                    $this->modelManager->persist($article);
+                $detail = $article->getMainDetail();
+
+                if ($detail->getAttribute()->getConnectPropertyGroup()) {
+                    $detail->getAttribute()->setConnectPropertyGroup(null);
+                    $this->modelManager->persist($detail);
                     $this->modelManager->flush();
                 }
 

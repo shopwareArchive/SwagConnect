@@ -68,10 +68,10 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @param bool $appendCurrent
      * @return ProductStreamsAssignments
-     * @throws \Exception
      */
-    public function prepareStreamsAssignments($streamId)
+    public function prepareStreamsAssignments($streamId, $appendCurrent = true)
     {
         $stream = $this->findStream($streamId);
 
@@ -79,9 +79,11 @@ class ProductStreamService
 
         $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
-        //merge prev with current streams
-        foreach ($articleIds as $articleId) {
-            $assignment[$articleId][$stream->getId()] = $stream->getName();
+        if ($appendCurrent) {
+            //merge prev with current streams
+            foreach ($articleIds as $articleId) {
+                $assignment[$articleId][$stream->getId()] = $stream->getName();
+            }
         }
 
         return new ProductStreamsAssignments(
@@ -138,6 +140,16 @@ class ProductStreamService
 
         //prepare previous related streams
         foreach ($collection as $item) {
+            //does not append the streams which were marked deleted
+            if ($item['deleted'] == ProductStreamAttribute::STREAM_RELATION_DELETED) {
+                if (!isset($assignment[$item['articleId']][$item['streamId']])) {
+                    //adds empty array if there is no other stream for this product
+                    $assignment[$item['articleId']] = [];
+                }
+
+                continue;
+            }
+
             $assignment[$item['articleId']][$item['streamId']] = $item['name'];
         }
 
@@ -299,12 +311,29 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function markProductsToBeRemovedFromStream($streamId)
+    {
+        return $this->productStreamRepository->markProductsToBeRemovedFromStream($streamId);
+    }
+
+    /**
+     * @param $streamId
      * @param array $articleIds
      * @return array
      */
     public function createStreamRelation($streamId, array $articleIds)
     {
         return $this->productStreamRepository->createStreamRelation($streamId, $articleIds);
+    }
+
+    /**
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function removeMarkedStreamRelations()
+    {
+        return $this->productStreamRepository->removeMarkedStreamRelations();
     }
 
     /**

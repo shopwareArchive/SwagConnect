@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Components\ProductStream;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
 use Doctrine\ORM\Query\Expr\Join;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 
 class ProductStreamRepository extends Repository
@@ -117,7 +118,7 @@ class ProductStreamRepository extends Repository
     public function fetchPreviousExportStaticStreams(array $articleIds)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('es.stream_id as streamId', 'pss.article_id as articleId', 'ps.name'))
+        $build->select(array('es.stream_id as streamId', 'pss.article_id as articleId', 'ps.name', '0 as deleted'))
             ->from('s_plugin_connect_streams', 'es')
             ->leftJoin('es', 's_product_streams_selection', 'pss', 'pss.stream_id = es.stream_id')
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
@@ -136,7 +137,7 @@ class ProductStreamRepository extends Repository
     public function fetchPreviousExportDynamicStreams(array $articleIds)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('es.stream_id as streamId', 'pcsr.article_id as articleId', 'ps.name'))
+        $build->select(array('es.stream_id as streamId', 'pcsr.article_id as articleId', 'ps.name', 'pcsr.deleted'))
             ->from('s_plugin_connect_streams', 'es')
             ->leftJoin('es', 's_plugin_connect_streams_relation', 'pcsr', 'pcsr.stream_id = es.stream_id')
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
@@ -202,24 +203,24 @@ class ProductStreamRepository extends Repository
      */
     public function createStreamRelation($streamId, array $articleIds)
     {
-        //remove all relations before insert
-        $this->removeStreamRelation($streamId);
-
         $queryValues = [];
         $insertData = [];
 
         $conn = $this->manager->getConnection();
-        $sql = 'INSERT INTO `s_plugin_connect_streams_relation` (`stream_id`, `article_id`) VALUES';
+        $sql = 'INSERT INTO `s_plugin_connect_streams_relation` (`stream_id`, `article_id`, `deleted`) VALUES ';
 
         foreach ($articleIds as $index => $articleId) {
-            $queryValues[] = '(:streamId' . $index . ', :articleId' . $index . ')';
+            $queryValues[] = '(:streamId' . $index . ', :articleId' . $index . ', :deleted' . $index .')';
             $insertData['streamId' . $index] = $streamId;
             $insertData['articleId' . $index] = $articleId;
+            $insertData['deleted' . $index] = ProductStreamAttribute::STREAM_RELATION_ACTIVE;
         }
 
         //batch insert
         $sql .= implode(', ', $queryValues);
+        $sql .= ' ON DUPLICATE KEY UPDATE deleted = VALUES(deleted)';
         $stmt = $conn->prepare($sql);
+
         return $stmt->execute($insertData);
     }
 
@@ -227,13 +228,27 @@ class ProductStreamRepository extends Repository
      * @param $streamId
      * @return \Doctrine\DBAL\Driver\Statement|int
      */
-    public function removeStreamRelation($streamId)
+    public function markProductsToBeRemovedFromStream($streamId)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        return $builder->update('s_plugin_connect_streams_relation', 'pcsr')
+            ->set('pcsr.deleted', ':deleted')
+            ->where('pcsr.stream_id = :streamId')
+            ->setParameter('streamId', $streamId)
+            ->setParameter('deleted', ProductStreamAttribute::STREAM_RELATION_DELETED)
+            ->execute();
+    }
+
+    /**
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function removeMarkedStreamRelations()
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
 
         return $builder->delete('s_plugin_connect_streams_relation')
-            ->where('stream_id = :streamId')
-            ->setParameter('streamId', $streamId)
+            ->where('deleted = :deleted')
+            ->setParameter('deleted', ProductStreamAttribute::STREAM_RELATION_DELETED)
             ->execute();
     }
 

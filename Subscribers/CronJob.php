@@ -113,29 +113,30 @@ class CronJob extends BaseSubscriber
 
         /** @var ProductStream $stream */
         foreach ($streams as $stream) {
+            $streamId = $stream->getId();
             $productSearchResult = $streamService->getProductFromConditionStream($stream);
             $orderNumbers = array_keys($productSearchResult->getProducts());
 
             //no products found
             if (!$orderNumbers) {
-                continue;
+                //removes all products from this stream
+                $streamService->markProductsToBeRemovedFromStream($streamId);
+            } else {
+                $articleIds = $this->getHelper()->getArticleIdsByNumber($orderNumbers);
+
+                $streamService->markProductsToBeRemovedFromStream($streamId);
+                $streamService->createStreamRelation($streamId, $articleIds);
+
             }
+            $streamsAssignments = $streamService->prepareStreamsAssignments($streamId, false);
 
-            $streamId = $stream->getId();
-            $articleIds = $this->getHelper()->getArticleIdsByNumber($orderNumbers);
-            $streamService->createStreamRelation($stream->getId(), $articleIds);
-
-            $streamsAssignments = $streamService->prepareStreamsAssignments($streamId);
-
-            if (!$streamsAssignments) {
-                return;
-            }
-
-            $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+            //article ids must be taken from streamsAssignments
+            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
             try {
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
+                $streamService->removeMarkedStreamRelations();
             } catch (\RuntimeException $e) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $streamService->log($streamId, $e->getMessage());

@@ -129,6 +129,36 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->assertCount(1, $streamsAssignments->getArticleIds());
     }
 
+    public function testPrepareStreamsAssignmentsWithRemovedArticleFromDynamicStream()
+    {
+        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36, 37]);
+        $this->productStreamService->markProductsToBeRemovedFromStream($this->streamDId);
+
+        //simulate the there is a changes in the dynamic stream conditions
+        //and a product which was in this stream, now is not taking part anymore
+        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36]);
+
+        $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamDId, false);
+
+        //this product no longer takes a part in the stream
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(35));
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(36));
+        $this->assertEmpty($streamsAssignments->getStreamsByArticleId(37));
+        $this->assertCount(3, $streamsAssignments->getArticleIds());
+    }
+
+    public function testPrepareStreamsAssignmentsWithoutProductsInDynamicStream()
+    {
+        $this->productStreamService->createStreamRelation($this->streamDId, [7, 8]);
+        $this->productStreamService->markProductsToBeRemovedFromStream($this->streamDId);
+
+        $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamDId, false);
+
+        $this->assertCount(0, $streamsAssignments->getStreamsByArticleId(7));
+        $this->assertCount(0, $streamsAssignments->getStreamsByArticleId(8));
+        $this->assertCount(2, $streamsAssignments->getArticleIds());
+    }
+
     public function testAllowToRemoveProductsFromStream()
     {
         $assignments = $this->productStreamService->getStreamAssignments($this->streamBId);

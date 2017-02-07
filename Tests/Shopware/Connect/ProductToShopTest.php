@@ -145,9 +145,13 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->assertNotFalse($articleTranslation);
         $articleTranslation = unserialize($articleTranslation);
+
+        $additionalDescription = array_key_exists(PdoProductTranslationsGateway::CONNECT_DESCRIPTION, $articleTranslation) ? $articleTranslation[PdoProductTranslationsGateway::CONNECT_DESCRIPTION] : '';
+
         $this->assertEquals($product->translations['en']->title, $articleTranslation['txtArtikel']);
         $this->assertEquals($product->translations['en']->longDescription, $articleTranslation['txtlangbeschreibung']);
         $this->assertEquals($product->translations['en']->shortDescription, $articleTranslation['txtshortdescription']);
+        $this->assertEquals($product->translations['en']->additionalDescription, $additionalDescription);
     }
 
     public function testInsertVariantOptionsAndGroupsTranslations()

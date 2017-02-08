@@ -12,6 +12,8 @@ before_script:
     - rm -rf /tmp/shopware/engine/Shopware/Plugins/Default/Backend/SwagConnect
     - cd ..
     - cd /tmp/shopware
+    # changes to the latest tag
+    - git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
     - mv /home/travis/build/shopware/SwagConnect /tmp/shopware/engine/Shopware/Plugins/Local/Backend
     - cd /tmp/shopware

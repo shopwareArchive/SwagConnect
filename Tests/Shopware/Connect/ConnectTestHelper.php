@@ -3,6 +3,7 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Gateway\PDO;
+use Shopware\Connect\Struct\Property;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -199,6 +200,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                     'title' => 'MassImport #'. $number . ' EN',
                     'longDescription' => 'Ein Produkt aus shopware Connect EN',
                     'shortDescription' => 'Ein Produkt aus shopware Connect short EN',
+                    'additionalDescription' => 'Ein Produkt aus shopware Verbinden Sie mit zusätzlicher Beschreibung EN',
                     'url' => 'http://shopware.de',
                 ))
             )
@@ -213,6 +215,37 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         }
 
         return $product;
+    }
+
+    protected function getProperties()
+    {
+        return array(
+            new Property(array(
+                'groupName' => 'Nike',
+                'comparable' => false,
+                'sortMode' => 1,
+                'option' => 'color',
+                'filterable' => false,
+                'value' => 'red'
+            )),
+            new Property(array(
+                'groupName' => 'Nike',
+                'comparable' => false,
+                'sortMode' => 1,
+                'option' => 'size',
+                'filterable' => false,
+                'value' => 'XXL',
+                'valuePosition' => 1
+            )),
+            new Property(array(
+                'groupName' => 'Nike',
+                'comparable' => false,
+                'sortMode' => 1,
+                'option' => 'size',
+                'filterable' => false,
+                'value' => '3XL'
+            ))
+        );
     }
 
     protected function getProducts($number = 10, $withImage = false, $withVariantImages = false)

@@ -314,10 +314,7 @@ class Product extends ShopItem
     /**
      * List of specific variant image URLs
      *
-     * Same images are also in $images property.
-     * If the image exists in both arrays then it should be used
-     * only for the given variant.
-     * If the image exists only in $images then it's global for all variants.
+     * Only specific images for the given variant.
      * This property does not affect products without variants.
      *
      * @var string[]
@@ -350,6 +347,13 @@ class Product extends ShopItem
      * @var string[]
      */
     public $categories = array();
+
+    /**
+     * List of properties that helps other shops to filter a product
+     *
+     * @var \Shopware\Connect\Struct\Property[]
+     */
+    public $properties = array();
 
     /**
      * Product Tags

@@ -351,6 +351,29 @@ class Helper
     }
 
     /**
+     * Verifies that at least one variant from
+     * same article is exported.
+     *
+     * @param Attribute $connectAttribute
+     * @return bool
+     */
+    public function hasExportedVariants(Attribute $connectAttribute)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('COUNT(spci.id)')
+            ->from('s_plugin_connect_items', 'spci')
+            ->where('spci.article_id = :articleId AND spci.export_status IN (:exportStatus) AND spci.shop_id IS NULL')
+            ->setParameter('articleId', $connectAttribute->getArticleId(), \PDO::PARAM_INT)
+            ->setParameter(
+                ':exportStatus',
+                [Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED],
+                \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+            );
+
+        return $builder->execute()->fetchColumn() > 0;
+    }
+
+    /**
      * Helper method to create a connect attribute on the fly
      *
      * @param $model
@@ -760,6 +783,22 @@ class Helper
         }
 
         return null;
+    }
+
+    /**
+     * @param $articleId
+     * @return array
+     */
+    public function getSourceIdsFromArticleId($articleId)
+    {
+        $rows = $this->manager->getConnection()->fetchAll(
+            'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
+            array($articleId)
+        );
+
+        return array_map(function($row) {
+            return $row['source_id'];
+        }, $rows);
     }
 
     /**

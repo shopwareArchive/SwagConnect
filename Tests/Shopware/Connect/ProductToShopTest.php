@@ -13,6 +13,8 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoPro
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Property;
 
 class ProductToShopTest extends ConnectTestHelper
 {
@@ -86,6 +88,20 @@ class ProductToShopTest extends ConnectTestHelper
         }
     }
 
+    public function truncateProperties()
+    {
+        $this->db->query("SET FOREIGN_KEY_CHECKS = 0");
+        $this->db->query("TRUNCATE s_filter_articles");
+        $this->db->query("TRUNCATE s_filter_relations");
+        $this->db->query("TRUNCATE s_filter_attributes");
+        $this->db->query("TRUNCATE s_filter");
+        $this->db->query("TRUNCATE s_filter_options_attributes");
+        $this->db->query("TRUNCATE s_filter_options");
+        $this->db->query("TRUNCATE s_filter_values_attributes");
+        $this->db->query("TRUNCATE s_filter_values");
+        $this->db->query("SET FOREIGN_KEY_CHECKS = 1");
+    }
+
     public function testInsertArticle()
     {
         $product = $this->getProduct();
@@ -129,9 +145,13 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->assertNotFalse($articleTranslation);
         $articleTranslation = unserialize($articleTranslation);
+
+        $additionalDescription = array_key_exists(PdoProductTranslationsGateway::CONNECT_DESCRIPTION, $articleTranslation) ? $articleTranslation[PdoProductTranslationsGateway::CONNECT_DESCRIPTION] : '';
+
         $this->assertEquals($product->translations['en']->title, $articleTranslation['txtArtikel']);
         $this->assertEquals($product->translations['en']->longDescription, $articleTranslation['txtlangbeschreibung']);
         $this->assertEquals($product->translations['en']->shortDescription, $articleTranslation['txtshortdescription']);
+        $this->assertEquals($product->translations['en']->additionalDescription, $additionalDescription);
     }
 
     public function testInsertVariantOptionsAndGroupsTranslations()
@@ -603,6 +623,46 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->assertEquals($product->vendor, $supplier->name);
         $this->assertEquals(1, $supplierAttr->connect_is_remote);
+    }
+
+    public function testInsertArticleProperties()
+    {
+        $product = $this->getProduct();
+        $product->properties = $this->getProperties();
+
+        $this->truncateProperties();
+
+        $this->productToShop->insertOrUpdate($product);
+
+        /** @var Article $article */
+        $article = $this->modelManager->getRepository(Article::class)->findOneBy(array(
+            'name' => $product->title
+        ));
+
+        /** @var \Shopware\Connect\Struct\Property $firstProperty */
+        $firstProperty = reset($product->properties);
+
+        /** @var Property\Group $group */
+        $group = $this->modelManager->getRepository(Property\Group::class)->findOneBy(array(
+            'name' => $firstProperty->groupName
+        ));
+
+        $this->assertEquals(3, count($article->getPropertyValues()));
+        $this->assertEquals(2, count($group->getOptions()));
+        $this->assertEquals($firstProperty->groupName, $article->getPropertyGroup()->getName());
+
+        /** @var Property\Value $propertyValue */
+        foreach ($article->getPropertyValues() as $index => $propertyValue) {
+            $property = $product->properties[$index];
+            $this->assertEquals($property->value, $propertyValue->getValue());
+            $this->assertEquals($property->valuePosition, $propertyValue->getPosition());
+        }
+
+        /** @var Property\Option $option */
+        foreach ($group->getOptions() as $index => $option) {
+            $property = $product->properties[$index];
+            $this->assertEquals($property->option, $option->getName());
+        }
     }
 
     public function testAutomaticallyActivateArticles()

@@ -1104,7 +1104,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         return;
                     }
 
-                    console.log(operation);
                     me.createGrowlMessage(title, 'The selected dynamic streams will be exported via cron job', false);
                 }
             }

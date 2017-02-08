@@ -1726,7 +1726,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();
 
-        foreach ($streamIds as $streamId) {
+        $filteredStreamIds = $productStreamService->filterExportedStreams($streamIds);
+
+        foreach ($filteredStreamIds as $streamId) {
             try {
                 $removedRecords = array();
 

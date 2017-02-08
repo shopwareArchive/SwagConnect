@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Components\ProductStream;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\DBAL\Connection;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 
@@ -60,6 +61,27 @@ class ProductStreamRepository extends Repository
     }
 
     /**
+     * @param array $streamIds
+     * @return array
+     */
+    public function filterExportedStreams(array $streamIds)
+    {
+        $build = $this->manager->getConnection()->createQueryBuilder();
+        $build->select(array('pcs.stream_id'))
+            ->from('s_plugin_connect_streams', 'pcs')
+            ->where('pcs.stream_id IN (:streamIds)')
+            ->andWhere('pcs.export_status IN (:status)')
+            ->setParameter('streamIds', $streamIds, Connection::PARAM_STR_ARRAY)
+            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY);
+
+        $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function($item){
+            return $item['stream_id'];
+        }, $items);
+    }
+
+    /**
      * @param ProductStream $stream
      * @return array
      */
@@ -70,7 +92,7 @@ class ProductStreamRepository extends Repository
             ->from('s_articles', 'product')
             ->innerJoin('product', 's_product_streams_selection', 'streamProducts', 'streamProducts.article_id = product.id')
             ->where('streamProducts.stream_id = :streamId')
-            ->setParameter(':streamId', $stream->getId());
+            ->setParameter('streamId', $stream->getId());
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -90,7 +112,7 @@ class ProductStreamRepository extends Repository
             ->from('s_articles', 'product')
             ->leftJoin('product', 's_plugin_connect_streams_relation', 'streamProducts', 'streamProducts.article_id = product.id')
             ->where('streamProducts.stream_id = :streamId')
-            ->setParameter(':streamId', $stream->getId());
+            ->setParameter('streamId', $stream->getId());
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -124,8 +146,8 @@ class ProductStreamRepository extends Repository
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pss.article_id IN (:articleIds)')
             ->andWhere('es.export_status IN (:status)')
-            ->setParameter(':status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
-            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY)
+            ->setParameter('articleIds', $articleIds, Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
@@ -143,8 +165,8 @@ class ProductStreamRepository extends Repository
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pcsr.article_id IN (:articleIds)')
             ->andWhere('es.export_status IN (:status)')
-            ->setParameter(':status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
-            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY)
+            ->setParameter('articleIds', $articleIds, Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }

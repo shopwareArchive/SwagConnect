@@ -128,6 +128,11 @@ class ProductStreamService
         return $this->productStreamRepository->findByIds($streamIds);
     }
 
+    public function filterExportedStreams(array $streamIds)
+    {
+        return $this->productStreamRepository->filterExportedStreams($streamIds);
+    }
+
     /**
      * @param $articleIds
      * @return array

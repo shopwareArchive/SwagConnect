@@ -171,7 +171,7 @@ class Checkout extends BaseSubscriber
             }
 
             $this->Application()->Container()->get('events')->notify(
-                'Connect_Merchant_Create_Order_Before',
+                'Connect_Merchant_Create_Order_After',
                 [
                     'basket' => $view->sBasket,
                     'order' => $order,

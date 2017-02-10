@@ -38,7 +38,7 @@ class OrderStatusMapper
                 '4' => OrderStatusStruct::STATE_ERROR, // 4 = Storno / Rejected
             );
 
-            $this->mapping = Enlight()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
+            $this->mapping = Shopware()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;
@@ -69,11 +69,15 @@ class OrderStatusMapper
      */
     public function getOrderStatusStructFromOrder(Order $order)
     {
+        $message = Shopware()->Snippets()->getNamespace('backend/static/payment_status')->get(
+            $order->getOrderStatus()->getName()
+        );
+
         return new OrderStatusStruct(array(
             'id' => (string) $order->getNumber(),
             'status' => $this->mapShopwareOrderStatusToConnect($order->getOrderStatus()->getId()),
             'messages' => array(
-                new Message(array('message' => $order->getOrderStatus()->getDescription()))
+                new Message(['message' => $message])
             )
         ));
     }

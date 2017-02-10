@@ -566,6 +566,36 @@ class Setup
             'integer'
         );
 
+        $crudService->update(
+            's_filter_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_options_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_values_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',

@@ -607,7 +607,10 @@ class Setup
             's_order_details_attributes',
             's_order_basket_attributes',
             's_articles_img_attributes',
-            's_media_attributes'
+            's_media_attributes',
+            's_filter_attributes',
+            's_filter_options_attributes',
+            's_filter_values_attributes',
         ));
     }
 

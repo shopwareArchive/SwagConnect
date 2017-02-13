@@ -118,7 +118,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function getImageImport()
     {
-        $thumbnailManager = $this->getMockBuilder('\\Shopware\\Components\\Thumbnail\\Manager')->getMock();
+        $thumbnailManager = $this->getMockBuilder('\\Shopware\\Components\\Thumbnail\\Manager')
+            ->disableOriginalConstructor()
+            ->getMock();
         return new ImageImport(
             Shopware()->Models(),
             $this->getHelper(),

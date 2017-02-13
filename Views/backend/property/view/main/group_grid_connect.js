@@ -8,7 +8,6 @@ Ext.define('Shopware.apps.Property.view.main.GroupGridConnect', {
             newColumns = [],
             columns = me.callOverridden();
 
-
         columns.forEach(function(element) {
             if (columns.indexOf(element) == columns.length - 1) {
                 newColumns.push(
@@ -26,7 +25,7 @@ Ext.define('Shopware.apps.Property.view.main.GroupGridConnect', {
 
     connectColumnRenderer: function(value, metaData, record) {
         var result;
-        var style = 'style="width: 16px; height: 16px; display: inline-block;"';
+        var style = 'style="width: 16px; height: 16px; display: inline-block; position: absolute; margin-top: -1px;"';
 
         if (record.raw['connect']) {
             result = '<div  title="' + marketplaceName + '" class="connect-icon" ' + style + '>&nbsp;</div>';

@@ -1,7 +1,7 @@
 //{namespace name=backend/connect/view/main}
-//{block name="backend/property/view/main/set_grid" append}
-Ext.define('Shopware.apps.Property.view.main.SetGridConnect', {
-    override: 'Shopware.apps.Property.view.main.SetGrid',
+//{block name="backend/Property/view/main/set_assign_grid" append}
+Ext.define('Shopware.apps.Property.view.main.SetAssignGridConnect', {
+    override: 'Shopware.apps.Property.view.main.SetAssignGrid',
 
     getColumns: function() {
         var me = this,

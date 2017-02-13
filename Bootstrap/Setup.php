@@ -7,6 +7,7 @@ use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use ShopwarePlugins\Connect\Components\Config;
 
 /**
  * The setup class does the basic setup of the shopware Connect plugin. All operations should be implemented in a way
@@ -85,7 +86,7 @@ class Setup
             array(
                 'label' => 'Shopware Connect Host',
                 'required' => false,
-                'value'    => 'sn.connect.shopware.com'
+                'value'    => Config::MARKETPLACE_URL
             ));
     }
 

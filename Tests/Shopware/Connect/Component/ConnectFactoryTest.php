@@ -1,5 +1,6 @@
 <?php
 
+namespace Tests\ShopwarePlugins\Connect\Component;
 
 class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
 {
@@ -38,22 +39,23 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.connect.local', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKSemLocal()
     {
+        putenv("_TRANSACTION_HOST");
+
         $this->configMock->method('getConfig')->willReturn('semdemo.connect.local');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.connect.local', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKRandomLocal()
     {
+        putenv("_TRANSACTION_HOST");
         $prefix = $this->generateRandomString();
         $this->configMock->method('getConfig')->willReturn($prefix . '.connect.local');
 
@@ -61,33 +63,33 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.connect.local', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKDefaultStaging()
     {
+        putenv("_TRANSACTION_HOST");
         $this->configMock->method('getConfig')->willReturn('sn.stage.connect.shopware.com');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.stage.connect.shopware.com', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKSemStaging()
     {
+        putenv("_TRANSACTION_HOST");
         $this->configMock->method('getConfig')->willReturn('sn.sem.stage.connect.shopware.com');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.stage.connect.shopware.com', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKMarketplaceStaging()
     {
+        putenv("_TRANSACTION_HOST");
         $prefix = $this->generateRandomString();
         $this->configMock->method('getConfig')->willReturn($prefix . '.stage.connect.shopware.com');
 
@@ -95,23 +97,23 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.stage.connect.shopware.com', getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKMarketplaceStagingWithMultipleStagings()
     {
+        putenv("_TRANSACTION_HOST");
         $prefix = $this->generateRandomString();
-        $suffix = '.stage'.rand(0, 9).'.connect.com';
+        $suffix = '.stage'.rand(0, 9).'.connect.shopware.com';
         $this->configMock->method('getConfig')->willReturn($prefix . $suffix);
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction' . $suffix, getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
     public function testCreateSDKLive()
     {
+        putenv("_TRANSACTION_HOST");
         //everything that is "unknown" defaults to live (the default value of transactionHost in the DependencyResolver)
         $prefix = $this->generateRandomString(20);
         $this->configMock->method('getConfig')->willReturn($prefix);
@@ -120,16 +122,18 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         $this->connectFactory->createSDK();
 
         $this->assertFalse(getenv('_TRANSACTION_HOST'));
-        putenv("_TRANSACTION_HOST");
     }
 
-    private function generateRandomString($length = 10) {
+    private function generateRandomString($length = 10)
+    {
+        putenv("_TRANSACTION_HOST");
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
+
         return $randomString;
     }
 }

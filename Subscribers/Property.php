@@ -49,7 +49,15 @@ class Property extends BaseSubscriber
                 );
 
                 $subject->View()->extendsTemplate(
+                    'backend/property/model/group_connect.js'
+                );
+
+                $subject->View()->extendsTemplate(
                     'backend/property/view/main/set_grid_connect.js'
+                );
+
+                $subject->View()->extendsTemplate(
+                    'backend/property/model/set_connect.js'
                 );
 
                 $subject->View()->extendsTemplate(
@@ -57,7 +65,15 @@ class Property extends BaseSubscriber
                 );
 
                 $subject->View()->extendsTemplate(
+                    'backend/property/model/option_connect.js'
+                );
+
+                $subject->View()->extendsTemplate(
                     'backend/property/view/main/set_assign_grid_connect.js'
+                );
+
+                $subject->View()->extendsTemplate(
+                    'backend/property/model/set_assign_connect.js'
                 );
 
                 break;

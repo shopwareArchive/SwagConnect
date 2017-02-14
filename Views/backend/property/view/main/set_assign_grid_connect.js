@@ -27,7 +27,7 @@ Ext.define('Shopware.apps.Property.view.main.SetAssignGridConnect', {
         var result;
         var style = 'style="width: 16px; height: 16px; display: inline-block; position: absolute; margin-top: -1px;"';
 
-        if (record.raw['connect']) {
+        if (record.get('connect')) {
             result = '<div  title="' + marketplaceName + '" class="connect-icon" ' + style + '>&nbsp;</div>';
         }
 

@@ -78,22 +78,28 @@ class Property extends BaseSubscriber
 
                 break;
             case 'getGroups':
-                $subject->View()->data = $this->markConnectGroupsProperties(
-                    $subject->View()->data
+                // The "Groups" in the frontend are actually "s_filter_options" in the database and the entity is called Option ?!
+                $subject->View()->data = $this->markRecordsAsConnect(
+                    $subject->View()->data,
+                    'Shopware\Models\Property\Option'
                 );
                 break;
             case 'getSets':
-                $subject->View()->data = $this->markConnectSetsProperties(
-                    $subject->View()->data
+                // The "Sets" in the frontend are actually "s_filter" in the database and the entity is called Group ?!
+                $subject->View()->data = $this->markRecordsAsConnect(
+                    $subject->View()->data,
+                    'Shopware\Models\Property\Group'
                 );
                 break;
             case 'getOptions':
-                $subject->View()->data = $this->markConnectOptionProperties(
-                    $subject->View()->data
+                // The "Options" in the frontend are actually "s_filter_values" in the database and the entity is called Value ?!
+                $subject->View()->data = $this->markRecordsAsConnect(
+                    $subject->View()->data,
+                    'Shopware\Models\Property\Value'
                 );
                 break;
             case 'getSetAssigns':
-                $subject->View()->data = $this->markSetAssignProperties(
+                $subject->View()->data = $this->markAssignsAsConnect(
                     $subject->View()->data
                 );
                 break;
@@ -102,82 +108,30 @@ class Property extends BaseSubscriber
         }
     }
 
-    public function markConnectGroupsProperties($data)
+    public function markRecordsAsConnect($data, $modelName)
     {
-        // The "Groups" in the frontend are actually "s_filter_options" in the database and the entity is called Option ?!
-        $options = [];
+        $result = [];
 
-        foreach ($data as $option) {
-            $optionId = $option['id'];
-            /** @var \Shopware\Models\Property\Option $groupModel */
-            $optionModel = $this->modelManager->getRepository('Shopware\Models\Property\Option')->find($optionId);
+        foreach ($data as $row) {
+            $recordId = $row['id'];
+            $model = $this->modelManager->getRepository($modelName)->find($recordId);
 
             $attribute = null;
-            if ($optionModel) {
-                $attribute = $optionModel->getAttribute();
+            if ($model) {
+                $attribute = $model->getAttribute();
             }
 
             if ($attribute && $attribute->getConnectIsRemote()) {
-                $option['connect'] = true;
+                $row['connect'] = true;
             }
 
-            $options[] = $option;
+            $result[] = $row;
         }
 
-        return $options;
+        return $result;
     }
 
-    public function markConnectSetsProperties($data)
-    {
-        // The "Sets" in the frontend are actually "s_filter" in the database and the entity is called Group ?!
-        $groups = [];
-
-        foreach ($data as $group) {
-            $groupId = $group['id'];
-            /** @var \Shopware\Models\Property\Group $groupModel */
-            $groupModel = $this->modelManager->getRepository('Shopware\Models\Property\Group')->find($groupId);
-
-            $attribute = null;
-            if ($groupModel) {
-                $attribute = $groupModel->getAttribute();
-            }
-
-            if ($attribute && $attribute->getConnectIsRemote()) {
-                $group['connect'] = true;
-            }
-
-            $groups[] = $group;
-        }
-
-        return $groups;
-    }
-
-    public function markConnectOptionProperties($data)
-    {
-        // The "Options" in the frontend are actually "s_filter_values" in the database and the entity is called Value ?!
-        $values = [];
-
-        foreach ($data as $value) {
-            $valueId = $value['id'];
-            /** @var \Shopware\Models\Property\Value $valueModel */
-            $valueModel = $this->modelManager->getRepository('Shopware\Models\Property\Value')->find($valueId);
-
-            $attribute = null;
-            if ($valueModel) {
-                $attribute = $valueModel->getAttribute();
-            }
-
-            if ($attribute && $attribute->getConnectIsRemote()) {
-                $value['connect'] = true;
-            }
-
-            $values[] = $value;
-        }
-
-        return $values;
-    }
-
-    public function markSetAssignProperties($data)
+    public function markAssignsAsConnect($data)
     {
         // The set assigns display assigned Groups
         // The "Groups" in the frontend are actually "s_filter_options" in the database and the entity is called Option ?!

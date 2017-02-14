@@ -67,6 +67,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportStreamMessage: '{s name=export/message/export_stream_message}Product streams were marked for export.{/s}',
         removeStreamTitle: '{s name=export/message/remove_stream_title}Product streams export{/s}',
         removeStreamMessage: '{s name=export/message/remove_stream_message}Products streams were marked for remove.{/s}',
+        exportDynamicStreamMessage: '{s name=export/message/dynamic_stream_selected}The selected dynamic streams will be exported via cron job{/s}',
 
         activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
@@ -1104,7 +1105,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         return;
                     }
 
-                    me.createGrowlMessage(title, 'The selected dynamic streams will be exported via cron job', false);
+                    me.createGrowlMessage(title, me.messages.exportDynamicStreamMessage, false);
                 }
             }
         });

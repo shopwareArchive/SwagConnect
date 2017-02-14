@@ -1438,12 +1438,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $streams = $streamService->findStreams($streamIds);
 
             if (!$streams) {
-                //todo: translate this
-                throw new \Exception('No streams were selected');
+                $message = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'export/message/error_no_stream_selected',
+                    'No streams were selected',
+                    true
+                );
+                throw new \Exception($message);
             }
 
             $modelManager = $this->getModelManager();
-
 
             foreach ($streams as $stream) {
                 $streamAttr = $streamService->createStreamAttribute($stream);

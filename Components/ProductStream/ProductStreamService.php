@@ -153,7 +153,7 @@ class ProductStreamService
         foreach ($collection as $item) {
             //does not append the streams which were marked deleted
             if ($item['deleted'] == ProductStreamAttribute::STREAM_RELATION_DELETED) {
-                if (!isset($assignment[$item['articleId']][$item['streamId']])) {
+                if (!isset($assignment[$item['articleId']])) {
                     //adds empty array if there is no other stream for this product
                     $assignment[$item['articleId']] = [];
                 }

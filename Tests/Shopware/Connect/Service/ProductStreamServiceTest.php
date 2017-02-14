@@ -111,12 +111,12 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
     public function testGetArticlesIdsFromDynamicStream()
     {
-        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36]);
+        $expectedArticleIds = [35, 36];
+        $this->productStreamService->createStreamRelation($this->streamDId, $expectedArticleIds);
         $stream = $this->productStreamService->findStream($this->streamDId);
         $articlesIds = $this->productStreamService->getArticlesIds($stream);
 
-        $this->assertCount(2, $articlesIds);
-        $this->assertTrue(in_array(35, $articlesIds));
+        $this->assertEquals($expectedArticleIds, $articlesIds);
     }
 
     public function testPrepareStreamsAssignments()
@@ -131,7 +131,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
     public function testPrepareStreamsAssignmentsWithRemovedArticleFromDynamicStream()
     {
-        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36, 37]);
+        $this->productStreamService->createStreamRelation($this->streamDId, [7, 35, 36, 37]);
         $this->productStreamService->markProductsToBeRemovedFromStream($this->streamDId);
 
         //simulate the there is a changes in the dynamic stream conditions
@@ -140,11 +140,15 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
         $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamDId, false);
 
-        //this product no longer takes a part in the stream
         $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(35));
         $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(36));
-        $this->assertEmpty($streamsAssignments->getStreamsByArticleId(37));
-        $this->assertCount(3, $streamsAssignments->getArticleIds());
+
+        //its not empty because its part of static stream
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(37));
+
+        //this product no longer takes a part in the stream
+        $this->assertEmpty($streamsAssignments->getStreamsByArticleId(7));
+        $this->assertCount(4, $streamsAssignments->getArticleIds());
     }
 
     public function testPrepareStreamsAssignmentsWithoutProductsInDynamicStream()

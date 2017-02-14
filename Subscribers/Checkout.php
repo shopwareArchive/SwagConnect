@@ -171,10 +171,11 @@ class Checkout extends BaseSubscriber
             }
 
             $this->Application()->Container()->get('events')->notify(
-                'Connect_Merchant_Create_Order_After',
+                'Connect_Merchant_Create_Order_Before',
                 [
+                    //we use clone to not be able to modify the connect order
+                    'order' => clone $order,
                     'basket' => $view->sBasket,
-                    'order' => $order,
                 ]
             );
 

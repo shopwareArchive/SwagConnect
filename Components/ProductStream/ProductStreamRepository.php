@@ -61,6 +61,8 @@ class ProductStreamRepository extends Repository
     }
 
     /**
+     * Filter the stream ids, it will return only the exported ones
+     *
      * @param array $streamIds
      * @return array
      */
@@ -183,7 +185,9 @@ class ProductStreamRepository extends Repository
             ->from('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa')
             ->leftJoin('Shopware\Models\ProductStream\ProductStream', 'ps', \Doctrine\ORM\Query\Expr\Join::WITH, 'ps.id = psa.streamId')
             ->where('ps.type = :type')
+            ->andWhere('ps.exportStatus != :status')
             ->setParameter('type', $type)
+            ->setParameter('status', ProductStreamService::STATUS_DELETE)
             ->getQuery()
             ->getResult();
     }

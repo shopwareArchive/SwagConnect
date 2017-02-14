@@ -128,6 +128,12 @@ class ProductStreamService
         return $this->productStreamRepository->findByIds($streamIds);
     }
 
+    /**
+     * Filter the stream ids, it will return only the exported ones
+     *
+     * @param array $streamIds
+     * @return array
+     */
     public function filterExportedStreams(array $streamIds)
     {
         return $this->productStreamRepository->filterExportedStreams($streamIds);

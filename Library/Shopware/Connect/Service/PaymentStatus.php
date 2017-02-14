@@ -78,4 +78,14 @@ class PaymentStatus
     {
         return $this->changes->getNextPaymentStatusChanges($since, $limit);
     }
+
+    /**
+     * Update payment status in provider shop
+     *
+     * @param array<\Shopware\Connect\Struct\PaymentStatus> $changes
+     */
+    public function productPaymentsFromShop(array $changes)
+    {
+        $this->replicate($changes);
+    }
 }

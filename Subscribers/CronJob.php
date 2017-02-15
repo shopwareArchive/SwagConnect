@@ -1,6 +1,9 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
+use Shopware\Connect\SDK;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
@@ -23,14 +26,21 @@ class CronJob extends BaseSubscriber
      */
     private $configComponent;
 
+    /** @var  SDK */
+    protected $sdk;
+
+    protected $streamService;
+
     /** @var ConnectExport */
     protected $connectExport;
 
     /**
      * CronJob constructor.
+     * @param SDK $sdk
      * @param ConnectExport $connectExport
      */
     public function __construct(
+        SDK $sdk,
         ConnectExport $connectExport
     ) {
         parent::__construct();
@@ -108,7 +118,7 @@ class CronJob extends BaseSubscriber
     public function exportDynamicStreams(\Shopware_Components_Cron_CronJob $job)
     {
         /** @var ProductStreamService $streamService */
-        $streamService = $this->Application()->Container()->get('swagconnect.product_stream_service');
+        $streamService = $this->getStreamService();
         $streams = $streamService->getAllExportedStreams(ProductStreamService::DYNAMIC_STREAM);
 
         /** @var ProductStream $stream */
@@ -126,17 +136,28 @@ class CronJob extends BaseSubscriber
 
                 $streamService->markProductsToBeRemovedFromStream($streamId);
                 $streamService->createStreamRelation($streamId, $articleIds);
-
             }
-            $streamsAssignments = $streamService->prepareStreamsAssignments($streamId, false);
-
-            //article ids must be taken from streamsAssignments
-            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
             try {
+                $streamsAssignments = $streamService->prepareStreamsAssignments($streamId, false);
+
+                //article ids must be taken from streamsAssignments
+                $exportArticleIds = $streamsAssignments->getArticleIds();
+
+                $removeArticleIds = $streamsAssignments->getArticleIdsWithoutStreams();
+
+                if (!empty($removeArticleIds)) {
+                    $this->removeArticlesFromStream($removeArticleIds);
+
+                    //filter the $exportArticleIds
+                    $exportArticleIds = array_diff($exportArticleIds, $removeArticleIds);
+                }
+
+                $sourceIds = $this->getHelper()->getArticleSourceIds($exportArticleIds);
+
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
-                $streamService->removeMarkedStreamRelations();
+
             } catch (\RuntimeException $e) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $streamService->log($streamId, $e->getMessage());
@@ -159,6 +180,35 @@ class CronJob extends BaseSubscriber
                 $streamService->log($streamId, $errorMessagesText);
             }
         }
+    }
+
+    /**
+     * If article is not taking part of any shopware stream it will be removed
+     * @param array $articleIds
+     */
+    private function removeArticlesFromStream(array $articleIds)
+    {
+        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $items = $this->connectExport->fetchConnectItems($sourceIds, false);
+
+        foreach ($items as $item) {
+            $this->getSDK()->recordDelete($item['sourceId']);
+        }
+
+        $this->getStreamService()->removeMarkedStreamRelations();
+        $this->connectExport->updateConnectItemsStatus($sourceIds, Attribute::STATUS_DELETE);
+    }
+
+    /**
+     * @return ProductStreamService $streamService
+     */
+    private function getStreamService()
+    {
+        if (!$this->streamService) {
+            $this->streamService = $this->Application()->Container()->get('swagconnect.product_stream_service');
+        }
+
+        return $this->streamService;
     }
 
     private function getConfigComponent()

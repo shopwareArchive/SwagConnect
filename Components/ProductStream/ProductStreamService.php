@@ -25,6 +25,13 @@ class ProductStreamService
     const STATUS_SYNCED = 'synced';
     const PRODUCT_LIMIT = 100;
 
+    //Available statuses for exported stream
+    const EXPORTED_STATUSES = [
+        self::STATUS_EXPORT,
+        self::STATUS_SYNCED,
+        self::STATUS_ERROR,
+    ];
+
     /**
      * @var ProductStreamRepository
      */

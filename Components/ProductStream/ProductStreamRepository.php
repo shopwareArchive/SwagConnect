@@ -74,7 +74,7 @@ class ProductStreamRepository extends Repository
             ->where('pcs.stream_id IN (:streamIds)')
             ->andWhere('pcs.export_status IN (:status)')
             ->setParameter('streamIds', $streamIds, Connection::PARAM_STR_ARRAY)
-            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY);
+            ->setParameter('status', ProductStreamService::EXPORTED_STATUSES, Connection::PARAM_STR_ARRAY);
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -148,7 +148,7 @@ class ProductStreamRepository extends Repository
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pss.article_id IN (:articleIds)')
             ->andWhere('es.export_status IN (:status)')
-            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY)
+            ->setParameter('status', ProductStreamService::EXPORTED_STATUSES, Connection::PARAM_STR_ARRAY)
             ->setParameter('articleIds', $articleIds, Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -167,7 +167,7 @@ class ProductStreamRepository extends Repository
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
             ->where('pcsr.article_id IN (:articleIds)')
             ->andWhere('es.export_status IN (:status)')
-            ->setParameter('status', [ProductStreamService::STATUS_EXPORT, ProductStreamService::STATUS_SYNCED], Connection::PARAM_STR_ARRAY)
+            ->setParameter('status', ProductStreamService::EXPORTED_STATUSES, Connection::PARAM_STR_ARRAY)
             ->setParameter('articleIds', $articleIds, Connection::PARAM_INT_ARRAY);
 
         return $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -185,7 +185,10 @@ class ProductStreamRepository extends Repository
             ->from('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa')
             ->leftJoin('Shopware\Models\ProductStream\ProductStream', 'ps', \Doctrine\ORM\Query\Expr\Join::WITH, 'ps.id = psa.streamId')
             ->where('ps.type = :type')
-            ->andWhere('ps.exportStatus != :status')
+            ->andWhere($builder->expr()->orX(
+                $builder->expr()->neq('psa.exportStatus', ':status'),
+                $builder->expr()->isNull('psa.exportStatus')
+            ))
             ->setParameter('type', $type)
             ->setParameter('status', ProductStreamService::STATUS_DELETE)
             ->getQuery()

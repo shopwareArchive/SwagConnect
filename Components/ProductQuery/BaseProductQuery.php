@@ -4,6 +4,7 @@ namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Shopware\Connect\Struct\Product;
 use Shopware\Components\Model\ModelManager;
+use Doctrine\ORM\Query\Expr\Join;
 
 
 abstract class BaseProductQuery
@@ -76,6 +77,54 @@ abstract class BaseProductQuery
             ->setParameter('groupKey', $exportPriceCustomerGroup);
 
         return $builder->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $articleId
+     * @return array
+     */
+    protected function getProperties($articleId)
+    {
+        $columns = [
+            'v.value',
+            'v.position as valuePosition',
+            'o.name as option',
+            'o.filterable',
+            'g.name as groupName',
+            'g.position as groupPosition',
+            'g.comparable',
+            'g.sortMode',
+        ];
+
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select($columns)
+            ->from('Shopware\Models\Property\Value', 'v')
+            ->leftJoin('v.option', 'o')
+            ->leftJoin('v.articles', 'a')
+            ->leftJoin('a.propertyGroup', 'g')
+            ->where('a.id = :articleId')
+            ->setParameter('articleId', $articleId);
+
+        return $builder->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $articleId
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    protected function attributeGroup($articleId)
+    {
+        $builder = $this->manager->createQueryBuilder();
+
+        return $builder->select('g')
+            ->from('Shopware\Models\Attribute\Article', 'attr')
+            ->leftJoin('Shopware\Models\Article\Detail','d', Join::WITH, 'd.id = attr.articleDetailId')
+            ->leftJoin('Shopware\Models\Property\Group','g', Join::WITH, 'g.id = attr.connectPropertyGroup')
+            ->where('d.articleId = :articleId')
+            ->andWhere('d.kind = 1')
+            ->setParameter(':articleId', $articleId)
+            ->getQuery()->getOneOrNullResult();
     }
 
     /**

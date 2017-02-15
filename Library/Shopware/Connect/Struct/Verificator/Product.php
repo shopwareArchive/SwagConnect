@@ -232,6 +232,8 @@ class Product extends Verificator
         }
         $this->verifyCategories($struct->categories);
 
+        $this->verifyProperties($struct->properties);
+
         if (!is_array($struct->tags)) {
             throw new \Shopware\Connect\Exception\VerificationFailedException("Invalid Datatype, Product#tags has to be an array.");
         }
@@ -385,6 +387,43 @@ class Product extends Verificator
                 throw new \Shopware\Connect\Exception\VerificationFailedException(
                     'Product#categories must contain all parent categories. Parent category of '.$category.' missing.'
                 );
+            }
+        }
+    }
+
+    /**
+     * @param array $properties
+     */
+    private function verifyProperties(array $properties)
+    {
+        /** @var Struct\Property $property */
+        foreach ($properties as $property) {
+            foreach (array('groupName', 'option', 'value') as $key) {
+                if (trim($property->$key) === '' || !$property->$key) {
+                    throw new \Shopware\Connect\Exception\VerificationFailedException("Property $key MUST be non-empty.");
+                }
+
+                if (@iconv('UTF-8', 'UTF-8', $property->$key) != $property->$key) {
+                    throw new \Shopware\Connect\Exception\VerificationFailedException("Property $key MUST be UTF-8 encoded.");
+                }
+            }
+
+            foreach (array('groupPosition', 'valuePosition', 'sortMode') as $key) {
+                if (!is_int($property->$key)) {
+                    throw new \Shopware\Connect\Exception\VerificationFailedException("Property $key MUST be int.");
+                }
+            }
+
+            if (!is_bool($property->comparable)) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property comparable MUST be boolean.");
+            }
+
+            if (!is_bool($property->filterable)) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property filterable MUST be boolean.");
+            }
+
+            if ($property->sortMode > 2 || $property->sortMode < 0) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property sortMode MUST be 0, 1, or 2");
             }
         }
     }

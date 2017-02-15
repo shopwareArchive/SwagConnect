@@ -20,6 +20,9 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
         productDescriptionLegend: '{s name=config/export/product_description_legend}Product description{/s}',
         productDescriptionFieldLabel: '{s name=config/export/product_description_field_label}Product description field{/s}',
         productDescriptionNotSelected: '{s name=config/export/product_description_export_not_selected}Please select product description{/s}',
+        longDescription: '{s name=config/export/product_long_description}Product long description{/s}',
+        shortDescription: '{s name=config/export/product_short_description}Product short description{/s}',
+        additionalDescription: '{s name=config/export/product_additional_description}Connect description{/s}',
         purchasePriceMode: '{s name=config/price/purchasePriceMode}Purchase price{/s}',
         priceMode: '{s name=config/config/price/priceMode}End customer price{/s}',
         priceModeNotSelected: '{s name=config/config/price/price_mode_not_selected}Please select price mode{/s}',
@@ -237,7 +240,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Artikel-Kurzbeschreibung',
+                fieldLabel: me.snippets.longDescription,
                 name: 'longDescriptionField',
                 inputValue: 1,
                 checked: true,
@@ -245,14 +248,14 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
             }), Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Artikel-Langbeschreibung',
+                fieldLabel: me.snippets.shortDescription,
                 name: 'shortDescriptionField',
                 inputValue: 1,
                 uncheckedValue: 0
             }), Ext.create('Ext.form.field.Checkbox', {
                 xtype: 'checkbox',
                 labelWidth: 150,
-                fieldLabel: 'Connect-Beschreibung',
+                fieldLabel: me.snippets.additionalDescription,
                 name: 'connectDescriptionField',
                 inputValue: 1,
                 uncheckedValue: 0
@@ -319,6 +322,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Form', {
                     if (value.getValue()) {
                         priceParams.descriptionField.push(value.getName());
                     }
+                    priceParams[value.getName()] = value.getValue() ? 1 : 0;
                 });
 
                 me.fireEvent('saveExportSettings', priceParams, btn);

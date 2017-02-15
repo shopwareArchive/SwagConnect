@@ -23,6 +23,7 @@
  */
 
 namespace ShopwarePlugins\Connect\Components;
+use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Connect\Struct\Product,
@@ -35,6 +36,10 @@ use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Models\Customer\Group;
+use Shopware\Connect\Struct\Property;
+use Shopware\Models\Property\Group as PropertyGroup;
+use Shopware\Models\Property\Option as PropertyOption;
+use Shopware\Models\Property\Value as PropertyValue;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -279,6 +284,9 @@ class ProductToShop implements ProductToShopBase
             $model->setSupplier($supplier);
         }
 
+        //set product properties
+        $this->applyProductProperties($model, $product);
+
         // apply marketplace attributes
         $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
 
@@ -432,6 +440,79 @@ class ProductToShop implements ProductToShopBase
             $this->imageImport->importImagesForDetail($product->variantImages, $detail);
         }
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
+    }
+
+    /**
+     * @param ProductModel $article
+     * @param Product $product
+     */
+    private function applyProductProperties(ProductModel $article, Product $product)
+    {
+        if (empty($product->properties)) {
+            return;
+        }
+
+        /** @var Property $firstProperty */
+        $firstProperty = reset($product->properties);
+        $groupRepo = $this->manager->getRepository(PropertyGroup::class);
+        $group = $groupRepo->findOneBy(['name' => $firstProperty->groupName]);
+
+        if (!$group) {
+            $group = new PropertyGroup();
+            $group->setName($firstProperty->groupName);
+            $group->setComparable($firstProperty->comparable);
+            $group->setSortMode($firstProperty->sortMode);
+            $group->setPosition($firstProperty->groupPosition);
+            $this->manager->persist($group);
+            $this->manager->flush();
+        }
+
+        $article->setPropertyGroup($group);
+
+        $valueCollection = new ArrayCollection();
+        $optionRepo = $this->manager->getRepository(PropertyOption::class);
+        $valueRepo = $this->manager->getRepository(PropertyValue::class);
+
+        foreach ($product->properties as $property) {
+            $option = $optionRepo->findOneBy(['name' => $property->option]);
+
+            if (!$option) {
+                $option = new PropertyOption();
+                $option->setName($property->option);
+                $option->setFilterable($property->filterable);
+                $this->manager->persist($option);
+                $this->manager->flush($option);
+            }
+
+            $value = $valueRepo->findOneBy(['optionId' => $option->getId(), 'value' => $property->value]);
+
+            if (!$value) {
+                $value = new PropertyValue($option, $property->value);
+                $value->setPosition($property->valuePosition);
+                $this->manager->persist($value);
+            }
+
+            $valueCollection->add($value);
+
+            $filters = [
+                ['property' => "options.name", 'expression' => '=', 'value' => $property->option],
+                ['property' => "groups.name", 'expression' => '=', 'value' => $property->groupName],
+            ];
+
+            $query = $groupRepo->getPropertyRelationQuery($filters, null, 1, 0);
+            $relation = $query->getOneOrNullResult();
+
+            if (!$relation) {
+                $group->addOption($option);
+                $this->manager->persist($group);
+                $this->manager->flush($group);
+            }
+        }
+
+        $article->setPropertyValues($valueCollection);
+
+        $this->manager->persist($article);
+        $this->manager->flush();
     }
 
     /**

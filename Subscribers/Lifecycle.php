@@ -47,6 +47,7 @@ class Lifecycle extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
@@ -72,6 +73,42 @@ class Lifecycle extends BaseSubscriber
             new ErrorHandler()
         );
     }
+
+    public function onPreUpdate(\Enlight_Event_EventArgs $eventArgs)
+    {
+        /** @var \Shopware\Models\Article\Article $entity */
+        $entity = $eventArgs->get('entity');
+        $db = Shopware()->Db();
+
+        // Check if entity is a connect product
+        $attribute = $this->getHelper()->getConnectAttributeByModel($entity);
+        if (!$attribute) {
+            return;
+        }
+
+        // if article is not exported to Connect
+        // don't need to generate changes
+        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+            return;
+        }
+
+        $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($entity);
+
+        // If product propertyGroup is changed we need to store the old one,
+        // because product property value are still not changed and
+        // this will generate wrong Connect changes
+        if ($changeSet['propertyGroup']) {
+            $filterGroupId = $db->fetchOne(
+                "SELECT filtergroupID FROM s_articles WHERE id = ?", [$entity->getId()]
+            );
+
+            $db->executeUpdate(
+                'UPDATE `s_articles_attributes` SET `connect_property_group` = ? WHERE `articledetailsID` = ?',
+                [$filterGroupId, $entity->getMainDetail()->getId()]
+            );
+        }
+    }
+
 
     /**
      * @param \Enlight_Event_EventArgs $eventArgs
@@ -150,12 +187,15 @@ class Lifecycle extends BaseSubscriber
         }
 
         // if article is not exported to Connect
+        // or at least one article detail from same article is not exported
         // don't need to generate changes
         if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
-            return;
+            if (!$this->getHelper()->hasExportedVariants($attribute)) {
+                return;
+            }
         }
 
-        $forceExport = false;
+		$forceExport = false;
         if ($entity instanceof \Shopware\Models\Article\Detail
             && $model->getNumber() != $entity->getNumber()) {
             // if detail number has been changed
@@ -244,20 +284,29 @@ class Lifecycle extends BaseSubscriber
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $force = false)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+        if (!$detail->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
+            $this->getConnectExport()->syncDeleteDetail($detail);
+            return;
+        }
 
         if ($this->autoUpdateProducts == 1 || $force === true) {
             $this->getConnectExport()->export(
                 array($attribute->getSourceId()), null, true
             );
-        } elseif ($this->autoUpdateProducts == 2) {
+        } elseif ($autoUpdate == 2) {
             $attribute->setCronUpdate(true);
-            $this->manager->persist($attribute);
-            $this->manager->flush();
+            Shopware()->Models()->persist($attribute);
+            Shopware()->Models()->flush();
         }
     }
 
     private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $force = false)
     {
+        if (!$article->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
+            $this->getConnectExport()->setDeleteStatusForVariants($article);
+            return;
+        }
+
         if ($this->autoUpdateProducts == 1 || $force === true) {
             $sourceIds = $this->manager->fetchCol(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',

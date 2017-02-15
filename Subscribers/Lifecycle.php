@@ -186,7 +186,6 @@ class Lifecycle extends BaseSubscriber
     {
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $eventArgs->get('entity');
-        $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
 
         /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
@@ -206,6 +205,7 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the article detail for connect export
         try {
+            $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
             $forceExport = false;
             if ($oldDetail && $oldDetail->getNumber() != $detail->getNumber()) {
                 // if detail number has been changed

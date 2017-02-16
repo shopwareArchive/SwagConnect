@@ -23,7 +23,7 @@ class ProductStreamService
     const STATUS_DELETE = 'delete';
     const STATUS_ERROR = 'error';
     const STATUS_SYNCED = 'synced';
-    const STATUS_READY = 'ready';
+    const STATUS_PENDING = 'pending';
     const PRODUCT_LIMIT = 100;
 
     //Available statuses for exported stream

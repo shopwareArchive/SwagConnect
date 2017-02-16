@@ -182,7 +182,7 @@ class ProductStreamRepository extends Repository
         $builder = $this->manager->createQueryBuilder();
 
         $status = ProductStreamService::EXPORTED_STATUSES;
-        $status[] = ProductStreamService::STATUS_READY;
+        $status[] = ProductStreamService::STATUS_PENDING;
 
         return $builder->select('ps')
             ->from('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa')

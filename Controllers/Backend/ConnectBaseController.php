@@ -1452,7 +1452,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 $streamAttr = $streamService->createStreamAttribute($stream);
 
                 if (!$streamAttr->getExportStatus()) {
-                    $streamAttr->setExportStatus(ProductStreamService::STATUS_READY);
+                    $streamAttr->setExportStatus(ProductStreamService::STATUS_PENDING);
                 }
 
                 $modelManager->persist($streamAttr);

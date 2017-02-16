@@ -1450,6 +1450,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             foreach ($streams as $stream) {
                 $streamAttr = $streamService->createStreamAttribute($stream);
+                $streamAttr->setExportStatus(ProductStreamService::STATUS_READY);
                 $modelManager->persist($streamAttr);
             }
 

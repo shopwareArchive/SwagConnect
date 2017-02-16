@@ -181,16 +181,15 @@ class ProductStreamRepository extends Repository
     {
         $builder = $this->manager->createQueryBuilder();
 
+        $status = array_merge(ProductStreamService::EXPORTED_STATUSES, [ProductStreamService::STATUS_READY]);
+
         return $builder->select('ps')
             ->from('Shopware\CustomModels\Connect\ProductStreamAttribute', 'psa')
             ->leftJoin('Shopware\Models\ProductStream\ProductStream', 'ps', \Doctrine\ORM\Query\Expr\Join::WITH, 'ps.id = psa.streamId')
             ->where('ps.type = :type')
-            ->andWhere($builder->expr()->orX(
-                $builder->expr()->neq('psa.exportStatus', ':status'),
-                $builder->expr()->isNull('psa.exportStatus')
-            ))
+            ->andWhere('psa.exportStatus IN (:status)')
             ->setParameter('type', $type)
-            ->setParameter('status', ProductStreamService::STATUS_DELETE)
+            ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
     }

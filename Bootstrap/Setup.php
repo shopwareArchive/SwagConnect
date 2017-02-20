@@ -566,6 +566,36 @@ class Setup
             'integer'
         );
 
+        $crudService->update(
+            's_filter_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_options_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_values_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -577,7 +607,10 @@ class Setup
             's_order_details_attributes',
             's_order_basket_attributes',
             's_articles_img_attributes',
-            's_media_attributes'
+            's_media_attributes',
+            's_filter_attributes',
+            's_filter_options_attributes',
+            's_filter_values_attributes',
         ));
     }
 

@@ -294,6 +294,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                 new Config($modelManager),
                 $this->getConnectFactory()->getHelper()
             ),
+            new \ShopwarePlugins\Connect\Subscribers\Property(
+                $modelManager
+            ),
         );
     }
 

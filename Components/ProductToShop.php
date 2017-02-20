@@ -463,6 +463,13 @@ class ProductToShop implements ProductToShopBase
             $group->setComparable($firstProperty->comparable);
             $group->setSortMode($firstProperty->sortMode);
             $group->setPosition($firstProperty->groupPosition);
+
+            $attribute = new \Shopware\Models\Attribute\PropertyGroup();
+            $attribute->setPropertyGroup($group);
+            $attribute->setConnectIsRemote(true);
+            $group->setAttribute($attribute);
+
+            $this->manager->persist($attribute);
             $this->manager->persist($group);
             $this->manager->flush();
         }
@@ -480,6 +487,12 @@ class ProductToShop implements ProductToShopBase
                 $option = new PropertyOption();
                 $option->setName($property->option);
                 $option->setFilterable($property->filterable);
+
+                $attribute = new \Shopware\Models\Attribute\PropertyOption();
+                $attribute->setPropertyOption($option);
+                $attribute->setConnectIsRemote(true);
+                $option->setAttribute($attribute);
+
                 $this->manager->persist($option);
                 $this->manager->flush($option);
             }
@@ -489,6 +502,12 @@ class ProductToShop implements ProductToShopBase
             if (!$value) {
                 $value = new PropertyValue($option, $property->value);
                 $value->setPosition($property->valuePosition);
+
+                $attribute = new \Shopware\Models\Attribute\PropertyValue();
+                $attribute->setPropertyValue($value);
+                $attribute->setConnectIsRemote(true);
+                $value->setAttribute($attribute);
+
                 $this->manager->persist($value);
             }
 

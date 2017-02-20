@@ -746,7 +746,7 @@ class Setup
     {
         $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
 
-        $repo = $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
             $model = $repo->findOneBy(array('key' => $name));
             if (is_null($model)) {

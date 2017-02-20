@@ -7,6 +7,8 @@ use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * The setup class does the basic setup of the shopware Connect plugin. All operations should be implemented in a way
@@ -74,6 +76,7 @@ class Setup
         if ($fullSetup) {
             $this->createMyMenu();
             $this->populatePaymentStates();
+            $this->populateOrderStates();
         }
     }
 
@@ -783,7 +786,7 @@ class Setup
 
     public function populatePaymentStates()
     {
-        $states = array(
+        $states = [
             'sc_received' => ' SC received',
             'sc_requested' => 'SC requested',
             'sc_initiated' => 'SC initiated',
@@ -795,27 +798,29 @@ class Setup
             'sc_verify' => 'SC verify',
             'sc_loss' => 'SC loss',
             'sc_error' => 'SC error',
-        );
+        ];
 
-        $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
-        $query->select('MAX(s.id)');
+        $this->populateStates($states, Status::GROUP_PAYMENT);
+    }
 
-        $maxId = $query->getQuery()->getOneOrNullResult();
-        $currentId = 0;
+    public function populateOrderStates()
+    {
+        $states = [
+            ConnectOrderUtil::ORDER_STATUS_ERROR => 'SC error'
+        ];
 
-        if (count($maxId) > 0) {
-            foreach ($maxId as $id) {
-                if ($id > $currentId) {
-                    $currentId = $id;
-                }
-            }
-        }
+        $this->populateStates($states, Status::GROUP_STATE);
+    }
+
+    public function populateStates(array $states, $group)
+    {
+        $currentId = $this->getMaxStateId();
 
         foreach ($states as $name => $description) {
             $isExists = $this->db->query('
                 SELECT `id` FROM `s_core_states`
-                WHERE `name` = ?
-                ', array($name)
+                WHERE `name` = ? AND `group` = ?
+                ', array($name, $group)
             )->fetch();
 
             if ($isExists) {
@@ -827,8 +832,24 @@ class Setup
                 INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)
-                ', array($currentId, $name, $description, $currentId, 'payment', 0)
+                ', array($currentId, $name, $description, $currentId, $group, 0)
             );
         }
+    }
+
+    /**
+     * @return int
+     */
+    private function getMaxStateId()
+    {
+        $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+        $query->select('MAX(s.id)');
+        $result = $query->getQuery()->getOneOrNullResult();
+
+        if (count($result) > 0) {
+            return (int) reset($result);
+        }
+
+        return 0;
     }
 }

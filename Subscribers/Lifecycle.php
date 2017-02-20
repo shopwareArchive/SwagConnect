@@ -196,11 +196,13 @@ class Lifecycle extends BaseSubscriber
         }
 
 		$forceExport = false;
-        if ($entity instanceof \Shopware\Models\Article\Detail
-            && $model->getNumber() != $entity->getNumber()) {
+        if ($entity instanceof \Shopware\Models\Article\Detail) {
+            $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($entity);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
-            $forceExport = true;
+            if ($changeSet['number']) {
+                $forceExport = true;
+            }
         }
 
         // Mark the product for connect update
@@ -240,16 +242,14 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-        /** @var \Shopware\Models\Article\Detail $oldDetail */
-        $oldDetail = $this->manager->getRepository('Shopware\Models\Article\Detail')->find($detail->getId());
-
         // Mark the article detail for connect export
         try {
             $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
             $forceExport = false;
-            if ($oldDetail && $oldDetail->getNumber() != $detail->getNumber()) {
-                // if detail number has been changed
-                // sc plugin must generate & sync the change immediately
+            $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
+            // if detail number has been changed
+            // sc plugin must generate & sync the change immediately
+            if ($changeSet['number']) {
                 $forceExport = true;
             }
 
@@ -293,10 +293,10 @@ class Lifecycle extends BaseSubscriber
             $this->getConnectExport()->export(
                 array($attribute->getSourceId()), null, true
             );
-        } elseif ($autoUpdate == 2) {
+        } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
-            Shopware()->Models()->persist($attribute);
-            Shopware()->Models()->flush();
+            $this->manager->persist($attribute);
+            $this->manager->flush();
         }
     }
 

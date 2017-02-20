@@ -279,6 +279,20 @@ class Setup
                 false
             );
         }
+
+        $connectExportDynamicStreams = $this->db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ConnectExportDynamicStreams')
+        );
+
+        if (!$connectExportDynamicStreams) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Export Dynamic Streams',
+                'Shopware_CronJob_ConnectExportDynamicStreams',
+                12 * 3600, //12hours
+                true
+            );
+        }
     }
 
 
@@ -420,6 +434,14 @@ class Setup
               `export_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
               `export_message` text COLLATE utf8_unicode_ci DEFAULT NULL,
               PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
+                `stream_id` int(11) unsigned NOT NULL,
+                `article_id` int(11) unsigned NOT NULL,
+                `deleted` int(1) NOT NULL DEFAULT '0',
+                UNIQUE KEY `stream_id` (`stream_id`,`article_id`),
+                CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
+                CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ");
 

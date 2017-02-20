@@ -212,12 +212,6 @@ class ProductToShop implements ProductToShopBase
             }
 
             $detail = new DetailModel();
-            if (!empty($product->sku)) {
-                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
-            } else {
-                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
-            }
-
             $detail->setActive($model->getActive());
 
             $detail->setArticle($model);
@@ -235,6 +229,12 @@ class ProductToShop implements ProductToShopBase
             if ($detail->getId() === $mainDetail->getId()) {
                 $isMainVariant = true;
             }
+        }
+
+        if (!empty($product->sku)) {
+            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
+        } else {
+            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
         }
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;

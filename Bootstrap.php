@@ -222,7 +222,10 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         return array(
             new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
+            new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
+                Shopware()->Models(),
+                $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
+            )
         );
     }
 
@@ -243,7 +246,10 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
+            new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
+                Shopware()->Models(),
+                $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
+            )
 
         );
 

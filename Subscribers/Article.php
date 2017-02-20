@@ -448,7 +448,7 @@ class Article extends BaseSubscriber
         $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
 
         try {
-            $this->connectExport->export([$detailAttribute->getSourceId()], null, true);
+            $this->connectExport->export([$detailAttribute->getSourceId()]);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

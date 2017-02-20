@@ -297,6 +297,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Property(
                 $modelManager
             ),
+            new \ShopwarePlugins\Connect\Subscribers\Search(
+                $modelManager
+            ),
         );
     }
 

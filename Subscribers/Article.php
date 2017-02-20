@@ -127,6 +127,9 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/controller/detail_connect.js'
                 );
+                $subject->View()->extendsTemplate(
+                    'backend/article/view/detail/connect_properties.js'
+                );
                 break;
             case 'saveDetail':
                 if ($request->getParam('standard')) {

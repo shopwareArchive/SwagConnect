@@ -3,6 +3,9 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Property\Group;
+use Shopware\Models\Property\Option;
+use Shopware\Models\Property\Value;
 
 /**
  * Class Property
@@ -47,22 +50,12 @@ class Search extends BaseSubscriber
                 $entity = $request->getParam('entity', null);
 
                 switch ($entity) {
-                    case 'Shopware\Models\Property\Group':
+                    case Group::class:
+                    case Option::class:
+                    case Value::class:
                         $subject->View()->data = $this->markRecordsAsConnect(
                             $subject->View()->data,
-                            'Shopware\Models\Property\Group'
-                        );
-                        break;
-                    case 'Shopware\Models\Property\Option':
-                        $subject->View()->data = $this->markRecordsAsConnect(
-                            $subject->View()->data,
-                            'Shopware\Models\Property\Option'
-                        );
-                        break;
-                    case 'Shopware\Models\Property\Value':
-                        $subject->View()->data = $this->markRecordsAsConnect(
-                            $subject->View()->data,
-                            'Shopware\Models\Property\Value'
+                            $entity
                         );
                         break;
                     default:
@@ -80,6 +73,9 @@ class Search extends BaseSubscriber
         $result = [];
 
         foreach ($data as $row) {
+            if (!array_key_exists('id', $row)) {
+                continue;
+            }
             $recordId = $row['id'];
             $model = $this->modelManager->getRepository($modelName)->find($recordId);
 

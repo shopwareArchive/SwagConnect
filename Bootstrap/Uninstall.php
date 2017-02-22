@@ -163,21 +163,36 @@ class Uninstall
      */
     public function setMenuItem()
     {
-        if ($this->shopware526installed) {
-            $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
-            if (null !== $connectInstallItem) {
-                $connectInstallItem->setActive(1);
-                $this->modelManager->persist($connectInstallItem);
-                $this->modelManager->flush();
-            } else {
-                $this->bootstrap->createMenuItem(array(
-                    'label' => 'Einstieg',
-                    'controller' => 'PluginManager',
-                    'class' => 'sprite-inbox-image contents--media-manager',
-                    'action' => 'ShopwareConnect',
-                    'active' => 1,
-                ));
-            }
+        if (!$this->shopware526installed) {
+            return;
+        }
+        $connectMainMenu = $this->bootstrap->Menu()->findOneBy(['label' => 'Connect']);
+
+        if (!$connectMainMenu) {
+            $connectMainMenu = $this->bootstrap->createMenuItem([
+                'label' => 'Connect',
+                'class' => 'shopware-connect',
+                'active' => 1,
+            ]);
+            $connectMainMenu->setPlugin(null);
+        }
+
+        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+        if (null !== $connectInstallItem) {
+            $connectInstallItem->setActive(1);
+            $connectInstallItem->setParent($connectMainMenu);
+            $this->modelManager->persist($connectInstallItem);
+            $this->modelManager->flush();
+        } else {
+            $item = $this->bootstrap->createMenuItem(array(
+                'label' => 'Einstieg',
+                'controller' => 'PluginManager',
+                'class' => 'sprite-inbox-image contents--media-manager',
+                'action' => 'ShopwareConnect',
+                'active' => 1,
+                'parent' => $connectMainMenu
+            ));
+            $item->setPlugin(null);
         }
     }
 }

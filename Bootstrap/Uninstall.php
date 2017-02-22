@@ -166,8 +166,8 @@ class Uninstall
         if (!$this->shopware526installed) {
             return;
         }
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy(['label' => 'Connect']);
 
+        $connectMainMenu = $this->bootstrap->Menu()->findOneBy(['label' => 'Connect']);
         if (!$connectMainMenu) {
             $connectMainMenu = $this->bootstrap->createMenuItem([
                 'label' => 'Connect',
@@ -177,21 +177,21 @@ class Uninstall
             $connectMainMenu->setPlugin(null);
         }
 
-        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
         if (null !== $connectInstallItem) {
             $connectInstallItem->setActive(1);
             $connectInstallItem->setParent($connectMainMenu);
             $this->modelManager->persist($connectInstallItem);
             $this->modelManager->flush();
         } else {
-            $item = $this->bootstrap->createMenuItem(array(
+            $item = $this->bootstrap->createMenuItem([
                 'label' => 'Einstieg',
                 'controller' => 'PluginManager',
-                'class' => 'sprite-inbox-image contents--media-manager',
+                'class' => 'sprite-mousepointer-click',
                 'action' => 'ShopwareConnect',
                 'active' => 1,
                 'parent' => $connectMainMenu
-            ));
+            ]);
             $item->setPlugin(null);
         }
     }

@@ -282,6 +282,20 @@ class Setup
                 false
             );
         }
+
+        $connectExportDynamicStreams = $this->db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ConnectExportDynamicStreams')
+        );
+
+        if (!$connectExportDynamicStreams) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Export Dynamic Streams',
+                'Shopware_CronJob_ConnectExportDynamicStreams',
+                12 * 3600, //12hours
+                true
+            );
+        }
     }
 
 
@@ -423,6 +437,14 @@ class Setup
               `export_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
               `export_message` text COLLATE utf8_unicode_ci DEFAULT NULL,
               PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
+                `stream_id` int(11) unsigned NOT NULL,
+                `article_id` int(11) unsigned NOT NULL,
+                `deleted` int(1) NOT NULL DEFAULT '0',
+                UNIQUE KEY `stream_id` (`stream_id`,`article_id`),
+                CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
+                CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ");
 
@@ -569,6 +591,36 @@ class Setup
             'integer'
         );
 
+        $crudService->update(
+            's_filter_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_options_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_values_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -580,7 +632,10 @@ class Setup
             's_order_details_attributes',
             's_order_basket_attributes',
             's_articles_img_attributes',
-            's_media_attributes'
+            's_media_attributes',
+            's_filter_attributes',
+            's_filter_options_attributes',
+            's_filter_values_attributes',
         ));
     }
 
@@ -716,7 +771,7 @@ class Setup
     {
         $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
 
-        $repo = $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
             $model = $repo->findOneBy(array('key' => $name));
             if (is_null($model)) {

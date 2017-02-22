@@ -90,7 +90,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->disableOriginalConstructor()
                 ->getMock();
             $this->contextService->expects($this->any())
-                ->method('createProductContext')
+                ->method('createShopContext')
                 ->willReturn($productContext);
 
             $this->productQuery = new ProductQuery(

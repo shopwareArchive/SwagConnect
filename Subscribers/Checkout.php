@@ -377,7 +377,7 @@ class Checkout extends BaseSubscriber
             /** @var $reservation \Shopware\Connect\Struct\Reservation */
             $reservation = $sdk->reserveProducts($order);
 
-            if (!$reservation->success) {
+            if (!$reservation || !$reservation->success) {
                 throw new \Exception('Error during reservation');
             }
 

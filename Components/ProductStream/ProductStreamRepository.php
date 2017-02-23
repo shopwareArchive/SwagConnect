@@ -211,7 +211,10 @@ class ProductStreamRepository extends Repository
 
         $builder->select($columns)
             ->from('s_product_streams', 'ps')
-            ->leftJoin('ps', 's_plugin_connect_streams', 'pcs', 'ps.id = pcs.stream_id');
+            ->leftJoin('ps', 's_plugin_connect_streams', 'pcs', 'ps.id = pcs.stream_id')
+            //!!! Do NOT remove the order by type
+            //because there is a bug with ext js when we have grouping
+            ->orderBy('ps.type', 'ASC');
 
         if ($start) {
             $builder->setFirstResult($start);

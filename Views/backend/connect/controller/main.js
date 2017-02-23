@@ -1071,7 +1071,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 staticStreamIds.push(record.get('id'));
             }
         });
-
         if (dynamicStreamIds.length > 0) {
             me.prepareDynamicStreamExport(dynamicStreamIds);
         }
@@ -1090,7 +1089,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             url: '{url action=prepareDynamicStreams}',
             method: 'POST',
             params: {
-                'streamIds': ids
+                'streamIds[]': ids
             },
             success: function(response) {
                 if (response.responseText) {

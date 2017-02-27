@@ -3,6 +3,7 @@
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use ShopwarePlugins\Connect\Components\Config;
 
 class ProductStreamServiceTest extends ConnectTestHelper
 {
@@ -17,6 +18,8 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
     public $streamCId;
 
+    public $streamDId;
+
     /**
      * @var ProductStreamService
      */
@@ -27,9 +30,13 @@ class ProductStreamServiceTest extends ConnectTestHelper
         parent::setUp();
 
         $manager = Shopware()->Models();
+        $container = Shopware()->Container();
         $this->productStreamService = new ProductStreamService(
             new ProductStreamRepository($manager),
-            $manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute')
+            $manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute'),
+            new Config($manager),
+            $container->get('shopware_search.product_search'),
+            $container->get('shopware_storefront.context_service')
         );
 
         $this->insertDummyData();
@@ -47,6 +54,9 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->db->insert('s_product_streams', array('name' => 'TestProductStreamC', 'type' => 2));
         $this->streamCId = $this->db->lastInsertId();
 
+        $this->db->insert('s_product_streams', array('name' => 'TestProductStreamD', 'type' => 1));
+        $this->streamDId = $this->db->lastInsertId();
+
         $this->db->insert(
             's_plugin_connect_streams',
             array('stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_EXPORT)
@@ -54,6 +64,10 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->db->insert(
             's_plugin_connect_streams',
             array('stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_EXPORT)
+        );
+        $this->db->insert(
+            's_plugin_connect_streams',
+            array('stream_id' => $this->streamDId, 'export_status' => ProductStreamService::STATUS_EXPORT)
         );
 
         $articleAIds = array(33, 34, 35, 36);
@@ -80,11 +94,13 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->db->delete('s_product_streams', array('id = ?' => $this->streamAId));
         $this->db->delete('s_product_streams', array('id = ?' => $this->streamBId));
         $this->db->delete('s_product_streams', array('id = ?' => $this->streamCId));
+        $this->db->delete('s_product_streams', array('id = ?' => $this->streamDId));
         $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamAId));
         $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamBId));
+        $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamDId));
     }
 
-    public function testGetArticlesIds()
+    public function testGetArticlesIdsFromStaticStream()
     {
         $stream = $this->productStreamService->findStream($this->streamAId);
         $articlesIds = $this->productStreamService->getArticlesIds($stream);
@@ -93,13 +109,58 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->assertTrue(in_array(33, $articlesIds));
     }
 
+    public function testGetArticlesIdsFromDynamicStream()
+    {
+        $expectedArticleIds = [35, 36];
+        $this->productStreamService->createStreamRelation($this->streamDId, $expectedArticleIds);
+        $stream = $this->productStreamService->findStream($this->streamDId);
+        $articlesIds = $this->productStreamService->getArticlesIds($stream);
+
+        $this->assertEquals($expectedArticleIds, $articlesIds);
+    }
+
     public function testPrepareStreamsAssignments()
     {
+        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36]);
         $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamCId);
 
         $this->assertNull($streamsAssignments->getStreamsByArticleId(35));
-        $this->assertCount(3, $streamsAssignments->getStreamsByArticleId(36));
+        $this->assertCount(4, $streamsAssignments->getStreamsByArticleId(36));
         $this->assertCount(1, $streamsAssignments->getArticleIds());
+    }
+
+    public function testPrepareStreamsAssignmentsWithRemovedArticleFromDynamicStream()
+    {
+        $this->productStreamService->createStreamRelation($this->streamDId, [7, 35, 36, 37]);
+        $this->productStreamService->markProductsToBeRemovedFromStream($this->streamDId);
+
+        //simulate the there is a changes in the dynamic stream conditions
+        //and a product which was in this stream, now is not taking part anymore
+        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36]);
+
+        $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamDId, false);
+
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(35));
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(36));
+
+        //its not empty because its part of static stream
+        $this->assertNotEmpty($streamsAssignments->getStreamsByArticleId(37));
+
+        //this product no longer takes a part in the stream
+        $this->assertEmpty($streamsAssignments->getStreamsByArticleId(7));
+        $this->assertCount(4, $streamsAssignments->getArticleIds());
+    }
+
+    public function testPrepareStreamsAssignmentsWithoutProductsInDynamicStream()
+    {
+        $this->productStreamService->createStreamRelation($this->streamDId, [7, 8]);
+        $this->productStreamService->markProductsToBeRemovedFromStream($this->streamDId);
+
+        $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($this->streamDId, false);
+
+        $this->assertCount(0, $streamsAssignments->getStreamsByArticleId(7));
+        $this->assertCount(0, $streamsAssignments->getStreamsByArticleId(8));
+        $this->assertCount(2, $streamsAssignments->getArticleIds());
     }
 
     public function testAllowToRemoveProductsFromStream()

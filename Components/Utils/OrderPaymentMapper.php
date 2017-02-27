@@ -31,7 +31,7 @@ class OrderPaymentMapper
                 'paypal' => OrderStruct::PAYMENT_PROVIDER,
             );
 
-            $this->mapping = Enlight()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
+            $this->mapping = Shopware()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;

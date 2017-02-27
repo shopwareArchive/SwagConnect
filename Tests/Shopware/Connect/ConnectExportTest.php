@@ -164,6 +164,20 @@ class ConnectExportTest extends ConnectTestHelper
         $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status = "delete"')->fetchColumn());
     }
 
+    public function testDeleteNotExportedVariant()
+    {
+        $articleId = $this->insertVariants();
+        $modelManager = $this->manager;
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
+        $detail = $article->getMainDetail();
+        Shopware()->Db()->executeUpdate('UPDATE s_plugin_connect_items SET export_status = NULL, exported = 0 where source_id = "1919"');
+        $this->connectExport->syncDeleteDetail($detail);
+
+        $this->assertEquals(0, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
+        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status IS NULL')->fetchColumn());
+    }
+
     private function insertVariants()
     {
         //clear connect_change table

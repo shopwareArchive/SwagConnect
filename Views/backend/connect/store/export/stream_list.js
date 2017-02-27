@@ -7,6 +7,7 @@ Ext.define('Shopware.apps.Connect.store.export.StreamList', {
     remoteFilter: true,
     pageSize: 20,
     autoLoad: true,
+    groupField: 'type',
     proxy: {
         type: 'ajax',
         url: '{url action=getStreamList}',

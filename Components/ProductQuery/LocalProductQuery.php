@@ -76,7 +76,7 @@ class LocalProductQuery extends BaseProductQuery
         // it's used for image translations
         // in our case translations are not used
         // so we don't care about shop language
-        $this->productContext = $this->contextService->createProductContext(
+        $this->productContext = $this->contextService->createShopContext(
             $this->configComponent->getDefaultShopId(),
             null,
             ContextService::FALLBACK_CUSTOMER_GROUP

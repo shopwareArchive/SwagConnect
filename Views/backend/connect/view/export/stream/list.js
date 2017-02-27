@@ -21,6 +21,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dockedItems: [
                 me.getPagingToolbar()
             ],
+            features: [me.getGrouping()],
             columns: me.getColumns()
         });
 
@@ -65,6 +66,25 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                 return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';
             }
         }];
+    },
+
+    getGrouping: function() {
+        return Ext.create('Ext.grid.feature.Grouping', {
+            groupHeaderTpl: [
+                '{literal}{name:this.formatName}{/literal}',
+                {
+                    formatName: function(type) {
+                        if (type == 2) {
+                            return '{s name=export/selection_streams}Selection streams{/s}';
+                        } else {
+                            return '{s name=export/condition_streams}Condition streams{/s}';
+                        }
+                    }
+                }
+            ],
+            hideGroupedHeader: true,
+            startCollapsed: false
+        });
     },
 
     /**

@@ -1815,7 +1815,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     protected function getHost()
     {
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'sn.connect.shopware.com');
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
         if (!$host || $host == "") {
             $host = $this->getConfigComponent()->getMarketplaceUrl();
         }

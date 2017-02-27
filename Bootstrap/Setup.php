@@ -124,10 +124,17 @@ class Setup
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem(array(
                     'label' => 'Connect',
-                    'controller' => 'Connect',
                     'class' => 'connect-icon',
                     'active' => 1,
                 ));
+
+                if ($this->shopware526installed) {
+                    $parent->setClass('shopware-connect');
+                    //if "Connect" menu does not exist
+                    //it must not have pluginID, because on plugin uninstall
+                    //it will be removed
+                    $parent->setPlugin(null);
+                }
             }
 
             if ($configComponent->getConfig('apiKey', '') == '') {

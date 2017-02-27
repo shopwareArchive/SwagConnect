@@ -663,6 +663,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 longDescriptionLocal: record.get('descriptionLong'),
                 longDescriptionRemote: remoteChangeSet['longDescription'],
 
+                additionalDescriptionLocal: record.get('additionalDescription'),
+                additionalDescriptionRemote: remoteChangeSet['additionalDescription'],
+
                 nameLocal: record.get('name'),
                 nameRemote: remoteChangeSet['name'],
 
@@ -681,37 +684,24 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 8: 'name',
                 16: 'image',
                 32: 'price',
-                64: 'imageInitialImport'
+                64: 'imageInitialImport',
+                128: 'additionalDescription'
             };
-
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
-            Ext.each(Object.keys(flags), function(key) {
-                var fieldName = flags[key],
-                    container = changeView.fields[fieldName];
+            var fieldName = flags[changeFlag];
+            var form = changeView.createContainer(fieldName);
 
-                if (container) {
-                    changeView.remove(container, false);
-                }
-
-                if (changeFlag & key && container) {
-                    changeView.add(container);
-
-                    container.applyButton.handler = function() {
-                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
-                    }
-
-                    container.loadRecord(changeRecord);
-                }
-            });
+            changeView.removeAll();
+            form.applyButton.handler = function() {
+                me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+            };
+            form.loadRecord(changeRecord);
+            changeView.add(form);
 
             changeView.setTitle(record.get('name'));
 
-            // hotfix: make sure that the tab is displayed correctly
             changeView.setActiveTab(0);
-            changeView.setActiveTab(1);
-            changeView.setActiveTab(0);
-
         }
     },
 

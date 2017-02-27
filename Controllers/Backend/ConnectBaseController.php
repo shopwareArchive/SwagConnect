@@ -1113,6 +1113,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             case 'longDescription':
                 $articleModel->setDescriptionLong($value);
                 break;
+            case 'additionalDescription':
+                $articleModel->getMainDetail()->getAttribute()->setConnectProductDescription($value);
+                break;
             case 'name':
                 break;
             case 'image':

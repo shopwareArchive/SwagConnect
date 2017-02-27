@@ -244,7 +244,11 @@ class ProductToShop implements ProductToShopBase
         }
         $connectAttribute->setGroupId($product->groupId);
 
-        $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
+        $detailAttribute = $detail->getAttribute();
+        if (!$detailAttribute) {
+            $detailAttribute = new AttributeModel();
+            $detail->setAttribute($detailAttribute);
+        }
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         /*
@@ -768,7 +772,7 @@ class ProductToShop implements ProductToShopBase
 
             $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
             $output[$field] = $updateAllowed;
-            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $attribute, $product)) {
+            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $product)) {
                 $flag |= $key;
             }
         }
@@ -782,11 +786,10 @@ class ProductToShop implements ProductToShopBase
      * @param $field
      * @param ProductModel $model
      * @param DetailModel $detail
-     * @param AttributeModel $attribute
      * @param Product $product
      * @return bool
      */
-    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, AttributeModel $attribute, Product $product)
+    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, Product $product)
     {
 
         switch ($field) {
@@ -794,6 +797,8 @@ class ProductToShop implements ProductToShopBase
                 return $model->getDescription() != $product->shortDescription;
             case 'longDescription':
                 return $model->getDescriptionLong() != $product->longDescription;
+            case 'additionalDescription':
+                return $detail->getAttribute()->getConnectProductDescription() != $product->additionalDescription;
             case 'name':
                 return $model->getName() != $product->title;
             case 'image':

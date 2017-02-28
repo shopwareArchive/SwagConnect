@@ -712,18 +712,18 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      * @param value
      * @param articleId
      */
-    applyChanges: function(type, value, articleId) {
+    applyChanges: function(type, value, detailId) {
         var me = this,
             changedProductsList = me.getChangedList(),
             store = changedProductsList.store;
 
         Ext.Ajax.request({
-            url: '{url action=applyChanges}',
+            url: '{url controller=LastChanges action=applyChanges}',
             method: 'POST',
             params: {
                 type: type,
                 value: value,
-                articleId: articleId
+                detailId: detailId
             },
             success: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');

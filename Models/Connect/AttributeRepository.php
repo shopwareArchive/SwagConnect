@@ -91,4 +91,52 @@ class AttributeRepository extends ModelRepository
 
         $builder->getQuery()->execute();
     }
+
+    /**
+     * List with all changed products which are comming from Connect
+     *
+     * @param int $start
+     * @param int $limit
+     * @param array $order
+     * @return \Shopware\Components\Model\QueryBuilder
+     */
+    public function getChangedProducts($start, $limit, array $order = [])
+    {
+        $builder = $this->_em->createQueryBuilder();
+        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
+        $builder->join('at.article', 'a');
+        $builder->join('at.articleDetail', 'd');
+        $builder->join('d.attribute', 'cad');
+        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->leftJoin('a.supplier', 's');
+        $builder->leftJoin('a.tax', 't');
+
+        $builder->select(array(
+            'at.lastUpdate',
+            'at.lastUpdateFlag as lastUpdateFlag',
+            'd.id',
+            'd.number as number',
+            'd.inStock as inStock',
+            'cad.connectProductDescription as additionalDescription',
+            'a.name as name',
+            'a.description',
+            'a.descriptionLong',
+            's.name as supplier',
+            'a.active as active',
+            't.tax as tax',
+            'p.price * (100 + t.tax) / 100 as price',
+            'at.category'
+        ));
+
+        $builder->where('at.shopId IS NOT NULL')
+            ->andWHere('at.lastUpdateFlag IS NOT NULL')
+            ->andWHere('at.lastUpdateFlag > 0');
+
+        $builder->addOrderBy($order);
+        $query = $builder->getQuery();
+        $query->setFirstResult($start);
+        $query->setMaxResults($limit);
+
+        return $builder;
+    }
 } 

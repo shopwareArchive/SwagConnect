@@ -689,18 +689,21 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             };
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
-            var fieldName = flags[changeFlag];
-            var form = changeView.createContainer(fieldName);
-
             changeView.removeAll();
-            form.applyButton.handler = function() {
-                me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
-            };
-            form.loadRecord(changeRecord);
-            changeView.add(form);
+
+            Ext.each(Object.keys(flags), function(key) {
+                var fieldName = flags[key];
+                if (changeFlag & key) {
+                    var form = changeView.createContainer(fieldName);
+                    form.loadRecord(changeRecord);
+                    changeView.add(form);
+                    form.applyButton.handler = function () {
+                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+                    }
+                }
+            });
 
             changeView.setTitle(record.get('name'));
-
             changeView.setActiveTab(0);
         }
     },

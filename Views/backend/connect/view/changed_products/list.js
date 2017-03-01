@@ -85,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.List', {
                         name: 'Shopware.apps.Article',
                         action: 'detail',
                         params: {
-                            articleId: record.get('id')
+                            articleId: record.get('articleId')
                         }
                     });
                 }

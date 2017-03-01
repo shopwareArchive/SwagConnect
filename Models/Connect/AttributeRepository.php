@@ -114,6 +114,7 @@ class AttributeRepository extends ModelRepository
         $builder->select(array(
             'at.lastUpdate',
             'at.lastUpdateFlag as lastUpdateFlag',
+            'a.id as articleId',
             'd.id',
             'd.number as number',
             'd.inStock as inStock',

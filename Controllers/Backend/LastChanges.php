@@ -27,7 +27,7 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
         $data = $query->getArrayResult();
 
         foreach ($data as $key => $record) {
-            $data[$key]['images'] = implode('|', $this->getImagesForArticle($record['id']));
+            $data[$key]['images'] = implode('|', $this->getImageImport()->getImagesForDetail($record['id']));
         }
 
         $this->View()->assign(array(
@@ -158,32 +158,6 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
             $this->getHelper(),
             $this->get('thumbnail_manager'),
             new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
-        );
-    }
-
-    /**
-     * Helper: Read images for a given article
-     *
-     * @param $articleId
-     * @return array
-     */
-    private function getImagesForArticle($articleId)
-    {
-
-        $builder = $this->getModelManager()->createQueryBuilder();
-        $builder->select('media.path')
-            ->from('Shopware\Models\Article\Image', 'images')
-            ->join('images.media', 'media')
-            ->where('images.articleId = :articleId')
-            ->andWhere('images.parentId IS NULL')
-            ->setParameter('articleId', $articleId)
-            ->orderBy('images.main', 'ASC')
-            ->addOrderBy('images.position', 'ASC');
-
-        return array_map(function($image) {
-            return $image['path'];
-        },
-            $builder->getQuery()->getArrayResult()
         );
     }
 }

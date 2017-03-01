@@ -248,6 +248,7 @@ class ProductToShop implements ProductToShopBase
         if (!$detailAttribute) {
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
         }
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);

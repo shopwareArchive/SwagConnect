@@ -698,7 +698,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     form.loadRecord(changeRecord);
                     changeView.add(form);
                     form.applyButton.handler = function () {
-                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'), changeView);
                     }
                 }
             });
@@ -713,9 +713,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      *
      * @param type
      * @param value
-     * @param articleId
+     * @param detailId
+     * @param changeView
      */
-    applyChanges: function(type, value, detailId) {
+    applyChanges: function(type, value, detailId, changeView) {
         var me = this,
             changedProductsList = me.getChangedList(),
             store = changedProductsList.store;
@@ -731,6 +732,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             success: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 store.reload();
+                changeView.removeAll();
             },
             failure: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);

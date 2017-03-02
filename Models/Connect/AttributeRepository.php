@@ -107,7 +107,7 @@ class AttributeRepository extends ModelRepository
         $builder->join('at.article', 'a');
         $builder->join('at.articleDetail', 'd');
         $builder->join('d.attribute', 'cad');
-        $builder->leftJoin('d.prices', 'p', 'with', "p.from = 1 AND p.customerGroupKey = 'EK'");
+        $builder->leftJoin('d.prices', 'p', \Doctrine\ORM\Query\Expr\Join::WITH, "p.from = 1 AND p.customerGroupKey = 'EK'");
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
 

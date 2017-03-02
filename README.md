@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/shopware/SwagConnect.svg?branch=master)](https://travis-ci.org/shopware/SwagConnect)
 [![Coverage Status](https://coveralls.io/repos/github/shopware/SwagConnect/badge.svg?branch=master)](https://coveralls.io/github/shopware/SwagConnect?branch=master)
 
 # General behaviour

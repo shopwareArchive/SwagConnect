@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/shopware/SwagConnect/badge.svg?branch=master)](https://coveralls.io/github/shopware/SwagConnect?branch=master)
+
 # General behaviour
 
 ## Uninstall

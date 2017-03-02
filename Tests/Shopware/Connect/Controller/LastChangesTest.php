@@ -159,7 +159,7 @@ class LastChangesTest extends ConnectTestHelper
         $this->assertEquals(117.63865546218489, $changedArticle->getMainDetail()->getPrices()->first()->getPrice());
     }
 
-    public function testApplyOnOfMultipleChanges()
+    public function testApplyOneOfMultipleChanges()
     {
         $article = $this->createArticle();
         $article = $this->manager->getRepository('Shopware\Models\Article\Article')->find($article->getId());
@@ -244,21 +244,27 @@ class LastChangesTest extends ConnectTestHelper
             )
         );
 
-//        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($article);
-//        $this->manager->persist($connectAttribute);
-//        $this->manager->persist($article);
-//        $this->manager->flush();
-//        $this->manager->clear();
-
         return $article;
     }
 
 
     public function tearDown()
     {
-//        $articleId = $this->article->getId();
-//        $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
-//        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
-//        $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
+        $query = $query = Shopware()->Db()->query('
+                SELECT articleID
+                FROM s_articles_details
+                WHERE ordernumber LIKE "lct%" GROUP BY articleID');
+        $articleIds = array_map(function($item) {
+            return $item['articleID'];
+        }, $query->fetchAll());
+
+        if (empty($articleIds)) {
+            return;
+        }
+
+        $this->db->exec('DELETE FROM s_articles WHERE id IN (' . implode(", ", $articleIds) . ')');
+        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "lct%"');
+        $this->db->exec('DELETE FROM s_articles_prices WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE article_id IN (' . implode(", ", $articleIds) . ')');
     }
 }

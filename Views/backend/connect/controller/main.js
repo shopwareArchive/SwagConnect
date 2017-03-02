@@ -730,7 +730,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 detailId: detailId
             },
             success: function(response, opts) {
-                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                var responseObject = Ext.decode(response.responseText);
+                if (responseObject.success) {
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', responseObject.message);
+                }
+
                 store.reload();
                 changeView.removeAll();
             },

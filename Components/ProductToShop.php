@@ -809,6 +809,10 @@ class ProductToShop implements ProductToShopBase
                 if (empty($prices)) {
                     return true;
                 }
+                $price = $prices->first();
+                if (!$price) {
+                    return true;
+                }
                 return $prices->first()->getPrice() != $product->price;
         }
 

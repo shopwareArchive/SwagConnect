@@ -52,7 +52,9 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
         $detail = $this->getModelManager()->getRepository('\Shopware\Models\Article\Detail')->find($detailId);
 
         if (!$detail) {
-            throw new \RuntimeException("Could not find detail with id {$detailId}");
+            $this->View()->assign('success', false);
+            $this->View()->assign('message', "Could not find detail with id {$detailId}");
+            return;
         }
 
         /** @var \Shopware\Models\Article\Article $article */
@@ -115,9 +117,7 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
         }
 
         $this->getModelManager()->flush();
-
         $this->View()->assign('success', true);
-
     }
 
     /**

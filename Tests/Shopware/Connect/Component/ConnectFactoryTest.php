@@ -103,7 +103,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
     {
         putenv("_TRANSACTION_HOST");
         $prefix = $this->generateRandomString();
-        $suffix = '.stage'.rand(0, 9).'.connect.shopware.com';
+        $suffix = '.stage'.rand(1, 9).'.connect.shopware.com';
         $this->configMock->method('getConfig')->willReturn($prefix . $suffix);
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();

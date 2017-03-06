@@ -411,6 +411,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getSDK()->verifySdk();
             $this->getConfigComponent()->setExportConfigs($data);
 
+            //todo@sb: check this. Not possible to export all products at the same request.
             $ids = $connectExport->getExportArticlesIds();
             $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
             $errors = $connectExport->export($sourceIds);

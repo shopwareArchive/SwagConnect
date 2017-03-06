@@ -171,6 +171,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'revisionId' => time(),
             'sourceId' => $number,
             'ean' => $number,
+            'sku' => 'sku#' . $number,
             'url' => 'http://shopware.de',
             'title' => 'MassImport #'. $number,
             'shortDescription' => 'Ein Produkt aus shopware Connect',

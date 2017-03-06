@@ -1426,6 +1426,52 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     }
 
     /**
+     * Saves the dynamic streams to the db.
+     * Cronjob will looks for those streams to process them
+     */
+    public function prepareDynamicStreamsAction()
+    {
+        $streamIds = $this->Request()->getParam('streamIds',[]);
+
+        try {
+            $streamService = $this->getProductStreamService();
+            $streams = $streamService->findStreams($streamIds);
+
+            if (!$streams) {
+                $message = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                    'export/message/error_no_stream_selected',
+                    'No streams were selected',
+                    true
+                );
+                throw new \Exception($message);
+            }
+
+            $modelManager = $this->getModelManager();
+
+            foreach ($streams as $stream) {
+                $streamAttr = $streamService->createStreamAttribute($stream);
+
+                if (!$streamAttr->getExportStatus()) {
+                    $streamAttr->setExportStatus(ProductStreamService::STATUS_PENDING);
+                }
+
+                $modelManager->persist($streamAttr);
+            }
+
+            $modelManager->flush();
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
+
+        $this->View()->assign(array(
+            'success' => true,
+        ));
+    }
+
+    /**
      * Add given category to products
      */
     public function assignProductsToCategoryAction()
@@ -1688,7 +1734,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();
 
-        foreach ($streamIds as $streamId) {
+        $filteredStreamIds = $productStreamService->filterExportedStreams($streamIds);
+
+        foreach ($filteredStreamIds as $streamId) {
             try {
                 $removedRecords = array();
 
@@ -1767,11 +1815,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     protected function getHost()
     {
-        $host = $this->getConfigComponent()->getConfig('connectDebugHost', 'connect.shopware.com');
-        if ($host) {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $host;
-        } else {
-            $host = $this->getConfigComponent()->getSocialNetworkPrefix() . $this->getConfigComponent()->getMarketplaceUrl();
+        $host = $this->getConfigComponent()->getConfig('connectDebugHost');
+        if (!$host || $host == "") {
+            $host = $this->getConfigComponent()->getMarketplaceUrl();
         }
 
         return $host;

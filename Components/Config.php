@@ -38,8 +38,7 @@ class Config
     const UPDATE_MANUAL = 0;
     const UPDATE_AUTO = 1;
     const UPDATE_CRON_JOB = 2;
-    const MARKETPLACE_URL = 'connect.shopware.com';
-    const SN_PREFIX = 'sn.';
+    const MARKETPLACE_URL = 'sn.connect.shopware.com';
 
     /**
      * @var ModelManager
@@ -131,6 +130,22 @@ class Config
             ->from('s_core_shops', 'cs')
             ->where('cs.default = :default')
             ->setParameter('default', true);
+
+        return (bool) $builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCronActive()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cp.active')
+            ->from('s_core_plugins', 'cp')
+            ->where('cp.namespace = :namespace')
+            ->andWhere('cp.name = :name')
+            ->setParameter('namespace', 'Core')
+            ->setParameter('name', 'Cron');
 
         return (bool) $builder->execute()->fetchColumn();
     }
@@ -521,11 +536,6 @@ class Config
         }
 
         return self::MARKETPLACE_URL;
-    }
-
-    public function getSocialNetworkPrefix()
-    {
-        return self::SN_PREFIX;
     }
 
     /**

@@ -68,6 +68,7 @@ class Update
         $this->addConnectDescriptionElement();
         $this->updateProductDescriptionSetting();
         $this->createUpdateAdditionalDescriptionColumn();
+        $this->createDynamicStreamTable();
 
         return true;
     }
@@ -214,6 +215,22 @@ class Update
             } catch (\Exception $e) {
                 // ignore it if the column already exists
             }
+        }
+    }
+
+    private function createDynamicStreamTable()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $query = "CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
+                `stream_id` int(11) unsigned NOT NULL,
+                `article_id` int(11) unsigned NOT NULL,
+                `deleted` int(1) NOT NULL DEFAULT '0',
+                UNIQUE KEY `stream_id` (`stream_id`,`article_id`),
+                CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
+                CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
+            $this->db->exec($query);
         }
     }
 }

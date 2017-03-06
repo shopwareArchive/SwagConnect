@@ -40,7 +40,7 @@ class OrderPaymentStatusMapper
                 'sc_error' => PaymentStatus::PAYMENT_ERROR,
             );
 
-            $this->mapping = Enlight()->Events()->filter('Connect_OrderPaymentStatus_Mapping', $this->mapping);
+            $this->mapping = Shopware()->Events()->filter('Connect_OrderPaymentStatus_Mapping', $this->mapping);
         }
 
         return $this->mapping;

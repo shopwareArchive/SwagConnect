@@ -33,4 +33,20 @@ class ProductStreamsAssignments extends Struct
         return array_keys($this->assignments);
     }
 
+    /**
+     * @return array
+     */
+    public function getArticleIdsWithoutStreams()
+    {
+        $articleIds = [];
+
+        foreach ($this->getArticleIds() as $articleId) {
+            if (empty($this->getStreamsByArticleId($articleId))) {
+                $articleIds[] = $articleId;
+            }
+        }
+
+        return $articleIds;
+    }
+
 }

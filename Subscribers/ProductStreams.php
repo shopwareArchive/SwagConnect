@@ -2,7 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-use Shopware\Components\Model\ModelManager;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Helper;
@@ -40,6 +40,7 @@ class ProductStreams extends BaseSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
             'Enlight_Controller_Action_PostDispatch_Backend_ProductStream' => 'extendBackendProductStream',
         );
     }
@@ -47,6 +48,46 @@ class ProductStreams extends BaseSubscriber
     public function getProductStreamService()
     {
         return $this->Application()->Container()->get('swagconnect.product_stream_service');
+    }
+
+    public function preProductStream(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch ($request->getActionName()) {
+            case 'delete':
+                $streamId = $request->get('id');
+                /** @var ProductStreamService $productStreamService */
+                $productStreamService = $this->getProductStreamService();
+
+                if ($productStreamService->isStreamExported($streamId)) {
+                    $assignments = $productStreamService->getStreamAssignments($streamId);
+                    $this->removeArticlesFromStream($streamId, $assignments, $assignments->getArticleIds());
+                    $this->getSDK()->recordStreamDelete($streamId);
+                    $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
+                }
+                break;
+            case 'removeSelectedProduct':
+                $streamId = $request->get('streamId');
+                $articleId = $request->get('articleId');
+
+                if (!$streamId || !$articleId) {
+                    return;
+                }
+
+                /** @var ProductStreamService $productStreamService */
+                $productStreamService = $this->getProductStreamService();
+
+                if ($productStreamService->isStreamExported($streamId)) {
+                    $assignments = $productStreamService->getStreamAssignments($streamId);
+                    $this->removeArticlesFromStream($streamId, $assignments, [$articleId]);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -67,13 +108,6 @@ class ProductStreams extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
                 );
-                break;
-            case 'delete':
-                $streamId = $request->get('id');
-
-                if ($this->getProductStreamService()->isStreamExported($streamId)) {
-                    $this->getSDK()->recordStreamDelete($streamId);
-                }
                 break;
             case 'addSelectedProduct':
                 $streamId = $request->getParam('streamId');
@@ -110,5 +144,42 @@ class ProductStreams extends BaseSubscriber
             default:
                 break;
         }
+    }
+
+    /**
+     * @param $streamId
+     * @param $assignments
+     * @param array $articleIds
+     */
+    private function removeArticlesFromStream($streamId, $assignments, array $articleIds)
+    {
+        $removedRecords = [];
+        $productStreamService = $this->getProductStreamService();
+        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $items = $this->connectExport->fetchConnectItems($sourceIds, false);
+
+        foreach ($items as $item) {
+            if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
+                $this->getSDK()->recordDelete($item['sourceId']);
+                $removedRecords[] = $item['sourceId'];
+            } else {
+                //updates items with the new streams
+                $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
+                if (!$this->getHelper()->isMainVariant($item['sourceId']) || !$streamCollection) {
+                    continue;
+                }
+
+                //removes current stream from the collection
+                unset($streamCollection[$streamId]);
+
+                $this->getSDK()->recordStreamAssignment(
+                    $item['sourceId'],
+                    $streamCollection,
+                    $item['groupId']
+                );
+            }
+        }
+
+        $this->connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
     }
 }

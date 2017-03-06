@@ -167,6 +167,26 @@ class Helper
     }
 
     /**
+     * @param array $orderNumbers
+     * @return array
+     */
+    public function getArticleIdsByNumber(array $orderNumbers)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+
+        $rows = $builder->select('d.articleID as articleId')
+            ->from('s_articles_details', 'd')
+            ->where('d.ordernumber IN (:orderNumbers)')
+            ->setParameter('orderNumbers', $orderNumbers, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
+            ->execute()
+            ->fetchAll();
+
+        return array_map(function($row){
+            return $row['articleId'];
+        }, $rows);
+    }
+
+    /**
      * Returns article detail model by
      * given sourceId and shopId
      *

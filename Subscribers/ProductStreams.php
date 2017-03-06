@@ -149,13 +149,13 @@ class ProductStreams extends BaseSubscriber
     /**
      * @param $streamId
      * @param $assignments
-     * @param array $articleId
+     * @param array $articleIds
      */
-    private function removeArticlesFromStream($streamId, $assignments, array $articleId)
+    private function removeArticlesFromStream($streamId, $assignments, array $articleIds)
     {
         $removedRecords = [];
         $productStreamService = $this->getProductStreamService();
-        $sourceIds = $this->getHelper()->getArticleSourceIds($articleId);
+        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
         $items = $this->connectExport->fetchConnectItems($sourceIds, false);
 
         foreach ($items as $item) {

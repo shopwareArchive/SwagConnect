@@ -132,7 +132,6 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
         $result = $apiRequest->verifyRequest($request);
 
         if ($result->isOk()) {
-
             /** @var \Shopware\Bundle\PluginInstallerBundle\Service\InstallerService $pluginManager */
             $pluginManager = $this->getPluginManager();
             $plugin = $pluginManager->getPluginByName('SwagConnect');

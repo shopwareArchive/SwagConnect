@@ -48,25 +48,25 @@ class RestApiRequest
                 throw new \InvalidArgumentException();
             }
         } catch (ExpiredException $e) {
-            return new JsonResponse(array(
+            return new JsonResponse([
                 'success' => false,
                 'message' => "Expired authentication key"
-            ), 404);
+            ], 404);
         } catch (BeforeValidException $e) {
-            return new JsonResponse(array(
+            return new JsonResponse([
                 'success' => false,
                 'message' => "Authentication key is not valid yet."
-            ), 404);
+            ], 404);
         } catch (SignatureInvalidException $e) {
-            return new JsonResponse(array(
+            return new JsonResponse([
                 'success' => false,
                 'message' => "Signature verification failed."
-            ), 404);
+            ], 404);
         } catch (\Exception $e) {
-            return new JsonResponse(array(
+            return new JsonResponse([
                 'success' => false,
                 'message' => "Invalid authentication token."
-            ), 404);
+            ], 404);
         }
 
         return new JsonResponse(array(

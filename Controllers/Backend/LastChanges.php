@@ -53,7 +53,12 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
 
         if (!$detail) {
             $this->View()->assign('success', false);
-            $this->View()->assign('message', "Could not find detail with id {$detailId}");
+            $message = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                'changed_products/error/wrongArticleDetailId',
+                'The product was not found',
+                true
+            );
+            $this->View()->assign('message', $message);
             return;
         }
 

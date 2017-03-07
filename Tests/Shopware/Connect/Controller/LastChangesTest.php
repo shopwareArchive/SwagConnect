@@ -199,7 +199,7 @@ class LastChangesTest extends ConnectTestHelper
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertFalse($this->View()->success);
-        $this->assertEquals('Could not find detail with id 99999999999', $this->View()->message);
+        $this->assertEquals('The product was not found', $this->View()->message);
     }
 
     private function createArticle()

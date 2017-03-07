@@ -70,7 +70,6 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
         $updateFlagsByName = array_flip($updateFlags);
         $flag = $updateFlagsByName[$type];
 
-
         switch ($type) {
             case 'shortDescription':
                 $article->setDescription($value);

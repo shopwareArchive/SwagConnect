@@ -199,7 +199,7 @@ class LastChangesTest extends ConnectTestHelper
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertFalse($this->View()->success);
-        $this->assertEquals('The product was not found', $this->View()->message);
+        $this->assertEquals('Das Produkt wurde nicht gefunden', $this->View()->message);
     }
 
     private function createArticle()

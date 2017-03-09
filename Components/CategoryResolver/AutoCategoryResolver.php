@@ -7,6 +7,7 @@ use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Shop\Shop;
 
 class AutoCategoryResolver implements CategoryResolver
 {
@@ -25,15 +26,29 @@ class AutoCategoryResolver implements CategoryResolver
      */
     private $remoteCategoryRepository;
 
+    /**
+     * @var Shop
+     */
+    private $shop;
+
+    /**
+     * AutoCategoryResolver constructor.
+     * @param ModelManager $manager
+     * @param CategoryRepository $categoryRepository
+     * @param RemoteCategoryRepository $remoteCategoryRepository
+     * @param Shop $shop
+     */
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
-        RemoteCategoryRepository $remoteCategoryRepository
+        RemoteCategoryRepository $remoteCategoryRepository,
+        Shop $shop
     )
     {
         $this->manager = $manager;
         $this->categoryRepository = $categoryRepository;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
+        $this->shop = $shop;
     }
 
     /**
@@ -43,7 +58,14 @@ class AutoCategoryResolver implements CategoryResolver
     {
         $tree = $this->generateTree($categories);
 
-        $this->convertTreeToEntities($tree);
+        $mainNode = reset($tree);
+
+        $mainCategory = $this->categoryRepository->findOneBy([
+            'name' => $mainNode['name'],
+            'parentId' => 1,
+        ]);
+
+        $this->convertTreeToEntities($mainNode['children'], $mainCategory);
         $categoryNames = array();
         $categoryNames = $this->collectOnlyLeafCategories($tree, $categoryNames);
 
@@ -84,7 +106,11 @@ class AutoCategoryResolver implements CategoryResolver
     public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = array())
     {
         if (!$parent) {
-            $parent = $this->categoryRepository->find(3);
+            //main shop category id
+            $shopCategoryId = $parent = $this->shop->getCategory()->getId();
+
+            //full load of category entity
+            $parent = $this->categoryRepository->find($shopCategoryId);
         }
 
         foreach ($node as $category) {

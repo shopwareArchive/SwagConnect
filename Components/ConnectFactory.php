@@ -188,7 +188,8 @@ class ConnectFactory
             new AutoCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\Models\Category\Category'),
-                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $this->getContainer()->get('shop')
             ) :
             new DefaultCategoryResolver(
                 $manager,

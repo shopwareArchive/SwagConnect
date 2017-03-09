@@ -9,21 +9,44 @@ class AutoCategoryResolverTest extends ConnectTestHelper
 {
     /** @var  \ShopwarePlugins\Connect\Components\CategoryResolver */
     private $categoryResolver;
+    private $manager;
+    private $categoryRepo;
 
     public function setUp()
     {
         parent::setUp();
 
+        $this->manager = Shopware()->Models();
+        $this->categoryRepo = $this->manager->getRepository('Shopware\Models\Category\Category');
+
         $this->categoryResolver = new AutoCategoryResolver(
-            Shopware()->Models(),
-            Shopware()->Models()->getRepository('Shopware\Models\Category\Category'),
-            Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+            $this->manager,
+            $this->categoryRepo,
+            $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+            Shopware()->Container()->get('shop')
         );
     }
 
     public function testResolve()
     {
-        // todo@sb: implement
+        $categories = [
+            '/spanish/nike/tshirts' => 'Tshirts',
+            '/spanish/nike' => 'Nike',
+            '/spanish/adidas/boots' => 'Boots',
+            '/spanish/adidas' => 'Adidas',
+            '/spanish' => 'Spanish',
+        ];
+
+        $this->categoryResolver->resolve($categories);
+
+        //Spanish category must not be created
+        $this->assertNull($this->categoryRepo->findOneByName('Spanish'));
+        $this->assertEquals(
+            Shopware()->Container()->get('shop')->getCategory()->getId(),
+            $expected = Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', array('Adidas'))
+        );
+
+        Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("'. implode('","', $categories) .'")');
     }
 
     public function testGenerateTree()

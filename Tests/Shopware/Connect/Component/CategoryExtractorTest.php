@@ -135,7 +135,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
-                $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                Shopware()->Container()->get('shop')
             ),
             $this->configurationGateway,
             $randomStringGenerator

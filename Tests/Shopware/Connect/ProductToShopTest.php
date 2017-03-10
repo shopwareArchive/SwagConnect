@@ -482,7 +482,8 @@ class ProductToShopTest extends ConnectTestHelper
             new AutoCategoryResolver(
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                Shopware()->Container()->get('shop')
             ),
             $this->gateway,
             Shopware()->Container()->get('events')

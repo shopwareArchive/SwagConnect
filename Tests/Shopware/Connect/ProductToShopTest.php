@@ -489,6 +489,7 @@ class ProductToShopTest extends ConnectTestHelper
             Shopware()->Container()->get('events')
         );
 
+        $mainCategoryName = Shopware()->Container()->get('shop')->getCategory()->getName();
 
         $product = $this->getProduct();
         $parentCategory1 = 'MassImport#' . rand(1, 999999999);
@@ -508,28 +509,16 @@ class ProductToShopTest extends ConnectTestHelper
         $childCategoryModel = $categoryRepository->findOneBy(array('name' => $childCategory));
 
         $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel);
-        $this->assertEquals($childCategoryModel->getParent()->getName(), $parentCategory1);
+        $this->assertEquals(
+            $mainCategoryName,
+            $childCategoryModel->getParent()->getName()
+        );
 
-        foreach ($product->categories as $category) {
-            // skip it because this category has child category
-            // and product will be assigned only to child categories
-            if ($category == $parentCategory1) {
-                continue;
-            }
+        /** @var Article $article */
+        $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
-            $articlesCount = Shopware()->Db()->query(
-                'SELECT COUNT(s_articles.id)
-              FROM s_plugin_connect_items
-              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
-              INNER JOIN s_articles_categories ON (s_plugin_connect_items.article_id = s_articles_categories.articleID)
-              INNER JOIN s_categories ON (s_articles_categories.categoryID = s_categories.id)
-              WHERE s_plugin_connect_items.source_id = :sourceId
-              AND s_categories.description = :category',
-                array('sourceId' => $product->sourceId, 'category' => $category)
-            )->fetchColumn();
-
-            $this->assertEquals(1, $articlesCount);
-        }
+        //2 cause we also count the main category usually its 'Deutsch'
+        $this->assertEquals(2, count($article->getAllCategories()));
     }
 
     public function testAutomaticallyCreateUnits()

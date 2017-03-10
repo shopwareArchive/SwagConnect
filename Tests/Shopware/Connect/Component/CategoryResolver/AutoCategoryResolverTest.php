@@ -37,12 +37,13 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             '/spanish' => 'Spanish',
         ];
 
+        $mainCategoryId = Shopware()->Container()->get('shop')->getCategory()->getId();
         $this->categoryResolver->resolve($categories);
 
         //Spanish category must not be created
         $this->assertNull($this->categoryRepo->findOneByName('Spanish'));
         $this->assertEquals(
-            Shopware()->Container()->get('shop')->getCategory()->getId(),
+            $mainCategoryId,
             $expected = Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', array('Adidas'))
         );
 

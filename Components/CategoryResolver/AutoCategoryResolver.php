@@ -58,14 +58,15 @@ class AutoCategoryResolver implements CategoryResolver
     {
         $tree = $this->generateTree($categories);
 
-        $mainNode = reset($tree);
+        foreach ($tree as $node) {
+            $mainCategory = $this->categoryRepository->findOneBy([
+                'name' => $node['name'],
+                'parentId' => 1,
+            ]);
 
-        $mainCategory = $this->categoryRepository->findOneBy([
-            'name' => $mainNode['name'],
-            'parentId' => 1,
-        ]);
+            $this->convertTreeToEntities($node['children'], $mainCategory);
+        }
 
-        $this->convertTreeToEntities($mainNode['children'], $mainCategory);
         $categoryNames = array();
         $categoryNames = $this->collectOnlyLeafCategories($tree, $categoryNames);
 

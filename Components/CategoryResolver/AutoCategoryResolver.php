@@ -7,7 +7,7 @@ use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Shop\Shop;
+use ShopwarePlugins\Connect\Components\Config;
 
 class AutoCategoryResolver implements CategoryResolver
 {
@@ -27,28 +27,28 @@ class AutoCategoryResolver implements CategoryResolver
     private $remoteCategoryRepository;
 
     /**
-     * @var Shop
+     * @var Config
      */
-    private $shop;
+    private $config;
 
     /**
      * AutoCategoryResolver constructor.
      * @param ModelManager $manager
      * @param CategoryRepository $categoryRepository
      * @param RemoteCategoryRepository $remoteCategoryRepository
-     * @param Shop $shop
+     * @param Config $config
      */
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
         RemoteCategoryRepository $remoteCategoryRepository,
-        Shop $shop
+        Config $config
     )
     {
         $this->manager = $manager;
         $this->categoryRepository = $categoryRepository;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
-        $this->shop = $shop;
+        $this->config = $config;
     }
 
     /**
@@ -111,11 +111,8 @@ class AutoCategoryResolver implements CategoryResolver
     public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = array())
     {
         if (!$parent) {
-            //main shop category id
-            $shopCategoryId = $parent = $this->shop->getCategory()->getId();
-
             //full load of category entity
-            $parent = $this->categoryRepository->find($shopCategoryId);
+            $parent = $this->config->getDefaultShopCategory();
         }
 
         foreach ($node as $category) {

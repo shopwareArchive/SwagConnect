@@ -53,7 +53,7 @@ class ImportServiceTest extends ConnectTestHelper
             $this->manager,
             $this->categoryRepository,
             $this->remoteCategoryRepository,
-            Shopware()->Container()->get('shop')
+            new \ShopwarePlugins\Connect\Components\Config($this->manager)
         );
 
         $this->importService = new ImportService(

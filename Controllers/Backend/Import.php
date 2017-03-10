@@ -411,7 +411,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $this->getModelManager(),
                 $this->getCategoryRepository(),
                 $this->getRemoteCategoryRepository(),
-                $this->get('shop')
+                new \ShopwarePlugins\Connect\Components\Config($this->getModelManager())
             );
         }
 

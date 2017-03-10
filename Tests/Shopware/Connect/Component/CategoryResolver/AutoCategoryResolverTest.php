@@ -23,7 +23,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $this->manager,
             $this->categoryRepo,
             $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-            Shopware()->Container()->get('shop')
+            new \ShopwarePlugins\Connect\Components\Config($this->manager)
         );
     }
 

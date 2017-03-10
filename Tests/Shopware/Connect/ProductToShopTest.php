@@ -483,7 +483,7 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                Shopware()->Container()->get('shop')
+                new \ShopwarePlugins\Connect\Components\Config($this->modelManager)
             ),
             $this->gateway,
             Shopware()->Container()->get('events')

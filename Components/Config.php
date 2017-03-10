@@ -553,6 +553,22 @@ class Config
     }
 
     /**
+     * @return \Shopware\Models\Category\Category
+     */
+    public function getDefaultShopCategory()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cs.category_id')
+            ->from('s_core_shops', 'cs')
+            ->where('cs.default = :default')
+            ->setParameter('default', true);
+
+        $categoryId = (int)$builder->execute()->fetchColumn();
+
+        return $this->manager->find('Shopware\Models\Category\Category', $categoryId);
+    }
+
+    /**
      * @return \Shopware\Components\Model\ModelRepository|\Shopware\CustomModels\Connect\ConfigRepository
      */
     private function getConfigRepository()

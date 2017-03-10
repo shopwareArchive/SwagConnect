@@ -58,6 +58,10 @@ class AutoCategoryResolver implements CategoryResolver
     {
         $tree = $this->generateTree($categories);
 
+        // we need to foreach, cause we may have two main nodes
+        // example:
+        // Deutsch/Category/Subcategory
+        // English/Category/Subcategory
         foreach ($tree as $node) {
             $mainCategory = $this->categoryRepository->findOneBy([
                 'name' => $node['name'],

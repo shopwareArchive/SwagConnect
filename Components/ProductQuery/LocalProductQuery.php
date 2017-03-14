@@ -211,7 +211,6 @@ class LocalProductQuery extends BaseProductQuery
         foreach ($mediaFiles as $media) {
             $row['images'][] = $media->getFile();
         }
-        $row['images'] = array_slice($row['images'], 0, 5);
 
         $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
         $sku = $row['sku'];

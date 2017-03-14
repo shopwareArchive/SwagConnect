@@ -207,7 +207,7 @@ class LocalProductQuery extends BaseProductQuery
 
         $row['images'] = array();
         $mediaFiles = $this->localMediaService->getProductMedia($product, $this->productContext);
-
+        $mediaFiles = array_slice($mediaFiles, 0, 5);
         foreach ($mediaFiles as $media) {
             $row['images'][] = $media->getFile();
         }
@@ -216,11 +216,11 @@ class LocalProductQuery extends BaseProductQuery
         $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
         $sku = $row['sku'];
         if (array_key_exists($sku, $variantMediaFiles) && $variantMediaFiles[$sku]) {
+            $variantMediaFiles[$sku] = array_slice($variantMediaFiles[$sku], 0, 5);
             foreach ($variantMediaFiles[$sku] as $media) {
                 $row['variantImages'][] = $media->getFile();
             }
         }
-        $row['variantImages'] = array_slice($row['variantImages'], 0, 5);
 
         //todo@sb: find better way to collect configuration option translations
         $row = $this->applyConfiguratorOptions($row);

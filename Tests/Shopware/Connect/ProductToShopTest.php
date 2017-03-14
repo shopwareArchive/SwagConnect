@@ -516,12 +516,9 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var Article $article */
         $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
-        //2 cause we also count the main category usually its 'Deutsch'
-        $this->assertEquals(2, count($article->getAllCategories()));
-
-        foreach ($article->getCategories() as $category) {
-            $this->assertEquals($childCategory, $category->getName());
-        }
+        $assignCategories = $article->getCategories();
+        $this->assertEquals(1, count($assignCategories));
+        $this->assertEquals($childCategory, $assignCategories[0]->getName());
     }
 
     public function testAutomaticallyCreateUnits()

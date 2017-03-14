@@ -468,6 +468,7 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
+        $config =  new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
         $productToShop = new ProductToShop(
             $this->getHelper(),
             $this->modelManager,
@@ -483,13 +484,11 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
                 $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->modelManager)
+                $config
             ),
             $this->gateway,
             Shopware()->Container()->get('events')
         );
-
-        $mainCategoryName = Shopware()->Container()->get('shop')->getCategory()->getName();
 
         $product = $this->getProduct();
         $parentCategory1 = 'MassImport#' . rand(1, 999999999);
@@ -510,7 +509,7 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel);
         $this->assertEquals(
-            $mainCategoryName,
+            $config->getDefaultShopCategory()->getName(),
             $childCategoryModel->getParent()->getName()
         );
 

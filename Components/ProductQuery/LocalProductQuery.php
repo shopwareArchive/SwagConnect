@@ -211,6 +211,7 @@ class LocalProductQuery extends BaseProductQuery
         foreach ($mediaFiles as $media) {
             $row['images'][] = $media->getFile();
         }
+        $row['images'] = array_slice($row['images'], 0, 5);
 
         $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
         $sku = $row['sku'];
@@ -219,6 +220,7 @@ class LocalProductQuery extends BaseProductQuery
                 $row['variantImages'][] = $media->getFile();
             }
         }
+        $row['variantImages'] = array_slice($row['variantImages'], 0, 5);
 
         //todo@sb: find better way to collect configuration option translations
         $row = $this->applyConfiguratorOptions($row);

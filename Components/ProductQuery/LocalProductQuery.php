@@ -25,7 +25,7 @@ use Shopware\Connect\Struct\PriceRange;
  */
 class LocalProductQuery extends BaseProductQuery
 {
-    const IMAGE_LIMIT = 5;
+    const IMAGE_LIMIT = 10;
 
     protected $baseProductUrl;
 

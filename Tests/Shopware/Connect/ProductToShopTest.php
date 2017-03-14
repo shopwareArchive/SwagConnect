@@ -518,6 +518,10 @@ class ProductToShopTest extends ConnectTestHelper
 
         //2 cause we also count the main category usually its 'Deutsch'
         $this->assertEquals(2, count($article->getAllCategories()));
+
+        foreach ($article->getCategories() as $category) {
+            $this->assertEquals($childCategory, $category->getName());
+        }
     }
 
     public function testAutomaticallyCreateUnits()

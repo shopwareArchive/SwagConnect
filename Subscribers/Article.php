@@ -149,6 +149,7 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/view/detail/connect_properties.js'
                 );
+                break;
             case 'setPropertyList':
                 // property values are saved in different ajax call then
                 // property group and this will generate wrong Connect changes.

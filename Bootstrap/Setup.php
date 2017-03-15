@@ -7,6 +7,7 @@ use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
@@ -88,7 +89,7 @@ class Setup
             array(
                 'label' => 'Shopware Connect Host',
                 'required' => false,
-                'value'    => 'connect.shopware.com'
+                'value'    => Config::MARKETPLACE_URL
             ));
     }
 
@@ -127,10 +128,17 @@ class Setup
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem(array(
                     'label' => 'Connect',
-                    'controller' => 'Connect',
                     'class' => 'connect-icon',
                     'active' => 1,
                 ));
+
+                if ($this->shopware526installed) {
+                    $parent->setClass('shopware-connect');
+                    //if "Connect" menu does not exist
+                    //it must not have pluginID, because on plugin uninstall
+                    //it will be removed
+                    $parent->setPlugin(null);
+                }
             }
 
             if ($configComponent->getConfig('apiKey', '') == '') {

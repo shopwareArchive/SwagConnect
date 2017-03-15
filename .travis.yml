@@ -31,7 +31,7 @@ before_script:
     - php bin/console sw:cache:clear --env=testing
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
 
-script: phpunit
+script: ../../../../../../vendor/bin/phpunit
 
 notifications:
     email: false

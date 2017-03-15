@@ -663,6 +663,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 longDescriptionLocal: record.get('descriptionLong'),
                 longDescriptionRemote: remoteChangeSet['longDescription'],
 
+                additionalDescriptionLocal: record.get('additionalDescription'),
+                additionalDescriptionRemote: remoteChangeSet['additionalDescription'],
+
                 nameLocal: record.get('name'),
                 nameRemote: remoteChangeSet['name'],
 
@@ -681,37 +684,27 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 8: 'name',
                 16: 'image',
                 32: 'price',
-                64: 'imageInitialImport'
+                64: 'imageInitialImport',
+                128: 'additionalDescription'
             };
-
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
+            changeView.removeAll();
+
             Ext.each(Object.keys(flags), function(key) {
-                var fieldName = flags[key],
-                    container = changeView.fields[fieldName];
-
-                if (container) {
-                    changeView.remove(container, false);
-                }
-
-                if (changeFlag & key && container) {
-                    changeView.add(container);
-
-                    container.applyButton.handler = function() {
-                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+                var fieldName = flags[key];
+                if (changeFlag & key) {
+                    var form = changeView.createContainer(fieldName);
+                    form.loadRecord(changeRecord);
+                    changeView.add(form);
+                    form.applyButton.handler = function () {
+                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'), changeView);
                     }
-
-                    container.loadRecord(changeRecord);
                 }
             });
 
             changeView.setTitle(record.get('name'));
-
-            // hotfix: make sure that the tab is displayed correctly
             changeView.setActiveTab(0);
-            changeView.setActiveTab(1);
-            changeView.setActiveTab(0);
-
         }
     },
 
@@ -720,24 +713,32 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      *
      * @param type
      * @param value
-     * @param articleId
+     * @param detailId
+     * @param changeView
      */
-    applyChanges: function(type, value, articleId) {
+    applyChanges: function(type, value, detailId, changeView) {
         var me = this,
             changedProductsList = me.getChangedList(),
             store = changedProductsList.store;
 
         Ext.Ajax.request({
-            url: '{url action=applyChanges}',
+            url: '{url controller=LastChanges action=applyChanges}',
             method: 'POST',
             params: {
                 type: type,
                 value: value,
-                articleId: articleId
+                detailId: detailId
             },
             success: function(response, opts) {
-                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                var responseObject = Ext.decode(response.responseText);
+                if (responseObject.success) {
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', responseObject.message);
+                }
+
                 store.reload();
+                changeView.removeAll();
             },
             failure: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
@@ -1071,7 +1072,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 staticStreamIds.push(record.get('id'));
             }
         });
-
         if (dynamicStreamIds.length > 0) {
             me.prepareDynamicStreamExport(dynamicStreamIds);
         }
@@ -1090,7 +1090,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             url: '{url action=prepareDynamicStreams}',
             method: 'POST',
             params: {
-                'streamIds': ids
+                'streamIds[]': ids
             },
             success: function(response) {
                 if (response.responseText) {

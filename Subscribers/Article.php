@@ -166,6 +166,10 @@ class Article extends BaseSubscriber
                     return;
                 }
 
+                if (!$this->hasPriceType()) {
+                    return;
+                }
+
                 $detail = $article->getMainDetail();
 
                 if ($detail->getAttribute()->getConnectPropertyGroup()) {
@@ -214,6 +218,10 @@ class Article extends BaseSubscriber
         }
         // Check if entity is a connect product
         if (!$this->getHelper()->isProductExported($attribute)) {
+            return;
+        }
+
+        if (!$this->hasPriceType()) {
             return;
         }
 
@@ -444,6 +452,10 @@ class Article extends BaseSubscriber
         }
         // Check if entity is a connect product
         if (!$this->getHelper()->isProductExported($attribute)) {
+            return;
+        }
+
+        if (!$this->hasPriceType()) {
             return;
         }
 

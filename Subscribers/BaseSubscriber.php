@@ -134,4 +134,19 @@ abstract class BaseSubscriber extends SubscribeManager
         );
     }
 
+    /**
+     * @return bool
+     */
+    public function hasPriceType()
+    {
+        if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
+            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
+            || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

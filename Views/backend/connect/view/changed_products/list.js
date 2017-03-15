@@ -56,7 +56,8 @@ Ext.define('Shopware.apps.Connect.view.changed_products.List', {
                         8: 'name',
                         16: 'image',
                         32: 'price',
-                        64: 'imageInitialImport'
+                        64: 'imageInitialImport',
+                        128: 'additionalDescription'
                     },
                     activeFlags = [];
 
@@ -84,7 +85,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.List', {
                         name: 'Shopware.apps.Article',
                         action: 'detail',
                         params: {
-                            articleId: record.get('id')
+                            articleId: record.get('articleId')
                         }
                     });
                 }
@@ -124,7 +125,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.List', {
                     { value: '80' },
                     { value: '100' },
                     { value: '250' },
-                    { value: '500' },
+                    { value: '500' }
                 ]
             }),
             displayField: 'value',

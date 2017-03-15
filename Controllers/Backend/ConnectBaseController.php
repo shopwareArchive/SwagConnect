@@ -24,14 +24,11 @@
 
 namespace ShopwarePlugins\Connect\Controllers\Backend;
 
-use \Shopware\Connect\Struct\Product;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
-use ShopwarePlugins\Connect\Components\ImageImport;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
@@ -157,19 +154,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         return $categoryModel;
-    }
-
-    /**
-     * @return ImageImport
-     */
-    public function getImageImport()
-    {
-        return new ImageImport(
-            Shopware()->Models(),
-            $this->getHelper(),
-            $this->get('thumbnail_manager'),
-            new \ShopwarePlugins\Connect\Components\Logger(Shopware()->Db())
-        );
     }
 
     /**
@@ -891,38 +875,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     }
 
     /**
-     * Returns article details ids
-     * by given article ids
-     *
-     * @param array $articleIds
-     * @return array
-     */
-    private function getArticleDetailsId(array $articleIds)
-    {
-        $ids = array();
-        foreach ($articleIds as $articleId) {
-            /** @var \Shopware\Models\Article\Article $article */
-            $article = $this->getConnectExport()->getArticleModelById($articleId);
-            if (!$article) {
-                continue;
-            }
-
-            $details = $article->getDetails();
-            //todo@sb: check with article without variants
-            if (count($details) == 0) {
-                continue;
-            }
-
-            /** @var \Shopware\Models\Article\Detail $detail */
-            foreach ($details as $detail) {
-                $ids[] = $detail->getId();
-            }
-        }
-
-        return $ids;
-    }
-
-    /**
      * Collect all source ids by given article ids
      */
     public function getArticleSourceIdsAction()
@@ -1038,151 +990,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $this->getModelManager()->flush();
 
-    }
-
-    /**
-     * Get a list of products with remote changes which have not been applied
-     */
-    public function getChangedProductsAction()
-    {
-        $builder = $this->getListQueryBuilder(
-            (array)$this->Request()->getParam('filter', array()),
-            $this->Request()->getParam('sort', array())
-        );
-
-        $builder->addSelect(array(
-            'at.lastUpdate',
-            'at.lastUpdateFlag',
-            'a.description',
-            'a.descriptionLong',
-            'a.name'
-        ));
-        $builder->andWhere('at.shopId IS NOT NULL')
-            ->andWHere('at.lastUpdateFlag IS NOT NULL')
-            ->andWHere('at.lastUpdateFlag > 0');
-
-
-        $query = $builder->getQuery();
-
-        $query->setFirstResult($this->Request()->getParam('start'));
-        $query->setMaxResults($this->Request()->getParam('limit'));
-
-        $total = Shopware()->Models()->getQueryCount($query);
-        $data = $query->getArrayResult();
-
-        foreach ($data as &$datum) {
-            $datum['images'] = implode('|', $this->getImagesForArticle($datum['id']));
-        }
-
-        $this->View()->assign(array(
-            'success' => true,
-            'data' => $data,
-            'total' => $total
-        ));
-    }
-
-    /**
-     * Apply given changes to product
-     *
-     * @throws \RuntimeException
-     */
-    public function applyChangesAction()
-    {
-        $type = $this->Request()->getParam('type');
-        $value = $this->Request()->getParam('value');
-        $articleId = $this->Request()->getParam('articleId');
-
-        /** @var Article $articleModel */
-        $articleModel = $this->getArticleRepository()->find($articleId);
-
-        if (!$articleModel) {
-            throw new \RuntimeException("Could not find model for article with id {$articleId}");
-        }
-
-        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($articleModel);
-
-        $updateFlags = $this->getHelper()->getUpdateFlags();
-        $updateFlagsByName = array_flip($updateFlags);
-        $flag = $updateFlagsByName[$type];
-
-
-        switch ($type) {
-            case 'shortDescription':
-                $articleModel->setDescription($value);
-                break;
-            case 'longDescription':
-                $articleModel->setDescriptionLong($value);
-                break;
-            case 'name':
-                break;
-            case 'image':
-                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-                $this->getImageImport()->importImagesForArticle(
-                    array_diff($lastUpdate['image'], $lastUpdate['variantImages']),
-                    $articleModel
-                );
-                $this->getImageImport()->importImagesForDetail(
-                    $lastUpdate['variantImages'],
-                    $connectAttribute->getArticleDetail()
-                );
-                break;
-            case 'price':
-                $netPrice = $value / (1 + ($articleModel->getTax()->getTax()/100));
-                $customerGroup = $this->getHelper()->getDefaultCustomerGroup();
-                $detail = $articleModel->getMainDetail();
-
-                $detail->getPrices()->clear();
-                $price = new Price();
-                $price->fromArray(array(
-                    'from' => 1,
-                    'price' => $netPrice,
-                    'basePrice' => $connectAttribute->getPurchasePrice(),
-                    'customerGroup' => $customerGroup,
-                    'article' => $articleModel
-                ));
-                $detail->setPrices(array($price));
-                break;
-        }
-
-        if ($connectAttribute->getLastUpdateFlag() & $flag) {
-            $connectAttribute->flipLastUpdateFlag($flag);
-        }
-        if ($type == 'image') {
-            if ($connectAttribute->getLastUpdateFlag() & $updateFlagsByName['imageInitialImport']) {
-                $connectAttribute->flipLastUpdateFlag($updateFlagsByName['imageInitialImport']);
-            }
-        }
-
-        $this->getModelManager()->flush();
-
-        $this->View()->assign('success', true);
-
-    }
-
-    /**
-     * Helper: Read images for a given article
-     *
-     * @param $articleId
-     * @return array
-     */
-    public function getImagesForArticle($articleId)
-    {
-
-        $builder = Shopware()->Models()->createQueryBuilder();
-        $builder->select('media.path')
-            ->from('Shopware\Models\Article\Image', 'images')
-            ->join('images.media', 'media')
-            ->where('images.articleId = :articleId')
-            ->andWhere('images.parentId IS NULL')
-            ->setParameter('articleId', $articleId)
-            ->orderBy('images.main', 'ASC')
-            ->addOrderBy('images.position', 'ASC');
-
-        return array_map(function($image) {
-            return $image['path'];
-        },
-            $builder->getQuery()->getArrayResult()
-        );
     }
 
     /**

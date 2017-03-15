@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.Connect', {
         'export.price.Form',
         'export.price.Checkboxcolumn',
 
+        'import.Window',
         'import.Panel',
         'import.RemoteCategories',
         'import.OwnCategories',

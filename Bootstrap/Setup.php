@@ -60,6 +60,8 @@ class Setup
 
     public function run($fullSetup)
     {
+        $this->createAclResource();
+
         $this->createMyEvents();
         $this->createMyTables();
         $this->createConfig();
@@ -786,6 +788,40 @@ class Setup
 
         throw new \RuntimeException('Could not find a free group name for the Shopware Connect customer group.Probably you need to delete an existing customer group created by Shopware Connect (SC, SWC, SWCONN, SC-1). Make sure, you really don\'t need it any more!'
         );
+    }
+
+    /**
+     * Creates the ACL
+     */
+    private function createAclResource()
+    {
+        $controllerName = 'connect';
+
+        $pluginId = $this->modelManager->getConnection()->fetchColumn(
+            'SELECT pluginID FROM s_core_acl_resources WHERE name = ? ',
+            [$controllerName]
+        );
+
+        if ($pluginId) {
+            // prevent creation of new acl resource
+            return;
+        }
+
+        $resource = new \Shopware\Models\User\Resource();
+        $resource->setName($controllerName);
+        $resource->setPluginId($this->bootstrap->getId());
+
+        foreach (['import', 'export', 'settings', 'read'] as $action) {
+            $privilege = new \Shopware\Models\User\Privilege();
+            $privilege->setResource($resource);
+            $privilege->setName($action);
+
+            $this->modelManager->persist($privilege);
+        }
+
+        $this->modelManager->persist($resource);
+
+        $this->modelManager->flush();
     }
 
     public function registerCustomModels()

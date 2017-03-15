@@ -45,6 +45,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     ],
 
     messages: {
+        accessDenied: '{s name=connect/accessDenied}Access denied{/s}',
+        contactAdministrator: '{s name=connect/contactAdministrator}Please contact your administrator{/s}',
         login: {
             successTitle: '{s name=login/successTitle}Shopware ID{/s}',
             successMessage: '{s name=login/successMessage}Login successful{/s}',
@@ -126,6 +128,34 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
+        me.sendAjaxRequest(
+            '{url controller=Connect action=checkPermissions}',
+            {},
+            function(response) {
+                if (response.success == true) {
+                    me.initApplication();
+                }
+            },
+            function(response) {
+
+                if (Shopware.app.Application.loadingMask) {
+                    Shopware.app.Application.loadingMask.destroy();
+                }
+
+                Shopware.Notification.createStickyGrowlMessage({
+                    title: me.messages.accessDenied,
+                    text: response.message,
+                    width: 350
+                });
+            }
+        );
+
+        me.callParent(arguments);
+    },
+
+    initApplication: function() {
+        var me = this;
+
         if (!window.marketplaceName) {
             me.sendAjaxRequest(
                 '{url controller=Connect action=initParams}',
@@ -147,19 +177,31 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             me.launchAction();
             me.setEventListeners();
         }
-
-        me.callParent(arguments);
     },
 
     launchAction: function () {
         var me = this;
         switch (me.subApplication.action){
+            case 'Import':
+                /*{if {acl_is_allowed privilege=import}} */
+                me.mainWindow = me.getView('import.Window').create({
+                    'action': me.subApplication.action
+                }).show();
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
+                break;
             case 'Export':
+                /*{if {acl_is_allowed privilege=export}} */
                 me.mainWindow = me.getView('export.Window').create({
                     'action': me.subApplication.action
                 }).show();
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
                 break;
             case 'Settings':
+                /*{if {acl_is_allowed privilege=settings}} */
                 me.customerGroupStore = Ext.create('Shopware.apps.Connect.store.config.CustomerGroup').load({
                     callback: function(){
                         me.mainWindow = me.getView('config.Window').create({
@@ -168,6 +210,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.populateLogCommandFilter();
                     }
                 });
+                /*{else}*/
+                me.createGrowlMessage(me.messages.accessDenied, me.messages.contactAdministrator, true);
+                /*{/if}*/
                 break;
             default:
                 me.mainWindow = me.getView('main.Window').create({

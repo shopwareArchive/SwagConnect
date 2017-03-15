@@ -170,6 +170,15 @@ class Checkout extends BaseSubscriber
                 }, $products);
             }
 
+            $this->Application()->Container()->get('events')->notify(
+                'Connect_Merchant_Create_Order_Before',
+                [
+                    //we use clone to not be able to modify the connect order
+                    'order' => clone $order,
+                    'basket' => $view->sBasket,
+                ]
+            );
+
             /** @var $checkResult \Shopware\Connect\Struct\CheckResult */
             try {
                 $checkResult = $sdk->checkProducts($order);

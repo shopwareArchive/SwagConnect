@@ -310,7 +310,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             success: function(response, opts) {
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                     if (reload === true) {
                         me.getRemoteProductsGrid().getStore().reload();
                         me.getLocalProductsGrid().getStore().reload();
@@ -388,7 +388,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                     if (reload === true) {
                         me.getRemoteProductsGrid().getStore().reload();
                         me.getLocalProductsGrid().getStore().reload();
@@ -453,7 +453,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
@@ -499,7 +499,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
@@ -740,7 +740,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }

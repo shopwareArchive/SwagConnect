@@ -29,7 +29,6 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Connect' => 'onGetControllerPathFrontend',
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_ConnectProductGateway' => 'onGetControllerPathFrontendConnectControllerGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Connect' => 'onGetControllerPathBackend',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_LastChanges' => 'onGetLastChangesControllerPath',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectConfig' => 'onGetControllerPathConnectConfig',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
@@ -52,21 +51,6 @@ class ControllerPath extends BaseSubscriber
             return $this->Path() . 'Controllers/Backend/Connect52.php';
         }
         return $this->Path() . 'Controllers/Backend/Connect.php';
-    }
-
-    /**
-     * Register the connect backend controller
-     *
-     * @param   \Enlight_Event_EventArgs $args
-     * @return  string
-     * @Enlight\Event Enlight_Controller_Dispatcher_ControllerPath_Backend_Connect
-     */
-    public function onGetLastChangesControllerPath(\Enlight_Event_EventArgs $args)
-    {
-        $this->registerMyTemplateDir();
-        $this->registerMySnippets();
-
-        return $this->Path() . 'Controllers/Backend/LastChanges.php';
     }
 
     /**

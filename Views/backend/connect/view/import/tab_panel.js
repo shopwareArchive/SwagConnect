@@ -9,7 +9,8 @@ Ext.define('Shopware.apps.Connect.view.import.TabPanel', {
     layout: 'card',
     snippets: {
         products: "{s name=import/tab/products}Products{/s}",
-        units: "{s name=import/tab/units}Units{/s}"
+        units: "{s name=import/tab/units}Units{/s}",
+        lastChanges: "{s name=connect/tab_panel/last_changes}Last changes{/s}"
     },
 
     initComponent: function () {
@@ -25,6 +26,10 @@ Ext.define('Shopware.apps.Connect.view.import.TabPanel', {
                 xtype: 'connect-import-unit',
                 title: me.snippets.units,
                 itemId: 'unit'
+            }, {
+                xtype: 'connect-changed-products',
+                title: me.snippets.lastChanges,
+                itemId: 'changed'
             }]
         });
 

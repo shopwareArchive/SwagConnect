@@ -11,8 +11,7 @@ Ext.define('Shopware.apps.Connect.view.config.TabPanel', {
         settings: "{s name=connect/tab_panel/settings}Settings{/s}",
         import: "{s name=connect/tab_panel/import}Import{/s}",
         export: "{s name=connect/tab_panel/export}Export{/s}",
-        log: "{s name=connect/tab_panel/log}Log{/s}",
-        lastChanges: "{s name=connect/tab_panel/last_changes}Last changes{/s}",
+        log: "{s name=connect/tab_panel/log}Log{/s}"
     },
 
     initComponent: function () {
@@ -36,10 +35,6 @@ Ext.define('Shopware.apps.Connect.view.config.TabPanel', {
                 xtype: 'connect-log',
                 title: me.snippets.log,
                 itemId: 'log'
-            }, {
-                xtype: 'connect-changed-products',
-                title: me.snippets.lastChanges,
-                itemId: 'changed'
             }]
         });
 

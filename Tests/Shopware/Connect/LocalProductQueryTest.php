@@ -271,6 +271,11 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image8.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image10.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image2.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image4.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image5.jpg',
         );
         $expectedProduct->variantImages = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',

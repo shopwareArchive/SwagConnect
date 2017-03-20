@@ -33,6 +33,7 @@ use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Gateway\ChangeGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use Firebase\JWT\JWT;
+use Shopware\Models\Menu\Menu;
 
 /**
  * @category  Shopware
@@ -515,6 +516,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         try{
             $this->resetExportedProducts();
+
+            //remove the existing api key
+            $this->getConfigComponent()->setGeneralConfigs(['apiKey' => '']);
+
+            //recreate the register menu
+            $this->createRegisterMenu();
+
         } catch (\Exception $e){
             $this->View()->assign([
                 'success' => false,
@@ -525,6 +533,29 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $this->View()->assign([
             'success' => true,
+        ]);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     */
+    private function createRegisterMenu()
+    {
+        $plugin = Shopware()->Container()->get('shopware_plugininstaller.plugin_manager')->getPluginByName('SwagConnect');
+
+        /** @var Menu $menuItem */
+        $menuItem = $this->getModelManager()->getRepository(Menu::class)->findOneBy(['label' => 'Connect']);
+
+        $connection = $this->getModelManager()->getConnection();
+        $connection->delete('s_core_menu', ['controller' => 'Connect', 'pluginID' => $plugin->getId()]);
+        $connection->insert('s_core_menu', [
+            'Name' => 'Register',
+            'class' => 'sprite-mousepointer-click',
+            'active' => 1,
+            'pluginID' => $plugin->getId(),
+            'controller' => 'Connect',
+            'action' => 'Register',
+            'parent' => $menuItem->getId(),
         ]);
     }
 

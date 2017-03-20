@@ -1546,6 +1546,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         me.messages.exchangeSettingsResetLabel,
                         me.messages.exchangeSettingsResetSuccess
                     );
+
+                    //reload after 3 sec
+                    setTimeout(function(){
+                        location.reload();
+                    }, 3000);
                 } else {
                     me.createGrowlMessage(
                         me.messages.exchangeSettingsResetLabel,

@@ -317,14 +317,15 @@ class Lifecycle extends BaseSubscriber
         }
 
         if ($this->autoUpdateProducts == 1 || $force === true) {
-            $sourceIds = $this->manager->fetchCol(
+
+            $sourceIds = $this->manager->getConnection()->fetchColumn(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                 array($article->getId())
             );
 
             $this->getConnectExport()->export($sourceIds, null, true);
         } elseif ($this->autoUpdateProducts == 2) {
-            $this->manager->update(
+            $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
                 array('article_id' => $article->getId())

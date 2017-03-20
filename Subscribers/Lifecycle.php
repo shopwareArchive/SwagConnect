@@ -317,8 +317,7 @@ class Lifecycle extends BaseSubscriber
         }
 
         if ($this->autoUpdateProducts == 1 || $force === true) {
-
-            $sourceIds = $this->manager->getConnection()->fetchArray(
+            $sourceIds = Shopware()->Db()->fetchCol(
                 'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                 array($article->getId())
             );

@@ -270,6 +270,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         foreach ($this->productUpdates as $entity) {
             $this->getLifecycleSubscriber()->handleChange($entity);
         }
+
+        $this->productUpdates = [];
     }
 
     public function getSubscribersForUnverifiedKeys()

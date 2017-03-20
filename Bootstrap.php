@@ -40,6 +40,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
     private $connectFactory;
 
+    private $productUpdates = [];
+
+    /**
+     * @var \ShopwarePlugins\Connect\Subscribers\Lifecycle
+     */
+    private $lifecycle;
+
     /**
      * Returns the current version of the plugin.
      *
@@ -211,6 +218,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
 
+        /** @var ModelManager $entityManager */
+        $entityManager = $this->get('models');
+        $entityManager->getEventManager()->addEventListener(
+            [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
+            $this
+        );
+
         /** @var $subscriber ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
             $subscriber->setBootstrap($this);
@@ -218,15 +232,66 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         }
     }
 
+    /**
+     * Collect updated Articles and Details
+     * Lifecycle events don't work correctly, because products will be fetched via query builder,
+     * but related entities like price are not updated yet.
+     *
+     * @param \Doctrine\ORM\Event\OnFlushEventArgs $eventArgs
+     */
+    public function onFlush(\Doctrine\ORM\Event\OnFlushEventArgs $eventArgs)
+    {
+        /** @var $em ModelManager */
+        $em  = $eventArgs->getEntityManager();
+        $uow = $em->getUnitOfWork();
+
+        // Entity updates
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            if (!$entity instanceof \Shopware\Models\Article\Article
+                && !$entity instanceof \Shopware\Models\Article\Detail
+            ) {
+                continue;
+            }
+
+            $this->productUpdates[] = $entity;
+        }
+    }
+
+    /**
+     * Generate changes for updated Articles and Details.
+     * On postFlush all related entities are updated and product can
+     * be fetched from DB correctly.
+     *
+     * @param \Doctrine\ORM\Event\PostFlushEventArgs $eventArgs
+     */
+    public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $eventArgs)
+    {
+        foreach ($this->productUpdates as $entity) {
+            $this->getLifecycleSubscriber()->handleChange($entity);
+        }
+    }
+
     public function getSubscribersForUnverifiedKeys()
     {
         return array(
             new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
+            $this->getLifecycleSubscriber()
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Subscribers\Lifecycle
+     */
+    public function getLifecycleSubscriber()
+    {
+        if (!$this->lifecycle) {
+            $this->lifecycle = new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
                 Shopware()->Models(),
                 $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
-            )
-        );
+            );
+        }
+
+        return $this->lifecycle;
     }
 
     /**
@@ -246,10 +311,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
-                Shopware()->Models(),
-                $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
-            )
+            $this->getLifecycleSubscriber()
 
         );
 

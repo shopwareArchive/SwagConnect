@@ -225,7 +225,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         }
 
         /** @var ModelManager $entityManager */
-        $entityManager = $this->get('models');
+        $entityManager = Shopware()->Models();
         $entityManager->getEventManager()->addEventListener(
             [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
             $this

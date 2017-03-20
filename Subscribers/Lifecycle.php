@@ -208,7 +208,7 @@ class Lifecycle extends BaseSubscriber
             $changeSet = $this->manager->getUnitOfWork()->getEntityChangeSet($entity);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
-            if ($changeSet['number']) {
+            if (array_key_exists('number', $changeSet) && $changeSet['number']) {
                 $forceExport = true;
             }
         }
@@ -257,7 +257,7 @@ class Lifecycle extends BaseSubscriber
             $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
-            if ($changeSet['number']) {
+            if (array_key_exists('number', $changeSet) && $changeSet['number']) {
                 $forceExport = true;
             }
 

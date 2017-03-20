@@ -399,8 +399,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         try {
             $data = !isset($data[0]) ? array($data) : $data;
             $response = $this->getSnHttpClient()->sendRequestToConnect(
-                array('priceType' => $priceType),
-                'account/settings'
+                'account/settings',
+                ['priceType' => $priceType]
             );
 
             $responseBody = json_decode($response->getBody());
@@ -462,10 +462,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     /**
      * It will make a call to SocialNetwork to reset the price type,
      * if this call return success true, then it will reset the export settings locally
+     *
+     * @return void
      */
     public function resetPriceTypeAction()
     {
-        $response = $this->getSnHttpClient()->sendRequestToConnect(array(), 'account/reset/price-type');
+        $response = $this->getSnHttpClient()->sendRequestToConnect('account/reset/price-type');
         $responseBody = json_decode($response->getBody());
 
         if(!$responseBody->success) {
@@ -473,13 +475,64 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 'success' => false,
                 'message' => $responseBody->message
             ]);
-
             return;
         }
 
-        // WARNING This code remove the current product changes
-        // This is a single call operation and its danger one
-        // This code should not be used anywhere
+        try{
+            $this->resetExportedProducts();
+        } catch (\Exception $e){
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseBody->message
+            ]);
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+        ]);
+    }
+
+    /**
+     * It will make a call to SocialNetwork to reset the exchange settings,
+     * if this call return success true, then it will reset the export settings locally
+     *
+     * @return void
+     */
+    public function resetExchangeSettingsAction()
+    {
+        $response = $this->getSnHttpClient()->sendRequestToConnect('account/reset/exchange-settings');
+
+        $responseBody = json_decode($response->getBody());
+
+        if(!$responseBody->success) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseBody->message
+            ]);
+            return;
+        }
+
+        try{
+            $this->resetExportedProducts();
+        } catch (\Exception $e){
+            $this->View()->assign([
+                'success' => false,
+                'message' => $responseBody->message
+            ]);
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+        ]);
+    }
+
+    /**
+     * WARNING This code remove the current product changes
+     * This is a single call operation and its danger one
+     */
+    private function resetExportedProducts(){
         $builder = $this->getModelManager()->getConnection()->createQueryBuilder();
         $builder->delete('sw_connect_change')
             ->where('c_operation IN (:changes)')
@@ -500,10 +553,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $streamRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
         $streamRepo->resetExportedStatus();
-
-        $this->View()->assign([
-            'success' => true,
-        ]);
     }
 
     /**

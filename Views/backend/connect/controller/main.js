@@ -102,6 +102,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         priceResetError: '{s name=config/price_reset_error}A problem occur in price type reset. Please try again later or contact our support team.{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
 
+        exchangeSettingsResetSuccess: '{s name=config/xs}Successfullyreset. It will take up to 10min for the changes to take effect. When this operation is done, you need to login again.{/s}',
+        exchangeSettingsResetError: '{s name=config/xe}A problem occur in exchange settings reset. Please try again later or contact our support team.{/s}',
+        exchangeSettingsResetLabel: '{s name=config/xl}Reset exchange settings{/s}',
+
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}',
@@ -189,6 +193,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             'connect-config-form': {
                 calculateFinishTime: me.onCalculateFinishTime,
                 resetPriceType: me.onResetPriceType,
+                resetExchangeSettings: me.onResetExchangeSettings
             },
             'connect-config-import-form button[action=save-import-config]': {
                 click: me.onSaveImportConfigForm
@@ -1522,6 +1527,29 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     me.createGrowlMessage(
                         me.messages.priceResetLabel,
                         me.messages.priceResetError
+                    );
+                }
+            }
+        });
+    },
+
+    onResetExchangeSettings: function () {
+        var me = this;
+
+        Ext.Ajax.request({
+            scope: this,
+            url: '{url module=backend controller=ConnectConfig action=resetExchangeSettings}',
+            success: function (result) {
+                var response = Ext.JSON.decode(result.responseText);
+                if (response.success) {
+                    me.createGrowlMessage(
+                        me.messages.exchangeSettingsResetLabel,
+                        me.messages.exchangeSettingsResetSuccess
+                    );
+                } else {
+                    me.createGrowlMessage(
+                        me.messages.exchangeSettingsResetLabel,
+                        me.messages.exchangeSettingsResetError
                     );
                 }
             }

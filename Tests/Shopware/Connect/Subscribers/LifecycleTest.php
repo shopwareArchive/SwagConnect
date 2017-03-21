@@ -131,9 +131,8 @@ class LifecycleTest extends ConnectTestHelper
             ->setPost('position', 0)
             ->setPost('shippingFree', false)
             ->setPost('minPurchase', 1)
-            ->setPost('purchasePrice', 38.990000000000002)
+            ->setPost('purchasePrice', 38.99)
             ->setPost('articleId', $articleId)
-            ->setPost('price', 239.00)
             ->setPost('standard', false)
             ->setPost('id', $detail->getId());
         ;

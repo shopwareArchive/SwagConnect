@@ -276,6 +276,11 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image4.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image5.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image6.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image7.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
         );
         $expectedProduct->variantImages = array(
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
@@ -283,6 +288,11 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image4.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image5.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image6.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image7.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
         );
 
         $row['vendorName'] = $row['vendor']['name'];

@@ -13,6 +13,10 @@ use Doctrine\ORM\Mapping as ORM,
  */
 class ProductStreamAttribute extends ModelEntity
 {
+    /** marks streams for deletion */
+    const STREAM_RELATION_DELETED = 1;
+    const STREAM_RELATION_ACTIVE = 0;
+
     /**
      * @var integer $id
      * @ORM\Id

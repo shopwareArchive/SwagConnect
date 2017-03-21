@@ -10,15 +10,29 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Enlight\Event\SubscriberInterface;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Services\PaymentService;
+use Shopware\Components\DependencyInjection\Container;
+use ShopwarePlugins\Connect\Components\Config;
 
 class ServiceContainer extends BaseSubscriber
 {
+    /** @var ModelManager  */
     private $manager;
 
-    public function __construct(ModelManager $manager)
-    {
+    /** @var Container */
+    private $container;
+
+    /**
+     * ServiceContainer constructor.
+     * @param ModelManager $manager
+     * @param Container $container
+     */
+    public function __construct(
+        ModelManager $manager,
+        Container $container
+    ) {
         parent::__construct();
         $this->manager = $manager;
+        $this->container = $container;
     }
 
     public function getSubscribedEvents()
@@ -35,12 +49,16 @@ class ServiceContainer extends BaseSubscriber
      */
     public function onProductStreamService()
     {
-        $productStreamQuery = new ProductStreamRepository($this->manager);
-
         /** @var ProductStreamAttributeRepository $streamAttrRepository */
         $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
 
-        return new ProductStreamService($productStreamQuery, $streamAttrRepository);
+        return new ProductStreamService(
+            new ProductStreamRepository($this->manager),
+            $streamAttrRepository,
+            new Config($this->manager),
+            $this->container->get('shopware_search.product_search'),
+            $this->container->get('shopware_storefront.context_service')
+        );
     }
 
     /**

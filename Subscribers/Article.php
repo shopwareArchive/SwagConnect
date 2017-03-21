@@ -127,6 +127,9 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/controller/detail_connect.js'
                 );
+                $subject->View()->extendsTemplate(
+                    'backend/article/view/detail/connect_properties.js'
+                );
                 break;
             case 'saveDetail':
                 if ($request->getParam('standard')) {
@@ -448,7 +451,7 @@ class Article extends BaseSubscriber
         $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
 
         try {
-            $this->connectExport->export([$detailAttribute->getSourceId()], null, true);
+            $this->connectExport->export([$detailAttribute->getSourceId()]);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

@@ -98,7 +98,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ->disableOriginalConstructor()
             ->getMock();
         $this->contextService->expects($this->any())
-            ->method('createProductContext')
+            ->method('createShopContext')
             ->willReturn($this->productContext);
     }
 

@@ -254,6 +254,7 @@ class ProductToShopTest extends ConnectTestHelper
         $newLongDesc = 'Updated connect variant - long description';
         $newShortDesc = 'Updated connect variant - short description';
         $newVat = 0.07;
+        $newSku = $variants[1]->sku . 'M';
         $variants[1]->title = $newTitle;
         $variants[1]->price = $newPrice;
         $variants[1]->purchasePrice = $newPurchasePrice;
@@ -262,6 +263,7 @@ class ProductToShopTest extends ConnectTestHelper
         $variants[1]->images[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->vat = $newVat;
+        $variants[1]->sku = $newSku;
 
         $this->productToShop->insertOrUpdate($variants[1]);
 
@@ -286,6 +288,7 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals(2, $connectAttribute->getArticle()->getImages()->count());
         $this->assertEquals(1, $detail->getImages()->count());
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
+        $this->assertEquals('SC-3-' . $newSku, $detail->getNumber());
     }
 
     public function testImportWithoutTitle()

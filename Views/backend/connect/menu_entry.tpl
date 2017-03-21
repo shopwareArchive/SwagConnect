@@ -5,6 +5,9 @@
     .connect-icon {
         background:url({$marketplaceIcon}) no-repeat 0 0 !important;
     }
+    body .shopware-menu .shopware-connect {
+        background:url({$marketplaceIcon}) no-repeat 0 0 !important;
+    }
     .connect-icon-green {
         background:url({$marketplaceIncomingIcon}) no-repeat 0 0 !important;
     }

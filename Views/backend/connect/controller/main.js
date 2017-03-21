@@ -67,6 +67,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         exportStreamMessage: '{s name=export/message/export_stream_message}Product streams were marked for export.{/s}',
         removeStreamTitle: '{s name=export/message/remove_stream_title}Product streams export{/s}',
         removeStreamMessage: '{s name=export/message/remove_stream_message}Products streams were marked for remove.{/s}',
+        exportDynamicStreamMessage: '{s name=export/message/dynamic_stream_selected}The selected dynamic streams will be exported via cron job{/s}',
 
         activateProductTitle: '{s name=import/message/activate_title}Products import{/s}',
         activateProductMessage: '{s name=import/message/activate_message}Products have been activated.{/s}',
@@ -244,7 +245,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             },
 
             'connect-export-stream button[action=remove]': {
-                click: me.onExportStream
+                click: me.onRemoveStreams
             },
             'connect-config-export-form': {
                 saveExportSettings: me.onSaveExportSettingsForm,
@@ -662,6 +663,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 longDescriptionLocal: record.get('descriptionLong'),
                 longDescriptionRemote: remoteChangeSet['longDescription'],
 
+                additionalDescriptionLocal: record.get('additionalDescription'),
+                additionalDescriptionRemote: remoteChangeSet['additionalDescription'],
+
                 nameLocal: record.get('name'),
                 nameRemote: remoteChangeSet['name'],
 
@@ -680,37 +684,27 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 8: 'name',
                 16: 'image',
                 32: 'price',
-                64: 'imageInitialImport'
+                64: 'imageInitialImport',
+                128: 'additionalDescription'
             };
-
             // Check all flags and show the corresponding tab if it is active
             // if not, remove the tab without destroying the component
+            changeView.removeAll();
+
             Ext.each(Object.keys(flags), function(key) {
-                var fieldName = flags[key],
-                    container = changeView.fields[fieldName];
-
-                if (container) {
-                    changeView.remove(container, false);
-                }
-
-                if (changeFlag & key && container) {
-                    changeView.add(container);
-
-                    container.applyButton.handler = function() {
-                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'));
+                var fieldName = flags[key];
+                if (changeFlag & key) {
+                    var form = changeView.createContainer(fieldName);
+                    form.loadRecord(changeRecord);
+                    changeView.add(form);
+                    form.applyButton.handler = function () {
+                        me.applyChanges(fieldName, changeRecord.get(fieldName + 'Remote'), record.get('id'), changeView);
                     }
-
-                    container.loadRecord(changeRecord);
                 }
             });
 
             changeView.setTitle(record.get('name'));
-
-            // hotfix: make sure that the tab is displayed correctly
             changeView.setActiveTab(0);
-            changeView.setActiveTab(1);
-            changeView.setActiveTab(0);
-
         }
     },
 
@@ -719,24 +713,32 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      *
      * @param type
      * @param value
-     * @param articleId
+     * @param detailId
+     * @param changeView
      */
-    applyChanges: function(type, value, articleId) {
+    applyChanges: function(type, value, detailId, changeView) {
         var me = this,
             changedProductsList = me.getChangedList(),
             store = changedProductsList.store;
 
         Ext.Ajax.request({
-            url: '{url action=applyChanges}',
+            url: '{url controller=LastChanges action=applyChanges}',
             method: 'POST',
             params: {
                 type: type,
                 value: value,
-                articleId: articleId
+                detailId: detailId
             },
             success: function(response, opts) {
-                me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/message}Successfully applied changes{/s}');
+                var responseObject = Ext.decode(response.responseText);
+                if (responseObject.success) {
+                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                } else {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', responseObject.message);
+                }
+
                 store.reload();
+                changeView.removeAll();
             },
             failure: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}', response.responseText);
@@ -1056,6 +1058,104 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         var me = this,
             list = me.getExportStreamList(),
             records = list.selModel.getSelection(),
+            staticStreamIds = [],
+            dynamicStreamIds = [];
+
+        if (records.length == 0) {
+            return;
+        }
+
+        Ext.each(records, function(record) {
+            if (record.get('type') == 1) {
+                dynamicStreamIds.push(record.get('id'));
+            } else {
+                staticStreamIds.push(record.get('id'));
+            }
+        });
+        if (dynamicStreamIds.length > 0) {
+            me.prepareDynamicStreamExport(dynamicStreamIds);
+        }
+
+        if (staticStreamIds.length > 0) {
+            me.prepareStaticStreamExport(staticStreamIds);
+        }
+
+    },
+
+    prepareDynamicStreamExport: function(ids){
+        var me = this,
+            title = me.messages.exportStreamTitle;
+
+        Ext.Ajax.request({
+            url: '{url action=prepareDynamicStreams}',
+            method: 'POST',
+            params: {
+                'streamIds[]': ids
+            },
+            success: function(response) {
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+
+                    if (!operation) {
+                        return;
+                    }
+
+                    if (!operation.success) {
+                        me.createGrowlMessage(title, operation.messages, false);
+                        return;
+                    }
+
+                    me.createGrowlMessage(title, me.messages.exportDynamicStreamMessage, false);
+                }
+            }
+        });
+    },
+
+    /**
+     * @param ids
+     */
+    prepareStaticStreamExport: function(ids){
+        var me = this;
+
+        Ext.Ajax.request({
+            url: '{url action=getStreamProductsCount}',
+            method: 'POST',
+            params: {
+                'id': ids[0]
+            },
+            success: function(response) {
+                if (response.responseText) {
+                    var operation = Ext.decode(response.responseText);
+
+                    if (!operation) {
+                        return;
+                    }
+
+                    if (!operation.success) {
+                        var title = me.messages.exportStreamTitle,
+                            messages = operation.messages;
+
+                        //todo: handle price and default errors
+                        if (messages.default.length > 0) {
+                            messages.default.forEach(function (message) {
+                                me.createGrowlMessage(title, message, false);
+                            });
+                        }
+                    } else {
+                        Ext.create('Shopware.apps.Connect.view.export.stream.Progress', {
+                            streamIds: ids,
+                            articleDetailIds: operation.sourceIds
+                        }).show();
+                    }
+                }
+            }
+        });
+    },
+
+    onRemoveStreams: function(){
+        var me = this,
+            list = me.getExportStreamList(),
+            records = list.selModel.getSelection(),
             ids = [],
             url,
             message,
@@ -1070,37 +1170,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             ids.push(record.get('id'));
         });
 
-        if(btn.action == 'add') {
-            Ext.Ajax.request({
-                url: '{url action=getStreamProductsCount}',
-                method: 'POST',
-                params: {
-                    'id': ids[0]
-                },
-                success: function(response) {
-                    if (response.responseText) {
-                        var operation = Ext.decode(response.responseText);
-                        if (operation) {
-                            if (!operation.success) {
-                                me.createGrowlMessage(title, operation.message, true);
-                            } else {
-                                Ext.create('Shopware.apps.Connect.view.export.stream.Progress', {
-                                    streamIds: ids,
-                                    articleDetailIds: operation.sourceIds
-                                }).show();
-                            }
-                        }
-                    }
-                }
-            });
-            return;
-        } else if(btn.action == 'remove') {
-            url = '{url action=removeStreams}';
-            title = me.messages.removeStreamTitle;
-            message = me.messages.removeStreamMessage;
-        } else {
-            return;
-        }
+        url = '{url action=removeStreams}';
+        title = me.messages.removeStreamTitle;
+        message = me.messages.removeStreamMessage;
 
         list.setLoading();
 

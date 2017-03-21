@@ -212,12 +212,6 @@ class ProductToShop implements ProductToShopBase
             }
 
             $detail = new DetailModel();
-            if (!empty($product->sku)) {
-                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
-            } else {
-                $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
-            }
-
             $detail->setActive($model->getActive());
 
             $detail->setArticle($model);
@@ -237,6 +231,12 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
+        if (!empty($product->sku)) {
+            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
+        } else {
+            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
+        }
+
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
         // configure main variant and groupId
         if ($isMainVariant === true) {
@@ -244,7 +244,12 @@ class ProductToShop implements ProductToShopBase
         }
         $connectAttribute->setGroupId($product->groupId);
 
-        $detailAttribute = $detail->getAttribute() ?: new AttributeModel();
+        $detailAttribute = $detail->getAttribute();
+        if (!$detailAttribute) {
+            $detailAttribute = new AttributeModel();
+            $detail->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
+        }
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         /*
@@ -463,6 +468,13 @@ class ProductToShop implements ProductToShopBase
             $group->setComparable($firstProperty->comparable);
             $group->setSortMode($firstProperty->sortMode);
             $group->setPosition($firstProperty->groupPosition);
+
+            $attribute = new \Shopware\Models\Attribute\PropertyGroup();
+            $attribute->setPropertyGroup($group);
+            $attribute->setConnectIsRemote(true);
+            $group->setAttribute($attribute);
+
+            $this->manager->persist($attribute);
             $this->manager->persist($group);
             $this->manager->flush();
         }
@@ -480,6 +492,12 @@ class ProductToShop implements ProductToShopBase
                 $option = new PropertyOption();
                 $option->setName($property->option);
                 $option->setFilterable($property->filterable);
+
+                $attribute = new \Shopware\Models\Attribute\PropertyOption();
+                $attribute->setPropertyOption($option);
+                $attribute->setConnectIsRemote(true);
+                $option->setAttribute($attribute);
+
                 $this->manager->persist($option);
                 $this->manager->flush($option);
             }
@@ -489,6 +507,12 @@ class ProductToShop implements ProductToShopBase
             if (!$value) {
                 $value = new PropertyValue($option, $property->value);
                 $value->setPosition($property->valuePosition);
+
+                $attribute = new \Shopware\Models\Attribute\PropertyValue();
+                $attribute->setPropertyValue($value);
+                $attribute->setConnectIsRemote(true);
+                $value->setAttribute($attribute);
+
                 $this->manager->persist($value);
             }
 
@@ -749,7 +773,7 @@ class ProductToShop implements ProductToShopBase
 
             $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
             $output[$field] = $updateAllowed;
-            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $attribute, $product)) {
+            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $product)) {
                 $flag |= $key;
             }
         }
@@ -763,11 +787,10 @@ class ProductToShop implements ProductToShopBase
      * @param $field
      * @param ProductModel $model
      * @param DetailModel $detail
-     * @param AttributeModel $attribute
      * @param Product $product
      * @return bool
      */
-    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, AttributeModel $attribute, Product $product)
+    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, Product $product)
     {
 
         switch ($field) {
@@ -775,6 +798,8 @@ class ProductToShop implements ProductToShopBase
                 return $model->getDescription() != $product->shortDescription;
             case 'longDescription':
                 return $model->getDescriptionLong() != $product->longDescription;
+            case 'additionalDescription':
+                return $detail->getAttribute()->getConnectProductDescription() != $product->additionalDescription;
             case 'name':
                 return $model->getName() != $product->title;
             case 'image':
@@ -782,6 +807,10 @@ class ProductToShop implements ProductToShopBase
             case 'price':
                 $prices = $detail->getPrices();
                 if (empty($prices)) {
+                    return true;
+                }
+                $price = $prices->first();
+                if (!$price) {
                     return true;
                 }
                 return $prices->first()->getPrice() != $product->price;

@@ -27,7 +27,7 @@ class LocalProductQuery extends BaseProductQuery
 {
     const IMAGE_LIMIT = 10;
 
-    const VARIANT_IMAGE_LIMIT = 5;
+    const VARIANT_IMAGE_LIMIT = 10;
 
     protected $baseProductUrl;
 

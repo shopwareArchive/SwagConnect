@@ -72,8 +72,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         priceResetBtn: '{s name=config/price_reset_btn}reset{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
         priceResetMessage: '{s name=config/price_reset_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
-        exchangeSettingResetLabel: '{s name=config/xxx}Reset exchange settings{/s}',
-        exchangeSettingResetMessage: '{s name=config/xxm}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
+        exchangeSettingResetLabel: '{s name=config/exchange_settings_label}Reset exchange settings{/s}',
+        exchangeSettingResetMessage: '{s name=config/exchange_settings_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
         showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },

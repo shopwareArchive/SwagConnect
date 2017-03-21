@@ -102,9 +102,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         priceResetError: '{s name=config/price_reset_error}A problem occur in price type reset. Please try again later or contact our support team.{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
 
-        exchangeSettingsResetSuccess: '{s name=config/xs}Successfullyreset. It will take up to 10min for the changes to take effect. When this operation is done, you need to login again.{/s}',
-        exchangeSettingsResetError: '{s name=config/xe}A problem occur in exchange settings reset. Please try again later or contact our support team.{/s}',
-        exchangeSettingsResetLabel: '{s name=config/xl}Reset exchange settings{/s}',
+        exchangeSettingsResetSuccess: '{s name=config/exchange_settings_success}Successfully reset. It will take up to 10min for the changes to take effect. When this operation is done, you need to login again.{/s}',
+        exchangeSettingsResetError: '{s name=config/exchange_settings_error}A problem occur in exchange settings reset. Please try again later or contact our support team.{/s}',
+        exchangeSettingsResetLabel: '{s name=config/exchange_settings_label}Reset exchange settings{/s}',
 
         importConnectCategoriesTitle: '{s name=mapping/importConnectCategoriesTitle}Import categories?{/s}',
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',

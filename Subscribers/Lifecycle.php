@@ -90,6 +90,10 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
+        if (!$this->hasPriceType()) {
+            return;
+        }
+
         $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($entity);
 
         // If product propertyGroup is changed we need to store the old one,
@@ -204,6 +208,10 @@ class Lifecycle extends BaseSubscriber
             }
         }
 
+        if (!$this->hasPriceType()) {
+            return;
+        }
+
         $forceExport = false;
         if ($entity instanceof \Shopware\Models\Article\Detail) {
             $changeSet = $this->manager->getUnitOfWork()->getEntityChangeSet($entity);
@@ -248,6 +256,10 @@ class Lifecycle extends BaseSubscriber
         // if article is not exported to Connect
         // don't need to generate changes
         if (!$this->getHelper()->isProductExported($articleAttribute) || !empty($articleAttribute->getShopId())) {
+            return;
+        }
+
+        if (!$this->hasPriceType()) {
             return;
         }
 

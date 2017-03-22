@@ -57,6 +57,7 @@ class Article extends BaseSubscriber
         return array(
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
+            'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
             'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
         );
@@ -83,6 +84,24 @@ class Article extends BaseSubscriber
             $this->customerGroupRepository = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         }
         return $this->customerGroupRepository;
+    }
+
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function preBackendArticle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch ($request->getActionName()) {
+            case 'saveDetail':
+                if ($request->getParam('standard')) {
+                    $this->generateMainVariantChange($request->getParam('id'));
+                }
+                break;
+        }
     }
 
     /**
@@ -130,11 +149,6 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/view/detail/connect_properties.js'
                 );
-                break;
-            case 'saveDetail':
-                if ($request->getParam('standard')) {
-                    $this->generateMainVariantChange($request->getParam('id'));
-                }
                 break;
             case 'setPropertyList':
                 // property values are saved in different ajax call then
@@ -208,6 +222,11 @@ class Article extends BaseSubscriber
         $detail = $this->getDetailRepository()->findOneBy(array('id' => $detailId));
 
         if (!$detail instanceof \Shopware\Models\Article\Detail) {
+            return;
+        }
+
+        //if it is already main variant dont generate MakeMainVariant change
+        if ($detail->getKind() == 1) {
             return;
         }
 

@@ -75,7 +75,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->getMock();
 
             $this->localMediaService->expects($this->any())
-                ->method('getProductMedia')
+                ->method('getProductMediaList')
                 ->willReturn([]);
 
             $this->localMediaService->expects($this->any())

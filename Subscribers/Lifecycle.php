@@ -49,8 +49,6 @@ class Lifecycle extends BaseSubscriber
         return array(
             'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
-            'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
-            'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postPersist' => 'onPersistDetail',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
@@ -170,6 +168,17 @@ class Lifecycle extends BaseSubscriber
     {
         $entity = $eventArgs->get('entity');
 
+        $this->handleChange($entity);
+    }
+
+
+    /**
+     * Generate changes for Article or Detail if necessary
+     *
+     * @param \Shopware\Models\Article\Article | \Shopware\Models\Article\Detail $entity
+     */
+    public function handleChange($entity)
+    {
         if (!$entity instanceof \Shopware\Models\Article\Article
             && !$entity instanceof \Shopware\Models\Article\Detail
         ) {
@@ -203,12 +212,12 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-		$forceExport = false;
+        $forceExport = false;
         if ($entity instanceof \Shopware\Models\Article\Detail) {
-            $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($entity);
+            $changeSet = $this->manager->getUnitOfWork()->getEntityChangeSet($entity);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
-            if ($changeSet['number']) {
+            if (array_key_exists('number', $changeSet)) {
                 $forceExport = true;
             }
         }
@@ -261,7 +270,7 @@ class Lifecycle extends BaseSubscriber
             $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
-            if ($changeSet['number']) {
+            if (array_key_exists('number', $changeSet)) {
                 $forceExport = true;
             }
 
@@ -320,14 +329,11 @@ class Lifecycle extends BaseSubscriber
         }
 
         if ($this->autoUpdateProducts == 1 || $force === true) {
-            $sourceIds = $this->manager->fetchCol(
-                'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-                array($article->getId())
-            );
+            $sourceIds = $this->getHelper()->getSourceIdsFromArticleId($article->getId());
 
             $this->getConnectExport()->export($sourceIds, null, true);
         } elseif ($this->autoUpdateProducts == 2) {
-            $this->manager->update(
+            $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
                 array('article_id' => $article->getId())

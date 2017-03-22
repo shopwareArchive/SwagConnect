@@ -85,6 +85,7 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
      */
     customerColumn: function(value, metaData, record, colIndex, store, view) {
         var me = this,
+            name,
             shipping = record.getShipping();
 
         if (shipping instanceof Ext.data.Store && shipping.first() instanceof Ext.data.Model) {

@@ -10,6 +10,7 @@ namespace ShopwarePlugins\Connect\Components\Utils;
  */
 class ConnectOrderUtil
 {
+    const ORDER_STATUS_ERROR = 'sc_error';
 
     /**
      * Returns a list of connect orders, their shop_id and the remote order_id

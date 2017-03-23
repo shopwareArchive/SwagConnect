@@ -25,6 +25,10 @@ use Shopware\Connect\Struct\PriceRange;
  */
 class LocalProductQuery extends BaseProductQuery
 {
+    const IMAGE_LIMIT = 10;
+
+    const VARIANT_IMAGE_LIMIT = 10;
+
     protected $baseProductUrl;
 
     /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
@@ -205,18 +209,22 @@ class LocalProductQuery extends BaseProductQuery
 
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
+        $sku = $row['sku'];
         $row['images'] = array();
-        $mediaFiles = $this->localMediaService->getProductMedia($product, $this->productContext);
-
-        foreach ($mediaFiles as $media) {
-            $row['images'][] = $media->getFile();
+        $mediaFiles = $this->localMediaService->getProductMediaList([$product], $this->productContext);
+        if (array_key_exists($sku, $mediaFiles) && $mediaFiles[$sku]) {
+            $mediaFiles[$sku] = array_slice($mediaFiles[$sku], 0, self::IMAGE_LIMIT);
+            foreach ($mediaFiles[$sku] as $media) {
+                $row['images'][] = $media->getFile();
+            }
         }
 
-        $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
-        $sku = $row['sku'];
+        $variantMediaFiles = $this->localMediaService->getVariantMediaList([$product], $this->productContext);
         if (array_key_exists($sku, $variantMediaFiles) && $variantMediaFiles[$sku]) {
+            $variantMediaFiles[$sku] = array_slice($variantMediaFiles[$sku], 0, self::VARIANT_IMAGE_LIMIT);
             foreach ($variantMediaFiles[$sku] as $media) {
                 $row['variantImages'][] = $media->getFile();
+                $row['images'][] = $media->getFile();
             }
         }
 

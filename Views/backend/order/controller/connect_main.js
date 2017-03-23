@@ -2,7 +2,7 @@
 //{block name="backend/order/controller/main" append}
 Ext.define('Shopware.apps.Order.controller.ConnectMain', {
     override: 'Shopware.apps.Order.controller.Main',
-    snippets: {
+    connectSnippets: {
         sc_received: '{s name=connect/payment_status/sc_received}Connect received{/s}',
         sc_requested: '{s name=connect/payment_status/sc_requested}Connect requested{/s}',
         sc_initiated: '{s name=connect/payment_status/sc_initiated}Connect initiated{/s}',
@@ -21,8 +21,8 @@ Ext.define('Shopware.apps.Order.controller.ConnectMain', {
         var stores = me.callOverridden(arguments);
 
         stores["paymentStatusStore"].each(function (record) {
-            if (record && me.snippets) {
-                var snippet = me.snippets[record.get('name')];
+            if (record && me.connectSnippets) {
+                var snippet = me.connectSnippets[record.get('name')];
             }
             if (Ext.isString(snippet) && snippet.length > 0) {
                 record.set('description', snippet);

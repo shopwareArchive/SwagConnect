@@ -29,9 +29,8 @@ before_script:
     - php bin/console sw:generate:attributes
     - php bin/console orm:generate:proxies
     - php bin/console sw:cache:clear --env=testing
-    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
 
-script: ../../../../../../vendor/bin/phpunit
+script: vendor/bin/phpunit -c engine/Shopware/Plugins/Local/Backend/SwagConnect/phpunit.xml
 
 notifications:
     email: false

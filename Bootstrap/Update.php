@@ -297,8 +297,10 @@ class Update
                 return;
             }
 
-            $newValues['longDescriptionField'] = $rows['shortDescriptionField'];
-            $newValues['shortDescriptionField'] = $rows['longDescriptionField'];
+            $newValues = [
+                'longDescriptionField' => $rows['shortDescriptionField'],
+                'shortDescriptionField' => $rows['longDescriptionField'],
+            ];
 
             $this->db->query("
                 UPDATE `s_plugin_connect_config`

@@ -293,7 +293,7 @@ class Update
             }
 
             if (($rows['longDescriptionField'] == 1 && $rows['shortDescriptionField'] == 1)
-                && ($rows['longDescriptionField'] == 0 && $rows['shortDescriptionField'] == 0)) {
+                || ($rows['longDescriptionField'] == 0 && $rows['shortDescriptionField'] == 0)) {
                 return;
             }
 
@@ -306,14 +306,14 @@ class Update
                 UPDATE `s_plugin_connect_config`
                 SET `value` = ?
                 WHERE `name` = ?",
-                array($newValues['longDescriptionField'], 'longDescriptionField')
+                [$newValues['longDescriptionField'], 'longDescriptionField']
             );
 
             $this->db->query("
                 UPDATE `s_plugin_connect_config`
                 SET `value` = ?
                 WHERE `name` = ?",
-                array($newValues['shortDescriptionField'], 'shortDescriptionField')
+                [$newValues['shortDescriptionField'], 'shortDescriptionField']
             );
         }
     }

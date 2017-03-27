@@ -72,6 +72,7 @@ class Update
         $this->createUpdateAdditionalDescriptionColumn();
         $this->createDynamicStreamTable();
         $this->addOrderStatus();
+        $this->fixExportDescriptionSettings();
 
         return true;
     }
@@ -269,6 +270,48 @@ class Update
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ', array($currentId, $name, 'SC error', $currentId, $group, 0)
+            );
+        }
+    }
+
+    /**
+     * Replace longDescriptionField and shortDescription values,
+     * because of wrong snippets in previous versions.
+     *
+     * ExtJs view show longDescription label, but the value was stored as shortDescription
+     */
+    private function fixExportDescriptionSettings()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $rows = $this->db->fetchPairs(
+                "SELECT `name`, `value` FROM s_plugin_connect_config WHERE name = ? OR name = ?",
+                ['longDescriptionField', 'shortDescriptionField']
+            );
+
+            if (!array_key_exists('longDescriptionField', $rows) || !array_key_exists('shortDescriptionField', $rows)) {
+                return;
+            }
+
+            if (($rows['longDescriptionField'] == 1 && $rows['shortDescriptionField'] == 1)
+                && ($rows['longDescriptionField'] == 0 && $rows['shortDescriptionField'] == 0)) {
+                return;
+            }
+
+            $newValues['longDescriptionField'] = $rows['shortDescriptionField'];
+            $newValues['shortDescriptionField'] = $rows['longDescriptionField'];
+
+            $this->db->query("
+                UPDATE `s_plugin_connect_config`
+                SET `value` = ?
+                WHERE `name` = ?",
+                array($newValues['longDescriptionField'], 'longDescriptionField')
+            );
+
+            $this->db->query("
+                UPDATE `s_plugin_connect_config`
+                SET `value` = ?
+                WHERE `name` = ?",
+                array($newValues['shortDescriptionField'], 'shortDescriptionField')
             );
         }
     }

@@ -72,6 +72,7 @@ class Update
         $this->createUpdateAdditionalDescriptionColumn();
         $this->createDynamicStreamTable();
         $this->addOrderStatus();
+        $this->fixMarketplaceUrl();
 
         return true;
     }
@@ -270,6 +271,45 @@ class Update
                 VALUES (?, ?, ?, ?, ?, ?)
                 ', array($currentId, $name, 'SC error', $currentId, $group, 0)
             );
+        }
+    }
+
+    private function fixMarketplaceUrl()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $repo = $this->modelManager->getRepository('Shopware\Models\Config\Form');
+            /** @var \Shopware\Models\Config\Form $form */
+            $form = $repo->findOneBy([
+                'name' => 'SwagConnect',
+            ]);
+
+            if (!$form) {
+                return;
+            }
+
+            /** @var \Shopware\Models\Config\Element $element */
+            foreach ($form->getElements() as $element) {
+                if ($element->getName() != 'connectDebugHost') {
+                    continue;
+                }
+
+                if (strlen($element->getValue()) > 0 && strpos($element->getValue(), 'sn.') === false) {
+                    $element->setValue('sn.' . $element->getValue());
+                    $this->modelManager->persist($element);
+                }
+
+                $values = $element->getValues();
+                if (count($values) > 0) {
+                    /** @var \Shopware\Models\Config\Value $element */
+                    $value = $values[0];
+                    if (strlen($value->getValue()) > 0 && strpos($value->getValue(), 'sn.') === false) {
+                        $value->setValue('sn.' . $value->getValue());
+                        $this->modelManager->persist($value);
+                    }
+                }
+
+                $this->modelManager->flush();
+            }
         }
     }
 }

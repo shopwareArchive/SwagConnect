@@ -319,7 +319,7 @@ class Update
         }
     }
 
-	private function fixMarketplaceUrl()
+    private function fixMarketplaceUrl()
     {
         if (version_compare($this->version, '1.0.12', '<=')) {
             $repo = $this->modelManager->getRepository('Shopware\Models\Config\Form');

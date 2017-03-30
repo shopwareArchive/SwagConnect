@@ -172,6 +172,10 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     opacity: 0.50;
 }
 
+.sc-transparency-color {
+    color:#a2adb4;
+}
+
 .export-window-message-wrapper {
     position: absolute;
     top: 45%;

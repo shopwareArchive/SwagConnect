@@ -53,7 +53,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             flex: 4,
             renderer: function(value, metaData, record) {
                 if (record.get('enableRow') == false) {
-                    return '<div style="color:#a2adb4">' + value + '</div>'
+                    return '<div class="sc-transparency-color">' + value + '</div>'
                 }
                 return value;
             }

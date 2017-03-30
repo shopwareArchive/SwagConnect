@@ -238,8 +238,8 @@ class ProductStreamService
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
                 $streams[$index]['productCount'] = $this->countProductsInStaticStream($stream['id']);
-            } elseif (!$isCronActive) {
-                unset($streams[$index]);
+            } elseif ($stream['type'] == self::DYNAMIC_STREAM) {
+                $streams[$index]['enableRow'] = $isCronActive;
             }
         }
 

@@ -27,6 +27,22 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
 
         me.callParent(arguments);
     },
+    listeners: {
+        beforeselect: function (sm, record) {
+            if (record.get('enableRow') == false ) return false;
+        },
+
+        selectionchange: function (sm, selected) {
+            // deselect disabled records
+            if (selected.length > 0) {
+                Ext.Array.each(selected, function (record) {
+                    if (record.get('enableRow') == false) {
+                        sm.deselect(record, true);
+                    }
+                });
+            }
+        }
+    },
 
     getColumns: function() {
         var me = this;
@@ -34,7 +50,13 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
         return [{
             header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
-            flex: 4
+            flex: 4,
+            renderer: function(value, metaData, record) {
+                if (record.get('enableRow') == false) {
+                    return '<div style="color:#a2adb4">' + value + '</div>'
+                }
+                return value;
+            }
         }, {
             header: '{s name=export/columns/product_amount}Product amount{/s}',
             dataIndex: 'productCount',
@@ -53,6 +75,10 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
 
                 if (me.iconMapping.hasOwnProperty(value)) {
                     className = me.iconMapping[value];
+                }
+
+                if (record.get('enableRow') == false) {
+                    className += ' sc-transparency';
                 }
 
                 if(record.get('exportMessage')) {

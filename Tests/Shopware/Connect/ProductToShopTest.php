@@ -6,6 +6,7 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Connect\Struct\ShopConfiguration;
+use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
@@ -666,6 +667,32 @@ class ProductToShopTest extends ConnectTestHelper
             $property = $product->properties[$index];
             $this->assertEquals($property->option, $option->getName());
         }
+    }
+
+    public function testCreateStreamAndAddProductToStream()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+
+        /** @var Article $article */
+        $article = $this->modelManager->getRepository(Article::class)->findOneBy(array(
+            'name' => $product->title
+        ));
+
+        /** @var ProductStream $stream */
+        $stream = $this->modelManager->getRepository(ProductStream::class)->findOneBy(['name' => $product->stream]);
+        $this->assertNotNull($stream);
+
+        $connection = $this->modelManager->getConnection();
+        $builder = $connection->createQueryBuilder();
+        $builder->select('*')
+            ->from('s_product_streams_selection')
+            ->where('stream_id = :streamId')
+            ->andWhere('article_id = :articleId')
+            ->setParameter('streamId', $stream->getId())
+            ->setParameter('articleId', $article->getId());
+
+        $this->assertNotEmpty($builder->execute()->fetchAll());
     }
 
     public function testAutomaticallyActivateArticles()

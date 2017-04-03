@@ -9,10 +9,20 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
 
     store: 'export.StreamList',
 
-    selModel: {
-        selType: 'checkboxmodel',
-        mode: 'MULTI'
-    },
+    selModel: Ext.create('Shopware.apps.Connect.view.export.stream.CustomCheckboxModel', {
+        selectedAll: false, // you can add whatever normal configuration properties you want here
+        mode: 'MULTI',
+        listeners: {
+            selectall: function (scope) {
+                if (!scope.selectedAll) {
+                    scope.selectedAll = true;
+                } else {
+                    scope.deselectAll();
+                    scope.selectedAll = false;
+                }
+            }
+        }
+    }),
 
     initComponent: function() {
         var me = this;

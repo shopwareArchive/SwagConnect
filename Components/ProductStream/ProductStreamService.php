@@ -229,12 +229,11 @@ class ProductStreamService
      */
     public function getList($start = null, $limit = null)
     {
-        $streamBuilder = $this->productStreamRepository->getStreamsBuilder($start, $limit);
-
-        $stmt = $streamBuilder->execute();
-        $streams = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $streamList = $this->productStreamRepository->fetchStreamList($start, $limit);
 
         $isCronActive = $this->config->isCronActive();
+
+        $streams = $streamList['streams'];
         foreach ($streams as $index => $stream) {
             if ($stream['type'] == self::STATIC_STREAM) {
                 $streams[$index]['productCount'] = $this->countProductsInStaticStream($stream['id']);
@@ -245,7 +244,7 @@ class ProductStreamService
 
         return [
             'data' => $streams,
-            'count' => $stmt->rowCount()
+            'total' => $streamList['total']
         ];
     }
 

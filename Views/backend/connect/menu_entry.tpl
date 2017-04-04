@@ -4,13 +4,13 @@
 <style type="text/css">
     .connect-icon {
         background-image:url({$marketplaceIcon}) !important;
-        background-size: 18px auto !important;
+        background-size: 16px auto !important;
         background-repeat: no-repeat !important;
         background-position-y: center ;
     }
     body .shopware-menu .shopware-connect {
         background-image:url({$marketplaceIcon}) !important;
-        background-size: 18px auto !important;
+        background-size: 16px auto !important;
         background-repeat: no-repeat !important;
         background-position-y: center !important;
     }

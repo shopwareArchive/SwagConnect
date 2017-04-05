@@ -559,6 +559,14 @@ class ProductToShop implements ProductToShopBase
             $stream->setSorting(json_encode(
                 [ReleaseDateSorting::class => ['direction' => 'desc']]
             ));
+
+            //add attributes
+            $attribute = new \Shopware\Models\Attribute\ProductStream();
+            $attribute->setProductStream($stream);
+            $attribute->setConnectIsRemote(true);
+            $stream->setAttribute($attribute);
+
+            $this->manager->persist($attribute);
             $this->manager->persist($stream);
             $this->manager->flush();
         }

@@ -30,10 +30,9 @@ Ext.define('Shopware.apps.ProductStream.view.list.ConnectList', {
 
     connectColumnRenderer: function(value, metaData, record) {
         var result;
-        var style = 'style="width: 16px; height: 16px; display: inline-block; position: absolute; margin-top: -1px;"';
 
         if (record.get('isConnect')) {
-            result = '<div  title="' + marketplaceName + '" class="connect-icon" ' + style + '>&nbsp;</div>';
+            result = '<div  title="' + marketplaceName + '" class="connect-icon sc-icon-position">&nbsp;</div>';
         }
 
         return result;

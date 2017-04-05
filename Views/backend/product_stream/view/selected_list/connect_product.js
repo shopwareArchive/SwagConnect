@@ -1,6 +1,6 @@
 //{namespace name=backend/connect/view/main}
 //{block name="backend/product_stream/view/selected_list/product" append}
-Ext.define('Shopware.apps.ProductStream.controller.ConnectProduct', {
+Ext.define('Shopware.apps.ProductStream.view.selected_list.ConnectProduct', {
     override: 'Shopware.apps.ProductStream.view.selected_list.Product',
 
     snippets: {

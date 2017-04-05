@@ -108,7 +108,9 @@ class ProductStreams extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
                 );
-
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/selected_list/connect_windows.js'
+                );
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/list/connect_list.js'
                 );
@@ -117,6 +119,12 @@ class ProductStreams extends BaseSubscriber
                 $subject->View()->data = $this->markConnectStreams(
                     $subject->View()->data
                 );
+                break;
+            case 'detail':
+                $connectSteamIds = $this->getProductStreamService()->getConnectStreamIds();
+                $stream = $subject->View()->data;
+                $stream['isConnect'] = in_array($stream['id'], $connectSteamIds);
+                $subject->View()->data = $stream;
                 break;
             case 'addSelectedProduct':
                 $streamId = $request->getParam('streamId');
@@ -196,12 +204,12 @@ class ProductStreams extends BaseSubscriber
      * @param $streams
      * @return array
      */
-    private function markConnectStreams($streams)
+    private function markConnectStreams(array $streams)
     {
         $connectSteamIds = $this->getProductStreamService()->getConnectStreamIds();
 
         foreach ($streams as $index => $stream) {
-            $streams[$index]['isConnect'] = in_array($stream['id'], $connectSteamIds) ? true : false;
+            $streams[$index]['isConnect'] = in_array($stream['id'], $connectSteamIds);
         }
 
         return $streams;

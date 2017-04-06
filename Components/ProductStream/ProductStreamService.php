@@ -355,6 +355,9 @@ class ProductStreamService
         return $this->productStreamRepository->removeMarkedStreamRelations();
     }
 
+    /**
+     * @return array
+     */
     public function getConnectStreamIds()
     {
         return $this->productStreamRepository->fetchConnectStreamIds();

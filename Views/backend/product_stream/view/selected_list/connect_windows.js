@@ -19,9 +19,9 @@ Ext.define('Shopware.apps.ProductStream.view.selected_list.ConnectWindow', {
             settingsPanel = this.callParent(arguments);
 
         if (me.record.get('isConnect')) {
-            settingsPanel.nameField.disable();
-            settingsPanel.descriptionField.disable();
-            settingsPanel.sortingCombo.disable();
+            settingsPanel.items.each(function(item){
+                item.disable();
+            });
         }
         return settingsPanel;
     }

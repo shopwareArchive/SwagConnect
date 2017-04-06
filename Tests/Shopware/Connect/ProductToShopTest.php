@@ -6,6 +6,7 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Connect\Struct\ShopConfiguration;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
@@ -682,6 +683,7 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var ProductStream $stream */
         $stream = $this->modelManager->getRepository(ProductStream::class)->findOneBy(['name' => $product->stream]);
         $this->assertNotNull($stream);
+        $this->assertEquals(1, $stream->getAttribute()->getConnectIsRemote());
 
         $connection = $this->modelManager->getConnection();
         $builder = $connection->createQueryBuilder();

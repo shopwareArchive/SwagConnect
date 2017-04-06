@@ -36,6 +36,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Struct\Property;
 use Shopware\Models\ProductStream\ProductStream;
@@ -546,11 +547,15 @@ class ProductToShop implements ProductToShopBase
         $this->manager->flush();
     }
 
+    /**
+     * @param Product $product
+     * @return ProductStream
+     */
     private function getOrCreateStream(Product $product)
     {
         /** @var ProductStreamRepository $repo */
-        $repo = $this->manager->getRepository(ProductStream::class);
-        $stream = $repo->findOneBy(['name' => $product->stream]);
+        $repo = $this->manager->getRepository(ProductStreamAttribute::class);
+        $stream = $repo->findConnectByName($product->stream);
 
         if (!$stream) {
             $stream = new ProductStream();
@@ -574,6 +579,11 @@ class ProductToShop implements ProductToShopBase
         return $stream;
     }
 
+    /**
+     * @param ProductStream $stream
+     * @param ProductModel $article
+     * @throws \Doctrine\DBAL\DBALException
+     */
     private function addProductToStream(ProductStream $stream, ProductModel $article)
     {
         $conn = $this->manager->getConnection();

@@ -3,6 +3,7 @@
 namespace Shopware\CustomModels\Connect;
 
 use \Shopware\Components\Model\ModelRepository;
+use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
@@ -71,5 +72,25 @@ class ProductStreamAttributeRepository extends ModelRepository
             );
 
         $builder->execute();
+    }
+
+
+    /**
+     * @param $name
+     * @return ProductStream
+     */
+    public function findConnectByName($name)
+    {
+        $builder = $this->_em->createQueryBuilder();
+
+        return $builder->select('ps')
+            ->from(ProductStream::class, 'ps')
+            ->leftJoin('ps.attribute', 'psa')
+            ->where('ps.name = :name')
+            ->andWhere('psa.connectIsRemote = :connectIsRemote')
+            ->setParameter('name', $name)
+            ->setParameter('connectIsRemote', true)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

@@ -536,29 +536,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
-     */
-    private function createRegisterMenu()
-    {
-        $plugin = Shopware()->Container()->get('shopware_plugininstaller.plugin_manager')->getPluginByName('SwagConnect');
-
-        /** @var Menu $menuItem */
-        $menuItem = $this->getModelManager()->getRepository(Menu::class)->findOneBy(['label' => 'Connect']);
-
-        $connection = $this->getModelManager()->getConnection();
-        $connection->delete('s_core_menu', ['controller' => 'Connect', 'pluginID' => $plugin->getId()]);
-        $connection->insert('s_core_menu', [
-            'Name' => 'Register',
-            'class' => 'sprite-mousepointer-click',
-            'active' => 1,
-            'pluginID' => $plugin->getId(),
-            'controller' => 'Connect',
-            'action' => 'Register',
-            'parent' => $menuItem->getId(),
-        ]);
-    }
-
-    /**
      * WARNING This code remove the current product changes
      * This is a single call operation and its danger one
      */

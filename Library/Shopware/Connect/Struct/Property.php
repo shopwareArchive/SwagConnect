@@ -36,7 +36,7 @@ class Property extends Struct
      * Example:
      * 0 - alphabetical sort
      * 1 - numeric sort
-     * 2 - position sort
+     * 3 - position sort
      *
      * @var int
      */

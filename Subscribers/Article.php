@@ -209,9 +209,44 @@ class Article extends BaseSubscriber
                     $this->exportMainVariant($request->getParam('articleId'));
                 }
                 break;
+            case 'getPropertyList':
+                $subject->View()->data = $this->addConnectFlagToProperties(
+                    $subject->View()->data
+                );
+                break;
             default:
                 break;
         }
+    }
+
+    public function addConnectFlagToProperties($data)
+    {
+        $groups = [];
+        foreach ($data as $group) {
+            $options = [];
+            foreach ($group['value'] as $value) {
+                $element = $value;
+                $optionId = $value['id'];
+                $valueModel = $this->modelManager->getRepository('Shopware\Models\Property\Value')->find($optionId);
+
+                $attribute = null;
+                if ($valueModel) {
+                    $attribute = $valueModel->getAttribute();
+                }
+
+                if ($attribute && $attribute->getConnectIsRemote()) {
+                    $element['connect'] = true;
+                } else {
+                    $element['connect'] = false;
+                }
+                $options[] = $element;
+            }
+
+            $group['value'] = $options;
+            $groups[] = $group;
+        }
+
+        return $groups;
     }
 
     /**

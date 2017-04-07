@@ -64,10 +64,12 @@ class MarketplaceSettingsApplier
     public function apply(MarketplaceSettings $settings)
     {
         if (!$settings->isDefault) {
-            $this->db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagConnect"', array($settings->marketplaceName));
-            $this->db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE name="connect"', array($settings->marketplaceName));
-            $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Connect"', array($settings->marketplaceName));
-            $this->db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagConnect"', array($settings->marketplaceName));
+            $this->db->executeUpdate('UPDATE `s_core_config_forms` SET `label`=? WHERE name="SwagConnect"', [$settings->marketplaceName]);
+            $this->db->executeUpdate('UPDATE `s_core_menu` SET `name`=? WHERE name="connect"', [$settings->marketplaceName]);
+            $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Connect"', [$settings->marketplaceName]);
+            $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Connect/Export"', ['Export']);
+            $this->db->executeUpdate('UPDATE `s_core_snippets` SET `value`=? WHERE name="Connect/Import"', ['Import']);
+            $this->db->executeUpdate('UPDATE `s_core_plugins` SET `label`=? WHERE name="SwagConnect"', [$settings->marketplaceName]);
             $this->configComponent->setMarketplaceSettings($settings);
             $this->cleanUpMarketplaceSnippets();
         } else {

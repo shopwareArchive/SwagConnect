@@ -1,6 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\Struct\Message;
 use Shopware\Connect\Struct\Order;
@@ -8,11 +9,14 @@ use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Reservation;
 use Shopware\Connect\Struct\TotalShippingCosts;
+use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 use ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper;
 use Shopware\Plugin\Debug\Components\Utils;
+use ShopwarePlugins\Connect\Components\Utils\OrderPaymentStatusMapper;
 
 /**
  * Handles the whole checkout manipulation, which is required for the connect checkout
@@ -30,6 +34,20 @@ class Checkout extends BaseSubscriber
 
     /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
+
+    /** @var  \Shopware\Components\Model\ModelManager $manager */
+    protected $manager;
+
+    /**
+     * Checkout constructor.
+     * @param ModelManager $manager
+     */
+    public function __construct(ModelManager $manager)
+    {
+        parent::__construct();
+
+        $this->manager = $manager;
+    }
 
     public function getSubscribedEvents()
     {
@@ -77,6 +95,7 @@ class Checkout extends BaseSubscriber
      *
      *
      * @param \Enlight_Event_EventArgs $args
+     * @throws CheckoutException
      * @return void
      */
     public function fixBasketForConnect(\Enlight_Event_EventArgs $args)
@@ -105,7 +124,12 @@ class Checkout extends BaseSubscriber
         // send order to connect
         // this method must be called after external payments (Sofort, Billsafe)
         if($actionName == 'finish' && !empty($view->sOrderNumber)) {
-            $this->checkoutReservedProducts($view->sOrderNumber);
+            try {
+                $this->checkoutReservedProducts($view->sOrderNumber);
+            } catch (CheckoutException $e) {
+                $this->setOrderStatusError($view->sOrderNumber);
+                throw $e;
+            }
         }
 
         // clear connect reserved products
@@ -361,6 +385,11 @@ class Checkout extends BaseSubscriber
         try {
             /** @var $reservation \Shopware\Connect\Struct\Reservation */
             $reservation = $sdk->reserveProducts($order);
+
+            if (!$reservation || !$reservation->success) {
+                throw new \Exception('Error during reservation');
+            }
+
             if(!empty($reservation->messages)) {
                 $messages = $reservation->messages;
             }
@@ -518,6 +547,25 @@ class Checkout extends BaseSubscriber
         }
 
         return $connectMessages;
+    }
+
+    /**
+     * @param $orderNumber
+     * @return void
+     */
+    private function setOrderStatusError($orderNumber)
+    {
+        $repo = $this->manager->getRepository('Shopware\Models\Order\Order');
+
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = $repo->findOneBy(['number' => $orderNumber]);
+
+        $repoStatus = $this->manager->getRepository(Status::class);
+        $status = $repoStatus->findOneBy(['name' => ConnectOrderUtil::ORDER_STATUS_ERROR, 'group' => Status::GROUP_STATE ]);
+
+        $order->setOrderStatus($status);
+        $this->manager->persist($order);
+        $this->manager->flush();
     }
 
     /**

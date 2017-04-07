@@ -139,6 +139,17 @@ class Config
      */
     public function isCronActive()
     {
+        if ($this->isCronPluginActive() && $this->isDynamicStreamCronActive()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCronPluginActive()
+    {
         $builder = $this->manager->getConnection()->createQueryBuilder();
         $builder->select('cp.active')
             ->from('s_core_plugins', 'cp')
@@ -146,6 +157,20 @@ class Config
             ->andWhere('cp.name = :name')
             ->setParameter('namespace', 'Core')
             ->setParameter('name', 'Cron');
+
+        return (bool) $builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDynamicStreamCronActive()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cron.active')
+            ->from('s_crontab', 'cron')
+            ->where('cron.action LIKE :action')
+            ->setParameter('action', '%ConnectExportDynamicStreams');
 
         return (bool) $builder->execute()->fetchColumn();
     }
@@ -550,6 +575,22 @@ class Config
             ->setParameter('default', true);
 
         return (int)$builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return \Shopware\Models\Category\Category
+     */
+    public function getDefaultShopCategory()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cs.category_id')
+            ->from('s_core_shops', 'cs')
+            ->where('cs.default = :default')
+            ->setParameter('default', true);
+
+        $categoryId = (int)$builder->execute()->fetchColumn();
+
+        return $this->manager->find('Shopware\Models\Category\Category', $categoryId);
     }
 
     /**

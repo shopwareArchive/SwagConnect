@@ -7,6 +7,7 @@ Ext.define('Shopware.apps.Connect.model.export.StreamList', {
         { name: 'id', type: 'int' },
         { name: 'name',  type: 'string' },
         { name: 'type',  type: 'int' },
+        { name: 'enableRow',  type: 'boolean', defaultValue: true },
         { name: 'productCount',  type: 'int', useNull: true  },
         { name: 'exportStatus', type: 'string', useNull: true },
         { name: 'exportMessage', type: 'string', useNull: true }

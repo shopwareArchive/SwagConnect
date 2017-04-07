@@ -15,7 +15,6 @@ class ImageImportTest extends ConnectTestHelper
         $this->assertNotEmpty($result);
     }
 
-
     public function testHasArticleMainImage()
     {
         $result = $this->getImageImport()->hasArticleMainImage(2);

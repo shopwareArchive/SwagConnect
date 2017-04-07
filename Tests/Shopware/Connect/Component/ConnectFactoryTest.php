@@ -33,6 +33,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKDefaultLocal()
     {
+        putenv("_TRANSACTION_HOST");
         $this->configMock->method('getConfig')->willReturn('sn.connect.local');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));

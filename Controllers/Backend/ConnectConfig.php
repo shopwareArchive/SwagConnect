@@ -32,8 +32,6 @@ use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Gateway\ChangeGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
-use Firebase\JWT\JWT;
-use Shopware\Models\Menu\Menu;
 
 /**
  * @category  Shopware

@@ -24,7 +24,9 @@
 
 namespace ShopwarePlugins\Connect\Controllers\Backend;
 
+use Firebase\JWT\JWT;
 use ShopwarePlugins\Connect\Components\Logger;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @category  Shopware
@@ -45,7 +47,6 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
     }
 
-
     /**
      * @return Logger
      */
@@ -61,6 +62,16 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
     public function getSDK()
     {
         return Shopware()->Container()->get('ConnectSDK');
+    }
+
+    public function getRestApiRequest()
+    {
+        return Shopware()->Container()->get('swagconnect.rest_api_request');
+    }
+
+    public function getPluginManager()
+    {
+        return Shopware()->Container()->get('shopware_plugininstaller.plugin_manager');
     }
 
     public function getConfigComponent()
@@ -109,5 +120,24 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
         $logger->write(false, $request, $result);
 
         echo $result;
+    }
+
+    public function removePluginAction()
+    {
+        $this->Response()->setHeader('Content-Type', 'application/json; charset=utf-8');
+
+        $request = file_get_contents('php://input');
+
+        $apiRequest = $this->getRestApiRequest();
+        $result = $apiRequest->verifyRequest($request);
+
+        if ($result->isOk()) {
+            /** @var \Shopware\Bundle\PluginInstallerBundle\Service\InstallerService $pluginManager */
+            $pluginManager = $this->getPluginManager();
+            $plugin = $pluginManager->getPluginByName('SwagConnect');
+            $pluginManager->uninstallPlugin($plugin);
+        }
+
+        echo $result->getContent();
     }
 }

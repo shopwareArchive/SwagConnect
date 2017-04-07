@@ -196,11 +196,9 @@ class ProductStreamRepository extends Repository
     }
 
     /**
-     * @param null $start
-     * @param null $limit
      * @return \Doctrine\DBAL\Query\QueryBuilder
      */
-    public function getStreamsBuilder($start = null, $limit = null)
+    public function getStreamsBuilder()
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
 
@@ -216,15 +214,33 @@ class ProductStreamRepository extends Repository
             //because there is a bug with ext js when we have grouping
             ->orderBy('ps.type', 'ASC');
 
+        return $builder;
+    }
+
+    /**
+     * @param null $start
+     * @param null $limit
+     * @return array
+     */
+    public function fetchStreamList($start = null, $limit = null)
+    {
+        $streamBuilder = $this->getStreamsBuilder();
+        $total = $streamBuilder->execute()->rowCount();
+
         if ($start) {
-            $builder->setFirstResult($start);
+            $streamBuilder->setFirstResult($start);
         }
 
         if ($limit) {
-            $builder->setMaxResults($limit);
+            $streamBuilder->setMaxResults($limit);
         }
 
-        return $builder;
+        $streams = $streamBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
+
+        return [
+            'streams' => $streams,
+            'total' => $total
+        ];
     }
 
     /**

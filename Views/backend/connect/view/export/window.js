@@ -66,7 +66,7 @@ Ext.define('Shopware.apps.Connect.view.export.Window', {
         return '<div class="export-window-wrapper">' +
             '<div class="export-window-message-wrapper">' +
             '</div>' +
-            '<div class="export-window-mask"></div>' +
+            '<div class="export-window-mask sc-transparency"></div>' +
             '</div>';
     }
 });

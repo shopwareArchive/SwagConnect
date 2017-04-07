@@ -34,13 +34,11 @@ class Shopware_Controllers_Backend_ConnectGateway extends ConnectGatewayBaseCont
 {
     public function getWhitelistedCSRFActions()
     {
-        return ['index'];
+        return ['index', 'removePlugin'];
     }
 
     public function indexAction()
     {
         parent::indexAction();
     }
-
-
 }

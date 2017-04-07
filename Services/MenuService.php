@@ -24,6 +24,11 @@ class MenuService
      */
     private $connection;
 
+    /**
+     * MenuService constructor.
+     * @param InstallerService $installerService
+     * @param ModelManager $manager
+     */
     public function __construct(
         InstallerService $installerService,
         ModelManager $manager

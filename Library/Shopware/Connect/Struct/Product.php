@@ -425,6 +425,13 @@ class Product extends ShopItem
     public $minPurchaseQuantity = 1;
 
     /**
+     * This property is for external devs to add some extra data
+     *
+     * @var string
+     */
+    public $customAttribute;
+
+    /**
      * Restores a product from a previously stored state array.
      *
      * @param array $state

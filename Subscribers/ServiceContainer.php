@@ -4,6 +4,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\PaymentRepository;
+use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
@@ -41,6 +42,7 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
             'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
+            'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
         );
     }
 
@@ -75,5 +77,12 @@ class ServiceContainer extends BaseSubscriber
     public function onCreateFrontendQuery()
     {
         return new FrontendQuery($this->manager);
+    }
+
+    public function onRestApiRequest()
+    {
+        return new RestApiRequest(
+            new Config($this->manager)
+        );
     }
 }

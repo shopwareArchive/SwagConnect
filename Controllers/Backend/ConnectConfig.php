@@ -477,7 +477,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             return;
         }
 
-        // WARNING This code remove the current product changes
+        // WARNING This code removes the current product changes
         // This is a single call operation and its danger one
         // This code should not be used anywhere
         $builder = $this->getModelManager()->getConnection()->createQueryBuilder();

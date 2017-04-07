@@ -521,8 +521,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getConfigComponent()->setGeneralConfigs(['apiKey' => '']);
 
             //recreate the register menu
-            $this->createRegisterMenu();
-
+            $this->get('swagconnect.menu_service')->createRegisterMenu();
         } catch (\Exception $e){
             $this->View()->assign([
                 'success' => false,

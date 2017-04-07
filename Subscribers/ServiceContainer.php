@@ -9,6 +9,7 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Enlight\Event\SubscriberInterface;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
+use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\Components\DependencyInjection\Container;
 use ShopwarePlugins\Connect\Components\Config;
@@ -40,6 +41,7 @@ class ServiceContainer extends BaseSubscriber
         return array(
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
+            'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
             'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
         );
     }
@@ -58,6 +60,17 @@ class ServiceContainer extends BaseSubscriber
             new Config($this->manager),
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
+        );
+    }
+
+    /**
+     * @return MenuService
+     */
+    public function onMenuService()
+    {
+        return new MenuService(
+            $this->container->get('shopware_plugininstaller.plugin_manager'),
+            $this->manager
         );
     }
 

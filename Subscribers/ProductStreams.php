@@ -101,12 +101,22 @@ class ProductStreams extends BaseSubscriber
         $request = $subject->Request();
 
         switch ($request->getActionName()) {
+            case 'index':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/connect_app.js'
+                );
+                break;
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
 
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/condition_list/connect_condition_panel.js'
                 );
                 break;
             case 'addSelectedProduct':

@@ -2,6 +2,8 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use ShopwarePlugins\Connect\Bundle\SearchBundleDBAL\ConditionHandler\SupplierConditionHandler;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -42,6 +44,7 @@ class ProductStreams extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
             'Enlight_Controller_Action_PostDispatch_Backend_ProductStream' => 'extendBackendProductStream',
+            'Shopware_SearchBundleDBAL_Collect_Condition_Handlers' => 'registerConditionHandlers'
         );
     }
 
@@ -191,5 +194,14 @@ class ProductStreams extends BaseSubscriber
         }
 
         $this->connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
+    }
+
+    /**
+     * @return array|ArrayCollection
+     */
+    public function registerConditionHandlers(){
+        return new ArrayCollection([
+            new SupplierConditionHandler(),
+        ]);
     }
 }

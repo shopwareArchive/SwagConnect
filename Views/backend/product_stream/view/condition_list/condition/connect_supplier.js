@@ -1,17 +1,14 @@
+//{namespace name=backend/connect/view/main}
 //{block name="backend/product_stream/view/condition_list/condition/connect_supplier"}
 Ext.define('Shopware.apps.ProductStream.view.condition_list.condition.ConnectSupplier', {
     extend: 'Shopware.apps.ProductStream.view.condition_list.condition.AbstractCondition',
 
-    initComponent: function() {
-        console.log('xxxx');
-    },
-
     getName: function() {
-        return 'Connect\\SupplierCondition';
+        return 'ShopwarePlugins\\Connect\\Bundle\\SearchBundle\\Condition\\SupplierCondition';
     },
 
     getLabel: function() {
-        return 'Bla condition';
+        return '{s name=product_stream/stream_condition_supplier_title}Connect supplier condition{/s}';
     },
 
     isSingleton: function() {
@@ -40,10 +37,10 @@ Ext.define('Shopware.apps.ProductStream.view.condition_list.condition.ConnectSup
         return Ext.create('Shopware.apps.ProductStream.view.condition_list.field.Grid', {
             name: 'condition.' + this.getName(),
             searchStore: this.createStore(),
-            idsName: 'connectSupplierIds',
+            idsName: 'supplierIds',
             store: this.createStore(),
             getErrorMessage: function() {
-                return 'No connect supplier selected';
+                return '{s name=product_stream/stream_condition_supplier_not_selected}No connect supplier selected{/s}';
             }
         });
 

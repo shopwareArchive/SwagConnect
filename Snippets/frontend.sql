@@ -38,7 +38,13 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_weight_label', 'Dispatch by weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_country_column_header', 'max weight', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_net_price', 'net price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:48')
+('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+
+('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message', 'Produkte in Ihrer Bestellung sind aktuell nicht lieferbar, bitte entfernen Sie die Produkte um fortzufahren.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message', 'Products of your order are out of stock in your order, delete this products in your order', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+
+('frontend/checkout/error_messages', 1, 1, 'connect_product_lower_stock_message', 'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/error_messages', 1, 2, 'connect_product_lower_stock_message', 'Availability of product "%product" changed to %availability', '2017-04-11 15:36:48', '2017-04-11 15:36:48')
 
 
 ON DUPLICATE KEY UPDATE

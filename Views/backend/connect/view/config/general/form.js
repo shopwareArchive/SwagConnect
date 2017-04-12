@@ -278,6 +278,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 {
                     xtype: 'container',
                     margin: '10 30 0 0',
+                    width: 185,
                     style: {
                         'color': '#475c6a',
                         'font-weight': 'bold',
@@ -310,11 +311,12 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
         return Ext.create('Ext.container.Container', {
             layout: 'column',
-            columnWidth: 1,
+            columnWidth: 2,
             items: [
                 {
                     xtype: 'container',
                     cls: 'sc-exchange-label-position',
+                    width: 185,
                     html: me.snippets.exchangeSettingResetLabel
                 }, {
                     xtype: 'button',

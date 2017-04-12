@@ -10,14 +10,13 @@ use Shopware\Bundle\SearchBundleDBAL\QueryBuilder;
 use ShopwarePlugins\Connect\Bundle\SearchBundle\Condition\SupplierCondition;
 
 /**
- * @category  Shopware
- * @package   Shopware\Bundle\SearchBundleDBAL\ConditionHandler
- * @copyright Copyright (c) shopware AG (http://www.shopware.de)
+ * Class SupplierConditionHandler
  */
 class SupplierConditionHandler implements ConditionHandlerInterface
 {
     /**
-     * {@inheritdoc}
+     * @param ConditionInterface $condition
+     * @return bool
      */
     public function supportsCondition(ConditionInterface $condition)
     {
@@ -25,7 +24,9 @@ class SupplierConditionHandler implements ConditionHandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param ConditionInterface $condition
+     * @param QueryBuilder $query
+     * @param ShopContextInterface $context
      */
     public function generateCondition(
         ConditionInterface $condition,

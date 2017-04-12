@@ -13,7 +13,8 @@ class SupplierCondition implements ConditionInterface
     private $supplierIds;
 
     /**
-     * @param int[] $supplierIds
+     * SupplierCondition constructor.
+     * @param array $supplierIds
      */
     public function __construct(array $supplierIds)
     {
@@ -22,7 +23,7 @@ class SupplierCondition implements ConditionInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public function getName()
     {

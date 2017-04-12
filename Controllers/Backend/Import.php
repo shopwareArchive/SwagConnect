@@ -343,7 +343,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function getSuppliersAction()
     {
         $suppliers = [];
-
         $pdoGateway = $this->getPdoGateway();
 
         foreach ($pdoGateway->getConnectedShopIds() as $shopId) {

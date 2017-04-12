@@ -197,9 +197,10 @@ class ProductStreams extends BaseSubscriber
     }
 
     /**
-     * @return array|ArrayCollection
+     * @return ArrayCollection
      */
-    public function registerConditionHandlers(){
+    public function registerConditionHandlers()
+    {
         return new ArrayCollection([
             new SupplierConditionHandler(),
         ]);

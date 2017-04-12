@@ -102,6 +102,7 @@ class ProductQueryTest extends ConnectTestHelper
                     $this->productTranslator,
                     $this->contextService,
                     $this->localMediaService,
+                    null,
                     Shopware()->Container()->get('events')
                 ),
                 new RemoteProductQuery(

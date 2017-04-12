@@ -30,6 +30,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     private $article;
 
     private $db;
+
     private $manager;
 
     protected $productContext;
@@ -116,7 +117,8 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->productTranslator,
                 $this->contextService,
                 $this->localMediaService,
-                $this->mediaService
+                $this->mediaService,
+                Shopware()->Container()->get('events')
             );
         }
         return $this->localProductQuery;

@@ -110,14 +110,24 @@ class ProductFromShop implements ProductFromShopBase
     public function getProducts(array $sourceIds)
     {
         $sourceIds = $this->eventManager->filter(
-            'Connect_Supplier_Get_Products_Before',
+            'Connect_Supplier_Get_Products_Filter_Source_IDS',
             $sourceIds,
             [
                 'subject' => $this
             ]
         );
 
-        return $this->helper->getLocalProduct($sourceIds);
+        $products = $this->helper->getLocalProduct($sourceIds);
+
+        $this->eventManager->notify(
+            'Connect_Supplier_Get_All_Products_Before',
+            [
+                'subject' => $this,
+                'products' => $products
+            ]
+        );
+
+        return $products;
     }
 
     /**

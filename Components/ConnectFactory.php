@@ -53,8 +53,8 @@ class ConnectFactory
      */
     private $container;
 
-    /** @var
-     * \ShopwarePlugins\Connect\Components\Config
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 
@@ -374,7 +374,8 @@ class ConnectFactory
     private function getRemoteProductQuery()
     {
         return new RemoteProductQuery(
-            $this->getModelManager()
+            $this->getModelManager(),
+            $this->getContainer()->get('events')
         );
     }
 
@@ -396,7 +397,8 @@ class ConnectFactory
             ),
             $this->getContainer()->get('shopware_storefront.context_service'),
             $this->getLocalMediaService(),
-            $this->getMediaService()
+            $this->getMediaService(),
+            $this->getContainer()->get('events')
         );
     }
 

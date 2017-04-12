@@ -374,8 +374,7 @@ class ConnectFactory
     private function getRemoteProductQuery()
     {
         return new RemoteProductQuery(
-            $this->getModelManager(),
-            $this->getContainer()->get('events')
+            $this->getModelManager()
         );
     }
 
@@ -397,8 +396,8 @@ class ConnectFactory
             ),
             $this->getContainer()->get('shopware_storefront.context_service'),
             $this->getLocalMediaService(),
-            $this->getMediaService(),
-            $this->getContainer()->get('events')
+            $this->getContainer()->get('events'),
+            $this->getMediaService()
         );
     }
 

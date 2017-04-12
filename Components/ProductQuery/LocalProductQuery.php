@@ -32,8 +32,8 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $baseProductUrl;
 
-    /** @var
-     * \ShopwarePlugins\Connect\Components\Config $configComponent
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config $configComponent
      */
     protected $configComponent;
 
@@ -87,8 +87,8 @@ class LocalProductQuery extends BaseProductQuery
         ProductTranslatorInterface $productTranslator,
         ContextServiceInterface $contextService,
         MediaService $storeFrontMediaService,
-        $mediaService = null,
-        Enlight_Event_EventManager $eventManager
+        Enlight_Event_EventManager $eventManager,
+        $mediaService = null
     )
     {
         parent::__construct($manager, $mediaService);
@@ -98,6 +98,7 @@ class LocalProductQuery extends BaseProductQuery
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
         $this->contextService = $contextService;
+        $this->eventManager = $eventManager;
         $this->localMediaService = $storeFrontMediaService;
 
         // products context is needed to load product media
@@ -109,7 +110,6 @@ class LocalProductQuery extends BaseProductQuery
             null,
             ContextService::FALLBACK_CUSTOMER_GROUP
         );
-        $this->eventManager = $eventManager;
     }
 
     /**

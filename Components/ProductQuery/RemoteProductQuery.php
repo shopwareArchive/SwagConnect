@@ -5,7 +5,6 @@ namespace ShopwarePlugins\Connect\Components\ProductQuery;
 use Shopware\Connect\Struct\Product;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelManager;
-use Enlight_Event_EventManager;
 
 /**
  * Will return an *imported* product as Shopware\Connect\Struct\Product
@@ -16,22 +15,14 @@ use Enlight_Event_EventManager;
 class RemoteProductQuery extends BaseProductQuery
 {
     /**
-     * @var Enlight_Event_EventManager
-     */
-    private $eventManager;
-
-    /**
      * RemoteProductQuery constructor.
      * @param ModelManager $manager
-     * @param Enlight_Event_EventManager $eventManager
      */
     public function __construct(
-        ModelManager $manager,
-        Enlight_Event_EventManager $eventManager
+        ModelManager $manager
     )
     {
         parent::__construct($manager);
-        $this->eventManager = $eventManager;
     }
 
     /**
@@ -123,14 +114,6 @@ class RemoteProductQuery extends BaseProductQuery
 
         $product = new Product(
             $row
-        );
-
-        $this->eventManager->notify(
-            'Connect_Supplier_Get_Single_Product_Before',
-            [
-                'subject' => $this,
-                'product' => $product
-            ]
         );
 
         return $product;

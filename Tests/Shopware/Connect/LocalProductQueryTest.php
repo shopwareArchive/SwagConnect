@@ -117,8 +117,8 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->productTranslator,
                 $this->contextService,
                 $this->localMediaService,
-                $this->mediaService,
-                Shopware()->Container()->get('events')
+                Shopware()->Container()->get('events'),
+                $this->mediaService
             );
         }
         return $this->localProductQuery;

@@ -188,7 +188,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
         return [
             '{literal}{name:this.formatName}{/literal}',
             {
-                formatName: function(type, enableRow) {
+                formatName: function(type) {
                     if (type == 2) {
                         return '{s name=export/selection_streams}Selection streams{/s}';
                     } else {

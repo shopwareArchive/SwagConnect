@@ -569,7 +569,7 @@ class BasketHelper
      * @param $connectMessages array Messages to show
      * @return array
      */
-    public function getConnectTemplateVariables($connectMessages)
+    public function getConnectTemplateVariables(array $connectMessages)
     {
         $snippets = Shopware()->Snippets()->getNamespace('frontend/checkout/error_messages');
         /** @var Message $message */

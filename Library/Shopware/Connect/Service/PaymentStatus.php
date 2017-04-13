@@ -76,7 +76,10 @@ class PaymentStatus
      */
     public function getChanges($since, $limit)
     {
-        return $this->changes->getNextPaymentStatusChanges($since, $limit);
+        $changes = $this->changes->getNextPaymentStatusChanges($since, $limit);
+        $this->changes->cleanChangesUntil($since);
+
+        return $changes;
     }
 
     /**

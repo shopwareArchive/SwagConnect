@@ -52,7 +52,8 @@ class ImportServiceTest extends ConnectTestHelper
         $autoCategoryResolver = new AutoCategoryResolver(
             $this->manager,
             $this->categoryRepository,
-            $this->remoteCategoryRepository
+            $this->remoteCategoryRepository,
+            new \ShopwarePlugins\Connect\Components\Config($this->manager)
         );
 
         $this->importService = new ImportService(

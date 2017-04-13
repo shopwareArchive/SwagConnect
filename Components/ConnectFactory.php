@@ -53,8 +53,8 @@ class ConnectFactory
      */
     private $container;
 
-    /** @var
-     * \ShopwarePlugins\Connect\Components\Config
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 
@@ -188,7 +188,8 @@ class ConnectFactory
             new AutoCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\Models\Category\Category'),
-                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $this->getConfigComponent()
             ) :
             new DefaultCategoryResolver(
                 $manager,
@@ -395,6 +396,7 @@ class ConnectFactory
             ),
             $this->getContainer()->get('shopware_storefront.context_service'),
             $this->getLocalMediaService(),
+            $this->getContainer()->get('events'),
             $this->getMediaService()
         );
     }

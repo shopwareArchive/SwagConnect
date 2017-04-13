@@ -30,6 +30,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     private $article;
 
     private $db;
+
     private $manager;
 
     protected $productContext;
@@ -116,6 +117,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->productTranslator,
                 $this->contextService,
                 $this->localMediaService,
+                Shopware()->Container()->get('events'),
                 $this->mediaService
             );
         }
@@ -232,7 +234,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'color',
                 'filterable' => false,
                 'value' => 'green',
@@ -242,7 +244,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'size',
                 'filterable' => false,
                 'value' => '2xl',
@@ -252,7 +254,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'size',
                 'filterable' => false,
                 'value' => '3xl',
@@ -320,7 +322,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             $group = new Property\Group();
             $group->setName('Nike');
             $group->setPosition(3);
-            $group->setSortMode(2);
+            $group->setSortMode(3);
             $group->setComparable(0);
             $this->manager->persist($group);
             $this->manager->flush();

@@ -422,8 +422,9 @@ class Product extends Verificator
                 throw new \Shopware\Connect\Exception\VerificationFailedException("Property filterable MUST be boolean.");
             }
 
-            if ($property->sortMode > 2 || $property->sortMode < 0) {
-                throw new \Shopware\Connect\Exception\VerificationFailedException("Property sortMode MUST be 0, 1, or 2");
+            $availableSortModes = array(0,1,3);
+            if (!in_array($property->sortMode, $availableSortModes)) {
+                throw new \Shopware\Connect\Exception\VerificationFailedException("Property sortMode MUST be 0, 1, or 3");
             }
         }
     }

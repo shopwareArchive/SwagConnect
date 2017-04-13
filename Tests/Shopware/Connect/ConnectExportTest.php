@@ -79,6 +79,12 @@ class ConnectExportTest extends ConnectTestHelper
         /** @var \Shopware\Models\Article\Article $model */
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(3);
         $detail = $model->getMainDetail();
+
+        //fixes wrong sort mode in demo data
+        $propertyGroup = $model->getPropertyGroup();
+        $propertyGroup->setSortMode(0);
+        $this->manager->persist($propertyGroup);
+
         /** @var \Shopware\Models\Article\Price $prices */
         $prices = $detail->getPrices();
         if (method_exists($detail, 'setPurchasePrice')) {
@@ -108,6 +114,9 @@ class ConnectExportTest extends ConnectTestHelper
         $this->assertEquals(1, $row['exported']);
     }
 
+    /**
+     * @depends testExport
+     */
     public function testExportErrors()
     {
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(4);

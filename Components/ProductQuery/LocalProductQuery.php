@@ -15,6 +15,7 @@ use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\Connect\Struct\PriceRange;
+use Enlight_Event_EventManager;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -31,9 +32,14 @@ class LocalProductQuery extends BaseProductQuery
 
     protected $baseProductUrl;
 
-    /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config $configComponent
+     */
     protected $configComponent;
 
+    /**
+     * @var MarketplaceGateway
+     */
     protected $marketplaceGateway;
 
     /**
@@ -56,6 +62,23 @@ class LocalProductQuery extends BaseProductQuery
      */
     protected $productContext;
 
+    /**
+     * @var Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
+     * LocalProductQuery constructor.
+     * @param ModelManager $manager
+     * @param null $baseProductUrl
+     * @param $configComponent
+     * @param MarketplaceGateway $marketplaceGateway
+     * @param ProductTranslatorInterface $productTranslator
+     * @param ContextServiceInterface $contextService
+     * @param MediaService $storeFrontMediaService
+     * @param null $mediaService
+     * @param Enlight_Event_EventManager $eventManager
+     */
     public function __construct(
         ModelManager $manager,
         $baseProductUrl,
@@ -64,6 +87,7 @@ class LocalProductQuery extends BaseProductQuery
         ProductTranslatorInterface $productTranslator,
         ContextServiceInterface $contextService,
         MediaService $storeFrontMediaService,
+        Enlight_Event_EventManager $eventManager,
         $mediaService = null
     )
     {
@@ -74,6 +98,7 @@ class LocalProductQuery extends BaseProductQuery
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
         $this->contextService = $contextService;
+        $this->eventManager = $eventManager;
         $this->localMediaService = $storeFrontMediaService;
 
         // products context is needed to load product media
@@ -267,6 +292,15 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $product = new Product($row);
+
+        $this->eventManager->notify(
+            'Connect_Supplier_Get_Single_Product_Before',
+            [
+                'subject' => $this,
+                'product' => $product
+            ]
+        );
+
         return $product;
     }
 

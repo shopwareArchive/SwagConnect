@@ -101,9 +101,12 @@ class ProductQueryTest extends ConnectTestHelper
                     new MarketplaceGateway(Shopware()->Models()),
                     $this->productTranslator,
                     $this->contextService,
-                    $this->localMediaService
+                    $this->localMediaService,
+                    Shopware()->Container()->get('events')
                 ),
-                new RemoteProductQuery(Shopware()->Models())
+                new RemoteProductQuery(
+                    Shopware()->Models()
+                )
             );
         }
         return $this->productQuery;

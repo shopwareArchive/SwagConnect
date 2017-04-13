@@ -13,10 +13,7 @@ before_script:
     - cd ..
     - cd /tmp/shopware
     # changes to the latest tag
-    #- git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-    # checkout tag v5.2.16, because v5.2.17 contains image optimizers and tests are failing
-    # we have to fix that
-    - git checkout v5.2.16
+    - git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
     - ant -f build/build.xml -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
     - mv /home/travis/build/shopware/SwagConnect /tmp/shopware/engine/Shopware/Plugins/Local/Backend
@@ -29,9 +26,8 @@ before_script:
     - php bin/console sw:generate:attributes
     - php bin/console orm:generate:proxies
     - php bin/console sw:cache:clear --env=testing
-    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
 
-script: phpunit
+script: vendor/bin/phpunit -c engine/Shopware/Plugins/Local/Backend/SwagConnect/phpunit.xml
 
 notifications:
     email: false

@@ -100,7 +100,7 @@ Ext.define('Shopware.apps.Connect.view.export.price.Checkboxcolumn', {
         var productCounter = "<span style='position: absolute; left: 20px'>" + counterText + "</span>";
 
         if (!record.get(columnType + 'Available')) {
-            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/>' + productCounter + '<div class="export-window-wrapper export-window-mask"></div></div>';
+            return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" readonly ' + checked + '/>' + productCounter + '<div class="export-window-wrapper export-window-mask sc-transparency"></div></div>';
         }
 
         return '<div style="position: relative"><input type="checkbox" class="' + cls.join(' ') + '" value="1" ' + checked + ' ' + readOnly + ' />' + productCounter + '</div>';

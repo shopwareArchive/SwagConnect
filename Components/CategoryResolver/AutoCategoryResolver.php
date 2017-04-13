@@ -7,6 +7,7 @@ use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\Config;
 
 class AutoCategoryResolver implements CategoryResolver
 {
@@ -25,15 +26,29 @@ class AutoCategoryResolver implements CategoryResolver
      */
     private $remoteCategoryRepository;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * AutoCategoryResolver constructor.
+     * @param ModelManager $manager
+     * @param CategoryRepository $categoryRepository
+     * @param RemoteCategoryRepository $remoteCategoryRepository
+     * @param Config $config
+     */
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
-        RemoteCategoryRepository $remoteCategoryRepository
+        RemoteCategoryRepository $remoteCategoryRepository,
+        Config $config
     )
     {
         $this->manager = $manager;
         $this->categoryRepository = $categoryRepository;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
+        $this->config = $config;
     }
 
     /**
@@ -43,7 +58,19 @@ class AutoCategoryResolver implements CategoryResolver
     {
         $tree = $this->generateTree($categories);
 
-        $this->convertTreeToEntities($tree);
+        // we need to foreach, cause we may have two main nodes
+        // example:
+        // Deutsch/Category/Subcategory
+        // English/Category/Subcategory
+        foreach ($tree as $node) {
+            $mainCategory = $this->categoryRepository->findOneBy([
+                'name' => $node['name'],
+                'parentId' => 1,
+            ]);
+
+            $this->convertTreeToEntities($node['children'], $mainCategory);
+        }
+
         $categoryNames = array();
         $categoryNames = $this->collectOnlyLeafCategories($tree, $categoryNames);
 
@@ -84,7 +111,8 @@ class AutoCategoryResolver implements CategoryResolver
     public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = array())
     {
         if (!$parent) {
-            $parent = $this->categoryRepository->find(3);
+            //full load of category entity
+            $parent = $this->config->getDefaultShopCategory();
         }
 
         foreach ($node as $category) {

@@ -153,7 +153,9 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     width: 100%;
     height: 100%;
     background-color: #FFFFFF;
+}
 
+.sc-transparency {
     /* This works in IE 8 & 9 too */
     /* ... but also 5, 6, 7 */
     filter: alpha(opacity=50);
@@ -168,6 +170,10 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     /* Firefox 0.9+, Safari 2?, Chrome any?
     /* Opera 9+, IE 9+ */
     opacity: 0.50;
+}
+
+.sc-transparency-color {
+    color:#a2adb4;
 }
 
 .export-window-message-wrapper {

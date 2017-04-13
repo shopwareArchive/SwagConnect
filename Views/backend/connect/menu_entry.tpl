@@ -3,7 +3,16 @@
 <link rel="stylesheet" href="{link file='backend/connect/_resources/styles/sw-connect-style.css'}" />
 <style type="text/css">
     .connect-icon {
-        background:url({$marketplaceIcon}) no-repeat 0 0 !important;
+        background-image:url({$marketplaceIcon}) !important;
+        background-size: 16px auto !important;
+        background-repeat: no-repeat !important;
+        background-position-y: center ;
+    }
+    body .shopware-menu .shopware-connect {
+        background-image:url({$marketplaceIcon}) !important;
+        background-size: 16px auto !important;
+        background-repeat: no-repeat !important;
+        background-position-y: center !important;
     }
     .connect-icon-green {
         background:url({$marketplaceIncomingIcon}) no-repeat 0 0 !important;

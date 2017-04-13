@@ -57,6 +57,7 @@ class Article extends BaseSubscriber
         return array(
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
+            'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
             'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
         );
@@ -83,6 +84,24 @@ class Article extends BaseSubscriber
             $this->customerGroupRepository = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         }
         return $this->customerGroupRepository;
+    }
+
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function preBackendArticle(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $subject \Enlight_Controller_Action */
+        $subject = $args->getSubject();
+        $request = $subject->Request();
+
+        switch ($request->getActionName()) {
+            case 'saveDetail':
+                if ($request->getParam('standard')) {
+                    $this->generateMainVariantChange($request->getParam('id'));
+                }
+                break;
+        }
     }
 
     /**
@@ -127,11 +146,9 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/controller/detail_connect.js'
                 );
-                break;
-            case 'saveDetail':
-                if ($request->getParam('standard')) {
-                    $this->generateMainVariantChange($request->getParam('id'));
-                }
+                $subject->View()->extendsTemplate(
+                    'backend/article/view/detail/connect_properties.js'
+                );
                 break;
             case 'setPropertyList':
                 // property values are saved in different ajax call then
@@ -163,6 +180,10 @@ class Article extends BaseSubscriber
                     return;
                 }
 
+                if (!$this->hasPriceType()) {
+                    return;
+                }
+
                 $detail = $article->getMainDetail();
 
                 if ($detail->getAttribute()->getConnectPropertyGroup()) {
@@ -188,9 +209,44 @@ class Article extends BaseSubscriber
                     $this->exportMainVariant($request->getParam('articleId'));
                 }
                 break;
+            case 'getPropertyList':
+                $subject->View()->data = $this->addConnectFlagToProperties(
+                    $subject->View()->data
+                );
+                break;
             default:
                 break;
         }
+    }
+
+    public function addConnectFlagToProperties($data)
+    {
+        $groups = [];
+        foreach ($data as $group) {
+            $options = [];
+            foreach ($group['value'] as $value) {
+                $element = $value;
+                $optionId = $value['id'];
+                $valueModel = $this->modelManager->getRepository('Shopware\Models\Property\Value')->find($optionId);
+
+                $attribute = null;
+                if ($valueModel) {
+                    $attribute = $valueModel->getAttribute();
+                }
+
+                if ($attribute && $attribute->getConnectIsRemote()) {
+                    $element['connect'] = true;
+                } else {
+                    $element['connect'] = false;
+                }
+                $options[] = $element;
+            }
+
+            $group['value'] = $options;
+            $groups[] = $group;
+        }
+
+        return $groups;
     }
 
     /**
@@ -204,6 +260,11 @@ class Article extends BaseSubscriber
             return;
         }
 
+        //if it is already main variant dont generate MakeMainVariant change
+        if ($detail->getKind() == 1) {
+            return;
+        }
+
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
 
         if (!$attribute) {
@@ -211,6 +272,10 @@ class Article extends BaseSubscriber
         }
         // Check if entity is a connect product
         if (!$this->getHelper()->isProductExported($attribute)) {
+            return;
+        }
+
+        if (!$this->hasPriceType()) {
             return;
         }
 
@@ -444,11 +509,15 @@ class Article extends BaseSubscriber
             return;
         }
 
+        if (!$this->hasPriceType()) {
+            return;
+        }
+
         $detail = $article->getMainDetail();
         $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
 
         try {
-            $this->connectExport->export([$detailAttribute->getSourceId()], null, true);
+            $this->connectExport->export([$detailAttribute->getSourceId()]);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error

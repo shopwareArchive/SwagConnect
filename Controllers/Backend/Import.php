@@ -343,11 +343,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $modelManager = Shopware()->Models();
             $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
-                new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                    $modelManager,
-                    $modelManager->getRepository('Shopware\Models\Category\Category'),
-                    $modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
-                ),
+                $this->getAutoCategoryResolver(),
                 new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
                 new \ShopwarePlugins\Connect\Components\RandomStringGenerator()
             );
@@ -414,7 +410,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->autoCategoryResolver = new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
                 $this->getModelManager(),
                 $this->getCategoryRepository(),
-                $this->getRemoteCategoryRepository()
+                $this->getRemoteCategoryRepository(),
+                new \ShopwarePlugins\Connect\Components\Config($this->getModelManager())
             );
         }
 

@@ -41,8 +41,8 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Progress', {
     snippets: {
         title: 'Export',
         process: '{s name=export/progress/process}[0] of [1] product(s) exported...{/s}',
-        processStream: '{s name=export/progress/processStream}[0] of [1] stream(s) exported...{/s}',
-        notice: '{s name=export/progress/notice}This process will take about [0] minutes depending on your system resources. <br>Do you want to continue?{/s}'
+        processStream: '{s name=export/progress/process_streams}[0] of [1] product stream(s) exported...{/s}',
+        notice: '{s name=export/progress/notice_streams}The export process can take several minutes. Do you want to continue?{/s}'
     },
 
     bodyPadding: 10,

@@ -79,6 +79,12 @@ class ConnectExportTest extends ConnectTestHelper
         /** @var \Shopware\Models\Article\Article $model */
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(3);
         $detail = $model->getMainDetail();
+
+        //fixes wrong sort mode in demo data
+        $propertyGroup = $model->getPropertyGroup();
+        $propertyGroup->setSortMode(0);
+        $this->manager->persist($propertyGroup);
+
         /** @var \Shopware\Models\Article\Price $prices */
         $prices = $detail->getPrices();
         if (method_exists($detail, 'setPurchasePrice')) {
@@ -108,6 +114,9 @@ class ConnectExportTest extends ConnectTestHelper
         $this->assertEquals(1, $row['exported']);
     }
 
+    /**
+     * @depends testExport
+     */
     public function testExportErrors()
     {
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(4);
@@ -162,6 +171,20 @@ class ConnectExportTest extends ConnectTestHelper
 
         $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
         $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status = "delete"')->fetchColumn());
+    }
+
+    public function testDeleteNotExportedVariant()
+    {
+        $articleId = $this->insertVariants();
+        $modelManager = $this->manager;
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
+        $detail = $article->getMainDetail();
+        Shopware()->Db()->executeUpdate('UPDATE s_plugin_connect_items SET export_status = NULL, exported = 0 where source_id = "1919"');
+        $this->connectExport->syncDeleteDetail($detail);
+
+        $this->assertEquals(0, Shopware()->Db()->query('SELECT COUNT(*) FROM sw_connect_change WHERE c_entity_id LIKE "1919%"')->fetchColumn());
+        $this->assertEquals(1, Shopware()->Db()->query('SELECT COUNT(*) FROM s_plugin_connect_items WHERE source_id = "1919" AND export_status IS NULL')->fetchColumn());
     }
 
     private function insertVariants()

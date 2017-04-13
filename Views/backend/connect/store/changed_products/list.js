@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Connect.store.changed_products.List', {
     pageSize: 20,
     proxy: {
         type: 'ajax',
-        url: '{url action=getChangedProducts}',
+        url: '{url controller=LastChanges action=getChangedProducts}',
         reader: {
             type: 'json',
             root: 'data'

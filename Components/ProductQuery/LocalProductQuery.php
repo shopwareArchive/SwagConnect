@@ -15,6 +15,7 @@ use ShopwarePlugins\Connect\Components\Translations\ProductTranslatorInterface;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\Connect\Struct\PriceRange;
+use Enlight_Event_EventManager;
 
 /**
  * Will return a local product (e.g. for export) as Shopware\Connect\Struct\Product
@@ -25,11 +26,20 @@ use Shopware\Connect\Struct\PriceRange;
  */
 class LocalProductQuery extends BaseProductQuery
 {
+    const IMAGE_LIMIT = 10;
+
+    const VARIANT_IMAGE_LIMIT = 10;
+
     protected $baseProductUrl;
 
-    /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config $configComponent
+     */
     protected $configComponent;
 
+    /**
+     * @var MarketplaceGateway
+     */
     protected $marketplaceGateway;
 
     /**
@@ -52,6 +62,23 @@ class LocalProductQuery extends BaseProductQuery
      */
     protected $productContext;
 
+    /**
+     * @var Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
+     * LocalProductQuery constructor.
+     * @param ModelManager $manager
+     * @param null $baseProductUrl
+     * @param $configComponent
+     * @param MarketplaceGateway $marketplaceGateway
+     * @param ProductTranslatorInterface $productTranslator
+     * @param ContextServiceInterface $contextService
+     * @param MediaService $storeFrontMediaService
+     * @param null $mediaService
+     * @param Enlight_Event_EventManager $eventManager
+     */
     public function __construct(
         ModelManager $manager,
         $baseProductUrl,
@@ -60,6 +87,7 @@ class LocalProductQuery extends BaseProductQuery
         ProductTranslatorInterface $productTranslator,
         ContextServiceInterface $contextService,
         MediaService $storeFrontMediaService,
+        Enlight_Event_EventManager $eventManager,
         $mediaService = null
     )
     {
@@ -70,13 +98,14 @@ class LocalProductQuery extends BaseProductQuery
         $this->marketplaceGateway = $marketplaceGateway;
         $this->productTranslator = $productTranslator;
         $this->contextService = $contextService;
+        $this->eventManager = $eventManager;
         $this->localMediaService = $storeFrontMediaService;
 
         // products context is needed to load product media
         // it's used for image translations
         // in our case translations are not used
         // so we don't care about shop language
-        $this->productContext = $this->contextService->createProductContext(
+        $this->productContext = $this->contextService->createShopContext(
             $this->configComponent->getDefaultShopId(),
             null,
             ContextService::FALLBACK_CUSTOMER_GROUP
@@ -205,18 +234,22 @@ class LocalProductQuery extends BaseProductQuery
 
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
+        $sku = $row['sku'];
         $row['images'] = array();
-        $mediaFiles = $this->localMediaService->getProductMedia($product, $this->productContext);
-
-        foreach ($mediaFiles as $media) {
-            $row['images'][] = $media->getFile();
+        $mediaFiles = $this->localMediaService->getProductMediaList([$product], $this->productContext);
+        if (array_key_exists($sku, $mediaFiles) && $mediaFiles[$sku]) {
+            $mediaFiles[$sku] = array_slice($mediaFiles[$sku], 0, self::IMAGE_LIMIT);
+            foreach ($mediaFiles[$sku] as $media) {
+                $row['images'][] = $media->getFile();
+            }
         }
 
-        $variantMediaFiles = $this->localMediaService->getVariantMediaList(array($product), $this->productContext);
-        $sku = $row['sku'];
+        $variantMediaFiles = $this->localMediaService->getVariantMediaList([$product], $this->productContext);
         if (array_key_exists($sku, $variantMediaFiles) && $variantMediaFiles[$sku]) {
+            $variantMediaFiles[$sku] = array_slice($variantMediaFiles[$sku], 0, self::VARIANT_IMAGE_LIMIT);
             foreach ($variantMediaFiles[$sku] as $media) {
                 $row['variantImages'][] = $media->getFile();
+                $row['images'][] = $media->getFile();
             }
         }
 
@@ -259,6 +292,15 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $product = new Product($row);
+
+        $this->eventManager->notify(
+            'Connect_Supplier_Get_Single_Product_Before',
+            [
+                'subject' => $this,
+                'product' => $product
+            ]
+        );
+
         return $product;
     }
 

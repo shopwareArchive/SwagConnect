@@ -40,6 +40,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
     private $connectFactory;
 
+    private $productUpdates = [];
+
+    /**
+     * @var \ShopwarePlugins\Connect\Subscribers\Lifecycle
+     */
+    private $lifecycle;
+
     /**
      * Returns the current version of the plugin.
      *
@@ -216,14 +223,78 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $subscriber->setBootstrap($this);
             $this->Application()->Events()->registerSubscriber($subscriber);
         }
+
+        /** @var ModelManager $entityManager */
+        $entityManager = Shopware()->Models();
+        $entityManager->getEventManager()->addEventListener(
+            [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
+            $this
+        );
+
+    }
+
+    /**
+     * Collect updated Articles and Details
+     * Lifecycle events don't work correctly, because products will be fetched via query builder,
+     * but related entities like price are not updated yet.
+     *
+     * @param \Doctrine\ORM\Event\OnFlushEventArgs $eventArgs
+     */
+    public function onFlush(\Doctrine\ORM\Event\OnFlushEventArgs $eventArgs)
+    {
+        /** @var $em ModelManager */
+        $em  = $eventArgs->getEntityManager();
+        $uow = $em->getUnitOfWork();
+
+        // Entity updates
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            if (!$entity instanceof \Shopware\Models\Article\Article
+                && !$entity instanceof \Shopware\Models\Article\Detail
+            ) {
+                continue;
+            }
+
+            $this->productUpdates[] = $entity;
+        }
+    }
+
+    /**
+     * Generate changes for updated Articles and Details.
+     * On postFlush all related entities are updated and product can
+     * be fetched from DB correctly.
+     *
+     * @param \Doctrine\ORM\Event\PostFlushEventArgs $eventArgs
+     */
+    public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $eventArgs)
+    {
+        foreach ($this->productUpdates as $entity) {
+            $this->getLifecycleSubscriber()->handleChange($entity);
+        }
+
+        $this->productUpdates = [];
     }
 
     public function getSubscribersForUnverifiedKeys()
     {
         return array(
             new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
+            $this->getLifecycleSubscriber()
         );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Subscribers\Lifecycle
+     */
+    public function getLifecycleSubscriber()
+    {
+        if (!$this->lifecycle) {
+            $this->lifecycle = new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
+                Shopware()->Models(),
+                $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
+            );
+        }
+
+        return $this->lifecycle;
     }
 
     /**
@@ -243,7 +314,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less(),
-            new \ShopwarePlugins\Connect\Subscribers\Lifecycle()
+            $this->getLifecycleSubscriber()
 
         );
 
@@ -266,7 +337,10 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
             new \ShopwarePlugins\Connect\Subscribers\ControllerPath($this->assertMinimumVersion('5.2')),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(),
+            new \ShopwarePlugins\Connect\Subscribers\CronJob(
+                $this->getSDK(),
+                $this->getConnectFactory()->getConnectExport()
+            ),
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($db->getConnection()),
@@ -286,13 +360,20 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Connect(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
-                $modelManager
+                $modelManager,
+                Shopware()->Container()
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),
             new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
                 $this->getConnectFactory()->getConnectExport(),
                 new Config($modelManager),
                 $this->getConnectFactory()->getHelper()
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\Property(
+                $modelManager
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\Search(
+                $modelManager
             ),
         );
     }
@@ -409,7 +490,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     private function createCheckoutSubscriber()
     {
-        $checkoutSubscriber = new \ShopwarePlugins\Connect\Subscribers\Checkout();
+        $checkoutSubscriber = new \ShopwarePlugins\Connect\Subscribers\Checkout(
+            Shopware()->Models()
+        );
         foreach ($checkoutSubscriber->getListeners() as $listener) {
             if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
                 $listener->setPosition(-1);

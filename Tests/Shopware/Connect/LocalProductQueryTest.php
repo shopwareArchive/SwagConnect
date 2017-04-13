@@ -30,6 +30,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     private $article;
 
     private $db;
+
     private $manager;
 
     protected $productContext;
@@ -98,7 +99,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ->disableOriginalConstructor()
             ->getMock();
         $this->contextService->expects($this->any())
-            ->method('createProductContext')
+            ->method('createShopContext')
             ->willReturn($this->productContext);
     }
 
@@ -116,6 +117,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->productTranslator,
                 $this->contextService,
                 $this->localMediaService,
+                Shopware()->Container()->get('events'),
                 $this->mediaService
             );
         }
@@ -180,19 +182,29 @@ class LocalProductQueryTest extends ConnectTestHelper
             ],
         );
 
-        $productMedia = new Media();
-        $productMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg');
-        $variantMedia = new Media();
-        $variantMedia->setFile('http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg');
+        $productMedia = [];
+        for ($i = 1; $i < 12; $i++) {
+            $media = new Media();
+            $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_product_image%s.jpg', $i));
+            $productMedia[] = $media;
+        }
+
+        $variantMedia = [];
+        for ($i = 1; $i < 12; $i++) {
+            $media = new Media();
+            $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_variant_image%s.jpg', $i));
+            $variantMedia[] = $media;
+        }
+
         $this->localMediaService->expects($this->once())
-            ->method('getProductMedia')
+            ->method('getProductMediaList')
             ->with($this->anything(), $this->productContext)
-            ->willReturn(array($productMedia, $variantMedia));
+            ->willReturn([$row['sku'] => $productMedia]);
 
         $this->localMediaService->expects($this->once())
             ->method('getVariantMediaList')
             ->with($this->anything(), $this->productContext)
-            ->willReturn(array($row['sku'] => array($variantMedia)));
+            ->willReturn([$row['sku'] => $variantMedia]);
 
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
@@ -222,7 +234,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'color',
                 'filterable' => false,
                 'value' => 'green',
@@ -232,7 +244,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'size',
                 'filterable' => false,
                 'value' => '2xl',
@@ -242,7 +254,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'groupName' => 'Nike',
                 'groupPosition' => 3,
                 'comparable' => false,
-                'sortMode' => 2,
+                'sortMode' => 3,
                 'option' => 'size',
                 'filterable' => false,
                 'value' => '3xl',
@@ -251,11 +263,38 @@ class LocalProductQueryTest extends ConnectTestHelper
         ];
 
 		$expectedProduct->images = array(
-            'http://myshop/media/image/2e/4f/tea_pavilion_product_image.jpg',
-            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image1.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image2.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image3.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image4.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image5.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image6.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image7.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image8.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image9.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_product_image10.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image2.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image4.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image5.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image6.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image7.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
         );
         $expectedProduct->variantImages = array(
-            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image.jpg'
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image2.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image4.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image5.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image6.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image7.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
+            'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
         );
 
         $row['vendorName'] = $row['vendor']['name'];
@@ -283,7 +322,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             $group = new Property\Group();
             $group->setName('Nike');
             $group->setPosition(3);
-            $group->setSortMode(2);
+            $group->setSortMode(3);
             $group->setComparable(0);
             $this->manager->persist($group);
             $this->manager->flush();
@@ -295,7 +334,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             'tax' => 19,
             'supplier' => 'Teapavilion',
             'mainDetail' => array(
-                'number' => '9898',
+                'number' => '9898' . rand(1, 99999),
             ),
             'filterGroupId' => $group->getId(),
             'propertyValues' => array(
@@ -354,6 +393,10 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function tearDown()
     {
+        if (!$this->article) {
+            return;
+        }
+
         $articleId = $this->article->getId();
         $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');

@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
+use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -19,13 +20,35 @@ use Shopware\Models\Order\Order;
  */
 class Lifecycle extends BaseSubscriber
 {
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
+    private $manager;
+
+    /**
+     * @var int
+     */
+    private $autoUpdateProducts;
+
+    /**
+     * Lifecycle constructor.
+     *
+     * @param ModelManager $modelManager
+     * @param int $autoUpdateProducts
+     */
+    public function __construct(ModelManager $modelManager, $autoUpdateProducts)
+    {
+        parent::__construct();
+
+        $this->manager = $modelManager;
+        $this->autoUpdateProducts = $autoUpdateProducts;
+    }
+
     public function getSubscribedEvents()
     {
         return array(
             'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
-            'Shopware\Models\Article\Article::postUpdate' => 'onUpdateArticle',
-            'Shopware\Models\Article\Detail::postUpdate' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postPersist' => 'onPersistDetail',
             'Shopware\Models\Article\Article::preRemove' => 'onDeleteArticle',
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
@@ -42,7 +65,7 @@ class Lifecycle extends BaseSubscriber
         return new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
-            Shopware()->Models(),
+            $this->manager,
             new ProductsAttributesValidator(),
             $this->getConnectConfig(),
             new ErrorHandler()
@@ -64,6 +87,10 @@ class Lifecycle extends BaseSubscriber
         // if article is not exported to Connect
         // don't need to generate changes
         if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+            return;
+        }
+
+        if (!$this->hasPriceType()) {
             return;
         }
 
@@ -139,16 +166,19 @@ class Lifecycle extends BaseSubscriber
      */
     public function onUpdateArticle(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config(Shopware()->Models());
-
-        $autoUpdate = $configComponent->getConfig('autoUpdateProducts', 1);
-        if (!$autoUpdate) {
-            return;
-        }
-
         $entity = $eventArgs->get('entity');
 
+        $this->handleChange($entity);
+    }
+
+
+    /**
+     * Generate changes for Article or Detail if necessary
+     *
+     * @param \Shopware\Models\Article\Article | \Shopware\Models\Article\Detail $entity
+     */
+    public function handleChange($entity)
+    {
         if (!$entity instanceof \Shopware\Models\Article\Article
             && !$entity instanceof \Shopware\Models\Article\Detail
         ) {
@@ -157,7 +187,7 @@ class Lifecycle extends BaseSubscriber
 
         $id = $entity->getId();
         $className = get_class($entity);
-        $model = Shopware()->Models()->getRepository($className)->find($id);
+        $model = $this->manager->getRepository($className)->find($id);
         // Check if we have a valid model
         if (!$model) {
             return;
@@ -178,12 +208,26 @@ class Lifecycle extends BaseSubscriber
             }
         }
 
+        if (!$this->hasPriceType()) {
+            return;
+        }
+
+        $forceExport = false;
+        if ($entity instanceof \Shopware\Models\Article\Detail) {
+            $changeSet = $this->manager->getUnitOfWork()->getEntityChangeSet($entity);
+            // if detail number has been changed
+            // sc plugin must generate & sync the change immediately
+            if (array_key_exists('number', $changeSet)) {
+                $forceExport = true;
+            }
+        }
+
         // Mark the product for connect update
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
-                $this->generateChangesForDetail($model, $autoUpdate);
+                $this->generateChangesForDetail($model, $forceExport);
             } elseif ($model instanceof \Shopware\Models\Article\Article){
-                $this->generateChangesForArticle($model, $autoUpdate);
+                $this->generateChangesForArticle($model, $forceExport);
             }
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
@@ -199,33 +243,38 @@ class Lifecycle extends BaseSubscriber
      */
     public function onPersistDetail(\Enlight_Event_EventArgs $eventArgs)
     {
-        /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config(Shopware()->Models());
-
-        $autoUpdate = $configComponent->getConfig('autoUpdateProducts', 1);
-        if (!$autoUpdate) {
-            return;
-        }
-
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $eventArgs->get('entity');
+
+        /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
-        // Check if entity is a connect product
-        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
-        if (!$attribute) {
+        $articleAttribute = $this->getHelper()->getConnectAttributeByModel($article);
+        if (!$articleAttribute) {
             return;
         }
 
         // if article is not exported to Connect
         // don't need to generate changes
-        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+        if (!$this->getHelper()->isProductExported($articleAttribute) || !empty($articleAttribute->getShopId())) {
             return;
         }
 
-        // Mark the product for connect update
+        if (!$this->hasPriceType()) {
+            return;
+        }
+
+        // Mark the article detail for connect export
         try {
             $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
-            $this->generateChangesForDetail($detail, $autoUpdate);
+            $forceExport = false;
+            $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
+            // if detail number has been changed
+            // sc plugin must generate & sync the change immediately
+            if (array_key_exists('number', $changeSet)) {
+                $forceExport = true;
+            }
+
+            $this->generateChangesForDetail($detail, $forceExport);
         } catch (\Exception $e) {
             // If the update fails due to missing requirements
             // (e.g. category assignment), continue without error
@@ -253,7 +302,7 @@ class Lifecycle extends BaseSubscriber
         $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
-    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $autoUpdate)
+    private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $force = false)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
         if (!$detail->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
@@ -261,33 +310,30 @@ class Lifecycle extends BaseSubscriber
             return;
         }
 
-        if ($autoUpdate == 1) {
+        if ($this->autoUpdateProducts == 1 || $force === true) {
             $this->getConnectExport()->export(
                 array($attribute->getSourceId()), null, true
             );
-        } elseif ($autoUpdate == 2) {
+        } elseif ($this->autoUpdateProducts == 2) {
             $attribute->setCronUpdate(true);
-            Shopware()->Models()->persist($attribute);
-            Shopware()->Models()->flush();
+            $this->manager->persist($attribute);
+            $this->manager->flush();
         }
     }
 
-    private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $autoUpdate)
+    private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $force = false)
     {
         if (!$article->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
             $this->getConnectExport()->setDeleteStatusForVariants($article);
             return;
         }
 
-        if ($autoUpdate == 1) {
-            $sourceIds = Shopware()->Db()->fetchCol(
-                'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-                array($article->getId())
-            );
+        if ($this->autoUpdateProducts == 1 || $force === true) {
+            $sourceIds = $this->getHelper()->getSourceIdsFromArticleId($article->getId());
 
             $this->getConnectExport()->export($sourceIds, null, true);
-        } elseif ($autoUpdate == 2) {
-            Shopware()->Db()->update(
+        } elseif ($this->autoUpdateProducts == 2) {
+            $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
                 array('article_id' => $article->getId())

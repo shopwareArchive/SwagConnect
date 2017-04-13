@@ -9,10 +9,20 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
 
     store: 'export.StreamList',
 
-    selModel: {
-        selType: 'checkboxmodel',
-        mode: 'MULTI'
-    },
+    selModel: Ext.create('Shopware.apps.Connect.view.export.stream.CustomCheckboxModel', {
+        selectedAll: false, // you can add whatever normal configuration properties you want here
+        mode: 'MULTI',
+        listeners: {
+            selectall: function (scope) {
+                if (!scope.selectedAll) {
+                    scope.selectedAll = true;
+                } else {
+                    scope.deselectAll();
+                    scope.selectedAll = false;
+                }
+            }
+        }
+    }),
 
     initComponent: function() {
         var me = this;
@@ -21,10 +31,27 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
             dockedItems: [
                 me.getPagingToolbar()
             ],
+            features: [me.getGrouping()],
             columns: me.getColumns()
         });
 
         me.callParent(arguments);
+    },
+    listeners: {
+        beforeselect: function (sm, record) {
+            if (record.get('enableRow') == false ) return false;
+        },
+
+        selectionchange: function (sm, selected) {
+            // deselect disabled records
+            if (selected.length > 0) {
+                Ext.Array.each(selected, function (record) {
+                    if (record.get('enableRow') == false) {
+                        sm.deselect(record, true);
+                    }
+                });
+            }
+        }
     },
 
     getColumns: function() {
@@ -33,7 +60,13 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
         return [{
             header: '{s name=export/columns/name}Name{/s}',
             dataIndex: 'name',
-            flex: 4
+            flex: 4,
+            renderer: function(value, metaData, record) {
+                if (record.get('enableRow') == false) {
+                    return '<div class="sc-transparency-color">' + value + '</div>'
+                }
+                return value;
+            }
         }, {
             header: '{s name=export/columns/product_amount}Product amount{/s}',
             dataIndex: 'productCount',
@@ -54,6 +87,10 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                     className = me.iconMapping[value];
                 }
 
+                if (record.get('enableRow') == false) {
+                    className += ' sc-transparency';
+                }
+
                 if(record.get('exportMessage')) {
                     metaData.tdAttr = 'data-qtip="' +  record.get('exportMessage') + '"';
                 } else {
@@ -65,6 +102,25 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                 return '<div class="' + className + '" style="width: 16px; height: 16px;"></div>';
             }
         }];
+    },
+
+    getGrouping: function() {
+        return Ext.create('Ext.grid.feature.Grouping', {
+            groupHeaderTpl: [
+                '{literal}{name:this.formatName}{/literal}',
+                {
+                    formatName: function(type) {
+                        if (type == 2) {
+                            return '{s name=export/selection_streams}Selection streams{/s}';
+                        } else {
+                            return '{s name=export/condition_streams}Condition streams{/s}';
+                        }
+                    }
+                }
+            ],
+            hideGroupedHeader: true,
+            startCollapsed: false
+        });
     },
 
     /**

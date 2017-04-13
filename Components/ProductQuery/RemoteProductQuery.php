@@ -14,7 +14,13 @@ use Shopware\Components\Model\ModelManager;
  */
 class RemoteProductQuery extends BaseProductQuery
 {
-    public function __construct(ModelManager $manager)
+    /**
+     * RemoteProductQuery constructor.
+     * @param ModelManager $manager
+     */
+    public function __construct(
+        ModelManager $manager
+    )
     {
         parent::__construct($manager);
     }
@@ -109,6 +115,7 @@ class RemoteProductQuery extends BaseProductQuery
         $product = new Product(
             $row
         );
+
         return $product;
     }
 

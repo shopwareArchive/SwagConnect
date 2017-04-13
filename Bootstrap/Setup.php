@@ -7,6 +7,9 @@ use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use ShopwarePlugins\Connect\Components\Config;
+use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * The setup class does the basic setup of the shopware Connect plugin. All operations should be implemented in a way
@@ -74,6 +77,7 @@ class Setup
         if ($fullSetup) {
             $this->createMyMenu();
             $this->populatePaymentStates();
+            $this->populateOrderStates();
         }
     }
 
@@ -85,7 +89,7 @@ class Setup
             array(
                 'label' => 'Shopware Connect Host',
                 'required' => false,
-                'value'    => 'connect.shopware.com'
+                'value'    => Config::MARKETPLACE_URL
             ));
     }
 
@@ -124,10 +128,17 @@ class Setup
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem(array(
                     'label' => 'Connect',
-                    'controller' => 'Connect',
                     'class' => 'connect-icon',
                     'active' => 1,
                 ));
+
+                if ($this->shopware526installed) {
+                    $parent->setClass('shopware-connect');
+                    //if "Connect" menu does not exist
+                    //it must not have pluginID, because on plugin uninstall
+                    //it will be removed
+                    $parent->setPlugin(null);
+                }
             }
 
             if ($configComponent->getConfig('apiKey', '') == '') {
@@ -279,6 +290,20 @@ class Setup
                 false
             );
         }
+
+        $connectExportDynamicStreams = $this->db->fetchOne(
+            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
+            array('action' => '%ConnectExportDynamicStreams')
+        );
+
+        if (!$connectExportDynamicStreams) {
+            $this->bootstrap->createCronJob(
+                'SwagConnect Export Dynamic Streams',
+                'Shopware_CronJob_ConnectExportDynamicStreams',
+                12 * 3600, //12hours
+                true
+            );
+        }
     }
 
 
@@ -420,6 +445,14 @@ class Setup
               `export_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
               `export_message` text COLLATE utf8_unicode_ci DEFAULT NULL,
               PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;","
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
+                `stream_id` int(11) unsigned NOT NULL,
+                `article_id` int(11) unsigned NOT NULL,
+                `deleted` int(1) NOT NULL DEFAULT '0',
+                UNIQUE KEY `stream_id` (`stream_id`,`article_id`),
+                CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
+                CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ");
 
@@ -566,6 +599,36 @@ class Setup
             'integer'
         );
 
+        $crudService->update(
+            's_filter_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_options_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
+        $crudService->update(
+            's_filter_values_attributes',
+            'connect_is_remote',
+            'boolean',
+            array(),
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -577,7 +640,10 @@ class Setup
             's_order_details_attributes',
             's_order_basket_attributes',
             's_articles_img_attributes',
-            's_media_attributes'
+            's_media_attributes',
+            's_filter_attributes',
+            's_filter_options_attributes',
+            's_filter_values_attributes',
         ));
     }
 
@@ -713,7 +779,7 @@ class Setup
     {
         $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
 
-        $repo = $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
             $model = $repo->findOneBy(array('key' => $name));
             if (is_null($model)) {
@@ -783,7 +849,7 @@ class Setup
 
     public function populatePaymentStates()
     {
-        $states = array(
+        $states = [
             'sc_received' => ' SC received',
             'sc_requested' => 'SC requested',
             'sc_initiated' => 'SC initiated',
@@ -795,27 +861,29 @@ class Setup
             'sc_verify' => 'SC verify',
             'sc_loss' => 'SC loss',
             'sc_error' => 'SC error',
-        );
+        ];
 
-        $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
-        $query->select('MAX(s.id)');
+        $this->populateStates($states, Status::GROUP_PAYMENT);
+    }
 
-        $maxId = $query->getQuery()->getOneOrNullResult();
-        $currentId = 0;
+    public function populateOrderStates()
+    {
+        $states = [
+            ConnectOrderUtil::ORDER_STATUS_ERROR => 'SC error'
+        ];
 
-        if (count($maxId) > 0) {
-            foreach ($maxId as $id) {
-                if ($id > $currentId) {
-                    $currentId = $id;
-                }
-            }
-        }
+        $this->populateStates($states, Status::GROUP_STATE);
+    }
+
+    public function populateStates(array $states, $group)
+    {
+        $currentId = $this->getMaxStateId();
 
         foreach ($states as $name => $description) {
             $isExists = $this->db->query('
                 SELECT `id` FROM `s_core_states`
-                WHERE `name` = ?
-                ', array($name)
+                WHERE `name` = ? AND `group` = ?
+                ', array($name, $group)
             )->fetch();
 
             if ($isExists) {
@@ -827,8 +895,24 @@ class Setup
                 INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)
-                ', array($currentId, $name, $description, $currentId, 'payment', 0)
+                ', array($currentId, $name, $description, $currentId, $group, 0)
             );
         }
+    }
+
+    /**
+     * @return int
+     */
+    private function getMaxStateId()
+    {
+        $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+        $query->select('MAX(s.id)');
+        $result = $query->getQuery()->getOneOrNullResult();
+
+        if (count($result) > 0) {
+            return (int) reset($result);
+        }
+
+        return 0;
     }
 }

@@ -50,7 +50,11 @@ class TemplateExtension extends BaseSubscriber
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
-                    'backend/order/connect.js'
+                    'backend/order/view/connect.js'
+                );
+
+                $subject->View()->extendsTemplate(
+                    'backend/order/controller/connect_main.js'
                 );
 
                 break;

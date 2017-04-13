@@ -75,7 +75,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->getMock();
 
             $this->localMediaService->expects($this->any())
-                ->method('getProductMedia')
+                ->method('getProductMediaList')
                 ->willReturn([]);
 
             $this->localMediaService->expects($this->any())
@@ -90,7 +90,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->disableOriginalConstructor()
                 ->getMock();
             $this->contextService->expects($this->any())
-                ->method('createProductContext')
+                ->method('createShopContext')
                 ->willReturn($productContext);
 
             $this->productQuery = new ProductQuery(
@@ -101,9 +101,12 @@ class ProductQueryTest extends ConnectTestHelper
                     new MarketplaceGateway(Shopware()->Models()),
                     $this->productTranslator,
                     $this->contextService,
-                    $this->localMediaService
+                    $this->localMediaService,
+                    Shopware()->Container()->get('events')
                 ),
-                new RemoteProductQuery(Shopware()->Models())
+                new RemoteProductQuery(
+                    Shopware()->Models()
+                )
             );
         }
         return $this->productQuery;

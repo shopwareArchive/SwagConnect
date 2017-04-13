@@ -254,6 +254,7 @@ class ProductToShopTest extends ConnectTestHelper
         $newLongDesc = 'Updated connect variant - long description';
         $newShortDesc = 'Updated connect variant - short description';
         $newVat = 0.07;
+        $newSku = $variants[1]->sku . 'M';
         $variants[1]->title = $newTitle;
         $variants[1]->price = $newPrice;
         $variants[1]->purchasePrice = $newPurchasePrice;
@@ -262,6 +263,7 @@ class ProductToShopTest extends ConnectTestHelper
         $variants[1]->images[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
         $variants[1]->vat = $newVat;
+        $variants[1]->sku = $newSku;
 
         $this->productToShop->insertOrUpdate($variants[1]);
 
@@ -286,6 +288,7 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals(2, $connectAttribute->getArticle()->getImages()->count());
         $this->assertEquals(1, $detail->getImages()->count());
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
+        $this->assertEquals('SC-3-' . $newSku, $detail->getNumber());
     }
 
     public function testImportWithoutTitle()
@@ -465,6 +468,7 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
+        $config =  new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
         $productToShop = new ProductToShop(
             $this->getHelper(),
             $this->modelManager,
@@ -479,12 +483,12 @@ class ProductToShopTest extends ConnectTestHelper
             new AutoCategoryResolver(
                 $this->modelManager,
                 $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory')
+                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $config
             ),
             $this->gateway,
             Shopware()->Container()->get('events')
         );
-
 
         $product = $this->getProduct();
         $parentCategory1 = 'MassImport#' . rand(1, 999999999);
@@ -504,28 +508,17 @@ class ProductToShopTest extends ConnectTestHelper
         $childCategoryModel = $categoryRepository->findOneBy(array('name' => $childCategory));
 
         $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel);
-        $this->assertEquals($childCategoryModel->getParent()->getName(), $parentCategory1);
+        $this->assertEquals(
+            $config->getDefaultShopCategory()->getName(),
+            $childCategoryModel->getParent()->getName()
+        );
 
-        foreach ($product->categories as $category) {
-            // skip it because this category has child category
-            // and product will be assigned only to child categories
-            if ($category == $parentCategory1) {
-                continue;
-            }
+        /** @var Article $article */
+        $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
-            $articlesCount = Shopware()->Db()->query(
-                'SELECT COUNT(s_articles.id)
-              FROM s_plugin_connect_items
-              LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
-              INNER JOIN s_articles_categories ON (s_plugin_connect_items.article_id = s_articles_categories.articleID)
-              INNER JOIN s_categories ON (s_articles_categories.categoryID = s_categories.id)
-              WHERE s_plugin_connect_items.source_id = :sourceId
-              AND s_categories.description = :category',
-                array('sourceId' => $product->sourceId, 'category' => $category)
-            )->fetchColumn();
-
-            $this->assertEquals(1, $articlesCount);
-        }
+        $assignCategories = $article->getCategories();
+        $this->assertEquals(1, count($assignCategories));
+        $this->assertEquals($childCategory, $assignCategories[0]->getName());
     }
 
     public function testAutomaticallyCreateUnits()

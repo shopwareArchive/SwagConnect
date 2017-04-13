@@ -9,15 +9,10 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Panel', {
     layout: 'border',
 
     initComponent: function() {
-        var me = this,
-            notice = Shopware.Notification.createBlockMessage("{s name=changed_products/info}These products have been updated by the supplier recently. As you manage some fields of the products manually, some changes where not applied.{/s}", 'error');;
-
-
-        notice.region = 'north';
-        notice.margin = 10;
+        var me = this;
 
         Ext.applyIf(me, {
-            items: [notice,{
+            items: [{
                 xtype: 'connect-changed-products-tabs',
                 region: 'south',
                 collapsible: true,
@@ -53,6 +48,8 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Panel', {
                 return '{s name=changed_products/title/longDescription}longDescription{/s}';
             case 'shortDescription':
                 return '{s name=changed_products/title/shortDescription}shortDescription{/s}';
+            case 'additionalDescription':
+                return '{s name=changed_products/title/additionalDescription}Connect Description{/s}';
             case 'imageInitialImport':
                 return '{s name=changed_products/title/imageInitialImport}imageInitialImport{/s}';
             default:

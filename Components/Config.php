@@ -38,8 +38,7 @@ class Config
     const UPDATE_MANUAL = 0;
     const UPDATE_AUTO = 1;
     const UPDATE_CRON_JOB = 2;
-    const MARKETPLACE_URL = 'connect.shopware.com';
-    const SN_PREFIX = 'sn.';
+    const MARKETPLACE_URL = 'sn.connect.shopware.com';
 
     /**
      * @var ModelManager
@@ -131,6 +130,47 @@ class Config
             ->from('s_core_shops', 'cs')
             ->where('cs.default = :default')
             ->setParameter('default', true);
+
+        return (bool) $builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCronActive()
+    {
+        if ($this->isCronPluginActive() && $this->isDynamicStreamCronActive()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCronPluginActive()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cp.active')
+            ->from('s_core_plugins', 'cp')
+            ->where('cp.namespace = :namespace')
+            ->andWhere('cp.name = :name')
+            ->setParameter('namespace', 'Core')
+            ->setParameter('name', 'Cron');
+
+        return (bool) $builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDynamicStreamCronActive()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cron.active')
+            ->from('s_crontab', 'cron')
+            ->where('cron.action LIKE :action')
+            ->setParameter('action', '%ConnectExportDynamicStreams');
 
         return (bool) $builder->execute()->fetchColumn();
     }
@@ -523,11 +563,6 @@ class Config
         return self::MARKETPLACE_URL;
     }
 
-    public function getSocialNetworkPrefix()
-    {
-        return self::SN_PREFIX;
-    }
-
     /**
      * @return int
      */
@@ -540,6 +575,22 @@ class Config
             ->setParameter('default', true);
 
         return (int)$builder->execute()->fetchColumn();
+    }
+
+    /**
+     * @return \Shopware\Models\Category\Category
+     */
+    public function getDefaultShopCategory()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('cs.category_id')
+            ->from('s_core_shops', 'cs')
+            ->where('cs.default = :default')
+            ->setParameter('default', true);
+
+        $categoryId = (int)$builder->execute()->fetchColumn();
+
+        return $this->manager->find('Shopware\Models\Category\Category', $categoryId);
     }
 
     /**

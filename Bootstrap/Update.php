@@ -6,7 +6,9 @@ use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use Shopware\Models\Attribute\Configuration;
+use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
+use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * Updates existing versions of the plugin
@@ -68,6 +70,10 @@ class Update
         $this->addConnectDescriptionElement();
         $this->updateProductDescriptionSetting();
         $this->createUpdateAdditionalDescriptionColumn();
+        $this->createDynamicStreamTable();
+        $this->addOrderStatus();
+        $this->fixExportDescriptionSettings();
+        $this->fixMarketplaceUrl();
 
         return true;
     }
@@ -213,6 +219,141 @@ class Update
                     ");
             } catch (\Exception $e) {
                 // ignore it if the column already exists
+            }
+        }
+    }
+
+    private function createDynamicStreamTable()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $query = "CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
+                `stream_id` int(11) unsigned NOT NULL,
+                `article_id` int(11) unsigned NOT NULL,
+                `deleted` int(1) NOT NULL DEFAULT '0',
+                UNIQUE KEY `stream_id` (`stream_id`,`article_id`),
+                CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
+                CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
+            $this->db->exec($query);
+        }
+    }
+
+    private function addOrderStatus()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $query = $this->modelManager->getRepository('Shopware\Models\Order\Status')->createQueryBuilder('s');
+            $query->select('MAX(s.id)');
+            $result = $query->getQuery()->getOneOrNullResult();
+
+            if (count($result) > 0) {
+                $currentId = (int) reset($result);
+            } else {
+                $currentId = 0;
+            }
+
+            $name = ConnectOrderUtil::ORDER_STATUS_ERROR;
+            $group = Status::GROUP_STATE;
+
+            $isExists = $this->db->query('
+                SELECT `id` FROM `s_core_states`
+                WHERE `name` = ? AND `group` = ?
+                ', array($name, $group)
+            )->fetch();
+
+            if ($isExists) {
+                return;
+            }
+
+            $currentId++;
+            $this->db->query('
+                INSERT INTO `s_core_states`
+                (`id`, `name`, `description`, `position`, `group`, `mail`)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ', array($currentId, $name, 'SC error', $currentId, $group, 0)
+            );
+        }
+    }
+
+    /**
+     * Replace longDescriptionField and shortDescription values,
+     * because of wrong snippets in previous versions.
+     *
+     * ExtJs view show longDescription label, but the value was stored as shortDescription
+     */
+    private function fixExportDescriptionSettings()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $rows = $this->db->fetchPairs(
+                "SELECT `name`, `value` FROM s_plugin_connect_config WHERE name = ? OR name = ?",
+                ['longDescriptionField', 'shortDescriptionField']
+            );
+
+            if (!array_key_exists('longDescriptionField', $rows) || !array_key_exists('shortDescriptionField', $rows)) {
+                return;
+            }
+
+            if (($rows['longDescriptionField'] == 1 && $rows['shortDescriptionField'] == 1)
+                || ($rows['longDescriptionField'] == 0 && $rows['shortDescriptionField'] == 0)) {
+                return;
+            }
+
+            $newValues = [
+                'longDescriptionField' => $rows['shortDescriptionField'],
+                'shortDescriptionField' => $rows['longDescriptionField'],
+            ];
+
+            $this->db->query("
+                UPDATE `s_plugin_connect_config`
+                SET `value` = ?
+                WHERE `name` = ?",
+                [$newValues['longDescriptionField'], 'longDescriptionField']
+            );
+
+            $this->db->query("
+                UPDATE `s_plugin_connect_config`
+                SET `value` = ?
+                WHERE `name` = ?",
+                [$newValues['shortDescriptionField'], 'shortDescriptionField']
+            );
+        }
+    }
+
+    private function fixMarketplaceUrl()
+    {
+        if (version_compare($this->version, '1.0.12', '<=')) {
+            $repo = $this->modelManager->getRepository('Shopware\Models\Config\Form');
+            /** @var \Shopware\Models\Config\Form $form */
+            $form = $repo->findOneBy([
+                'name' => 'SwagConnect',
+            ]);
+
+            if (!$form) {
+                return;
+            }
+
+            /** @var \Shopware\Models\Config\Element $element */
+            foreach ($form->getElements() as $element) {
+                if ($element->getName() != 'connectDebugHost') {
+                    continue;
+                }
+
+                if (strlen($element->getValue()) > 0 && strpos($element->getValue(), 'sn.') === false) {
+                    $element->setValue('sn.' . $element->getValue());
+                    $this->modelManager->persist($element);
+                }
+
+                $values = $element->getValues();
+                if (count($values) > 0) {
+                    /** @var \Shopware\Models\Config\Value $element */
+                    $value = $values[0];
+                    if (strlen($value->getValue()) > 0 && strpos($value->getValue(), 'sn.') === false) {
+                        $value->setValue('sn.' . $value->getValue());
+                        $this->modelManager->persist($value);
+                    }
+                }
+
+                $this->modelManager->flush();
             }
         }
     }

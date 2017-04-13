@@ -29,7 +29,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
      * @object
      */
     snippets: {
-        streamInfoMessage: '{s name=export/stream/cron_message}Activate the cron job to use this function{/s}'
+        streamInfoMessage: '{s name=export/stream/activate_cron_message}Activate the cron job to use this function{/s}'
     },
 
     initComponent: function() {
@@ -193,7 +193,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
                         return '{s name=export/selection_streams}Selection streams{/s}';
                     } else {
                         if (hasInactiveRows) {
-                            return '{s name=export/condition_streams}Condition streams{/s}<div class="sc-stream-hint x-form-help-icon" data-qtip="'+ me.snippets.streamInfoMessage +'"></div>';
+                            return '{s name=export/condition_streams}Condition streams{/s}<div class="sc-stream-hint sprite-exclamation" data-qtip="'+ me.snippets.streamInfoMessage +'"></div>';
                         } else {
                             return '{s name=export/condition_streams}Condition streams{/s}';
                         }

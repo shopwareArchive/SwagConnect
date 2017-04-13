@@ -219,9 +219,11 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 }
 
 .sc-stream-hint {
+    width: 16px;
+    height: 16px;
     position: absolute;
-    top: 3px;
-    left: 115px;
+    top: 8px;
+    left: 117px;
     z-index: 2;
 }
 

@@ -108,6 +108,23 @@ class ProductStreams extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
                 );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/selected_list/connect_windows.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/list/connect_list.js'
+                );
+                break;
+            case 'list':
+                $subject->View()->data = $this->markConnectStreams(
+                    $subject->View()->data
+                );
+                break;
+            case 'detail':
+                $streams = $this->markConnectStreams(
+                    [$subject->View()->data]
+                );
+                $subject->View()->data = reset($streams);
                 break;
             case 'addSelectedProduct':
                 $streamId = $request->getParam('streamId');
@@ -181,5 +198,22 @@ class ProductStreams extends BaseSubscriber
         }
 
         $this->connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
+    }
+
+    /**
+     * @param $streams
+     * @return array
+     */
+    private function markConnectStreams(array $streams)
+    {
+        $connectSteamIds = $this->getProductStreamService()->getConnectStreamIds();
+
+        foreach ($streams as $index => $stream) {
+            if (isset($stream['id'])) {
+                $streams[$index]['isConnect'] = in_array($stream['id'], $connectSteamIds);
+            }
+        }
+
+        return $streams;
     }
 }

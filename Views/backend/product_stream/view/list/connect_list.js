@@ -1,9 +1,14 @@
-//{namespace name=backend/connect/view/main}
-//{block name="backend/property/view/main/set_grid" append}
-Ext.define('Shopware.apps.Property.view.main.SetGridConnect', {
-    override: 'Shopware.apps.Property.view.main.SetGrid',
+/*
+{block name="backend/product_stream/model/stream/fields" append}
+    { name: 'isConnect', type: 'boolean', defaultValue: false },
+{/block}
+*/
 
-    getColumns: function() {
+//{block name="backend/product_stream/view/list/list" append}
+Ext.define('Shopware.apps.ProductStream.view.list.ConnectList', {
+    override: 'Shopware.apps.ProductStream.view.list.List',
+
+    createColumns: function() {
         var me = this,
             newColumns = [],
             columns = me.callOverridden();
@@ -26,7 +31,7 @@ Ext.define('Shopware.apps.Property.view.main.SetGridConnect', {
     connectColumnRenderer: function(value, metaData, record) {
         var result;
 
-        if (record.get('connect')) {
+        if (record.get('isConnect')) {
             result = '<div  title="' + marketplaceName + '" class="connect-icon sc-icon-position">&nbsp;</div>';
         }
 

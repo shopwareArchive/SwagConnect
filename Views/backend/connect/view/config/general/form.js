@@ -69,9 +69,11 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}',
-        priceResetBtn: '{s name=config/price_reset_btn}reset{/s}',
+        resetBtn: '{s name=config/reset_btn}reset{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
         priceResetMessage: '{s name=config/price_reset_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
+        exchangeSettingResetLabel: '{s name=config/exchange_settings_label}Reset exchange settings{/s}',
+        exchangeSettingResetMessage: '{s name=config/exchange_settings_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
         showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
@@ -271,10 +273,12 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         return Ext.create('Ext.container.Container', {
             layout: 'column',
             columnWidth: 1,
+            margin: '0 0 10 0',
             items: [
                 {
                     xtype: 'container',
-                    margin: '10 30 0 0 ',
+                    margin: '10 30 0 0',
+                    width: 185,
                     style: {
                         'color': '#475c6a',
                         'font-weight': 'bold',
@@ -286,7 +290,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     flex: 1,
                     height: 27,
                     width: 100,
-                    text: me.snippets.priceResetBtn,
+                    text: me.snippets.resetBtn,
                     handler: function (btn) {
                         Ext.MessageBox.confirm(me.snippets.priceResetLabel, me.snippets.priceResetMessage, function (response) {
                             if (response !== 'yes') {
@@ -294,6 +298,39 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                             }
 
                             me.fireEvent('resetPriceType');
+                        });
+                    }
+                }
+            ]
+        });
+    },
+
+
+    getResetExchangeSettingFields: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            layout: 'column',
+            columnWidth: 2,
+            items: [
+                {
+                    xtype: 'container',
+                    cls: 'sc-exchange-label-position',
+                    width: 185,
+                    html: me.snippets.exchangeSettingResetLabel
+                }, {
+                    xtype: 'button',
+                    flex: 1,
+                    height: 27,
+                    width: 100,
+                    text: me.snippets.resetBtn,
+                    handler: function (btn) {
+                        Ext.MessageBox.confirm(me.snippets.exchangeSettingResetLabel, me.snippets.exchangeSettingResetMessage, function (response) {
+                            if (response !== 'yes') {
+                                return false;
+                            }
+
+                            me.fireEvent('resetExchangeSettings');
                         });
                     }
                 }
@@ -337,6 +374,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         }));
 
         items.push(me.getResetPriceTypeFields());
+        items.push(me.getResetExchangeSettingFields());
 
         return Ext.create('Ext.form.FieldSet', {
             layout: 'anchor',

@@ -53,8 +53,8 @@ class ConnectFactory
      */
     private $container;
 
-    /** @var
-     * \ShopwarePlugins\Connect\Components\Config
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
 
@@ -396,6 +396,7 @@ class ConnectFactory
             ),
             $this->getContainer()->get('shopware_storefront.context_service'),
             $this->getLocalMediaService(),
+            $this->getContainer()->get('events'),
             $this->getMediaService()
         );
     }

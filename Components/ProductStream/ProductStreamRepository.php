@@ -301,6 +301,46 @@ class ProductStreamRepository extends Repository
     }
 
     /**
+     * @param ProductStream $stream
+     * @return bool
+     */
+    public function activateConnectProductsByStream(ProductStream $stream)
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $articleIds = $builder->select('article_id')
+            ->from('s_product_streams_selection')
+            ->where('stream_id = :streamId')
+            ->setParameter('streamId', $stream->getId())
+            ->execute()->fetchAll();
+
+        $articleIds = array_map(function($item){
+            return $item['article_id'];
+        }, $articleIds);
+
+        if (!$articleIds) {
+            return false;
+        }
+
+        $articleBuilder = $this->manager->getConnection()->createQueryBuilder();
+        $articleBuilder->update('s_articles', 'a')
+            ->set('a.active', ':active')
+            ->where('a.id IN (:articleIds)')
+            ->setParameter('active', 1)
+            ->setParameter('articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
+            ->execute();
+
+        $variantBuilder = $this->manager->getConnection()->createQueryBuilder();
+        $variantBuilder->update('s_articles_details', 'ad')
+            ->set('ad.active', ':active')
+            ->where('ad.articleID IN (:articleIds)')
+            ->setParameter('active', 1)
+            ->setParameter('articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
+            ->execute();
+
+        return true;
+    }
+
+    /**
      * @return array
      */
     public function fetchConnectStreamIds()

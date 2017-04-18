@@ -119,6 +119,26 @@ class ProductStreamService
     }
 
     /**
+     * @param ProductStream $stream
+     * @return bool
+     */
+    public function isConnectStream(ProductStream $stream)
+    {
+        $attribute = $stream->getAttribute();
+
+        if (!$attribute) {
+            return false;
+        }
+
+        return (boolean) $attribute->getConnectIsRemote();
+    }
+
+    public function activateConnectProductsByStream(ProductStream $stream)
+    {
+        return $this->productStreamRepository->activateConnectProductsByStream($stream);
+    }
+
+    /**
      * @param $streamId
      * @return mixed
      */

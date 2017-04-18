@@ -2,9 +2,10 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-
 use Doctrine\DBAL\Connection;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\ProductStream\ProductStream;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 class Category extends BaseSubscriber
 {
@@ -27,6 +28,14 @@ class Category extends BaseSubscriber
     }
 
     /**
+     * @return ProductStreamService;
+     */
+    public function getProductStreamService()
+    {
+        return $this->Application()->Container()->get('swagconnect.product_stream_service');
+    }
+
+    /**
      * @event Enlight_Controller_Action_PostDispatch_Backend_Article
      * @param \Enlight_Event_EventArgs $args
      */
@@ -39,21 +48,47 @@ class Category extends BaseSubscriber
 
         $scQuery = $request->getParam('localCategoriesQuery', '');
 
-        if ($request->getActionName() === 'getList') {
+        switch ($request->getActionName()) {
+            case 'getList':
+                if (trim($scQuery) !== "") {
+                    $parentId = $request->getParam('id', null);
+                    $subject->View()->data = $this->getCategoriesByQuery($scQuery, $parentId);
+                }
 
-            if (trim($scQuery) !== "") {
-                $parentId = $request->getParam('id', null);
-                $subject->View()->data = $this->getCategoriesByQuery($scQuery, $parentId);
-            }
+                $subject->View()->data = $this->extendTreeNodes(
+                    $subject->View()->data
+                );
 
-            $subject->View()->data = $this->extendTreeNodes(
-                $subject->View()->data
-            );
+                $subject->View()->data = $this->expandCategories(
+                    $subject->View()->data,
+                    $expandedCategories
+                );
+                break;
+            case 'updateDetail':
+                $streamId = $request->getParam('streamId');
+                if ($streamId) {
+                    $this->activateConnectProducts($streamId);
+                }
+                break;
+        }
+    }
 
-            $subject->View()->data = $this->expandCategories(
-                $subject->View()->data,
-                $expandedCategories
-            );
+    /**
+     * @param $streamId
+     */
+    private function activateConnectProducts($streamId)
+    {
+        $streamService = $this->getProductStreamService();
+
+        /** @var ProductStream $stream */
+        try {
+            $stream = $streamService->findStream($streamId);
+        } catch (\Exception $e) {
+            return;
+        }
+
+        if ($streamService->isConnectStream($stream) && $streamService->isStatic($stream)) {
+            $streamService->activateConnectProductsByStream($stream);
         }
     }
 

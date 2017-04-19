@@ -11,6 +11,8 @@ use Shopware\Models\ProductStream\ProductStream;
 
 class ProductStreamRepository extends Repository
 {
+    const CHUNK_LIMIT = 500;
+
     /**
      * @var \Shopware\Components\Model\ModelManager
      */
@@ -306,21 +308,44 @@ class ProductStreamRepository extends Repository
      */
     public function activateConnectProductsByStream(ProductStream $stream)
     {
-        $builder = $this->manager->getConnection()->createQueryBuilder();
-        $articleIds = $builder->select('article_id')
-            ->from('s_product_streams_selection')
-            ->where('stream_id = :streamId')
-            ->setParameter('streamId', $stream->getId())
-            ->execute()->fetchAll();
+        $connection = $this->manager->getConnection();
+        $connection->beginTransaction();
 
-        $articleIds = array_map(function($item){
-            return $item['article_id'];
-        }, $articleIds);
+        try {
+            $builder = $connection->createQueryBuilder();
+            $articleIds = $builder->select('article_id')
+                ->from('s_product_streams_selection')
+                ->where('stream_id = :streamId')
+                ->setParameter('streamId', $stream->getId())
+                ->execute()->fetchAll();
 
-        if (!$articleIds) {
+            $articleIds = array_map(function ($item) {
+                return $item['article_id'];
+            }, $articleIds);
+
+            if (!$articleIds) {
+                return false;
+            }
+
+            $chunkArticleIds = array_chunk($articleIds, self::CHUNK_LIMIT);
+
+            foreach ($chunkArticleIds as $chunk) {
+                $this->activateConnectProducts($chunk);
+            }
+
+            $connection->commit();
+        } catch (\Exception $e) {
+            $connection->rollback();
             return false;
         }
+        return true;
+    }
 
+    /**
+     * @param array $articleIds
+     */
+    private function activateConnectProducts(array $articleIds)
+    {
         $articleBuilder = $this->manager->getConnection()->createQueryBuilder();
         $articleBuilder->update('s_articles', 'a')
             ->set('a.active', ':active')
@@ -336,8 +361,6 @@ class ProductStreamRepository extends Repository
             ->setParameter('active', 1)
             ->setParameter('articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
             ->execute();
-
-        return true;
     }
 
     /**

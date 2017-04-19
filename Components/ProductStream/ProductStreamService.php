@@ -133,6 +133,10 @@ class ProductStreamService
         return (boolean) $attribute->getConnectIsRemote();
     }
 
+    /**
+     * @param ProductStream $stream
+     * @return bool
+     */
     public function activateConnectProductsByStream(ProductStream $stream)
     {
         return $this->productStreamRepository->activateConnectProductsByStream($stream);

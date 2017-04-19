@@ -77,6 +77,7 @@ class Authorization extends Rpc\ServiceRegistry
             case 'categories':
             case 'configuration':
             case 'productPayments':
+            case 'product_payments_from_shop':
             case 'shippingCosts':
                 if ($this->token->userIdentifier !== "connect") {
                     throw new SecurityException("No authorization to call 'products' or 'configuration' service.");

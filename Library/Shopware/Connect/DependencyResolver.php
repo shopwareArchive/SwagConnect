@@ -301,7 +301,13 @@ class DependencyResolver
 
             $this->registry->registerService(
                 'productPayments',
-                array('lastRevision', 'replicate', 'getChanges'),
+                array('lastRevision', 'getChanges'),
+                $this->getPaymentStatusService()
+            );
+
+            $this->registry->registerService(
+                'product_payments_from_shop',
+                array('lastRevision', 'replicate'),
                 $this->getPaymentStatusService()
             );
         }

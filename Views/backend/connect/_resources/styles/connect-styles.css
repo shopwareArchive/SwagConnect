@@ -125,6 +125,14 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     color: #486783 !important;
 }
 
+.sc-icon-position {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    position: absolute;
+    margin-top: -1px;
+}
+
 .sc-btn-right {
     float: right;
 }
@@ -140,6 +148,13 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
 
 .sc-tree-node.inactive{
     opacity: 0.4;
+}
+
+.sc-exchange-label-position {
+    margin: 8px 30px 0 0;
+    color: #475c6a;
+    font-weight: bold;
+    font-size: 11px;
 }
 
 .export-window-wrapper {

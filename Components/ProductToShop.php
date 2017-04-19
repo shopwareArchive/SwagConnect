@@ -24,6 +24,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductToShop as ProductToShopBase,
     Shopware\Connect\Struct\Product,
@@ -35,11 +36,15 @@ use Shopware\Connect\ProductToShop as ProductToShopBase,
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\ProductUpdate;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Struct\Property;
+use Shopware\Models\ProductStream\ProductStream;
 use Shopware\Models\Property\Group as PropertyGroup;
 use Shopware\Models\Property\Option as PropertyOption;
 use Shopware\Models\Property\Value as PropertyValue;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -467,6 +472,10 @@ class ProductToShop implements ProductToShopBase
                 'shopArticleDetail' => $detail
             ]
         );
+
+        $stream = $this->getOrCreateStream($product);
+        $this->addProductToStream($stream, $model);
+
     }
 
     /**
@@ -559,6 +568,53 @@ class ProductToShop implements ProductToShopBase
 
         $this->manager->persist($article);
         $this->manager->flush();
+    }
+
+    /**
+     * @param Product $product
+     * @return ProductStream
+     */
+    private function getOrCreateStream(Product $product)
+    {
+        /** @var ProductStreamRepository $repo */
+        $repo = $this->manager->getRepository(ProductStreamAttribute::class);
+        $stream = $repo->findConnectByName($product->stream);
+
+        if (!$stream) {
+            $stream = new ProductStream();
+            $stream->setName($product->stream);
+            $stream->setType(ProductStreamService::STATIC_STREAM);
+            $stream->setSorting(json_encode(
+                [ReleaseDateSorting::class => ['direction' => 'desc']]
+            ));
+
+            //add attributes
+            $attribute = new \Shopware\Models\Attribute\ProductStream();
+            $attribute->setProductStream($stream);
+            $attribute->setConnectIsRemote(true);
+            $stream->setAttribute($attribute);
+
+            $this->manager->persist($attribute);
+            $this->manager->persist($stream);
+            $this->manager->flush();
+        }
+
+        return $stream;
+    }
+
+    /**
+     * @param ProductStream $stream
+     * @param ProductModel $article
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function addProductToStream(ProductStream $stream, ProductModel $article)
+    {
+        $conn = $this->manager->getConnection();
+        $sql = 'INSERT INTO `s_product_streams_selection` (`stream_id`, `article_id`)
+                VALUES (:streamId, :articleId)
+                ON DUPLICATE KEY UPDATE stream_id = :streamId, article_id = :articleId';
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':streamId' => $stream->getId(), ':articleId' => $article->getId()]);
     }
 
     /**

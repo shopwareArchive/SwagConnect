@@ -38,11 +38,11 @@ class SnHttpClient
     /**
      * Call SocialNetwork REST API
      *
-     * @param array $data
      * @param string $path
+     * @param array $data
      * @return \Shopware\Components\HttpClient\Response
      */
-    public function sendRequestToConnect(array $data, $path)
+    public function sendRequestToConnect($path, array $data = [])
     {
         $host = $this->configComponent->getConfig('connectDebugHost');
         if (!$host || $host == "") {
@@ -51,24 +51,24 @@ class SnHttpClient
 
         $shopId = $this->gateway->getShopId();
         $key = $this->configComponent->getConfig('apiKey');
-        $token = array(
+        $token = [
             "iss" => $shopId,
             "aud" => "SocialNetwork",
             "iat" => time(),
             "nbf" => time(),
             "exp" => time() + (60),
             "content" => $data
-        );
+        ];
         $connectAuthKey = JWT::encode($token, $key);
         $url = $host . '/rest/' . $path;
 
         $response = $this->httpClient->post(
             $url,
-            array(
+            [
                 'content-type' => 'application/json',
                 'X-Shopware-Connect-Shop' => $shopId,
                 'X-Shopware-Connect-Key' => $connectAuthKey
-            )
+            ]
         );
 
         return $response;

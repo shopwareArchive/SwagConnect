@@ -2,6 +2,8 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use ShopwarePlugins\Connect\Bundle\SearchBundleDBAL\ConditionHandler\SupplierConditionHandler;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -42,6 +44,7 @@ class ProductStreams extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
             'Enlight_Controller_Action_PostDispatch_Backend_ProductStream' => 'extendBackendProductStream',
+            'Shopware_SearchBundleDBAL_Collect_Condition_Handlers' => 'registerConditionHandlers'
         );
     }
 
@@ -101,6 +104,13 @@ class ProductStreams extends BaseSubscriber
         $request = $subject->Request();
 
         switch ($request->getActionName()) {
+            case 'index':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/connect_app.js'
+                );
+                break;
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
@@ -108,6 +118,26 @@ class ProductStreams extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
                 );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/condition_list/connect_condition_panel.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/selected_list/connect_windows.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/list/connect_list.js'
+                );
+                break;
+            case 'list':
+                $subject->View()->data = $this->markConnectStreams(
+                    $subject->View()->data
+                );
+                break;
+            case 'detail':
+                $streams = $this->markConnectStreams(
+                    [$subject->View()->data]
+                );
+                $subject->View()->data = reset($streams);
                 break;
             case 'addSelectedProduct':
                 $streamId = $request->getParam('streamId');
@@ -181,5 +211,32 @@ class ProductStreams extends BaseSubscriber
         }
 
         $this->connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
+    }
+
+    /**
+     * @param $streams
+     * @return array
+     */
+    private function markConnectStreams(array $streams)
+    {
+        $connectSteamIds = $this->getProductStreamService()->getConnectStreamIds();
+
+        foreach ($streams as $index => $stream) {
+            if (isset($stream['id'])) {
+                $streams[$index]['isConnect'] = in_array($stream['id'], $connectSteamIds);
+            }
+        }
+
+        return $streams;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function registerConditionHandlers()
+    {
+        return new ArrayCollection([
+            new SupplierConditionHandler(),
+        ]);
     }
 }

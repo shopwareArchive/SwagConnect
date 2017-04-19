@@ -355,6 +355,14 @@ class ProductStreamService
     }
 
     /**
+     * @return array
+     */
+    public function getConnectStreamIds()
+    {
+        return $this->productStreamRepository->fetchConnectStreamIds();
+    }
+
+    /**
      * @param $streamId
      * @param $status
      */

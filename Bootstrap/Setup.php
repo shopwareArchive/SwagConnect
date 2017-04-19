@@ -629,6 +629,16 @@ class Setup
             0
         );
 
+        $crudService->update(
+            's_product_streams_attributes',
+            'connect_is_remote',
+            'boolean',
+            [],
+            null,
+            false,
+            0
+        );
+
         $this->modelManager->generateAttributeModels(array(
             's_articles_attributes',
             's_articles_supplier_attributes',
@@ -644,6 +654,7 @@ class Setup
             's_filter_attributes',
             's_filter_options_attributes',
             's_filter_values_attributes',
+            's_product_streams_attributes',
         ));
     }
 

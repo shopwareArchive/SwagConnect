@@ -320,8 +320,14 @@ class Shopping
         foreach ($changes as $change) {
             switch (true) {
                 case ($change instanceof Struct\Change\InterShop\Update):
-                case ($change instanceof Struct\Change\InterShop\Unavailable):
+                    /**
+                     * Change the availability to 0 - this means that either the fixed price does not match or
+                     * the purchase price hash is invalid, so the product should not be buyable.
+                     */
                     $this->productToShop->changeAvailability($change->shopId, $change->sourceId, 0);
+                    break;
+                case ($change instanceof Struct\Change\InterShop\Unavailable):
+                    $this->productToShop->changeAvailability($change->shopId, $change->sourceId, $change->availability);
                     break;
 
                 case ($change instanceof Struct\Change\InterShop\Delete):

@@ -5,6 +5,7 @@ namespace ShopwarePlugins\Connect\Components;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Message;
 use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components;
 
@@ -568,8 +569,27 @@ class BasketHelper
      * @param $connectMessages array Messages to show
      * @return array
      */
-    public function getConnectTemplateVariables($connectMessages)
+    public function getConnectTemplateVariables(array $connectMessages)
     {
+        $snippets = Shopware()->Snippets()->getNamespace('frontend/checkout/error_messages');
+        /** @var Message $message */
+        foreach($connectMessages as $message) {
+            if ($message->message == "Availability of product %product changed to %availability.") {
+                if ($message->values['availability'] == 0) {
+                    $message->message = $snippets->get(
+                        'connect_product_out_of_stock_message',
+                        'Produkte in Ihrer Bestellung sind aktuell nicht lieferbar, bitte entfernen Sie die Produkte um fortzufahren.'
+                    );
+                } else {
+                    $message->message = $snippets->get(
+                        'connect_product_lower_stock_message',
+                        'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert'
+                    );
+                }
+            }
+        }
+
+
         return array(
             'connectContent' => $this->getConnectContent(),
             'connectShops' => $this->getConnectShops(),

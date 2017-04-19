@@ -164,6 +164,7 @@ class LocalProductQuery extends BaseProductQuery
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
+            'a.lastStock',
         );
 
         if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)){

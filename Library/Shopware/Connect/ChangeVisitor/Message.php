@@ -43,12 +43,32 @@ class Message extends ChangeVisitor
 
             switch (true) {
                 case ($change instanceof Struct\Change\InterShop\Update):
+                    /**
+                     * The else block can be removed when all shops use version greater than 2.0.3
+                     */
+                    if ($change->oldProduct !== null) {
+                        $messages[] = new Struct\Message(array(
+                            'message' => 'The price of product %product has changed.',
+                            'values' => array(
+                                'product' => $change->oldProduct->title
+                            )
+                        ));
+                    } else {
+                        $messages[] = new Struct\Message(array(
+                            'message' => 'The price of product %product has changed.',
+                            'values' => array(
+                                'product' => $change->sourceId
+                            )
+                        ));
+                    }
+                    break;
+
                 case ($change instanceof Struct\Change\InterShop\Unavailable):
                     $messages[] = new Struct\Message(array(
                         'message' => 'Availability of product %product changed to %availability.',
                         'values' => array(
                             'product' => $change->sourceId,
-                            'availability' => 0,
+                            'availability' => $change->availability,
                         )
                     ));
                     break;
@@ -61,7 +81,6 @@ class Message extends ChangeVisitor
                         )
                     ));
                     break;
-
 
                 default:
                     throw new \RuntimeException(

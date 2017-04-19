@@ -91,6 +91,13 @@ class Product extends ShopItem
     public $sku;
 
     /**
+     * Shows if the product is EOL
+     *
+     * @var boolean
+     */
+    public $lastStock;
+
+    /**
      * Shared ID for product variants.
      *
      * This ID must be identical for all variants of the same product. If the product

@@ -18,4 +18,11 @@ use Shopware\Connect\Struct\Product;
  */
 class Unavailable extends Change
 {
+    /**
+     * Current availability of the product in the supplier shop during checkout in merchant shop
+     * Used when the availability in the supplier shop is less than the requested in teh checkout process of the merchant shop.
+     *
+     * @var int
+     */
+    public $availability = 0;
 }

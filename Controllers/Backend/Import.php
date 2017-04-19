@@ -337,6 +337,29 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ));
     }
 
+    /**
+     * @return Enlight_View|Enlight_View_Default
+     */
+    public function getSuppliersAction()
+    {
+        $suppliers = [];
+        $pdoGateway = $this->getPdoGateway();
+
+        foreach ($pdoGateway->getConnectedShopIds() as $shopId) {
+            $configuration = $pdoGateway->getShopConfiguration($shopId);
+            $suppliers = [
+                'id' => $shopId,
+                'name' => $configuration->displayName,
+                'logoUrl' => $configuration->logoUrl,
+            ];
+        }
+
+        return $this->View()->assign([
+            'success' => true,
+            'data' => $suppliers,
+        ]);
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
@@ -344,12 +367,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
                 $this->getAutoCategoryResolver(),
-                new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+                $this->getPdoGateway(),
                 new \ShopwarePlugins\Connect\Components\RandomStringGenerator()
             );
         }
 
         return $this->categoryExtractor;
+    }
+
+    /**
+     * @return \Shopware\Connect\Gateway\PDO
+     */
+    private function getPdoGateway(){
+        return new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection());
     }
 
     /**

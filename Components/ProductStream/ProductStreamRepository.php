@@ -301,6 +301,24 @@ class ProductStreamRepository extends Repository
     }
 
     /**
+     * @return array
+     */
+    public function fetchConnectStreamIds()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+
+        $results = $builder->select('sa.streamID')
+            ->from('s_product_streams_attributes', 'sa')
+            ->where('sa.connect_is_remote = 1')
+            ->execute()
+            ->fetchAll();
+
+        return array_map(function($item){
+            return $item['streamID'];
+        }, $results);
+    }
+
+    /**
      * @param $streamId
      * @return bool|string
      */

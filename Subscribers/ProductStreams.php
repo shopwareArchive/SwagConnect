@@ -2,6 +2,8 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use ShopwarePlugins\Connect\Bundle\SearchBundleDBAL\ConditionHandler\SupplierConditionHandler;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -42,6 +44,7 @@ class ProductStreams extends BaseSubscriber
         return array(
             'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
             'Enlight_Controller_Action_PostDispatch_Backend_ProductStream' => 'extendBackendProductStream',
+            'Shopware_SearchBundleDBAL_Collect_Condition_Handlers' => 'registerConditionHandlers'
         );
     }
 
@@ -101,12 +104,22 @@ class ProductStreams extends BaseSubscriber
         $request = $subject->Request();
 
         switch ($request->getActionName()) {
+            case 'index':
+                $this->registerMyTemplateDir();
+                $this->registerMySnippets();
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/connect_app.js'
+                );
+                break;
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
 
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
+                );
+                $subject->View()->extendsTemplate(
+                    'backend/product_stream/view/condition_list/connect_condition_panel.js'
                 );
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_windows.js'
@@ -215,5 +228,15 @@ class ProductStreams extends BaseSubscriber
         }
 
         return $streams;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function registerConditionHandlers()
+    {
+        return new ArrayCollection([
+            new SupplierConditionHandler(),
+        ]);
     }
 }

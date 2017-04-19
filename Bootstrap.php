@@ -118,7 +118,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         $this->doSetup($fullSetup);
         $this->doUpdate($version);
 
-        return array('success' => true, 'invalidateCache' => array('backend', 'config', 'template', 'theme'));
+        return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme']];
     }
 
     /**

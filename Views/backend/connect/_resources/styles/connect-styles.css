@@ -233,6 +233,15 @@ table[id^=base-element-fieldset] tbody + tbody .x-btn {
     line-height: 17px;
 }
 
+.sc-stream-hint {
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top: 8px;
+    left: 117px;
+    z-index: 2;
+}
+
 @-moz-document url-prefix() {
     .connect-checkbox-label{
         padding: 0 0 0 20px;

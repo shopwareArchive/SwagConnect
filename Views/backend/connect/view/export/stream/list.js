@@ -24,6 +24,14 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
         }
     }),
 
+    /**
+     * Contains all snippets for the component
+     * @object
+     */
+    snippets: {
+        streamInfoMessage: '{s name=export/stream/activate_cron_message}Activate the cron job to use this function{/s}'
+    },
+
     initComponent: function() {
         var me = this;
 
@@ -36,6 +44,19 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
         });
 
         me.callParent(arguments);
+
+        me.store.addListener('load', function (store, records) {
+            var hasInactiveRows = false;
+            Ext.Array.each(records, function (record) {
+                if (record.get('enableRow') == false) {
+                    hasInactiveRows = true;
+                    return false;
+                }
+            });
+
+            me.getView().features[0].groupHeaderTpl = me.getGroupHeaderTpl(hasInactiveRows);
+            me.getView().refresh();
+        });
     },
     listeners: {
         beforeselect: function (sm, record) {
@@ -105,19 +126,9 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
     },
 
     getGrouping: function() {
+        var me = this;
         return Ext.create('Ext.grid.feature.Grouping', {
-            groupHeaderTpl: [
-                '{literal}{name:this.formatName}{/literal}',
-                {
-                    formatName: function(type) {
-                        if (type == 2) {
-                            return '{s name=export/selection_streams}Selection streams{/s}';
-                        } else {
-                            return '{s name=export/condition_streams}Condition streams{/s}';
-                        }
-                    }
-                }
-            ],
+            groupHeaderTpl: me.getGroupHeaderTpl(false),
             hideGroupedHeader: true,
             startCollapsed: false
         });
@@ -170,6 +181,26 @@ Ext.define('Shopware.apps.Connect.view.export.stream.List', {
 
         pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
         return pagingBar;
+    },
+
+    getGroupHeaderTpl: function(hasInactiveRows) {
+        var me = this;
+        return [
+            '{literal}{name:this.formatName}{/literal}',
+            {
+                formatName: function(type) {
+                    if (type == 2) {
+                        return '{s name=export/selection_streams}Selection streams{/s}';
+                    } else {
+                        if (hasInactiveRows) {
+                            return '{s name=export/condition_streams}Condition streams{/s}<div class="sc-stream-hint sprite-exclamation" data-qtip="'+ me.snippets.streamInfoMessage +'"></div>';
+                        } else {
+                            return '{s name=export/condition_streams}Condition streams{/s}';
+                        }
+                    }
+                }
+            }
+        ]
     }
 });
 //{/block}

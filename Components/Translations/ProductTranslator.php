@@ -206,10 +206,10 @@ class ProductTranslator implements ProductTranslatorInterface
 //        if (strlen($translation->title) === 0) {
 //            throw new \Exception('Translation title cannot be empty string.');
 //        }
-//
-//        if (strlen($translation->url) === 0) {
-//            throw new \Exception('Translation title cannot be empty string.');
-//        }
+
+        if (strlen($translation->url) === 0) {
+            throw new \Exception('Translation url cannot be empty string.');
+        }
 
         if (count($translation->variantLabels) != $optionsCount) {
             throw new \Exception('variantLabels property has not correct items count.');

@@ -43,6 +43,13 @@ abstract class BaseProductQuery
      */
     abstract function getConnectProducts($rows);
 
+    /**
+     * Returns array of Product structs by given sourceIds
+     *
+     * @param array $sourceIds
+     * @param int|null $shopId
+     * @return array
+     */
     public function get(array $sourceIds, $shopId = null)
     {
         $implodedIds = "'" . implode("','", $sourceIds) . "'";

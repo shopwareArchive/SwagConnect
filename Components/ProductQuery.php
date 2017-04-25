@@ -22,9 +22,9 @@ class ProductQuery
         return $this->localProductQuery->get($sourceIds);
     }
 
-    public function getRemote(array $ids)
+    public function getRemote(array $ids, $shopId)
     {
-        return $this->remoteProductQuery->get($ids);
+        return $this->remoteProductQuery->get($ids, $shopId);
     }
 
 }

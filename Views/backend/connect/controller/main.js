@@ -1062,6 +1062,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     onExportStream: function(btn){
         var me = this,
             list = me.getExportStreamList(),
+            store = list.store;
             records = list.selModel.getSelection(),
             staticStreamIds = [],
             dynamicStreamIds = [];
@@ -1078,7 +1079,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
         if (dynamicStreamIds.length > 0) {
-            me.prepareDynamicStreamExport(dynamicStreamIds);
+            me.prepareDynamicStreamExport(dynamicStreamIds, store);
         }
 
         if (staticStreamIds.length > 0) {
@@ -1087,7 +1088,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     },
 
-    prepareDynamicStreamExport: function(ids){
+    prepareDynamicStreamExport: function(ids, store){
         var me = this,
             title = me.messages.exportStreamTitle;
 
@@ -1111,6 +1112,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     }
 
                     me.createGrowlMessage(title, me.messages.exportDynamicStreamMessage, false);
+                    store.reload();
                 }
             }
         });

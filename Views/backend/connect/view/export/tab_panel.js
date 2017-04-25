@@ -41,6 +41,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'custom-product': 'sc-icon-custom-product',
             'export': 'sprite-arrow-circle-135',
             'delete': 'sprite-bin-metal-full',
+            'pending': 'sprite-arrow-circle-135',
             'cron-update': 'sprite-arrow-circle-135'
         };
     },

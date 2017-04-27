@@ -1062,7 +1062,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     onExportStream: function(btn){
         var me = this,
             list = me.getExportStreamList(),
-            store = list.store;
             records = list.selModel.getSelection(),
             staticStreamIds = [],
             dynamicStreamIds = [];
@@ -1079,7 +1078,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             }
         });
         if (dynamicStreamIds.length > 0) {
-            me.prepareDynamicStreamExport(dynamicStreamIds, store);
+            me.prepareDynamicStreamExport(dynamicStreamIds);
         }
 
         if (staticStreamIds.length > 0) {
@@ -1088,8 +1087,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     },
 
-    prepareDynamicStreamExport: function(ids, store){
+    prepareDynamicStreamExport: function(ids){
         var me = this,
+            list = me.getExportStreamList(),
+            store = list.store,
             title = me.messages.exportStreamTitle;
 
         Ext.Ajax.request({

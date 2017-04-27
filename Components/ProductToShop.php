@@ -191,12 +191,26 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        $product = $this->eventManager->filter(
+            'Connect_ProductToShop_InsertOrUpdate_Before',
+            $product
+        );
+
         // todo@dn: Set dummy values and make product inactive
         if (empty($product->title) || empty($product->vendor)) {
             return;
         }
 
         $detail = $this->helper->getArticleDetailModelByProduct($product);
+        $detail = $this->eventManager->filter(
+            'Connect_Merchant_Get_Article_Detail_After',
+            $detail,
+            [
+                'product' => $product,
+                'subject' => $this
+            ]
+        );
+
         $isMainVariant = false;
 
         if ($detail === null) {
@@ -451,8 +465,17 @@ class ProductToShop implements ProductToShopBase
         }
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
 
+        $this->eventManager->notify(
+            'Connect_ProductToShop_InsertOrUpdate_After',
+            [
+                'connectProduct' => $product,
+                'shopArticleDetail' => $detail
+            ]
+        );
+
         $stream = $this->getOrCreateStream($product);
         $this->addProductToStream($stream, $model);
+
     }
 
     /**

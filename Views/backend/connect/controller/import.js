@@ -576,11 +576,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return false;
         }
 
-        //dragged leaf can be drop everywhere except if the target node is not leaf
-        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord)){
-            return true;
-        }
-
+        //dragged node can be drop everywhere except if the target node is not leaf
         return !me.isLeaf(targetNodeRecord);
     },
 

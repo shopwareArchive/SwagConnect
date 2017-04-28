@@ -41,11 +41,7 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
                         return false;
                     }
 
-                    //dragged leaf can be drop everywhere except at the main language categories
-                    if(draggedRecord.data.leaf && !targetRecord.data.leaf){
-                        return true;
-                    }
-
+                    //dragged node can be drop everywhere except at the main language categories
                     return !targetRecord.data.leaf;
                 };
             }

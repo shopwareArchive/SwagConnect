@@ -571,8 +571,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var draggedDepth = me.getDepth(selectedNodeRecord) - 3;
         var droppedDepth = me.getDepth(targetNodeRecord);
 
-        //main categories Deutsch/English cant be dragged
-        if (!draggedDepth) {
+        //stream or main (Deutsch/English) categories cant be dragged
+        if (draggedDepth <= 0) {
             return false;
         }
 

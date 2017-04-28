@@ -36,12 +36,17 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
                     var draggedDepth = draggedRecord.data.depth - 3;
                     var droppedDepth = targetRecord.data.depth;
 
+                    //main categories Deutsch/English cant be dragged
+                    if (!draggedDepth) {
+                        return false;
+                    }
+
                     //dragged leaf can be drop everywhere except at the main language categories
-                    if(draggedRecord.data.leaf && !targetRecord.data.leaf && droppedDepth > 1){
+                    if(draggedRecord.data.leaf && !targetRecord.data.leaf){
                         return true;
                     }
 
-                    return !targetRecord.data.leaf && draggedDepth == droppedDepth;
+                    return !targetRecord.data.leaf;
                 };
             }
         }

@@ -571,12 +571,17 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var draggedDepth = me.getDepth(selectedNodeRecord) - 3;
         var droppedDepth = me.getDepth(targetNodeRecord);
 
-        //dragged leaf can be drop everywhere except at the main language categories
-        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord) && droppedDepth > 1){
+        //main categories Deutsch/English cant be dragged
+        if (!draggedDepth) {
+            return false;
+        }
+
+        //dragged leaf can be drop everywhere except if the target node is not leaf
+        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord)){
             return true;
         }
 
-        return !me.isLeaf(targetNodeRecord) && draggedDepth == droppedDepth;
+        return !me.isLeaf(targetNodeRecord);
     },
 
     isLeaf: function(record) {

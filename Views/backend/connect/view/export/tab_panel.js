@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
                 xtype: 'connect-export-stream',
                 title: '{s name=export/tab/streams}Product Streams{/s}',
                 iconMapping: me.getStatusIconMapping(),
-                iconLabelMapping: me.getIconLabelMapping(),
+                iconLabelMapping: me.getStreamIconLabelMapping(),
                 itemId: 'stream'
             }]
         });
@@ -54,12 +54,24 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'error-price': '{s name=export/message/error_price_status}There is an empty price field{/s}',
             'inactive': '{s name=export/statusInactive}Product is inactive{/s}',
             'update': '{s name=export/statusUpdate}Product will be updated{/s}',
-            'pending': '{s name=export/statusInsert}Product will be inserted{/s}',
             'custom-product': '{s name=export/list/customProduct}Custom products are excluded from export{/s}',
             'export': '{s name=export/statusExport}Exported{/s}',
             'delete': '{s name=export/statusDelete}Product was deleted{/s}',
             'cron-update': 'Cron update'
         };
+    },
+
+    getStreamIconLabelMapping: function() {
+        var me = this,
+            labelMapping = me.getIconLabelMapping();
+
+        var streamLabelMapping = {
+            'pending': '{s name=export/statusStreamPending}Product Stream will be added{/s}',
+            'delete': '{s name=export/statusStreamDelete}Product Stream was deleted{/s}'
+        };
+
+        //streamLabelMapping will override the existing properties of labelMapping
+        return Ext.apply(labelMapping, streamLabelMapping);
     }
 });
 //{/block}

@@ -47,8 +47,6 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
     },
 
     getIconLabelMapping: function() {
-        var me = this;
-
         return {
             'insert': '{s name=export/statusInsert}Product will be inserted{/s}',
             'synced': '{s name=export/statusSynced}Synchronisation complete{/s}',
@@ -56,6 +54,7 @@ Ext.define('Shopware.apps.Connect.view.export.TabPanel', {
             'error-price': '{s name=export/message/error_price_status}There is an empty price field{/s}',
             'inactive': '{s name=export/statusInactive}Product is inactive{/s}',
             'update': '{s name=export/statusUpdate}Product will be updated{/s}',
+            'pending': '{s name=export/statusInsert}Product will be inserted{/s}',
             'custom-product': '{s name=export/list/customProduct}Custom products are excluded from export{/s}',
             'export': '{s name=export/statusExport}Exported{/s}',
             'delete': '{s name=export/statusDelete}Product was deleted{/s}',

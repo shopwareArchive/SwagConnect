@@ -267,8 +267,10 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $eventArgs)
     {
+        $em  = $eventArgs->getEntityManager();
+
         foreach ($this->productUpdates as $entity) {
-            $this->getLifecycleSubscriber()->handleChange($entity);
+            $this->getLifecycleSubscriber()->handleChange($entity, $em);
         }
 
         $this->productUpdates = [];

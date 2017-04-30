@@ -168,7 +168,7 @@ class Lifecycle extends BaseSubscriber
     {
         $entity = $eventArgs->get('entity');
 
-        $this->handleChange($entity);
+        $this->handleChange($entity, $eventArgs->get('entityManager'));
     }
 
 
@@ -176,8 +176,9 @@ class Lifecycle extends BaseSubscriber
      * Generate changes for Article or Detail if necessary
      *
      * @param \Shopware\Models\Article\Article | \Shopware\Models\Article\Detail $entity
+     * @param $entityManager
      */
-    public function handleChange($entity)
+    public function handleChange($entity, $entityManager)
     {
         if (!$entity instanceof \Shopware\Models\Article\Article
             && !$entity instanceof \Shopware\Models\Article\Detail
@@ -214,7 +215,7 @@ class Lifecycle extends BaseSubscriber
 
         $forceExport = false;
         if ($entity instanceof \Shopware\Models\Article\Detail) {
-            $changeSet = $this->manager->getUnitOfWork()->getEntityChangeSet($entity);
+            $changeSet = $entityManager->getUnitOfWork()->getEntityChangeSet($entity);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
             if (array_key_exists('number', $changeSet)) {

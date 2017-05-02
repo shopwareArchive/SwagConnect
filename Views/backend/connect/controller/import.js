@@ -419,8 +419,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].get('categoryId'),
-            remoteCategoryLabel = data.records[0].get('text'),
+        var remoteCategoryKey = data.records[0].categoryId,
+            remoteCategoryLabel = data.records[0].text,
             localCategoryId = overModel.get('id');
 
         me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
@@ -466,12 +466,6 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     }
                 });
                 me.reloadAndExpandLocalCategories(expandedCategories);
-
-                // remove the selected remote category as if dragged and dropped to local
-                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
-                if( remoteCategoryTreeSelection.length > 0) {
-                    remoteCategoryTreeSelection[0].remove(false);
-                }
 
             },
             failure: function(response, opts) {

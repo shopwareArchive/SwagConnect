@@ -15,9 +15,9 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
     },
     store: 'import.RemoteCategories',
     viewConfig: {
+        copy: true,
         plugins: {
             ptype: 'remote-category-drag-and-drop',
-            appendOnly: true,
             dragGroup: 'local-category',
             dropGroup: 'remote-category'
         }

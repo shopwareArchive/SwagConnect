@@ -16,7 +16,6 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Panel', {
                 xtype: 'connect-changed-products-tabs',
                 region: 'south',
                 collapsible: true,
-                collapsed: true,
                 split: true,
                 getTranslatedTitle: me.getTranslatedTitle
             },{

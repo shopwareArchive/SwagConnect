@@ -808,6 +808,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         offset = parseInt(offset) || 0;
         var limit = offset + batchSize;
 
+        if (limit > sourceIds.length) {
+            limit = sourceIds.length;
+        }
+
         var me = this,
         message = me.messages.insertOrUpdateProductMessage,
         title = me.messages.insertOrUpdateProductTitle,
@@ -847,9 +851,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 );
 
                 if (limit >= sourceIds.length) {
-                    window.inProcess = false;
-                    window.startButton.setDisabled(false);
-                    window.destroy();
+                    window.closeWindow();
                     me.createGrowlMessage(title, message, false);
                     list.store.load();
                     me.onGetExportStatus();

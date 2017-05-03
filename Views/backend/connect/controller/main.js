@@ -1089,6 +1089,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
     prepareDynamicStreamExport: function(ids){
         var me = this,
+            list = me.getExportStreamList(),
+            store = list.store,
             title = me.messages.exportStreamTitle;
 
         Ext.Ajax.request({
@@ -1111,6 +1113,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     }
 
                     me.createGrowlMessage(title, me.messages.exportDynamicStreamMessage, false);
+                    store.reload();
                 }
             }
         });

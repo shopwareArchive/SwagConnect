@@ -143,7 +143,7 @@ class ProductTranslator implements ProductTranslatorInterface
                 continue;
             }
 
-            $groupTranslation = isset($groupTranslations[$shopId]) ? $groupTranslations[$shopId] : $groupName;
+            $groupTranslation = isset($groupTranslations[$shopId]) ? $groupTranslations[$shopId] : '';
             if (!array_key_exists($localeCode[0], $translations)) {
                 continue;
             }
@@ -184,7 +184,7 @@ class ProductTranslator implements ProductTranslatorInterface
                 continue;
             }
 
-            $optionTranslation = isset($optionTranslations[$shopId]) ? $optionTranslations[$shopId] : $optionName;
+            $optionTranslation = isset($optionTranslations[$shopId]) ? $optionTranslations[$shopId] : '';
             $translationStruct = $translations[$localeCode[0]];
             if (!$translationStruct instanceof Translation) {
                 continue;
@@ -201,12 +201,14 @@ class ProductTranslator implements ProductTranslatorInterface
      */
     public function validate(Translation $translation, $optionsCount)
     {
-        if (strlen($translation->title) === 0) {
-            throw new \Exception('Translation title cannot be empty string.');
-        }
+        // currently we dont want to stop the other translations like description
+        // even we dont have translated title
+//        if (strlen($translation->title) === 0) {
+//            throw new \Exception('Translation title cannot be empty string.');
+//        }
 
         if (strlen($translation->url) === 0) {
-            throw new \Exception('Translation title cannot be empty string.');
+            throw new \Exception('Translation url cannot be empty string.');
         }
 
         if (count($translation->variantLabels) != $optionsCount) {

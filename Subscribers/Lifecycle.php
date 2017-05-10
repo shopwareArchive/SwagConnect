@@ -315,9 +315,11 @@ class Lifecycle extends BaseSubscriber
                 array($attribute->getSourceId()), null, true
             );
         } elseif ($this->autoUpdateProducts == 2) {
-            $attribute->setCronUpdate(true);
-            $this->manager->persist($attribute);
-            $this->manager->flush();
+            $this->manager->getConnection()->update(
+                's_plugin_connect_items',
+                array('cron_update' => 1),
+                array('article_detail_id' => $detail->getId())
+            );
         }
     }
 

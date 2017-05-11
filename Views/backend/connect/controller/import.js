@@ -419,8 +419,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].get('categoryId'),
-            remoteCategoryLabel = data.records[0].get('text'),
+        var remoteCategoryKey = data.records[0].categoryId,
+            remoteCategoryLabel = data.records[0].text,
             localCategoryId = overModel.get('id');
 
         me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
@@ -466,12 +466,6 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     }
                 });
                 me.reloadAndExpandLocalCategories(expandedCategories);
-
-                // remove the selected remote category as if dragged and dropped to local
-                var remoteCategoryTreeSelection = me.getRemoteCategoryTree().getSelectionModel().getSelection();
-                if( remoteCategoryTreeSelection.length > 0) {
-                    remoteCategoryTreeSelection[0].remove(false);
-                }
 
             },
             failure: function(response, opts) {
@@ -571,12 +565,13 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         var draggedDepth = me.getDepth(selectedNodeRecord) - 3;
         var droppedDepth = me.getDepth(targetNodeRecord);
 
-        //dragged leaf can be drop everywhere except at the main language categories
-        if(me.isLeaf(selectedNodeRecord) && !me.isLeaf(targetNodeRecord) && droppedDepth > 1){
-            return true;
+        //stream or main (Deutsch/English) categories cant be dragged
+        if (draggedDepth <= 0) {
+            return false;
         }
 
-        return !me.isLeaf(targetNodeRecord) && draggedDepth == droppedDepth;
+        //dragged node can be drop everywhere except if the target node is not leaf
+        return !me.isLeaf(targetNodeRecord);
     },
 
     isLeaf: function(record) {

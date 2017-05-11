@@ -745,9 +745,6 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->assertTrue($this->productTranslator->validate($translation, 2));
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testValidateMissingTitle()
     {
         $translation = new Translation(array(

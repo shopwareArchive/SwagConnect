@@ -3,7 +3,7 @@
 //{block name="backend/connect/view/export/product/progress"}
 Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
 
-    extend:'Enlight.app.Window',
+    extend:'Enlight.app.SubWindow',
 
     alias: 'widget.connect-article-export-progress-window',
     border: false,
@@ -56,7 +56,6 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
         var me = this;
 
         me.progressField = Ext.create('Ext.ProgressBar', {
-            animate: true,
             name: 'productExportBar',
             text: Ext.String.format(me.snippets.process, 0, me.sourceIds.length),
             margin: '0 0 15',
@@ -74,7 +73,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
             handler: function() {
                 me.startButton.setDisabled(false);
                 if (!me.inProcess) {
-                    me.destroy();
+                    me.closeWindow();
                 }
             }
         });
@@ -105,6 +104,18 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
         });
 
         return [ notice, me.progressField, me.cancelButton, me.startButton ];
+    },
+
+    closeWindow: function() {
+        var me = this;
+
+        if (me.progressField.getActiveAnimation()) {
+            Ext.defer(me.closeWindow, 200, me);
+            return;
+        }
+
+        // Wait a little before destroy the window for a better use feeling
+        Ext.defer(me.destroy, 500, me);
     }
 });
 //{/block}

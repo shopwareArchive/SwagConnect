@@ -75,6 +75,7 @@ class Config
      */
     public function getConfig($name, $default = null, $shopId = null)
     {
+        
         $result = $this->getPluginConfig($name);
         if (!empty($result)) {
             return $result;

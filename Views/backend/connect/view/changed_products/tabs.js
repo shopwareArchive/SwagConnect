@@ -27,15 +27,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Tabs', {
         var me = this;
 
         me.fields = { };
-        Ext.each([
-            'price',
-            'shortDescription',
-            'longDescription',
-            'name',
-            'image',
-            'imageInitialImport',
-            'additionalDescription'
-        ], function(field) {
+        Ext.each(['price', 'shortDescription', 'longDescription', 'name', 'image', 'imageInitialImport'], function(field) {
             me.fields[field] = me.createContainer(field);
         });
     },
@@ -81,13 +73,6 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Tabs', {
                     height: 150
                 };
                 break;
-            case 'additionalDescription':
-                config = {
-                    xtype: 'textarea',
-                    title: me.getTranslatedTitle('additionalDescription'),
-                    height: 150
-                };
-                break;
             case 'image':
                 config = {
                     xtype: 'shopware-images-field',
@@ -105,7 +90,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Tabs', {
         }
 
         // Define some default options for the local / remote field
-        // The name is generated from the passed name and the suffix "local"/"remote"
+        // The name is generated from the passed name and the prefix "local"/"remote"
         local = {
             fieldLabel: '{s name=changed_products/local}Local{/s}',
             name: name + 'Local',
@@ -141,7 +126,7 @@ Ext.define('Shopware.apps.Connect.view.changed_products.Tabs', {
                 },
                 applyButton: applyButton,
                 items: [applyButton, local, remote]
-        });
+            });
     }
 });
 //{/block}

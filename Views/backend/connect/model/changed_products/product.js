@@ -9,9 +9,6 @@ Ext.define('Shopware.apps.Connect.model.changed_products.Product', {
         { name: 'longDescriptionLocal', type: 'string' },
         { name: 'longDescriptionRemote', type: 'string' },
 
-        { name: 'additionalDescriptionLocal', type: 'string' },
-        { name: 'additionalDescriptionRemote', type: 'string' },
-
         { name: 'nameLocal', type: 'string' },
         { name: 'nameRemote', type: 'string' },
 
@@ -20,7 +17,7 @@ Ext.define('Shopware.apps.Connect.model.changed_products.Product', {
 
 
         { name: 'priceLocal', type: 'float' },
-        { name: 'priceRemote', type: 'float' }
+        { name: 'priceRemote', type: 'float' },
     ]
 });
 //{/block}

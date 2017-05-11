@@ -351,32 +351,6 @@ class ImageImport
     }
 
     /**
-     * Helper: Read images for a given detail
-     *
-     * @param int $articleDetailId
-     * @return array
-     */
-    public function getImagesForDetail($articleDetailId)
-    {
-
-        $builder = $this->manager->createQueryBuilder();
-        $builder->select('media.path')
-            ->from('Shopware\Models\Article\Image', 'images')
-            ->join('images.media', 'media')
-            ->where('images.articleDetailId = :articleDetailId')
-            ->andWhere('images.parentId IS NULL')
-            ->setParameter('articleDetailId', $articleDetailId)
-            ->orderBy('images.main', 'ASC')
-            ->addOrderBy('images.position', 'ASC');
-
-        return array_map(function($image) {
-            return $image['path'];
-        },
-            $builder->getQuery()->getArrayResult()
-        );
-    }
-
-    /**
      * Download, import and assign images to article
      *
      * @param array $imagesToCreate

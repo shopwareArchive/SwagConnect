@@ -71,8 +71,8 @@ class Setup
         $this->generateConnectPaymentAttribute();
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
-
         $this->createConnectCustomerGroup();
+        $this->addIndexToChangeTable();
 
         if ($fullSetup) {
             $this->createMyMenu();
@@ -925,5 +925,13 @@ class Setup
         }
 
         return 0;
+    }
+
+    private function addIndexToChangeTable()
+    {
+        $this->db->query("
+          ALTER TABLE `sw_connect_change`
+          ADD INDEX `c_operation` (`c_operation`)
+         ");
     }
 }

@@ -133,7 +133,7 @@ class Setup
                 ));
 
                 if ($this->shopware526installed) {
-                    $parent->setClass('shopware-connect');
+                    $parent->setClass(Menu::CONNECT_CLASS);
                     //if "Connect" menu does not exist
                     //it must not have pluginID, because on plugin uninstall
                     //it will be removed

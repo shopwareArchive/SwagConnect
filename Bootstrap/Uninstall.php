@@ -167,24 +167,30 @@ class Uninstall
             return;
         }
 
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy(['label' => 'Connect']);
+        //if it is sem demo marketplace it will not find the correct menu item
+        $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
+            'class' => Menu::CONNECT_CLASS,
+            'parent' => null,
+        ]);
+
         if (!$connectMainMenu) {
             $connectMainMenu = $this->bootstrap->createMenuItem([
-                'label' => 'Connect',
-                'class' => 'shopware-connect',
+                'label' => Menu::CONNECT_LABEL,
+                'class' => Menu::CONNECT_CLASS,
                 'active' => 1,
             ]);
             $connectMainMenu->setPlugin(null);
+        } else {
+            //resets the label if it's changed (diff marketplace)
+            $connectMainMenu->setLabel(Menu::CONNECT_LABEL);
         }
 
         $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
         if (null !== $connectInstallItem) {
             $connectInstallItem->setActive(1);
             $connectInstallItem->setParent($connectMainMenu);
-            $this->modelManager->persist($connectInstallItem);
-            $this->modelManager->flush();
         } else {
-            $item = $this->bootstrap->createMenuItem([
+            $connectInstallItem = $this->bootstrap->createMenuItem([
                 'label' => 'Einstieg',
                 'controller' => 'PluginManager',
                 'class' => 'sprite-mousepointer-click',
@@ -192,7 +198,7 @@ class Uninstall
                 'active' => 1,
                 'parent' => $connectMainMenu
             ]);
-            $item->setPlugin(null);
+            $connectInstallItem->setPlugin(null);
         }
     }
 }

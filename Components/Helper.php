@@ -35,6 +35,7 @@ use Shopware\Models\Article\Unit;
 use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
+use ShopwarePlugins\Connect\Struct\ShopProductId;
 
 /**
  * @category  Shopware
@@ -245,11 +246,12 @@ class Helper
      * Returns a remote connectProduct e.g. for checkout maniputlations
      *
      * @param array $ids
+     * @param int $shopId
      * @return array
      */
-    public function getRemoteProducts(array $ids)
+    public function getRemoteProducts(array $ids, $shopId)
     {
-        return $this->connectProductQuery->getRemote($ids);
+        return $this->connectProductQuery->getRemote($ids, $shopId);
     }
 
     /**
@@ -634,63 +636,25 @@ class Helper
     }
 
     /**
-     * Get sourceId by given article detail id
+     * Get ShopProductId struct by given article detail id
+     * It contains product sourceId and shopId.
+     * If $articleDetailId is local product, $shopProductId->shopId will be null.
      *
      * @param int $articleDetailId
-     * @return string
+     * @return ShopProductId
      */
-    public function getArticleDetailSourceId($articleDetailId)
-    {
-        $articleDetailId = (int) $articleDetailId;
-        $articleDetailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
-        $detail = $articleDetailRepository->find($articleDetailId);
-        if (!$detail) {
-            return null;
-        }
-
-        $connectAttribute = $this->getConnectAttributeByModel($detail);
-        if (!$connectAttribute) {
-            return null;
-        }
-
-        return $connectAttribute->getSourceId();
-    }
-
-    /**
-     * Get sourceId by given article detail id
-     *
-     * @param int $articleDetailId
-     * @return string
-     */
-    public function getArticleDetailSourceIdDBAL($articleDetailId)
+    public function getShopProductId($articleDetailId)
     {
         $articleDetailId = (int) $articleDetailId;
         $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->select('items.source_id')
+        $builder->select('items.source_id as sourceId, items.shop_id as shopId')
             ->from('s_plugin_connect_items', 'items')
             ->where('items.article_detail_id = :articleDetailIds')
             ->setParameter(':articleDetailIds', $articleDetailId);
 
-        return $builder->execute()->fetchColumn();
-    }
+        $result = $builder->execute()->fetch(\PDO::FETCH_ASSOC);
 
-    public function getArticleDetailSourceIds(array $articleDetailIds)
-    {
-        $quotedArticleDetailIds = array();
-        foreach ($articleDetailIds as $articleDetailId) {
-            $articleDetailId = (int) $articleDetailId;
-            $quotedArticleDetailIds[] = $this->manager->getConnection()->quote($articleDetailId);
-        }
-
-        $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT source_id
-              FROM s_plugin_connect_items
-              WHERE article_detail_id IN (' . implode(', ', $quotedArticleDetailIds) . ')'
-        );
-
-        return array_map(function($row) {
-            return $row['source_id'];
-        }, $rows);
+        return new ShopProductId($result);
     }
 
     /**

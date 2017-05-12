@@ -43,11 +43,23 @@ abstract class BaseProductQuery
      */
     abstract function getConnectProducts($rows);
 
-    public function get(array $sourceIds)
+    /**
+     * Returns array of Product structs by given sourceIds
+     *
+     * @param array $sourceIds
+     * @param int|null $shopId
+     * @return array
+     */
+    public function get(array $sourceIds, $shopId = null)
     {
         $implodedIds = "'" . implode("','", $sourceIds) . "'";
         $builder = $this->getProductQuery();
         $builder->andWhere("at.sourceId IN ($implodedIds)");
+        if ($shopId > 0) {
+            $builder->andWhere("at.shopId = :shopId")
+                    ->setParameter('shopId', $shopId);
+        }
+
         $query = $builder->getQuery();
 
         return $this->getConnectProducts($query->getArrayResult());

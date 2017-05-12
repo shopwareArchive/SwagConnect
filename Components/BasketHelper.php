@@ -142,8 +142,8 @@ class BasketHelper
                 continue;
             }
 
-            $sourceId = $this->helper->getArticleDetailSourceIdDBAL($articleDetailId);
-            $products = $this->getHelper()->getRemoteProducts(array($sourceId));
+            $shopProductId = $this->helper->getShopProductId($articleDetailId);
+            $products = $this->getHelper()->getRemoteProducts([$shopProductId->sourceId], $shopProductId->shopId);
             if (empty($products)) {
                 continue;
             }

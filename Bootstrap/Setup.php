@@ -72,7 +72,6 @@ class Setup
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
         $this->createConnectCustomerGroup();
-        $this->addIndexToChangeTable();
 
         if ($fullSetup) {
             $this->createMyMenu();

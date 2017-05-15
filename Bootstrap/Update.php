@@ -74,6 +74,7 @@ class Update
         $this->addOrderStatus();
         $this->fixExportDescriptionSettings();
         $this->fixMarketplaceUrl();
+        $this->removeDuplicatedMenuItems();
 
         return true;
     }
@@ -355,6 +356,29 @@ class Update
 
                 $this->modelManager->flush();
             }
+        }
+    }
+
+    /**
+     * In some cases Connect main menu was duplicated
+     * when shop is connected to SEM project. All not needed menu items must be removed.
+     */
+    private function removeDuplicatedMenuItems()
+    {
+        if (version_compare($this->version, '1.0.16', '<=')) {
+            $mainMenuItems = $this->bootstrap->Menu()->findBy([
+                'class' => Menu::CONNECT_CLASS,
+                'parent' => null,
+            ], ['id' => 'ASC']);
+
+            foreach (array_slice($mainMenuItems, 1) as $menuItem) {
+                foreach ($menuItem->getChildren() as $children) {
+                    $this->modelManager->remove($children);
+                }
+
+                $this->modelManager->remove($menuItem);
+            }
+            $this->modelManager->flush();
         }
     }
 }

@@ -68,7 +68,10 @@ class Menu
      */
     public function getMainMenuItem()
     {
-        return $this->bootstrap->Menu()->findOneBy(array('class' => self::CONNECT_CLASS));
+        return $this->bootstrap->Menu()->findOneBy([
+            'class' => self::CONNECT_CLASS,
+            'parent' => null,
+        ]);
     }
 
     /**
@@ -80,7 +83,7 @@ class Menu
         // check if shopware Connect menu item exists
         if (!$connectItem || $this->shopware526installed) {
             if ($this->shopware526installed) {
-                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
+                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
                 if (null !== $connectInstallItem) {
                     $connectInstallItem->setActive(0);
                     $this->modelManager->persist($connectInstallItem);
@@ -88,7 +91,7 @@ class Menu
                 }
             } else {
                 //move help menu item after Connect
-                $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
+                $helpItem = $this->bootstrap->Menu()->findOneBy(['label' => '']);
                 $helpItem->setPosition(1);
                 $this->modelManager->persist($helpItem);
                 $this->modelManager->flush();
@@ -100,13 +103,13 @@ class Menu
                 $this->modelManager->flush();
             }
 
-            $parent = $this->bootstrap->Menu()->findOneBy(array('class' => self::CONNECT_CLASS));
+            $parent = $this->bootstrap->Menu()->findOneBy(['class' => self::CONNECT_CLASS]);
             if (null === $parent) {
-                $parent = $this->bootstrap->createMenuItem(array(
+                $parent = $this->bootstrap->createMenuItem([
                     'label' => self::CONNECT_LABEL,
                     'class' => 'connect-icon',
                     'active' => 1,
-                ));
+                ]);
 
                 if ($this->shopware526installed) {
                     $parent->setClass(Menu::CONNECT_CLASS);
@@ -119,75 +122,75 @@ class Menu
 
             if ($this->configComponent->getConfig('apiKey', '') == ''
                 && !$this->configComponent->getConfig('shopwareId')) {
-                $registerItem = $this->bootstrap->Menu()->findOneBy(array(
+                $registerItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Register'
-                ));
+                ]);
                 if (!$registerItem) {
-                    $this->bootstrap->createMenuItem(array(
+                    $this->bootstrap->createMenuItem([
                         'label' => 'Register',
                         'controller' => 'Connect',
                         'action' => 'Register',
                         'class' => 'sprite-mousepointer-click',
                         'active' => 1,
                         'parent' => $parent
-                    ));
+                    ]);
                 }
             } else {
                 // check if menu item already exists
                 // this is possible when start update,
                 // because setup function is called
-                $importItem = $this->bootstrap->Menu()->findOneBy(array(
+                $importItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Import'
-                ));
+                ]);
                 if (!$importItem) {
-                    $this->bootstrap->createMenuItem(array(
+                    $this->bootstrap->createMenuItem([
                         'label' => 'Import',
                         'controller' => 'Connect',
                         'action' => 'Import',
                         'class' => 'sc-icon-import',
                         'active' => 1,
                         'parent' => $parent
-                    ));
+                    ]);
                 }
 
-                $exportItem = $this->bootstrap->Menu()->findOneBy(array(
+                $exportItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Export'
-                ));
+                ]);
                 if (!$exportItem) {
-                    $this->bootstrap->createMenuItem(array(
+                    $this->bootstrap->createMenuItem([
                         'label' => 'Export',
                         'controller' => 'Connect',
                         'action' => 'Export',
                         'class' => 'sc-icon-export',
                         'active' => 1,
                         'parent' => $parent
-                    ));
+                    ]);
                 }
 
-                $settingsItem = $this->bootstrap->Menu()->findOneBy(array(
+                $settingsItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Settings'
-                ));
+                ]);
                 if (!$settingsItem) {
-                    $this->bootstrap->createMenuItem(array(
+                    $this->bootstrap->createMenuItem([
                         'label' => 'Settings',
                         'controller' => 'Connect',
                         'action' => 'Settings',
                         'class' => 'sprite-gear',
                         'active' => 1,
                         'parent' => $parent
-                    ));
+                    ]);
                 }
 
-                $openConnectItem = $this->bootstrap->Menu()->findOneBy(array(
+                $openConnectItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'OpenConnect'
-                ));
+                ]);
                 if (!$openConnectItem) {
-                    $this->bootstrap->createMenuItem(array(
+                    $this->bootstrap->createMenuItem([
                         'label' => 'OpenConnect',
                         'controller' => 'Connect',
                         'action' => 'OpenConnect',
@@ -195,7 +198,7 @@ class Menu
                         'class' => 'connect-icon',
                         'active' => 1,
                         'parent' => $parent
-                    ));
+                    ]);
                 }
             }
 

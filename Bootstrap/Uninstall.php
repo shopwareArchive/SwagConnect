@@ -31,28 +31,28 @@ class Uninstall
     protected $modelManager;
 
     /**
-     * @var string
+     * @var Menu
      */
-    protected $shopware526installed;
+    private $menu;
 
     /**
      * Setup constructor.
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
-     * @param $shopware526installed
+     * @param Menu $menu
      */
     public function __construct
     (
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
-        $shopware526installed
+        Menu $menu
     ) {
         $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
-        $this->shopware526installed = $shopware526installed;
+        $this->menu = $menu;
     }
 
     public function run()
@@ -60,7 +60,7 @@ class Uninstall
         // Currently this should not be done
 //         $this->removeMyAttributes();
 
-        $this->setMenuItem();
+        $this->menu->remove();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
 
@@ -155,50 +155,6 @@ class Uninstall
         if ($element) {
             $this->modelManager->remove($element);
             $this->modelManager->flush();
-        }
-    }
-
-    /**
-     * Re-Activate the connect install menu item, if version is >= 5.2.6
-     */
-    public function setMenuItem()
-    {
-        if (!$this->shopware526installed) {
-            return;
-        }
-
-        //if it is sem demo marketplace it will not find the correct menu item
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
-            'class' => Menu::CONNECT_CLASS,
-            'parent' => null,
-        ]);
-
-        if (!$connectMainMenu) {
-            $connectMainMenu = $this->bootstrap->createMenuItem([
-                'label' => Menu::CONNECT_LABEL,
-                'class' => Menu::CONNECT_CLASS,
-                'active' => 1,
-            ]);
-            $connectMainMenu->setPlugin(null);
-        } else {
-            //resets the label if it's changed (diff marketplace)
-            $connectMainMenu->setLabel(Menu::CONNECT_LABEL);
-        }
-
-        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
-        if (null !== $connectInstallItem) {
-            $connectInstallItem->setActive(1);
-            $connectInstallItem->setParent($connectMainMenu);
-        } else {
-            $connectInstallItem = $this->bootstrap->createMenuItem([
-                'label' => 'Einstieg',
-                'controller' => 'PluginManager',
-                'class' => 'sprite-mousepointer-click',
-                'action' => 'ShopwareConnect',
-                'active' => 1,
-                'parent' => $connectMainMenu
-            ]);
-            $connectInstallItem->setPlugin(null);
         }
     }
 }

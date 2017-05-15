@@ -1458,7 +1458,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $db->update(
                 's_plugin_connect_items',
-                array('cron_update' => 1),
+                ['cron_update' => 1, 'export_status' => Attribute::STATUS_UPDATE],
                 "shop_id IS NULL"
             );
 

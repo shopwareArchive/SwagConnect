@@ -968,7 +968,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
      */
     onExportAllAction: function (btn) {
         var me = this,
+            list = me.getExportList(),
             title = me.messages.insertOrUpdateProductTitle;
+
+        list.setLoading(true);
 
         Ext.Ajax.request({
             url: '{url action=getArticleSourceIds}',
@@ -977,6 +980,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 'exportAll': true
             },
             success: function (response, opts) {
+                list.setLoading(false);
+
                 if (!response.responseText) {
                     return;
                 }

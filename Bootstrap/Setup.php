@@ -71,7 +71,6 @@ class Setup
         $this->generateConnectPaymentAttribute();
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
-
         $this->createConnectCustomerGroup();
 
         if ($fullSetup) {
@@ -320,7 +319,8 @@ class Setup
               `c_payload` longblob,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               UNIQUE KEY `c_revision` (`c_revision`),
-              KEY `c_entity_id` (`c_entity_id`)
+              KEY `c_entity_id` (`c_entity_id`),
+              INDEX `c_operation` (`c_operation`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
            CREATE TABLE IF NOT EXISTS `sw_connect_data` (
               `d_key` varchar(32) NOT NULL,

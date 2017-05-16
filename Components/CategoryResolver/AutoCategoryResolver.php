@@ -62,41 +62,22 @@ class AutoCategoryResolver implements CategoryResolver
         // example:
         // Deutsch/Category/Subcategory
         // English/Category/Subcategory
+        $leafCategories = [];
         foreach ($tree as $node) {
             $mainCategory = $this->categoryRepository->findOneBy([
                 'name' => $node['name'],
                 'parentId' => 1,
             ]);
 
-            $this->convertTreeToEntities($node['children'], $mainCategory);
+            // collect only leaf categories from current tree
+            $leafCategories = array_merge($leafCategories, $this->convertTreeToEntities($node['children'], $mainCategory));
         }
 
-        $categoryNames = array();
-        $categoryNames = $this->collectOnlyLeafCategories($tree, $categoryNames);
-
-        return $this->categoryRepository->findBy(array(
-            'name' => $categoryNames
-        ));
-    }
-
-    /**
-     * Collect only categories without children
-     *
-     * @param array $tree
-     * @param array $categoryNames
-     * @return array
-     */
-    public function collectOnlyLeafCategories($tree, array $categoryNames)
-    {
-        foreach ($tree as $category) {
-            if (empty($category['children'])) {
-                $categoryNames[] = $category['name'];
-            } else {
-                $categoryNames = $this->collectOnlyLeafCategories($category['children'], $categoryNames);
-            }
-        }
-
-        return $categoryNames;
+        // return only leaf categories. Do not fetch them from database by name as before.
+        // it is possible to have more than one subcategory "Boots" - CON-4589
+        return array_map(function($category) {
+            return $category['model'];
+        }, $leafCategories);
     }
 
     /**

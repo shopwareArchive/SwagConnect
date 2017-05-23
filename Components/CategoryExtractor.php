@@ -163,8 +163,7 @@ class CategoryExtractor
         }
 
         if ($excludeMapped === true) {
-            $whereSql[] = 'pcc.local_category_id IS NULL';
-
+            $whereSql[] = 'ar.connect_mapped_category IS NULL';
         }
 
         if (count($whereSql) > 0) {

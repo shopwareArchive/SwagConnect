@@ -140,7 +140,7 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function testGetRemoteShouldReturnEmptyArray()
     {
-        $result = $this->getProductQuery()->getRemote(array(2));
+        $result = $this->getProductQuery()->getRemote([2], 2);
         $this->assertEmpty($result);
     }
 
@@ -158,7 +158,7 @@ class ProductQueryTest extends ConnectTestHelper
             )
         ));
 
-        $result = $this->getProductQuery()->getRemote(array($newProduct->sourceId));
+        $result = $this->getProductQuery()->getRemote([$newProduct->sourceId], $newProduct->shopId);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 

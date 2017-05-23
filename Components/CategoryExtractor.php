@@ -134,9 +134,10 @@ class CategoryExtractor
      * @param string|null $parent
      * @param boolean|null $includeChildren
      * @param boolean|null $excludeMapped
+     * @param int|null $shopId
      * @return array
      */
-    public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false)
+    public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false, $shopId = null)
     {
         $sql = '
             SELECT pcc.category_key, pcc.label
@@ -149,23 +150,32 @@ class CategoryExtractor
             ON ar.articleID = pci.article_id
         ';
 
+        $whereParams = [];
+        $whereSql = [];
         if ($parent !== null) {
-            $sql .= ' WHERE pcc.category_key LIKE ?';
-            $whereParams = array($parent . '/%');
-            if ($excludeMapped === true) {
-                $sql .= ' AND ar.connect_mapped_category IS NULL';
-            }
-            // filter only first child categories
-            $rows = $this->db->fetchPairs($sql, $whereParams);
-            $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren);
-        } else {
-            if ($excludeMapped === true) {
-                $sql .= ' WHERE ar.connect_mapped_category IS NULL';
-            }
-            $rows = $this->db->fetchPairs($sql);
-            // filter only main categories
-            $rows = $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
+            $whereSql[] = 'pcc.category_key LIKE ?';
+            $whereParams[] = $parent . '/%';
         }
+
+        if ($shopId > 0) {
+            $whereSql[] = 'pci.shop_id = ?';
+            $whereParams[] = $shopId;
+        }
+
+        if ($excludeMapped === true) {
+            $whereSql[] = 'pcc.local_category_id IS NULL';
+
+        }
+
+        if (count($whereSql) > 0) {
+            $sql .= sprintf(' WHERE %s', implode(' AND ', $whereSql));
+        }
+
+        $rows = $this->db->fetchPairs($sql, $whereParams);
+        $parent = $parent ?: '';
+        // if parent is an empty string, filter only main categories, otherwise
+        // filter only first child categories
+        $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren, false, false, $shopId);
 
         return $rows;
     }
@@ -192,7 +202,7 @@ class CategoryExtractor
 
         $rows = $this->db->fetchPairs($sql, array((int)$shopId, $stream));
 
-        return $this->convertTree($this->categoryResolver->generateTree($rows), false);
+        return $this->convertTree($this->categoryResolver->generateTree($rows), false, false, false, $shopId);
     }
 
     /**
@@ -509,7 +519,7 @@ class CategoryExtractor
      * @param array $tree
      * @return array
      */
-    private function convertTree(array $tree, $includeChildren = true, $expanded = false, $checkLeaf = false)
+    private function convertTree(array $tree, $includeChildren = true, $expanded = false, $checkLeaf = false, $shopId = null)
     {
         $categories = array();
         foreach ($tree as $id => $node) {
@@ -522,9 +532,14 @@ class CategoryExtractor
                 continue;
             }
 
+            if ($shopId > 0) {
+                $categoryId = $this->randomStringGenerator->generate(sprintf('shopId%s~%s', $shopId, $id));
+            } else {
+                $categoryId = $this->randomStringGenerator->generate($id);
+            }
             $category = array(
                 'name' => $node['name'],
-                'id' => $this->randomStringGenerator->generate($id),
+                'id' => $categoryId,
                 'categoryId' => $id,
                 'leaf' => empty($node['children']) ? true : false,
                 'children' => $children,

@@ -73,10 +73,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 break;
             case strpos($parent, '_stream_') > 0:
                 list($shopId, $stream) = explode('_stream_', $parent);
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped, $shopId);
                 break;
             default:
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped);
+                $node = $this->request->getParam('id');
+                preg_match('/^(shopId(\d+)~)(.*)$/', $node, $matches);
+                if (empty($matches)) {
+                    $this->View()->assign(array(
+                        'success' => false,
+                        'message' => 'Node must contain shopId',
+                    ));
+                    return;
+                }
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2]);
         }
 
         $this->View()->assign(array(

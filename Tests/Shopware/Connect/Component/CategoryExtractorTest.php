@@ -677,7 +677,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $argument = sprintf('shopId%s~%s', $shopId, '/Kleidung-unit/Hosen-unit/Hosentraeger-unit');
         $randomStringGenerator->expects($this->once())
             ->method('generate')
-            ->with()
+            ->with($argument)
             ->willReturn($argument . '1040');
 
         $expected = array(

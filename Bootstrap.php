@@ -22,10 +22,12 @@
  * our trademarks remain entirely with us.
  */
 
+use Doctrine\Common\Collections\ArrayCollection;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use Shopware\Connect\Gateway\PDO;
+use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -241,6 +243,18 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $this
         );
 
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function onConsoleAddCommand()
+    {
+        $this->registerMyLibrary();
+
+        return new ArrayCollection([
+            new ApiEndpointCommand()
+        ]);
     }
 
     /**

@@ -137,6 +137,11 @@ class Setup
             'onStartDispatch'
         );
 
+        $this->bootstrap->subscribeEvent(
+            'Shopware_Console_Add_Command',
+            'onConsoleAddCommand'
+        );
+
         $connectImportImages = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
             array('action' => '%ShopwareConnectImportImages')

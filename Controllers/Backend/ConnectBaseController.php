@@ -1216,7 +1216,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getModelManager(),
             new ProductsAttributesValidator(),
             $this->getConfigComponent(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            $this->container->get('events')
         );
     }
 

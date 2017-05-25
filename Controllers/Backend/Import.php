@@ -360,6 +360,15 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ]);
     }
 
+    public function recreateRemoteCategoriesAction()
+    {
+        $this->getImportService()->recreateRemoteCategories();
+
+        return $this->View()->assign([
+            'success' => true,
+        ]);
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {

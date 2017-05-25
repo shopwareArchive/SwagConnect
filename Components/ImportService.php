@@ -278,6 +278,51 @@ class ImportService
         $detailBuilder->getQuery()->execute();
     }
 
+    public function recreateRemoteCategories()
+    {
+        // unassign all articles/categories
+
+        // insert all missing remote categories
+        $remoteItems = $this->getArticlesWithoutImportedCategories();
+        $this->manager->getConnection()->beginTransaction();
+        try {
+            foreach ($remoteItems as $item) {
+                if (!isset($item['category'])) {
+                    continue;
+                }
+
+                foreach (json_decode($item['category'], true) as $categoryKey => $category) {
+                    $this->manager->getConnection()->executeQuery(
+                        'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
+                        [$categoryKey, $category]
+                    );
+                    $remoteCategoryId = $this->manager->getConnection()->lastInsertId();
+
+                    $this->manager->getConnection()->executeQuery(
+                        'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`connect_category_id`, `articleID`) VALUES (?, ?)',
+                        [$remoteCategoryId, $item['article_id']]
+                    );
+                }
+            }
+            $this->manager->getConnection()->commit();
+        } catch(\Exception $e) {
+            $this->manager->getConnection()->rollBack();
+        }
+    }
+
+    private function getArticlesWithoutImportedCategories()
+    {
+        $statement = $this->manager->getConnection()->prepare(
+            "SELECT b.article_id, b.category
+            FROM s_plugin_connect_items b
+            LEFT JOIN s_plugin_connect_product_to_categories a ON b.article_id = a.articleID
+             WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id"
+        );
+
+        $statement->execute();
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     /**
      * Helper function to create filter values
      * @param int $categoryId

@@ -278,45 +278,86 @@ class ImportService
         $detailBuilder->getQuery()->execute();
     }
 
+    /**
+     * Revert category changes due to the option "auto-import categories" was enabled
+     *
+     * - Add missing remote categories in Connect tables
+     * - Assign remote products to these categories
+     * - Deactivate all auto imported categories
+     *
+     * @throws \Exception
+     */
     public function recreateRemoteCategories()
     {
-        // unassign all articles/categories
-
+        $connection = $this->manager->getConnection();
         // insert all missing remote categories
-        $remoteItems = $this->getArticlesWithoutImportedCategories();
-        $this->manager->getConnection()->beginTransaction();
+        $remoteItems = $this->getArticlesWithAutoImportedCategories();
+        $articleIds = [];
+        $connection->beginTransaction();
         try {
             foreach ($remoteItems as $item) {
+                $articleIds[] = $item['article_id'];
+
                 if (!isset($item['category'])) {
                     continue;
                 }
 
                 foreach (json_decode($item['category'], true) as $categoryKey => $category) {
-                    $this->manager->getConnection()->executeQuery(
+                    $connection->executeQuery(
                         'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
                         [$categoryKey, $category]
                     );
-                    $remoteCategoryId = $this->manager->getConnection()->lastInsertId();
 
-                    $this->manager->getConnection()->executeQuery(
-                        'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`connect_category_id`, `articleID`) VALUES (?, ?)',
-                        [$remoteCategoryId, $item['article_id']]
+                    $connection->executeQuery(
+                        'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`connect_category_id`, `articleID`) VALUES ((SELECT c.id FROM s_plugin_connect_categories c WHERE c.category_key = ?), ?)',
+                        [$categoryKey, $item['article_id']]
                     );
                 }
             }
-            $this->manager->getConnection()->commit();
+            $connection->commit();
         } catch(\Exception $e) {
-            $this->manager->getConnection()->rollBack();
+            $connection->rollBack();
+
+            throw $e;
         }
+
+        // deactivate all imported categories via auto import
+        $remoteCategoryIds = [];
+        while ($currentIdBatch = array_splice($articleIds, 0, 500)) {
+            if (empty($articleIds)) {
+                break;
+            }
+
+            $sql = 'SELECT sac.categoryID
+            FROM s_articles_categories sac
+            WHERE sac.articleID IN (' . implode(", ", $currentIdBatch) . ') GROUP BY categoryID';
+            $rows = $connection->fetchAll($sql);
+
+            $remoteCategoryIds = array_merge($remoteCategoryIds, array_map(function ($row) {
+                return $row['categoryID'];
+            }, $rows));
+        }
+
+        $this->deactivateLocalCategoriesByIds(array_unique($remoteCategoryIds));
+
+        // unassign all categories from articles
+        // while auto import categories was enabled
+        $this->unAssignArticleCategories($articleIds);
     }
 
-    private function getArticlesWithoutImportedCategories()
+    /**
+     * Fetch all articles where categories are auto imported
+     * and there isn't record in s_plugin_connect_product_to_categories for them
+     * 
+     * @return array
+     */
+    private function getArticlesWithAutoImportedCategories()
     {
         $statement = $this->manager->getConnection()->prepare(
             "SELECT b.article_id, b.category
             FROM s_plugin_connect_items b
             LEFT JOIN s_plugin_connect_product_to_categories a ON b.article_id = a.articleID
-             WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id"
+            WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id"
         );
 
         $statement->execute();

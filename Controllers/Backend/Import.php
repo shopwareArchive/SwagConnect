@@ -77,6 +77,10 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 break;
             default:
                 $node = $this->request->getParam('id');
+                // given id must have following structure:
+                // shopId5~/english/boots/nike
+                // shopId is required parameter to fetch all child categories of this parent
+                // $matches[2] gives us only shopId as a int
                 preg_match('/^(shopId(\d+)~)(.*)$/', $node, $matches);
                 if (empty($matches)) {
                     $this->View()->assign(array(

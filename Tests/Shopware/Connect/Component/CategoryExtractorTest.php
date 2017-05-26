@@ -1,5 +1,8 @@
 <?php
 
+namespace Tests\ShopwarePlugins\Connect\Component;
+
+use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
 {
@@ -126,7 +129,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             ->disableOriginalConstructor()
             ->getMock();
 
-        $randomStringGenerator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\RandomStringGenerator')
+        $randomStringGenerator = $this->getMockBuilder(RandomStringGenerator::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -685,13 +688,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $result = $categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, false, $shopId);
         $this->assertEquals(
             [
-                'id' => 'shopId1~/Kleidung-unit/Hosen-unit/Hosentraeger-unit1040',
-                'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
-                'name' => 'Hosentraeger',
-                'leaf' => true,
-                'children' => [],
-                'cls' => "sc-tree-node",
-                'expanded' => false
+                [
+                    'id' => 'shopId1~/Kleidung-unit/Hosen-unit/Hosentraeger-unit1040',
+                    'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                    'name' => 'Hosentraeger',
+                    'leaf' => true,
+                    'children' => [],
+                    'cls' => "sc-tree-node",
+                    'expanded' => false
+                ]
             ],
             $result
         );

@@ -83,10 +83,10 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 // $matches[2] gives us only shopId as a int
                 preg_match('/^(shopId(\d+)~)(.*)$/', $node, $matches);
                 if (empty($matches)) {
-                    $this->View()->assign(array(
+                    $this->View()->assign([
                         'success' => false,
                         'message' => 'Node must contain shopId',
-                    ));
+                    ]);
                     return;
                 }
                 $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2]);

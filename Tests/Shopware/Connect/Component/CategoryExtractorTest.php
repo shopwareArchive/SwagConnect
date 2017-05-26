@@ -680,21 +680,21 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             ->with($argument)
             ->willReturn($argument . '1040');
 
-        $expected = array(
-            array(
+        $parent = '/Kleidung-unit/Hosen-unit';
+        $includeChildren = true;
+        $result = $categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, false, $shopId);
+        $this->assertEquals(
+            [
                 'id' => 'shopId1~/Kleidung-unit/Hosen-unit/Hosentraeger-unit1040',
                 'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
                 'name' => 'Hosentraeger',
                 'leaf' => true,
-                'children' => array(),
+                'children' => [],
                 'cls' => "sc-tree-node",
                 'expanded' => false
-            ),
+            ],
+            $result
         );
-        $parent = '/Kleidung-unit/Hosen-unit';
-        $includeChildren = true;
-        $result = $categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, false, $shopId);
-        $this->assertEquals($expected, $result);
     }
 }
  

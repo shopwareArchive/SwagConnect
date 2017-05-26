@@ -661,7 +661,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $shopId = 1;
 
-        $randomStringGenerator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\RandomStringGenerator')
+        $randomStringGenerator = $this->getMockBuilder(RandomStringGenerator::class)
             ->disableOriginalConstructor()
             ->getMock();
 

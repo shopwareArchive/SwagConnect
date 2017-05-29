@@ -14,15 +14,14 @@ use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use Enlight\Event\SubscriberInterface;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\Components\DependencyInjection\Container;
 use ShopwarePlugins\Connect\Components\Config;
-use Shopware\Models\Category\Category;
-use Shopware\Models\Article\Article;
+use Shopware\Models\Category\Category as CategoryModel;
+use Shopware\Models\Article\Article as ArticleModel;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 
@@ -31,6 +30,7 @@ class ServiceContainer extends BaseSubscriber
     /** @var ModelManager  */
     private $manager;
 
+    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql  */
     private $db;
 
     /** @var Container */
@@ -39,6 +39,7 @@ class ServiceContainer extends BaseSubscriber
     /**
      * ServiceContainer constructor.
      * @param ModelManager $manager
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param Container $container
      */
     public function __construct(
@@ -123,7 +124,7 @@ class ServiceContainer extends BaseSubscriber
     {
         $autoCategoryResolver = new AutoCategoryResolver(
             $this->manager,
-            $this->manager->getRepository(Category::class),
+            $this->manager->getRepository(CategoryModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             new Config($this->manager)
         );
@@ -131,8 +132,8 @@ class ServiceContainer extends BaseSubscriber
         return new ImportService(
             $this->manager,
             $this->container->get('multi_edit.product'),
-            $this->manager->getRepository(Category::class),
-            $this->manager->getRepository(Article::class),
+            $this->manager->getRepository(CategoryModel::class),
+            $this->manager->getRepository(ArticleModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class),
             $autoCategoryResolver,

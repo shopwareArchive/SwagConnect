@@ -3,15 +3,14 @@
 namespace Tests\ShopwarePlugins\Connect\Component;
 
 
-use ShopwarePlugins\Connect\Components\AutoCategoryFixer;
+use ShopwarePlugins\Connect\Components\AutoCategoryReverter;
+use ShopwarePlugins\Connect\Components\ImportService;
 
-class AutoCategoryFixerTest extends \PHPUnit_Framework_TestCase
+class AutoCategoryReverterTest extends \PHPUnit_Framework_TestCase
 {
     public function testRecreateRemoteCategories()
     {
-        $importService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\ImportService')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $importService = $this->createMock(ImportService::class);
 
         $remoteItems = [
             5 => [
@@ -48,8 +47,8 @@ class AutoCategoryFixerTest extends \PHPUnit_Framework_TestCase
             ->method('unAssignArticleCategories')
             ->with(array_keys($remoteItems));
 
-        $autoCategoryFixer = new AutoCategoryFixer($importService);
+        $autoCategoryReverter = new AutoCategoryReverter($importService);
 
-        $autoCategoryFixer->recreateRemoteCategories();
+        $autoCategoryReverter->recreateRemoteCategories();
     }
 }

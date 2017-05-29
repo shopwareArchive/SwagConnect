@@ -10,7 +10,7 @@
 namespace ShopwarePlugins\Connect\Components;
 
 
-class AutoCategoryFixer
+class AutoCategoryReverter
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\ImportService

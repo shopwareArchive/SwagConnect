@@ -47,7 +47,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $logger;
 
-    private $autoCategoryFixer;
+    private $autoCategoryReverter;
 
     public function getImportedProductCategoriesTreeAction()
     {
@@ -364,7 +364,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function recreateRemoteCategoriesAction()
     {
-        $this->getAutoCategoryFixer()->recreateRemoteCategories();
+        $this->getAutoCategoryReverter()->recreateRemoteCategories();
 
         return $this->View()->assign([
             'success' => true,
@@ -442,15 +442,15 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         return $this->importService;
     }
 
-    private function getAutoCategoryFixer()
+    private function getAutoCategoryReverter()
     {
-        if (!$this->autoCategoryFixer) {
-            $this->autoCategoryFixer = new \ShopwarePlugins\Connect\Components\AutoCategoryFixer(
+        if (!$this->autoCategoryReverter) {
+            $this->autoCategoryReverter = new \ShopwarePlugins\Connect\Components\AutoCategoryReverter(
                 $this->getImportService()
             );
         }
 
-        return $this->autoCategoryFixer;
+        return $this->autoCategoryReverter;
     }
 
     /**

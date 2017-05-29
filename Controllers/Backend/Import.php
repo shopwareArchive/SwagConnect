@@ -34,11 +34,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private $productToRemoteCategoryRepository;
 
-    /**
-     * @var \ShopwarePlugins\Connect\Components\ImportService
-     */
-    private $importService;
-
     private $remoteCategoryRepository;
 
     private $autoCategoryResolver;
@@ -46,8 +41,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private $categoryRepository;
 
     private $logger;
-
-    private $autoCategoryReverter;
 
     public function getImportedProductCategoriesTreeAction()
     {
@@ -426,20 +419,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private function getImportService()
     {
-        if (!$this->importService) {
-            $this->importService = Shopware()->Container()->get('swagconnect.import_service');
-        }
-
-        return $this->importService;
+        return $this->container->get('swagconnect.import_service');
     }
 
     private function getAutoCategoryReverter()
     {
-        if (!$this->autoCategoryReverter) {
-            $this->autoCategoryReverter = Shopware()->Container()->get('swagconnect.auto_category_reverter');
-        }
-
-        return $this->autoCategoryReverter;
+        return $this->container->get('swagconnect.auto_category_reverter');
     }
 
     /**

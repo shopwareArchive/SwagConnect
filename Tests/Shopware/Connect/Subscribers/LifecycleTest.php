@@ -47,7 +47,8 @@ class LifecycleTest extends ConnectTestHelper
             $this->manager,
             new ProductsAttributesValidator(),
             $this->config,
-            new ErrorHandler()
+            new ErrorHandler(),
+            Shopware()->Container()->get('events')
         );
 
         $configs = [

@@ -304,7 +304,8 @@ class Article extends BaseSubscriber
             Shopware()->Models(),
             new ProductsAttributesValidator(),
             $this->getConnectConfig(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            Shopware()->Container()->get('events')
         );
     }
 

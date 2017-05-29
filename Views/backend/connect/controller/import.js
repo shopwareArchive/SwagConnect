@@ -26,7 +26,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             removeArticleTitle: '{s name=import/message/remove_article_title}Remove selected product?{/s}',
             removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}',
             recreateRemoteCategoriesTitle: '{s name=import/message/recreate_remote_categories_title}Re-create remote categories{/s}',
-            recreateRemoteCategoriesConfirmMessage: '{s name=import/message/recreate_remote_categories}Are you sure you want to re-create remote categories? This will unassign all remote categories/products.{/s}',
+            recreateRemoteCategoriesConfirmMessage: '{s name=import/message/recreate_remote_categories}Are you sure you want to re-create remote categories? This will deactivate all auto created remote categories and unassign their products.{/s}',
             deactivatedCategoriesSuccess: '{s name=deactivated_categories/success/message}[0] categories deactivated{/s}'
         }
     },

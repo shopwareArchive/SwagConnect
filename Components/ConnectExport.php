@@ -144,8 +144,6 @@ class ConnectExport
 
         $this->manager->beginTransaction();
 
-        //HIER
-
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
             if($model === null) {

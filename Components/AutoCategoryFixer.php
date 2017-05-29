@@ -28,7 +28,7 @@ class AutoCategoryFixer
         $remoteItems = $this->importService->getArticlesWithAutoImportedCategories();
         $this->importService->storeRemoteCategories($remoteItems);
         $articleIds = array_keys($remoteItems);
-        // fetch categories which are imported in via auto import
+        // fetch categories which are imported via auto import
         $remoteCategoryIds = $this->importService->fetchRemoteCategoriesByArticleIds($articleIds);
         // deactivate all imported categories via auto import
         $this->importService->deactivateLocalCategoriesByIds($remoteCategoryIds);

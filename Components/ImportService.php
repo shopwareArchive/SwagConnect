@@ -325,7 +325,7 @@ class ImportService
             $sql = 'SELECT sac.categoryID
             FROM s_articles_categories sac
             LEFT JOIN s_categories_attributes attr ON sac.categoryID = attr.categoryID
-            WHERE attr.connect_imported_category AND sac.articleID IN (' . implode(", ", $currentIdBatch) . ') GROUP BY sac.categoryID';
+            WHERE attr.connect_imported_category = 1 AND sac.articleID IN (' . implode(", ", $currentIdBatch) . ') GROUP BY sac.categoryID';
             $rows = $this->manager->getConnection()->fetchAll($sql);
 
             $remoteCategoryIds = array_merge($remoteCategoryIds, array_map(function ($row) {

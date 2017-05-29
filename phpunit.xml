@@ -5,4 +5,14 @@
             <directory>Tests/</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./</directory>
+            <exclude>
+                <directory suffix=".php">./Tests</directory>
+                <directory suffix=".php">./vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>

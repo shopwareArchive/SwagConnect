@@ -1153,7 +1153,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             case 1:
                 $builder->andWhere('logs.isError = 0');
                 break;
-
         }
 
         $query = $builder->getQuery()

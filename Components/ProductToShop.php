@@ -191,6 +191,7 @@ class ProductToShop implements ProductToShopBase
      */
     public function insertOrUpdate(Product $product)
     {
+        /** @var Product $product */
         $product = $this->eventManager->filter(
             'Connect_ProductToShop_InsertOrUpdate_Before',
             $product

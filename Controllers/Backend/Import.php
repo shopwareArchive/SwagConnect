@@ -427,16 +427,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getImportService()
     {
         if (!$this->importService) {
-            $this->importService = new \ShopwarePlugins\Connect\Components\ImportService(
-                $this->getModelManager(),
-                $this->container->get('multi_edit.product'),
-                $this->getCategoryRepository(),
-                $this->getModelManager()->getRepository('Shopware\Models\Article\Article'),
-                $this->getRemoteCategoryRepository(),
-                $this->getProductToRemoteCategoryRepository(),
-                $this->getAutoCategoryResolver(),
-                $this->getCategoryExtractor()
-            );
+            $this->importService = Shopware()->Container()->get('swagconnect.import_service');
         }
 
         return $this->importService;
@@ -445,9 +436,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getAutoCategoryReverter()
     {
         if (!$this->autoCategoryReverter) {
-            $this->autoCategoryReverter = new \ShopwarePlugins\Connect\Components\AutoCategoryReverter(
-                $this->getImportService()
-            );
+            $this->autoCategoryReverter = Shopware()->Container()->get('swagconnect.auto_category_reverter');
         }
 
         return $this->autoCategoryReverter;

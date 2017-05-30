@@ -53,13 +53,21 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
 
         $query = $this->request->getParam('remoteCategoriesQuery', "");
+        $node = $this->request->getParam('id');
 
         if (trim($query) !== "") {
-            $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent);
-            $this->View()->assign(array(
-                'success' => true,
-                'data' => $categories,
-            ));
+            try {
+                $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent, $node);
+                $this->View()->assign(array(
+                    'success' => true,
+                    'data' => $categories,
+                ));
+            } catch (\InvalidArgumentException $e) {
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ));
+            }
 
             return;
         }
@@ -73,23 +81,22 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 break;
             case strpos($parent, '_stream_') > 0:
                 list($shopId, $stream) = explode('_stream_', $parent);
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped, $shopId);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
                 break;
             default:
-                $node = $this->request->getParam('id');
                 // given id must have following structure:
                 // shopId5~/english/boots/nike
                 // shopId is required parameter to fetch all child categories of this parent
                 // $matches[2] gives us only shopId as a int
-                preg_match('/^(shopId(\d+)~)(.*)$/', $node, $matches);
+                preg_match('/^(shopId(\d+)~)(stream~(.*)~)(.*)$/', $node, $matches);
                 if (empty($matches)) {
                     $this->View()->assign([
                         'success' => false,
-                        'message' => 'Node must contain shopId',
+                        'message' => 'Node must contain shopId and stream',
                     ]);
                     return;
                 }
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2]);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2], $matches[4]);
         }
 
         $this->View()->assign(array(

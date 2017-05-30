@@ -27,8 +27,8 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
     snippets: {
         reload: '{s name=import/tree/reload}Neuladen{/s}',
         importSelectedCategories: '{s name=import/tree/import_selected_categories}Import categories{/s}',
-        recreateRemoteCategories: '{s name=import/tree/recreate_remote_categories}Re-create categories{/s}',
-        hideMappedCategories: '{s name=import/tree/hide_mapped_categories}Hide assigned categories{/s}'
+        recreateRemoteCategories: '{s name=import/tree/update_remote_categories}Re-create categories{/s}',
+        hideMappedCategories: '{s name=import/tree/hide_mapped}Hide assigned{/s}'
     },
 
     initComponent: function() {

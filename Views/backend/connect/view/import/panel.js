@@ -14,7 +14,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
     snippets: {
         connectProductsTitle: '{s name=import/connect_products}Products{/s}',
         showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Nur shopware Connect Produkte anzeigen{/s}',
-        hideMappedProducts: '{s name=import/hide_mapped_products}Zugewiesene Produkte und Kategorien ausblenden{/s}',
+        hideMappedProducts: '{s name=import/tree/hide_mapped}Zugewiesene ausblenden{/s}',
         myShopTitle: '{s name=import/your_shop}Your Shop{/s}',
         myProductsTitle: '{s name=import/my_products}Meine Produkte{/s}'
     },

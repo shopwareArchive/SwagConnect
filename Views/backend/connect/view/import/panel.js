@@ -36,7 +36,8 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             xtype: 'fieldset',
                             layout: 'vbox',
                             width: '50%',
-                            style: 'margin-right: 30px',
+                            padding: '12px',
+                            style: 'margin-right: 12px',
                             flex: 1,
                             title: '<div class="connect-icon fieldset-label-icon">' + me.snippets.connectProductsTitle + '</div>',
                             items:[
@@ -61,6 +62,7 @@ Ext.define('Shopware.apps.Connect.view.import.Panel', {
                             layout: 'vbox',
                             width: '50%',
                             flex: 1,
+                            padding: '12px',
                             title: me.snippets.myShopTitle,
                             items:[
                                 {

@@ -132,7 +132,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
                 xtype: 'button',
                 iconCls: 'sprite-plus-circle-frame',
                 action: 'importRemoteCategory',
-                margin: '0 10px 0 0',
+                margin: '0 5px 0 0',
                 text: me.snippets.importSelectedCategories
             }, {
                 xtype: 'button',

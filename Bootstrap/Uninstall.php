@@ -31,28 +31,28 @@ class Uninstall
     protected $modelManager;
 
     /**
-     * @var string
+     * @var Menu
      */
-    protected $shopware526installed;
+    private $menu;
 
     /**
      * Setup constructor.
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
-     * @param $shopware526installed
+     * @param Menu $menu
      */
     public function __construct
     (
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
-        $shopware526installed
+        Menu $menu
     ) {
         $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
-        $this->shopware526installed = $shopware526installed;
+        $this->menu = $menu;
     }
 
     public function run()
@@ -60,7 +60,7 @@ class Uninstall
         // Currently this should not be done
 //         $this->removeMyAttributes();
 
-        $this->setMenuItem();
+        $this->menu->remove();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
 
@@ -155,44 +155,6 @@ class Uninstall
         if ($element) {
             $this->modelManager->remove($element);
             $this->modelManager->flush();
-        }
-    }
-
-    /**
-     * Re-Activate the connect install menu item, if version is >= 5.2.6
-     */
-    public function setMenuItem()
-    {
-        if (!$this->shopware526installed) {
-            return;
-        }
-
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy(['label' => 'Connect']);
-        if (!$connectMainMenu) {
-            $connectMainMenu = $this->bootstrap->createMenuItem([
-                'label' => 'Connect',
-                'class' => 'shopware-connect',
-                'active' => 1,
-            ]);
-            $connectMainMenu->setPlugin(null);
-        }
-
-        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
-        if (null !== $connectInstallItem) {
-            $connectInstallItem->setActive(1);
-            $connectInstallItem->setParent($connectMainMenu);
-            $this->modelManager->persist($connectInstallItem);
-            $this->modelManager->flush();
-        } else {
-            $item = $this->bootstrap->createMenuItem([
-                'label' => 'Einstieg',
-                'controller' => 'PluginManager',
-                'class' => 'sprite-mousepointer-click',
-                'action' => 'ShopwareConnect',
-                'active' => 1,
-                'parent' => $connectMainMenu
-            ]);
-            $item->setPlugin(null);
         }
     }
 }

@@ -144,12 +144,17 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function doSetup($fullSetup = true)
     {
         $this->registerMyLibrary();
-
+        $modelManager = Shopware()->Models();
         $setup = new Setup(
             $this,
-            Shopware()->Models(),
+            $modelManager,
             Shopware()->Db(),
-            $this->assertMinimumVersion('5.2.6')
+            new \ShopwarePlugins\Connect\Bootstrap\Menu(
+                $this,
+                $this->getConfigComponents(),
+                $modelManager,
+                $this->assertMinimumVersion('5.2.6')
+            )
         );
         $setup->run($fullSetup);
     }
@@ -179,12 +184,17 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function doUninstall()
     {
         $this->registerMyLibrary();
-
+        $modelManager = Shopware()->Models();
         $uninstall = new Uninstall(
             $this,
-            Shopware()->Models(),
+            $modelManager,
             Shopware()->Db(),
-            $this->assertMinimumVersion('5.2.6')
+            new \ShopwarePlugins\Connect\Bootstrap\Menu(
+                $this,
+                $this->getConfigComponents(),
+                $modelManager,
+                $this->assertMinimumVersion('5.2.6')
+            )
         );
         return $uninstall->run();
     }

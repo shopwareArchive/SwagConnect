@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "748802fd9f829dca4b6fca4ed4e110a5",
+    "content-hash": "4db36b5cb12c942375aafbcbd0513b98",
     "packages": [],
     "packages-dev": [
         {
             "name": "shopware/plugin-dev-tools",
-            "version": "dev-add-coveralls-support",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopwareLabs/plugin-dev-tools.git",
-                "reference": "63771ceacc4926a669cd07fe8ecdce648540a693"
+                "reference": "494754d30fffc6b6b3052b52191df1595e8899d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/63771ceacc4926a669cd07fe8ecdce648540a693",
-                "reference": "63771ceacc4926a669cd07fe8ecdce648540a693",
+                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/494754d30fffc6b6b3052b52191df1595e8899d8",
+                "reference": "494754d30fffc6b6b3052b52191df1595e8899d8",
                 "shasum": ""
             },
             "type": "application",
@@ -30,10 +30,10 @@
             ],
             "description": "Tools for plugin development.",
             "support": {
-                "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/add-coveralls-support",
+                "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-05-31T20:08:17+00:00"
+            "time": "2017-06-01T06:09:40+00:00"
         }
     ],
     "aliases": [],

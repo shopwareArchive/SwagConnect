@@ -1,7 +1,7 @@
 {
   "name": "shopware/SwagConnect",
   "require-dev": {
-    "shopware/plugin-dev-tools": "dev-add-coveralls-support "
+    "shopware/plugin-dev-tools": "dev-master"
   },
   "repositories": [
     {

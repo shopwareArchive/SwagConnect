@@ -36,8 +36,6 @@ class SwagConnectTestKernel
     }
 }
 
-SwagConnectTestKernel::start();
-
 class ThumbnailManagerDummy extends Manager
 {
     public function __construct()
@@ -64,3 +62,5 @@ class OptimizerServiceDummy implements OptimizerServiceInterface
     {
     }
 }
+
+SwagConnectTestKernel::start();

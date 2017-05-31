@@ -2,19 +2,10 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Bundle\MediaBundle\OptimizerServiceInterface;
-use Shopware\Components\Thumbnail\Manager;
 use Shopware\Models\Article\Supplier;
-use Shopware\Models\Media\Media;
 
 class ImageImportTest extends ConnectTestHelper
 {
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-
     public function testGetProductsNeedingImageImport()
     {
         $ids = $this->insertOrUpdateProducts(10, false, false);

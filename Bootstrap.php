@@ -361,7 +361,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                     $modelManager,
                     new ProductsAttributesValidator(),
                     $this->getConfigComponents(),
-                    new ErrorHandler()
+                    new ErrorHandler(),
+                    $this->get('events')
                 )
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(

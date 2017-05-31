@@ -74,7 +74,8 @@ class Update
         $this->addOrderStatus();
         $this->fixExportDescriptionSettings();
         $this->fixMarketplaceUrl();
-        $this->removeDuplicatedMenuItems();
+        $this->addIndexToChangeTable();
+	    $this->removeDuplicatedMenuItems();
 
         return true;
     }
@@ -356,6 +357,16 @@ class Update
 
                 $this->modelManager->flush();
             }
+        }
+    }
+
+    private function addIndexToChangeTable()
+    {
+        if (version_compare($this->version, '1.0.16', '<=')) {
+            $this->db->query("
+              ALTER TABLE `sw_connect_change`
+              ADD INDEX `c_operation` (`c_operation`)
+             ");
         }
     }
 

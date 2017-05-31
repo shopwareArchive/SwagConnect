@@ -101,14 +101,15 @@ class HelperTest extends ConnectTestHelper
     public function testGetCategoriesByProduct()
     {
         $this->markTestSkipped('It fails in travis, but works locally');
-        $this->resetConnectCategoryMappings();
-        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
-
-        $sourceId = $this->getExternalProductSourceId();
-        $products = $this->getHelper()->getRemoteProducts(array($sourceId));
-        $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
-
-        $this->assertNotEmpty($categories);
+        //todo@sb: check if this test is still needed
+//        $this->resetConnectCategoryMappings();
+//        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
+//
+//        $sourceId = $this->getExternalProductSourceId();
+//        $products = $this->getHelper()->getRemoteProducts([$sourceId]);
+//        $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
+//
+//        $this->assertNotEmpty($categories);
     }
 
     public function testUpdateUnitInRelatedProducts()

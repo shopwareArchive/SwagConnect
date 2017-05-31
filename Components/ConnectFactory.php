@@ -485,7 +485,8 @@ class ConnectFactory
             Shopware()->Models(),
             new ProductsAttributesValidator(),
             $this->getConfigComponent(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            $this->container->get('events')
         );
     }
 }

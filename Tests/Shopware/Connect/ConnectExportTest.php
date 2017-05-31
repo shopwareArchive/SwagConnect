@@ -47,7 +47,8 @@ class ConnectExportTest extends ConnectTestHelper
             $this->manager,
             new ProductsAttributesValidator(),
             new Config($this->manager),
-            new ErrorHandler()
+            new ErrorHandler(),
+            Shopware()->Container()->get('events')
         );
 
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {

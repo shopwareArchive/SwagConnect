@@ -68,7 +68,8 @@ class Lifecycle extends BaseSubscriber
             $this->manager,
             new ProductsAttributesValidator(),
             $this->getConnectConfig(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            Shopware()->Container()->get('events')
         );
     }
 

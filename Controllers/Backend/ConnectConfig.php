@@ -454,7 +454,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $this->getModelManager(),
             new ProductsAttributesValidator(),
             $this->getConfigComponent(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            $this->container->get('events')
         );
     }
 

@@ -4,7 +4,10 @@ namespace Tests\ShopwarePlugins\Connect;
 
 require_once __DIR__ . '/../../../../../../../../../autoload.php';
 
+use Shopware\Bundle\MediaBundle\OptimizerServiceInterface;
+use Shopware\Components\Thumbnail\Manager;
 use Shopware\Kernel;
+use Shopware\Models\Media\Media;
 
 class SwagConnectTestKernel
 {
@@ -26,7 +29,38 @@ class SwagConnectTestKernel
 
         Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__  . '/');
         Shopware()->Container()->get('ConnectSDK');
+
+        Shopware()->Container()->set('thumbnail_manager', new ThumbnailManagerDummy());
+        Shopware()->Container()->set('shopware_media.cache_optimizer_service', new OptimizerServiceDummy());
+        Shopware()->Container()->set('shopware_media.optimizer_service', new OptimizerServiceDummy());
     }
 }
 
 SwagConnectTestKernel::start();
+
+class ThumbnailManagerDummy extends Manager
+{
+    public function __construct()
+    {
+    }
+
+    public function createMediaThumbnail(Media $media, $thumbnailSizes = [], $keepProportions = false)
+    {
+        return true;
+    }
+}
+
+class OptimizerServiceDummy implements OptimizerServiceInterface
+{
+    public function optimize($filepath)
+    {
+    }
+
+    public function getOptimizers()
+    {
+    }
+
+    public function getOptimizerByMimeType($mime)
+    {
+    }
+}

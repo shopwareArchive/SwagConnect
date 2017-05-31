@@ -2,6 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Bundle\MediaBundle\OptimizerServiceInterface;
 use Shopware\Components\Thumbnail\Manager;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Media\Media;
@@ -11,7 +12,6 @@ class ImageImportTest extends ConnectTestHelper
     public function setUp()
     {
         parent::setUp();
-        Shopware()->Container()->set('thumbnail_manager', new ThumbnailManagerDummy());
     }
 
 
@@ -132,17 +132,5 @@ class ImageImportTest extends ConnectTestHelper
         $this->assertEquals(1, $article->getMainDetail()->getImages()->count());
 
         $this->assertEmpty($this->getImageImport()->getProductsNeedingImageImport());
-    }
-}
-
-class ThumbnailManagerDummy extends Manager
-{
-    public function __construct()
-    {
-    }
-
-    public function createMediaThumbnail(Media $media, $thumbnailSizes = [], $keepProportions = false)
-    {
-        return true;
     }
 }

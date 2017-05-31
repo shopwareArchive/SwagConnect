@@ -75,7 +75,7 @@ class Update
         $this->fixExportDescriptionSettings();
         $this->fixMarketplaceUrl();
         $this->addIndexToChangeTable();
-	    $this->removeDuplicatedMenuItems();
+        $this->removeDuplicatedMenuItems();
 
         return true;
     }

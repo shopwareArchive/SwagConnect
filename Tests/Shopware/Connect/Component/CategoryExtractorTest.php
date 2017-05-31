@@ -1,5 +1,8 @@
 <?php
 
+namespace Tests\ShopwarePlugins\Connect\Component;
+
+use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
 {
@@ -126,7 +129,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             ->disableOriginalConstructor()
             ->getMock();
 
-        $randomStringGenerator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\RandomStringGenerator')
+        $randomStringGenerator = $this->getMockBuilder(RandomStringGenerator::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -649,6 +652,54 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
         $remoteCategories = $this->categoryExtractor->getRemoteCategoriesTreeByStream($stream, $shopId);
         $this->assertEquals($expected, $remoteCategories);
+    }
+
+    /**
+     * Test concat shopId, categoryId and unique number
+     */
+    public function testConcatShopIdAndCategoryId()
+    {
+        $shopId = 1;
+
+        $randomStringGenerator = $this->getMockBuilder(RandomStringGenerator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
+            $this->attributeRepository,
+            new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
+                $this->em,
+                $this->em->getRepository('Shopware\Models\Category\Category'),
+                $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                new \ShopwarePlugins\Connect\Components\Config($this->em)
+            ),
+            $this->configurationGateway,
+            $randomStringGenerator
+        );
+
+        $argument = sprintf('shopId%s~%s', $shopId, '/Kleidung-unit/Hosen-unit/Hosentraeger-unit');
+        $randomStringGenerator->expects($this->once())
+            ->method('generate')
+            ->with($argument)
+            ->willReturn($argument . '1040');
+
+        $parent = '/Kleidung-unit/Hosen-unit';
+        $includeChildren = true;
+        $result = $categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren, false, $shopId);
+        $this->assertEquals(
+            [
+                [
+                    'id' => 'shopId1~/Kleidung-unit/Hosen-unit/Hosentraeger-unit1040',
+                    'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
+                    'name' => 'Hosentraeger',
+                    'leaf' => true,
+                    'children' => [],
+                    'cls' => "sc-tree-node",
+                    'expanded' => false
+                ]
+            ],
+            $result
+        );
     }
 }
  

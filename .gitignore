@@ -13,3 +13,8 @@ Thumbs.db
 
 # PhpStorm-Project
 .idea/
+
+psh.yml
+psh.yaml
+vendor
+build/

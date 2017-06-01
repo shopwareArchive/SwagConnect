@@ -34,11 +34,6 @@ class ApiEndpointCommand extends ShopwareCommand
         $symfonyStyle = new SymfonyStyle($input, $output);
         $apiEndpoint = $input->getArgument('api-endpoint');
 
-        if (filter_var($apiEndpoint, FILTER_VALIDATE_URL) !== false) {
-            $symfonyStyle->error('Invalid url was passed: ' . $apiEndpoint);
-            exit(1);
-        }
-
         $host = parse_url($apiEndpoint, PHP_URL_HOST);
 
         $configWriter->save('connectDebugHost', $host);

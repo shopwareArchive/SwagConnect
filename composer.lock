@@ -1,0 +1,48 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "4db36b5cb12c942375aafbcbd0513b98",
+    "packages": [],
+    "packages-dev": [
+        {
+            "name": "shopware/plugin-dev-tools",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shopwareLabs/plugin-dev-tools.git",
+                "reference": "494754d30fffc6b6b3052b52191df1595e8899d8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/494754d30fffc6b6b3052b52191df1595e8899d8",
+                "reference": "494754d30fffc6b6b3052b52191df1595e8899d8",
+                "shasum": ""
+            },
+            "type": "application",
+            "authors": [
+                {
+                    "name": "Simon Bäumer",
+                    "email": "s.baeumer@shopware.com"
+                }
+            ],
+            "description": "Tools for plugin development.",
+            "support": {
+                "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
+                "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
+            },
+            "time": "2017-06-01T06:09:40+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "shopware/plugin-dev-tools": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

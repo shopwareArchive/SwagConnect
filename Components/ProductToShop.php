@@ -511,9 +511,13 @@ class ProductToShop implements ProductToShopBase
             $this->manager->flush();
         }
 
+        $propertyValues = $article->getPropertyValues();
+        $propertyValues->clear();
+        $this->manager->persist($article);
+        $this->manager->flush();
+
         $article->setPropertyGroup($group);
 
-        $valueCollection = new ArrayCollection();
         $optionRepo = $this->manager->getRepository(PropertyOption::class);
         $valueRepo = $this->manager->getRepository(PropertyValue::class);
 
@@ -546,7 +550,10 @@ class ProductToShop implements ProductToShopBase
                 $this->manager->persist($value);
             }
 
-            $valueCollection->add($value);
+            if (!$propertyValues->contains($value)) {
+                //add only new values
+                $propertyValues->add($value);
+            }
 
             $filters = [
                 ['property' => "options.name", 'expression' => '=', 'value' => $property->option],
@@ -563,7 +570,7 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
-        $article->setPropertyValues($valueCollection);
+        $article->setPropertyValues($propertyValues);
 
         $this->manager->persist($article);
         $this->manager->flush();

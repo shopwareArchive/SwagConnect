@@ -519,7 +519,7 @@ class ProductToShop implements ProductToShopBase
 
         foreach ($product->properties as $property) {
             $option = $optionRepo->findOneBy(['name' => $property->option]);
-
+            $optionExists = $option instanceof PropertyOption;
             if (!$option) {
                 $option = new PropertyOption();
                 $option->setName($property->option);
@@ -534,9 +534,7 @@ class ProductToShop implements ProductToShopBase
                 $this->manager->flush($option);
             }
 
-            $value = $valueRepo->findOneBy(['optionId' => $option->getId(), 'value' => $property->value]);
-
-            if (!$value) {
+            if (!$optionExists || !$value = $valueRepo->findOneBy(['option' => $option, 'value' => $property->value])) {
                 $value = new PropertyValue($option, $property->value);
                 $value->setPosition($property->valuePosition);
 

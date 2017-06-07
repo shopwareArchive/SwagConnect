@@ -138,7 +138,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteCategories', {
                 xtype: 'button',
                 iconCls: 'sprite-arrow-circle-135',
                 action: 'recreateRemoteCategories',
-                margin: '0 10px 0 0',
+                margin: '0 5px 0 0',
                 text: me.snippets.recreateRemoteCategories
             }, {
                 xtype : 'checkbox',

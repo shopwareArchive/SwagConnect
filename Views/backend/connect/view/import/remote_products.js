@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     },
 
     snippets: {
-        hideMappedProducts: '{s name=import/hide_mapped}Hide Assigned products{/s}',
+        hideMappedProducts: '{s name=import/tree/hide_mapped}Hide Assigned products{/s}',
         assignProducts: '{s name=import/assign_selected_products}Add product{/s}'
     },
 
@@ -171,7 +171,6 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
         var me = this;
 
         return Ext.create('Ext.toolbar.Toolbar', {
-            padding: '0 0 0 10px',
             dock: 'top',
             ui: 'shopware-ui',
             items: [{

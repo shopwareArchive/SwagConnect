@@ -163,4 +163,12 @@ class ImportTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
     }
+
+    public function testRecreateRemoteCategoriesAction()
+    {
+        $this->dispatch('backend/Import/recreateRemoteCategories');
+
+        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
+        $this->assertTrue($this->View()->success);
+    }
 }

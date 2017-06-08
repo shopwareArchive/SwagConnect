@@ -25,6 +25,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         messages: {
             removeArticleTitle: '{s name=import/message/remove_article_title}Remove selected product?{/s}',
             removeArticle: '{s name=import/message/remove_article}Are you sure you want to remove this product?{/s}',
+            recreateRemoteCategoriesTitle: '{s name=import/tree/update_remote_categories}Re-create categories{/s}',
+            recreateRemoteCategoriesConfirmMessage: '{s name=import/message/recreate_remote_categories}Are you sure you want to re-create remote categories? This will deactivate all auto created remote categories and unassign their products.{/s}',
             deactivatedCategoriesSuccess: '{s name=deactivated_categories/success/message}[0] categories deactivated{/s}'
         }
     },
@@ -64,6 +66,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             'connect-import button[action=importRemoteCategory]': {
                 click: me.onImportRemoteCategoryButtonClick
+            },
+            'connect-import button[action=recreateRemoteCategories]': {
+                click: me.onRecreateRemoteCategoryButtonClick
             },
             'connect-import button[action=unassignRemoteCategory]': {
                 click: me.onUnassignRemoteCategoryButtonClick
@@ -539,6 +544,44 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
     },
 
+    onRecreateRemoteCategoryButtonClick: function() {
+        var me = this;
+
+        Ext.MessageBox.confirm(
+            me.snippets.messages.recreateRemoteCategoriesTitle,
+            me.snippets.messages.recreateRemoteCategoriesConfirmMessage,
+            function (response) {
+                if (response !== 'yes') {
+                    return false;
+                }
+
+                var panel = me.getImportPanel();
+                panel.setLoading();
+                Ext.Ajax.request({
+                    url: '{url controller=Import action=recreateRemoteCategories}',
+                    method: 'POST',
+                    success: function (response, opts) {
+                        panel.setLoading(false);
+                        var data = Ext.JSON.decode(response.responseText);
+                        if (data.success == true) {
+                            me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                        } else {
+                            me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                        }
+
+                        me.onReloadRemoteCategories();
+                        me.onReloadOwnCategories();
+                        me.clearLocalProducts();
+                        me.clearRemoteProducts();
+                    },
+                    failure: function (response, opts) {
+                        panel.setLoading(false);
+                        me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
+                    }
+                });
+            });
+    },
+
     onUnassignRemoteCategoryButtonClick: function () {
         var me = this;
 
@@ -853,6 +896,22 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
 
         store.getRootNode().removeAll();
         store.load();
+    },
+
+    clearRemoteProducts: function () {
+        var me = this;
+        var store = me.getRemoteProductsGrid().getStore();
+
+        store.getProxy().extraParams = [];
+        store.loadPage(1);
+    },
+
+    clearLocalProducts: function () {
+        var me = this;
+        var store = me.getLocalProductsGrid().getStore();
+
+        store.getProxy().extraParams = [];
+        store.loadPage(1);
     }
 });
 //{/block}

@@ -60,6 +60,7 @@ class VerificatorDispatcher
 
         if ($verificator === null) {
             throw new \OutOfBoundsException(
+
                 "No verificator available for class " . get_class($struct)
             );
         }

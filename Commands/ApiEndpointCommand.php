@@ -35,6 +35,9 @@ class ApiEndpointCommand extends ShopwareCommand
         $apiEndpoint = $input->getArgument('api-endpoint');
 
         $host = parse_url($apiEndpoint, PHP_URL_HOST);
+        if (!$host) {
+            $host = $apiEndpoint;
+        }
 
         $configWriter->save('connectDebugHost', $host);
         $symfonyStyle->success('Endpoint was updated successfully to ' . $host);

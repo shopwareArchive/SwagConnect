@@ -17,7 +17,13 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
 
     snippets: {
         hideMappedProducts: '{s name=import/hide_mapped}Hide Assigned products{/s}',
-        assignProducts: '{s name=import/assign_selected_products}Add product{/s}'
+        assignProducts: '{s name=import/assign_selected_products}Add product{/s}',
+        orderNumberColumnLabel: '{s name=import/columns/order_number}Order number{/s}',
+        nameColumnLabel: '{s name=import/columns/name}Name{/s}',
+        supplierColumnLabel: '{s name=import/columns/supplier}Supplier{/s}',
+        retailersPriceColumnLabel: '{s name=import/columns/retailers_buying_price}Retailers buying price{/s}',
+        priceColumnLabel: '{s name=import/columns/price}Price{/s}',
+        taxRateColumnLabel: '{s name=import/columns/tax_rate}Tax rate{/s}'
     },
 
     viewConfig: {
@@ -52,21 +58,23 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
     },
 
     getColumns: function() {
+        var me = this;
+
         return [
             {
-                header: 'Artikel Nr.',
+                header: me.snippets.orderNumberColumnLabel,
                 dataIndex: 'Detail_number',
                 flex: 2
             }, {
-                header: 'Name',
+                header: me.snippets.nameColumnLabel,
                 dataIndex: 'Article_name',
                 flex: 3
             }, {
-                header: 'Hersteller',
+                header: me.snippets.supplierColumnLabel,
                 dataIndex: 'Supplier_name',
                 flex: 3
             }, {
-                header: 'HEK (netto)',
+                header: me.snippets.retailersPriceColumnLabel,
                 dataIndex: 'Price_basePrice',
                 xtype: 'numbercolumn',
                 format: '0.00',
@@ -76,13 +84,13 @@ Ext.define('Shopware.apps.Connect.view.import.RemoteProducts', {
                     return Ext.util.Format.number(value, this.format);
                 }
             }, {
-                header: 'Preis',
+                header: me.snippets.priceColumnLabel,
                 dataIndex: 'Price_price',
                 xtype: 'numbercolumn',
                 format: '0.00',
                 flex: 2
             }, {
-                header: 'Steuersatz',
+                header: me.snippets.taxRateColumnLabel,
                 dataIndex: 'Tax_name',
                 flex: 2
             }, {

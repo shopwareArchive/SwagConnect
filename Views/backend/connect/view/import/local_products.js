@@ -11,7 +11,14 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
     snippets: {
         removeProducts: '{s name=import/remove_products}Remove Products{/s}',
         activateProductsLabel: '{s name=import/activate_products}Activate products{/s}',
-        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Show products{/s}'
+        showOnlyConnectProductsLabel: '{s name=import/show_only_connect_products}Products{/s}',
+        orderNumberColumnLabel: '{s name=import/columns/order_number}Order number{/s}',
+        nameColumnLabel: '{s name=import/columns/name}Name{/s}',
+        supplierColumnLabel: '{s name=import/columns/supplier}Supplier{/s}',
+        activeColumnLabel: '{s name=import/columns/active}Active{/s}',
+        retailersPriceColumnLabel: '{s name=import/columns/retailers_buying_price}Retailers buying price{/s}',
+        priceColumnLabel: '{s name=import/columns/price}Price{/s}',
+        taxRateColumnLabel: '{s name=import/columns/tax_rate}Tax rate{/s}'
     },
 
     border: false,
@@ -55,11 +62,11 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
 
         return [
             {
-                header: 'Artikel Nr.',
+                header: me.snippets.orderNumberColumnLabel,
                 dataIndex: 'Detail_number',
                 flex: 2
             }, {
-                header: 'Name',
+                header: me.snippets.nameColumnLabel,
                 dataIndex: 'Article_name',
                 flex: 3,
                 renderer: function(value, metaData, record) {
@@ -70,11 +77,11 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                     return value;
                 }
             }, {
-                header: 'Hersteller',
+                header: me.snippets.supplierColumnLabel,
                 dataIndex: 'Supplier_name',
                 flex: 3
             }, {
-                header: 'Aktiv',
+                header: me.snippets.activeColumnLabel,
                 dataIndex: 'Article_active',
                 flex: 1,
                 renderer: function(value, metaData, record) {
@@ -85,7 +92,7 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                     return '<span style="display:block; margin: 0 auto; height:25px; width:25px;" class="' + checked + '"></span>';
                 }
             }, {
-                header: 'HEK (netto)',
+                header: me.snippets.retailersPriceColumnLabel,
                 xtype: 'numbercolumn',
                 dataIndex: 'Detail_purchasePrice',
                 flex: 2,
@@ -94,12 +101,12 @@ Ext.define('Shopware.apps.Connect.view.import.LocalProducts', {
                     return Ext.util.Format.number(value, this.format);
                 }
             }, {
-                header: 'Preis',
+                header: me.snippets.priceColumnLabel,
                 xtype: 'numbercolumn',
                 dataIndex: 'Price_price',
                 flex: 2
             }, {
-                header: 'Steuersatz',
+                header: me.snippets.taxRateColumnLabel,
                 dataIndex: 'Tax_name',
                 flex: 2
             }, {

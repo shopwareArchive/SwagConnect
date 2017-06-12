@@ -146,7 +146,6 @@ Ext.define('Shopware.apps.Connect.view.import.OwnCategories', {
         var me = this;
 
         return Ext.create('Ext.toolbar.Toolbar', {
-            padding: '2px 0 2px 10px',
             cls: 'tree-table-toolbar',
             dock: 'top',
             ui: 'shopware-ui',

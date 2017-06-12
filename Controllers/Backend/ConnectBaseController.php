@@ -1153,7 +1153,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             case 1:
                 $builder->andWhere('logs.isError = 0');
                 break;
-
         }
 
         $query = $builder->getQuery()
@@ -1216,7 +1215,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $this->getModelManager(),
             new ProductsAttributesValidator(),
             $this->getConfigComponent(),
-            new ErrorHandler()
+            new ErrorHandler(),
+            $this->container->get('events')
         );
     }
 
@@ -1458,7 +1458,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $db->update(
                 's_plugin_connect_items',
-                array('cron_update' => 1),
+                ['cron_update' => 1, 'export_status' => Attribute::STATUS_UPDATE],
                 "shop_id IS NULL"
             );
 

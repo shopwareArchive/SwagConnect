@@ -22,10 +22,12 @@
  * our trademarks remain entirely with us.
  */
 
+use Doctrine\Common\Collections\ArrayCollection;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use Shopware\Connect\Gateway\PDO;
+use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -144,12 +146,17 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function doSetup($fullSetup = true)
     {
         $this->registerMyLibrary();
-
+        $modelManager = Shopware()->Models();
         $setup = new Setup(
             $this,
-            Shopware()->Models(),
+            $modelManager,
             Shopware()->Db(),
-            $this->assertMinimumVersion('5.2.6')
+            new \ShopwarePlugins\Connect\Bootstrap\Menu(
+                $this,
+                $this->getConfigComponents(),
+                $modelManager,
+                $this->assertMinimumVersion('5.2.6')
+            )
         );
         $setup->run($fullSetup);
     }
@@ -179,12 +186,17 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function doUninstall()
     {
         $this->registerMyLibrary();
-
+        $modelManager = Shopware()->Models();
         $uninstall = new Uninstall(
             $this,
-            Shopware()->Models(),
+            $modelManager,
             Shopware()->Db(),
-            $this->assertMinimumVersion('5.2.6')
+            new \ShopwarePlugins\Connect\Bootstrap\Menu(
+                $this,
+                $this->getConfigComponents(),
+                $modelManager,
+                $this->assertMinimumVersion('5.2.6')
+            )
         );
         return $uninstall->run();
     }
@@ -231,6 +243,18 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $this
         );
 
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function onConsoleAddCommand()
+    {
+        $this->registerMyLibrary();
+
+        return new ArrayCollection([
+            new ApiEndpointCommand()
+        ]);
     }
 
     /**
@@ -351,7 +375,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                     $modelManager,
                     new ProductsAttributesValidator(),
                     $this->getConfigComponents(),
-                    new ErrorHandler()
+                    new ErrorHandler(),
+                    $this->get('events')
                 )
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
@@ -361,6 +386,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $modelManager,
+                $db,
                 Shopware()->Container()
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),

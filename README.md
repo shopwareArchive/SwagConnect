@@ -1,6 +1,21 @@
 [![Build Status](https://travis-ci.org/shopware/SwagConnect.svg?branch=master)](https://travis-ci.org/shopware/SwagConnect)
 [![Coverage Status](https://coveralls.io/repos/github/shopware/SwagConnect/badge.svg?branch=master)](https://coveralls.io/github/shopware/SwagConnect?branch=master)
 
+# Development
+
+## Installation
+
+1. Clone this repository
+2. Run `$ composer install`
+3. Move to `vendor/shopware/plugin-dev-tools` and execute `$ ./install.sh`
+
+## Running tests
+
+The test suite relies on the [plugin-dev-tools](https://github.com/shopwareLabs/plugin-dev-tools).
+
+1. Run `$ ./psh local:init` to initilize a testing environment on your local system.
+2. Run `$ ./psh local:unit` to execute all tests or `$ ./psh local:unit-coverage` to generate the code-coverage
+
 # General behaviour
 
 ## Uninstall

@@ -1,0 +1,12 @@
+{
+  "name": "shopware/SwagConnect",
+  "require-dev": {
+    "shopware/plugin-dev-tools": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/shopwareLabs/plugin-dev-tools"
+    }
+  ]
+}

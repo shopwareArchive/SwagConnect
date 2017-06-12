@@ -108,7 +108,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             Shopware()->Models(),
             new ProductsAttributesValidator(),
             new Config(Shopware()->Models()),
-            new ErrorHandler()
+            new ErrorHandler(),
+            Shopware()->Container()->get('events')
         );
     }
 

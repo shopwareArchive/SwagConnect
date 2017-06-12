@@ -34,11 +34,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private $productToRemoteCategoryRepository;
 
-    /**
-     * @var \ShopwarePlugins\Connect\Components\ImportService
-     */
-    private $importService;
-
     private $remoteCategoryRepository;
 
     private $autoCategoryResolver;
@@ -53,13 +48,21 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
 
         $query = $this->request->getParam('remoteCategoriesQuery', "");
+        $node = $this->request->getParam('id');
 
         if (trim($query) !== "") {
-            $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent);
-            $this->View()->assign(array(
-                'success' => true,
-                'data' => $categories,
-            ));
+            try {
+                $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent, $node);
+                $this->View()->assign(array(
+                    'success' => true,
+                    'data' => $categories,
+                ));
+            } catch (\InvalidArgumentException $e) {
+                $this->View()->assign(array(
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ));
+            }
 
             return;
         }
@@ -76,7 +79,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
                 break;
             default:
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped);
+                // given id must have following structure:
+                // shopId5~/english/boots/nike
+                // shopId is required parameter to fetch all child categories of this parent
+                // $matches[2] gives us only shopId as a int
+                preg_match('/^(shopId(\d+)~)(stream~(.*)~)(.*)$/', $node, $matches);
+                if (empty($matches)) {
+                    $this->View()->assign([
+                        'success' => false,
+                        'message' => 'Node must contain shopId and stream',
+                    ]);
+                    return;
+                }
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2], $matches[4]);
         }
 
         $this->View()->assign(array(
@@ -360,6 +375,15 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ]);
     }
 
+    public function recreateRemoteCategoriesAction()
+    {
+        $this->getAutoCategoryReverter()->recreateRemoteCategories();
+
+        return $this->View()->assign([
+            'success' => true,
+        ]);
+    }
+
     private function getCategoryExtractor()
     {
         if (!$this->categoryExtractor) {
@@ -415,20 +439,12 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     private function getImportService()
     {
-        if (!$this->importService) {
-            $this->importService = new \ShopwarePlugins\Connect\Components\ImportService(
-                $this->getModelManager(),
-                $this->container->get('multi_edit.product'),
-                $this->getCategoryRepository(),
-                $this->getModelManager()->getRepository('Shopware\Models\Article\Article'),
-                $this->getRemoteCategoryRepository(),
-                $this->getProductToRemoteCategoryRepository(),
-                $this->getAutoCategoryResolver(),
-                $this->getCategoryExtractor()
-            );
-        }
+        return $this->container->get('swagconnect.import_service');
+    }
 
-        return $this->importService;
+    private function getAutoCategoryReverter()
+    {
+        return $this->container->get('swagconnect.auto_category_reverter');
     }
 
     /**

@@ -279,6 +279,93 @@ class ImportService
     }
 
     /**
+     * Store remote categories in Connect tables
+     * and add relations between categories and products.
+     *
+     * @param array $remoteItems
+     *
+     * @throws \Exception
+     */
+    public function storeRemoteCategories(array $remoteItems)
+    {
+        $connection = $this->manager->getConnection();
+
+        $connection->beginTransaction();
+        try {
+            foreach ($remoteItems as $articleId => $categories) {
+                foreach ($categories as $categoryKey => $category) {
+                    $connection->executeQuery(
+                        'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
+                        [$categoryKey, $category]
+                    );
+
+                    $connection->executeQuery(
+                        'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`connect_category_id`, `articleID`) VALUES ((SELECT c.id FROM s_plugin_connect_categories c WHERE c.category_key = ?), ?)',
+                        [$categoryKey, $articleId]
+                    );
+                }
+            }
+            $connection->commit();
+        } catch(\Exception $e) {
+            $connection->rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Fetch remote (Connect) categories by given article ids
+     * @param array $articleIds
+     * @return array
+     */
+    public function fetchRemoteCategoriesByArticleIds(array $articleIds)
+    {
+        $remoteCategoryIds = [];
+        while ($currentIdBatch = array_splice($articleIds, 0, 500)) {
+            $sql = 'SELECT sac.categoryID
+            FROM s_articles_categories sac
+            LEFT JOIN s_categories_attributes attr ON sac.categoryID = attr.categoryID
+            WHERE attr.connect_imported_category = 1 AND sac.articleID IN (' . implode(", ", $currentIdBatch) . ') GROUP BY sac.categoryID';
+            $rows = $this->manager->getConnection()->fetchAll($sql);
+
+            $remoteCategoryIds = array_merge($remoteCategoryIds, array_map(function ($row) {
+                return $row['categoryID'];
+            }, $rows));
+        }
+
+        return array_unique($remoteCategoryIds);
+    }
+
+    /**
+     * Fetch all articles where categories are auto imported
+     * and there isn't record in s_plugin_connect_product_to_categories for them.
+     * Returned array contains key = articleId and value = array of categories
+     *
+     * @return array
+     */
+    public function getArticlesWithAutoImportedCategories()
+    {
+        $statement = $this->manager->getConnection()->prepare(
+            "SELECT b.article_id, b.category
+            FROM s_plugin_connect_items b
+            LEFT JOIN s_plugin_connect_product_to_categories a ON b.article_id = a.articleID
+            WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id"
+        );
+        $statement->execute();
+
+        $remoteItems = [];
+        foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $item) {
+            $categories = json_decode($item['category'], true);
+            if (is_array($categories) && count($categories) > 0) {
+                $articleId = $item['article_id'];
+                $remoteItems[$articleId] = $categories;
+            }
+        }
+
+        return $remoteItems;
+    }
+
+    /**
      * Helper function to create filter values
      * @param int $categoryId
      * @param boolean $showOnlyConnectArticles

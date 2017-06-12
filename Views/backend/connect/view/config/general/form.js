@@ -416,6 +416,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                     fieldLabel: me.snippets.separateShippingLabel,
                     labelWidth: me.defaults.labelWidth,
                     inputValue: 1,
+                    hidden : true,
                     uncheckedValue: 0
                 }
             ]

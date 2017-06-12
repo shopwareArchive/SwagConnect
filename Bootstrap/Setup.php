@@ -35,29 +35,27 @@ class Setup
      */
     protected $modelManager;
 
-    /**
-     * @var string
-     */
-    protected $shopware526installed;
+    private $menu;
 
     /**
      * Setup constructor.
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
-     * @param $shopware526installed
+     * @param Menu
      */
     public function __construct
     (
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
-        $shopware526installed
+        Menu $menu
+
     ) {
         $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
-        $this->shopware526installed = $shopware526installed;
+        $this->menu = $menu;
     }
 
     public function run($fullSetup)
@@ -71,7 +69,6 @@ class Setup
         $this->generateConnectPaymentAttribute();
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
-
         $this->createConnectCustomerGroup();
 
         if ($fullSetup) {
@@ -98,131 +95,9 @@ class Setup
      */
     private function createMyMenu()
     {
-        $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
-        // check if shopware Connect menu item exists
-        if (!$connectItem || $this->shopware526installed) {
-            $configComponent = new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
+        $this->menu->create();
 
-            if ($this->shopware526installed) {
-                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Einstieg', 'action' => 'ShopwareConnect'));
-                if (null !== $connectInstallItem) {
-                    $connectInstallItem->setActive(0);
-                    $this->modelManager->persist($connectInstallItem);
-                    $this->modelManager->flush();
-                }
-            } else {
-                //move help menu item after Connect
-                $helpItem = $this->bootstrap->Menu()->findOneBy(array('label' => ''));
-                $helpItem->setPosition(1);
-                $this->modelManager->persist($helpItem);
-                $this->modelManager->flush();
-            }
-
-            if ($connectItem) {
-                $connectItem->setActive(1);
-                $this->modelManager->persist($connectItem);
-                $this->modelManager->flush();
-            }
-
-            $parent = $this->bootstrap->Menu()->findOneBy(array('label' => 'Connect'));
-            if (null === $parent) {
-                $parent = $this->bootstrap->createMenuItem(array(
-                    'label' => 'Connect',
-                    'class' => 'connect-icon',
-                    'active' => 1,
-                ));
-
-                if ($this->shopware526installed) {
-                    $parent->setClass('shopware-connect');
-                    //if "Connect" menu does not exist
-                    //it must not have pluginID, because on plugin uninstall
-                    //it will be removed
-                    $parent->setPlugin(null);
-                }
-            }
-
-            if ($configComponent->getConfig('apiKey', '') == '') {
-                $registerItem  = $this->bootstrap->Menu()->findOneBy(array(
-                    'controller' => 'Connect',
-                    'action' => 'Register'
-                ));
-                if (!$registerItem) {
-                    $this->bootstrap->createMenuItem(array(
-                        'label' => 'Register',
-                        'controller' => 'Connect',
-                        'action' => 'Register',
-                        'class' => 'sprite-mousepointer-click',
-                        'active' => 1,
-                        'parent' => $parent
-                    ));
-                }
-            } else {
-                // check if menu item already exists
-                // this is possible when start update,
-                // because setup function is called
-                $importItem  = $this->bootstrap->Menu()->findOneBy(array(
-                    'controller' => 'Connect',
-                    'action' => 'Import'
-                ));
-                if (!$importItem) {
-                    $this->bootstrap->createMenuItem(array(
-                        'label' => 'Import',
-                        'controller' => 'Connect',
-                        'action' => 'Import',
-                        'class' => 'sc-icon-import',
-                        'active' => 1,
-                        'parent' => $parent
-                    ));
-                }
-
-                $exportItem  = $this->bootstrap->Menu()->findOneBy(array(
-                    'controller' => 'Connect',
-                    'action' => 'Export'
-                ));
-                if (!$exportItem) {
-                    $this->bootstrap->createMenuItem(array(
-                        'label' => 'Export',
-                        'controller' => 'Connect',
-                        'action' => 'Export',
-                        'class' => 'sc-icon-export',
-                        'active' => 1,
-                        'parent' => $parent
-                    ));
-                }
-
-                $settingsItem  = $this->bootstrap->Menu()->findOneBy(array(
-                    'controller' => 'Connect',
-                    'action' => 'Settings'
-                ));
-                if (!$settingsItem) {
-                    $this->bootstrap->createMenuItem(array(
-                        'label' => 'Settings',
-                        'controller' => 'Connect',
-                        'action' => 'Settings',
-                        'class' => 'sprite-gear',
-                        'active' => 1,
-                        'parent' => $parent
-                    ));
-                }
-
-                $openConnectItem  = $this->bootstrap->Menu()->findOneBy(array(
-                    'controller' => 'Connect',
-                    'action' => 'OpenConnect'
-                ));
-                if (!$openConnectItem) {
-                    $this->bootstrap->createMenuItem(array(
-                        'label' => 'OpenConnect',
-                        'controller' => 'Connect',
-                        'action' => 'OpenConnect',
-                        'onclick' => 'window.open("connect/autoLogin")',
-                        'class' => 'connect-icon',
-                        'active' => 1,
-                        'parent' => $parent
-                    ));
-                }
-            }
-
-            $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
+        $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
             ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 2, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
             ('backend/index/view/main', 1, 1, 'Connect/Export', 'Produkte zu Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
@@ -243,8 +118,7 @@ class Setup
               `localeID` = VALUES(`localeID`),
               `value` = VALUES(`value`)
               ;";
-            $this->db->exec($sql);
-        }
+        $this->db->exec($sql);
     }
 
     /**
@@ -261,6 +135,11 @@ class Setup
         $this->bootstrap->subscribeEvent(
             'Enlight_Controller_Front_DispatchLoopStartup',
             'onStartDispatch'
+        );
+
+        $this->bootstrap->subscribeEvent(
+            'Shopware_Console_Add_Command',
+            'onConsoleAddCommand'
         );
 
         $connectImportImages = $this->db->fetchOne(
@@ -320,7 +199,8 @@ class Setup
               `c_payload` longblob,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               UNIQUE KEY `c_revision` (`c_revision`),
-              KEY `c_entity_id` (`c_entity_id`)
+              KEY `c_entity_id` (`c_entity_id`),
+              INDEX `c_operation` (`c_operation`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
            CREATE TABLE IF NOT EXISTS `sw_connect_data` (
               `d_key` varchar(32) NOT NULL,

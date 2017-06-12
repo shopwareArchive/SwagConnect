@@ -15,27 +15,40 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Struct\ExportList;
 use ShopwarePlugins\Connect\Struct\SearchCriteria;
+use Enlight_Event_EventManager;
 
 class ConnectExport
 {
     const BATCH_SIZE = 200;
 
-    /** @var  Helper */
+    /** @var
+     * Helper
+     */
     protected $helper;
 
-    /** @var  SDK */
+    /** @var
+     * SDK
+     */
     protected $sdk;
 
-    /** @var  ModelManager */
+    /** @var
+     * ModelManager
+     */
     protected $manager;
 
-    /** @var ProductAttributesValidator  */
+    /**
+     * @var ProductAttributesValidator
+     */
     protected $productAttributesValidator;
 
-    /** @var  MarketplaceGateway */
+    /** @var
+     * MarketplaceGateway
+     */
     protected $marketplaceGateway;
 
-    /** @var ErrorHandler */
+    /**
+     * @var ErrorHandler
+     */
     protected $errorHandler;
 
     /**
@@ -43,13 +56,29 @@ class ConnectExport
      */
     protected $configComponent;
 
+    /**
+     * @var Enlight_Event_EventManager
+     */
+    private $eventManager;
+
+    /**
+     * ConnectExport constructor.
+     * @param Helper $helper
+     * @param SDK $sdk
+     * @param ModelManager $manager
+     * @param ProductAttributesValidator $productAttributesValidator
+     * @param Config $configComponent
+     * @param \ShopwarePlugins\Connect\Components\ErrorHandler $errorHandler
+     * @param Enlight_Event_EventManager $eventManager
+     */
     public function __construct(
         Helper $helper,
         SDK $sdk,
         ModelManager $manager,
         ProductAttributesValidator $productAttributesValidator,
         Config $configComponent,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
+        Enlight_Event_EventManager $eventManager
     )
     {
         $this->helper = $helper;
@@ -58,6 +87,7 @@ class ConnectExport
         $this->productAttributesValidator = $productAttributesValidator;
         $this->configComponent = $configComponent;
         $this->errorHandler = $errorHandler;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -94,7 +124,23 @@ class ConnectExport
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
+        $ids = $this->eventManager->filter(
+            'Connect_Supplier_Get_Products_Filter_Source_IDS',
+            $ids,
+            [
+                'subject' => $this
+            ]
+        );
+
         $connectItems = $this->fetchConnectItems($ids);
+
+        $this->eventManager->notify(
+            'Connect_Supplier_Get_All_Products_Before',
+            [
+                'subject' => $this,
+                'products' => $connectItems
+            ]
+        );
 
         $this->manager->beginTransaction();
 

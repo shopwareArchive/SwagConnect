@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/menu.xsd">
+    <entries>
+        <entry>
+            <name>Register</name>
+            <label lang="en">Register</label>
+            <label lang="de">Register</label>
+            <controller>Connect</controller>
+            <action>Register</action>
+            <class>sprite-mousepointer-click</class>
+            <parent identifiedBy="label">Connect</parent>
+        </entry>
+
+        <entry>
+            <name>Import</name>
+            <label lang="en">Import</label>
+            <label lang="de">Import</label>
+            <controller>Connect</controller>
+            <action>Import</action>
+            <class>sc-icon-import</class>
+            <parent identifiedBy="label">Connect</parent>
+        </entry>
+    </entries>
+</menu>

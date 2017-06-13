@@ -95,7 +95,7 @@ class Setup
      */
     private function createMyMenu()
     {
-//        $this->menu->create();
+        $this->menu->create();
 
         $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
             ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),

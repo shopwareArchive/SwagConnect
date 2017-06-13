@@ -37,6 +37,11 @@ class Menu
      */
     private $shopware526installed;
 
+    /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    private $menuRepository;
+
     public function __construct(
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         Config $configComponent,
@@ -48,6 +53,7 @@ class Menu
         $this->configComponent = $configComponent;
         $this->modelManager = $modelManager;
         $this->shopware526installed = $shopware526installed;
+        $this->menuRepository = Shopware()->Models()->getRepository(\Shopware\Models\Menu\Menu::class);
     }
 
     /**
@@ -68,7 +74,7 @@ class Menu
      */
     public function getMainMenuItem()
     {
-        return $this->bootstrap->Menu()->findOneBy([
+        return $this->menuRepository->findOneBy([
             'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
@@ -83,7 +89,7 @@ class Menu
         // check if shopware Connect menu item exists
         if (!$connectItem || $this->shopware526installed) {
             if ($this->shopware526installed) {
-                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+                $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
                 if (null !== $connectInstallItem) {
                     $connectInstallItem->setActive(0);
                     $this->modelManager->persist($connectInstallItem);
@@ -91,7 +97,7 @@ class Menu
                 }
             } else {
                 //move help menu item after Connect
-                $helpItem = $this->bootstrap->Menu()->findOneBy(['label' => '']);
+                $helpItem = $this->menuRepository->findOneBy(['label' => '']);
                 $helpItem->setPosition(1);
                 $this->modelManager->persist($helpItem);
                 $this->modelManager->flush();
@@ -103,7 +109,7 @@ class Menu
                 $this->modelManager->flush();
             }
 
-            $parent = $this->bootstrap->Menu()->findOneBy(['class' => self::CONNECT_CLASS]);
+            $parent = $this->menuRepository->findOneBy(['class' => self::CONNECT_CLASS]);
             if (null === $parent) {
                 $parent = $this->bootstrap->createMenuItem([
                     'label' => self::CONNECT_LABEL,
@@ -122,7 +128,7 @@ class Menu
 
             if ($this->configComponent->getConfig('apiKey', '') == ''
                 && !$this->configComponent->getConfig('shopwareId')) {
-                $registerItem = $this->bootstrap->Menu()->findOneBy([
+                $registerItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Register'
                 ]);
@@ -140,7 +146,7 @@ class Menu
                 // check if menu item already exists
                 // this is possible when start update,
                 // because setup function is called
-                $importItem = $this->bootstrap->Menu()->findOneBy([
+                $importItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Import'
                 ]);
@@ -155,7 +161,7 @@ class Menu
                     ]);
                 }
 
-                $exportItem = $this->bootstrap->Menu()->findOneBy([
+                $exportItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Export'
                 ]);
@@ -170,7 +176,7 @@ class Menu
                     ]);
                 }
 
-                $settingsItem = $this->bootstrap->Menu()->findOneBy([
+                $settingsItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Settings'
                 ]);
@@ -185,7 +191,7 @@ class Menu
                     ]);
                 }
 
-                $openConnectItem = $this->bootstrap->Menu()->findOneBy([
+                $openConnectItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'OpenConnect'
                 ]);
@@ -215,7 +221,7 @@ class Menu
         }
 
         //if it is sem demo marketplace it will not find the correct menu item
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
+        $connectMainMenu = $this->menuRepository->findOneBy([
             'class' => Menu::CONNECT_CLASS,
             'parent' => null,
         ]);
@@ -232,7 +238,7 @@ class Menu
             $connectMainMenu->setLabel(Menu::CONNECT_LABEL);
         }
 
-        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+        $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
         if (null !== $connectInstallItem) {
             $connectInstallItem->setActive(1);
             $connectInstallItem->setParent($connectMainMenu);

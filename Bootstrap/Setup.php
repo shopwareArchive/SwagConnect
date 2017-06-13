@@ -79,15 +79,15 @@ class Setup
     }
 
     private function createConfig() {
-        $form = $this->bootstrap->Form();
+//        $form = $this->bootstrap->Form();
 
-        $form->setElement('text',
-            'connectDebugHost',
-            array(
-                'label' => 'Shopware Connect Host',
-                'required' => false,
-                'value'    => Config::MARKETPLACE_URL
-            ));
+//        $form->setElement('text',
+//            'connectDebugHost',
+//            array(
+//                'label' => 'Shopware Connect Host',
+//                'required' => false,
+//                'value'    => Config::MARKETPLACE_URL
+//            ));
     }
 
     /**
@@ -95,7 +95,7 @@ class Setup
      */
     private function createMyMenu()
     {
-        $this->menu->create();
+//        $this->menu->create();
 
         $sql = "INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
             ('backend/index/view/main', 1, 1, 'Connect', 'Connect', '2016-03-17 18:32:48', '2016-03-17 18:32:48'),
@@ -127,20 +127,20 @@ class Setup
      */
     public function createMyEvents()
     {
-        $this->bootstrap->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_ConnectSDK',
-            'onInitResourceSDK'
-        );
-
-        $this->bootstrap->subscribeEvent(
-            'Enlight_Controller_Front_DispatchLoopStartup',
-            'onStartDispatch'
-        );
-
-        $this->bootstrap->subscribeEvent(
-            'Shopware_Console_Add_Command',
-            'onConsoleAddCommand'
-        );
+//        $this->bootstrap->subscribeEvent(
+//            'Enlight_Bootstrap_InitResource_ConnectSDK',
+//            'onInitResourceSDK'
+//        );
+//
+//        $this->bootstrap->subscribeEvent(
+//            'Enlight_Controller_Front_DispatchLoopStartup',
+//            'onStartDispatch'
+//        );
+//
+//        $this->bootstrap->subscribeEvent(
+//            'Shopware_Console_Add_Command',
+//            'onConsoleAddCommand'
+//        );
 
         $connectImportImages = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
@@ -597,8 +597,8 @@ class Setup
      */
     public function importSnippets()
     {
-        $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
-        $this->db->exec($sql);
+//        $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
+//        $this->db->exec($sql);
     }
 
     /**

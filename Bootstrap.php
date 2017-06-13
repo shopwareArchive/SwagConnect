@@ -23,6 +23,7 @@
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Components\Plugin\Context\InstallContext;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
@@ -50,20 +51,25 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     private $lifecycle;
 
     /**
+     * @var InstallContext
+     */
+    private $installContext;
+
+    public function __construct($name, $info = null, InstallContext $context = null)
+    {
+        $this->installContext = $context;
+        parent::__construct($name, $info);
+    }
+
+    /**
      * Returns the current version of the plugin.
      *
-     * @return string|void
+     * @return string
      * @throws Exception
      */
     public function getVersion()
     {
-        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR .'plugin.json'), true);
-
-        if ($info) {
-            return $info['currentVersion'];
-        } else {
-            throw new \Exception('The plugin has an invalid version file.');
-        }
+        return $this->installContext->getCurrentVersion();
     }
 
     /**
@@ -145,7 +151,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function doSetup($fullSetup = true)
     {
-        $this->registerMyLibrary();
         $modelManager = Shopware()->Models();
         $setup = new Setup(
             $this,
@@ -416,18 +421,19 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function registerMyLibrary()
     {
-        $this->Application()->Loader()->registerNamespace(
+        Shopware()->Loader()->registerNamespace(
             'Shopware\\Connect',
             $this->Path() . 'Library/Shopware/Connect/'
         );
-        $this->Application()->Loader()->registerNamespace(
+        Shopware()->Loader()->registerNamespace(
             'Firebase\\JWT',
             $this->Path() . 'Library/Firebase/JWT/'
         );
-        $this->Application()->Loader()->registerNamespace(
+        Shopware()->Loader()->registerNamespace(
             'ShopwarePlugins\\Connect',
             $this->Path()
         );
+
 
         $this->registerCustomModels();
     }
@@ -526,5 +532,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         }
 
         return $checkoutSubscriber;
+    }
+
+    /**
+     * @return Shopware
+     */
+    public function Application()
+    {
+        return Shopware();
     }
 }

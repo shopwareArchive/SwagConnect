@@ -3,6 +3,14 @@
   "require-dev": {
     "shopware/plugin-dev-tools": "dev-master"
   },
+  "autoload": {
+    "psr-4": {
+      "ShopwarePlugins\\Connect\\": "./",
+      "Shopware\\Connect\\": "Library/Shopware/Connect",
+      "Firebase\\JWT\\": "Library/Firebase/JWT",
+      "Shopware\\CustomModels\\": "Models/"
+    }
+  },
   "repositories": [
     {
       "type": "vcs",

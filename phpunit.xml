@@ -10,8 +10,8 @@
         <whitelist>
             <directory suffix=".php">./</directory>
             <exclude>
-                <directory suffix=".php">./Tests</directory>
-                <directory suffix=".php">./vendor</directory>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
                 <directory>Library</directory>
             </exclude>
         </whitelist>

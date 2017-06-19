@@ -9,11 +9,18 @@ cache:
    directories:
      - $HOME/.composer/cache/files
 
+env:
+  - SHOPWARE_VERSION: 5.2
+  - SHOPWARE_VERSION: 5.3
+
+matrix:
+  allow_failures:
+    - env: SHOPWARE_VERSION=5.3
+
 before_script:
     - git clone https://github.com/shopware/shopware.git /tmp/shopware
     - cd /tmp/shopware
-    # changes to the latest tag
-    - git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+    - git checkout $SHOPWARE_VERSION
 
     - mv /home/travis/build/shopware/SwagConnect /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect

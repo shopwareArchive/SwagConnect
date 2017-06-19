@@ -11,6 +11,7 @@ class ApiEndpointCommandTest extends ConnectTestHelper
     {
         $result = $this->runCommand('connect:endpoint:set sn.connect.local');
         $this->assertContains('Endpoint was updated', $result[1]);
+        $this->assertContains('sn.connect.local', $result[1]);
     }
 
     public function testShouldParseUrlWithoutProtocol()

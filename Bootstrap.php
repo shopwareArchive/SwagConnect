@@ -517,7 +517,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     private function createCheckoutSubscriber()
     {
         $checkoutSubscriber = new \ShopwarePlugins\Connect\Subscribers\Checkout(
-            Shopware()->Models()
+            Shopware()->Models(),
+            Shopware()->Container()->get('events')
         );
         foreach ($checkoutSubscriber->getListeners() as $listener) {
             if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {

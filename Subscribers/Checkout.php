@@ -1,6 +1,8 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
+use Enlight_Event_EventManager;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\Struct\Message;
@@ -10,6 +12,7 @@ use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Reservation;
 use Shopware\Connect\Struct\TotalShippingCosts;
 use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
@@ -26,27 +29,40 @@ use ShopwarePlugins\Connect\Components\Utils\OrderPaymentStatusMapper;
  */
 class Checkout extends BaseSubscriber
 {
-
+    /**
+     * @var Logger
+     */
     protected $logger;
 
-    /** @var  string */
+    /**
+     * @var string
+     */
     private $newSessionId;
 
-    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
+    /**
+     * @var  ConnectFactory
+     */
     protected $factory;
 
-    /** @var  \Shopware\Components\Model\ModelManager $manager */
+    /**
+     * @var ModelManager $manager
+     */
     protected $manager;
 
     /**
-     * Checkout constructor.
+     * @var Enlight_Event_EventManager
+     */
+    protected $eventManager;
+
+    /**
      * @param ModelManager $manager
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(ModelManager $manager, Enlight_Event_EventManager $eventManager)
     {
         parent::__construct();
 
         $this->manager = $manager;
+        $this->eventManager = $eventManager;
     }
 
     public function getSubscribedEvents()
@@ -64,6 +80,9 @@ class Checkout extends BaseSubscriber
     }
 
 
+    /**
+     * @return Logger
+     */
     public function getLogger()
     {
         if (!$this->logger) {
@@ -77,7 +96,7 @@ class Checkout extends BaseSubscriber
     protected function getFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
+            $this->factory = new ConnectFactory();
         }
 
         return $this->factory;
@@ -383,6 +402,11 @@ class Checkout extends BaseSubscriber
         }
 
         try {
+            $order = $this->eventManager->filter(
+                'Connect_Components_ProductFromShop_Buy_OrderFilter',
+                $order
+            );
+
             /** @var $reservation \Shopware\Connect\Struct\Reservation */
             $reservation = $sdk->reserveProducts($order);
 

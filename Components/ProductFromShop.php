@@ -158,8 +158,9 @@ class ProductFromShop implements ProductFromShopBase
     public function buy(Order $order)
     {
         $this->manager->getConnection()->beginTransaction();
-
         try {
+            $order = $this->eventManager->filter('Connect_Components_ProductFromShop_Buy_OrderFilter', $order);
+
             $this->validateBilling($order->billingAddress);
             $orderNumber = $this->doBuy($order);
 

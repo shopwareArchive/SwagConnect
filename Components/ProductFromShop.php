@@ -159,7 +159,7 @@ class ProductFromShop implements ProductFromShopBase
     {
         $this->manager->getConnection()->beginTransaction();
         try {
-            $order = $this->eventManager->filter('Shopware_Connect_Order_ProductFromShop_Buy', $order);
+            $order = $this->eventManager->filter('Connect_Components_ProductFromShop_Buy_OrderFilter', $order);
 
             $this->validateBilling($order->billingAddress);
             $orderNumber = $this->doBuy($order);

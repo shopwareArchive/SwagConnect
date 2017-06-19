@@ -402,7 +402,10 @@ class Checkout extends BaseSubscriber
         }
 
         try {
-            $order = $this->eventManager->filter('Shopware_Connect_Order_Checkout_Order', $order);
+            $order = $this->eventManager->filter(
+                'Connect_Components_ProductFromShop_Buy_OrderFilter',
+                $order
+            );
 
             /** @var $reservation \Shopware\Connect\Struct\Reservation */
             $reservation = $sdk->reserveProducts($order);

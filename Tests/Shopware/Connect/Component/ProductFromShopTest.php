@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Component;
 
 use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\Change\FromShop\Availability;
@@ -15,6 +15,7 @@ use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
@@ -34,7 +35,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $manager->flush();
 
         $translator = new \Shopware_Components_Translation();
-        $translationData = array (
+        $translationData = array(
             'dispatch_name' => 'Standard delivery',
             'dispatch_status_link' => 'http://track.me',
             'dispatch_description' => 'Standard delivery description',
@@ -58,13 +59,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testBuy()
     {
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
+        $fromShop = $this->createService();
 
         $address = new Address(array(
             'firstName' => 'John',
@@ -111,93 +106,6 @@ class ProductFromShopTest extends ConnectTestHelper
     public function getOrderByNumber($orderNumber)
     {
         return Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneBy(array('number' => $orderNumber));
-    }
-
-    public function testUpdatePaymentStatus()
-    {
-//        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
-//        $fromShop = new ProductFromShop($this->getHelper(), Shopware()->Models(), new Logger(Shopware()->Db()));
-//
-//        $address = new Address(array(
-//            'firstName' => 'John',
-//            'surName' => 'Doe',
-//            'zip' => '48153',
-//            'street' => 'Eggeroderstraße',
-//            'streetNumber' => '6',
-//            'city' => 'Schöppingen',
-//            'country' => 'DEU',
-//            'email' => 'info@shopware.com',
-//            'phone' => '0000123'
-//        ));
-//
-//        $localOrderId = rand(0, 99999);
-//        $orderNumber = $fromShop->buy(new Order(array(
-//            'orderShop' => '3',
-//            'localOrderId' => $localOrderId,
-//            'deliveryAddress' => $address,
-//            'billingAddress' => $address,
-//            'products' => array(
-//                new OrderItem(array(
-//                    'count' => 1,
-//                    'product' => new Product(array(
-//                        'shopId' => '3',
-//                        'sourceId' => '2',
-//                        'price' => 44.44,
-//                        'purchasePrice' => 33.33,
-//                        'fixedPrice' => false,
-//                        'currency' => 'EUR',
-//                        'availability' => 3,
-//                        'title' => 'Milchschnitte',
-//                        'categories' => array()
-//                    ))
-//                ))
-//            )
-//        )));
-//
-//        $paymentStatus = new PaymentStatus(array(
-//            'localOrderId' => $orderNumber,
-//            'paymentStatus' => 'received',
-//            'paymentProvider' => 'paypal',
-//            'providerTransactionId' => 'pp1234567890',
-//            'revision' => '1431090080.0525200000',
-//        ));
-// todo: disable OrderHistorySubscriber
-//        foreach (Shopware()->Models()->getEventManager()->getListeners('preUpdate') as $listener) {
-////            if (get_class($listener) == 'Shopware\Models\Order\OrderHistorySubscriber') {
-//                Shopware()->Models()->getEventManager()->removeEventSubscriber($listener);
-////            }
-//        }
-//        \Doctrine\Common\Util\Debug::dump(Shopware()->Models()->getEventManager()->hasListeners('preUpdate'));exit;
-//        $a = new \Doctrine\Common\EventManager();
-//        $a->removeEventListener()
-//        $a->removeEventSubscriber('Shopware\Models\Order\OrderHistorySubscriber');
-//        try {
-//        $order = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneBy(array('number' => $orderNumber));
-
-//        \Doctrine\Common\Util\Debug::dump(Shopware()->Models()->getClassMetadata('Shopware\Models\Order\Order')->get);exit;
-//        Shopware()->Models()->getClassMetadata('Shopware\Models\Order\Order')->getLifecycleCallbacks()
-//            setLifecycleCallbacks(array());
-
-//            $fromShop->updatePaymentStatus($paymentStatus);
-//        } catch (\Exception $e) {
-//            var_dump($e->getMessage());exit;
-//        }
-
-//        $commands = array(
-//            $paymentStatus
-//        );
-//            $commands[] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
-//                'product' => $product,
-//                'revision' => time(),
-//            ));
-//        }
-
-//        $this->dispatchRpcCall('productPayments', 'replicate', array(
-//            $commands
-//        ));
-
-//        return array_keys($commands);
-
     }
 
     public function testCalculateShippingCosts()
@@ -256,13 +164,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testCalculateShippingCostsWithoutCountry()
     {
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
+        $fromShop = $this->createService();
 
         $order = new Order();
         $shippingCosts = $fromShop->calculateShippingCosts($order);
@@ -275,13 +177,7 @@ class ProductFromShopTest extends ConnectTestHelper
      */
     public function testCalculateShippingCostsWithoutOrderItems()
     {
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
+        $fromShop = $this->createService();
 
         $order = $this->createOrder();
         $order->orderItems = array();
@@ -348,13 +244,7 @@ class ProductFromShopTest extends ConnectTestHelper
      */
     public function testByShouldThrowException()
     {
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
+        $fromShop = $this->createService();
 
         $address = new Address(array());
         $fromShop->buy(new Order(array(
@@ -370,13 +260,7 @@ class ProductFromShopTest extends ConnectTestHelper
             'UPDATE s_plugin_connect_items SET export_status = NULL WHERE shop_id IS NULL'
         );
 
-        $fromShop = new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
+        $fromShop = $this->createService();
 
         $time = microtime(true);
         $iteration = 0;
@@ -447,7 +331,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
         $product = $this->getLocalArticle();
         Shopware()->Db()->executeQuery(
-                'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
+            'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
             [
                 Attribute::STATUS_UPDATE,
                 $product->getId()
@@ -494,5 +378,42 @@ class ProductFromShopTest extends ConnectTestHelper
 
             $this->assertEquals($change->revision, reset($result));
         }
+    }
+
+    public function testBuyShouldFireFilterEventWithOrder()
+    {
+        $order = $this->createOrder();
+
+        /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject $eventManagerMock */
+        $eventManagerMock = $this->createMock(\Enlight_Event_EventManager::class);
+        $eventManagerMock->method('filter')
+            ->with('Connect_Components_ProductFromShop_Buy_OrderFilter', $order)
+            ->willReturn($order);
+
+        $fromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db()),
+            $eventManagerMock
+        );
+
+        $result = $fromShop->buy($order);
+
+        $this->assertStringStartsWith('SC-', $result);
+    }
+
+    /**
+     * @return ProductFromShop
+     */
+    private function createService()
+    {
+        return new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
+        );
     }
 }

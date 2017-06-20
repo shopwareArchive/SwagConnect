@@ -19,7 +19,15 @@ use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ProductFromShopTest extends ConnectTestHelper
 {
+    /**
+     * @var array
+     */
     private $user;
+
+    /**
+     * @var ProductFromShop
+     */
+    private $productFromShop;
 
     public static function setUpBeforeClass()
     {
@@ -50,6 +58,15 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->user = $this->getRandomUser();
         $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
+
+
+        $this->productFromShop = new ProductFromShop(
+            $this->getHelper(),
+            Shopware()->Models(),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            new Logger(Shopware()->Db()),
+            Shopware()->Container()->get('events')
+        );
     }
 
     public function onGetUserData(\Enlight_Event_EventArgs $args)
@@ -59,8 +76,6 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testBuy()
     {
-        $fromShop = $this->createService();
-
         $address = new Address(array(
             'firstName' => 'John',
             'surName' => 'Doe',
@@ -72,7 +87,7 @@ class ProductFromShopTest extends ConnectTestHelper
             'email' => 'info@shopware.com',
             'phone' => '0000123'
         ));
-        $orderNumber = $fromShop->buy(new Order(array(
+        $orderNumber = $this->productFromShop->buy(new Order(array(
             'orderShop' => '3',
             'localOrderId' => rand(0, 99999),
             'deliveryAddress' => $address,
@@ -164,10 +179,8 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testCalculateShippingCostsWithoutCountry()
     {
-        $fromShop = $this->createService();
-
         $order = new Order();
-        $shippingCosts = $fromShop->calculateShippingCosts($order);
+        $shippingCosts = $this->productFromShop->calculateShippingCosts($order);
         $this->assertFalse($shippingCosts->isShippable);
     }
 
@@ -177,8 +190,6 @@ class ProductFromShopTest extends ConnectTestHelper
      */
     public function testCalculateShippingCostsWithoutOrderItems()
     {
-        $fromShop = $this->createService();
-
         $order = $this->createOrder();
         $order->orderItems = array();
 
@@ -187,7 +198,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
         Shopware()->Session()->offsetSet('sDispatch', 9);
 
-        $shippingCosts = $fromShop->calculateShippingCosts($order);
+        $shippingCosts = $this->productFromShop->calculateShippingCosts($order);
 
         $this->assertFalse($shippingCosts->isShippable);
     }
@@ -244,10 +255,8 @@ class ProductFromShopTest extends ConnectTestHelper
      */
     public function testByShouldThrowException()
     {
-        $fromShop = $this->createService();
-
         $address = new Address(array());
-        $fromShop->buy(new Order(array(
+        $this->productFromShop->buy(new Order(array(
             'billingAddress' => $address,
             'deliveryAddress' => $address,
         )));
@@ -259,8 +268,6 @@ class ProductFromShopTest extends ConnectTestHelper
         Shopware()->Db()->executeQuery(
             'UPDATE s_plugin_connect_items SET export_status = NULL WHERE shop_id IS NULL'
         );
-
-        $fromShop = $this->createService();
 
         $time = microtime(true);
         $iteration = 0;
@@ -343,7 +350,7 @@ class ProductFromShopTest extends ConnectTestHelper
             'revision' => sprintf('%.5f%05d', $time, $iteration++)
         ]);
 
-        $fromShop->onPerformSync($since, $changes);
+        $this->productFromShop->onPerformSync($since, $changes);
 
         $result = Shopware()->Db()->fetchAll(
             'SELECT source_id
@@ -401,19 +408,5 @@ class ProductFromShopTest extends ConnectTestHelper
         $result = $fromShop->buy($order);
 
         $this->assertStringStartsWith('SC-', $result);
-    }
-
-    /**
-     * @return ProductFromShop
-     */
-    private function createService()
-    {
-        return new ProductFromShop(
-            $this->getHelper(),
-            Shopware()->Models(),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            new Logger(Shopware()->Db()),
-            Shopware()->Container()->get('events')
-        );
     }
 }

@@ -157,16 +157,16 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function buy(Order $order)
     {
-        $this->manager->getConnection()->beginTransaction();
+        $this->manager->beginTransaction();
         try {
             $order = $this->eventManager->filter('Connect_Components_ProductFromShop_Buy_OrderFilter', $order);
 
             $this->validateBilling($order->billingAddress);
             $orderNumber = $this->doBuy($order);
 
-            $this->manager->getConnection()->commit();
+            $this->manager->commit();
         } catch (\Exception $e) {
-            $this->manager->getConnection()->rollBack();
+            $this->manager->rollback();
             throw $e;
         }
 
@@ -644,6 +644,9 @@ class ProductFromShop implements ProductFromShopBase
         }
     }
 
+    /**
+     * @param Address $address
+     */
     private function validateBilling(Address $address)
     {
         if (!$address->email) {

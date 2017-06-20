@@ -57,8 +57,10 @@ class Checkout extends BaseSubscriber
     /**
      * @param ModelManager $manager
      */
-    public function __construct(ModelManager $manager, Enlight_Event_EventManager $eventManager)
-    {
+    public function __construct(
+        ModelManager $manager,
+        Enlight_Event_EventManager $eventManager
+    ) {
         parent::__construct();
 
         $this->manager = $manager;
@@ -403,7 +405,7 @@ class Checkout extends BaseSubscriber
 
         try {
             $order = $this->eventManager->filter(
-                'Connect_Components_ProductFromShop_Buy_OrderFilter',
+                'Connect_Subscriber_OrderReservation_OrderFilter',
                 $order
             );
 
@@ -513,7 +515,7 @@ class Checkout extends BaseSubscriber
      * Asks the user to leave is phone number if connect products are in the basket and the
      * phone number was not configured, yet.
      *
-     * @param $view
+     * @param \Enlight_View_Default $view
      * @return null
      */
     public function enforcePhoneNumber($view)

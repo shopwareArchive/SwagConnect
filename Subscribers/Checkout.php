@@ -403,7 +403,7 @@ class Checkout extends BaseSubscriber
 
         try {
             $order = $this->eventManager->filter(
-                'Connect_Components_ProductFromShop_Buy_OrderFilter',
+                'Connect_Subscriber_OrderReservation_OrderFilter',
                 $order
             );
 

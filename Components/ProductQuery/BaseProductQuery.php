@@ -35,13 +35,13 @@ abstract class BaseProductQuery
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    abstract function getProductQuery();
+    abstract public function getProductQuery();
 
     /**
      * @param $rows
      * @return array
      */
-    abstract function getConnectProducts($rows);
+    abstract public function getConnectProducts($rows);
 
     /**
      * Returns array of Product structs by given sourceIds

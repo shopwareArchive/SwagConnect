@@ -303,6 +303,10 @@ class Lifecycle extends BaseSubscriber
         $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
+    /**
+     * @param \Shopware\Models\Article\Detail $detail
+     * @param bool $force
+     */
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $force = false)
     {
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);

@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Component\ProductQuery;
 
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
@@ -11,9 +12,13 @@ use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 use Shopware\Models\Property;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
+    /**
+     * @var LocalProductQuery
+     */
     protected $localProductQuery;
 
     protected $productTranslator;
@@ -29,8 +34,14 @@ class LocalProductQueryTest extends ConnectTestHelper
     /** @var \Shopware\Models\Article\Article $article */
     private $article;
 
+    /**
+     * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
     private $db;
 
+    /**
+     * @var ModelManager
+     */
     private $manager;
 
     protected $productContext;
@@ -390,6 +401,17 @@ class LocalProductQueryTest extends ConnectTestHelper
         );
     }
 
+    public function testGetLocalProductQueryShouldFetchProductsWithoutArticleDetails()
+    {
+        $this->db->exec(file_get_contents(__DIR__ . '/_fixtures.sql'));
+        $this->localProductQuery = $this->getLocalProductQuery();
+
+        $builder = $this->localProductQuery->getProductQuery();
+        $result = $builder->getQuery()->getArrayResult();
+
+        $this->assertCount(4, $result);
+    }
+
 
     public function tearDown()
     {
@@ -401,5 +423,6 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
         $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
+        $this->db->exec("DELETE FROM s_plugin_connect_items");
     }
 }

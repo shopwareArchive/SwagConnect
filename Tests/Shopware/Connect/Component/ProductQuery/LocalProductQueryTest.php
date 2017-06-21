@@ -44,6 +44,11 @@ class LocalProductQueryTest extends ConnectTestHelper
      */
     private $manager;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
     protected $productContext;
 
     public function setUp()
@@ -52,6 +57,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->db = Shopware()->Db();
         $this->manager = Shopware()->Models();
+        $this->config = new Config($this->manager);
         $this->createArticle();
 
         $this->translations = array(
@@ -112,6 +118,24 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->contextService->expects($this->any())
             ->method('createShopContext')
             ->willReturn($this->productContext);
+
+        $configs = array(
+            'priceGroupForPriceExport' => array('EK', null, 'export'),
+            'priceGroupForPurchasePriceExport' => array('EK', null, 'export'),
+            'priceFieldForPriceExport' => array('price', null, 'export'),
+            'priceFieldForPurchasePriceExport' => array('detailPurchasePrice', null, 'export'),
+        );
+
+        foreach ($configs as $name => $values) {
+            list($value, $shopId, $group) = $values;
+
+            $this->config->setConfig(
+                $name,
+                $value,
+                $shopId,
+                $group
+            );
+        }
     }
 
     public function getLocalProductQuery()
@@ -242,7 +266,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $expectedProduct->properties = [
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -252,7 +276,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'valuePosition' => 0,
             ]),
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -262,7 +286,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'valuePosition' => 0,
             ]),
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -326,12 +350,12 @@ class LocalProductQueryTest extends ConnectTestHelper
     private function createArticle()
     {
         $group = $this->manager->getRepository(Property\Group::class)->findOneBy(
-            ['name' => 'Nike']
+            ['name' => 'Adidas']
         );
 
         if (!$group) {
             $group = new Property\Group();
-            $group->setName('Nike');
+            $group->setName('Adidas');
             $group->setPosition(3);
             $group->setSortMode(3);
             $group->setComparable(0);

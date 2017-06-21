@@ -409,7 +409,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         $builder = $this->localProductQuery->getProductQuery();
         $result = $builder->getQuery()->getArrayResult();
 
-        $this->assertCount(4, $result);
+        $this->assertCount(1, $result);
     }
 
 
@@ -423,6 +423,6 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
         $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
-        $this->db->exec("DELETE FROM s_plugin_connect_items");
+        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE article_id = 5');
     }
 }

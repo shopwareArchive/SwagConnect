@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -23,8 +28,8 @@ class SDKTest extends ConnectTestHelper
 
         $this->manager = Shopware()->Models();
         $this->db = Shopware()->Db();
-        $this->db->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
-        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH));
+        $this->db->delete('sw_connect_shop_config', ['s_shop = ?' => '_price_type']);
+        $this->db->insert('sw_connect_shop_config', ['s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH]);
 
         $this->db->executeQuery(
             'DELETE FROM `s_plugin_connect_config` WHERE `name` = "priceFieldForPurchasePriceExport"'
@@ -52,31 +57,29 @@ class SDKTest extends ConnectTestHelper
 
         $this->manager->flush();
 
-        $this->getConnectExport()->export(array($article->getId()));
-
+        $this->getConnectExport()->export([$article->getId()]);
 
         /** @var \Shopware\CustomModels\Connect\Attribute $model */
-        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('sourceId' => $article->getId()));
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(['sourceId' => $article->getId()]);
         $message = $model->getExportMessage();
 
         $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $message);
-
     }
 
     public function testHandleProductUpdates()
     {
         // pseudo verify SDK
-        $this->db->delete('sw_connect_shop_config', array());
-        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_self_', 's_config' => -1));
-        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
-        $this->db->insert('sw_connect_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
+        $this->db->delete('sw_connect_shop_config', []);
+        $this->db->insert('sw_connect_shop_config', ['s_shop' => '_self_', 's_config' => -1]);
+        $this->db->insert('sw_connect_shop_config', ['s_shop' => '_last_update_', 's_config' => time()]);
+        $this->db->insert('sw_connect_shop_config', ['s_shop' => '_categories_', 's_config' => serialize(['/bücher' => 'Bücher'])]);
 
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $purchasePrice = 6.99;
-        $this->dispatchRpcCall('products', 'toShop', array(
-            array(
-                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
-                    'product' => new \Shopware\Connect\Struct\Product(array(
+        $this->dispatchRpcCall('products', 'toShop', [
+            [
+                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate([
+                    'product' => new \Shopware\Connect\Struct\Product([
                         'shopId' => 3,
                         'revisionId' => time(),
                         'sourceId' => 'ABCDEFGH' . time(),
@@ -96,18 +99,18 @@ class SDKTest extends ConnectTestHelper
                         ),
                         'offerValidUntil' => $offerValidUntil,
                         'availability' => 100,
-                        'images' => array(self::IMAGE_PROVIDER_URL),
-                        'categories' => array('/bücher' => 'Bücher'),
-                    )),
+                        'images' => [self::IMAGE_PROVIDER_URL],
+                        'categories' => ['/bücher' => 'Bücher'],
+                    ]),
                     'revision' => time(),
-                ))
-            )
-        ));
+                ]),
+            ],
+        ]);
     }
 
     public function testExportProductWithPurchasePrice()
     {
-        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(['articleId' => 3]);
         $model->setExportMessage(null);
         $this->manager->persist($model);
         $this->manager->flush();
@@ -126,10 +129,10 @@ class SDKTest extends ConnectTestHelper
         $this->manager->flush();
 
         // Insert the product
-        $this->getConnectExport()->export(array($article->getId()));
+        $this->getConnectExport()->export([$article->getId()]);
 
         /** @var \Shopware\CustomModels\Connect\Attribute $model */
-        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(array('articleId' => 3));
+        $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(['articleId' => 3]);
         $message = $model->getExportMessage();
 
         $this->assertNull($message);

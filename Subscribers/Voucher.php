@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -6,17 +11,15 @@ namespace ShopwarePlugins\Connect\Subscribers;
  * Handle vouchers, remove discounts and don't allow percentaged vouchers for connect baskets
  *
  * Class Voucher
- * @package ShopwarePlugins\Connect\Subscribers
  */
 class Voucher extends BaseSubscriber
 {
-
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Shopware_Modules_Basket_AddVoucher_Start' => 'preventPercentagedVoucher',
-            'Shopware_Modules_Basket_GetBasket_FilterSQL' => 'removeDiscount'
-        );
+            'Shopware_Modules_Basket_GetBasket_FilterSQL' => 'removeDiscount',
+        ];
     }
 
     /**
@@ -38,8 +41,8 @@ class Voucher extends BaseSubscriber
 
         if ($this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             $stmt = Shopware()->Db()->query(
-                "DELETE FROM s_order_basket WHERE sessionID=? AND modus=3",
-                array(Shopware()->SessionID())
+                'DELETE FROM s_order_basket WHERE sessionID=? AND modus=3',
+                [Shopware()->SessionID()]
             );
 
             // If rows where actually affected, show the corresponding message
@@ -55,6 +58,7 @@ class Voucher extends BaseSubscriber
      * @event Shopware_Modules_Basket_AddVoucher_Start
      *
      * @param \Enlight_Event_EventArgs $args
+     *
      * @return bool|null
      */
     public function preventPercentagedVoucher(\Enlight_Event_EventArgs $args)
@@ -77,6 +81,7 @@ class Voucher extends BaseSubscriber
         $result = $basketHelper->findPercentagedVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
+
             return true;
         }
 
@@ -84,6 +89,7 @@ class Voucher extends BaseSubscriber
         $result = $basketHelper->findPercentagedIndividualVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
+
             return true;
         }
     }

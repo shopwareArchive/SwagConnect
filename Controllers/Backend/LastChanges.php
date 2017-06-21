@@ -1,7 +1,12 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use ShopwarePlugins\Connect\Components\ImageImport;
 use Shopware\Models\Article\Price;
+use ShopwarePlugins\Connect\Components\ImageImport;
 
 class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Backend_ExtJs
 {
@@ -20,7 +25,6 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
             $this->Request()->getParam('start', 0),
             $this->Request()->getParam('limit', 20),
             $this->Request()->getParam('sort', [])
-
         )->getQuery();
 
         $total = $this->getModelManager()->getQueryCount($query);
@@ -30,11 +34,11 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
             $data[$key]['images'] = implode('|', $this->getImageImport()->getImagesForDetail($record['id']));
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $data,
-            'total' => $total
-        ));
+            'total' => $total,
+        ]);
     }
 
     /**
@@ -59,6 +63,7 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
                 true
             );
             $this->View()->assign('message', $message);
+
             return;
         }
 
@@ -95,19 +100,19 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
                 );
                 break;
             case 'price':
-                $netPrice = $value / (1 + ($article->getTax()->getTax()/100));
+                $netPrice = $value / (1 + ($article->getTax()->getTax() / 100));
                 $customerGroup = $this->getHelper()->getDefaultCustomerGroup();
 
                 $detail->getPrices()->clear();
                 $price = new Price();
-                $price->fromArray(array(
+                $price->fromArray([
                     'from' => 1,
                     'price' => $netPrice,
                     'basePrice' => $connectAttribute->getPurchasePrice(),
                     'customerGroup' => $customerGroup,
-                    'article' => $article
-                ));
-                $detail->setPrices(array($price));
+                    'article' => $article,
+                ]);
+                $detail->setPrices([$price]);
                 break;
         }
 

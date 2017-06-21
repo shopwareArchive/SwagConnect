@@ -1,7 +1,11 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Services;
-
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Model\ModelManager;
@@ -26,8 +30,9 @@ class MenuService
 
     /**
      * MenuService constructor.
+     *
      * @param InstallerService $installerService
-     * @param ModelManager $manager
+     * @param ModelManager     $manager
      */
     public function __construct(
         InstallerService $installerService,
@@ -37,7 +42,6 @@ class MenuService
         $this->manager = $manager;
         $this->connection = $manager->getConnection();
     }
-
 
     /**
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException

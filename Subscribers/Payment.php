@@ -1,15 +1,17 @@
 <?php
-
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Class Payment
- * @package ShopwarePlugins\Connect\Subscribers
  */
 class Payment extends BaseSubscriber
 {
-
     /**
      * @var \Shopware\Models\Payment\Repository
      */
@@ -25,10 +27,10 @@ class Payment extends BaseSubscriber
      */
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatch_Backend_Payment' => 'extendBackendPayment',
             'Shopware_Modules_Admin_GetPaymentMeans_DataFilter' => 'onFilterPaymentMethods',
-        );
+        ];
     }
 
     /**
@@ -52,7 +54,7 @@ class Payment extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        switch($request->getActionName()) {
+        switch ($request->getActionName()) {
             case 'load':
                 $this->registerMyTemplateDir();
 
@@ -71,7 +73,7 @@ class Payment extends BaseSubscriber
                 break;
             case 'updatePayments':
                 $paymentId = (int) $request->getParam('id', null);
-                $isAllowed = (boolean) $request->getParam('connectIsAllowed', false);
+                $isAllowed = (bool) $request->getParam('connectIsAllowed', false);
 
                 $this->getPaymentService()->updateConnectAllowed($paymentId, $isAllowed);
                 break;
@@ -124,6 +126,7 @@ class Payment extends BaseSubscriber
         if (!$this->repository) {
             $this->repository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
         }
+
         return $this->repository;
     }
-} 
+}

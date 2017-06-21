@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -27,7 +32,7 @@ class SwagConnectTestKernel
 
         $_SERVER['HTTP_HOST'] = $shop->getHost();
 
-        Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__  . '/');
+        Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__ . '/');
         Shopware()->Container()->get('ConnectSDK');
 
         Shopware()->Container()->set('thumbnail_manager', new ThumbnailManagerDummy());

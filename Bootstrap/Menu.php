@@ -1,9 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\Config;
 
 class Menu
 {
@@ -42,8 +47,7 @@ class Menu
         Config $configComponent,
         ModelManager $modelManager,
         $shopware526installed
-    )
-    {
+    ) {
         $this->bootstrap = $bootstrap;
         $this->configComponent = $configComponent;
         $this->modelManager = $modelManager;
@@ -112,7 +116,7 @@ class Menu
                 ]);
 
                 if ($this->shopware526installed) {
-                    $parent->setClass(Menu::CONNECT_CLASS);
+                    $parent->setClass(self::CONNECT_CLASS);
                     //if "Connect" menu does not exist
                     //it must not have pluginID, because on plugin uninstall
                     //it will be removed
@@ -124,7 +128,7 @@ class Menu
                 && !$this->configComponent->getConfig('shopwareId')) {
                 $registerItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
-                    'action' => 'Register'
+                    'action' => 'Register',
                 ]);
                 if (!$registerItem) {
                     $this->bootstrap->createMenuItem([
@@ -133,7 +137,7 @@ class Menu
                         'action' => 'Register',
                         'class' => 'sprite-mousepointer-click',
                         'active' => 1,
-                        'parent' => $parent
+                        'parent' => $parent,
                     ]);
                 }
             } else {
@@ -142,7 +146,7 @@ class Menu
                 // because setup function is called
                 $importItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
-                    'action' => 'Import'
+                    'action' => 'Import',
                 ]);
                 if (!$importItem) {
                     $this->bootstrap->createMenuItem([
@@ -151,13 +155,13 @@ class Menu
                         'action' => 'Import',
                         'class' => 'sc-icon-import',
                         'active' => 1,
-                        'parent' => $parent
+                        'parent' => $parent,
                     ]);
                 }
 
                 $exportItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
-                    'action' => 'Export'
+                    'action' => 'Export',
                 ]);
                 if (!$exportItem) {
                     $this->bootstrap->createMenuItem([
@@ -166,13 +170,13 @@ class Menu
                         'action' => 'Export',
                         'class' => 'sc-icon-export',
                         'active' => 1,
-                        'parent' => $parent
+                        'parent' => $parent,
                     ]);
                 }
 
                 $settingsItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
-                    'action' => 'Settings'
+                    'action' => 'Settings',
                 ]);
                 if (!$settingsItem) {
                     $this->bootstrap->createMenuItem([
@@ -181,13 +185,13 @@ class Menu
                         'action' => 'Settings',
                         'class' => 'sprite-gear',
                         'active' => 1,
-                        'parent' => $parent
+                        'parent' => $parent,
                     ]);
                 }
 
                 $openConnectItem = $this->bootstrap->Menu()->findOneBy([
                     'controller' => 'Connect',
-                    'action' => 'OpenConnect'
+                    'action' => 'OpenConnect',
                 ]);
                 if (!$openConnectItem) {
                     $this->bootstrap->createMenuItem([
@@ -197,11 +201,10 @@ class Menu
                         'onclick' => 'window.open("connect/autoLogin")',
                         'class' => 'connect-icon',
                         'active' => 1,
-                        'parent' => $parent
+                        'parent' => $parent,
                     ]);
                 }
             }
-
         }
     }
 
@@ -216,20 +219,20 @@ class Menu
 
         //if it is sem demo marketplace it will not find the correct menu item
         $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
-            'class' => Menu::CONNECT_CLASS,
+            'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
 
         if (!$connectMainMenu) {
             $connectMainMenu = $this->bootstrap->createMenuItem([
-                'label' => Menu::CONNECT_LABEL,
-                'class' => Menu::CONNECT_CLASS,
+                'label' => self::CONNECT_LABEL,
+                'class' => self::CONNECT_CLASS,
                 'active' => 1,
             ]);
             $connectMainMenu->setPlugin(null);
         } else {
             //resets the label if it's changed (diff marketplace)
-            $connectMainMenu->setLabel(Menu::CONNECT_LABEL);
+            $connectMainMenu->setLabel(self::CONNECT_LABEL);
         }
 
         $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
@@ -243,7 +246,7 @@ class Menu
                 'class' => 'sprite-mousepointer-click',
                 'action' => 'ShopwareConnect',
                 'active' => 1,
-                'parent' => $connectMainMenu
+                'parent' => $connectMainMenu,
             ]);
             $connectInstallItem->setPlugin(null);
         }

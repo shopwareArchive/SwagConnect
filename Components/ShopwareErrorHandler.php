@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
@@ -21,7 +26,6 @@ class ShopwareErrorHandler extends ErrorHandler
      * Handle error
      *
      * @param Error $error
-     * @return void
      */
     public function handleError(Error $error)
     {
@@ -37,8 +41,8 @@ class ShopwareErrorHandler extends ErrorHandler
      * Handle exception
      *
      * @param \Exception $exception
+     *
      * @throws \Exception
-     * @return void
      */
     public function handleException(\Exception $exception)
     {
@@ -46,5 +50,4 @@ class ShopwareErrorHandler extends ErrorHandler
 
         throw $exception;
     }
-
 }

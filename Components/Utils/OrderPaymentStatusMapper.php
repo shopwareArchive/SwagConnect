@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Utils;
 
@@ -7,11 +12,9 @@ use Shopware\Models\Order\Order;
 
 /**
  * Class OrderPaymentStatusMapper
- * @package ShopwarePlugins\Connect\Components\Utils
  */
 class OrderPaymentStatusMapper
 {
-
     private $mapping;
 
     /**
@@ -24,7 +27,7 @@ class OrderPaymentStatusMapper
     protected function getMapping()
     {
         if (!$this->mapping) {
-            $this->mapping = array(
+            $this->mapping = [
                 'open' => PaymentStatus::PAYMENT_OPEN,
                 'completely_paid' => PaymentStatus::PAYMENT_RECEIVED,
                 'sc_requested' => PaymentStatus::PAYMENT_REQUESTED,
@@ -38,7 +41,7 @@ class OrderPaymentStatusMapper
                 'sc_refunded' => PaymentStatus::PAYMENT_REFUNDED,
                 'sc_loss' => PaymentStatus::PAYMENT_LOSS,
                 'sc_error' => PaymentStatus::PAYMENT_ERROR,
-            );
+            ];
 
             $this->mapping = Shopware()->Events()->filter('Connect_OrderPaymentStatus_Mapping', $this->mapping);
         }
@@ -50,6 +53,7 @@ class OrderPaymentStatusMapper
      * Helper to map shopware order states to connect order states
      *
      * @param $swOrderPaymentStatus
+     *
      * @return string
      */
     public function mapShopwareOrderPaymentStatusToConnect($swOrderPaymentStatus)
@@ -67,6 +71,7 @@ class OrderPaymentStatusMapper
 
     /**
      * @param Order $order
+     *
      * @return PaymentStatus
      */
     public function getPaymentStatus(Order $order)
@@ -75,12 +80,11 @@ class OrderPaymentStatusMapper
             $order->getPaymentStatus()->getName()
         );
 
-        return new PaymentStatus(array(
+        return new PaymentStatus([
             'localOrderId' => $order->getNumber(),
             'paymentStatus' => $paymentStatus,
             'paymentProvider' => $order->getPayment()->getName(),
             'providerTransactionId' => $order->getTransactionId(),
-        ));
+        ]);
     }
-
 }

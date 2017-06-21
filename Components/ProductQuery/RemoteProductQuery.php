@@ -1,33 +1,34 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
-use Shopware\Connect\Struct\Product;
-use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\Struct\Product;
 
 /**
  * Will return an *imported* product as Shopware\Connect\Struct\Product
  *
  * Class RemoteProductQuery
- * @package ShopwarePlugins\Connect\Components\ProductQuery
  */
 class RemoteProductQuery extends BaseProductQuery
 {
     /**
      * RemoteProductQuery constructor.
+     *
      * @param ModelManager $manager
      */
     public function __construct(
         ModelManager $manager
-    )
-    {
+    ) {
         parent::__construct($manager);
     }
 
     /**
-     *
-     *
      * @return \Doctrine\ORM\QueryBuilder
      */
     public function getProductQuery()
@@ -43,7 +44,7 @@ class RemoteProductQuery extends BaseProductQuery
         $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->where('at.shopId IS NOT NULL');
-        $builder->select(array(
+        $builder->select([
             'a.id as localId',
             'at.shopId as shopId',
             'at.sourceId as sourceId',
@@ -74,7 +75,7 @@ class RemoteProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'attribute.connectArticleShipping as shipping',
             'attribute.connectProductDescription as additionalDescription',
-        ));
+        ]);
 
         return $builder;
     }
@@ -83,17 +84,19 @@ class RemoteProductQuery extends BaseProductQuery
      * Returns a list of connect products
      *
      * @param array $rows
+     *
      * @return array
      */
     public function getConnectProducts($rows)
     {
-        $products = array();
+        $products = [];
         foreach ($rows as $row) {
             $product = $this->getConnectProduct($row);
             if ($product) {
                 $products[] = $product;
             }
         }
+
         return $products;
     }
 
@@ -101,6 +104,7 @@ class RemoteProductQuery extends BaseProductQuery
      * Returns a connect product or null if the given row does not reference a imported product
      *
      * @param $row
+     *
      * @return Product|null
      */
     protected function getConnectProduct($row)
@@ -118,7 +122,4 @@ class RemoteProductQuery extends BaseProductQuery
 
         return $product;
     }
-
-
 }
-

@@ -1,17 +1,22 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Components\Model\ModelManager;
-use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+
 /**
  * Uninstaller of the plugin.
  * Currently attribute columns will never be removed, as well as the plugin tables. This can be changed once
  * shopware supports asking the user, if he wants to remove the plugin permanently or temporarily
  *
  * Class Uninstall
- * @package ShopwarePlugins\Connect\Bootstrap
  */
 class Uninstall
 {
@@ -37,13 +42,13 @@ class Uninstall
 
     /**
      * Setup constructor.
+     *
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
-     * @param ModelManager $modelManager
-     * @param Pdo $db
-     * @param Menu $menu
+     * @param ModelManager                                    $modelManager
+     * @param Pdo                                             $db
+     * @param Menu                                            $menu
      */
-    public function __construct
-    (
+    public function __construct(
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
@@ -117,16 +122,15 @@ class Uninstall
                 'connect_hash'
             );
 
-            $this->modelManager->generateAttributeModels(array(
+            $this->modelManager->generateAttributeModels([
                 's_premium_dispatch_attributes',
                 's_categories_attributes',
                 's_order_details_attributes',
                 's_order_basket_attributes',
-                's_media_attributes'
-            ));
+                's_media_attributes',
+            ]);
         } catch (\Exception $e) {
         }
-
     }
 
     /**
@@ -150,7 +154,7 @@ class Uninstall
     public function removeEngineElement()
     {
         $repo = $this->modelManager->getRepository('Shopware\Models\Article\Element');
-        $element = $repo->findOneBy(array('name' => 'connectProductDescription'));
+        $element = $repo->findOneBy(['name' => 'connectProductDescription']);
 
         if ($element) {
             $this->modelManager->remove($element);

@@ -1,21 +1,24 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\DBALException;
-use Shopware\Components\ContainerAwareEventManager;
+use Enlight_Event_EventManager;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
-use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
 use ShopwarePlugins\Connect\Struct\ExportList;
 use ShopwarePlugins\Connect\Struct\SearchCriteria;
-use Enlight_Event_EventManager;
 
 class ConnectExport
 {
@@ -63,13 +66,14 @@ class ConnectExport
 
     /**
      * ConnectExport constructor.
-     * @param Helper $helper
-     * @param SDK $sdk
-     * @param ModelManager $manager
-     * @param ProductAttributesValidator $productAttributesValidator
-     * @param Config $configComponent
+     *
+     * @param Helper                                           $helper
+     * @param SDK                                              $sdk
+     * @param ModelManager                                     $manager
+     * @param ProductAttributesValidator                       $productAttributesValidator
+     * @param Config                                           $configComponent
      * @param \ShopwarePlugins\Connect\Components\ErrorHandler $errorHandler
-     * @param Enlight_Event_EventManager $eventManager
+     * @param Enlight_Event_EventManager                       $eventManager
      */
     public function __construct(
         Helper $helper,
@@ -79,8 +83,7 @@ class ConnectExport
         Config $configComponent,
         ErrorHandler $errorHandler,
         Enlight_Event_EventManager $eventManager
-    )
-    {
+    ) {
         $this->helper = $helper;
         $this->sdk = $sdk;
         $this->manager = $manager;
@@ -94,6 +97,7 @@ class ConnectExport
      * Load article entity
      *
      * @param $id
+     *
      * @return null|\Shopware\Models\Article\Article
      */
     public function getArticleModelById($id)
@@ -105,6 +109,7 @@ class ConnectExport
      * Load article detail entity
      *
      * @param $id
+     *
      * @return null|\Shopware\Models\Article\Detail
      */
     public function getArticleDetailById($id)
@@ -118,8 +123,9 @@ class ConnectExport
      * There is a problem with flush when is called from life cycle event in php7,
      * this flag '$isEvent' is preventing the flush
      *
-     * @param array $ids
+     * @param array                          $ids
      * @param ProductStreamsAssignments|null $streamsAssignments
+     *
      * @return array
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
@@ -128,7 +134,7 @@ class ConnectExport
             'Connect_Supplier_Get_Products_Filter_Source_IDS',
             $ids,
             [
-                'subject' => $this
+                'subject' => $this,
             ]
         );
 
@@ -138,7 +144,7 @@ class ConnectExport
             'Connect_Supplier_Get_All_Products_Before',
             [
                 'subject' => $this,
-                'products' => $connectItems
+                'products' => $connectItems,
             ]
         );
 
@@ -146,7 +152,7 @@ class ConnectExport
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
-            if($model === null) {
+            if ($model === null) {
                 continue;
             }
 
@@ -156,15 +162,15 @@ class ConnectExport
             if ($excludeInactiveProducts && !$model->getActive()) {
                 $this->updateLocalConnectItem(
                     $connectAttribute->getSourceId(),
-                    array(
+                    [
                         'export_status' => Attribute::STATUS_INACTIVE,
                         'exported' => false,
-                        'export_message' =>  Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+                        'export_message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                             'export/message/error_product_is_not_active',
                             'Produkt ist inaktiv',
                             true
                         ),
-                    )
+                    ]
                 );
                 $this->manager->refresh($connectAttribute);
                 continue;
@@ -178,18 +184,18 @@ class ConnectExport
 
             $categories = $this->helper->getConnectCategoryForProduct($item['articleId']);
             if (is_string($categories)) {
-                $categories = array($categories);
+                $categories = [$categories];
             }
             $categories = json_encode($categories);
 
             $this->updateLocalConnectItem(
                 $connectAttribute->getSourceId(),
-                array(
+                [
                     'export_status' => $status,
                     'export_message' => null,
                     'exported' => true,
                     'category' => $categories,
-                )
+                ]
             );
 
             try {
@@ -214,22 +220,22 @@ class ConnectExport
                 if ($this->errorHandler->isPriceError($e)) {
                     $this->updateLocalConnectItem(
                         $connectAttribute->getSourceId(),
-                        array(
+                        [
                             'export_status' => Attribute::STATUS_ERROR_PRICE,
                             'export_message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                                 'export/message/error_price_status',
                                 'There is an empty price field',
                                 true
                             ),
-                        )
+                        ]
                     );
                 } else {
                     $this->updateLocalConnectItem(
                         $connectAttribute->getSourceId(),
-                        array(
+                        [
                             'export_status' => Attribute::STATUS_ERROR,
                             'export_message' => $e->getMessage() . "\n" . $e->getTraceAsString(),
-                        )
+                        ]
                     );
                 }
 
@@ -252,14 +258,14 @@ class ConnectExport
      * Update connect attribute data
      *
      * @param string $sourceId
-     * @param array $params
+     * @param array  $params
      */
-    private function updateLocalConnectItem($sourceId, $params = array())
+    private function updateLocalConnectItem($sourceId, $params = [])
     {
         if (empty($params)) {
             return;
         }
-        $possibleValues = array(
+        $possibleValues = [
             Attribute::STATUS_DELETE,
             Attribute::STATUS_INSERT,
             Attribute::STATUS_UPDATE,
@@ -268,7 +274,7 @@ class ConnectExport
             Attribute::STATUS_INACTIVE,
             Attribute::STATUS_SYNCED,
             null,
-        );
+        ];
 
         if (isset($params['export_status']) && !in_array($params['export_status'], $possibleValues)) {
             throw new \InvalidArgumentException('Invalid export status');
@@ -280,7 +286,7 @@ class ConnectExport
 
         $builder = $this->manager->getConnection()->createQueryBuilder();
         $builder->update('s_plugin_connect_items', 'ci');
-        array_walk($params, function($param, $name) use ($builder) {
+        array_walk($params, function ($param, $name) use ($builder) {
             $builder->set('ci.' . $name, ':' . $name)
                     ->setParameter($name, $param);
         });
@@ -298,13 +304,14 @@ class ConnectExport
      * will be selected as main variant.
      *
      * @param array $sourceIds
-     * @param boolean $orderByMainVariants
+     * @param bool  $orderByMainVariants
+     *
      * @return array
      */
     public function fetchConnectItems(array $sourceIds, $orderByMainVariants = true)
     {
         if (count($sourceIds) == 0) {
-            return array();
+            return [];
         }
 
         $implodedIds = '"' . implode('","', $sourceIds) . '"';
@@ -323,18 +330,20 @@ class ConnectExport
 
         if ($orderByMainVariants === false) {
             $query .= ';';
+
             return Shopware()->Db()->fetchAll($query);
         }
 
         $query .= 'AND d.kind = ?;';
-        $mainVariants = Shopware()->Db()->fetchAll($query, array(1));
-        $regularVariants = Shopware()->Db()->fetchAll($query, array(2));
+        $mainVariants = Shopware()->Db()->fetchAll($query, [1]);
+        $regularVariants = Shopware()->Db()->fetchAll($query, [2]);
 
         return array_merge($mainVariants, $regularVariants);
     }
 
     /**
      * Helper function to return export product ids
+     *
      * @return array
      */
     public function getExportArticlesIds()
@@ -347,7 +356,7 @@ class ConnectExport
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
 
-        $builder->select(array('a.id'));
+        $builder->select(['a.id']);
 
         $builder->where("at.exportStatus = 'update' OR at.exportStatus = 'insert' OR at.exportStatus = 'error'");
         $builder->andWhere('at.shopId IS NULL');
@@ -355,7 +364,7 @@ class ConnectExport
         $query = $builder->getQuery();
         $articles = $query->getArrayResult();
 
-        $ids = array();
+        $ids = [];
         foreach ($articles as $article) {
             $ids[] = $article['id'];
         }
@@ -373,7 +382,7 @@ class ConnectExport
     {
         $sql = 'SELECT COUNT(*) FROM `sw_connect_change`';
 
-        return (int)Shopware()->Db()->fetchOne($sql);
+        return (int) Shopware()->Db()->fetchOne($sql);
     }
 
     /**
@@ -402,14 +411,14 @@ class ConnectExport
     public function setDeleteStatusForVariants(Article $article)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('at.sourceId'))
+        $builder->select(['at.sourceId'])
             ->from('Shopware\CustomModels\Connect\Attribute', 'at')
             ->where('at.articleId = :articleId')
             ->andWhere('at.exported = 1')
             ->setParameter(':articleId', $article->getId());
         $connectItems = $builder->getQuery()->getArrayResult();
 
-        foreach($connectItems as $item) {
+        foreach ($connectItems as $item) {
             $this->sdk->recordDelete($item['sourceId']);
         }
 
@@ -448,6 +457,7 @@ class ConnectExport
 
     /**
      * @param SearchCriteria $criteria
+     *
      * @return ExportList
      */
     public function getExportList(SearchCriteria $criteria)
@@ -467,7 +477,7 @@ class ConnectExport
         }
 
         $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->select(array(
+        $builder->select([
             'a.id',
             'd.ordernumber as number',
             'd.inStock as inStock',
@@ -479,8 +489,8 @@ class ConnectExport
             'i.category',
             'i.export_status as exportStatus',
             'i.export_message as exportMessage',
-            'i.cron_update as cronUpdate'
-        ))
+            'i.cron_update as cronUpdate',
+        ])
             ->from('s_plugin_connect_items', 'i')
             ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')
             ->innerJoin('a', 's_articles_details', 'd', 'a.main_detail_id = d.id')
@@ -491,7 +501,7 @@ class ConnectExport
             ->where('i.shop_id IS NULL');
 
         if ($customProductsTableExists) {
-            $builder->addSelect("IF(spcptpr.template_id > 0, 1, 0) as customProduct")
+            $builder->addSelect('IF(spcptpr.template_id > 0, 1, 0) as customProduct')
                     ->leftJoin('a', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'a.id = spcptpr.article_id');
         }
 
@@ -501,7 +511,6 @@ class ConnectExport
         }
 
         if ($criteria->categoryId) {
-
             // Get all children categories
             $qBuilder = $this->manager->getConnection()->createQueryBuilder();
             $qBuilder->select('c.id');
@@ -514,7 +523,7 @@ class ConnectExport
             $categoryIds = $qBuilder->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
             if (count($categoryIds) === 0) {
-                $categoryIds = array($criteria->categoryId);
+                $categoryIds = [$criteria->categoryId];
             }
 
             $builder->innerJoin('a', 's_articles_categories', 'sac', 'a.id = sac.articleID')
@@ -558,10 +567,10 @@ class ConnectExport
 
         $data = $builder->execute()->fetchAll();
 
-        return new ExportList(array(
+        return new ExportList([
             'articles' => $data,
             'count' => $total,
-        ));
+        ]);
     }
 
     public function clearConnectItems()
@@ -610,11 +619,12 @@ class ConnectExport
      * Extracts all marketplaces attributes from product
      *
      * @param Detail $detail
+     *
      * @return array
      */
     private function extractProductAttributes(Detail $detail)
     {
-        $marketplaceAttributes = array();
+        $marketplaceAttributes = [];
         $marketplaceAttributes['purchaseUnit'] = $detail->getPurchaseUnit();
         $marketplaceAttributes['referenceUnit'] = $detail->getReferenceUnit();
 

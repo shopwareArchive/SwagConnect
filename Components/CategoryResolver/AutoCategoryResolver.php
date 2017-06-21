@@ -1,12 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryResolver;
 
-use ShopwarePlugins\Connect\Components\CategoryResolver;
+use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
-use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Components\CategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
 
 class AutoCategoryResolver implements CategoryResolver
@@ -14,7 +19,7 @@ class AutoCategoryResolver implements CategoryResolver
     /**
      * @var ModelManager
      */
-    private  $manager;
+    private $manager;
 
     /**
      * @var CategoryRepository
@@ -33,18 +38,18 @@ class AutoCategoryResolver implements CategoryResolver
 
     /**
      * AutoCategoryResolver constructor.
-     * @param ModelManager $manager
-     * @param CategoryRepository $categoryRepository
+     *
+     * @param ModelManager             $manager
+     * @param CategoryRepository       $categoryRepository
      * @param RemoteCategoryRepository $remoteCategoryRepository
-     * @param Config $config
+     * @param Config                   $config
      */
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
         RemoteCategoryRepository $remoteCategoryRepository,
         Config $config
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->categoryRepository = $categoryRepository;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
@@ -75,7 +80,7 @@ class AutoCategoryResolver implements CategoryResolver
 
         // return only leaf categories. Do not fetch them from database by name as before.
         // it is possible to have more than one subcategory "Boots" - CON-4589
-        return array_map(function($category) {
+        return array_map(function ($category) {
             return $category['model'];
         }, $leafCategories);
     }
@@ -84,12 +89,13 @@ class AutoCategoryResolver implements CategoryResolver
      * Loop categories tree recursive and
      * create same structure with entities
      *
-     * @param array $node
+     * @param array         $node
      * @param null Category $parent
-     * @param array $leafCollection
+     * @param array         $leafCollection
+     *
      * @return array
      */
-    public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = array())
+    public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = [])
     {
         if (!$parent) {
             //full load of category entity
@@ -97,10 +103,10 @@ class AutoCategoryResolver implements CategoryResolver
         }
 
         foreach ($node as $category) {
-            $categoryModel = $this->categoryRepository->findOneBy(array(
+            $categoryModel = $this->categoryRepository->findOneBy([
                 'name' => $category['name'],
-                'parentId' => $parent->getId()
-            ));
+                'parentId' => $parent->getId(),
+            ]);
 
             if (!$categoryModel) {
                 $categoryModel = $this->convertNodeToEntity($category, $parent);
@@ -109,10 +115,10 @@ class AutoCategoryResolver implements CategoryResolver
             if (!empty($category['children'])) {
                 $leafCollection = $this->convertTreeToEntities($category['children'], $categoryModel, $leafCollection);
             } else {
-                $leafCollection[] = array(
+                $leafCollection[] = [
                     'model' => $categoryModel,
                     'categoryKey' => $category['categoryId'],
-                );
+                ];
             }
         }
 
@@ -120,8 +126,9 @@ class AutoCategoryResolver implements CategoryResolver
     }
 
     /**
-     * @param array $category
+     * @param array    $category
      * @param Category $parent
+     *
      * @return Category
      */
     public function convertNodeToEntity(array $category, Category $parent)
@@ -137,7 +144,7 @@ class AutoCategoryResolver implements CategoryResolver
         $this->manager->persist($categoryAttribute);
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $category['categoryId']));
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $category['categoryId']]);
         if ($remoteCategory) {
             $remoteCategory->setLocalCategory($categoryModel);
             $this->manager->persist($remoteCategory);
@@ -153,8 +160,8 @@ class AutoCategoryResolver implements CategoryResolver
      */
     public function generateTree(array $categories, $idPrefix = '')
     {
-        $tree = array();
-        uksort($categories, function($a, $b) {
+        $tree = [];
+        uksort($categories, function ($a, $b) {
             return strlen($a) - strlen($b);
         });
 
@@ -174,13 +181,14 @@ class AutoCategoryResolver implements CategoryResolver
 
         foreach ($filteredCategories as $key => $categoryName) {
             $children = $this->generateTree($categories, $key);
-            $tree[$key] = array(
+            $tree[$key] = [
                 'name' => $categoryName,
                 'children' => $children,
                 'categoryId' => $key,
                 'leaf' => empty($children),
-            );
+            ];
         }
+
         return $tree;
     }
 
@@ -195,17 +203,17 @@ class AutoCategoryResolver implements CategoryResolver
      * attribute from array
      *
      * @param string $name
+     *
      * @return array
      */
     private function getCategoryData($name)
     {
-        return array (
+        return [
             'name' => $name,
             'active' => true,
             'childrenCount' => 0,
             'text' => $name,
-            'attribute' =>
-                array (
+            'attribute' => [
                     'id' => 0,
                     'parent' => 0,
                     'name' => 'Deutsch',
@@ -217,14 +225,14 @@ class AutoCategoryResolver implements CategoryResolver
                     'leaf' => false,
                     'allowDrag' => false,
                     'parentId' => 0,
-                    'categoryId' => NULL,
-                    'attribute1' => NULL,
-                    'attribute2' => NULL,
-                    'attribute3' => NULL,
-                    'attribute4' => NULL,
-                    'attribute5' => NULL,
-                    'attribute6' => NULL,
-                ),
-        );
+                    'categoryId' => null,
+                    'attribute1' => null,
+                    'attribute2' => null,
+                    'attribute3' => null,
+                    'attribute4' => null,
+                    'attribute5' => null,
+                    'attribute6' => null,
+                ],
+        ];
     }
-} 
+}

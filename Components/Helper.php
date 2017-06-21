@@ -1,45 +1,27 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
+
 use Doctrine\DBAL\DBALException;
-use Shopware\Connect\Struct\Product,
-    Shopware\Models\Article\Article as ProductModel,
-    Shopware\Components\Model\ModelManager,
-    Doctrine\ORM\Query;
-use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
+use Doctrine\ORM\Query;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\Struct\Product;
 use Shopware\CustomModels\Connect\Attribute;
+use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
+use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Article\Detail as ProductDetail;
-use Shopware\Models\Article\Unit;
-use Shopware\Models\Attribute\Media as MediaAttribute;
 use Shopware\Models\Article\Image;
+use Shopware\Models\Article\Unit;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Struct\ShopProductId;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
  */
 class Helper
 {
@@ -50,7 +32,7 @@ class Helper
 
     private $connectCategoryQuery;
 
-    /** @var \ShopwarePlugins\Connect\Components\ProductQuery  */
+    /** @var \ShopwarePlugins\Connect\Components\ProductQuery */
     private $connectProductQuery;
 
     /**
@@ -62,8 +44,7 @@ class Helper
         ModelManager $manager,
         CategoryQuery $connectCategoryQuery,
         ProductQuery $connectProductQuery
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->connectCategoryQuery = $connectCategoryQuery;
         $this->connectProductQuery = $connectProductQuery;
@@ -75,7 +56,8 @@ class Helper
     public function getDefaultCustomerGroup()
     {
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
-        $customerGroup = $repository->findOneBy(array('key' => 'EK'));
+        $customerGroup = $repository->findOneBy(['key' => 'EK']);
+
         return $customerGroup;
     }
 
@@ -83,13 +65,14 @@ class Helper
      * Returns an article model for a given (sdk) product.
      *
      * @param Product $product
-     * @param int $mode
+     * @param int     $mode
+     *
      * @return null|ProductModel
      */
     public function getArticleModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('ba', 'a'));
+        $builder->select(['ba', 'a']);
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.article', 'a');
 
@@ -104,6 +87,7 @@ class Helper
 
         if (isset($result[0])) {
             $attribute = $result[0];
+
             return $attribute->getArticle();
         }
 
@@ -112,13 +96,14 @@ class Helper
 
     /**
      * @param Product $product
-     * @param int $mode
+     * @param int     $mode
+     *
      * @return null|ProductDetail
      */
-    public function  getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
+    public function getArticleDetailModelByProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('ba', 'd'));
+        $builder->select(['ba', 'd']);
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
@@ -135,6 +120,7 @@ class Helper
         if (isset($result[0])) {
             /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
             $attribute = $result[0];
+
             return $attribute->getArticleDetail();
         }
 
@@ -144,7 +130,7 @@ class Helper
     public function getConnectArticleModel($sourceId, $shopId)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('ba', 'a'));
+        $builder->select(['ba', 'a']);
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.article', 'a');
         $builder->join('a.mainDetail', 'd');
@@ -161,6 +147,7 @@ class Helper
 
         if (isset($result[0])) {
             $attribute = $result[0];
+
             return $attribute->getArticle();
         }
 
@@ -169,6 +156,7 @@ class Helper
 
     /**
      * @param array $orderNumbers
+     *
      * @return array
      */
     public function getArticleIdsByNumber(array $orderNumbers)
@@ -182,7 +170,7 @@ class Helper
             ->execute()
             ->fetchAll();
 
-        return array_map(function($row){
+        return array_map(function ($row) {
             return $row['articleId'];
         }, $rows);
     }
@@ -192,7 +180,8 @@ class Helper
      * given sourceId and shopId
      *
      * @param string $sourceId
-     * @param int $shopId
+     * @param int    $shopId
+     *
      * @return null|ProductDetail
      */
     public function getConnectArticleDetailModel($sourceId, $shopId)
@@ -241,12 +230,12 @@ class Helper
         $this->manager->getConnection()->exec($sql);
     }
 
-
     /**
      * Returns a remote connectProduct e.g. for checkout maniputlations
      *
      * @param array $ids
-     * @param int $shopId
+     * @param int   $shopId
+     *
      * @return array
      */
     public function getRemoteProducts(array $ids, $shopId)
@@ -258,6 +247,7 @@ class Helper
      * Returns a local connectProduct for export
      *
      * @param array $sourceIds
+     *
      * @return Product[]
      */
     public function getLocalProduct(array $sourceIds)
@@ -269,6 +259,7 @@ class Helper
      * Does the current basket contain connect products?
      *
      * @param $session
+     *
      * @return bool
      */
     public function hasBasketConnectProducts($session, $userId = null)
@@ -284,7 +275,7 @@ class Helper
 
             WHERE ob.sessionID=?
             ';
-        $whereClause = array($session);
+        $whereClause = [$session];
 
         if ($userId > 0) {
             $sql .= ' OR userID=?';
@@ -302,6 +293,7 @@ class Helper
      * Will return the connectAttribute for a given model. The model can be an Article\Article or Article\Detail
      *
      * @param $model ProductModel|ProductDetail
+     *
      * @return ConnectAttribute
      */
     public function getConnectAttributeByModel($model)
@@ -315,9 +307,10 @@ class Helper
             if (!$model->getMainDetail()) {
                 return false;
             }
-            return $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
+
+            return $repository->findOneBy(['articleDetailId' => $model->getMainDetail()->getId()]);
         } elseif ($model instanceof ProductDetail) {
-            return $repository->findOneBy(array('articleDetailId' => $model->getId()));
+            return $repository->findOneBy(['articleDetailId' => $model->getId()]);
         }
 
         return false;
@@ -327,12 +320,13 @@ class Helper
      * Returns connectAttributes for all article details by given article object
      *
      * @param ProductModel $article
+     *
      * @return \Shopware\CustomModels\Connect\Attribute[]
      */
     public function getConnectAttributesByArticle(ProductModel $article)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('connectAttribute', 'detail'));
+        $builder->select(['connectAttribute', 'detail']);
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'connectAttribute');
         $builder->innerJoin('connectAttribute.articleDetail', 'detail');
 
@@ -348,6 +342,7 @@ class Helper
      * Returns true when product is exported to Connect
      *
      * @param Attribute $connectAttribute
+     *
      * @return bool
      */
     public function isProductExported(Attribute $connectAttribute)
@@ -377,6 +372,7 @@ class Helper
      * same article is exported.
      *
      * @param Attribute $connectAttribute
+     *
      * @return bool
      */
     public function hasExportedVariants(Attribute $connectAttribute)
@@ -399,8 +395,10 @@ class Helper
      * Helper method to create a connect attribute on the fly
      *
      * @param $model
-     * @return ConnectAttribute
+     *
      * @throws \RuntimeException
+     *
+     * @return ConnectAttribute
      */
     public function getOrCreateConnectAttributeByModel($model)
     {
@@ -425,7 +423,7 @@ class Helper
                     $this->generateSourceId($model)
                 );
             } else {
-                throw new \RuntimeException("Passed model needs to be an article or an article detail");
+                throw new \RuntimeException('Passed model needs to be an article or an article detail');
             }
             $this->manager->persist($attribute);
             $this->manager->flush($attribute);
@@ -441,11 +439,12 @@ class Helper
      * it will be created.
      *
      * @param ProductModel $article
+     *
      * @return array
      */
     public function getOrCreateConnectAttributes(ProductModel $article)
     {
-        $attributes = array();
+        $attributes = [];
         /** @var \Shopware\Models\Article\Detail $detail */
         foreach ($article->getDetails() as $detail) {
             $attributes[] = $this->getOrCreateConnectAttributeByModel($detail);
@@ -458,12 +457,13 @@ class Helper
      * Generate sourceId
      *
      * @param ProductDetail $detail
+     *
      * @return string
      */
     public function generateSourceId(ProductDetail $detail)
     {
         if ($detail->getKind() == 1) {
-            $sourceId = (string)$detail->getArticle()->getId();
+            $sourceId = (string) $detail->getArticle()->getId();
         } else {
             $sourceId = sprintf(
                 '%s-%s',
@@ -477,6 +477,7 @@ class Helper
 
     /**
      * @param $id
+     *
      * @return array
      */
     public function getConnectCategoryForProduct($id)
@@ -486,6 +487,7 @@ class Helper
 
     /**
      * @param Product $product
+     *
      * @return \Shopware\Models\Category\Category[]
      */
     public function getCategoriesByProduct(Product $product)
@@ -502,10 +504,10 @@ class Helper
     {
         usort(
             $categories,
-            array(
+            [
                 $this->getCategoryQuery()->getRelevanceSorter(),
-                'sortConnectCategoriesByRelevance'
-            )
+                'sortConnectCategoriesByRelevance',
+            ]
         );
 
         return array_pop($categories);
@@ -518,20 +520,21 @@ class Helper
      */
     public function getUpdateFlags()
     {
-        return array(2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport', 128 => 'additionalDescription');
+        return [2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport', 128 => 'additionalDescription'];
     }
 
     /**
      * Returns shopware unit entity
      *
      * @param $unitKey
+     *
      * @return \Shopware\Models\Article\Unit
      */
     public function getUnit($unitKey)
     {
         $repository = $this->manager->getRepository('Shopware\Models\Article\Unit');
 
-        return $repository->findOneBy(array('unit' => $unitKey));
+        return $repository->findOneBy(['unit' => $unitKey]);
     }
 
     /**
@@ -541,13 +544,15 @@ class Helper
     {
         Shopware()->Events()->notify(
             'Shopware_Plugins_HttpCache_InvalidateCacheId',
-            array('cacheId' => 'a' . $articleId)
+            ['cacheId' => 'a' . $articleId]
         );
     }
 
     /**
      * Replace unit and ref quantity
+     *
      * @param $products
+     *
      * @return mixed
      */
     public function prepareConnectUnit($products)
@@ -565,7 +570,7 @@ class Helper
             }
 
             if ($p->attributes['ref_quantity']) {
-                $intRefQuantity = (int)$p->attributes['ref_quantity'];
+                $intRefQuantity = (int) $p->attributes['ref_quantity'];
                 if ($p->attributes['ref_quantity'] - $intRefQuantity <= 0.0001) {
                     $p->attributes['ref_quantity'] = $intRefQuantity;
                 }
@@ -587,12 +592,13 @@ class Helper
      * Collect sourceIds by given article ids
      *
      * @param array $articleIds
+     *
      * @return array
      */
     public function getArticleSourceIds(array $articleIds)
     {
         if (empty($articleIds)) {
-            return array();
+            return [];
         }
 
         return array_merge(
@@ -641,6 +647,7 @@ class Helper
      * If $articleDetailId is local product, $shopProductId->shopId will be null.
      *
      * @param int $articleDetailId
+     *
      * @return ShopProductId
      */
     public function getShopProductId($articleDetailId)
@@ -661,6 +668,7 @@ class Helper
      * Check if given articleDetailId is remote product
      *
      * @param int $articleDetailId
+     *
      * @return bool
      */
     public function isRemoteArticleDetail($articleDetailId)
@@ -678,13 +686,14 @@ class Helper
             return false;
         }
 
-        return ($connectAttribute->getShopId() != null);
+        return $connectAttribute->getShopId() != null;
     }
 
     /**
      * Check if given articleDetailId is remote product
      *
      * @param int $articleDetailId
+     *
      * @return bool
      */
     public function isRemoteArticleDetailDBAL($articleDetailId)
@@ -704,6 +713,7 @@ class Helper
      * from source ID
      *
      * @param $sourceId
+     *
      * @return array
      */
     public function explodeArticleId($sourceId)
@@ -714,15 +724,16 @@ class Helper
             return $articleId;
         }
 
-        return array(
-            $articleId[0]
-        );
+        return [
+            $articleId[0],
+        ];
     }
 
     /**
      * Creates Shopware product model
      *
      * @param Product $product
+     *
      * @return ProductModel
      */
     public function createProductModel(Product $product)
@@ -741,12 +752,13 @@ class Helper
      *
      * @param $product
      * @param int $mode
+     *
      * @return null|ProductModel
      */
     public function getArticleByRemoteProduct(Product $product, $mode = Query::HYDRATE_OBJECT)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('ba', 'd'));
+        $builder->select(['ba', 'd']);
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'ba');
         $builder->join('ba.articleDetail', 'd');
         $builder->leftJoin('d.attribute', 'at');
@@ -763,6 +775,7 @@ class Helper
         if (isset($result[0])) {
             /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
             $attribute = $result[0];
+
             return $attribute->getArticle();
         }
 
@@ -771,30 +784,31 @@ class Helper
 
     /**
      * @param $articleId
+     *
      * @return array
      */
     public function getSourceIdsFromArticleId($articleId)
     {
         $rows = $this->manager->getConnection()->fetchAll(
             'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-            array($articleId)
+            [$articleId]
         );
 
-        return array_map(function($row) {
+        return array_map(function ($row) {
             return $row['source_id'];
         }, $rows);
     }
 
     /**
-     * @param Unit $localUnit
+     * @param Unit   $localUnit
      * @param string $remoteUnit
      */
     public function updateUnitInRelatedProducts(Unit $localUnit, $remoteUnit)
     {
-        $statement = $this->manager->getConnection()->prepare("UPDATE s_articles_details sad
+        $statement = $this->manager->getConnection()->prepare('UPDATE s_articles_details sad
             LEFT JOIN s_articles_attributes saa ON sad.id = saa.articledetailsID
             SET sad.unitID = :unitId
-            WHERE saa.connect_remote_unit = :remoteUnit");
+            WHERE saa.connect_remote_unit = :remoteUnit');
 
         $statement->bindValue(':unitId', $localUnit->getId(), \PDO::PARAM_INT);
         $statement->bindValue(':remoteUnit', $remoteUnit, \PDO::PARAM_STR);
@@ -811,6 +825,7 @@ class Helper
      * s_plugin_connect_items
      *
      * @param string $sourceId
+     *
      * @return bool
      */
     public function isMainVariant($sourceId)
@@ -820,7 +835,7 @@ class Helper
               FROM s_plugin_connect_items spci
               LEFT JOIN s_articles_details d ON spci.article_detail_id = d.id
               WHERE source_id = ?',
-            array($sourceId)
+            [$sourceId]
         );
 
         if ($isMainVariant != 1) {

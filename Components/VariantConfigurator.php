@@ -1,41 +1,23 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
 
-use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
-use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\Product;
-use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Configurator\Group;
 use Shopware\Models\Article\Configurator\Option;
 use Shopware\Models\Article\Configurator\Set;
+use Shopware\Models\Article\Detail;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
  */
 class VariantConfigurator
 {
@@ -60,7 +42,7 @@ class VariantConfigurator
      * Configure variant group, options and configurator set
      *
      * @param \Shopware\Connect\Struct\Product $product
-     * @param \Shopware\Models\Article\Detail $detail
+     * @param \Shopware\Models\Article\Detail  $detail
      */
     public function configureVariantAttributes(Product $product, Detail $detail)
     {
@@ -73,7 +55,7 @@ class VariantConfigurator
         if (!$article->getConfiguratorSet()) {
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
-            $configSet->setArticles(array($article));
+            $configSet->setArticles([$article]);
             $article->setConfiguratorSet($configSet);
         } else {
             $configSet = $article->getConfiguratorSet();
@@ -112,13 +94,14 @@ class VariantConfigurator
      * Creates variant configurator group
      *
      * @param string $name
+     *
      * @return \Shopware\Models\Article\Configurator\Group
      */
     public function createConfiguratorGroup($name)
     {
         $latestGroup = $this->manager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array(), array('position' => 'DESC'));
+            ->findOneBy([], ['position' => 'DESC']);
 
         $position = $latestGroup ? $latestGroup->getPosition() + 1 : 1;
 
@@ -132,8 +115,9 @@ class VariantConfigurator
     /**
      * Adds group to configurator set if it does not exist
      *
-     * @param Set $set
+     * @param Set   $set
      * @param Group $group
+     *
      * @return Set
      */
     private function addGroupToConfiguratorSet(Set $set, Group $group)
@@ -156,15 +140,16 @@ class VariantConfigurator
     /**
      * Adds option to configurator set if it does not exist
      *
-     * @param Set $set
+     * @param Set    $set
      * @param Option $option
+     *
      * @return Set
      */
     private function addOptionToConfiguratorSet(Set $set, Option $option)
     {
         $configSetOptions = $set->getOptions();
-        /** @var \Shopware\Models\Article\Configurator\Option $option */
-        foreach($configSetOptions as $configSetOption) {
+        /* @var \Shopware\Models\Article\Configurator\Option $option */
+        foreach ($configSetOptions as $configSetOption) {
             if ($configSetOption->getName() === $option->getName()
                 && $configSetOption->getGroup()->getName() === $option->getGroup()->getName()) {
                 return $set;
@@ -183,6 +168,7 @@ class VariantConfigurator
      *
      * @param Set $set
      * @param $groupName
+     *
      * @return Group
      */
     private function getGroupByName(Set $set, $groupName)
@@ -195,7 +181,7 @@ class VariantConfigurator
         }
 
         $repository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Group');
-        $group = $repository->findOneBy(array('name' => $groupName));
+        $group = $repository->findOneBy(['name' => $groupName]);
 
         if (empty($group)) {
             $group = $this->createConfiguratorGroup($groupName);
@@ -208,9 +194,10 @@ class VariantConfigurator
      * Find option in already assigned configurator set options.
      * If it does not exist, then create it.
      *
-     * @param Set $set
+     * @param Set   $set
      * @param Group $group
      * @param $optionName
+     *
      * @return null|object|Option
      */
     private function getOrCreateOptionByName(Set $set, Group $group, $optionName)
@@ -227,14 +214,14 @@ class VariantConfigurator
         }
 
         $optionsRepository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Option');
-        $option = $optionsRepository->findOneBy(array('name' => $optionName, 'group' => $group));
+        $option = $optionsRepository->findOneBy(['name' => $optionName, 'group' => $group]);
 
         if (empty($option)) {
             $option = new Option();
             $option->setName($optionName);
             $option->setGroup($group);
             $optionPositionsCount = count($group->getOptions());
-            $optionPositionsCount++;
+            ++$optionPositionsCount;
             $option->setPosition($optionPositionsCount);
             $groupOptions = $group->getOptions();
             $groupOptions->add($option);
@@ -255,10 +242,10 @@ class VariantConfigurator
             }
 
             /** @var \Shopware\Models\Shop\Locale $locale */
-            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            $locale = $this->getLocaleRepository()->findOneBy(['locale' => LocaleMapper::getShopwareLocale($key)]);
 
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            $shop = $this->getShopRepository()->findOneBy(['locale' => $locale]);
             if (!$shop) {
                 continue;
             }
@@ -280,10 +267,10 @@ class VariantConfigurator
             }
 
             /** @var \Shopware\Models\Shop\Locale $locale */
-            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            $locale = $this->getLocaleRepository()->findOneBy(['locale' => LocaleMapper::getShopwareLocale($key)]);
 
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            $shop = $this->getShopRepository()->findOneBy(['locale' => $locale]);
             if (!$shop) {
                 continue;
             }
@@ -313,4 +300,4 @@ class VariantConfigurator
 
         return $this->localeRepository;
     }
-} 
+}

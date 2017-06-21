@@ -1,53 +1,35 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
+
 use Enlight_Event_EventManager;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Random;
 use Shopware\Connect\Gateway;
-use Shopware\Connect\ProductFromShop as ProductFromShopBase,
-    Shopware\Connect\Struct\Order,
-    Shopware\Connect\Struct\Product,
-    Shopware\Connect\Struct\Address,
-    Shopware\Models\Order as OrderModel,
-    Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel,
-    Shopware\Models\Customer as CustomerModel,
-    Shopware\Components\Model\ModelManager,
-    Doctrine\ORM\Query,
-    Shopware\Components\Random;
+use Shopware\Connect\ProductFromShop as ProductFromShopBase;
+use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\Change\FromShop\Availability;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
 use Shopware\Connect\Struct\Change\FromShop\Update;
+use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\PaymentStatus;
+use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Shipping;
 use Shopware\CustomModels\Connect\Attribute;
+use Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel;
+use Shopware\Models\Customer as CustomerModel;
+use Shopware\Models\Order as OrderModel;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
  * The interface for products exported *to* connect *from* the local shop
  *
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
  */
 class ProductFromShop implements ProductFromShopBase
 {
@@ -77,10 +59,10 @@ class ProductFromShop implements ProductFromShopBase
     private $eventManager;
 
     /**
-     * @param Helper $helper
-     * @param ModelManager $manager
-     * @param Gateway $gateway
-     * @param Logger $logger
+     * @param Helper                     $helper
+     * @param ModelManager               $manager
+     * @param Gateway                    $gateway
+     * @param Logger                     $logger
      * @param Enlight_Event_EventManager $eventManager
      */
     public function __construct(
@@ -89,8 +71,7 @@ class ProductFromShop implements ProductFromShopBase
         Gateway $gateway,
         Logger $logger,
         Enlight_Event_EventManager $eventManager
-    )
-    {
+    ) {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->gateway = $gateway;
@@ -105,6 +86,7 @@ class ProductFromShop implements ProductFromShopBase
      * array.
      *
      * @param string[] $sourceIds
+     *
      * @return Product[]
      */
     public function getProducts(array $sourceIds)
@@ -118,6 +100,7 @@ class ProductFromShop implements ProductFromShopBase
      * Get all IDs of all exported products
      *
      * @throws \BadMethodCallException
+     *
      * @return string[]
      */
     public function getExportedProductIDs()
@@ -129,8 +112,8 @@ class ProductFromShop implements ProductFromShopBase
      * Reserve a product in shop for purchase
      *
      * @param Order $order
-     * @return void
-     * @throws \Exception Abort reservation by throwing an exception here.
+     *
+     * @throws \Exception abort reservation by throwing an exception here
      */
     public function reserve(Order $order)
     {
@@ -138,7 +121,7 @@ class ProductFromShop implements ProductFromShopBase
             'Connect_Supplier_Reservation_Before',
             [
                 'subject' => $this,
-                'order' => $order
+                'order' => $order,
             ]
         );
     }
@@ -149,11 +132,12 @@ class ProductFromShop implements ProductFromShopBase
      *
      *
      * @param Order $order
-     * @return string
      *
      * @throws \Exception Abort buy by throwing an exception,
      *                    but only in very important cases.
      *                    Do validation in {@see reserve} instead.
+     *
+     * @return string
      */
     public function buy(Order $order)
     {
@@ -177,6 +161,7 @@ class ProductFromShop implements ProductFromShopBase
      * Actually creates the remote order in shopware.
      *
      * @param Order $order
+     *
      * @return string
      */
     public function doBuy(Order $order)
@@ -189,24 +174,24 @@ class ProductFromShop implements ProductFromShopBase
         $number = 'SC-' . $order->orderShop . '-' . $order->localOrderId;
 
         $repository = $this->manager->getRepository('Shopware\Models\Payment\Payment');
-        $payment = $repository->findOneBy(array(
+        $payment = $repository->findOneBy([
             'name' => 'invoice',
-        ));
+        ]);
 
         // todo: Create the OrderModel without previous plain SQL
         //$model = new OrderModel\Order();
         $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 17);';
-        Shopware()->Db()->query($sql, array($number));
+        Shopware()->Db()->query($sql, [$number]);
         $modelId = Shopware()->Db()->lastInsertId();
         /** @var $model \Shopware\Models\Order\Order */
         $model = $this->manager->find('Shopware\Models\Order\Order', $modelId);
 
-        $attribute = new \Shopware\Models\Attribute\Order;
+        $attribute = new \Shopware\Models\Attribute\Order();
         $attribute->setConnectOrderId($order->localOrderId);
         $attribute->setConnectShopId($order->orderShop);
         $model->setAttribute($attribute);
 
-        $model->fromArray(array(
+        $model->fromArray([
             'number' => $number,
             'invoiceShipping' => $order->grossShippingCosts,
             'invoiceShippingNet' => $order->shippingCosts,
@@ -216,19 +201,19 @@ class ProductFromShop implements ProductFromShopBase
             'languageSubShop' => $shop,
             'payment' => $payment,
             'currency' => 'EUR',
-            'orderTime' => 'now'
-        ));
-        $items = array();
+            'orderTime' => 'now',
+        ]);
+        $items = [];
         $connectAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
 
         /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
-        foreach($order->products as $orderItem) {
+        foreach ($order->products as $orderItem) {
             $product = $orderItem->product;
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
-            $connectAttribute = $connectAttributeRepository->findOneBy(array(
+            $connectAttribute = $connectAttributeRepository->findOneBy([
                 'sourceId' => $product->sourceId,
                 'shopId' => null,
-            ));
+            ]);
             if (!$connectAttribute) {
                 $this->logger->write(
                     true,
@@ -244,7 +229,7 @@ class ProductFromShop implements ProductFromShopBase
             /** @var $productModel \Shopware\Models\Article\Article */
             $productModel = $detail->getArticle();
             $item = new OrderModel\Detail();
-            $item->fromArray(array(
+            $item->fromArray([
                 'articleId' => $productModel->getId(),
                 'quantity' => $orderItem->count,
                 'orderId' => $model->getId(),
@@ -254,8 +239,8 @@ class ProductFromShop implements ProductFromShopBase
                 'price' => $this->calculatePrice($product),
                 'taxRate' => $product->vat * 100,
                 'status' => $detailStatus,
-                'attribute' => new OrderDetailAttributeModel()
-            ));
+                'attribute' => new OrderDetailAttributeModel(),
+            ]);
             $items[] = $item;
         }
         $model->setDetails($items);
@@ -265,21 +250,21 @@ class ProductFromShop implements ProductFromShopBase
         $password = Random::getAlphanumericString(30);
 
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
-        $customer = $repository->findOneBy(array(
-            'email' => $email
-        ));
-        if($customer === null) {
+        $customer = $repository->findOneBy([
+            'email' => $email,
+        ]);
+        if ($customer === null) {
             $customer = new CustomerModel\Customer();
-            $customer->fromArray(array(
+            $customer->fromArray([
                 'active' => true,
                 'email' => $email,
                 'password' => $password,
                 'accountMode' => 1,
                 'shop' => $shop,
                 'paymentId' => $payment->getId(),
-            ));
+            ]);
         }
-        if($customer->getBilling() === null) {
+        if ($customer->getBilling() === null) {
             $billing = new CustomerModel\Billing();
             $customer->setBilling($billing);
         } else {
@@ -310,9 +295,9 @@ class ProductFromShop implements ProductFromShopBase
         $model->calculateInvoiceAmount();
 
         $dispatchRepository = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch');
-        $dispatch = $dispatchRepository->findOneBy(array(
-            'name' => $order->shipping->service
-        ));
+        $dispatch = $dispatchRepository->findOneBy([
+            'name' => $order->shipping->service,
+        ]);
         if ($dispatch) {
             $model->setDispatch($dispatch);
         }
@@ -321,7 +306,7 @@ class ProductFromShop implements ProductFromShopBase
             'Connect_Supplier_Buy_Before',
             [
                 'subject' => $this,
-                'order' => $order
+                'order' => $order,
             ]
         );
 
@@ -344,6 +329,7 @@ class ProductFromShop implements ProductFromShopBase
 
     /**
      * @param Address $address
+     *
      * @return array
      */
     private function getAddressData(Address $address)
@@ -351,10 +337,11 @@ class ProductFromShop implements ProductFromShopBase
         $repository = 'Shopware\Models\Country\Country';
         $repository = $this->manager->getRepository($repository);
         /** @var $country \Shopware\Models\Country\Country */
-        $country = $repository->findOneBy(array(
-            'iso3' => $address->country
-        ));
-        return array(
+        $country = $repository->findOneBy([
+            'iso3' => $address->country,
+        ]);
+
+        return [
             'company' => $address->company ?: '',
             'salutation' => 'mr',
             'lastName' => $address->surName,
@@ -364,8 +351,8 @@ class ProductFromShop implements ProductFromShopBase
             'street' => $address->street,
             'streetNumber' => $address->streetNumber,
             'phone' => $address->phone,
-            'country' => $country
-        );
+            'country' => $country,
+        ];
     }
 
     public function updatePaymentStatus(PaymentStatus $status)
@@ -373,13 +360,13 @@ class ProductFromShop implements ProductFromShopBase
         // $paymentStatus->localOrderId is actually ordernumber for this shop
         // e.g. BP-35-20002
         $repository = $this->manager->getRepository('Shopware\Models\Order\Order');
-        $order = $repository->findOneBy(array('number' => $status->localOrderId));
+        $order = $repository->findOneBy(['number' => $status->localOrderId]);
 
         if ($order) {
             $paymentStatusRepository = $this->manager->getRepository('Shopware\Models\Order\Status');
             /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
             $orderPaymentStatus = $paymentStatusRepository->findOneBy(
-                array('name' => 'sc_' . $status->paymentStatus)
+                ['name' => 'sc_' . $status->paymentStatus]
             );
 
             if ($orderPaymentStatus) {
@@ -390,7 +377,7 @@ class ProductFromShop implements ProductFromShopBase
                     [
                         'subject' => $this,
                         'paymentStatus' => $status,
-                        'order' => $order
+                        'order' => $order,
                     ]
                 );
 
@@ -424,26 +411,26 @@ class ProductFromShop implements ProductFromShopBase
     public function calculateShippingCosts(Order $order)
     {
         if (!$order->deliveryAddress) {
-            return new Shipping(array('isShippable' => false));
+            return new Shipping(['isShippable' => false]);
         }
 
         $countryIso3 = $order->deliveryAddress->country;
-        $country = $this->manager->getRepository('Shopware\Models\Country\Country')->findOneBy(array('iso3' => $countryIso3));
+        $country = $this->manager->getRepository('Shopware\Models\Country\Country')->findOneBy(['iso3' => $countryIso3]);
 
         if (!$country) {
-            return new Shipping(array('isShippable' => false));
+            return new Shipping(['isShippable' => false]);
         }
 
         if (count($order->orderItems) == 0) {
             throw new \InvalidArgumentException(
-                "ProductList is not allowed to be empty"
+                'ProductList is not allowed to be empty'
             );
         }
 
         /* @var \Shopware\Models\Shop\Shop $shop */
         $shop = $this->manager->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
         if (!$shop) {
-            return new Shipping(array('isShippable' => false));
+            return new Shipping(['isShippable' => false]);
         }
         $shop->registerResources(Shopware()->Container()->get('bootstrap'));
 
@@ -453,61 +440,61 @@ class ProductFromShop implements ProductFromShopBase
         $session->offsetSet('sSESSION_ID', $sessionId);
 
         /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
-        $shipping = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy(array(
-            'type' => 0 // standard shipping
-        ));
+        $shipping = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy([
+            'type' => 0, // standard shipping
+        ]);
 
         // todo: if products are not shippable with default shipping
         // todo: do we need to check with other shipping methods
         if (!$shipping) {
-            return new Shipping(array('isShippable' => false));
+            return new Shipping(['isShippable' => false]);
         }
 
         $session->offsetSet('sDispatch', $shipping->getId());
 
         $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
-        $products = array();
+        $products = [];
         /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
         foreach ($order->orderItems as $orderItem) {
-            $attributes = $repository->findBy(array('sourceId' => array($orderItem->product->sourceId), 'shopId' => null));
+            $attributes = $repository->findBy(['sourceId' => [$orderItem->product->sourceId], 'shopId' => null]);
             if (count($attributes) === 0) {
                 continue;
             }
 
-            $products[] = array(
+            $products[] = [
                 'ordernumber' => $attributes[0]->getArticleDetail()->getNumber(),
                 'quantity' => $orderItem->count,
-            );
+            ];
         }
 
-        /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
+        /* @var \Shopware\CustomModels\Connect\Attribute $attribute */
         foreach ($products as $product) {
             Shopware()->Modules()->Basket()->sAddArticle($product['ordernumber'], $product['quantity']);
         }
 
-        $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(array('id' => $country->getId()));
+        $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(['id' => $country->getId()]);
         if (!is_array($result)) {
-            return new Shipping(array('isShippable' => false));
+            return new Shipping(['isShippable' => false]);
         }
 
         $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';
-        Shopware()->Db()->executeQuery($sql, array(
+        Shopware()->Db()->executeQuery($sql, [
             $sessionId,
-        ));
+        ]);
 
-        $shippingReturn = new Shipping(array(
+        $shippingReturn = new Shipping([
             'shopId' => $this->gateway->getShopId(),
             'service' => $shipping->getName(),
             'shippingCosts' => floatval($result['netto']),
             'grossShippingCosts' => floatval($result['brutto']),
-        ));
+        ]);
 
         $this->eventManager->notify(
             'Connect_Supplier_Get_Shipping_After',
             [
                 'subject' => $this,
                 'shipping' => $shippingReturn,
-                'order' => $order
+                'order' => $order,
             ]
         );
 
@@ -517,9 +504,8 @@ class ProductFromShop implements ProductFromShopBase
     /**
      * Perform sync changes to fromShop
      *
-     * @param string $since
+     * @param string                            $since
      * @param \Shopware\Connect\Struct\Change[] $changes
-     * @return void
      */
     public function onPerformSync($since, array $changes)
     {
@@ -534,8 +520,8 @@ class ProductFromShop implements ProductFromShopBase
                 "UPDATE s_plugin_connect_items
                 SET export_status = '$statusSynced'
                 WHERE revision <= ?
-                AND ( export_status = '$statusInsert' OR export_status = '$statusUpdate' )" ,
-                array($since)
+                AND ( export_status = '$statusInsert' OR export_status = '$statusUpdate' )",
+                [$since]
             );
 
             $this->manager->getConnection()->executeQuery(
@@ -543,7 +529,7 @@ class ProductFromShop implements ProductFromShopBase
                 SET export_status = ?
                 WHERE revision <= ?
                 AND export_status = '$statusDelete'",
-                array(NULL, $since)
+                [null, $since]
             );
 
             /** @var \Shopware\Connect\Struct\Change $change */
@@ -553,10 +539,10 @@ class ProductFromShop implements ProductFromShopBase
                 }
 
                 $this->manager->getConnection()->executeQuery(
-                    "UPDATE s_plugin_connect_items
+                    'UPDATE s_plugin_connect_items
                     SET revision = ?
-                    WHERE source_id = ? AND shop_id IS NULL",
-                    array($change->revision, $change->sourceId)
+                    WHERE source_id = ? AND shop_id IS NULL',
+                    [$change->revision, $change->sourceId]
                 );
             }
 
@@ -575,37 +561,36 @@ class ProductFromShop implements ProductFromShopBase
                 null
             );
         }
-
     }
 
     private function markStreamsAsNotExported()
     {
         $streamIds = $this->manager->getConnection()->executeQuery(
-            "SELECT pcs.stream_id as streamId
+            'SELECT pcs.stream_id as streamId
              FROM s_plugin_connect_streams as pcs
-             WHERE export_status = ?",
-            array(ProductStreamService::STATUS_DELETE)
+             WHERE export_status = ?',
+            [ProductStreamService::STATUS_DELETE]
         )->fetchAll();
 
         foreach ($streamIds as $stream) {
             $streamId = $stream['streamId'];
 
             $notDeleted = $this->manager->getConnection()->executeQuery(
-                "SELECT pss.id
+                'SELECT pss.id
                  FROM s_product_streams_selection as pss
                  JOIN s_plugin_connect_items as pci
                  ON pss.article_id = pci.article_id
                  WHERE pss.stream_id = ?
-                 AND pci.export_status != ?",
-                array($streamId, null)
+                 AND pci.export_status != ?',
+                [$streamId, null]
             )->fetchAll();
 
             if (count($notDeleted) === 0) {
                 $this->manager->getConnection()->executeQuery(
-                    "UPDATE s_plugin_connect_streams
+                    'UPDATE s_plugin_connect_streams
                      SET export_status = ?
-                     WHERE stream_id = ?",
-                    array(null, $streamId)
+                     WHERE stream_id = ?',
+                    [null, $streamId]
                 );
             }
         }
@@ -614,31 +599,31 @@ class ProductFromShop implements ProductFromShopBase
     private function markStreamsAsSynced()
     {
         $streamIds = $this->manager->getConnection()->executeQuery(
-            "SELECT pcs.stream_id as streamId
+            'SELECT pcs.stream_id as streamId
              FROM s_plugin_connect_streams as pcs
-             WHERE export_status = ?",
-            array(ProductStreamService::STATUS_EXPORT)
+             WHERE export_status = ?',
+            [ProductStreamService::STATUS_EXPORT]
         )->fetchAll();
 
         foreach ($streamIds as $stream) {
             $streamId = $stream['streamId'];
 
             $notExported = $this->manager->getConnection()->executeQuery(
-                "SELECT pss.id
+                'SELECT pss.id
                  FROM s_product_streams_selection as pss
                  JOIN s_plugin_connect_items as pci
                  ON pss.article_id = pci.article_id
                  WHERE pss.stream_id = ?
-                 AND pci.export_status != ?",
-                array($streamId, Attribute::STATUS_SYNCED)
+                 AND pci.export_status != ?',
+                [$streamId, Attribute::STATUS_SYNCED]
             )->fetchAll();
 
             if (count($notExported) === 0) {
                 $this->manager->getConnection()->executeQuery(
-                    "UPDATE s_plugin_connect_streams
+                    'UPDATE s_plugin_connect_streams
                      SET export_status = ?
-                     WHERE stream_id = ?",
-                    array(ProductStreamService::STATUS_SYNCED, $streamId)
+                     WHERE stream_id = ?',
+                    [ProductStreamService::STATUS_SYNCED, $streamId]
                 );
             }
         }

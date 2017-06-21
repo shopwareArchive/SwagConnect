@@ -1,7 +1,11 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component;
-
 
 use ShopwarePlugins\Connect\Components\AutoCategoryReverter;
 use ShopwarePlugins\Connect\Components\ImportService;
@@ -22,7 +26,7 @@ class AutoCategoryReverterTest extends \PHPUnit_Framework_TestCase
                 '/Kleidung/Hosentraeger' => 'Hosentraeger',
                 '/Kleidung/Nahrung & Getraenke' => 'Nahrung & Getraenke',
                 '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke' => 'Alkoholische Getränke',
-            ]
+            ],
         ];
         $importService->expects($this->once())
             ->method('getArticlesWithAutoImportedCategories')

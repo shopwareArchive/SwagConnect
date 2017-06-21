@@ -1,13 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace   Shopware\CustomModels\Connect;
 
-use         \Shopware\Components\Model\ModelRepository;
+use         Shopware\Components\Model\ModelRepository;
 
 class ConfigRepository extends ModelRepository
 {
-
-    public function getConfigsQuery($name=null, $shopId=null, $groupName=null)
+    public function getConfigsQuery($name = null, $shopId = null, $groupName = null)
     {
         $builder = $this->getConfigsQueryBuilder($name, $shopId, $groupName);
 
@@ -43,5 +47,4 @@ class ConfigRepository extends ModelRepository
         $this->getEntityManager()->remove($config);
         $this->getEntityManager()->flush();
     }
-
 }

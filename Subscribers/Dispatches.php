@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -6,22 +11,22 @@ namespace ShopwarePlugins\Connect\Subscribers;
  * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
  *
  * Class Dispatches
- * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 class Dispatches extends BaseSubscriber
 {
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatch_Backend_Shipping' => 'onPostDispatchBackendShipping',
             'sAdmin::sGetPremiumDispatches::after' => 'onFilterDispatches',
-        );
+        ];
     }
 
     /**
      * If connect products are in the basket: Remove dispatches which are not allowed for connect
      *
      * @event sAdmin::sGetPremiumDispatches::after
+     *
      * @param \Enlight_Hook_HookArgs $args
      */
     public function onFilterDispatches(\Enlight_Hook_HookArgs $args)
@@ -47,7 +52,7 @@ class Dispatches extends BaseSubscriber
         WHERE `connect_allowed` > 0
         AND `dispatchID` IN ({$questionMarks})
         ";
-        
+
         $allowedDispatchIds = Shopware()->Db()->fetchCol($sql, $dispatchIds);
 
         // Remove the non-allowed dispatches from dispatch array
@@ -71,7 +76,7 @@ class Dispatches extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        switch($request->getActionName()) {
+        switch ($request->getActionName()) {
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
@@ -89,6 +94,4 @@ class Dispatches extends BaseSubscriber
                 break;
         }
     }
-
-
 }

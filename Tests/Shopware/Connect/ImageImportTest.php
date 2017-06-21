@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -24,8 +29,8 @@ class ImageImportTest extends ConnectTestHelper
 
     public function testImportImagesForArticle()
     {
-        $images = array();
-        for ($i=0; $i<10; $i++) {
+        $images = [];
+        for ($i = 0; $i < 10; ++$i) {
             $images[] = self::IMAGE_PROVIDER_URL . '?' . $i;
         }
 
@@ -41,11 +46,11 @@ class ImageImportTest extends ConnectTestHelper
 
     public function testImportDifferentImagesForEachVariant()
     {
-        $articleImages = array(
-            self::IMAGE_PROVIDER_URL . '?0'
-        );
-        $variantImages = array();
-        for ($i=1; $i<10; $i++) {
+        $articleImages = [
+            self::IMAGE_PROVIDER_URL . '?0',
+        ];
+        $variantImages = [];
+        for ($i = 1; $i < 10; ++$i) {
             $variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $i;
         }
 
@@ -82,7 +87,7 @@ class ImageImportTest extends ConnectTestHelper
 
         unset($importedArticleImages[0]);
         foreach ($importedArticleImages as $image) {
-            /** @var \Shopware\Models\Article\Image $image */
+            /* @var \Shopware\Models\Article\Image $image */
             $this->assertNotEmpty($image->getMappings());
             $this->assertEquals(array_shift($expectedVariantImages), $image->getMedia()->getAttribute()->getConnectHash());
         }

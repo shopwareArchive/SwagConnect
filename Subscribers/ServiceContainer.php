@@ -1,36 +1,41 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
+use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\CustomModels\Connect\PaymentRepository;
+use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\Models\Article\Article as ArticleModel;
+use Shopware\Models\Category\Category as CategoryModel;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
-use Shopware\Components\DependencyInjection\Container;
-use ShopwarePlugins\Connect\Components\Config;
-use Shopware\Models\Category\Category as CategoryModel;
-use Shopware\Models\Article\Article as ArticleModel;
-use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
-use Enlight_Components_Db_Adapter_Pdo_Mysql;
 
 class ServiceContainer extends BaseSubscriber
 {
-    /** @var ModelManager  */
+    /** @var ModelManager */
     private $manager;
 
-    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql  */
+    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql */
     private $db;
 
     /** @var Container */
@@ -38,9 +43,10 @@ class ServiceContainer extends BaseSubscriber
 
     /**
      * ServiceContainer constructor.
-     * @param ModelManager $manager
+     *
+     * @param ModelManager                            $manager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
-     * @param Container $container
+     * @param Container                               $container
      */
     public function __construct(
         ModelManager $manager,
@@ -55,7 +61,7 @@ class ServiceContainer extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
             'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
@@ -63,7 +69,7 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
-        );
+        ];
     }
 
     /**

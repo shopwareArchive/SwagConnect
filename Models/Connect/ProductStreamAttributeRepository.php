@@ -1,14 +1,18 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Shopware\CustomModels\Connect;
 
-use \Shopware\Components\Model\ModelRepository;
+use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
 /**
  * Class ProductStreamAttributeRepository
- * @package Shopware\CustomModels\Connect
  */
 class ProductStreamAttributeRepository extends ModelRepository
 {
@@ -31,6 +35,7 @@ class ProductStreamAttributeRepository extends ModelRepository
 
     /**
      * @param $streamId
+     *
      * @return bool
      */
     public function isStreamExported($streamId)
@@ -49,7 +54,7 @@ class ProductStreamAttributeRepository extends ModelRepository
             ->setParameter('exportedStatus', ProductStreamService::STATUS_EXPORT)
             ->setParameter('syncedStatus', ProductStreamService::STATUS_SYNCED);
 
-        return (bool)$qb->execute()->fetchColumn();
+        return (bool) $qb->execute()->fetchColumn();
     }
 
     public function resetExportedStatus()
@@ -66,7 +71,7 @@ class ProductStreamAttributeRepository extends ModelRepository
                 [
                     ProductStreamService::STATUS_EXPORT,
                     ProductStreamService::STATUS_SYNCED,
-                    ProductStreamService::STATUS_DELETE
+                    ProductStreamService::STATUS_DELETE,
                 ],
                 \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
             );
@@ -74,9 +79,9 @@ class ProductStreamAttributeRepository extends ModelRepository
         $builder->execute();
     }
 
-
     /**
      * @param $name
+     *
      * @return ProductStream
      */
     public function findConnectByName($name)

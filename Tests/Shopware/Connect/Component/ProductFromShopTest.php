@@ -1,11 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
 use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\Change\FromShop\Availability;
-use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Change\FromShop\Delete;
+use Shopware\Connect\Struct\Change\FromShop\Insert;
+use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
@@ -13,8 +19,6 @@ use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Article;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
-use Shopware\Connect\Struct\Change\FromShop\Insert;
-use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ProductFromShopTest extends ConnectTestHelper
@@ -43,11 +47,11 @@ class ProductFromShopTest extends ConnectTestHelper
         $manager->flush();
 
         $translator = new \Shopware_Components_Translation();
-        $translationData = array(
+        $translationData = [
             'dispatch_name' => 'Standard delivery',
             'dispatch_status_link' => 'http://track.me',
             'dispatch_description' => 'Standard delivery description',
-        );
+        ];
         $translator->write(2, 'config_dispatch', 9, $translationData, true);
     }
 
@@ -58,7 +62,6 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->user = $this->getRandomUser();
         $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
-
 
         $this->productFromShop = new ProductFromShop(
             $this->getHelper(),
@@ -76,7 +79,7 @@ class ProductFromShopTest extends ConnectTestHelper
 
     public function testBuy()
     {
-        $address = new Address(array(
+        $address = new Address([
             'firstName' => 'John',
             'surName' => 'Doe',
             'zip' => '48153',
@@ -85,17 +88,17 @@ class ProductFromShopTest extends ConnectTestHelper
             'city' => 'Schöppingen',
             'country' => 'DEU',
             'email' => 'info@shopware.com',
-            'phone' => '0000123'
-        ));
-        $orderNumber = $this->productFromShop->buy(new Order(array(
+            'phone' => '0000123',
+        ]);
+        $orderNumber = $this->productFromShop->buy(new Order([
             'orderShop' => '3',
             'localOrderId' => rand(0, 99999),
             'deliveryAddress' => $address,
             'billingAddress' => $address,
-            'products' => array(
-                new OrderItem(array(
+            'products' => [
+                new OrderItem([
                     'count' => 1,
-                    'product' => new Product(array(
+                    'product' => new Product([
                         'shopId' => '3',
                         'sourceId' => '2',
                         'price' => 44.44,
@@ -104,11 +107,11 @@ class ProductFromShopTest extends ConnectTestHelper
                         'currency' => 'EUR',
                         'availability' => 3,
                         'title' => 'Milchschnitte',
-                        'categories' => array()
-                    ))
-                ))
-            )
-        )));
+                        'categories' => [],
+                    ]),
+                ]),
+            ],
+        ]));
 
         $order = $this->getOrderByNumber($orderNumber);
         $this->assertEquals($orderNumber, $order->getNumber());
@@ -116,11 +119,12 @@ class ProductFromShopTest extends ConnectTestHelper
 
     /**
      * @param $orderNumber
+     *
      * @return \Shopware\Models\Order\Order
      */
     public function getOrderByNumber($orderNumber)
     {
-        return Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneBy(array('number' => $orderNumber));
+        return Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneBy(['number' => $orderNumber]);
     }
 
     public function testCalculateShippingCosts()
@@ -191,7 +195,7 @@ class ProductFromShopTest extends ConnectTestHelper
     public function testCalculateShippingCostsWithoutOrderItems()
     {
         $order = $this->createOrder();
-        $order->orderItems = array();
+        $order->orderItems = [];
 
         $request = new \Enlight_Controller_Request_RequestTestCase();
         Shopware()->Front()->setRequest($request);
@@ -209,7 +213,7 @@ class ProductFromShopTest extends ConnectTestHelper
             $localArticle = $this->getLocalArticle();
         }
 
-        $address = new Address(array(
+        $address = new Address([
             'firstName' => 'John',
             'surName' => 'Doe',
             'zip' => '48153',
@@ -218,23 +222,23 @@ class ProductFromShopTest extends ConnectTestHelper
             'city' => 'Schöppingen',
             'country' => 'DEU',
             'email' => 'info@shopware.com',
-            'phone' => '0000123'
-        ));
+            'phone' => '0000123',
+        ]);
 
         $localOrderId = rand(0, 99999);
 
         $repository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
-        $attribute = $repository->findOneBy(array('articleDetailId' => $localArticle->getMainDetail()->getId(), 'shopId' => null));
+        $attribute = $repository->findOneBy(['articleDetailId' => $localArticle->getMainDetail()->getId(), 'shopId' => null]);
 
-        return new Order(array(
+        return new Order([
             'orderShop' => '3',
             'localOrderId' => $localOrderId,
             'deliveryAddress' => $address,
             'billingAddress' => $address,
-            'products' => array(
-                new OrderItem(array(
+            'products' => [
+                new OrderItem([
                     'count' => 1,
-                    'product' => new Product(array(
+                    'product' => new Product([
                         'shopId' => '3',
                         'sourceId' => $attribute->getSourceId(),
                         'price' => 44.44,
@@ -243,11 +247,11 @@ class ProductFromShopTest extends ConnectTestHelper
                         'currency' => 'EUR',
                         'availability' => 3,
                         'title' => 'Milchschnitte',
-                        'categories' => array()
-                    ))
-                ))
-            )
-        ));
+                        'categories' => [],
+                    ]),
+                ]),
+            ],
+        ]);
     }
 
     /**
@@ -255,11 +259,11 @@ class ProductFromShopTest extends ConnectTestHelper
      */
     public function testByShouldThrowException()
     {
-        $address = new Address(array());
-        $this->productFromShop->buy(new Order(array(
+        $address = new Address([]);
+        $this->productFromShop->buy(new Order([
             'billingAddress' => $address,
             'deliveryAddress' => $address,
-        )));
+        ]));
     }
 
     public function testOnPerformSync()
@@ -283,7 +287,7 @@ class ProductFromShopTest extends ConnectTestHelper
             [
                 sprintf('%.5f%05d', $time, $iteration++),
                 Attribute::STATUS_INSERT,
-                $syncedProduct->getId()
+                $syncedProduct->getId(),
             ]
         );
 
@@ -297,7 +301,7 @@ class ProductFromShopTest extends ConnectTestHelper
             [
                 sprintf('%.5f%05d', $time, $iteration++),
                 Attribute::STATUS_DELETE,
-                $deletedProduct->getId()
+                $deletedProduct->getId(),
             ]
         );
 
@@ -306,19 +310,19 @@ class ProductFromShopTest extends ConnectTestHelper
         // generate 5 changes
         // their status is "insert" or "update"
         // and it won't be changed, because revision is greater than $since
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; ++$i) {
             $product = $this->getLocalArticle();
             Shopware()->Db()->executeQuery(
                 'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
                 [
                     Attribute::STATUS_INSERT,
-                    $product->getId()
+                    $product->getId(),
                 ]
             );
             $changes[] = new Insert([
                 'product' => $product,
                 'sourceId' => $product->getId(),
-                'revision' => sprintf('%.5f%05d', $time, $iteration++)
+                'revision' => sprintf('%.5f%05d', $time, $iteration++),
             ]);
         }
 
@@ -327,13 +331,13 @@ class ProductFromShopTest extends ConnectTestHelper
             'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
             [
                 Attribute::STATUS_UPDATE,
-                $product->getId()
+                $product->getId(),
             ]
         );
         $changes[] = new Update([
             'product' => $product,
             'sourceId' => $product->getId(),
-            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+            'revision' => sprintf('%.5f%05d', $time, $iteration++),
         ]);
 
         $product = $this->getLocalArticle();
@@ -341,13 +345,13 @@ class ProductFromShopTest extends ConnectTestHelper
             'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id = ? AND shop_id IS NULL',
             [
                 Attribute::STATUS_UPDATE,
-                $product->getId()
+                $product->getId(),
             ]
         );
         $changes[] = new Availability([
             'availability' => 5,
             'sourceId' => $product->getId(),
-            'revision' => sprintf('%.5f%05d', $time, $iteration++)
+            'revision' => sprintf('%.5f%05d', $time, $iteration++),
         ]);
 
         $this->productFromShop->onPerformSync($since, $changes);

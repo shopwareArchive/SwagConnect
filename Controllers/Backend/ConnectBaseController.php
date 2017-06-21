@@ -1,43 +1,25 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Controllers\Backend;
 
+use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\ConnectExport;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Price;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
-use \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use Doctrine\ORM\NoResultException;
 use ShopwarePlugins\Connect\Components\SnHttpClient;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
-use Shopware\Connect\SDK;
 
 /**
  * Class ConnectBaseController
@@ -49,7 +31,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     private $factory;
 
-    /** @var  \ShopwarePlugins\Connect\Components\Config */
+    /** @var \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     /**
@@ -121,6 +103,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $repository = $manager->getRepository(
             'Shopware\Models\Article\Article'
         );
+
         return $repository;
     }
 
@@ -133,6 +116,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $repository = $manager->getRepository(
             'Shopware\Models\Category\Category'
         );
+
         return $repository;
     }
 
@@ -141,6 +125,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * it will be created
      *
      * @param $id
+     *
      * @return null|\Shopware\Models\Category\Category
      */
     private function getCategoryModelById($id)
@@ -212,6 +197,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      *
      * @param $filter
      * @param $order
+     *
      * @return \Doctrine\ORM\QueryBuilder
      */
     private function getListQueryBuilder($filter, $order)
@@ -224,7 +210,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $builder->leftJoin('a.supplier', 's');
         $builder->leftJoin('a.tax', 't');
 
-        $builder->select(array(
+        $builder->select([
             'a.id',
             'd.number as number',
             'd.inStock as inStock',
@@ -233,14 +219,14 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             'a.active as active',
             't.tax as tax',
             'p.price * (100 + t.tax) / 100 as price',
-            'at.category'
-        ));
+            'at.category',
+        ]);
 
         // show only main variant in export/import lists
         $builder->groupBy('at.articleId');
 
-        foreach($filter as $key => $rule) {
-            switch($rule['property']) {
+        foreach ($filter as $key => $rule) {
+            switch ($rule['property']) {
                 case 'search':
                     $builder->andWhere('d.number LIKE :search OR a.name LIKE :search OR s.name LIKE :search')
                         ->setParameter('search', $rule['value']);
@@ -277,50 +263,49 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getExportListAction()
     {
-        $filter = (array)$this->Request()->getParam('filter', array());
-        $order = reset($this->Request()->getParam('sort', array()));
+        $filter = (array) $this->Request()->getParam('filter', []);
+        $order = reset($this->Request()->getParam('sort', []));
 
-        $criteria = new SearchCriteria(array(
-            'offset' => (int)$this->Request()->getParam('start'),
-            'limit' => (int)$this->Request()->getParam('limit'),
+        $criteria = new SearchCriteria([
+            'offset' => (int) $this->Request()->getParam('start'),
+            'limit' => (int) $this->Request()->getParam('limit'),
             'orderBy' => $order['property'],
             'orderByDirection' => $order['direction'],
+        ]);
 
-        ));
-
-        foreach($filter as $key => $rule) {
+        foreach ($filter as $key => $rule) {
             $field = $rule['property'];
             $criteria->{$field} = $rule['value'];
         }
 
         $exportList = $this->getConnectExport()->getExportList($criteria);
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $exportList->articles,
             'total' => $exportList->count,
-        ));
+        ]);
     }
 
     public function getExportStatusAction()
     {
         $attrRepo = $this->getModelManager()->getRepository('Shopware\CustomModels\Connect\Attribute');
 
-        $syncedItems = $attrRepo->countStatus(array(
+        $syncedItems = $attrRepo->countStatus([
             Attribute::STATUS_SYNCED,
-        ));
+        ]);
 
-        $totalItems = $attrRepo->countStatus(array(
+        $totalItems = $attrRepo->countStatus([
             Attribute::STATUS_INSERT,
             Attribute::STATUS_UPDATE,
             Attribute::STATUS_SYNCED,
-        ));
+        ]);
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $syncedItems,
             'total' => $totalItems,
-        ));
+        ]);
     }
 
     /**
@@ -328,8 +313,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function getImportListAction()
     {
-        $filter = (array)$this->Request()->getParam('filter', array());
-        $sort = $this->Request()->getParam('sort', array());
+        $filter = (array) $this->Request()->getParam('filter', []);
+        $sort = $this->Request()->getParam('sort', []);
 
         foreach ($sort as $key => $currentSorter) {
             if ($currentSorter['property'] == 'category') {
@@ -341,11 +326,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $filter,
             $sort
         );
-        $builder->addSelect(array(
+        $builder->addSelect([
             'at.shopId',
             'at.sourceId',
             'at.exportStatus as connectStatus',
-        ));
+        ]);
         $builder->andWhere('at.shopId IS NOT NULL');
 
         $builder->addOrderBy('at.category', 'ASC');
@@ -355,18 +340,18 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $query->setFirstResult($this->Request()->getParam('start'));
         $query->setMaxResults($this->Request()->getParam('limit'));
 
-        $countResult = array_map('current', $builder->select(array('COUNT(DISTINCT at.articleId) as current'))->orderBy("current")->getQuery()->getScalarResult());
+        $countResult = array_map('current', $builder->select(['COUNT(DISTINCT at.articleId) as current'])->orderBy('current')->getQuery()->getScalarResult());
         $total = array_sum($countResult);
         $total = array_sum($countResult);
         // todo@sb: find better solution. getQueryCount method counts s_plugin_connect_items.id like they are not grouped by article id
 //        $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $data,
-            'total' => $total
-        ));
+            'total' => $total,
+        ]);
     }
 
     /**
@@ -398,9 +383,8 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $entityManager->getConnection()->commit();
         } catch (\Exception $e) {
             $entityManager->getConnection()->rollback();
-            throw new \RuntimeException("Could not import categories", 0, $e);
+            throw new \RuntimeException('Could not import categories', 0, $e);
         }
-
     }
 
     /**
@@ -423,7 +407,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
          */
         $importString = $fromCategory . '-' . $toCategory;
         $currentLevel = 1;
-        $mappings = array();
+        $mappings = [];
 
         foreach ($categoriesToImport as $id => $category) {
             $name = $category['name'];
@@ -447,7 +431,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             // Check if there is already a category attribute for this import
             $categoryAttributes = $entityManager->getRepository('\Shopware\Models\Attribute\Category')->findBy(
-                array('connectImported' => $importString, 'connectImportMapping' => $id),
+                ['connectImported' => $importString, 'connectImportMapping' => $id],
                 null,
                 1
             );
@@ -470,7 +454,6 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 Shopware()->Models()->persist($category);
                 Shopware()->Models()->persist($attribute);
             }
-
 
             // Store the new category model in out $mappings array
             $mappings[$id] = $category;
@@ -495,7 +478,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $marketplaceLogo = $this->getConfigComponent()->getConfig('marketplaceLogo', Connect::MARKETPLACE_LOGO);
         $purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => [
                 'marketplaceName' => $marketplaceName,
@@ -506,24 +489,25 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 'marketplaceIncomingIcon' => $marketplaceIncomingIcon,
                 'marketplaceLogo' => $marketplaceLogo,
                 'purchasePriceInDetail' => $purchasePriceInDetail,
-            ]
-        ));
+            ],
+        ]);
     }
 
     /**
      * Returns a flat array of connect categories
      *
      * @param $rootCategory
+     *
      * @return array(
-     *      string => array('id' => string, 'name' => string, 'level' => int, 'parent' => string|null)
-     * )
+     *                string => array('id' => string, 'name' => string, 'level' => int, 'parent' => string|null)
+     *                )
      */
     private function getFlatConnectCategories($rootCategory)
     {
         $sdk = $this->getSDK();
         $connectCategories = $sdk->getCategories();
 
-        $categoriesToImport = array();
+        $categoriesToImport = [];
         foreach ($connectCategories as $id => $name) {
             // Skip all entries which do not start with the parent or do not have it at all
             if (strpos($id, $rootCategory) !== 0) {
@@ -537,12 +521,12 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 continue;
             }
 
-            $categoriesToImport[$id] = array(
+            $categoriesToImport[$id] = [
                 'id' => $id,
                 'name' => $name,
                 'level' => $level,
-                'parent' => $level == 1 ? null : implode('/', array_slice(explode('/', $id), 0, -1))
-            );
+                'parent' => $level == 1 ? null : implode('/', array_slice(explode('/', $id), 0, -1)),
+            ];
         }
 
         // Sort the categories ascending by their level, so parent categories can be imported first
@@ -554,12 +538,13 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 if ($a == $b) {
                     return 0;
                 }
+
                 return ($a < $b) ? -1 : 1;
             }
         );
+
         return $categoriesToImport;
     }
-
 
     /**
      * Save a given mapping of a given category to all subcategories
@@ -575,15 +560,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $entityManager->getConnection()->beginTransaction();
             $this->applyMappingToChildren($mapping, $categoryId);
             $entityManager->getConnection()->commit();
-            $this->View()->assign(array(
-                'success' => true
-            ));
+            $this->View()->assign([
+                'success' => true,
+            ]);
         } catch (\Exception $e) {
             $entityManager->getConnection()->rollback();
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'message' => $e->getMessage(),
-                'success' => false
-            ));
+                'success' => false,
+            ]);
         }
     }
 
@@ -591,10 +576,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * Returns success true if user could be logged in, or false if something went wrong
      *
      * @return array(
-     *      string => bool
-     * )
+     *                string => bool
+     *                )
      */
-    public function loginAction(){
+    public function loginAction()
+    {
         /** @var \Shopware\Components\HttpClient\GuzzleHttpClient $client */
         $client = $this->get('http_client');
 
@@ -606,17 +592,17 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $response = $client->post(
             $loginUrl,
             [
-                'content-type' => 'application/x-www-form-urlencoded'
+                'content-type' => 'application/x-www-form-urlencoded',
             ],
             [
                 'username' => urlencode($shopwareId),
-                'password' => urlencode($password)
+                'password' => urlencode($password),
             ]
         );
 
         $responseObject = json_decode($response->getBody());
 
-        if(!$responseObject->success) {
+        if (!$responseObject->success) {
             $message = $responseObject->reason;
 
             if ($responseObject->reason == SDK::WRONG_CREDENTIALS_MESSAGE) {
@@ -626,11 +612,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                     SDK::WRONG_CREDENTIALS_MESSAGE,
                     true
                 );
-            };
+            }
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $message
+                'message' => $message,
             ]);
 
             return;
@@ -653,14 +639,14 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return;
         }
 
         $this->View()->assign([
-            'success' => true
+            'success' => true,
         ]);
     }
 
@@ -668,10 +654,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * Returns success true if user could be logged in, or false if something went wrong
      *
      * @return array(
-     *      string => bool
-     * )
+     *                string => bool
+     *                )
      */
-    public function registerAction(){
+    public function registerAction()
+    {
         /** @var \Shopware\Components\HttpClient\GuzzleHttpClient $client */
         $client = $this->get('http_client');
 
@@ -687,21 +674,21 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $response = $client->post(
             $loginUrl,
             [
-                'content-type' => 'application/x-www-form-urlencoded'
+                'content-type' => 'application/x-www-form-urlencoded',
             ],
             [
-                'username'  => urlencode($shopwareId),
-                'password'  => urlencode($password),
-                'email'     => urlencode($email)
+                'username' => urlencode($shopwareId),
+                'password' => urlencode($password),
+                'email' => urlencode($email),
             ]
         );
 
         $responseObject = json_decode($response->getBody());
 
-        if(!$responseObject->success) {
+        if (!$responseObject->success) {
             $this->View()->assign([
                 'success' => false,
-                'message' => $responseObject->reason
+                'message' => $responseObject->reason,
             ]);
 
             return;
@@ -724,14 +711,14 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return;
         }
 
         $this->View()->assign([
-            'success' => true
+            'success' => true,
         ]);
     }
 
@@ -745,9 +732,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
     /**
      * @param bool $loggedIn
+     *
      * @throws Zend_Db_Adapter_Exception
      */
-    private function removeConnectMenuEntry($loggedIn = true) {
+    private function removeConnectMenuEntry($loggedIn = true)
+    {
         /** @var Enlight_Components_Db_Adapter_Pdo_Mysql $db */
         $db = Shopware()->Db();
 
@@ -757,7 +746,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
         $row = current($result);
 
-        $db->exec("DELETE FROM s_core_menu WHERE id = " . $row['id']);
+        $db->exec('DELETE FROM s_core_menu WHERE id = ' . $row['id']);
 
         $insertSql = "INSERT INTO s_core_menu (
             parent,
@@ -786,7 +775,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
-            '#action#' => 'Import'
+            '#action#' => 'Import',
         ]));
 
         $db->exec(strtr($insertSql, [
@@ -796,7 +785,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
-            '#action#' => 'Export'
+            '#action#' => 'Export',
         ]));
 
         $db->exec(strtr($insertSql, [
@@ -806,7 +795,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => '',
-            '#action#' => 'Settings'
+            '#action#' => 'Settings',
         ]));
 
         $db->exec(strtr($insertSql, [
@@ -816,7 +805,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             '#pluginID#' => $row['pluginID'],
             '#controller#' => 'Connect',
             '#onclick#' => 'window.open("connect/autoLogin")',
-            '#action#' => 'OpenConnect'
+            '#action#' => 'OpenConnect',
         ]));
     }
 
@@ -824,15 +813,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * Helper that will assign a given mapping to all children of a given category
      *
      * @param $mapping string
-     * @throws \Exception
      * @param $categoryId int
+     *
+     * @throws \Exception
      */
     private function applyMappingToChildren($mapping, $categoryId)
     {
         $helper = $this->getHelper();
         $ids = $this->getChildCategoriesIds($categoryId);
         $entityManager = $this->getModelManager();
-
 
         if (!$categoryId) {
             throw new \RuntimeException("Category '{$categoryId}' not found");
@@ -847,7 +836,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         // Don't set the children with models in order to speed things up
         $builder = $entityManager->createQueryBuilder();
         $builder->update('\Shopware\Models\Attribute\Category', 'categoryAttribute')
-            ->set('categoryAttribute.connectExportMapping',  $builder->expr()->literal($mapping))
+            ->set('categoryAttribute.connectExportMapping', $builder->expr()->literal($mapping))
             ->where($builder->expr()->in('categoryAttribute.categoryId', $ids));
 
         $builder->getQuery()->execute();
@@ -857,12 +846,13 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      * Helper function which returns the IDs of the child categories of a given parent category
      *
      * @param $parentId int
+     *
      * @return array
      */
     private function getChildCategoriesIds($parentId)
     {
         $query = $this->getModelManager()->createQuery('SELECT c.id from Shopware\Models\Category\Category c WHERE c.path LIKE ?1 ');
-        $query->setParameter(1, array("%|{$parentId}|%"));
+        $query->setParameter(1, ["%|{$parentId}|%"]);
         $result = $query->getResult(\Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
 
         // Pop IDs from result rows
@@ -880,28 +870,28 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function getArticleSourceIdsAction()
     {
         try {
-            $exportAll = (bool)$this->Request()->getPost('exportAll', false);
-            $articleIds = $this->Request()->getPost('ids', array());
+            $exportAll = (bool) $this->Request()->getPost('exportAll', false);
+            $articleIds = $this->Request()->getPost('ids', []);
 
             if ($exportAll) {
                 $articleIds = $this->getHelper()->getAllNonConnectArticleIds();
             }
 
             if (!is_array($articleIds)) {
-                $articleIds = array($articleIds);
+                $articleIds = [$articleIds];
             }
 
             $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => true,
-                'sourceIds' => $sourceIds
-            ));
+                'sourceIds' => $sourceIds,
+            ]);
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
-            ));
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -920,25 +910,27 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         try {
             $errors = $connectExport->export($sourceIds);
-        }catch (\RuntimeException $e) {
-            $this->View()->assign(array(
+        } catch (\RuntimeException $e) {
+            $this->View()->assign([
                 'success' => false,
-                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
-            ));
+                'messages' => [ErrorHandler::TYPE_DEFAULT_ERROR => [$e->getMessage()]],
+            ]);
+
             return;
         }
 
         if (!empty($errors)) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'messages' => $errors
-            ));
+                'messages' => $errors,
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
-            'success' => true
-        ));
+        $this->View()->assign([
+            'success' => true,
+        ]);
     }
 
     /**
@@ -948,10 +940,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     {
         $sdk = $this->getSDK();
         $ids = $this->Request()->getPost('ids');
-        foreach($ids as $id) {
+        foreach ($ids as $id) {
             /** @var \Shopware\Models\Article\Article $model */
             $model = $this->getConnectExport()->getArticleModelById($id);
-            if($model === null) {
+            if ($model === null) {
                 continue;
             }
             /** @var \Shopware\Models\Article\Detail $detail */
@@ -974,22 +966,21 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         try {
             $key = $this->Request()->getPost('apiKey');
             $sdk->verifyKey($key);
-            $this->View()->assign(array(
-                'success' => true
-            ));
+            $this->View()->assign([
+                'success' => true,
+            ]);
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'message' => $e->getMessage(),
-                'success' => false
-            ));
+                'success' => false,
+            ]);
             $this->getConfigComponent()->setConfig('apiKeyVerified', false);
         }
 
         $this->getModelManager()->flush();
-
     }
 
     /**
@@ -1003,7 +994,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $articleId = $this->Request()->getParam('articleId');
 
         if (!$articleId) {
-            throw new \Exception("Connect: ArticleId empty");
+            throw new \Exception('Connect: ArticleId empty');
         }
 
         /** @var Article $articleModel */
@@ -1017,13 +1008,13 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $data = $this->getModelManager()->toArray($data);
         if (isset($data['articleId'])) {
-            $data = array($data);
+            $data = [$data];
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
-            'data' => $data
-        ));
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -1058,7 +1049,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $this->getModelManager()->flush();
 
-        $this->View()->assign(array('success' => true));
+        $this->View()->assign(['success' => true]);
     }
 
     /**
@@ -1107,10 +1098,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function getLogsAction()
     {
         $params = $this->Request()->getParams();
-        $order = $this->Request()->getParam('sort', array(array('property' => 'time', 'direction' => 'DESC')));
+        $order = $this->Request()->getParam('sort', [['property' => 'time', 'direction' => 'DESC']]);
         $filters = $this->Request()->getParam('filter');
 
-        $commandFilters = array();
+        $commandFilters = [];
         foreach ($params as $key => $param) {
             if (strpos($key, 'commandFilter_') !== false && $param == 'true') {
                 $commandFilters[] = str_replace('commandFilter_', '', $key);
@@ -1162,11 +1153,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $data,
-            'total' => $total
-        ));
+            'total' => $total,
+        ]);
     }
 
     /**
@@ -1178,21 +1169,21 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             'SELECT DISTINCT `command` FROM `s_plugin_connect_log`'
         );
 
-        $data = array_map(function($column) {
+        $data = array_map(function ($column) {
             return $column['command'];
         }, $data);
 
         // Enforce these fields
-        foreach (array('fromShop', 'toShop', 'getLastRevision', 'update', 'checkProducts', 'buy', 'reserveProducts', 'confirm') as $value) {
+        foreach (['fromShop', 'toShop', 'getLastRevision', 'update', 'checkProducts', 'buy', 'reserveProducts', 'confirm'] as $value) {
             if (!in_array($value, $data)) {
                 $data[] = $value;
             }
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
-            'data' => $data
-        ));
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -1238,7 +1229,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function prepareDynamicStreamsAction()
     {
-        $streamIds = $this->Request()->getParam('streamIds',[]);
+        $streamIds = $this->Request()->getParam('streamIds', []);
 
         try {
             $streamService = $this->getProductStreamService();
@@ -1267,15 +1258,15 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $modelManager->flush();
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
-            ));
+                'message' => $e->getMessage(),
+            ]);
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
-        ));
+        ]);
     }
 
     /**
@@ -1284,7 +1275,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     public function assignProductsToCategoryAction()
     {
         $articleIds = $this->Request()->getParam('ids');
-        $categoryId = (int)$this->Request()->getParam('category');
+        $categoryId = (int) $this->Request()->getParam('category');
 
         /** @var \Shopware\Models\Category\Category $category */
         $category = $this->getCategoryModelById($categoryId);
@@ -1302,9 +1293,9 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         }
 
         $this->View()->assign(
-            array(
-                'success' => true
-            )
+            [
+                'success' => true,
+            ]
         );
     }
 
@@ -1318,11 +1309,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         );
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $result['data'],
                 'total' => $result['total'],
-            )
+            ]
         );
     }
 
@@ -1331,10 +1322,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         $streamId = $this->request->getParam('id', null);
 
         if ($streamId === null) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'message' => 'No stream selected'
-            ));
+                'message' => 'No stream selected',
+            ]);
         }
 
         $streamsAssignments = $this->getStreamAssignments($streamId);
@@ -1345,19 +1336,19 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
-            'sourceIds' => $sourceIds
-        ));
+            'sourceIds' => $sourceIds,
+        ]);
     }
 
     public function exportStreamAction()
     {
-        $streamIds = $this->request->getParam('streamIds', array());
+        $streamIds = $this->request->getParam('streamIds', []);
         $currentStreamIndex = $this->request->getParam('currentStreamIndex', 0);
         $offset = $this->request->getParam('offset', 0);
         $limit = $this->request->getParam('limit', 1);
-        $articleDetailIds = $this->request->getParam('articleDetailIds', array());
+        $articleDetailIds = $this->request->getParam('articleDetailIds', []);
 
         $streamId = $streamIds[$currentStreamIndex];
 
@@ -1410,15 +1401,14 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $processedStreams = count($streamIds);
         }
 
-
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'articleDetailIds' => $newArticleDetailIds,
             'nextStreamIndex' => $nextStreamIndex,
             'newOffset' => $newOffset,
             'hasMoreIterations' => $hasMoreIterations,
             'processedStreams' => $processedStreams,
-        ));
+        ]);
     }
 
     public function hasManyVariantsAction()
@@ -1440,7 +1430,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         $this->View()->assign([
             'success' => true,
-            'hasManyVariants' => $hasManyVariants
+            'hasManyVariants' => $hasManyVariants,
         ]);
     }
 
@@ -1452,24 +1442,24 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $db->update(
                 's_crontab',
-                array('active' => 1),
+                ['active' => 1],
                 "action = 'ShopwareConnectUpdateProducts' OR action = 'Shopware_CronJob_ShopwareConnectUpdateProducts'"
             );
 
             $db->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1, 'export_status' => Attribute::STATUS_UPDATE],
-                "shop_id IS NULL"
+                'shop_id IS NULL'
             );
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => true,
-            ));
+            ]);
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
-            ));
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -1480,10 +1470,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
         try {
             $streamsAssignments = $productStreamService->prepareStreamsAssignments($streamId);
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
-            ));
+                'messages' => [ErrorHandler::TYPE_DEFAULT_ERROR => [$e->getMessage()]],
+            ]);
+
             return false;
         }
 
@@ -1499,21 +1490,22 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
             $errorMessages = $connectExport->export($sourceIds, $streamsAssignments);
         } catch (\RuntimeException $e) {
             $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'messages' => array(ErrorHandler::TYPE_DEFAULT_ERROR => array($e->getMessage()))
-            ));
+                'messages' => [ErrorHandler::TYPE_DEFAULT_ERROR => [$e->getMessage()]],
+            ]);
+
             return false;
         }
 
         if (!empty($errorMessages)) {
             $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
 
-            $errorMessagesText = "";
-            $displayedErrorTypes = array(
+            $errorMessagesText = '';
+            $displayedErrorTypes = [
                 ErrorHandler::TYPE_DEFAULT_ERROR,
-                ErrorHandler::TYPE_PRICE_ERROR
-            );
+                ErrorHandler::TYPE_PRICE_ERROR,
+            ];
 
             foreach ($displayedErrorTypes as $displayedErrorType) {
                 $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
@@ -1521,10 +1513,11 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
             $productStreamService->log($streamId, $errorMessagesText);
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-                'messages' => $errorMessages
-            ));
+                'messages' => $errorMessages,
+            ]);
+
             return false;
         }
 
@@ -1536,7 +1529,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
      */
     public function removeStreamsAction()
     {
-        $streamIds = $this->request->getParam('ids', array());
+        $streamIds = $this->request->getParam('ids', []);
 
         $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();
@@ -1545,7 +1538,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
 
         foreach ($filteredStreamIds as $streamId) {
             try {
-                $removedRecords = array();
+                $removedRecords = [];
 
                 $assignments = $productStreamService->getStreamAssignments($streamId);
                 $sourceIds = $this->getHelper()->getArticleSourceIds($assignments->getArticleIds());
@@ -1576,13 +1569,13 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 $connectExport->updateConnectItemsStatus($removedRecords, Attribute::STATUS_DELETE);
                 $this->getSDK()->recordStreamDelete($streamId);
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
-
             } catch (\Exception $e) {
                 $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
-                    'message' => $e->getMessage()
-                ));
+                    'message' => $e->getMessage(),
+                ]);
+
                 return;
             }
         }
@@ -1623,7 +1616,7 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
     protected function getHost()
     {
         $host = $this->getConfigComponent()->getConfig('connectDebugHost');
-        if (!$host || $host == "") {
+        if (!$host || $host == '') {
             $host = $this->getConfigComponent()->getMarketplaceUrl();
         }
 

@@ -1,16 +1,21 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Components\Config;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ProductStreamServiceTest extends ConnectTestHelper
 {
     public $db;
 
     /**
-     * @var integer
+     * @var int
      */
     public $streamAId;
 
@@ -45,59 +50,59 @@ class ProductStreamServiceTest extends ConnectTestHelper
     private function insertDummyData()
     {
         $this->db = Shopware()->Db();
-        $this->db->insert('s_product_streams', array('name' => 'TestProductStreamA', 'type' => 2));
+        $this->db->insert('s_product_streams', ['name' => 'TestProductStreamA', 'type' => 2]);
         $this->streamAId = $this->db->lastInsertId();
 
-        $this->db->insert('s_product_streams', array('name' => 'TestProductStreamB', 'type' => 2));
+        $this->db->insert('s_product_streams', ['name' => 'TestProductStreamB', 'type' => 2]);
         $this->streamBId = $this->db->lastInsertId();
 
-        $this->db->insert('s_product_streams', array('name' => 'TestProductStreamC', 'type' => 2));
+        $this->db->insert('s_product_streams', ['name' => 'TestProductStreamC', 'type' => 2]);
         $this->streamCId = $this->db->lastInsertId();
 
-        $this->db->insert('s_product_streams', array('name' => 'TestProductStreamD', 'type' => 1));
+        $this->db->insert('s_product_streams', ['name' => 'TestProductStreamD', 'type' => 1]);
         $this->streamDId = $this->db->lastInsertId();
 
         $this->db->insert(
             's_plugin_connect_streams',
-            array('stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_EXPORT)
+            ['stream_id' => $this->streamAId, 'export_status' => ProductStreamService::STATUS_EXPORT]
         );
         $this->db->insert(
             's_plugin_connect_streams',
-            array('stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_EXPORT)
+            ['stream_id' => $this->streamBId, 'export_status' => ProductStreamService::STATUS_EXPORT]
         );
         $this->db->insert(
             's_plugin_connect_streams',
-            array('stream_id' => $this->streamDId, 'export_status' => ProductStreamService::STATUS_EXPORT)
+            ['stream_id' => $this->streamDId, 'export_status' => ProductStreamService::STATUS_EXPORT]
         );
 
-        $articleAIds = array(33, 34, 35, 36);
+        $articleAIds = [33, 34, 35, 36];
         foreach ($articleAIds as $articleAId) {
             $this->db->insert('s_product_streams_selection',
-                array('stream_id' => $this->streamAId, 'article_id' => $articleAId));
+                ['stream_id' => $this->streamAId, 'article_id' => $articleAId]);
         }
 
-        $articleBIds = array(35, 36, 37);
+        $articleBIds = [35, 36, 37];
         foreach ($articleBIds as $articleBId) {
             $this->db->insert('s_product_streams_selection',
-                array('stream_id' => $this->streamBId, 'article_id' => $articleBId));
+                ['stream_id' => $this->streamBId, 'article_id' => $articleBId]);
         }
 
-        $articleCIds = array(36);
+        $articleCIds = [36];
         foreach ($articleCIds as $articleCId) {
             $this->db->insert('s_product_streams_selection',
-                array('stream_id' => $this->streamCId, 'article_id' => $articleCId));
+                ['stream_id' => $this->streamCId, 'article_id' => $articleCId]);
         }
     }
 
     public function tearDown()
     {
-        $this->db->delete('s_product_streams', array('id = ?' => $this->streamAId));
-        $this->db->delete('s_product_streams', array('id = ?' => $this->streamBId));
-        $this->db->delete('s_product_streams', array('id = ?' => $this->streamCId));
-        $this->db->delete('s_product_streams', array('id = ?' => $this->streamDId));
-        $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamAId));
-        $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamBId));
-        $this->db->delete('s_plugin_connect_streams', array('stream_id = ?' => $this->streamDId));
+        $this->db->delete('s_product_streams', ['id = ?' => $this->streamAId]);
+        $this->db->delete('s_product_streams', ['id = ?' => $this->streamBId]);
+        $this->db->delete('s_product_streams', ['id = ?' => $this->streamCId]);
+        $this->db->delete('s_product_streams', ['id = ?' => $this->streamDId]);
+        $this->db->delete('s_plugin_connect_streams', ['stream_id = ?' => $this->streamAId]);
+        $this->db->delete('s_plugin_connect_streams', ['stream_id = ?' => $this->streamBId]);
+        $this->db->delete('s_plugin_connect_streams', ['stream_id = ?' => $this->streamDId]);
     }
 
     public function testGetArticlesIdsFromStaticStream()
@@ -175,11 +180,10 @@ class ProductStreamServiceTest extends ConnectTestHelper
     }
 
     /**
-     * @expectedException Doctrine\ORM\NoResultException
+     * @expectedException \Doctrine\ORM\NoResultException
      */
     public function testNotExistingStream()
     {
         $this->productStreamService->findStream(99999);
     }
-
 }

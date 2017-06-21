@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Utils;
 
@@ -8,11 +13,9 @@ use Shopware\Models\Order\Order;
 
 /**
  * Class OrderStatusMapper
- * @package ShopwarePlugins\Connect\Components\Utils
  */
 class OrderStatusMapper
 {
-
     private $mapping;
 
     /**
@@ -25,7 +28,7 @@ class OrderStatusMapper
     protected function getMapping()
     {
         if (!$this->mapping) {
-            $this->mapping = array(
+            $this->mapping = [
                 '0' => OrderStatusStruct::STATE_OPEN, // 0 = open
                 '1' => OrderStatusStruct::STATE_IN_PROCESS, // 1 = in progress (waiting)
                 '3' => OrderStatusStruct::STATE_IN_PROCESS, // 3 = partially completed
@@ -36,7 +39,7 @@ class OrderStatusMapper
                 '7' => OrderStatusStruct::STATE_DELIVERED, // 7 = Completely delivered
                 '-1' => OrderStatusStruct::STATE_CANCELED, // -1 = Canceled
                 '4' => OrderStatusStruct::STATE_ERROR, // 4 = Storno / Rejected
-            );
+            ];
 
             $this->mapping = Shopware()->Events()->filter('Connect_OrderStatus_Mapping', $this->mapping);
         }
@@ -48,6 +51,7 @@ class OrderStatusMapper
      * Helper to map shopware order states to connect order states
      *
      * @param $swOrderStatus
+     *
      * @return string
      */
     public function mapShopwareOrderStatusToConnect($swOrderStatus)
@@ -65,6 +69,7 @@ class OrderStatusMapper
 
     /**
      * @param Order $order
+     *
      * @return OrderStatusStruct
      */
     public function getOrderStatusStructFromOrder(Order $order)
@@ -73,13 +78,12 @@ class OrderStatusMapper
             $order->getOrderStatus()->getName()
         );
 
-        return new OrderStatusStruct(array(
+        return new OrderStatusStruct([
             'id' => (string) $order->getNumber(),
             'status' => $this->mapShopwareOrderStatusToConnect($order->getOrderStatus()->getId()),
-            'messages' => array(
-                new Message(['message' => $message])
-            )
-        ));
+            'messages' => [
+                new Message(['message' => $message]),
+            ],
+        ]);
     }
-
 }

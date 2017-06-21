@@ -1,9 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Services;
 
-use Shopware\Models\Payment\Repository as PaymentRepository;
 use Shopware\CustomModels\Connect\PaymentRepository as ConnectPaymentRepository;
+use Shopware\Models\Payment\Repository as PaymentRepository;
 
 class PaymentService
 {
@@ -20,6 +25,7 @@ class PaymentService
 
     /**
      * @param array $payments
+     *
      * @return array
      */
     public function allowConnect(array $payments)
@@ -34,8 +40,8 @@ class PaymentService
     }
 
     /**
-     * @param int $paymentId
-     * @param boolean $connectIsAllowed
+     * @param int  $paymentId
+     * @param bool $connectIsAllowed
      */
     public function updateConnectAllowed($paymentId, $connectIsAllowed)
     {

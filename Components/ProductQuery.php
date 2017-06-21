@@ -1,13 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
-use Shopware\Components\Model\ModelManager;
-use Doctrine\ORM\QueryBuilder;
-
 class ProductQuery
 {
-
     protected $localProductQuery;
     protected $remoteProductQuery;
 
@@ -21,6 +22,7 @@ class ProductQuery
      * Returns array of local Product structs by given sourceIds
      *
      * @param array $sourceIds
+     *
      * @return \Shopware\Connect\Struct\Product[]
      */
     public function getLocal(array $sourceIds)
@@ -32,12 +34,12 @@ class ProductQuery
      * Returns array of remote Product structs by given sourceIds and shopId
      *
      * @param array $sourceIds
-     * @param int $shopId
+     * @param int   $shopId
+     *
      * @return \Shopware\Connect\Struct\Product[]
      */
     public function getRemote(array $sourceIds, $shopId)
     {
         return $this->remoteProductQuery->get($sourceIds, $shopId);
     }
-
 }

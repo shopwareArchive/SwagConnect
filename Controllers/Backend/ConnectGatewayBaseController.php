@@ -1,36 +1,17 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Controllers\Backend;
 
-use Firebase\JWT\JWT;
 use ShopwarePlugins\Connect\Components\Logger;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
+ *
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
@@ -53,6 +34,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
     public function getLogger()
     {
         $loggingEnabled = $this->getConfigComponent()->getConfig('logRequest');
+
         return new Logger(Shopware()->Db(), $loggingEnabled);
     }
 
@@ -98,7 +80,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
         try {
             $this->get('events')->notify(
                 'Shopware_Connect_SDK_Handle_Before',
-                [ $request ]
+                [$request]
             );
 
             $sdk = $this->getSDK();
@@ -108,12 +90,12 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action
 
             $this->get('events')->notify(
                 'Shopware_Connect_SDK_Handle_After',
-                [ $request, $result ]
+                [$request, $result]
             );
         } catch (\Exception $e) {
             // Always write errors to the log
             $logger->write(true, $request, $e);
-            $logger->write(true, 'Headers: '.print_r($_SERVER, true), $e, 'request-headers');
+            $logger->write(true, 'Headers: ' . print_r($_SERVER, true), $e, 'request-headers');
             throw $e;
         }
 

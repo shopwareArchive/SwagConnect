@@ -1,11 +1,15 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Translations;
 
-
 class LocaleMapper
 {
-    private static $languageCodes = array(
+    private static $languageCodes = [
         'aa' => 'aa_DJ', 'af' => 'af_NA', 'am' => 'am_ET', 'ar' => 'ar_AE', 'as' => 'as_IN', 'az' => 'az_AZ',
         'be' => 'be_BY', 'bg' => 'bg_BG', 'bh' => 'bh_BD', 'bn' => 'bn_IN', 'bo' => 'bo_CN', 'ca' => 'ca_ES',
         'cs' => 'cs_CZ', 'cy' => 'cy_GB', 'da' => 'da_DK', 'de' => 'de_DE', 'dz' => 'dz_BT', 'el' => 'el_CY',
@@ -23,13 +27,14 @@ class LocaleMapper
         'tg' => 'tg_TJ', 'th' => 'th_TH', 'ti' => 'ti_ER', 'tn' => 'tn_ZA', 'to' => 'to_TO', 'tr' => 'tr_TR',
         'ts' => 'ts_ZA', 'tt' => 'tt_RU', 'ug' => 'ug_CN', 'uk' => 'uk_UA', 'ur' => 'ur_IN', 'uz' => 'uz_AF',
         'vi' => 'vi_VN', 'wo' => 'wo_SN', 'xh' => 'xh_ZA', 'yo' => 'yo_NG', 'zh' => 'zh_CN', 'zu' => 'zu_ZA',
-    );
+    ];
 
     /**
      * Returns ISO 639-1 language code by given
      * Shopware locale
      *
      * @param string $locale
+     *
      * @return string|null
      */
     public static function getIso639($locale)
@@ -47,10 +52,11 @@ class LocaleMapper
      * ISO 639-1 language code
      *
      * @param string $locale
+     *
      * @return string|null
      */
     public static function getShopwareLocale($locale)
     {
         return self::$languageCodes[$locale];
     }
-} 
+}

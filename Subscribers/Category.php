@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -12,7 +17,7 @@ class Category extends BaseSubscriber
     /** @var Connection $connection */
     private $connection;
 
-    private $parentCollection = array();
+    private $parentCollection = [];
 
     public function __construct(ModelManager $modelManager)
     {
@@ -22,9 +27,9 @@ class Category extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatch_Backend_Category' => 'extendBackendCategory',
-        );
+        ];
     }
 
     /**
@@ -37,6 +42,7 @@ class Category extends BaseSubscriber
 
     /**
      * @event Enlight_Controller_Action_PostDispatch_Backend_Article
+     *
      * @param \Enlight_Event_EventArgs $args
      */
     public function extendBackendCategory(\Enlight_Event_EventArgs $args)
@@ -44,13 +50,13 @@ class Category extends BaseSubscriber
         /** @var $subject \Enlight_Controller_Action */
         $subject = $args->getSubject();
         $request = $subject->Request();
-        $expandedCategories = $request->getParam('expandedCategories', array());
+        $expandedCategories = $request->getParam('expandedCategories', []);
 
         $scQuery = $request->getParam('localCategoriesQuery', '');
 
         switch ($request->getActionName()) {
             case 'getList':
-                if (trim($scQuery) !== "") {
+                if (trim($scQuery) !== '') {
                     $parentId = $request->getParam('id', null);
                     $subject->View()->data = $this->getCategoriesByQuery($scQuery, $parentId);
                 }
@@ -80,7 +86,7 @@ class Category extends BaseSubscriber
     {
         $streamService = $this->getProductStreamService();
 
-        /** @var ProductStream $stream */
+        /* @var ProductStream $stream */
         try {
             $stream = $streamService->findStream($streamId);
         } catch (\Exception $e) {
@@ -109,6 +115,7 @@ class Category extends BaseSubscriber
 
     /**
      * @param array $nodes
+     *
      * @return array
      */
     private function extendTreeNodes(array $nodes)
@@ -117,7 +124,7 @@ class Category extends BaseSubscriber
             return $nodes;
         }
         $categoryIds = array_map(function ($node) {
-            return (int)$node['id'];
+            return (int) $node['id'];
         }, $nodes);
 
         $builder = $this->connection->createQueryBuilder();
@@ -127,7 +134,7 @@ class Category extends BaseSubscriber
             ->andWhere('ca.connect_imported_category = 1')
             ->setParameter(':categoryIds', $categoryIds, Connection::PARAM_STR_ARRAY);
 
-        $rows = array();
+        $rows = [];
         $stmt = $builder->execute();
         while ($row = $stmt->fetch()) {
             $rows[] = $row['categoryID'];
@@ -162,7 +169,7 @@ class Category extends BaseSubscriber
         $statement = $builder->execute();
         $rows = $statement->fetchAll();
 
-        $parents = array();
+        $parents = [];
         foreach ($rows as $row) {
             $maxParent = $this->getMaxRootCategories($row, $parentId);
             if (!in_array($maxParent, $parents) && $maxParent !== null) {
@@ -170,13 +177,13 @@ class Category extends BaseSubscriber
             }
         }
 
-        $nodes = array();
+        $nodes = [];
         foreach ($parents as $parent) {
             $nodes[] = $this->createTreeNode(
                 $parent['id'],
                 $parent['description'],
                 $parent['parent'],
-                "",
+                '',
                 $this->isLeaf($parent['id']),
                 true,
                 true
@@ -188,7 +195,7 @@ class Category extends BaseSubscriber
 
     public function createTreeNode($id, $name, $parentId, $class, $leaf, $allowDrag, $expanded)
     {
-        return array(
+        return [
             'id' => $id,
             'active' => true,
             'name' => $name,
@@ -196,10 +203,10 @@ class Category extends BaseSubscriber
             'parentId' => $parentId,
             'text' => $name,
             'cls' => $class,
-            'leaf' => (bool)$leaf,
+            'leaf' => (bool) $leaf,
             'allowDrag' => $allowDrag,
-            'expanded' => $expanded
-        );
+            'expanded' => $expanded,
+        ];
     }
 
     public function getMaxRootCategories($category, $parent)

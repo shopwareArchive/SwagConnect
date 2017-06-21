@@ -1,18 +1,22 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
-use Shopware\Bundle\SearchBundle\ProductSearch;
-use Shopware\Bundle\SearchBundle\ProductSearchResult;
-use Shopware\Bundle\StoreFrontBundle\Struct\ProductContext;
-use Shopware\CustomModels\Connect\ProductStreamAttribute;
-use Shopware\Models\ProductStream\ProductStream;
-use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
-use Shopware\Bundle\SearchBundle\Criteria;
-use Shopware\Bundle\SearchBundle\ConditionInterface;
-use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use Shopware\Bundle\SearchBundle\Condition\CategoryCondition;
 use Shopware\Bundle\SearchBundle\Condition\CustomerGroupCondition;
+use Shopware\Bundle\SearchBundle\Criteria;
+use Shopware\Bundle\SearchBundle\ProductSearch;
+use Shopware\Bundle\SearchBundle\ProductSearchResult;
+use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
+use Shopware\Bundle\StoreFrontBundle\Struct\ProductContext;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
+use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
+use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\Config;
 
 class ProductStreamService
@@ -54,11 +58,12 @@ class ProductStreamService
 
     /**
      * ProductStreamService constructor.
-     * @param ProductStreamRepository $productStreamRepository
+     *
+     * @param ProductStreamRepository          $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
-     * @param Config $config
-     * @param ProductSearch $productSearchService
-     * @param ContextService $contextService
+     * @param Config                           $config
+     * @param ProductSearch                    $productSearchService
+     * @param ContextService                   $contextService
      */
     public function __construct(
         ProductStreamRepository $productStreamRepository,
@@ -77,6 +82,7 @@ class ProductStreamService
     /**
      * @param $streamId
      * @param bool $appendCurrent
+     *
      * @return ProductStreamsAssignments
      */
     public function prepareStreamsAssignments($streamId, $appendCurrent = true)
@@ -95,14 +101,16 @@ class ProductStreamService
         }
 
         return new ProductStreamsAssignments(
-            array('assignments' => $assignment)
+            ['assignments' => $assignment]
         );
     }
 
     /**
      * @param $streamId
-     * @return ProductStreamsAssignments
+     *
      * @throws \Exception
+     *
+     * @return ProductStreamsAssignments
      */
     public function getStreamAssignments($streamId)
     {
@@ -114,12 +122,13 @@ class ProductStreamService
         $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
         return new ProductStreamsAssignments(
-            array('assignments' => $assignment)
+            ['assignments' => $assignment]
         );
     }
 
     /**
      * @param ProductStream $stream
+     *
      * @return bool
      */
     public function isConnectStream(ProductStream $stream)
@@ -130,11 +139,12 @@ class ProductStreamService
             return false;
         }
 
-        return (boolean) $attribute->getConnectIsRemote();
+        return (bool) $attribute->getConnectIsRemote();
     }
 
     /**
      * @param ProductStream $stream
+     *
      * @return bool
      */
     public function activateConnectProductsByStream(ProductStream $stream)
@@ -144,6 +154,7 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     *
      * @return mixed
      */
     public function findStream($streamId)
@@ -153,6 +164,7 @@ class ProductStreamService
 
     /**
      * @param array $streamIds
+     *
      * @return \Shopware\Models\ProductStream\ProductStream[]
      */
     public function findStreams(array $streamIds)
@@ -164,6 +176,7 @@ class ProductStreamService
      * Filter the stream ids, it will return only the exported ones
      *
      * @param array $streamIds
+     *
      * @return array
      */
     public function filterExportedStreams(array $streamIds)
@@ -173,11 +186,12 @@ class ProductStreamService
 
     /**
      * @param $articleIds
+     *
      * @return array
      */
     private function collectRelatedStreamsAssignments($articleIds)
     {
-        $assignment = array();
+        $assignment = [];
 
         $collection = $this->productStreamRepository->fetchAllPreviousExportedStreams($articleIds);
 
@@ -203,6 +217,7 @@ class ProductStreamService
      * @param ProductStreamsAssignments $assignments
      * @param $streamId
      * @param $articleId
+     *
      * @return bool
      */
     public function allowToRemove(ProductStreamsAssignments $assignments, $streamId, $articleId)
@@ -222,6 +237,7 @@ class ProductStreamService
 
     /**
      * @param ProductStream $stream
+     *
      * @return array
      */
     public function getArticlesIds(ProductStream $stream)
@@ -235,6 +251,7 @@ class ProductStreamService
 
     /**
      * @param ProductStream $productStream
+     *
      * @return bool
      */
     public function isStatic(ProductStream $productStream)
@@ -249,6 +266,7 @@ class ProductStreamService
     /**
      * @param null $start
      * @param null $limit
+     *
      * @return array
      */
     public function getList($start = null, $limit = null)
@@ -268,12 +286,13 @@ class ProductStreamService
 
         return [
             'data' => $streams,
-            'total' => $streamList['total']
+            'total' => $streamList['total'],
         ];
     }
 
     /**
      * @param $type
+     *
      * @return array
      */
     public function getAllExportedStreams($type)
@@ -283,6 +302,7 @@ class ProductStreamService
 
     /**
      * @param ProductStream $stream
+     *
      * @return ProductStreamAttribute
      */
     public function createStreamAttribute(ProductStream $stream)
@@ -299,6 +319,7 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     *
      * @return string
      */
     public function countProductsInStaticStream($streamId)
@@ -308,6 +329,7 @@ class ProductStreamService
 
     /**
      * @param ProductStream $stream
+     *
      * @return ProductSearchResult
      */
     public function getProductFromConditionStream(ProductStream $stream)
@@ -344,6 +366,7 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     *
      * @return bool
      */
     public function isStreamExported($streamId)
@@ -353,6 +376,7 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     *
      * @return \Doctrine\DBAL\Driver\Statement|int
      */
     public function markProductsToBeRemovedFromStream($streamId)
@@ -363,6 +387,7 @@ class ProductStreamService
     /**
      * @param $streamId
      * @param array $articleIds
+     *
      * @return array
      */
     public function createStreamRelation($streamId, array $articleIds)
@@ -392,7 +417,7 @@ class ProductStreamService
      */
     public function changeStatus($streamId, $status)
     {
-        $streamAttr = $this->streamAttrRepository->findOneBy(array('streamId' => (int) $streamId));
+        $streamAttr = $this->streamAttrRepository->findOneBy(['streamId' => (int) $streamId]);
 
         if (!$streamAttr) {
             $streamAttr = $this->streamAttrRepository->create();
@@ -410,7 +435,7 @@ class ProductStreamService
     public function log($streamId, $message)
     {
         /** @var ProductStreamAttribute $streamAttr */
-        $streamAttr = $this->streamAttrRepository->findOneBy(array('streamId' => $streamId));
+        $streamAttr = $this->streamAttrRepository->findOneBy(['streamId' => $streamId]);
         $streamAttr->setExportMessage($message);
 
         $this->streamAttrRepository->save($streamAttr);

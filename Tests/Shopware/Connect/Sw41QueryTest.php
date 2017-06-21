@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\CategoryQuery;
 
@@ -20,10 +25,10 @@ class Sw41QueryTest extends ConnectTestHelper
     }
 
     /**
-    * @param string $name
-    * @param string $key
-    * @dataProvider provideCategoryNames
-    */
+     * @param string $name
+     * @param string $key
+     * @dataProvider provideCategoryNames
+     */
     public function testNormalizeCategoryName($name, $key)
     {
         $this->assertTrue(true);
@@ -37,44 +42,44 @@ class Sw41QueryTest extends ConnectTestHelper
 
     public function provideCategoryNames()
     {
-        return array(
-            array(
+        return [
+            [
                 'Zubehör für Videospielkonsolen',
                 '/zubehör_für_videospielkonsolen',
-            ),
-            array(
+            ],
+            [
                 'Hobby & Kunst',
                 '/hobby_kunst',
-            ),
-            array(
+            ],
+            [
                 'Sofa-Zubehör',
                 '/sofa_zubehör',
-            ),
-            array(
+            ],
+            [
                 'Forst- & Holzwirtschaft',
                 '/forst_holzwirtschaft',
-            ),
-            array(
+            ],
+            [
                 'VariantenKat1',
                 '/variantenkat1',
-            ),
-            array(
+            ],
+            [
                 'VariantenKat2',
                 '/variantenkat2',
-            ),
-            array(
+            ],
+            [
                 'VariantenKat3',
                 '/variantenkat3',
-            ),
-            array(
+            ],
+            [
                 '4VariantenKat',
                 '/4variantenkat',
-            ),
-            array(
+            ],
+            [
                 '5VariantenKat',
                 '/5variantenkat',
-            ),
-        );
+            ],
+        ];
     }
 
     public function testGetCategoriesByProduct()
@@ -85,7 +90,7 @@ class Sw41QueryTest extends ConnectTestHelper
         $query = $this->createQuery();
 
         $product = new Product();
-        $product->categories = array('/bücher');
+        $product->categories = ['/bücher'];
 
         $categories = $query->getCategoriesByProduct($product);
 
@@ -104,7 +109,7 @@ class Sw41QueryTest extends ConnectTestHelper
 
         $categories = $query->getConnectCategoryForProduct(21); // 21 = Jasmine Tee im Demoshop
 
-        $expectedCategories = array(
+        $expectedCategories = [
             '/deutsch/genusswelten/tees_und_zubehör/tees' => 'Tees',
             '/deutsch/genusswelten/tees_und_zubehör' => 'Tees und Zubehör',
             '/deutsch/genusswelten' => 'Genusswelten',
@@ -113,7 +118,7 @@ class Sw41QueryTest extends ConnectTestHelper
             '/english/worlds_of_indulgence/teas_and_accessories' => 'Teas and Accessories',
             '/english/worlds_of_indulgence' => 'Worlds of indulgence',
             '/english' => 'English',
-        );
+        ];
 
         $this->assertEquals($expectedCategories, $categories);
     }

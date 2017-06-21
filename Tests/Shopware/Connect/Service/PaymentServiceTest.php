@@ -1,11 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\CustomModels\Connect\PaymentRepository as CustomPaymentRepository;
 use Shopware\Models\Payment\Repository as PaymentRepository;
-use Shopware\Models\Payment\Payment;
-use Shopware\Models\Attribute\Payment as AttrPayment;
+use ShopwarePlugins\Connect\Services\PaymentService;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class PaymentServiceTest extends ConnectTestHelper
 {
@@ -44,22 +47,22 @@ class PaymentServiceTest extends ConnectTestHelper
     {
         $this->db->insert(
             's_core_paymentmeans',
-            array(
+            [
                 'name' => 'dummy',
                 'description' => 'Dummy',
                 'additionaldescription' => 'Dummy',
                 'template' => 'Dummy',
-            )
+            ]
         );
 
         $this->paymentId = $this->db->lastInsertId();
 
         $this->db->insert(
             's_core_paymentmeans_attributes',
-            array(
+            [
                 'paymentmeanID' => $this->paymentId,
                 'connect_is_allowed' => 1,
-            )
+            ]
         );
     }
 
@@ -68,13 +71,13 @@ class PaymentServiceTest extends ConnectTestHelper
         $this->paymentService->updateConnectAllowed($this->paymentId, false);
 
         $sql = 'SELECT connect_is_allowed as connectIsAllowed FROM s_core_paymentmeans_attributes WHERE paymentmeanID = ?';
-        $result = $this->db->fetchRow($sql, array($this->paymentId));
+        $result = $this->db->fetchRow($sql, [$this->paymentId]);
 
         $this->assertEquals(0, $result['connectIsAllowed']);
     }
 
     public function tearDown()
     {
-        $this->db->delete('s_core_paymentmeans', array('id = ?' => $this->paymentId));
+        $this->db->delete('s_core_paymentmeans', ['id = ?' => $this->paymentId]);
     }
 }

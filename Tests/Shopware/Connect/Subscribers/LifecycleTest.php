@@ -1,12 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Subscribers;
 
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 class LifecycleTest extends ConnectTestHelper
 {
@@ -92,8 +97,7 @@ class LifecycleTest extends ConnectTestHelper
             ->setMethod('POST')
             ->setPost('prices',
                 [
-                    0 =>
-                        [
+                    0 => [
                             'id' => $price->getId(),
                             'from' => 1,
                             'to' => 5,
@@ -102,10 +106,8 @@ class LifecycleTest extends ConnectTestHelper
                             'percent' => 0,
                             'cloned' => false,
                             'customerGroupKey' => 'EK',
-                            'customerGroup' =>
-                                [
-                                    0 =>
-                                        [
+                            'customerGroup' => [
+                                    0 => [
                                             'id' => 1,
                                             'key' => 'EK',
                                             'name' => 'Shopkunden',
@@ -136,7 +138,6 @@ class LifecycleTest extends ConnectTestHelper
             ->setPost('articleId', $articleId)
             ->setPost('standard', false)
             ->setPost('id', $detail->getId());
-        ;
 
         $this->dispatch('backend/Article/saveDetail');
 
@@ -149,7 +150,6 @@ class LifecycleTest extends ConnectTestHelper
         $this->assertEquals('update', $updateChange['c_operation']);
         $product = unserialize($updateChange['c_payload']);
         $this->assertEquals(200.00, $product->price);
-
     }
 
     private function insertVariants()
@@ -191,7 +191,7 @@ class LifecycleTest extends ConnectTestHelper
                             ['name' => 'L'],
                             ['name' => 'XL'],
                             ['name' => 'XXL'],
-                        ]
+                        ],
                     ],
                     [
                         'name' => 'Farbe',
@@ -201,9 +201,9 @@ class LifecycleTest extends ConnectTestHelper
                             ['name' => 'Blau'],
                             ['name' => 'Schwarz'],
                             ['name' => 'Rot'],
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
             'taxId' => 1,
             'variants' => [
@@ -227,7 +227,7 @@ class LifecycleTest extends ConnectTestHelper
                     'additionnaltext' => 'S / Schwarz',
                     'purchasePrice' => 38.99,
                     'configuratorOptions' => [
-                        ['group' => 'Größe', 'groupId' => null, 'optionId' => null,'option' => 'S'],
+                        ['group' => 'Größe', 'groupId' => null, 'optionId' => null, 'option' => 'S'],
                         ['group' => 'Farbe', 'groupId' => null, 'optionId' => null, 'option' => 'Schwarz'],
                     ],
                 ],
@@ -239,8 +239,8 @@ class LifecycleTest extends ConnectTestHelper
                     'additionnaltext' => 'S / Rot',
                     'purchasePrice' => 38.99,
                     'configuratorOptions' => [
-                        ['group' => 'Größe', 'groupId' => null, 'optionId' => null,'option' => 'S'],
-                        ['group' => 'Farbe', 'groupId' => null, 'optionId' => null,'option' => 'Rot'],
+                        ['group' => 'Größe', 'groupId' => null, 'optionId' => null, 'option' => 'S'],
+                        ['group' => 'Farbe', 'groupId' => null, 'optionId' => null, 'option' => 'Rot'],
                     ],
                 ],
                 [
@@ -252,10 +252,10 @@ class LifecycleTest extends ConnectTestHelper
                     'purchasePrice' => 38.99,
                     'configuratorOptions' => [
                         ['group' => 'Größe', 'groupId' => null, 'optionId' => null, 'option' => 'XL'],
-                        ['group' => 'Farbe', 'groupId' => null, 'optionId' => null,'option' => 'Rot'],
+                        ['group' => 'Farbe', 'groupId' => null, 'optionId' => null, 'option' => 'Rot'],
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
 
         /** @var \Shopware\Models\Article\Article $article */
@@ -270,7 +270,7 @@ class LifecycleTest extends ConnectTestHelper
                 'price' => 123.99,
                 'articleID' => $article->getId(),
                 'articledetailsID' => $article->getMainDetail()->getId(),
-                'pseudoprice' => 0
+                'pseudoprice' => 0,
             ]
         );
 
@@ -287,7 +287,7 @@ class LifecycleTest extends ConnectTestHelper
                     $detail->getId(),
                     $detail->getNumber(),
                     '/bücher',
-                    1
+                    1,
                 ]);
         }
 

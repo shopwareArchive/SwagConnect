@@ -1,12 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Api\Request;
 
-use ShopwarePlugins\Connect\Components\Config;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
+use ShopwarePlugins\Connect\Components\Config;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class RestApiRequest
@@ -18,6 +23,7 @@ class RestApiRequest
 
     /**
      * RestApiRequest constructor.
+     *
      * @param Config $config
      */
     public function __construct(
@@ -50,27 +56,27 @@ class RestApiRequest
         } catch (ExpiredException $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => "Expired authentication key"
+                'message' => 'Expired authentication key',
             ], 404);
         } catch (BeforeValidException $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => "Authentication key is not valid yet."
+                'message' => 'Authentication key is not valid yet.',
             ], 404);
         } catch (SignatureInvalidException $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => "Signature verification failed."
+                'message' => 'Signature verification failed.',
             ], 404);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => "Invalid authentication token."
+                'message' => 'Invalid authentication token.',
             ], 404);
         }
 
-        return new JsonResponse(array(
+        return new JsonResponse([
             'success' => true,
-        ), 200);
+        ], 200);
     }
 }

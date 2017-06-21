@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -10,35 +15,32 @@ class MassImportTest extends ConnectTestHelper
     {
         // pseudo verify SDK
         $conn = Shopware()->Db();
-        $conn->delete('sw_connect_shop_config', array());
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_self_', 's_config' => -1));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_last_update_', 's_config' => time()));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_categories_', 's_config' => serialize(array('/bücher' => 'Bücher'))));
+        $conn->delete('sw_connect_shop_config', []);
+        $conn->insert('sw_connect_shop_config', ['s_shop' => '_self_', 's_config' => -1]);
+        $conn->insert('sw_connect_shop_config', ['s_shop' => '_last_update_', 's_config' => time()]);
+        $conn->insert('sw_connect_shop_config', ['s_shop' => '_categories_', 's_config' => serialize(['/bücher' => 'Bücher'])]);
     }
-
 
     public function _testMassImportProducts()
     {
-        $commands = array();
-        for ($i=0; $i<=60; $i++) {
+        $commands = [];
+        for ($i = 0; $i <= 60; ++$i) {
             $product = $this->getProduct();
-            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
+            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate([
                 'product' => $product,
                 'revision' => time(),
-            ));
+            ]);
         }
 
         $start = microtime(true);
-        $this->dispatchRpcCall('products', 'toShop', array(
-            $commands
-        ));
+        $this->dispatchRpcCall('products', 'toShop', [
+            $commands,
+        ]);
 
         $end = microtime(true);
 
         $t = $end - $start;
 
         echo $t;
-
     }
-
 }

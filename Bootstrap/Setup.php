@@ -1,14 +1,19 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Customer\Group;
-use Shopware\Components\Model\ModelManager;
-use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
@@ -16,7 +21,6 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
  * that they can also be run on update of the plugin
  *
  * Class Setup
- * @package ShopwarePlugins\Connect\Bootstrap
  */
 class Setup
 {
@@ -39,18 +43,17 @@ class Setup
 
     /**
      * Setup constructor.
+     *
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
-     * @param ModelManager $modelManager
-     * @param Pdo $db
+     * @param ModelManager                                    $modelManager
+     * @param Pdo                                             $db
      * @param Menu
      */
-    public function __construct
-    (
+    public function __construct(
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
         Menu $menu
-
     ) {
         $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
@@ -78,16 +81,17 @@ class Setup
         }
     }
 
-    private function createConfig() {
+    private function createConfig()
+    {
         $form = $this->bootstrap->Form();
 
         $form->setElement('text',
             'connectDebugHost',
-            array(
+            [
                 'label' => 'Shopware Connect Host',
                 'required' => false,
-                'value'    => Config::MARKETPLACE_URL
-            ));
+                'value' => Config::MARKETPLACE_URL,
+            ]);
     }
 
     /**
@@ -144,7 +148,7 @@ class Setup
 
         $connectImportImages = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            array('action' => '%ShopwareConnectImportImages')
+            ['action' => '%ShopwareConnectImportImages']
         );
 
         if (!$connectImportImages) {
@@ -158,7 +162,7 @@ class Setup
 
         $connectUpdateProducts = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            array('action' => '%ShopwareConnectUpdateProducts')
+            ['action' => '%ShopwareConnectUpdateProducts']
         );
 
         if (!$connectUpdateProducts) {
@@ -172,7 +176,7 @@ class Setup
 
         $connectExportDynamicStreams = $this->db->fetchOne(
             'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            array('action' => '%ConnectExportDynamicStreams')
+            ['action' => '%ConnectExportDynamicStreams']
         );
 
         if (!$connectExportDynamicStreams) {
@@ -185,13 +189,12 @@ class Setup
         }
     }
 
-
     /**
      * Create necessary tables
      */
     private function createMyTables()
     {
-        $queries = array("
+        $queries = ['
             CREATE TABLE IF NOT EXISTS `sw_connect_change` (
               `c_entity_id` varchar(64) NOT NULL,
               `c_operation` char(8) NOT NULL,
@@ -201,32 +204,32 @@ class Setup
               UNIQUE KEY `c_revision` (`c_revision`),
               KEY `c_entity_id` (`c_entity_id`),
               INDEX `c_operation` (`c_operation`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
            CREATE TABLE IF NOT EXISTS `sw_connect_data` (
               `d_key` varchar(32) NOT NULL,
               `d_value` varchar(256) NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`d_key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `sw_connect_product` (
               `p_source_id` varchar(64) NOT NULL,
               `p_hash` varchar(64) NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`p_source_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `sw_connect_reservations` (
               `r_id` varchar(32) NOT NULL,
               `r_state` varchar(12) NOT NULL,
               `r_order` longblob NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`r_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `sw_connect_shop_config` (
               `s_shop` varchar(32) NOT NULL,
               `s_config` LONGBLOB NOT NULL,
               `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`s_shop`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_config` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
@@ -234,7 +237,7 @@ class Setup
               `shopId` int(11) NULL,
               `groupName` varchar(255) NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `sw_connect_shipping_costs` (
               `sc_from_shop` VARCHAR(32) NOT NULL,
               `sc_to_shop` VARCHAR(32) NOT NULL,
@@ -244,7 +247,7 @@ class Setup
               `changed` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (`sc_from_shop`, `sc_to_shop`),
               INDEX (`sc_revision`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_log` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `isError` int(1) NOT NULL,
@@ -254,13 +257,13 @@ class Setup
               `response` text COLLATE utf8_unicode_ci DEFAULT NULL,
               `time` datetime NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_marketplace_attr` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `marketplace_attribute` varchar(255) NOT NULL UNIQUE,
               `local_attribute` varchar(255) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;', "
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_items` (
              `id` int(11) NOT NULL AUTO_INCREMENT,
              `article_id` int(11) unsigned DEFAULT NULL,
@@ -292,7 +295,7 @@ class Setup
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", '
             CREATE TABLE IF NOT EXISTS `sw_connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,
              `sr_group_id` int(11) unsigned DEFAULT NULL,
@@ -302,7 +305,7 @@ class Setup
              `sr_zip_prefix` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
              PRIMARY KEY (`sr_id`),
              KEY `sr_group_id` (`sr_group_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `category_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -311,21 +314,21 @@ class Setup
               PRIMARY KEY (`id`),
               INDEX (`category_key`),
               UNIQUE KEY `scuk_category_key` (`category_key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_product_to_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `connect_category_id` int(11) NOT NULL,
               `articleID` int(11) NOT NULL,
               PRIMARY KEY (`id`),
               UNIQUE KEY `scuk_connect_category_id` (`connect_category_id`,`articleID`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", "
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `stream_id` int(11) NOT NULL,
               `export_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
               `export_message` text COLLATE utf8_unicode_ci DEFAULT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;","
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;', "
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams_relation` (
                 `stream_id` int(11) unsigned NOT NULL,
                 `article_id` int(11) unsigned NOT NULL,
@@ -334,7 +337,7 @@ class Setup
                 CONSTRAINT s_plugin_connect_streams_selection_fk_stream_id FOREIGN KEY (stream_id) REFERENCES s_product_streams (id) ON DELETE CASCADE,
                 CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-            ");
+            "];
 
         foreach ($queries as $query) {
             $this->db->exec($query);
@@ -394,7 +397,7 @@ class Setup
             's_premium_dispatch_attributes',
             'connect_allowed',
             'boolean',
-            array(),
+            [],
             null,
             false,
             1
@@ -407,7 +410,7 @@ class Setup
             [
                 'translatable' => 1,
                 'displayInBackend' => 1,
-                'label' => 'Connect Beschreibung'
+                'label' => 'Connect Beschreibung',
             ]
         );
 
@@ -415,7 +418,7 @@ class Setup
             's_articles_prices_attributes',
             'connect_price',
             'float',
-            array(),
+            [],
             null,
             false,
             0
@@ -467,7 +470,7 @@ class Setup
             's_articles_supplier_attributes',
             'connect_is_remote',
             'boolean',
-            array(),
+            [],
             null,
             false,
             0
@@ -483,7 +486,7 @@ class Setup
             's_filter_attributes',
             'connect_is_remote',
             'boolean',
-            array(),
+            [],
             null,
             false,
             0
@@ -493,7 +496,7 @@ class Setup
             's_filter_options_attributes',
             'connect_is_remote',
             'boolean',
-            array(),
+            [],
             null,
             false,
             0
@@ -503,7 +506,7 @@ class Setup
             's_filter_values_attributes',
             'connect_is_remote',
             'boolean',
-            array(),
+            [],
             null,
             false,
             0
@@ -519,7 +522,7 @@ class Setup
             0
         );
 
-        $this->modelManager->generateAttributeModels(array(
+        $this->modelManager->generateAttributeModels([
             's_articles_attributes',
             's_articles_supplier_attributes',
             's_order_attributes',
@@ -535,9 +538,8 @@ class Setup
             's_filter_options_attributes',
             's_filter_values_attributes',
             's_product_streams_attributes',
-        ));
+        ]);
     }
-
 
     /**
      * Creates the configuration table. Existing configs will not be overwritten
@@ -551,28 +553,28 @@ class Setup
         // when add/remove item in $configs array
         // open ConnectConfigTest.php and change tearDown function
         // for some reason shopware runs test during plugin installation
-        $configs = array(
-            'priceGroupForPriceExport' => array('', null, 'export'),
-            'priceGroupForPurchasePriceExport' => array('', null, 'export'),
-            'priceFieldForPriceExport' => array('', null, 'export'),
-            'priceFieldForPurchasePriceExport' => array('', null, 'export'),
-            'excludeInactiveProducts' => array('1', null, 'export'),
-            'detailProductNoIndex' => array('1', null, 'general'),
-            'detailShopInfo' => array('1', null, 'general'),
-            'checkoutShopInfo' => array('1', null, 'general'),
-            'longDescriptionField' => array('1', null, 'export'),
-            'importImagesOnFirstImport' => array('1', null, 'import'),
-            'autoUpdateProducts' => array('1', null, 'export'),
-            'overwriteProductName' => array('1', null, 'import'),
-            'overwriteProductPrice' => array('1', null, 'import'),
-            'overwriteProductImage' => array('1', null, 'import'),
-            'overwriteProductShortDescription' => array('1', null, 'import'),
-            'overwriteProductLongDescription' => array('1', null, 'import'),
-            'overwriteProductAdditionalDescription' => array('1', null, 'import'),
-            'logRequest' => array('1', null, 'general'),
-            'showShippingCostsSeparately' => array('0', null, 'general'),
-            'articleImagesLimitImport' => array(5, null, 'import'),
-        );
+        $configs = [
+            'priceGroupForPriceExport' => ['', null, 'export'],
+            'priceGroupForPurchasePriceExport' => ['', null, 'export'],
+            'priceFieldForPriceExport' => ['', null, 'export'],
+            'priceFieldForPurchasePriceExport' => ['', null, 'export'],
+            'excludeInactiveProducts' => ['1', null, 'export'],
+            'detailProductNoIndex' => ['1', null, 'general'],
+            'detailShopInfo' => ['1', null, 'general'],
+            'checkoutShopInfo' => ['1', null, 'general'],
+            'longDescriptionField' => ['1', null, 'export'],
+            'importImagesOnFirstImport' => ['1', null, 'import'],
+            'autoUpdateProducts' => ['1', null, 'export'],
+            'overwriteProductName' => ['1', null, 'import'],
+            'overwriteProductPrice' => ['1', null, 'import'],
+            'overwriteProductImage' => ['1', null, 'import'],
+            'overwriteProductShortDescription' => ['1', null, 'import'],
+            'overwriteProductLongDescription' => ['1', null, 'import'],
+            'overwriteProductAdditionalDescription' => ['1', null, 'import'],
+            'logRequest' => ['1', null, 'general'],
+            'showShippingCostsSeparately' => ['0', null, 'general'],
+            'articleImagesLimitImport' => [5, null, 'import'],
+        ];
 
         foreach ($configs as $name => $values) {
             list($value, $shopId, $group) = $values;
@@ -584,11 +586,10 @@ class Setup
                     $shopId,
                     $group
                 );
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 // This may fail if the config table was not updated, yet.
                 // The Updater will take care of this
             }
-
         }
     }
 
@@ -610,16 +611,15 @@ class Setup
     {
         $connectGroupAttributeId = $this->getConnectCustomerGroupId();
         if (!$this->connectCustomerGroupExists($connectGroupAttributeId)) {
-
             // Create Customer Group
             $this->db->insert(
                 's_core_customergroups',
                 [
                     'groupkey' => $this->getAvailableCustomerGroupName(),
-                    'description' => "SC export",
+                    'description' => 'SC export',
                     'tax' => 0,
                     'taxinput' => 0,
-                    'mode' => 0
+                    'mode' => 0,
                 ]
             );
 
@@ -630,7 +630,7 @@ class Setup
                 's_core_customergroups_attributes',
                 [
                   'customerGroupID' => $customerGroupID,
-                  'connect_group' => 1
+                  'connect_group' => 1,
                 ]
             );
         }
@@ -652,7 +652,7 @@ class Setup
             FROM `s_core_customergroups`
             WHERE id = :id',
             [
-                'id' => $attributeId
+                'id' => $attributeId,
             ]
         );
 
@@ -663,16 +663,17 @@ class Setup
      * Return a free customer group name. It will only check 5 groups - if all are used, probably the detection
      * of existing connectCustomerGroups is broken. Throw an exception then
      *
-     * @return mixed
      * @throws \RuntimeException
+     *
+     * @return mixed
      */
     private function getAvailableCustomerGroupName()
     {
-        $names = array('SC', 'SWC', 'SWCONN', 'SC-1');
+        $names = ['SC', 'SWC', 'SWCONN', 'SC-1'];
 
         $repo = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         foreach ($names as $name) {
-            $model = $repo->findOneBy(array('key' => $name));
+            $model = $repo->findOneBy(['key' => $name]);
             if (is_null($model)) {
                 return $name;
             }
@@ -688,9 +689,9 @@ class Setup
             'Shopware\CustomModels',
             $this->bootstrap->Path() . 'Models/'
         );
-        Shopware()->ModelAnnotations()->addPaths(array(
-            $this->bootstrap->Path() . 'Models/'
-        ));
+        Shopware()->ModelAnnotations()->addPaths([
+            $this->bootstrap->Path() . 'Models/',
+        ]);
     }
 
     /**
@@ -717,15 +718,15 @@ class Setup
             's_core_paymentmeans_attributes',
             'connect_is_allowed',
             'boolean',
-            array(),
+            [],
             null,
             false,
             1
         );
 
-        $this->modelManager->generateAttributeModels(array(
-            's_core_paymentmeans_attributes'
-        ));
+        $this->modelManager->generateAttributeModels([
+            's_core_paymentmeans_attributes',
+        ]);
 
         $this->modelManager->regenerateProxies();
     }
@@ -760,7 +761,7 @@ class Setup
     public function populateOrderStates()
     {
         $states = [
-            ConnectOrderUtil::ORDER_STATUS_ERROR => 'SC error'
+            ConnectOrderUtil::ORDER_STATUS_ERROR => 'SC error',
         ];
 
         $this->populateStates($states, Status::GROUP_STATE);
@@ -774,19 +775,19 @@ class Setup
             $isExists = $this->db->query('
                 SELECT `id` FROM `s_core_states`
                 WHERE `name` = ? AND `group` = ?
-                ', array($name, $group)
+                ', [$name, $group]
             )->fetch();
 
             if ($isExists) {
                 continue;
             }
 
-            $currentId++;
+            ++$currentId;
             $this->db->query('
                 INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)
-                ', array($currentId, $name, $description, $currentId, $group, 0)
+                ', [$currentId, $name, $description, $currentId, $group, 0]
             );
         }
     }

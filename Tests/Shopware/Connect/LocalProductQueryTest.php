@@ -1,16 +1,20 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
+use Shopware\Models\Property;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
-use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
-use Shopware\Bundle\StoreFrontBundle\Struct\Media;
-use Shopware\Models\Property;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
@@ -43,24 +47,24 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->manager = Shopware()->Models();
         $this->createArticle();
 
-        $this->translations = array(
+        $this->translations = [
             'en' => new Translation(
-                array(
+                [
                     'title' => 'Glas -Teetasse 0,25l EN',
                     'shortDescription' => 'shopware Connect local product short description EN',
                     'longDescription' => 'shopware Connect local product long description EN',
-                    'url' => $this->getProductBaseUrl() . '22/shId/2'
-                )
+                    'url' => $this->getProductBaseUrl() . '22/shId/2',
+                ]
             ),
             'nl' => new Translation(
-                array(
+                [
                     'title' => 'Glas -Teetasse 0,25l NL',
                     'shortDescription' => 'shopware Connect local product short description NL',
                     'longDescription' => 'shopware Connect local product long description NL',
-                    'url' => $this->getProductBaseUrl() . '22/shId/176'
-                )
+                    'url' => $this->getProductBaseUrl() . '22/shId/176',
+                ]
             ),
-        );
+        ];
 
         $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
@@ -85,7 +89,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->productTranslator->expects($this->any())
             ->method('translateConfiguratorOption')
-            ->willReturn($this->translations);		
+            ->willReturn($this->translations);
 
         $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
             ->disableOriginalConstructor()
@@ -121,6 +125,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->mediaService
             );
         }
+
         return $this->localProductQuery;
     }
 
@@ -130,13 +135,13 @@ class LocalProductQueryTest extends ConnectTestHelper
             return null;
         }
 
-        return Shopware()->Front()->Router()->assemble(array(
+        return Shopware()->Front()->Router()->assemble([
             'module' => 'frontend',
             'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
-            'fullPath' => true
-        ));
+            'fullPath' => true,
+        ]);
     }
 
     public function testGetUrlForProduct()
@@ -153,19 +158,19 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function testGetConnectProduct()
     {
-        $row = array (
+        $row = [
             'sku' => 'SW10005',
             'sourceId' => '22',
-            'ean' => NULL,
+            'ean' => null,
             'title' => 'Glas -Teetasse 0,25l',
             'shortDescription' => 'Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius.',
-            'vendor' =>  array(
+            'vendor' => [
                 'name' => 'Teapavilion',
                 'description' => 'Teapavilion description',
                 'logo_url' => 'tea_pavilion.jpg',
                 'url' => 'http://teapavilion.com',
                 'page_title' => 'Teapavilion title',
-            ),
+            ],
             'vat' => '0.190000',
             'availability' => 3445,
             'price' => 10.924369747899,
@@ -180,17 +185,17 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'quantity' => null,
                 'ref_quantity' => null,
             ],
-        );
+        ];
 
         $productMedia = [];
-        for ($i = 1; $i < 12; $i++) {
+        for ($i = 1; $i < 12; ++$i) {
             $media = new Media();
             $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_product_image%s.jpg', $i));
             $productMedia[] = $media;
         }
 
         $variantMedia = [];
-        for ($i = 1; $i < 12; $i++) {
+        for ($i = 1; $i < 12; ++$i) {
             $media = new Media();
             $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_variant_image%s.jpg', $i));
             $variantMedia[] = $media;
@@ -209,10 +214,10 @@ class LocalProductQueryTest extends ConnectTestHelper
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         $expectedProduct->url = $this->getProductBaseUrl() . '22';
-        $expectedProduct->attributes = array(
-            'quantity' => NULL,
-            'ref_quantity' => NULL,
-        );
+        $expectedProduct->attributes = [
+            'quantity' => null,
+            'ref_quantity' => null,
+        ];
         $expectedProduct->translations = $this->translations;
         $expectedProduct->priceRanges = [
             new PriceRange([
@@ -262,7 +267,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ]),
         ];
 
-		$expectedProduct->images = array(
+        $expectedProduct->images = [
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image1.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image2.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image3.jpg',
@@ -283,8 +288,8 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
-        );
-        $expectedProduct->variantImages = array(
+        ];
+        $expectedProduct->variantImages = [
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image2.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
@@ -295,7 +300,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
-        );
+        ];
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];
@@ -328,68 +333,67 @@ class LocalProductQueryTest extends ConnectTestHelper
             $this->manager->flush();
         }
 
-        $minimalTestArticle = array(
+        $minimalTestArticle = [
             'name' => 'Glas -Teetasse 0,25l',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Teapavilion',
-            'mainDetail' => array(
+            'mainDetail' => [
                 'number' => '9898' . rand(1, 99999),
-            ),
+            ],
             'filterGroupId' => $group->getId(),
-            'propertyValues' => array(
-                array(
-                    'option' => array(
+            'propertyValues' => [
+                [
+                    'option' => [
                         'name' => 'color',
-                    ),
-                    'value' => 'green'
-                ),
-                array(
-                    'option' => array(
+                    ],
+                    'value' => 'green',
+                ],
+                [
+                    'option' => [
                         'name' => 'size',
-                    ),
-                    'value' => '2xl'
-                ),
-                array(
-                    'option' => array(
+                    ],
+                    'value' => '2xl',
+                ],
+                [
+                    'option' => [
                         'name' => 'size',
-                    ),
-                    'value' => '3xl'
-                )
-            )
-        );
+                    ],
+                    'value' => '3xl',
+                ],
+            ],
+        ];
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
-        /** @var \Shopware\Models\Article\Article $article */
+        /* @var \Shopware\Models\Article\Article $article */
         $this->article = $articleResource->create($minimalTestArticle);
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 1,
                 'to' => 5,
                 'price' => 123.99,
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
-                'pseudoprice' => 0
-            )
+                'pseudoprice' => 0,
+            ]
         );
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 6,
                 'to' => 'beliebig',
                 'price' => 113.99,
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
-                'pseudoprice' => 0
-            )
+                'pseudoprice' => 0,
+            ]
         );
     }
-
 
     public function tearDown()
     {

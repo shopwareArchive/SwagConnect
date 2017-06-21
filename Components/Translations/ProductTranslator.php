@@ -1,33 +1,16 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components\Translations;
 
-use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\Translation;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 
 class ProductTranslator implements ProductTranslatorInterface
 {
@@ -60,8 +43,7 @@ class ProductTranslator implements ProductTranslatorInterface
         ProductTranslationsGateway $productTranslationsGateway,
         ModelManager $manager,
         $baseProductUrl
-    )
-    {
+    ) {
         $this->config = $config;
         $this->productTranslationsGateway = $productTranslationsGateway;
         $this->manager = $manager;
@@ -74,11 +56,11 @@ class ProductTranslator implements ProductTranslatorInterface
     public function translate($productId, $sourceId)
     {
         $exportLanguages = $this->config->getConfig('exportLanguages');
-        $exportLanguages = $exportLanguages ?: array();
+        $exportLanguages = $exportLanguages ?: [];
 
         $translations = $this->productTranslationsGateway->getTranslations($productId, $exportLanguages);
 
-        $result = array();
+        $result = [];
         foreach ($translations as $shopId => $translation) {
             /** @var \Shopware\Models\Shop\Shop $shop */
             $shop = $this->getShopRepository()->find($shopId);
@@ -99,13 +81,13 @@ class ProductTranslator implements ProductTranslatorInterface
             }
 
             $result[$localeCode[0]] = new Translation(
-                array(
+                [
                     'title' => isset($translation['title']) ? $translation['title'] : '',
                     'shortDescription' => isset($translation['shortDescription']) ? $translation['shortDescription'] : '',
                     'longDescription' => isset($translation['longDescription']) ? $translation['longDescription'] : '',
                     'additionalDescription' => isset($translation['additionalDescription']) ? $translation['additionalDescription'] : '',
                     'url' => $this->getUrlForProduct($sourceId, $shop->getId()),
-                )
+                ]
             );
         }
 
@@ -119,7 +101,7 @@ class ProductTranslator implements ProductTranslatorInterface
     {
         // exportLanguages actually is shop ids
         $exportLanguages = $this->config->getConfig('exportLanguages');
-        $exportLanguages = $exportLanguages ?: array();
+        $exportLanguages = $exportLanguages ?: [];
 
         $groupTranslations = $this->productTranslationsGateway->getConfiguratorGroupTranslations($groupId, $exportLanguages);
         foreach ($exportLanguages as $shopId) {
@@ -164,7 +146,7 @@ class ProductTranslator implements ProductTranslatorInterface
     public function translateConfiguratorOption($optionId, $optionName, $translations)
     {
         $exportLanguages = $this->config->getConfig('exportLanguages');
-        $exportLanguages = $exportLanguages ?: array();
+        $exportLanguages = $exportLanguages ?: [];
 
         $optionTranslations = $this->productTranslationsGateway->getConfiguratorOptionTranslations($optionId, $exportLanguages);
         foreach ($exportLanguages as $shopId) {
@@ -224,7 +206,7 @@ class ProductTranslator implements ProductTranslatorInterface
 
     public function getUrlForProduct($productId, $shopId = null)
     {
-        $shopId = (int)$shopId;
+        $shopId = (int) $shopId;
         $url = $this->baseProductUrl . $productId;
         if ($shopId > 0) {
             $url = $url . '/shId/' . $shopId;
@@ -250,4 +232,4 @@ class ProductTranslator implements ProductTranslatorInterface
 
         return $this->localeRepository;
     }
-} 
+}

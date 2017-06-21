@@ -1,9 +1,13 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 use Shopware\Connect\Struct\Product;
-use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Category\Category;
 
 class Sw41Query extends SwQuery
@@ -12,6 +16,7 @@ class Sw41Query extends SwQuery
      * Return local SW categories for a given product
      *
      * @param Product $product
+     *
      * @return \Shopware\Models\Category\Category[]
      */
     public function getCategoriesByProduct(Product $product)
@@ -29,12 +34,13 @@ class Sw41Query extends SwQuery
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         /** @var $categories CategoryModel[] */
-        $categories = array();
-        foreach($product->categories as $category) {
+        $categories = [];
+        foreach ($product->categories as $category) {
             $categories = array_merge(
                 $query->setParameter('mapping', $category)->execute()
             );
         }
+
         return $categories;
     }
 
@@ -42,22 +48,23 @@ class Sw41Query extends SwQuery
      * Return connect category mapping for the given product id
      *
      * @param $id
+     *
      * @return array
      */
     public function getConnectCategoryForProduct($id)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('categories'))
+        $builder->select(['categories'])
             ->from('Shopware\Models\Category\Category', 'categories', 'categories.id')
             ->andWhere(':articleId MEMBER OF categories.articles')
-            ->setParameters(array('articleId' => $id));
+            ->setParameters(['articleId' => $id]);
 
         $result = $builder->getQuery()->getResult();
         if (empty($result)) {
-            return array();
+            return [];
         }
 
-        $categories = array();
+        $categories = [];
         /** @var \Shopware\Models\Category\Category $category */
         foreach ($result as $category) {
             list($key, $name) = $this->extractCategory($category);
@@ -77,7 +84,9 @@ class Sw41Query extends SwQuery
 
     /**
      * Returns category path and category name as array
+     *
      * @param Category $category
+     *
      * @return array
      */
     private function extractCategory(Category $category)
@@ -85,13 +94,14 @@ class Sw41Query extends SwQuery
         $path = $this->getCategoryRepository()->getPathById($category->getId(), 'name', ' > ');
         $key = $this->normalizeCategory($path);
 
-        return array($key, $category->getName());
+        return [$key, $category->getName()];
     }
 
     /**
      * Normalize category name
      *
      * @param string $name
+     *
      * @return string
      */
     private function normalizeCategoryName($name)
@@ -103,14 +113,16 @@ class Sw41Query extends SwQuery
      * Convert a clear text category name into normalized format.
      *
      * @param string $categoryName
+     *
      * @return string
      */
     public function normalizeCategory($categoryName)
     {
         $path = preg_split('(\\s+>\\s+)', trim($categoryName));
+
         return '/' . implode(
             '/',
-            array_map(array($this, 'normalizeCategoryName'), $path)
+            array_map([$this, 'normalizeCategoryName'], $path)
         );
     }
 }

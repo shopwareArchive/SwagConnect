@@ -1,38 +1,40 @@
 <?php
-
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Utils;
 
-use \Shopware\Components\Model\ModelManager;
-use \Shopware\Models\Customer\Customer;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Customer\Customer;
 
 /**
  * The CountryCodeResolver class helps to determine the country code for the current user
  *
  * Class CountryCode
- * @package ShopwarePlugins\Connect\Components
  */
 class CountryCodeResolver
 {
-
-    /** @var \Shopware\Components\Model\ModelManager  */
+    /** @var \Shopware\Components\Model\ModelManager */
     protected $modelManager;
-    /** @var  \Shopware\Models\Country\Repository */
+    /** @var \Shopware\Models\Country\Repository */
     protected $countryRepository;
-    /** @var string  */
+    /** @var string */
     protected $default = 'DEU';
-    /** @var  \Shopware\Models\Customer\Customer */
+    /** @var \Shopware\Models\Customer\Customer */
     protected $customer;
-    /** @var  int */
+    /** @var int */
     protected $countryId;
 
     /**
      * @param ModelManager $modelManager
-     * @param Customer $customer            Customer object, if available
-     * @param null $countryId               CountryID - e.g. from session
-     * @param string $default               Fallback
+     * @param Customer     $customer     Customer object, if available
+     * @param null         $countryId    CountryID - e.g. from session
+     * @param string       $default      Fallback
      */
-    public function __construct(ModelManager $modelManager, Customer $customer=null, $countryId=null,  $default = 'DEU')
+    public function __construct(ModelManager $modelManager, Customer $customer = null, $countryId = null, $default = 'DEU')
     {
         $this->modelManager = $modelManager;
         $this->default = 'DEU';
@@ -48,6 +50,7 @@ class CountryCodeResolver
         if (!$this->countryRepository) {
             $this->countryRepository = $this->modelManager->getRepository('Shopware\Models\Country\Country');
         }
+
         return $this->countryRepository;
     }
 
@@ -58,10 +61,10 @@ class CountryCodeResolver
     {
         if ($this->customer && $this->customer->getShipping()) {
             $countryId = $this->customer->getShipping()->getCountryId();
-        } else if ($this->countryId) {
+        } elseif ($this->countryId) {
             $countryId = $this->countryId;
         } else {
-            return $this->getCountryRepository()->findOneBy(array('iso3' => $this->default));
+            return $this->getCountryRepository()->findOneBy(['iso3' => $this->default]);
         }
 
         return $this->getCountryRepository()->find($countryId);

@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Gateway;
 
@@ -12,6 +17,7 @@ interface ProductTranslationsGateway
      *
      * @param int $articleId
      * @param int $languageId
+     *
      * @return array | null
      */
     public function getSingleTranslation($articleId, $languageId);
@@ -24,6 +30,7 @@ interface ProductTranslationsGateway
      *
      * @param int $groupId
      * @param int $shopId
+     *
      * @return string | null
      */
     public function getConfiguratorGroupTranslation($groupId, $shopId);
@@ -34,8 +41,9 @@ interface ProductTranslationsGateway
      * shopId as key and translation as value.
      * 2 => 'Size'
      *
-     * @param int $groupId
+     * @param int   $groupId
      * @param array $shopIds
+     *
      * @return array
      */
     public function getConfiguratorGroupTranslations($groupId, $shopIds);
@@ -46,6 +54,7 @@ interface ProductTranslationsGateway
      *
      * @param int $optionId
      * @param int $shopId
+     *
      * @return string | null
      */
     public function getConfiguratorOptionTranslation($optionId, $shopId);
@@ -54,8 +63,9 @@ interface ProductTranslationsGateway
      * Returns translations for variant options.
      * Returned array contains key value pairs,
      *
-     * @param int $optionId
+     * @param int   $optionId
      * @param array $shopIds
+     *
      * @return array
      */
     public function getConfiguratorOptionTranslations($optionId, $shopIds);
@@ -66,7 +76,6 @@ interface ProductTranslationsGateway
      * @param $translation
      * @param $groupId
      * @param $shopId
-     * @return void
      */
     public function addGroupTranslation($translation, $groupId, $shopId);
 
@@ -74,9 +83,8 @@ interface ProductTranslationsGateway
      * Inserts translation record for given configurator option
      *
      * @param string $translation
-     * @param int $optionId
-     * @param int $shopId
-     * @return void
+     * @param int    $optionId
+     * @param int    $shopId
      */
     public function addOptionTranslation($translation, $optionId, $shopId);
 
@@ -84,9 +92,8 @@ interface ProductTranslationsGateway
      * Inserts translation record for given article
      *
      * @param Translation $translation
-     * @param int $articleId
-     * @param int $shopId
-     * @return void
+     * @param int         $articleId
+     * @param int         $shopId
      */
     public function addArticleTranslation(Translation $translation, $articleId, $shopId);
 }

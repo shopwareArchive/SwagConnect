@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
@@ -50,7 +33,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translation = $this->db->executeQuery(
             $sql,
-            array('article', $articleId, $languageId)
+            ['article', $articleId, $languageId]
         )->fetchColumn();
 
         if ($translation === false) {
@@ -59,12 +42,12 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translation = unserialize($translation);
 
-        return array(
+        return [
             'title' => $translation['txtArtikel'] ?: '',
-            'shortDescription' => array_key_exists('txtshortdescription', $translation) ? $translation['txtshortdescription']: '',
+            'shortDescription' => array_key_exists('txtshortdescription', $translation) ? $translation['txtshortdescription'] : '',
             'longDescription' => array_key_exists('txtlangbeschreibung', $translation) ? $translation['txtlangbeschreibung'] : '',
             'additionalDescription' => array_key_exists(self::CONNECT_DESCRIPTION, $translation) ? $translation[self::CONNECT_DESCRIPTION] : '',
-        );
+        ];
     }
 
     /**
@@ -73,7 +56,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
     public function getTranslations($articleId, $languageIds)
     {
         if (is_array($languageIds) === false || count($languageIds) === 0) {
-            return array();
+            return [];
         }
 
         $inQuery = str_repeat('?,', count($languageIds) - 1) . '?';
@@ -82,7 +65,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
                 FROM s_core_translations
                 WHERE objecttype = ? AND objectkey = ? AND objectlanguage IN ($inQuery)
         ";
-        $whereClause = array('article', $articleId);
+        $whereClause = ['article', $articleId];
         foreach ($languageIds as $languageId) {
             $whereClause[] = $languageId;
         }
@@ -92,17 +75,17 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
             $whereClause
         )->fetchAll();
 
-        $result = array();
+        $result = [];
         foreach ($translations as $translation) {
             $languageId = $translation['objectlanguage'];
             $data = unserialize($translation['objectdata']);
 
-            $result[$languageId] = array(
+            $result[$languageId] = [
                 'title' => $data['txtArtikel'] ?: '',
-                'shortDescription' => array_key_exists('txtshortdescription', $data) ? $data['txtshortdescription']: '',
+                'shortDescription' => array_key_exists('txtshortdescription', $data) ? $data['txtshortdescription'] : '',
                 'longDescription' => array_key_exists('txtlangbeschreibung', $data) ? $data['txtlangbeschreibung'] : '',
                 'additionalDescription' => array_key_exists(self::CONNECT_DESCRIPTION, $data) ? $data[self::CONNECT_DESCRIPTION] : '',
-            );
+            ];
         }
 
         return $result;
@@ -121,7 +104,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translation = $this->db->executeQuery(
             $sql,
-            array('configuratorgroup', $groupId, $languageId)
+            ['configuratorgroup', $groupId, $languageId]
         )->fetchColumn();
 
         if ($translation === false) {
@@ -140,7 +123,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
     {
         //todo@sb: add test
         if (is_array($languageIds) === false || count($languageIds) === 0) {
-            return array();
+            return [];
         }
 
         $inQuery = implode(',', $languageIds);
@@ -151,10 +134,10 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translations = $this->db->executeQuery(
             $sql,
-            array('configuratorgroup', $groupId)
+            ['configuratorgroup', $groupId]
         )->fetchAll();
 
-        $result = array();
+        $result = [];
         foreach ($translations as $translation) {
             $languageId = $translation['objectlanguage'];
             $data = unserialize($translation['objectdata']);
@@ -178,7 +161,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translation = $this->db->executeQuery(
             $sql,
-            array('configuratoroption', $optionId, $shopId)
+            ['configuratoroption', $optionId, $shopId]
         )->fetchColumn();
 
         if ($translation === false) {
@@ -196,7 +179,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
     public function getConfiguratorOptionTranslations($optionId, $shopIds)
     {
         if (is_array($shopIds) === false || count($shopIds) === 0) {
-            return array();
+            return [];
         }
 
         $inQuery = implode(',', $shopIds);
@@ -207,10 +190,10 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
 
         $translations = $this->db->executeQuery(
             $sql,
-            array('configuratoroption', $optionId)
+            ['configuratoroption', $optionId]
         )->fetchAll();
 
-        $result = array();
+        $result = [];
         foreach ($translations as $translation) {
             $languageId = $translation['objectlanguage'];
             $data = unserialize($translation['objectdata']);
@@ -232,7 +215,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', array('configuratorgroup', serialize(array('name' => $translation)), $groupId, $shopId)
+                ', ['configuratorgroup', serialize(['name' => $translation]), $groupId, $shopId]
         );
     }
 
@@ -246,7 +229,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', array('configuratoroption', serialize(array('name' => $translation)), $optionId, $shopId)
+                ', ['configuratoroption', serialize(['name' => $translation]), $optionId, $shopId]
         );
     }
 
@@ -255,7 +238,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
      */
     public function addArticleTranslation(Translation $translation, $articleId, $shopId)
     {
-        $objectData = array('txtArtikel' => $translation->title);
+        $objectData = ['txtArtikel' => $translation->title];
         if (strlen($translation->longDescription)) {
             $objectData['txtlangbeschreibung'] = $translation->longDescription;
         }
@@ -272,7 +255,7 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', array('article', serialize($objectData), $articleId, $shopId)
+                ', ['article', serialize($objectData), $articleId, $shopId]
         );
     }
-} 
+}

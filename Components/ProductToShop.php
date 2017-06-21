@@ -1,64 +1,44 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
-use Doctrine\Common\Collections\ArrayCollection;
+
 use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway;
-use Shopware\Connect\ProductToShop as ProductToShopBase,
-    Shopware\Connect\Struct\Product,
-    Shopware\Models\Article\Article as ProductModel,
-    Shopware\Models\Article\Detail as DetailModel,
-    Shopware\Models\Attribute\Article as AttributeModel,
-    Shopware\Components\Model\ModelManager,
-    Doctrine\ORM\Query;
-use Shopware\Connect\SDK;
+use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\PriceRange;
+use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\ProductUpdate;
-use Shopware\CustomModels\Connect\ProductStreamAttribute;
-use Shopware\Models\Customer\Group;
 use Shopware\Connect\Struct\Property;
+use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
+use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Article\Detail as DetailModel;
+use Shopware\Models\Article\Image;
+use Shopware\Models\Article\Price;
+use Shopware\Models\Article\Supplier;
+use Shopware\Models\Attribute\Article as AttributeModel;
+use Shopware\Models\Customer\Group;
 use Shopware\Models\ProductStream\ProductStream;
 use Shopware\Models\Property\Group as PropertyGroup;
 use Shopware\Models\Property\Option as PropertyOption;
 use Shopware\Models\Property\Value as PropertyValue;
+use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
-use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
-use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
-use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
-use Shopware\Models\Article\Image;
-use Shopware\Models\Article\Price;
-use Shopware\Models\Article\Supplier;
 
 /**
  * The interface for products imported *from* connect *to* the local shop
  *
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
  */
 class ProductToShop implements ProductToShopBase
 {
@@ -90,7 +70,7 @@ class ProductToShop implements ProductToShopBase
     /**
      * @var MarketplaceGateway
      */
-	private $marketplaceGateway;
+    private $marketplaceGateway;
 
     /**
      * @var ProductTranslationsGateway
@@ -120,16 +100,16 @@ class ProductToShop implements ProductToShopBase
     private $eventManager;
 
     /**
-     * @param Helper $helper
-     * @param ModelManager $manager
-     * @param ImageImport $imageImport
-     * @param \ShopwarePlugins\Connect\Components\Config $config
-     * @param VariantConfigurator $variantConfigurator
+     * @param Helper                                                             $helper
+     * @param ModelManager                                                       $manager
+     * @param ImageImport                                                        $imageImport
+     * @param \ShopwarePlugins\Connect\Components\Config                         $config
+     * @param VariantConfigurator                                                $variantConfigurator
      * @param \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway $marketplaceGateway
-     * @param ProductTranslationsGateway $productTranslationsGateway
-     * @param CategoryResolver $categoryResolver
-     * @param Gateway $connectGateway
-     * @param \Enlight_Event_EventManager $eventManager
+     * @param ProductTranslationsGateway                                         $productTranslationsGateway
+     * @param CategoryResolver                                                   $categoryResolver
+     * @param Gateway                                                            $connectGateway
+     * @param \Enlight_Event_EventManager                                        $eventManager
      */
     public function __construct(
         Helper $helper,
@@ -142,8 +122,7 @@ class ProductToShop implements ProductToShopBase
         CategoryResolver $categoryResolver,
         Gateway $connectGateway,
         \Enlight_Event_EventManager $eventManager
-    )
-    {
+    ) {
         $this->helper = $helper;
         $this->manager = $manager;
         $this->config = $config;
@@ -161,8 +140,6 @@ class ProductToShop implements ProductToShopBase
      *
      * Starts a transaction, which includes all insertOrUpdate and delete
      * operations, as well as the revision updates.
-     *
-     * @return void
      */
     public function startTransaction()
     {
@@ -173,12 +150,10 @@ class ProductToShop implements ProductToShopBase
      * Commit transaction
      *
      * Commits the transactions, once all operations are queued.
-     *
-     * @return void
      */
     public function commit()
     {
-       $this->manager->getConnection()->commit();
+        $this->manager->getConnection()->commit();
     }
 
     /**
@@ -208,7 +183,7 @@ class ProductToShop implements ProductToShopBase
             $detail,
             [
                 'product' => $product,
-                'subject' => $this
+                'subject' => $this,
             ]
         );
 
@@ -257,7 +232,7 @@ class ProductToShop implements ProductToShopBase
             $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
         }
 
-        $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
+        $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute();
         // configure main variant and groupId
         if ($isMainVariant === true) {
             $connectAttribute->setIsMainVariant(true);
@@ -282,7 +257,6 @@ class ProductToShop implements ProductToShopBase
         }
         if ($updateFields['shortDescription']) {
             $model->setDescription($product->shortDescription);
-
         }
         if ($updateFields['longDescription']) {
             $model->setDescriptionLong($product->longDescription);
@@ -295,14 +269,14 @@ class ProductToShop implements ProductToShopBase
         if ($product->vat !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
             $tax = round($product->vat * 100, 2);
-			/** @var \Shopware\Models\Tax\Tax $tax */
-            $tax = $repo->findOneBy(array('tax' => $tax));
+            /** @var \Shopware\Models\Tax\Tax $tax */
+            $tax = $repo->findOneBy(['tax' => $tax]);
             $model->setTax($tax);
         }
 
         if ($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
-            $supplier = $repo->findOneBy(array('name' => $product->vendor));
+            $supplier = $repo->findOneBy(['name' => $product->vendor]);
             if ($supplier === null) {
                 $supplier = $this->createSupplier($product->vendor);
             }
@@ -391,7 +365,7 @@ class ProductToShop implements ProductToShopBase
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
-        $connectAttribute->setLastUpdate(json_encode(array(
+        $connectAttribute->setLastUpdate(json_encode([
             'shortDescription' => $product->shortDescription,
             'longDescription' => $product->longDescription,
             'additionalDescription' => $product->additionalDescription,
@@ -400,8 +374,8 @@ class ProductToShop implements ProductToShopBase
             'variantImages' => $product->variantImages,
             'price' => $product->price * ($product->vat + 1),
             'name' => $product->title,
-            'vat' => $product->vat
-        )));
+            'vat' => $product->vat,
+        ]));
 
         if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
@@ -419,7 +393,7 @@ class ProductToShop implements ProductToShopBase
             'Connect_Merchant_Saving_ArticleAttribute_Before',
             [
                 'subject' => $this,
-                'connectAttribute' => $connectAttribute
+                'connectAttribute' => $connectAttribute,
             ]
         );
 
@@ -470,18 +444,17 @@ class ProductToShop implements ProductToShopBase
             'Connect_ProductToShop_InsertOrUpdate_After',
             [
                 'connectProduct' => $product,
-                'shopArticleDetail' => $detail
+                'shopArticleDetail' => $detail,
             ]
         );
 
         $stream = $this->getOrCreateStream($product);
         $this->addProductToStream($stream, $model);
-
     }
 
     /**
      * @param ProductModel $article
-     * @param Product $product
+     * @param Product      $product
      */
     private function applyProductProperties(ProductModel $article, Product $product)
     {
@@ -556,8 +529,8 @@ class ProductToShop implements ProductToShopBase
             }
 
             $filters = [
-                ['property' => "options.name", 'expression' => '=', 'value' => $property->option],
-                ['property' => "groups.name", 'expression' => '=', 'value' => $property->groupName],
+                ['property' => 'options.name', 'expression' => '=', 'value' => $property->option],
+                ['property' => 'groups.name', 'expression' => '=', 'value' => $property->groupName],
             ];
 
             $query = $groupRepo->getPropertyRelationQuery($filters, null, 1, 0);
@@ -578,6 +551,7 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * @param Product $product
+     *
      * @return ProductStream
      */
     private function getOrCreateStream(Product $product)
@@ -610,7 +584,8 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * @param ProductStream $stream
-     * @param ProductModel $article
+     * @param ProductModel  $article
+     *
      * @throws \Doctrine\DBAL\DBALException
      */
     private function addProductToStream(ProductStream $stream, ProductModel $article)
@@ -628,8 +603,9 @@ class ProductToShop implements ProductToShopBase
      * Entity usage throws exception when error handlers are disabled
      *
      * @param ProductModel $article
-     * @param DetailModel $detail
-     * @param Product $product
+     * @param DetailModel  $detail
+     * @param Product      $product
+     *
      * @throws \Doctrine\DBAL\DBALException
      */
     private function setPrice(ProductModel $article, DetailModel $detail, Product $product)
@@ -640,13 +616,14 @@ class ProductToShop implements ProductToShopBase
 
         if (!empty($product->priceRanges)) {
             $this->setPriceRange($article, $detail, $product->priceRanges, $customerGroup);
+
             return;
         }
 
         $id = $this->manager->getConnection()->fetchColumn(
             'SELECT id FROM `s_articles_prices`
               WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
-            [$customerGroup->getKey(), 1, "beliebig", $article->getId(), $detail->getId()]
+            [$customerGroup->getKey(), 1, 'beliebig', $article->getId(), $detail->getId()]
         );
 
         // todo@sb: test update prices
@@ -666,9 +643,10 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * @param ProductModel $article
-     * @param DetailModel $detail
-     * @param array $priceRanges
-     * @param Group $group
+     * @param DetailModel  $detail
+     * @param array        $priceRanges
+     * @param Group        $group
+     *
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Exception
      */
@@ -686,7 +664,6 @@ class ProductToShop implements ProductToShopBase
 
             /** @var PriceRange $priceRange */
             foreach ($priceRanges as $priceRange) {
-
                 $priceTo = $priceRange->to == PriceRange::ANY ? 'beliebig' : $priceRange->to;
 
                 //todo: maybe batch insert if possible?
@@ -699,7 +676,7 @@ class ProductToShop implements ProductToShopBase
                         $priceTo,
                         $article->getId(),
                         $detail->getId(),
-                        $priceRange->price
+                        $priceRange->price,
                     ]
                 );
             }
@@ -714,17 +691,16 @@ class ProductToShop implements ProductToShopBase
      * Adds translation record for given article
      *
      * @param ProductModel $article
-     * @param Product $sdkProduct
+     * @param Product      $sdkProduct
      */
     private function addArticleTranslations(ProductModel $article, Product $sdkProduct)
     {
         /** @var \Shopware\Connect\Struct\Translation $translation */
         foreach ($sdkProduct->translations as $key => $translation) {
             /** @var \Shopware\Models\Shop\Locale $locale */
-
-            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            $locale = $this->getLocaleRepository()->findOneBy(['locale' => LocaleMapper::getShopwareLocale($key)]);
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            $shop = $this->getShopRepository()->findOneBy(['locale' => $locale]);
             if (!$shop) {
                 continue;
             }
@@ -735,6 +711,7 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * dsadsa
+     *
      * @return \Shopware\Components\Model\ModelRepository
      */
     private function getLocaleRepository()
@@ -766,27 +743,24 @@ class ProductToShop implements ProductToShopBase
      *
      * @param string $shopId
      * @param string $sourceId
-     * @return void
      */
     public function delete($shopId, $sourceId)
     {
-        $detail = $this->helper->getArticleDetailModelByProduct(new Product(array(
+        $detail = $this->helper->getArticleDetailModelByProduct(new Product([
             'shopId' => $shopId,
             'sourceId' => $sourceId,
-        )));
-        if($detail === null) {
+        ]));
+        if ($detail === null) {
             return;
         }
-
 
         $this->eventManager->notify(
             'Connect_Merchant_Delete_Product_Before',
             [
                 'subject' => $this,
-                'articleDetail' => $detail
+                'articleDetail' => $detail,
             ]
         );
-
 
         $article = $detail->getArticle();
         $isOnlyOneVariant = false;
@@ -832,6 +806,7 @@ class ProductToShop implements ProductToShopBase
      * @param $detail
      * @param $attribute
      * @param $product
+     *
      * @return array
      */
     public function getUpdateFields($model, $detail, $attribute, $product)
@@ -841,7 +816,7 @@ class ProductToShop implements ProductToShopBase
         $flagsByName = array_flip($fields);
 
         $flag = 0;
-        $output = array();
+        $output = [];
         foreach ($fields as $key => $field) {
             // Don't handle the imageInitialImport flag
             if ($field == 'imageInitialImport') {
@@ -862,7 +837,7 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
-        return array($output, $flag);
+        return [$output, $flag];
     }
 
     /**
@@ -870,13 +845,13 @@ class ProductToShop implements ProductToShopBase
      *
      * @param $field
      * @param ProductModel $model
-     * @param DetailModel $detail
-     * @param Product $product
+     * @param DetailModel  $detail
+     * @param Product      $product
+     *
      * @return bool
      */
     public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, Product $product)
     {
-
         switch ($field) {
             case 'shortDescription':
                 return $model->getDescription() != $product->shortDescription;
@@ -897,6 +872,7 @@ class ProductToShop implements ProductToShopBase
                 if (!$price) {
                     return true;
                 }
+
                 return $prices->first()->getPrice() != $product->price;
         }
 
@@ -911,19 +887,21 @@ class ProductToShop implements ProductToShopBase
      * @param $field
      * @param $model ProductModel
      * @param $attribute ConnectAttribute
-     * @return bool|null
+     *
      * @throws \RuntimeException
+     *
+     * @return bool|null
      */
     public function isFieldUpdateAllowed($field, ProductModel $model, ConnectAttribute $attribute)
     {
-        $allowed = array(
+        $allowed = [
             'ShortDescription',
             'LongDescription',
             'AdditionalDescription',
             'Image',
             'Price',
             'Name',
-        );
+        ];
 
         // Always allow updates for new models
         if (!$model->getId()) {
@@ -940,8 +918,6 @@ class ProductToShop implements ProductToShopBase
 
         $attributeValue = $attribute->$attributeGetter();
 
-
-
         // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
         // Once we have a supplier based configuration, we need to take it into account here
         if ($attributeValue == null || $attributeValue == 'inherit') {
@@ -955,7 +931,8 @@ class ProductToShop implements ProductToShopBase
      * Read product attributes mapping and set to shopware attribute model
      *
      * @param AttributeModel $detailAttribute
-     * @param Product $product
+     * @param Product        $product
+     *
      * @return AttributeModel
      */
     private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
@@ -963,7 +940,7 @@ class ProductToShop implements ProductToShopBase
         $detailAttribute->setConnectReference($product->sourceId);
         $detailAttribute->setConnectArticleShipping($product->shipping);
         //todo@sb: check if connectAttribute matches position of the marketplace attribute
-        array_walk($product->attributes, function($value, $key) use ($detailAttribute) {
+        array_walk($product->attributes, function ($value, $key) use ($detailAttribute) {
             $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);
             if (strlen($shopwareAttribute) > 0) {
                 $setter = 'set' . ucfirst($shopwareAttribute);
@@ -976,13 +953,14 @@ class ProductToShop implements ProductToShopBase
 
     /**
      * @param $vendor
+     *
      * @return Supplier
      */
     private function createSupplier($vendor)
     {
         $supplier = new Supplier();
 
-        if (is_array($vendor)){
+        if (is_array($vendor)) {
             $supplier->setName($vendor['name']);
             $supplier->setDescription($vendor['description']);
             if (array_key_exists('url', $vendor) && $vendor['url']) {
@@ -1012,14 +990,15 @@ class ProductToShop implements ProductToShopBase
      * Entity usage throws exception when error handlers are disabled
      *
      * @param DetailModel $detail
-     * @param float $purchasePrice
-     * @param Group $defaultGroup
+     * @param float       $purchasePrice
+     * @param Group       $defaultGroup
+     *
      * @throws \Doctrine\DBAL\DBALException
      */
     private function setPurchasePrice(DetailModel $detail, $purchasePrice, Group $defaultGroup)
     {
         if (method_exists($detail, 'setPurchasePrice')) {
-                $this->manager->getConnection()->executeQuery(
+            $this->manager->getConnection()->executeQuery(
                     'UPDATE `s_articles_details` SET `purchaseprice` = ? WHERE `id` = ?',
                     [$purchasePrice, $detail->getId()]
                 );
@@ -1027,7 +1006,7 @@ class ProductToShop implements ProductToShopBase
             $id = $this->manager->getConnection()->fetchColumn(
                 'SELECT id FROM `s_articles_prices`
               WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
-                [$defaultGroup->getKey(), 1, "beliebig", $detail->getArticleId(), $detail->getId()]
+                [$defaultGroup->getKey(), 1, 'beliebig', $detail->getArticleId(), $detail->getId()]
             );
 
             if ($id > 0) {
@@ -1050,7 +1029,7 @@ class ProductToShop implements ProductToShopBase
         // find article detail id
         $articleDetailId = $this->manager->getConnection()->fetchColumn(
             'SELECT article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
-            array($sourceId, $shopId)
+            [$sourceId, $shopId]
         );
 
         $this->eventManager->notify(
@@ -1059,7 +1038,7 @@ class ProductToShop implements ProductToShopBase
                 'subject' => $this,
                 'shopId' => $shopId,
                 'sourceId' => $sourceId,
-                'articleDetailId' => $articleDetailId
+                'articleDetailId' => $articleDetailId,
             ]
         );
 
@@ -1067,13 +1046,13 @@ class ProductToShop implements ProductToShopBase
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_plugin_connect_items SET purchase_price_hash = ?, offer_valid_until = ?, purchase_price = ?
             WHERE source_id = ? AND shop_id = ?',
-            array(
+            [
                 $product->purchasePriceHash,
                 $product->offerValidUntil,
                 $product->purchasePrice,
                 $sourceId,
                 $shopId,
-            )
+            ]
         );
 
         // update stock in article detail
@@ -1084,17 +1063,17 @@ class ProductToShop implements ProductToShopBase
         if (method_exists('Shopware\Models\Article\Detail', 'getPurchasePrice')) {
             $this->manager->getConnection()->executeUpdate(
                 'UPDATE s_articles_details SET instock = ?, purchaseprice = ? WHERE id = ?',
-                array($product->availability, $product->purchasePrice, $articleDetailId)
+                [$product->availability, $product->purchasePrice, $articleDetailId]
             );
         } else {
             $this->manager->getConnection()->executeUpdate(
                 'UPDATE s_articles_details SET instock = ? WHERE id = ?',
-                array($product->availability, $articleDetailId)
+                [$product->availability, $articleDetailId]
             );
         }
         $this->manager->getConnection()->executeUpdate(
             "UPDATE s_articles_prices SET price = ?, baseprice = ? WHERE articledetailsID = ? AND pricegroup = 'EK'",
-            array($product->price, $product->purchasePrice, $articleDetailId)
+            [$product->price, $product->purchasePrice, $articleDetailId]
         );
     }
 
@@ -1103,7 +1082,7 @@ class ProductToShop implements ProductToShopBase
         // find article detail id
         $articleDetailId = $this->manager->getConnection()->fetchColumn(
             'SELECT article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
-            array($sourceId, $shopId)
+            [$sourceId, $shopId]
         );
 
         $this->eventManager->notify(
@@ -1112,19 +1091,19 @@ class ProductToShop implements ProductToShopBase
                 'subject' => $this,
                 'shopId' => $shopId,
                 'sourceId' => $sourceId,
-                'articleDetailId' => $articleDetailId
+                'articleDetailId' => $articleDetailId,
             ]
         );
 
         // update stock in article detail
         $this->manager->getConnection()->executeUpdate(
             'UPDATE s_articles_details SET instock = ? WHERE id = ?',
-            array($availability, $articleDetailId)
+            [$availability, $articleDetailId]
         );
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function makeMainVariant($shopId, $sourceId, $groupId)
     {
@@ -1144,7 +1123,7 @@ class ProductToShop implements ProductToShopBase
                 'shopId' => $shopId,
                 'sourceId' => $sourceId,
                 'articleId' => $article->getId(),
-                'articleDetailId' => $newMainDetail->getId()
+                'articleDetailId' => $newMainDetail->getId(),
             ]
         );
 

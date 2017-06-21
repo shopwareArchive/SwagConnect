@@ -1,14 +1,19 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
+use Shopware\Connect\Gateway\PDO;
 use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use Shopware\Connect\Gateway\PDO;
 
 class ImportServiceTest extends ConnectTestHelper
 {
@@ -35,8 +40,8 @@ class ImportServiceTest extends ConnectTestHelper
         parent::setUpBeforeClass();
 
         $conn = Shopware()->Db();
-        $conn->delete('sw_connect_shop_config', array('s_shop = ?' => '_price_type'));
-        $conn->insert('sw_connect_shop_config', array('s_shop' => '_price_type', 's_config' => 3));
+        $conn->delete('sw_connect_shop_config', ['s_shop = ?' => '_price_type']);
+        $conn->insert('sw_connect_shop_config', ['s_shop' => '_price_type', 's_config' => 3]);
     }
 
     public function setUp()
@@ -75,23 +80,23 @@ class ImportServiceTest extends ConnectTestHelper
 
     public function testUnAssignArticleCategories()
     {
-        Shopware()->Db()->exec("DELETE FROM `s_plugin_connect_categories`");
+        Shopware()->Db()->exec('DELETE FROM `s_plugin_connect_categories`');
 
         $sourceIds = $this->insertOrUpdateProducts(3, false, false);
 
         // find articles by sourceId
-        $connectAttributes = $this->connectAttributeRepository->findBy(array('sourceId' => $sourceIds));
+        $connectAttributes = $this->connectAttributeRepository->findBy(['sourceId' => $sourceIds]);
 
         // map buecher category to some local category
         $localCategory = $this->categoryRepository->find(6);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => '/bücher'));
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
         $remoteCategory->setLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
 
         // assign local category to products
-        $articleIds = array();
+        $articleIds = [];
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         foreach ($connectAttributes as $connectAttribute) {
             $article = $connectAttribute->getArticle();
@@ -113,17 +118,17 @@ class ImportServiceTest extends ConnectTestHelper
         $db = Shopware()->Db();
         $this->assertEquals(
             0,
-            $db->query('SELECT COUNT(*) FROM s_articles_categories WHERE articleID IN (' . implode(", ", $articleIds) . ')')->fetchColumn()
+            $db->query('SELECT COUNT(*) FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')')->fetchColumn()
         );
 
         $this->assertEquals(
             0,
-            $db->query('SELECT COUNT(*) FROM s_articles_categories_ro WHERE articleID IN (' . implode(", ", $articleIds) . ')')->fetchColumn()
+            $db->query('SELECT COUNT(*) FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')')->fetchColumn()
         );
 
         $this->manager->clear();
         /** @var \Shopware\Models\Article\Article $article */
-        foreach ($this->articleRepository->findBy(array('id' => $articleIds)) as $article) {
+        foreach ($this->articleRepository->findBy(['id' => $articleIds]) as $article) {
             // check connect_mapped_category flag, must be null
             $this->assertNull($article->getAttribute()->getConnectMappedCategory());
 
@@ -138,24 +143,24 @@ class ImportServiceTest extends ConnectTestHelper
         $sourceIds = $this->insertOrUpdateProducts(3, false, false);
 
         // find articles by sourceId
-        $connectAttributes = $this->connectAttributeRepository->findBy(array('sourceId' => $sourceIds));
+        $connectAttributes = $this->connectAttributeRepository->findBy(['sourceId' => $sourceIds]);
 
         // map them to local category
         // map buecher category to local category
         $parentCategory = $this->categoryRepository->find(3);
         $localCategory = new Category();
-        $localCategory->setName('MassImport #'. rand(1, 999999999));
+        $localCategory->setName('MassImport #' . rand(1, 999999999));
         $localCategory->setParent($parentCategory);
         $this->manager->persist($localCategory);
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => '/bücher'));
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
         $remoteCategory->setLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
 
         // assign local category to products
-        $articleIds = array();
+        $articleIds = [];
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         foreach ($connectAttributes as $connectAttribute) {
             $article = $connectAttribute->getArticle();

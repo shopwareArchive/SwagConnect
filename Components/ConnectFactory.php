@@ -1,11 +1,17 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Shopware\Components\DependencyInjection\Container;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
 use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
-use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
@@ -18,13 +24,11 @@ use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use Shopware\Components\DependencyInjection\Container;
 
 /**
  * Creates services like SDK, Helper and BasketHelper and injects the needed dependencies
  *
  * Class ConnectFactory
- * @package ShopwarePlugins\Connect\Components
  */
 class ConnectFactory
 {
@@ -85,7 +89,7 @@ class ConnectFactory
      */
     private $connectGateway;
 
-    public function __construct($version='')
+    public function __construct($version = '')
     {
         $this->pluginVersion = $version;
     }
@@ -95,7 +99,7 @@ class ConnectFactory
      */
     public function getSDK()
     {
-        if(!$this->sdk) {
+        if (!$this->sdk) {
             $this->sdk = $this->getContainer()->get('ConnectSDK');
         }
 
@@ -171,11 +175,11 @@ class ConnectFactory
          */
         $debugHost = $this->getConfigComponent()->getConfig('connectDebugHost');
         if (!empty($debugHost)) {
-            $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
+            $debugHost = str_replace(['http://', 'https://'], '', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
             putenv("_SOCIALNETWORK_HOST={$debugHost}");
 
-            if (preg_match("/(stage[1-9]?.connect.*)|(connect.local$)/", $debugHost, $matches)) {
+            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)/', $debugHost, $matches)) {
                 // Use local or staging url
                 putenv("_TRANSACTION_HOST=transaction.{$matches[0]}");
             }
@@ -196,6 +200,7 @@ class ConnectFactory
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             );
+
         return new SDK(
             $apiKey,
             $this->getSdkRoute($front),
@@ -242,19 +247,20 @@ class ConnectFactory
      * Returns a route to the connect gateway controller
      *
      * @param $front \Enlight_Controller_Front
+     *
      * @return string
      */
     private function getSdkRoute($front)
     {
-        if ( ! $front->Router()) {
+        if (!$front->Router()) {
             return '';
         }
 
-        $url = $front->Router()->assemble(array(
+        $url = $front->Router()->assemble([
             'module' => 'backend',
             'controller' => 'connect_gateway',
-            'fullPath' => true
-        ));
+            'fullPath' => true,
+        ]);
 
         if ($this->getConfigComponent()->hasSsl()) {
             $url = str_replace('http://', 'https://', $url);
@@ -268,7 +274,7 @@ class ConnectFactory
      */
     public function getHelper()
     {
-        if($this->helper === null) {
+        if ($this->helper === null) {
             $this->helper = new Helper(
                 $this->getModelManager(),
                 $this->getCategoryQuery(),
@@ -299,7 +305,8 @@ class ConnectFactory
     public function getBasketHelper()
     {
         $db = Shopware()->Db();
-        return new BasketHelper (
+
+        return new BasketHelper(
             $db,
             $this->getSDK(),
             $this->getHelper(),
@@ -355,11 +362,12 @@ class ConnectFactory
      * Checks if the current shopware version matches a given requirement
      *
      * @param $requiredVersion
+     *
      * @return bool
      */
     public function checkMinimumVersion($requiredVersion)
     {
-         $version = Shopware()->Config()->version;
+        $version = Shopware()->Config()->version;
 
         if ($version === '___VERSION___') {
             return true;
@@ -412,13 +420,13 @@ class ConnectFactory
             return $exportDomain;
         }
 
-        return Shopware()->Front()->Router()->assemble(array(
+        return Shopware()->Front()->Router()->assemble([
             'module' => 'frontend',
             'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
-            'fullPath' => true
-        ));
+            'fullPath' => true,
+        ]);
     }
 
     /**

@@ -1,26 +1,10 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
+
 namespace ShopwarePlugins\Connect\Components\Marketplace;
 
 use Shopware\Components\Model\ModelManager;
@@ -28,7 +12,6 @@ use Shopware\CustomModels\Connect\MarketplaceAttribute;
 
 /**
  * @category  Shopware
- * @package   Shopware\Plugins\SwagConnect
  */
 class MarketplaceGateway
 {
@@ -57,22 +40,22 @@ class MarketplaceGateway
      */
     public function setMarketplaceMapping(array $attributes)
     {
-        array_walk($attributes, function($attribute) {
+        array_walk($attributes, function ($attribute) {
             $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
-                array(
+                [
                     'marketplaceAttribute' => $attribute['attributeKey'],
-                )
+                ]
             );
 
-            if (! $mappingModel) {
+            if (!$mappingModel) {
                 $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
-                    array(
+                    [
                         'localAttribute' => $attribute['shopwareAttributeKey'],
-                    )
+                    ]
                 );
             }
 
-            if (! $mappingModel) {
+            if (!$mappingModel) {
                 $mappingModel = new MarketplaceAttribute();
             }
 
@@ -95,11 +78,11 @@ class MarketplaceGateway
      */
     public function getMappings()
     {
-        return array_map(function($mapping) {
-            return array(
+        return array_map(function ($mapping) {
+            return [
                 'shopwareAttributeKey' => $mapping->getLocalAttribute(),
                 'attributeKey' => $mapping->getMarketplaceAttribute(),
-            );
+            ];
         }, $this->getMarketplaceAttributeRepository()->findAll());
     }
 
@@ -107,17 +90,16 @@ class MarketplaceGateway
      * Return marketplace product attribute name
      *
      * @param $shopwareAttributeName
-     * @return null
      */
     public function findMarketplaceMappingFor($shopwareAttributeName)
     {
         $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
-            array(
+            [
                 'localAttribute' => $shopwareAttributeName,
-            )
+            ]
         );
 
-        if (! $mappingModel) {
+        if (!$mappingModel) {
             return null;
         }
 
@@ -128,17 +110,16 @@ class MarketplaceGateway
      * Returns shopware product attribute name
      *
      * @param $marketplaceAttribute
-     * @return null
      */
     public function findShopwareMappingFor($marketplaceAttribute)
     {
         $mappingModel = $this->getMarketplaceAttributeRepository()->findOneBy(
-            array(
+            [
                 'marketplaceAttribute' => $marketplaceAttribute,
-            )
+            ]
         );
 
-        if (! $mappingModel) {
+        if (!$mappingModel) {
             return null;
         }
 
@@ -156,4 +137,4 @@ class MarketplaceGateway
 
         return $this->marketplaceAttributeRepository;
     }
-} 
+}

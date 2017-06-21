@@ -390,6 +390,14 @@ class LocalProductQueryTest extends ConnectTestHelper
         );
     }
 
+    public function testGetLocalProductQueryShouldFetchProductsWithoutArticleDetails()
+    {
+        $this->db->exec(file_get_contents(__DIR__ . '/_fixtures.sql'));
+        $this->localProductQuery = $this->getLocalProductQuery();
+        $builder = $this->localProductQuery->getProductQuery();
+        $result = $builder->getQuery()->getArrayResult();
+        $this->assertCount(1, $result);
+    }
 
     public function tearDown()
     {
@@ -400,6 +408,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         $articleId = $this->article->getId();
         $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
-        $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
+        $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
+        $this->db->exec("DELETE FROM s_plugin_connect_items WHERE article_id = 5");
     }
 }

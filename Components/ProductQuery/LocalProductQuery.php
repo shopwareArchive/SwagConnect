@@ -130,9 +130,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
-        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)){
-            $builder->leftJoin('d.attribute', 'attribute');
-        }
+        $builder->join('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->where('at.shopId IS NULL');
         $selectColumns = array(

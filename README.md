@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/shopware/SwagConnect.svg?branch=master)](https://travis-ci.org/shopware/SwagConnect)
 [![Coverage Status](https://coveralls.io/repos/github/shopware/SwagConnect/badge.svg?branch=master)](https://coveralls.io/github/shopware/SwagConnect?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/shopware/SwagConnect/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/shopware/SwagConnect/?branch=master)
 
 # Development
 

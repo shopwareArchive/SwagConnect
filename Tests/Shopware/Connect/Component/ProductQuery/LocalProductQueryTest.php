@@ -89,9 +89,11 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->mediaService->expects($this->any())
             ->method('getUrl')
-            ->with('/media/image/tea_pavilion.jpg')
-            ->willReturn('http://myshop/media/image/2e/4f/tea_pavilion.jpg');
-
+            ->with($this->logicalOr(
+                $this->equalTo('/media/image/tea_pavilion.jpg'),
+                $this->equalTo('/media/image/tea.png')
+            ))
+            ->will($this->returnCallback(array($this, 'getUrlCallback')));
         $this->productTranslator->expects($this->any())
             ->method('translate')
             ->willReturn($this->translations);
@@ -136,6 +138,20 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $group
             );
         }
+    }
+
+    /**
+     * @param string $imagePath
+     * @return string
+     */
+    public function getUrlCallback($imagePath) {
+        if ($imagePath == '/media/image/tea_pavilion.jpg') {
+            return 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
+        } elseif ($imagePath == '/media/image/tea.png') {
+            return 'http://myshop/media/image/2e/4f/tea.png';
+        }
+
+        throw new \InvalidArgumentException();
     }
 
     public function getLocalProductQuery()
@@ -423,17 +439,32 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'pseudoprice' => 0
             )
         );
+
+        $this->db->insert(
+            's_plugin_connect_items',
+            [
+                'article_id' => $this->article->getId(),
+                'article_detail_id' => $this->article->getMainDetail()->getId(),
+                'source_id' => $this->getHelper()->generateSourceId($this->article->getMainDetail()),
+            ]
+        );
     }
 
-    public function testGetLocalProductQueryShouldFetchProductsWithoutArticleDetails()
+    public function testGetLocalProductQueryShouldFetchProductsWithoutArticleDetailAttribute()
     {
-        $this->db->exec(file_get_contents(__DIR__ . '/_fixtures.sql'));
-        $this->localProductQuery = $this->getLocalProductQuery();
+        $this->localMediaService->expects($this->any())
+            ->method('getProductMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(['SW10005' => []]);
 
-        $builder = $this->localProductQuery->getProductQuery();
-        $result = $builder->getQuery()->getArrayResult();
+        $this->localMediaService->expects($this->any())
+            ->method('getVariantMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(['SW10005' => []]);
 
-        $this->assertCount(1, $result);
+        $this->db->delete('s_articles_attributes', 'articleID = ' . $this->article->getId());
+
+        $this->assertCount(1, $this->getLocalProductQuery()->get([$this->article->getId()]));
     }
 
 
@@ -447,6 +478,5 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->db->exec("DELETE FROM s_articles WHERE id = $articleId");
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "9898%"');
         $this->db->exec("DELETE FROM s_articles_prices WHERE articleID = $articleId");
-        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE article_id = 5');
     }
 }

@@ -52,17 +52,33 @@ abstract class BaseProductQuery
      */
     public function get(array $sourceIds, $shopId = null)
     {
-        $implodedIds = "'" . implode("','", $sourceIds) . "'";
+        \ShopwarePlugins\Connect\Components\p_open('executeQuery');
         $builder = $this->getProductQuery();
-        $builder->andWhere("at.sourceId IN ($implodedIds)");
+//        if (count($sourceIds) > 1) {
+            $implodedIds = "'" . implode("','", $sourceIds) . "'";
+            $builder->andWhere("at.sourceId IN ($implodedIds)");
+//        } else {
+//            $builder->andWhere("at.sourceId = :sourceId")
+//                    ->setParameter('sourceId', reset($sourceIds));
+//        }
+
         if ($shopId > 0) {
             $builder->andWhere("at.shopId = :shopId")
                     ->setParameter('shopId', $shopId);
         }
 
         $query = $builder->getQuery();
+        file_put_contents('/tmp/connect_cron', print_r($query->getSQL(), 1), FILE_APPEND);
+        \ShopwarePlugins\Connect\Components\p_close('executeQuery');
+        \ShopwarePlugins\Connect\Components\p_open('getResult');
+        $result = $query->getArrayResult();
+        \ShopwarePlugins\Connect\Components\p_close('getResult');
 
-        return $this->getConnectProducts($query->getArrayResult());
+        \ShopwarePlugins\Connect\Components\p_open('getConnectProducts');
+        $products = $this->getConnectProducts($result);
+        \ShopwarePlugins\Connect\Components\p_close('getConnectProducts');
+
+        return $products;
     }
 
 	/**

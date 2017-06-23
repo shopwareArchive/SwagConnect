@@ -124,6 +124,8 @@ class ConnectExport
      */
     public function export(array $ids, ProductStreamsAssignments $streamsAssignments = null)
     {
+        set_time_limit(120);
+        p_open('filter');
         $ids = $this->eventManager->filter(
             'Connect_Supplier_Get_Products_Filter_Source_IDS',
             $ids,
@@ -131,9 +133,11 @@ class ConnectExport
                 'subject' => $this
             ]
         );
-
+        p_close('filter');
+        p_open('fetchConnectItems');
         $connectItems = $this->fetchConnectItems($ids);
 
+        p_close('fetchConnectItems');
         $this->eventManager->notify(
             'Connect_Supplier_Get_All_Products_Before',
             [
@@ -143,19 +147,21 @@ class ConnectExport
         );
 
         $this->manager->beginTransaction();
-
         foreach ($connectItems as &$item) {
+            p_open('getArticleDetailById');
             $model = $this->getArticleDetailById($item['articleDetailId']);
+            p_close('getArticleDetailById');
             if($model === null) {
                 continue;
             }
-
+            p_open('getOrCreateConnectAttributeByModel');
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
-
+            p_close('getOrCreateConnectAttributeByModel');
             $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
             if ($excludeInactiveProducts && !$model->getActive()) {
+                p_open('excludeInactive');
                 $this->updateLocalConnectItem(
-                    $connectAttribute->getSourceId(),
+                    $item['articleDetailId'],
                     array(
                         'export_status' => Attribute::STATUS_INACTIVE,
                         'exported' => false,
@@ -167,6 +173,7 @@ class ConnectExport
                     )
                 );
                 $this->manager->refresh($connectAttribute);
+                p_close('excludeInactive');
                 continue;
             }
 
@@ -175,15 +182,16 @@ class ConnectExport
             } else {
                 $status = Attribute::STATUS_UPDATE;
             }
-
+            p_open('getConnectCategoryForProduct');
             $categories = $this->helper->getConnectCategoryForProduct($item['articleId']);
             if (is_string($categories)) {
                 $categories = array($categories);
             }
             $categories = json_encode($categories);
-
+            p_close('getConnectCategoryForProduct');
+            p_open('updateLocalConnectItem');
             $this->updateLocalConnectItem(
-                $connectAttribute->getSourceId(),
+                $item['articleDetailId'],
                 array(
                     'export_status' => $status,
                     'export_message' => null,
@@ -191,15 +199,22 @@ class ConnectExport
                     'category' => $categories,
                 )
             );
-
+            p_close('updateLocalConnectItem');
             try {
+                p_open('validate');
                 $this->productAttributesValidator->validate($this->extractProductAttributes($model));
+                p_close('validate');
                 if ($status == Attribute::STATUS_INSERT) {
+                    p_open('recordInsert');
                     $this->sdk->recordInsert($item['sourceId']);
+                    p_close('recordInsert');
                 } else {
+                    p_open('recordUpdate');
                     $this->sdk->recordUpdate($item['sourceId']);
+                    p_close('recordUpdate');
                 }
 
+                p_open('getStreams');
                 if ($this->helper->isMainVariant($item['sourceId']) &&
                     $streamsAssignments !== null &&
                     $streamsAssignments->getStreamsByArticleId($item['articleId']) !== null
@@ -210,10 +225,12 @@ class ConnectExport
                         $item['groupId']
                     );
                 }
+                p_close('getStreams');
             } catch (\Exception $e) {
+                p_open('handleException');
                 if ($this->errorHandler->isPriceError($e)) {
                     $this->updateLocalConnectItem(
-                        $connectAttribute->getSourceId(),
+                        $item['articleDetailId'],
                         array(
                             'export_status' => Attribute::STATUS_ERROR_PRICE,
                             'export_message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
@@ -225,36 +242,41 @@ class ConnectExport
                     );
                 } else {
                     $this->updateLocalConnectItem(
-                        $connectAttribute->getSourceId(),
+                        $item['articleDetailId'],
                         array(
                             'export_status' => Attribute::STATUS_ERROR,
                             'export_message' => $e->getMessage() . "\n" . $e->getTraceAsString(),
                         )
                     );
                 }
-
                 $this->errorHandler->handle($e);
+                p_close('handleException');
             }
             $this->manager->refresh($connectAttribute);
         }
 
         try {
+            p_open('commit');
             $this->manager->commit();
+            p_close('commit');
         } catch (\Exception $e) {
+            p_open('rollback');
             $this->manager->rollback();
             $this->errorHandler->handle($e);
+            p_close('rollback');
         }
 
+        file_put_contents('/tmp/connect_cron', print_r(p_dump(), 1), FILE_APPEND);
         return $this->errorHandler->getMessages();
     }
 
     /**
      * Update connect attribute data
      *
-     * @param string $sourceId
+     * @param int $detailId
      * @param array $params
      */
-    private function updateLocalConnectItem($sourceId, $params = array())
+    private function updateLocalConnectItem($detailId, $params = array())
     {
         if (empty($params)) {
             return;
@@ -285,8 +307,8 @@ class ConnectExport
                     ->setParameter($name, $param);
         });
 
-        $builder->where('source_id = :sourceId')
-                ->setParameter('sourceId', $sourceId)
+        $builder->where('article_detail_id = :articleDetailId')
+                ->setParameter('articleDetailId', $detailId)
                 ->andWhere('shop_id IS NULL')
                 ->execute();
     }
@@ -309,9 +331,9 @@ class ConnectExport
 
         $implodedIds = '"' . implode('","', $sourceIds) . '"';
         $query = "SELECT bi.article_id as articleId,
-                    bi.article_detail_id as articleDetailId,
+            bi.export_message as exportMessage,
+            bi.article_detail_id as articleDetailId,
                     bi.export_status as exportStatus,
-                    bi.export_message as exportMessage,
                     bi.source_id as sourceId,
                     a.name as title,
                     IF (a.configurator_set_id IS NOT NULL, a.id, NULL) as groupId,
@@ -319,18 +341,19 @@ class ConnectExport
             FROM s_plugin_connect_items bi
             LEFT JOIN s_articles a ON bi.article_id = a.id
             LEFT JOIN s_articles_details d ON bi.article_detail_id = d.id
-            WHERE bi.source_id IN ($implodedIds)";
+            WHERE bi.source_id IN ($implodedIds) ORDER BY d.kind";
 
         if ($orderByMainVariants === false) {
             $query .= ';';
             return Shopware()->Db()->fetchAll($query);
         }
 
-        $query .= 'AND d.kind = ?;';
-        $mainVariants = Shopware()->Db()->fetchAll($query, array(1));
-        $regularVariants = Shopware()->Db()->fetchAll($query, array(2));
+        return Shopware()->Db()->fetchAll($query);
+//        $query .= 'AND d.kind = ?;';
+//        $mainVariants = Shopware()->Db()->fetchAll($query, array(1));
+//        $regularVariants = Shopware()->Db()->fetchAll($query, array(2));
 
-        return array_merge($mainVariants, $regularVariants);
+//        return array_merge($mainVariants, $regularVariants);
     }
 
     /**
@@ -634,4 +657,37 @@ class ConnectExport
 
         return $marketplaceAttributes;
     }
+}
+
+function p_open($flag) {
+    global $p_times;
+    if (null === $p_times)
+        $p_times = [];
+    if (! array_key_exists($flag, $p_times))
+        $p_times[$flag] = [ 'total' => 0, 'open' => 0 ];
+    $p_times[$flag]['open'] = microtime(true);
+}
+
+function p_close($flag)
+{
+    global $p_times;
+    if (isset($p_times[$flag]['open'])) {
+        $p_times[$flag]['total'] += (microtime(true) - $p_times[$flag]['open']);
+        unset($p_times[$flag]['open']);
+    }
+}
+
+function p_dump()
+{
+    global $p_times;
+    $dump = [];
+    $sum  = 0;
+    foreach ($p_times as $flag => $info) {
+        $dump[$flag]['elapsed'] = $info['total'];
+        $sum += $info['total'];
+    }
+    foreach ($dump as $flag => $info) {
+        $dump[$flag]['percent'] = $dump[$flag]['elapsed']/$sum;
+    }
+    return $dump;
 }

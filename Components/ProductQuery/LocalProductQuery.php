@@ -130,7 +130,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('at.articleDetail', 'd');
         $builder->leftJoin('a.supplier', 's');
         $builder->join('a.tax', 't');
-        $builder->join('d.attribute', 'attribute');
+        $builder->leftJoin('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->where('at.shopId IS NULL');
         $selectColumns = array(
@@ -442,6 +442,32 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         return $priceRanges;
+    }
+
+    /**
+     * @param int $detailId
+     * @return array
+     */
+    private function getPriceRanges($detailId)
+    {
+        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
+        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport');
+
+        $columns = ['p.from', 'p.to', 'p.customerGroupKey'];
+
+        if ($exportPriceColumn) {
+            $columns[] = "p.{$exportPriceColumn} as price";
+        }
+
+        $builder = $this->manager->createQueryBuilder();
+        $builder->select($columns)
+            ->from('Shopware\Models\Article\Price', 'p')
+            ->where('p.articleDetailsId = :detailId')
+            ->andWhere('p.customerGroupKey = :groupKey')
+            ->setParameter('detailId', $detailId)
+            ->setParameter('groupKey', $exportPriceCustomerGroup);
+
+        return $builder->getQuery()->getArrayResult();
     }
 
     /**

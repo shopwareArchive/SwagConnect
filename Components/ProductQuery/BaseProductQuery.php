@@ -35,13 +35,13 @@ abstract class BaseProductQuery
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    abstract function getProductQuery();
+    abstract public function getProductQuery();
 
     /**
      * @param $rows
      * @return array
      */
-    abstract function getConnectProducts($rows);
+    abstract public function getConnectProducts($rows);
 
     /**
      * Returns array of Product structs by given sourceIds
@@ -65,34 +65,8 @@ abstract class BaseProductQuery
         return $this->getConnectProducts($query->getArrayResult());
     }
 
-	/**
-     * @param $detailId
-     * @return array
-     */
-    protected function getPriceRanges($detailId)
-    {
-        $exportPriceCustomerGroup = $this->configComponent->getConfig('priceGroupForPriceExport', 'EK');
-        $exportPriceColumn = $this->configComponent->getConfig('priceFieldForPriceExport');
-
-        $columns = ['p.from', 'p.to', 'p.customerGroupKey'];
-
-        if ($exportPriceColumn) {
-            $columns[] = "p.{$exportPriceColumn} as price";
-        }
-
-        $builder = $this->manager->createQueryBuilder();
-        $builder->select($columns)
-            ->from('Shopware\Models\Article\Price', 'p')
-            ->where('p.articleDetailsId = :detailId')
-            ->andWhere('p.customerGroupKey = :groupKey')
-            ->setParameter('detailId', $detailId)
-            ->setParameter('groupKey', $exportPriceCustomerGroup);
-
-        return $builder->getQuery()->getArrayResult();
-    }
-
     /**
-     * @param $articleId
+     * @param int $articleId
      * @return array
      */
     protected function getProperties($articleId)

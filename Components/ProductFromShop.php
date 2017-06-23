@@ -109,9 +109,7 @@ class ProductFromShop implements ProductFromShopBase
      */
     public function getProducts(array $sourceIds)
     {
-        $products = $this->helper->getLocalProduct($sourceIds);
-
-        return $products;
+        return $this->helper->getLocalProduct($sourceIds);
     }
 
     /**

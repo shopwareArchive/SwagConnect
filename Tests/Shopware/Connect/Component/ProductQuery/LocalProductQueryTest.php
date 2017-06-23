@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Component\ProductQuery;
 
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
@@ -11,9 +12,13 @@ use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 use Shopware\Models\Property;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class LocalProductQueryTest extends ConnectTestHelper
 {
+    /**
+     * @var LocalProductQuery
+     */
     protected $localProductQuery;
 
     protected $productTranslator;
@@ -29,9 +34,20 @@ class LocalProductQueryTest extends ConnectTestHelper
     /** @var \Shopware\Models\Article\Article $article */
     private $article;
 
+    /**
+     * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
     private $db;
 
+    /**
+     * @var ModelManager
+     */
     private $manager;
+
+    /**
+     * @var Config
+     */
+    private $config;
 
     protected $productContext;
 
@@ -41,26 +57,27 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->db = Shopware()->Db();
         $this->manager = Shopware()->Models();
+        $this->config = new Config($this->manager);
         $this->createArticle();
 
-        $this->translations = array(
+        $this->translations = [
             'en' => new Translation(
-                array(
+                [
                     'title' => 'Glas -Teetasse 0,25l EN',
                     'shortDescription' => 'shopware Connect local product short description EN',
                     'longDescription' => 'shopware Connect local product long description EN',
                     'url' => $this->getProductBaseUrl() . '22/shId/2'
-                )
+                ]
             ),
             'nl' => new Translation(
-                array(
+                [
                     'title' => 'Glas -Teetasse 0,25l NL',
                     'shortDescription' => 'shopware Connect local product short description NL',
                     'longDescription' => 'shopware Connect local product long description NL',
                     'url' => $this->getProductBaseUrl() . '22/shId/176'
-                )
+                ]
             ),
-        );
+        ];
 
         $this->productTranslator = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\Translations\\ProductTranslator')
             ->disableOriginalConstructor()
@@ -72,9 +89,11 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->mediaService->expects($this->any())
             ->method('getUrl')
-            ->with('/media/image/tea_pavilion.jpg')
-            ->willReturn('http://myshop/media/image/2e/4f/tea_pavilion.jpg');
-
+            ->with($this->logicalOr(
+                $this->equalTo('/media/image/tea_pavilion.jpg'),
+                $this->equalTo('/media/image/tea.png')
+            ))
+            ->will($this->returnCallback([$this, 'getUrlCallback']));
         $this->productTranslator->expects($this->any())
             ->method('translate')
             ->willReturn($this->translations);
@@ -101,6 +120,38 @@ class LocalProductQueryTest extends ConnectTestHelper
         $this->contextService->expects($this->any())
             ->method('createShopContext')
             ->willReturn($this->productContext);
+
+        $configs = [
+            'priceGroupForPriceExport' => ['EK', null, 'export'],
+            'priceGroupForPurchasePriceExport' => ['EK', null, 'export'],
+            'priceFieldForPriceExport' => ['price', null, 'export'],
+            'priceFieldForPurchasePriceExport' => ['detailPurchasePrice', null, 'export'],
+        ];
+
+        foreach ($configs as $name => $values) {
+            list($value, $shopId, $group) = $values;
+
+            $this->config->setConfig(
+                $name,
+                $value,
+                $shopId,
+                $group
+            );
+        }
+    }
+
+    /**
+     * @param string $imagePath
+     * @return string
+     */
+    public function getUrlCallback($imagePath) {
+        if ($imagePath == '/media/image/tea_pavilion.jpg') {
+            return 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
+        } elseif ($imagePath == '/media/image/tea.png') {
+            return 'http://myshop/media/image/2e/4f/tea.png';
+        }
+
+        throw new \InvalidArgumentException();
     }
 
     public function getLocalProductQuery()
@@ -130,13 +181,13 @@ class LocalProductQueryTest extends ConnectTestHelper
             return null;
         }
 
-        return Shopware()->Front()->Router()->assemble(array(
+        return Shopware()->Front()->Router()->assemble([
             'module' => 'frontend',
             'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
-        ));
+        ]);
     }
 
     public function testGetUrlForProduct()
@@ -153,19 +204,19 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function testGetConnectProduct()
     {
-        $row = array (
+        $row = [
             'sku' => 'SW10005',
             'sourceId' => '22',
             'ean' => NULL,
             'title' => 'Glas -Teetasse 0,25l',
             'shortDescription' => 'Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius.',
-            'vendor' =>  array(
+            'vendor' =>  [
                 'name' => 'Teapavilion',
                 'description' => 'Teapavilion description',
                 'logo_url' => 'tea_pavilion.jpg',
                 'url' => 'http://teapavilion.com',
                 'page_title' => 'Teapavilion title',
-            ),
+            ],
             'vat' => '0.190000',
             'availability' => 3445,
             'price' => 10.924369747899,
@@ -180,7 +231,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'quantity' => null,
                 'ref_quantity' => null,
             ],
-        );
+        ];
 
         $productMedia = [];
         for ($i = 1; $i < 12; $i++) {
@@ -209,10 +260,10 @@ class LocalProductQueryTest extends ConnectTestHelper
         $expectedProduct = new Product($row);
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         $expectedProduct->url = $this->getProductBaseUrl() . '22';
-        $expectedProduct->attributes = array(
+        $expectedProduct->attributes = [
             'quantity' => NULL,
             'ref_quantity' => NULL,
-        );
+        ];
         $expectedProduct->translations = $this->translations;
         $expectedProduct->priceRanges = [
             new PriceRange([
@@ -231,7 +282,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $expectedProduct->properties = [
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -241,7 +292,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'valuePosition' => 0,
             ]),
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -251,7 +302,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'valuePosition' => 0,
             ]),
             new \Shopware\Connect\Struct\Property([
-                'groupName' => 'Nike',
+                'groupName' => 'Adidas',
                 'groupPosition' => 3,
                 'comparable' => false,
                 'sortMode' => 3,
@@ -262,7 +313,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ]),
         ];
 
-		$expectedProduct->images = array(
+		$expectedProduct->images = [
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image1.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image2.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image3.jpg',
@@ -283,8 +334,8 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
-        );
-        $expectedProduct->variantImages = array(
+        ];
+        $expectedProduct->variantImages = [
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image1.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image2.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image3.jpg',
@@ -295,7 +346,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image8.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
-        );
+        ];
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];
@@ -315,12 +366,12 @@ class LocalProductQueryTest extends ConnectTestHelper
     private function createArticle()
     {
         $group = $this->manager->getRepository(Property\Group::class)->findOneBy(
-            ['name' => 'Nike']
+            ['name' => 'Adidas']
         );
 
         if (!$group) {
             $group = new Property\Group();
-            $group->setName('Nike');
+            $group->setName('Adidas');
             $group->setPosition(3);
             $group->setSortMode(3);
             $group->setComparable(0);
@@ -328,36 +379,36 @@ class LocalProductQueryTest extends ConnectTestHelper
             $this->manager->flush();
         }
 
-        $minimalTestArticle = array(
+        $minimalTestArticle = [
             'name' => 'Glas -Teetasse 0,25l',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Teapavilion',
-            'mainDetail' => array(
+            'mainDetail' => [
                 'number' => '9898' . rand(1, 99999),
-            ),
+            ],
             'filterGroupId' => $group->getId(),
-            'propertyValues' => array(
-                array(
-                    'option' => array(
+            'propertyValues' => [
+                [
+                    'option' => [
                         'name' => 'color',
-                    ),
+                    ],
                     'value' => 'green'
-                ),
-                array(
-                    'option' => array(
+                ],
+                [
+                    'option' => [
                         'name' => 'size',
-                    ),
+                    ],
                     'value' => '2xl'
-                ),
-                array(
-                    'option' => array(
+                ],
+                [
+                    'option' => [
                         'name' => 'size',
-                    ),
+                    ],
                     'value' => '3xl'
-                )
-            )
-        );
+                ]
+            ]
+        ];
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
         /** @var \Shopware\Models\Article\Article $article */
@@ -365,7 +416,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 1,
                 'to' => 5,
@@ -373,12 +424,12 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
                 'pseudoprice' => 0
-            )
+            ]
         );
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 6,
                 'to' => 'beliebig',
@@ -386,8 +437,34 @@ class LocalProductQueryTest extends ConnectTestHelper
                 'articleID' => $this->article->getId(),
                 'articledetailsID' => $this->article->getMainDetail()->getId(),
                 'pseudoprice' => 0
-            )
+            ]
         );
+
+        $this->db->insert(
+            's_plugin_connect_items',
+            [
+                'article_id' => $this->article->getId(),
+                'article_detail_id' => $this->article->getMainDetail()->getId(),
+                'source_id' => $this->getHelper()->generateSourceId($this->article->getMainDetail()),
+            ]
+        );
+    }
+
+    public function testGetLocalProductQueryShouldFetchProductsWithoutArticleDetailAttribute()
+    {
+        $this->localMediaService->expects($this->any())
+            ->method('getProductMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(['SW10005' => []]);
+
+        $this->localMediaService->expects($this->any())
+            ->method('getVariantMediaList')
+            ->with($this->anything(), $this->productContext)
+            ->willReturn(['SW10005' => []]);
+
+        $this->db->delete('s_articles_attributes', 'articleID = ' . $this->article->getId());
+
+        $this->assertCount(1, $this->getLocalProductQuery()->get([$this->article->getId()]));
     }
 
 

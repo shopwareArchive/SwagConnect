@@ -4,7 +4,7 @@ if (typeof marketplaceName == 'undefined') {
     window.marketplaceName = 'Shopware Connect';
     window.marketplaceNetworkUrl = 'http://sn.connect.shopware.com';
     window.marketplaceLogo = '';
-    window.defaultMarketplace = '';
+    window.defaultMarketplace = true;
     window.isFixedPriceAllowed = '';
     window.purchasePriceInDetail = '';
 }

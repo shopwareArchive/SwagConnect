@@ -23,6 +23,7 @@
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
@@ -209,40 +210,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
         $this->registerMyLibrary();
-
-        try {
-            /** @var Shopware\Components\Model\ModelManager $modelManager */
-            $configComponent = $this->getConfigComponents();
-            $verified = $configComponent->getConfig('apiKeyVerified', false);
-        } catch (\Exception $e) {
-            // if the config table is not available, just assume, that the update
-            // still needs to be installed
-            $verified = false;
-        }
-
-        $subscribers = $this->getDefaultSubscribers();
-
-        // Some subscribers may only be used, if the SDK is verified
-        if ($verified) {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
-        // These subscribers are used if the api key is not valid
-        } else {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
-        }
-
-        /** @var $subscriber ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriber->setBootstrap($this);
-            $this->Application()->Events()->registerSubscriber($subscriber);
-        }
-
-        /** @var ModelManager $entityManager */
-        $entityManager = Shopware()->Models();
-        $entityManager->getEventManager()->addEventListener(
-            [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
-            $this
-        );
-
+        $this->registerSubscribers();
     }
 
     /**
@@ -250,6 +218,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onConsoleAddCommand()
     {
+        $this->registerSubscribers();
         $this->registerMyLibrary();
 
         return new ArrayCollection([
@@ -527,5 +496,41 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         }
 
         return $checkoutSubscriber;
+    }
+
+    private function registerSubscribers()
+    {
+        try {
+            /** @var Shopware\Components\Model\ModelManager $modelManager */
+            $configComponent = $this->getConfigComponents();
+            $verified = $configComponent->getConfig('apiKeyVerified', false);
+        } catch (\Exception $e) {
+            // if the config table is not available, just assume, that the update
+            // still needs to be installed
+            $verified = false;
+        }
+
+        $subscribers = $this->getDefaultSubscribers();
+
+        // Some subscribers may only be used, if the SDK is verified
+        if ($verified) {
+            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
+            // These subscribers are used if the api key is not valid
+        } else {
+            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
+        }
+
+        /** @var $subscriber ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
+        foreach ($subscribers as $subscriber) {
+            $subscriber->setBootstrap($this);
+            $this->Application()->Events()->registerSubscriber($subscriber);
+        }
+
+        /** @var ModelManager $entityManager */
+        $entityManager = Shopware()->Models();
+        $entityManager->getEventManager()->addEventListener(
+            [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
+            $this
+        );
     }
 }

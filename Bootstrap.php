@@ -23,16 +23,12 @@
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Shopware\Components\Model\ModelManager;
+use ShopwarePlugins\Connect\Bootstrap\SubscriberRegistration;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
-use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
-use ShopwarePlugins\Connect\Components\ConnectExport;
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 /**
  * @category  Shopware
@@ -40,15 +36,15 @@ use ShopwarePlugins\Connect\Components\Config;
  */
 final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
-    private $connectFactory;
-
-    private $productUpdates = [];
+    /**
+     * @var SubscriberRegistration
+     */
+    private $subscriberRegistration;
 
     /**
-     * @var \ShopwarePlugins\Connect\Subscribers\Lifecycle
+     * @var ConnectFactory
      */
-    private $lifecycle;
+    private $connectFactory;
 
     /**
      * Returns the current version of the plugin.
@@ -218,159 +214,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onConsoleAddCommand()
     {
-        $this->registerSubscribers();
         $this->registerMyLibrary();
+        $this->registerSubscribers();
 
         return new ArrayCollection([
             new ApiEndpointCommand()
         ]);
-    }
-
-    /**
-     * Collect updated Articles and Details
-     * Lifecycle events don't work correctly, because products will be fetched via query builder,
-     * but related entities like price are not updated yet.
-     *
-     * @param \Doctrine\ORM\Event\OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(\Doctrine\ORM\Event\OnFlushEventArgs $eventArgs)
-    {
-        /** @var $em ModelManager */
-        $em  = $eventArgs->getEntityManager();
-        $uow = $em->getUnitOfWork();
-
-        // Entity updates
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if (!$entity instanceof \Shopware\Models\Article\Article
-                && !$entity instanceof \Shopware\Models\Article\Detail
-            ) {
-                continue;
-            }
-
-            $this->productUpdates[] = $entity;
-        }
-    }
-
-    /**
-     * Generate changes for updated Articles and Details.
-     * On postFlush all related entities are updated and product can
-     * be fetched from DB correctly.
-     *
-     * @param \Doctrine\ORM\Event\PostFlushEventArgs $eventArgs
-     */
-    public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $eventArgs)
-    {
-        foreach ($this->productUpdates as $entity) {
-            $this->getLifecycleSubscriber()->handleChange($entity);
-        }
-
-        $this->productUpdates = [];
-    }
-
-    public function getSubscribersForUnverifiedKeys()
-    {
-        return array(
-            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
-            $this->getLifecycleSubscriber()
-        );
-    }
-
-    /**
-     * @return \ShopwarePlugins\Connect\Subscribers\Lifecycle
-     */
-    public function getLifecycleSubscriber()
-    {
-        if (!$this->lifecycle) {
-            $this->lifecycle = new \ShopwarePlugins\Connect\Subscribers\Lifecycle(
-                Shopware()->Models(),
-                $this->getConfigComponents()->getConfig('autoUpdateProducts', 1)
-            );
-        }
-
-        return $this->lifecycle;
-    }
-
-    /**
-     * These subscribers will only be used, once the user has verified his api key
-     * This will prevent the users from having shopware Connect extensions in their frontend
-     * even if they cannot use shopware Connect due to the missing / wrong api key
-     *
-     * @return array
-     */
-    public function getSubscribersForVerifiedKeys()
-    {
-        $subscribers = array(
-            new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
-            $this->createCheckoutSubscriber(),
-            new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
-            new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
-            new \ShopwarePlugins\Connect\Subscribers\Javascript(),
-            new \ShopwarePlugins\Connect\Subscribers\Less(),
-            $this->getLifecycleSubscriber()
-
-        );
-
-        $this->registerMyLibrary();
-
-        return $subscribers;
-    }
-
-    /**
-     * Default subscribers can safely be used, even if the api key wasn't verified, yet
-     *
-     * @return array
-     */
-    public function getDefaultSubscribers()
-    {
-        $db = Shopware()->Db();
-        $modelManager = Shopware()->Models();
-
-        return array(
-            new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\ControllerPath($this->assertMinimumVersion('5.2')),
-            new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(
-                $this->getSDK(),
-                $this->getConnectFactory()->getConnectExport()
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
-            new \ShopwarePlugins\Connect\Subscribers\Article(
-                new PDO($db->getConnection()),
-                $modelManager,
-                new ConnectExport(
-                    $this->getHelper(),
-                    $this->getSDK(),
-                    $modelManager,
-                    new ProductsAttributesValidator(),
-                    $this->getConfigComponents(),
-                    new ErrorHandler(),
-                    $this->get('events')
-                )
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Category(
-                $modelManager
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Connect(),
-            new \ShopwarePlugins\Connect\Subscribers\Payment(),
-            new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
-                $modelManager,
-                $db,
-                Shopware()->Container()
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Supplier(),
-            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
-                $this->getConnectFactory()->getConnectExport(),
-                new Config($modelManager),
-                $this->getConnectFactory()->getHelper()
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Property(
-                $modelManager
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Search(
-                $modelManager
-            ),
-        );
     }
 
     public function onInitResourceSDK()
@@ -404,14 +253,14 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Lazy getter for the connectFactory
      *
-     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     * @return ConnectFactory
      */
     public function getConnectFactory()
     {
         $this->registerMyLibrary();
 
         if (!$this->connectFactory) {
-            $this->connectFactory = new \ShopwarePlugins\Connect\Components\ConnectFactory($this->getVersion());
+            $this->connectFactory = new ConnectFactory($this->getVersion());
         }
 
         return $this->connectFactory;
@@ -478,59 +327,21 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         return (bool) $plugin->getInstalled();
     }
 
-    /**
-     * Creates checkout subscriber
-     *
-     * @return \ShopwarePlugins\Connect\Subscribers\Checkout
-     */
-    private function createCheckoutSubscriber()
-    {
-        $checkoutSubscriber = new \ShopwarePlugins\Connect\Subscribers\Checkout(
-            Shopware()->Models(),
-            Shopware()->Container()->get('events')
-        );
-        foreach ($checkoutSubscriber->getListeners() as $listener) {
-            if ($listener->getName() == 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
-                $listener->setPosition(-1);
-            }
-        }
-
-        return $checkoutSubscriber;
-    }
-
     private function registerSubscribers()
     {
-        try {
-            /** @var Shopware\Components\Model\ModelManager $modelManager */
-            $configComponent = $this->getConfigComponents();
-            $verified = $configComponent->getConfig('apiKeyVerified', false);
-        } catch (\Exception $e) {
-            // if the config table is not available, just assume, that the update
-            // still needs to be installed
-            $verified = false;
+        if (!$this->subscriberRegistration instanceof  SubscriberRegistration) {
+            $this->subscriberRegistration = new SubscriberRegistration(
+                $this->getConfigComponents(),
+                $this->get('models'),
+                $this->get('db'),
+                $this,
+                $this->get('events'),
+                $this->getSDK(),
+                $this->getConnectFactory(),
+                $this->getHelper()
+            );
         }
 
-        $subscribers = $this->getDefaultSubscribers();
-
-        // Some subscribers may only be used, if the SDK is verified
-        if ($verified) {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
-            // These subscribers are used if the api key is not valid
-        } else {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
-        }
-
-        /** @var $subscriber ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriber->setBootstrap($this);
-            $this->Application()->Events()->registerSubscriber($subscriber);
-        }
-
-        /** @var ModelManager $entityManager */
-        $entityManager = Shopware()->Models();
-        $entityManager->getEventManager()->addEventListener(
-            [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
-            $this
-        );
+        $this->subscriberRegistration->registerSubscribers($this->assertMinimumVersion('5.2'));
     }
 }

@@ -241,6 +241,10 @@ class Units
             'en' => 'Square yard(s)',
             'de' => 'Quadratyard',
         ),
+        'lfm' => array(
+            'en' => 'Running metre',
+            'de' => 'Laufender Meter'
+        )
     );
 
     /**

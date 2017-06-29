@@ -28,6 +28,7 @@ use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
+use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 /**
@@ -49,7 +50,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Returns the current version of the plugin.
      *
-     * @return string|void
+     * @return string
      * @throws Exception
      */
     public function getVersion()
@@ -58,9 +59,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
         if ($info) {
             return $info['currentVersion'];
-        } else {
-            throw new \Exception('The plugin has an invalid version file.');
         }
+
+        throw new \Exception('The plugin has an invalid version file.');
     }
 
     /**
@@ -78,12 +79,12 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function getInfo()
     {
-        return array(
+        return [
             'version' => $this->getVersion(),
             'label' => $this->getLabel(),
             'description' => file_get_contents($this->Path() . 'info.txt'),
             'link' => 'http://www.shopware.de/',
-        );
+        ];
     }
 
     /**
@@ -96,7 +97,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     {
         $this->doSetup();
 
-        return array('success' => true, 'invalidateCache' => array('backend', 'config'));
+        return ['success' => true, 'invalidateCache' => ['backend', 'config']];
     }
 
     /**
@@ -282,6 +283,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         return $this->getConnectFactory()->getHelper();
     }
 
+    /**
+     * @return BasketHelper
+     */
     public function getBasketHelper()
     {
         return $this->getConnectFactory()->getBasketHelper();
@@ -293,16 +297,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function getConfigComponents()
     {
         return $this->getConnectFactory()->getConfigComponent();
-    }
-
-    public function getMarketplaceGateway()
-    {
-        return $this->getConnectFactory()->getMarketplaceGateway();
-    }
-
-    public function getMarketplaceApplier()
-    {
-        return $this->getConnectFactory()->getMarketplaceApplier();
     }
 
     /**
@@ -329,7 +323,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
     private function registerSubscribers()
     {
-        if (!$this->subscriberRegistration instanceof  SubscriberRegistration) {
+        if (!$this->subscriberRegistration instanceof SubscriberRegistration) {
             $this->subscriberRegistration = new SubscriberRegistration(
                 $this->getConfigComponents(),
                 $this->get('models'),
@@ -338,7 +332,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                 $this->get('events'),
                 $this->getSDK(),
                 $this->getConnectFactory(),
-                $this->getHelper()
+                $this->getHelper(),
+                $this->get('service_container')
             );
         }
 

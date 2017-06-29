@@ -14,6 +14,7 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SubscriberRegistration
 {
@@ -72,6 +73,11 @@ class SubscriberRegistration
     private $lifecycle;
 
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * @param Config $config
      * @param ModelManager $modelManager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
@@ -80,6 +86,7 @@ class SubscriberRegistration
      * @param SDK $SDK
      * @param ConnectFactory $connectFactory
      * @param Helper $helper
+     * @param ContainerInterface $container
      */
     public function __construct(
         Config $config,
@@ -89,7 +96,8 @@ class SubscriberRegistration
         \Enlight_Event_EventManager $eventManager,
         SDK $SDK,
         ConnectFactory $connectFactory,
-        Helper $helper
+        Helper $helper,
+        ContainerInterface $container
     ) {
         $this->config = $config;
         $this->modelManager = $modelManager;
@@ -99,6 +107,7 @@ class SubscriberRegistration
         $this->SDK = $SDK;
         $this->connectFactory = $connectFactory;
         $this->helper = $helper;
+        $this->container = $container;
     }
 
     /**
@@ -175,7 +184,7 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,
                 $this->db,
-                Shopware()->Container()
+                $this->container
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),
             new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
@@ -194,10 +203,10 @@ class SubscriberRegistration
 
     private function getSubscribersForUnverifiedKeys()
     {
-        return array(
+        return [
             new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
             $this->getLifecycleSubscriber()
-        );
+        ];
     }
 
 
@@ -210,7 +219,7 @@ class SubscriberRegistration
      */
     private function getSubscribersForVerifiedKeys()
     {
-        $subscribers = array(
+        $subscribers = [
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             $this->createCheckoutSubscriber(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
@@ -220,7 +229,7 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\Less(),
             $this->getLifecycleSubscriber()
 
-        );
+        ];
 
         return $subscribers;
     }

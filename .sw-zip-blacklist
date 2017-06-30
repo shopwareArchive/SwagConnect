@@ -1,1 +1,9 @@
 psh
+.gitignore
+.psh.yml
+.psh.yaml
+.psh.yml.dist
+.psh.yaml.dist
+Tests
+.travis.yml
+phpunit.xml

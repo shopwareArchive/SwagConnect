@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -24,7 +29,7 @@ class ControllerPath extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectGateway' => 'onGetControllerPathGateway',
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Connect' => 'onGetControllerPathFrontend',
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_ConnectProductGateway' => 'onGetControllerPathFrontendConnectControllerGateway',
@@ -33,7 +38,7 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectConfig' => 'onGetControllerPathConnectConfig',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
-        );
+        ];
     }
 
     /**
@@ -51,6 +56,7 @@ class ControllerPath extends BaseSubscriber
         if ($this->shopware52Installed) {
             return $this->Path() . 'Controllers/Backend/Connect52.php';
         }
+
         return $this->Path() . 'Controllers/Backend/Connect.php';
     }
 
@@ -80,6 +86,7 @@ class ControllerPath extends BaseSubscriber
         if ($this->shopware52Installed) {
             return $this->Path() . '/Controllers/Backend/ConnectGateway52.php';
         }
+
         return $this->Path() . 'Controllers/Backend/ConnectGateway.php';
     }
 
@@ -92,6 +99,7 @@ class ControllerPath extends BaseSubscriber
     public function onGetControllerPathFrontend(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
+
         return $this->Path() . 'Controllers/Frontend/Connect.php';
     }
 
@@ -104,6 +112,7 @@ class ControllerPath extends BaseSubscriber
     public function onGetControllerPathFrontendConnectControllerGateway(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
+
         return $this->Path() . 'Controllers/Frontend/ConnectProductGateway.php';
     }
 
@@ -118,6 +127,7 @@ class ControllerPath extends BaseSubscriber
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
+
         return $this->Path() . 'Controllers/Backend/ConnectConfig.php';
     }
 
@@ -133,11 +143,11 @@ class ControllerPath extends BaseSubscriber
         return $this->Path() . 'Controllers/Backend/Import.php';
     }
 
-
     public function onGetControllerPathShippingGroups(\Enlight_Event_EventArgs $args)
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
+
         return $this->Path() . 'Controllers/Backend/ShippingGroups.php';
     }
 }

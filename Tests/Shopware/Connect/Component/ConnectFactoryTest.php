@@ -1,10 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
 class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
 {
-
     private $connectFactory;
     private $configMock;
     private $localProductQuery;
@@ -14,7 +18,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         parent::setUp();
 
         $this->connectFactory = $this->getMockBuilder('ShopwarePlugins\Connect\Components\ConnectFactory')
-            ->setMethods(array('getConfigComponent', 'getLocalProductQuery', 'getRemoteProductQuery'))
+            ->setMethods(['getConfigComponent', 'getLocalProductQuery', 'getRemoteProductQuery'])
             ->getMock();
 
         $this->configMock = $this->getMockBuilder('\ShopwarePlugins\Connect\Components\Config')
@@ -28,12 +32,11 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
         $this->connectFactory->method('getConfigComponent')->willReturn($this->configMock);
         $this->connectFactory->method('getLocalProductQuery')->willReturn($this->localProductQuery);
-
     }
 
     public function testCreateSDKDefaultLocal()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $this->configMock->method('getConfig')->willReturn('sn.connect.local');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
@@ -44,7 +47,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKSemLocal()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
 
         $this->configMock->method('getConfig')->willReturn('semdemo.connect.local');
 
@@ -56,7 +59,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKRandomLocal()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $prefix = $this->generateRandomString();
         $this->configMock->method('getConfig')->willReturn($prefix . '.connect.local');
 
@@ -68,7 +71,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKDefaultStaging()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $this->configMock->method('getConfig')->willReturn('sn.stage.connect.shopware.com');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
@@ -79,7 +82,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKSemStaging()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $this->configMock->method('getConfig')->willReturn('sn.sem.stage.connect.shopware.com');
 
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
@@ -90,7 +93,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKMarketplaceStaging()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $prefix = $this->generateRandomString();
         $this->configMock->method('getConfig')->willReturn($prefix . '.stage.connect.shopware.com');
 
@@ -102,9 +105,9 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKMarketplaceStagingWithMultipleStagings()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $prefix = $this->generateRandomString();
-        $suffix = '.stage'.rand(1, 9).'.connect.shopware.com';
+        $suffix = '.stage' . rand(1, 9) . '.connect.shopware.com';
         $this->configMock->method('getConfig')->willReturn($prefix . $suffix);
         $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
         $this->connectFactory->createSDK();
@@ -114,7 +117,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     public function testCreateSDKLive()
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         //everything that is "unknown" defaults to live (the default value of transactionHost in the DependencyResolver)
         $prefix = $this->generateRandomString(20);
         $this->configMock->method('getConfig')->willReturn($prefix);
@@ -127,15 +130,14 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
 
     private function generateRandomString($length = 10)
     {
-        putenv("_TRANSACTION_HOST");
+        putenv('_TRANSACTION_HOST');
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.';
         $charactersLength = strlen($characters);
         $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $length; ++$i) {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
 
         return $randomString;
     }
 }
- 

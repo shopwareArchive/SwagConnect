@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Utils;
 
@@ -17,13 +22,15 @@ class ConnectOrderUtil
      * @param $orderIds
      * @return mixed
      */
-    function getRemoteConnectOrders($orderIds) {
+    public function getRemoteConnectOrders($orderIds)
+    {
         // This will apply for the fromShop
         $sql = 'SELECT orderID, connect_shop_id, connect_order_id
         FROM s_order_attributes
         WHERE orderID IN (' . implode(', ', $orderIds) . ')
         AND connect_shop_id IS NOT NULL
         ';
+
         return  Shopware()->Db()->fetchAll($sql);
     }
 
@@ -33,9 +40,10 @@ class ConnectOrderUtil
      * @param $orderId
      * @return bool
      */
-    function hasRemoteOrderConnectProducts($orderId)
+    public function hasRemoteOrderConnectProducts($orderId)
     {
-        $orders = $this->getRemoteConnectOrders(array($orderId));
+        $orders = $this->getRemoteConnectOrders([$orderId]);
+
         return !empty($orders);
     }
 
@@ -45,7 +53,7 @@ class ConnectOrderUtil
      * @param $orderIds
      * @return mixed
      */
-    function getLocalConnectOrders($orderIds)
+    public function getLocalConnectOrders($orderIds)
     {
         // This will apply for orders with remote connect products in it
         $sql = 'SELECT oa.orderID, bi.shop_id as connect_shop_id,  "remote" as connect_order_id
@@ -75,9 +83,10 @@ class ConnectOrderUtil
      * @param $orderId
      * @return bool
      */
-    function hasLocalOrderConnectProducts($orderId)
+    public function hasLocalOrderConnectProducts($orderId)
     {
-        $orders = $this->getLocalConnectOrders(array($orderId));
+        $orders = $this->getLocalConnectOrders([$orderId]);
+
         return !empty($orders);
     }
 }

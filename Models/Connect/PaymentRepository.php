@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Shopware\CustomModels\Connect;
 
@@ -44,7 +49,7 @@ class PaymentRepository
 
     /**
      * @param int $paymentId
-     * @param boolean $connectIsAllowed
+     * @param bool $connectIsAllowed
      */
     public function updateConnectIsAllowed($paymentId, $connectIsAllowed)
     {

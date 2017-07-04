@@ -1,10 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
-use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\DBAL\Connection;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
@@ -30,9 +34,9 @@ class ProductStreamRepository extends Repository
 
     /**
      * @param $streamId
-     * @return ProductStream
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return ProductStream
      */
     public function findById($streamId)
     {
@@ -40,7 +44,7 @@ class ProductStreamRepository extends Repository
 
         return $builder->select('ps')
             ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
-            ->where("ps.id = :streamId")
+            ->where('ps.id = :streamId')
             ->setParameter('streamId', $streamId)
             ->getQuery()
             ->getSingleResult();
@@ -56,7 +60,7 @@ class ProductStreamRepository extends Repository
 
         return $builder->select('ps')
             ->from('Shopware\Models\ProductStream\ProductStream', 'ps')
-            ->where("ps.id IN (:streamIds)")
+            ->where('ps.id IN (:streamIds)')
             ->setParameter('streamIds', $streamIds)
             ->getQuery()
             ->getResult();
@@ -71,7 +75,7 @@ class ProductStreamRepository extends Repository
     public function filterExportedStreams(array $streamIds)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('pcs.stream_id'))
+        $build->select(['pcs.stream_id'])
             ->from('s_plugin_connect_streams', 'pcs')
             ->where('pcs.stream_id IN (:streamIds)')
             ->andWhere('pcs.export_status IN (:status)')
@@ -80,7 +84,7 @@ class ProductStreamRepository extends Repository
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array_map(function($item){
+        return array_map(function ($item) {
             return $item['stream_id'];
         }, $items);
     }
@@ -92,7 +96,7 @@ class ProductStreamRepository extends Repository
     public function fetchArticleIdsFromStaticStream(ProductStream $stream)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('product.id'))
+        $build->select(['product.id'])
             ->from('s_articles', 'product')
             ->innerJoin('product', 's_product_streams_selection', 'streamProducts', 'streamProducts.article_id = product.id')
             ->where('streamProducts.stream_id = :streamId')
@@ -100,7 +104,7 @@ class ProductStreamRepository extends Repository
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-       return array_map(function($item){
+        return array_map(function ($item) {
             return $item['id'];
         }, $items);
     }
@@ -120,7 +124,7 @@ class ProductStreamRepository extends Repository
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array_map(function($item){
+        return array_map(function ($item) {
             return $item['id'];
         }, $items);
     }
@@ -144,7 +148,7 @@ class ProductStreamRepository extends Repository
     public function fetchPreviousExportStaticStreams(array $articleIds)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('es.stream_id as streamId', 'pss.article_id as articleId', 'ps.name', '0 as deleted'))
+        $build->select(['es.stream_id as streamId', 'pss.article_id as articleId', 'ps.name', '0 as deleted'])
             ->from('s_plugin_connect_streams', 'es')
             ->leftJoin('es', 's_product_streams_selection', 'pss', 'pss.stream_id = es.stream_id')
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
@@ -163,7 +167,7 @@ class ProductStreamRepository extends Repository
     public function fetchPreviousExportDynamicStreams(array $articleIds)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(array('es.stream_id as streamId', 'pcsr.article_id as articleId', 'ps.name', 'pcsr.deleted'))
+        $build->select(['es.stream_id as streamId', 'pcsr.article_id as articleId', 'ps.name', 'pcsr.deleted'])
             ->from('s_plugin_connect_streams', 'es')
             ->leftJoin('es', 's_plugin_connect_streams_relation', 'pcsr', 'pcsr.stream_id = es.stream_id')
             ->leftJoin('es', 's_product_streams', 'ps', 'ps.id = es.stream_id')
@@ -248,8 +252,8 @@ class ProductStreamRepository extends Repository
     /**
      * @param $streamId
      * @param array $articleIds
-     * @return bool
      * @throws \Doctrine\DBAL\DBALException
+     * @return bool
      */
     public function createStreamRelation($streamId, array $articleIds)
     {
@@ -260,7 +264,7 @@ class ProductStreamRepository extends Repository
         $sql = 'INSERT INTO `s_plugin_connect_streams_relation` (`stream_id`, `article_id`, `deleted`) VALUES ';
 
         foreach ($articleIds as $index => $articleId) {
-            $queryValues[] = '(:streamId' . $index . ', :articleId' . $index . ', :deleted' . $index .')';
+            $queryValues[] = '(:streamId' . $index . ', :articleId' . $index . ', :deleted' . $index . ')';
             $insertData['streamId' . $index] = $streamId;
             $insertData['articleId' . $index] = $articleId;
             $insertData['deleted' . $index] = ProductStreamAttribute::STREAM_RELATION_ACTIVE;
@@ -281,6 +285,7 @@ class ProductStreamRepository extends Repository
     public function markProductsToBeRemovedFromStream($streamId)
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
+
         return $builder->update('s_plugin_connect_streams_relation', 'pcsr')
             ->set('pcsr.deleted', ':deleted')
             ->where('pcsr.stream_id = :streamId')
@@ -336,8 +341,10 @@ class ProductStreamRepository extends Repository
             $connection->commit();
         } catch (\Exception $e) {
             $connection->rollback();
+
             return false;
         }
+
         return true;
     }
 
@@ -376,7 +383,7 @@ class ProductStreamRepository extends Repository
             ->execute()
             ->fetchAll();
 
-        return array_map(function($item){
+        return array_map(function ($item) {
             return $item['streamID'];
         }, $results);
     }
@@ -396,5 +403,4 @@ class ProductStreamRepository extends Repository
             ->setParameter('streamId', $streamId)
             ->execute()->fetchColumn();
     }
-
 }

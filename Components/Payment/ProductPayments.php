@@ -1,32 +1,14 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components\Payment;
 
 use Shopware\Connect\Struct\PaymentStatus;
 use ShopwarePlugins\Connect\Components\Logger;
-use ShopwarePlugins\Connect\Components\OrderQuery\RemoteOrderQuery;
 
 /**
  * Class ProductPayments
@@ -53,7 +35,7 @@ class ProductPayments implements \Shopware\Connect\ProductPayments
         // $paymentStatus->localOrderId is actually ordernumber for this shop
         // e.g. BP-35-20002
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Order\Order');
-        $order = $repository->findOneBy(array('number' => $paymentStatus->localOrderId));
+        $order = $repository->findOneBy(['number' => $paymentStatus->localOrderId]);
 
         if (!$order) {
             $this->getLogger()->write(
@@ -64,12 +46,13 @@ class ProductPayments implements \Shopware\Connect\ProductPayments
                 ),
                 serialize($paymentStatus)
             );
+
             return;
         }
 
         /** @var \Shopware\Models\Order\Status $orderPaymentStatus */
         $orderPaymentStatus = $this->getPaymentStatusRepository()->findOneBy(
-            array('description' => $this->mapPaymentStatus($paymentStatus->paymentStatus))
+            ['description' => $this->mapPaymentStatus($paymentStatus->paymentStatus)]
         );
 
         if (!$orderPaymentStatus) {
@@ -84,6 +67,7 @@ class ProductPayments implements \Shopware\Connect\ProductPayments
                     $paymentStatus->localOrderId
                 )
             );
+
             return;
         }
 
@@ -93,7 +77,6 @@ class ProductPayments implements \Shopware\Connect\ProductPayments
         Shopware()->Models()->flush();
 
         return true;
-
     }
 
     /**
@@ -151,4 +134,4 @@ class ProductPayments implements \Shopware\Connect\ProductPayments
 
         return $this->logger;
     }
-} 
+}

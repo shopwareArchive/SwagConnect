@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -64,8 +69,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     {
         $id = Shopware()->Db()->fetchOne(
             'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? and shop_id =  ? LIMIT 1',
-            array($sourceId, $shopId)
+            [$sourceId, $shopId]
         );
+
         return $id;
     }
 
@@ -85,7 +91,6 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
     }
 
-
     public function callPrivate($class, $method, $args)
     {
         $method = new \ReflectionMethod(
@@ -94,7 +99,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
         $method->setAccessible(true);
 
-        return call_user_func(array($method, 'invoke', $args));
+        return call_user_func([$method, 'invoke', $args]);
     }
 
     /**
@@ -112,7 +117,6 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             Shopware()->Container()->get('events')
         );
     }
-
 
     /**
      * @return ImageImport
@@ -159,7 +163,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $serviceRegistry = $deps->getServiceRegistry();
         $callable = $serviceRegistry->getService($service, $command);
 
-        return call_user_func_array(array($callable['provider'], $callable['command']), $args);
+        return call_user_func_array([$callable['provider'], $callable['command']], $args);
     }
 
     protected function getProduct($withImage = false, $withVariantImages = false)
@@ -167,24 +171,24 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $purchasePrice = 6.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $number = rand(1, 999999999);
-        $product =  new \Shopware\Connect\Struct\Product(array(
+        $product =  new \Shopware\Connect\Struct\Product([
             'shopId' => 3,
             'revisionId' => time(),
             'sourceId' => $number,
             'ean' => $number,
             'sku' => 'sku#' . $number,
             'url' => 'http://shopware.de',
-            'title' => 'MassImport #'. $number,
+            'title' => 'MassImport #' . $number,
             'shortDescription' => 'Ein Produkt aus shopware Connect',
             'longDescription' => 'Ein Produkt aus shopware Connect',
             'additionalDescription' => 'Ein Produkt aus shopware Connect',
-            'vendor' => array(
+            'vendor' => [
                 'url' => 'http://connect.shopware.de/',
                 'name' => 'shopware Connect',
                 'logo_url' => self::IMAGE_PROVIDER_URL,
                 'page_title' => 'shopware Connect title',
                 'description' => 'shopware Connect description'
-            ),
+            ],
             'stream' => 'Awesome products',
             'price' => 9.99,
             'purchasePrice' => $purchasePrice,
@@ -194,26 +198,26 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             ),
             'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
-            'categories' => array(
+            'categories' => [
                 '/bücher' => 'Bücher',
-            ),
-            'translations' => array(
-                'en' => new Translation(array(
-                    'title' => 'MassImport #'. $number . ' EN',
+            ],
+            'translations' => [
+                'en' => new Translation([
+                    'title' => 'MassImport #' . $number . ' EN',
                     'longDescription' => 'Ein Produkt aus shopware Connect EN',
                     'shortDescription' => 'Ein Produkt aus shopware Connect short EN',
                     'additionalDescription' => 'Ein Produkt aus shopware Verbinden Sie mit zusätzlicher Beschreibung EN',
                     'url' => 'http://shopware.de',
-                ))
-            )
-        ));
+                ])
+            ]
+        ]);
 
         if ($withImage) {
-            $product->images = array(self::IMAGE_PROVIDER_URL . '?' . $number);
+            $product->images = [self::IMAGE_PROVIDER_URL . '?' . $number];
         }
 
         if ($withVariantImages) {
-            $product->variantImages = array(self::IMAGE_PROVIDER_URL . '?' . $number . '-variantImage');
+            $product->variantImages = [self::IMAGE_PROVIDER_URL . '?' . $number . '-variantImage'];
         }
 
         return $product;
@@ -221,16 +225,16 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function getProperties()
     {
-        return array(
-            new Property(array(
+        return [
+            new Property([
                 'groupName' => 'Nike',
                 'comparable' => false,
                 'sortMode' => 1,
                 'option' => 'color',
                 'filterable' => false,
                 'value' => 'red'
-            )),
-            new Property(array(
+            ]),
+            new Property([
                 'groupName' => 'Nike',
                 'comparable' => false,
                 'sortMode' => 1,
@@ -238,38 +242,39 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                 'filterable' => false,
                 'value' => 'XXL',
                 'valuePosition' => 1
-            )),
-            new Property(array(
+            ]),
+            new Property([
                 'groupName' => 'Nike',
                 'comparable' => false,
                 'sortMode' => 1,
                 'option' => 'size',
                 'filterable' => false,
                 'value' => '3XL'
-            ))
-        );
+            ])
+        ];
     }
 
     protected function getProducts($number = 10, $withImage = false, $withVariantImages = false)
     {
-        $products = array();
-        for($i=0; $i<$number; $i++) {
+        $products = [];
+        for ($i=0; $i<$number; ++$i) {
             $products[] = $this->getProduct($withImage, $withVariantImages);
         }
+
         return $products;
     }
 
     protected function getVariants()
     {
         $number = $groupId = rand(1, 999999999);
-        $color = array(
-            array('de' => 'Weiss-Blau' . $number, 'en' => 'White-Blue'),
-            array('de' => 'Weiss-Rot' . $number, 'en' => 'White-Red'),
-            array('de' => 'Blau-Rot' . $number, 'en' => 'Blue-Red'),
-            array('de' => 'Schwarz-Rot' . $number, 'en' => 'Black-Red'),
-        );
+        $color = [
+            ['de' => 'Weiss-Blau' . $number, 'en' => 'White-Blue'],
+            ['de' => 'Weiss-Rot' . $number, 'en' => 'White-Red'],
+            ['de' => 'Blau-Rot' . $number, 'en' => 'Blue-Red'],
+            ['de' => 'Schwarz-Rot' . $number, 'en' => 'Black-Red'],
+        ];
 
-        $variants = array();
+        $variants = [];
         $mainVariant = $this->getProduct(true);
         $mainVariantColor = array_pop($color);
         $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
@@ -277,14 +282,14 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $variants[] = $mainVariant;
 
         //add translations
-        $mainVariant->translations['en']->variantLabels = array(
+        $mainVariant->translations['en']->variantLabels = [
             'Farbe' => 'Color',
-        );
-        $mainVariant->translations['en']->variantValues = array(
+        ];
+        $mainVariant->translations['en']->variantValues = [
             $mainVariantColor['de'] => $mainVariantColor['en'],
-        );
+        ];
 
-        for ($i = 0; $i < 4 - 1; $i++) {
+        for ($i = 0; $i < 4 - 1; ++$i) {
             $variant = $this->getProduct(true);
             $variantSourceId = $mainVariant->sourceId . '-' . $i;
             $variant->title = 'MassImport #' . $variantSourceId;
@@ -293,19 +298,19 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $variantColor = array_pop($color);
             $variant->variant['Farbe'] = $variantColor['de'];
             $variant->groupId = $groupId;
-            $variant->translations = array(
-                'en' => new Translation(array(
+            $variant->translations = [
+                'en' => new Translation([
                     'title' => 'MassImport #' . $variantSourceId . ' EN',
                     'longDescription' => $mainVariant->longDescription . ' EN',
                     'shortDescription' => $mainVariant->shortDescription . ' EN',
-                    'variantLabels' => array(
+                    'variantLabels' => [
                         'Farbe' => 'Color',
-                    ),
-                    'variantValues' => array(
+                    ],
+                    'variantValues' => [
                         $variantColor['de'] => $variantColor['en'],
-                    ),
-                )),
-            );
+                    ],
+                ]),
+            ];
 
             $variants[] = $variant;
         }
@@ -318,10 +323,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $number = rand(1, 999999999);
 
         $article = new Article();
-        $article->fromArray(array(
-            'name' => 'LocalArticle #'. $number,
+        $article->fromArray([
+            'name' => 'LocalArticle #' . $number,
             'active' => true,
-        ));
+        ]);
         $tax = Shopware()->Models()->getRepository('Shopware\Models\Tax\Tax')->find(1);
         $article->setTax($tax);
 
@@ -332,23 +337,23 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         Shopware()->Models()->flush();
 
         $mainDetail = new Detail();
-        $mainDetail->fromArray(array(
+        $mainDetail->fromArray([
             'number' => $number,
             'inStock' => 30,
             'article' => $article
-        ));
+        ]);
         $article->setMainDetail($mainDetail);
         $detailAtrribute = new \Shopware\Models\Attribute\Article();
-        $detailAtrribute->fromArray(array(
+        $detailAtrribute->fromArray([
             'article' => $article,
             'articleDetail' => $mainDetail,
-        ));
+        ]);
 
         /** @var \Shopware\Models\Customer\Group $customerGroup */
         $customerGroup = Shopware()->Models()->getRepository('Shopware\Models\Customer\Group')->findOneByKey('EK');
 
         $connectAttribute = new Attribute();
-        $connectAttribute->fromArray(array(
+        $connectAttribute->fromArray([
             'isMainVariant' => true,
             'article' => $article,
             'articleDetail' => $article->getMainDetail(),
@@ -358,7 +363,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'purchasePriceHash' => '',
             'offerValidUntil' => 0,
             'stream' => '',
-        ));
+        ]);
 
         Shopware()->Models()->persist($mainDetail);
         Shopware()->Models()->persist($detailAtrribute);
@@ -378,6 +383,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     public function getProductToShop()
     {
         $manager = Shopware()->Models();
+
         return new ProductToShop(
             $this->getHelper(),
             Shopware()->Models(),
@@ -401,54 +407,54 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
     protected function insertOrUpdateProducts($number, $withImage, $withVariantImages)
     {
-        $commands = array();
+        $commands = [];
         foreach ($this->getProducts($number, $withImage, $withVariantImages) as $product) {
-            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
+            $commands[$product->sourceId] = new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate([
                 'product' => $product,
                 'revision' => time(),
-            ));
+            ]);
         }
 
-        $this->dispatchRpcCall('products', 'toShop', array(
+        $this->dispatchRpcCall('products', 'toShop', [
             $commands
-        ));
+        ]);
 
         return array_keys($commands);
     }
 
     protected function getRandomUser()
     {
-        $user = Shopware()->Db()->fetchRow("SELECT * FROM s_user WHERE id = 1 LIMIT 1");
+        $user = Shopware()->Db()->fetchRow('SELECT * FROM s_user WHERE id = 1 LIMIT 1');
 
         $billing = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_user_billingaddress WHERE userID = :id",
-            array(':id' => $user['id'])
+            'SELECT * FROM s_user_billingaddress WHERE userID = :id',
+            [':id' => $user['id']]
         );
-        $billing['stateID'] = isset($billing['stateId'])?$billing['stateID']:'1';
+        $billing['stateID'] = isset($billing['stateId']) ? $billing['stateID'] : '1';
         $shipping = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_user_shippingaddress WHERE userID = :id",
-            array(':id' => $user['id'])
+            'SELECT * FROM s_user_shippingaddress WHERE userID = :id',
+            [':id' => $user['id']]
         );
-        $shipping['stateID'] = isset($shipping['stateId'])?$shipping['stateID']:'1';
+        $shipping['stateID'] = isset($shipping['stateId']) ? $shipping['stateID'] : '1';
         $country = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_core_countries WHERE id = :id",
-            array(':id' => $billing['countryID'])
+            'SELECT * FROM s_core_countries WHERE id = :id',
+            [':id' => $billing['countryID']]
         );
         $state = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_core_countries_states WHERE id = :id",
-            array(':id' => $billing['stateID'])
+            'SELECT * FROM s_core_countries_states WHERE id = :id',
+            [':id' => $billing['stateID']]
         );
         $countryShipping = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_core_countries WHERE id = :id",
-            array(':id' => $shipping['countryID'])
+            'SELECT * FROM s_core_countries WHERE id = :id',
+            [':id' => $shipping['countryID']]
         );
         $payment = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_core_paymentmeans WHERE id = :id",
-            array(':id' => $user['paymentID'])
+            'SELECT * FROM s_core_paymentmeans WHERE id = :id',
+            [':id' => $user['paymentID']]
         );
         $customerGroup = Shopware()->Db()->fetchRow(
-            "SELECT * FROM s_core_customergroups WHERE groupkey = :key",
-            array(':key' => $user['customergroup'])
+            'SELECT * FROM s_core_customergroups WHERE groupkey = :key',
+            [':key' => $user['customergroup']]
         );
 
         $taxFree = (bool) ($countryShipping['taxfree']);
@@ -464,19 +470,19 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 
         Shopware()->Session()->sUserGroupData = $customerGroup;
 
-        return array(
+        return [
             'user' => $user,
             'billingaddress' => $billing,
             'shippingaddress' => $shipping,
             'customerGroup' => $customerGroup,
-            'additional' => array(
+            'additional' => [
                 'country' => $country,
                 'state'   => $state,
                 'user'    => $user,
                 'countryShipping' => $countryShipping,
                 'payment' => $payment,
                 'charge_vat' => !$taxFree
-            )
-        );
+            ]
+        ];
     }
 }

@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -11,7 +16,6 @@ use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Cronjob callback
@@ -26,7 +30,7 @@ class CronJob extends BaseSubscriber
      */
     private $configComponent;
 
-    /** @var  SDK */
+    /** @var SDK */
     protected $sdk;
 
     protected $streamService;
@@ -50,11 +54,11 @@ class CronJob extends BaseSubscriber
     public function getSubscribedEvents()
     {
         //todo@sb: fix cronjobs via bin/console
-        return array(
+        return [
             'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
             'Shopware_CronJob_ShopwareConnectUpdateProducts' => 'updateProducts',
             'Shopware_CronJob_ConnectExportDynamicStreams' => 'exportDynamicStreams',
-        );
+        ];
     }
 
     /**
@@ -157,7 +161,6 @@ class CronJob extends BaseSubscriber
 
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
-
             } catch (\RuntimeException $e) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $streamService->log($streamId, $e->getMessage());
@@ -167,11 +170,11 @@ class CronJob extends BaseSubscriber
             if ($errorMessages) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
 
-                $errorMessagesText = "";
-                $displayedErrorTypes = array(
+                $errorMessagesText = '';
+                $displayedErrorTypes = [
                     ErrorHandler::TYPE_DEFAULT_ERROR,
                     ErrorHandler::TYPE_PRICE_ERROR
-                );
+                ];
 
                 foreach ($displayedErrorTypes as $displayedErrorType) {
                     $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);

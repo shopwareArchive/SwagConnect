@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
@@ -50,7 +33,7 @@ class Config
      */
     private $repository;
 
-    /** @var  \Shopware\Models\Shop\Shop */
+    /** @var \Shopware\Models\Shop\Shop */
     private $shopRepository;
 
     private $customerGroupRepository;
@@ -92,6 +75,7 @@ class Config
             if ($decodedString !== null) {
                 return $decodedString;
             }
+
             return $model->getValue();
         }
 
@@ -113,6 +97,7 @@ class Config
                 if ($decodedString !== null) {
                     return $decodedString;
                 }
+
                 return $model->getValue();
             }
         }
@@ -142,6 +127,7 @@ class Config
         if ($this->isCronPluginActive() && $this->isDynamicStreamCronActive()) {
             return true;
         }
+
         return false;
     }
 
@@ -203,6 +189,7 @@ class Config
         if ($decodedString !== null) {
             return $decodedString;
         }
+
         return $result[0]->getValue();
     }
 
@@ -227,7 +214,7 @@ class Config
      */
     public function setConfig($name, $value, $shopId = null, $groupName = null)
     {
-        $model = $this->getConfigRepository()->findOneBy(array('name' => $name));
+        $model = $this->getConfigRepository()->findOneBy(['name' => $name]);
 
         if (!$model) {
             $model = new ConfigModel();
@@ -250,7 +237,7 @@ class Config
 
     public function deleteConfig($name, $shopId = null)
     {
-        $whereClause = array('name' => $name);
+        $whereClause = ['name' => $name];
         if ($shopId > 0) {
             $whereClause['shopId'] = $shopId;
         }
@@ -279,7 +266,7 @@ class Config
         $result = Shopware()->Db()->fetchPairs($query);
         $result['shopId'] = $this->getConnectPDOGateway()->getShopId();
 
-        return array($result);
+        return [$result];
     }
 
     /**
@@ -299,10 +286,10 @@ class Config
         foreach ($data as $key => $configItem) {
 
             /** @var \Shopware\CustomModels\Connect\Config $model */
-            $model = $this->getConfigRepository()->findOneBy(array(
+            $model = $this->getConfigRepository()->findOneBy([
                 'name' => $key,
                 'groupName' => 'general'
-            ));
+            ]);
 
             if (is_null($model)) {
                 $model = new ConfigModel();
@@ -349,11 +336,11 @@ class Config
             unset($config['id']);
             foreach ($config as $key => $configValue) {
                 /** @var \Shopware\CustomModels\Connect\Config $model */
-                $model = $this->getConfigRepository()->findOneBy(array(
+                $model = $this->getConfigRepository()->findOneBy([
                     'name' => $key,
                     'shopId' => null,
                     'groupName' => 'import'
-                ));
+                ]);
                 if (is_null($model)) {
                     $model = new ConfigModel();
                     $model->setName($key);
@@ -401,11 +388,11 @@ class Config
             unset($config['id']);
             foreach ($config as $key => $configValue) {
                 /** @var \Shopware\CustomModels\Connect\Config $model */
-                $model = $this->getConfigRepository()->findOneBy(array(
+                $model = $this->getConfigRepository()->findOneBy([
                     'name' => $key,
                     'shopId' => null,
                     'groupName' => 'export'
-                ));
+                ]);
                 if (is_null($model)) {
                     $model = new ConfigModel();
                     $model->setName($key);
@@ -435,11 +422,11 @@ class Config
     {
         foreach ($units as $unit) {
             /** @var \Shopware\CustomModels\Connect\Config $model */
-            $model = $this->getConfigRepository()->findOneBy(array(
+            $model = $this->getConfigRepository()->findOneBy([
                 'name' => $unit['connectUnit'],
                 'shopId' => null,
                 'groupName' => 'units'
-            ));
+            ]);
 
             if (!$model) {
                 continue;
@@ -474,16 +461,17 @@ class Config
     public function compareExportConfiguration($config)
     {
         $currentConfig = $this->getExportConfig();
-        if ($currentConfig['priceGroupForPriceExport'] != $config['priceGroupForPriceExport'])
+        if ($currentConfig['priceGroupForPriceExport'] != $config['priceGroupForPriceExport']) {
             return true;
-        elseif ($currentConfig['priceFieldForPriceExport'] != $config['priceFieldForPriceExport'])
+        } elseif ($currentConfig['priceFieldForPriceExport'] != $config['priceFieldForPriceExport']) {
             return true;
-        elseif ($currentConfig['priceGroupForPurchasePriceExport'] != $config['priceGroupForPurchasePriceExport'])
+        } elseif ($currentConfig['priceGroupForPurchasePriceExport'] != $config['priceGroupForPurchasePriceExport']) {
             return true;
-        elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport'])
+        } elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport']) {
             return true;
-        elseif ($currentConfig['exportPriceMode'] != $config['exportPriceMode'])
+        } elseif ($currentConfig['exportPriceMode'] != $config['exportPriceMode']) {
             return true;
+        }
 
         return false;
     }
@@ -507,14 +495,14 @@ class Config
 
         $allowGroup = isset($exportConfigArray[$group]) && $exportConfigArray[$group] == $customerGroupKey;
 
-        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
+        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(['key' => $customerGroupKey]);
 
         $productCount = $this->getPriceGateway()->countProducts($customerGroup);
         $priceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'price');
         $basePriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'baseprice');
         $pseudoPriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'pseudoprice');
 
-        return array(
+        return [
             'price' => $allowGroup && $exportConfigArray[$price] == 'price' ? true : false,
             'priceAvailable' => false,
             'priceConfiguredProducts' => $priceConfiguredProducts,
@@ -525,9 +513,8 @@ class Config
             'pseudoPriceAvailable' => false,
             'pseudoPriceConfiguredProducts' => $pseudoPriceConfiguredProducts,
             'productCount' => $productCount
-        );
+        ];
     }
-
 
     /**
      * Returns config entity by value
@@ -536,7 +523,7 @@ class Config
      */
     public function getConfigByValue($value)
     {
-        $model = $this->getConfigRepository()->findOneBy(array('value' => $value, 'groupName' => 'units'));
+        $model = $this->getConfigRepository()->findOneBy(['value' => $value, 'groupName' => 'units']);
 
         return $model;
     }
@@ -548,7 +535,7 @@ class Config
      */
     public function setMarketplaceSettings(MarketplaceSettings $settings)
     {
-        $settings = (array)$settings;
+        $settings = (array) $settings;
         foreach ($settings as $settingName => $settingValue) {
             $this->setConfig($settingName, $settingValue, null, 'marketplace');
         }
@@ -574,7 +561,7 @@ class Config
             ->where('cs.default = :default')
             ->setParameter('default', true);
 
-        return (int)$builder->execute()->fetchColumn();
+        return (int) $builder->execute()->fetchColumn();
     }
 
     /**
@@ -588,7 +575,7 @@ class Config
             ->where('cs.default = :default')
             ->setParameter('default', true);
 
-        $categoryId = (int)$builder->execute()->fetchColumn();
+        $categoryId = (int) $builder->execute()->fetchColumn();
 
         return $this->manager->find('Shopware\Models\Category\Category', $categoryId);
     }
@@ -651,4 +638,4 @@ class Config
 
         return $this->connectGateway;
     }
-} 
+}

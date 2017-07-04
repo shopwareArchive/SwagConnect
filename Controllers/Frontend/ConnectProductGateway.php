@@ -1,17 +1,16 @@
 <?php
-
 /**
- * The product gateway controller is used to forward to a product from connect. It is subshop-aware and will
- * redirect the user to the 'best' subshop available.
- *
- * Class Shopware_Controllers_Frontend_ConnectProductGateway
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
+
 class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Controller_Action
 {
-    /** @var  ShopwarePlugins\Connect\Components\ConnectFactory */
+    /** @var ShopwarePlugins\Connect\Components\ConnectFactory */
     private $factory;
 
-    /** @var  \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery */
+    /** @var \ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery */
     private $frontendQuery;
 
     /**
@@ -37,6 +36,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         return $this->frontendQuery;
     }
+
     /**
      * Redirect the user to the best subshop with this product
      *
@@ -53,6 +53,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         // if no id was given, forward to start page
         if (!$sourceId) {
             $this->forward('index', 'index');
+
             return;
         }
 
@@ -61,6 +62,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         // if no article id was given, forward to start page
         if (!isset($articleId)) {
             $this->forward('index', 'index');
+
             return;
         }
 
@@ -69,6 +71,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         if (!$articleModel) {
             $this->forward('index', 'index');
+
             return;
         }
 
@@ -80,6 +83,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
             if (!$articleDetailModel) {
                 $this->forward('index', 'index');
+
                 return;
             }
         } else {
@@ -90,16 +94,18 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
         // if the product does not exist, forward to start page
         if (empty($product)) {
             $this->forward('index', 'index');
+
             return;
         }
 
-        $shopId = (int)$this->Request()->getParam('shId');
+        $shopId = (int) $this->Request()->getParam('shId');
         if ($shopId > 0) {
             /** @var \Shopware\Models\Shop\Shop $shop */
             $shop = $this->getFrontendQuery()->getShopById($shopId);
 
             if ($shop instanceof \Shopware\Models\Shop\Shop) {
                 $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
+
                 return;
             }
         }
@@ -111,6 +117,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
                 $shop = $this->getShopFromCategory($category);
                 if ($shop) {
                     $this->forwardToArticle($shop->getId(), $articleModel->getId(), $articleDetailModel->getId());
+
                     return;
                 }
             }
@@ -138,12 +145,12 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         $this->Response()->setCookie('shop', $shopId, 0, $shop->getBasePath());
 
-        $this->redirect(Shopware()->Front()->Router()->assemble(array(
+        $this->redirect(Shopware()->Front()->Router()->assemble([
             'sArticle' => $articleId,
             'sArticleDetail' => $articleDetailId,
             'module' => 'frontend',
             'controller' => 'detail'
-        )));
+        ]));
     }
 
     /**
@@ -165,6 +172,7 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
 
         /** @var \Shopware\Models\Shop\Shop $shop */
         $shop = $this->getFrontendQuery()->getShopByCategoryId($category->getId());
+
         return $shop;
     }
 
@@ -176,10 +184,11 @@ class Shopware_Controllers_Frontend_ConnectProductGateway extends Enlight_Contro
      */
     public function getProductById($id)
     {
-        $products = $this->getHelper()->getLocalProduct(array($id));
+        $products = $this->getHelper()->getLocalProduct([$id]);
         if (empty($products)) {
             return null;
         }
+
         return $products[0];
     }
 }

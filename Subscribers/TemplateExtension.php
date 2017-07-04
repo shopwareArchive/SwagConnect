@@ -1,6 +1,12 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
@@ -12,14 +18,13 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
  */
 class TemplateExtension extends BaseSubscriber
 {
-
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addConnectTemplateVariablesToDetail',
             'Enlight_Controller_Action_PostDispatch_Frontend' => 'addConnectStyle'
-        );
+        ];
     }
 
     public function addConnectStyle(\Enlight_Event_EventArgs $args)
@@ -31,7 +36,6 @@ class TemplateExtension extends BaseSubscriber
         if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
             $subject->View()->extendsTemplate('frontend/connect/index/index.tpl');
         }
-
     }
 
     /**
@@ -45,7 +49,7 @@ class TemplateExtension extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        switch($request->getActionName()) {
+        switch ($request->getActionName()) {
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
@@ -82,14 +86,14 @@ class TemplateExtension extends BaseSubscriber
         $sdk = $this->getSDK();
 
         $orderIds = array_map(function ($orderView) {
-            return (int)$orderView['id'];
+            return (int) $orderView['id'];
         }, $data);
 
         if (!$orderIds) {
             return $data;
         }
 
-        $connectOrderData = array();
+        $connectOrderData = [];
 
 
         $connectOrderUtil = new ConnectOrderUtil();
@@ -109,10 +113,10 @@ class TemplateExtension extends BaseSubscriber
             return $data;
         }
 
-        $shopNames = array();
+        $shopNames = [];
 
-        foreach($data as $idx => $order) {
-            if ( ! isset($connectOrderData[$order['id']])) {
+        foreach ($data as $idx => $order) {
+            if (! isset($connectOrderData[$order['id']])) {
                 continue;
             }
 
@@ -152,7 +156,7 @@ class TemplateExtension extends BaseSubscriber
         }
 
         $articleData = $view->getAssign('sArticle');
-        if(empty($articleData['articleID'])) {
+        if (empty($articleData['articleID'])) {
             return;
         }
 
@@ -168,12 +172,12 @@ class TemplateExtension extends BaseSubscriber
         }
 
         $product = reset($products);
-        if(empty($product->shopId)) {
+        if (empty($product->shopId)) {
             return;
         }
 
         // Fix prices for displaying
-        foreach(array('price', 'purchasePrice', 'vat') as $name) {
+        foreach (['price', 'purchasePrice', 'vat'] as $name) {
             $product->$name = round($product->$name, 2);
         }
 
@@ -182,11 +186,11 @@ class TemplateExtension extends BaseSubscriber
         $modelsManager = Shopware()->Models();
         /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
         $configComponent = new Config($modelsManager);
-        $view->assign(array(
+        $view->assign([
             'connectProduct' => $product,
             'connectShop' => $shop,
             'connectShopInfo' => $configComponent->getConfig('detailShopInfo'),
             'connectNoIndex' => $configComponent->getConfig('detailProductNoIndex'),
-        ));
+        ]);
     }
 }

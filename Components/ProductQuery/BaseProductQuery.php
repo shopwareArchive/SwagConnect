@@ -1,11 +1,15 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
 use Shopware\Connect\Struct\Product;
 use Shopware\Components\Model\ModelManager;
 use Doctrine\ORM\Query\Expr\Join;
-
 
 abstract class BaseProductQuery
 {
@@ -24,13 +28,12 @@ abstract class BaseProductQuery
         $this->mediaService = $mediaService;
     }
 
-    protected $attributeMapping = array(
+    protected $attributeMapping = [
         'weight' => Product::ATTRIBUTE_WEIGHT,
         'unit' => Product::ATTRIBUTE_UNIT,
         'referenceUnit' => 'ref_quantity',
         'purchaseUnit' => 'quantity'
-    );
-
+    ];
 
     /**
      * @return \Doctrine\ORM\QueryBuilder
@@ -56,7 +59,7 @@ abstract class BaseProductQuery
         $builder = $this->getProductQuery();
         $builder->andWhere("at.sourceId IN ($implodedIds)");
         if ($shopId > 0) {
-            $builder->andWhere("at.shopId = :shopId")
+            $builder->andWhere('at.shopId = :shopId')
                     ->setParameter('shopId', $shopId);
         }
 
@@ -96,8 +99,8 @@ abstract class BaseProductQuery
 
     /**
      * @param $articleId
-     * @return mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return mixed
      */
     protected function attributeGroup($articleId)
     {
@@ -105,8 +108,8 @@ abstract class BaseProductQuery
 
         return $builder->select('g')
             ->from('Shopware\Models\Attribute\Article', 'attr')
-            ->leftJoin('Shopware\Models\Article\Detail','d', Join::WITH, 'd.id = attr.articleDetailId')
-            ->leftJoin('Shopware\Models\Property\Group','g', Join::WITH, 'g.id = attr.connectPropertyGroup')
+            ->leftJoin('Shopware\Models\Article\Detail', 'd', Join::WITH, 'd.id = attr.articleDetailId')
+            ->leftJoin('Shopware\Models\Property\Group', 'g', Join::WITH, 'g.id = attr.connectPropertyGroup')
             ->where('d.articleId = :articleId')
             ->andWhere('d.kind = 1')
             ->setParameter(':articleId', $articleId)
@@ -120,7 +123,7 @@ abstract class BaseProductQuery
     protected function getImagesById($id)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('i.path', 'i.extension', 'i.main', 'i.position'))
+        $builder->select(['i.path', 'i.extension', 'i.main', 'i.position'])
             ->from('Shopware\Models\Article\Image', 'i')
             ->where('i.articleId = :articleId')
             ->andWhere('i.parentId IS NULL')
@@ -133,7 +136,7 @@ abstract class BaseProductQuery
 
         $images = $query->getArrayResult();
 
-        $images = array_map(function($image) {
+        $images = array_map(function ($image) {
             return $this->getImagePath($image['path'] . '.' . $image['extension']);
         }, $images);
 
@@ -173,15 +176,15 @@ abstract class BaseProductQuery
      */
     public function prepareCommonAttributes($row)
     {
-        if(isset($row['deliveryDate'])) {
+        if (isset($row['deliveryDate'])) {
             /** @var \DateTime $time */
             $time = $row['deliveryDate'];
             $row['deliveryDate'] = $time->getTimestamp();
         }
 
         // Fix categories
-        if(is_string($row['category']) && strlen($row['category']) > 0) {
-            $row['categories'] = json_decode($row['category'], true) ?: array();
+        if (is_string($row['category']) && strlen($row['category']) > 0) {
+            $row['categories'] = json_decode($row['category'], true) ?: [];
         }
         unset($row['category']);
 
@@ -196,7 +199,7 @@ abstract class BaseProductQuery
         }
 
         // Fix attributes
-        $row['attributes'] = array();
+        $row['attributes'] = [];
         foreach ($this->getAttributeMapping() as $swField => $connectField) {
             if (!array_key_exists($swField, $row)) {
                 continue;
@@ -208,7 +211,7 @@ abstract class BaseProductQuery
         // Fix dimensions
         $row = $this->prepareProductDimensions($row);
         // Fix availability
-        $row['availability'] = (int)$row['availability'];
+        $row['availability'] = (int) $row['availability'];
 
         return $row;
     }
@@ -220,12 +223,13 @@ abstract class BaseProductQuery
     public function prepareProductDimensions($row)
     {
         if (!empty($row['width']) && !empty($row['height']) && !empty($row['length'])) {
-            $dimension = array(
+            $dimension = [
                 $row['length'], $row['width'], $row['height']
-            );
+            ];
             $row['attributes'][Product::ATTRIBUTE_DIMENSION] = implode('x', $dimension);
         }
         unset($row['width'], $row['height'], $row['length']);
+
         return $row;
     }
 
@@ -234,4 +238,3 @@ abstract class BaseProductQuery
         return $this->attributeMapping;
     }
 }
-

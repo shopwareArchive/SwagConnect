@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -14,6 +19,7 @@ class LoggerTest extends ConnectTestHelper
         if (!$this->logger) {
             $this->logger = new Logger(Shopware()->Db());
         }
+
         return $this->logger;
     }
 
@@ -21,11 +27,11 @@ class LoggerTest extends ConnectTestHelper
     {
         $logger = $this->getLogger();
 
-        $message = 'Example Exception '.rand(1, 9999);
+        $message = 'Example Exception ' . rand(1, 9999);
         $logger->write(true, null, new \Exception($message));
 
         $sql = 'SELECT id FROM s_plugin_connect_log WHERE response LIKE ?';
-        $id = Shopware()->Db()->fetchOne($sql, array('%' . $message . '%'));
+        $id = Shopware()->Db()->fetchOne($sql, ['%' . $message . '%']);
 
         $this->assertNotEmpty($id);
     }
@@ -34,11 +40,11 @@ class LoggerTest extends ConnectTestHelper
     {
         $logger = $this->getLogger();
 
-        $message = 'Example Message '.rand(1, 9999);
+        $message = 'Example Message ' . rand(1, 9999);
         $logger->write(false, null, $message);
 
         $sql = 'SELECT id FROM s_plugin_connect_log WHERE response = ?';
-        $id = Shopware()->Db()->fetchOne($sql, array($message));
+        $id = Shopware()->Db()->fetchOne($sql, [$message]);
 
         $this->assertNotEmpty($id);
     }

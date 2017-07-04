@@ -1,9 +1,13 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 use Shopware\Connect\Struct\Product;
-use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Category\Category;
 
 class Sw41Query extends SwQuery
@@ -29,12 +33,13 @@ class Sw41Query extends SwQuery
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 
         /** @var $categories CategoryModel[] */
-        $categories = array();
-        foreach($product->categories as $category) {
+        $categories = [];
+        foreach ($product->categories as $category) {
             $categories = array_merge(
                 $query->setParameter('mapping', $category)->execute()
             );
         }
+
         return $categories;
     }
 
@@ -47,17 +52,17 @@ class Sw41Query extends SwQuery
     public function getConnectCategoryForProduct($id)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('categories'))
+        $builder->select(['categories'])
             ->from('Shopware\Models\Category\Category', 'categories', 'categories.id')
             ->andWhere(':articleId MEMBER OF categories.articles')
-            ->setParameters(array('articleId' => $id));
+            ->setParameters(['articleId' => $id]);
 
         $result = $builder->getQuery()->getResult();
         if (empty($result)) {
-            return array();
+            return [];
         }
 
-        $categories = array();
+        $categories = [];
         /** @var \Shopware\Models\Category\Category $category */
         foreach ($result as $category) {
             list($key, $name) = $this->extractCategory($category);
@@ -85,7 +90,7 @@ class Sw41Query extends SwQuery
         $path = $this->getCategoryRepository()->getPathById($category->getId(), 'name', ' > ');
         $key = $this->normalizeCategory($path);
 
-        return array($key, $category->getName());
+        return [$key, $category->getName()];
     }
 
     /**
@@ -108,9 +113,10 @@ class Sw41Query extends SwQuery
     public function normalizeCategory($categoryName)
     {
         $path = preg_split('(\\s+>\\s+)', trim($categoryName));
+
         return '/' . implode(
             '/',
-            array_map(array($this, 'normalizeCategoryName'), $path)
+            array_map([$this, 'normalizeCategoryName'], $path)
         );
     }
 }

@@ -1,28 +1,11 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
-namespace Tests\ShopwarePlugins\Connect;
 
+namespace Tests\ShopwarePlugins\Connect;
 
 class LastChangesTest extends ConnectTestHelper
 {
@@ -204,15 +187,15 @@ class LastChangesTest extends ConnectTestHelper
 
     private function createArticle()
     {
-        $minimalTestArticle = array(
+        $minimalTestArticle = [
             'name' => 'Glas -Teetasse 0,25l',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Teapavilion',
-            'mainDetail' => array(
+            'mainDetail' => [
                 'number' => uniqid('lct'),
-            ),
-        );
+            ],
+        ];
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
         /** @var \Shopware\Models\Article\Article $article */
@@ -220,7 +203,7 @@ class LastChangesTest extends ConnectTestHelper
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 1,
                 'to' => 5,
@@ -228,12 +211,12 @@ class LastChangesTest extends ConnectTestHelper
                 'articleID' => $article->getId(),
                 'articledetailsID' => $article->getMainDetail()->getId(),
                 'pseudoprice' => 0
-            )
+            ]
         );
 
         $this->db->insert(
             's_articles_prices',
-            array(
+            [
                 'pricegroup' => 'EK',
                 'from' => 6,
                 'to' => 'beliebig',
@@ -241,12 +224,11 @@ class LastChangesTest extends ConnectTestHelper
                 'articleID' => $article->getId(),
                 'articledetailsID' => $article->getMainDetail()->getId(),
                 'pseudoprice' => 0
-            )
+            ]
         );
 
         return $article;
     }
-
 
     public function tearDown()
     {
@@ -254,7 +236,7 @@ class LastChangesTest extends ConnectTestHelper
                 SELECT articleID
                 FROM s_articles_details
                 WHERE ordernumber LIKE "lct%" GROUP BY articleID');
-        $articleIds = array_map(function($item) {
+        $articleIds = array_map(function ($item) {
             return $item['articleID'];
         }, $query->fetchAll());
 
@@ -262,9 +244,9 @@ class LastChangesTest extends ConnectTestHelper
             return;
         }
 
-        $this->db->exec('DELETE FROM s_articles WHERE id IN (' . implode(", ", $articleIds) . ')');
+        $this->db->exec('DELETE FROM s_articles WHERE id IN (' . implode(', ', $articleIds) . ')');
         $this->db->exec('DELETE FROM s_articles_details WHERE ordernumber LIKE "lct%"');
-        $this->db->exec('DELETE FROM s_articles_prices WHERE articleID IN (' . implode(", ", $articleIds) . ')');
-        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE article_id IN (' . implode(", ", $articleIds) . ')');
+        $this->db->exec('DELETE FROM s_articles_prices WHERE articleID IN (' . implode(', ', $articleIds) . ')');
+        $this->db->exec('DELETE FROM s_plugin_connect_items WHERE article_id IN (' . implode(', ', $articleIds) . ')');
     }
 }

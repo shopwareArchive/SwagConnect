@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -25,6 +30,7 @@ trait CommandTestCaseTrait
         $application->doRun($input, $output);
 
         $consoleOutput = $this->readConsoleOutput($fp);
+
         return explode(PHP_EOL, $consoleOutput);
     }
 
@@ -40,6 +46,7 @@ trait CommandTestCaseTrait
             $output = fread($fp, 4096);
         }
         fclose($fp);
+
         return $output;
     }
 }

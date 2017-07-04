@@ -1,7 +1,11 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
-use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 
 /**
  * The basket widget shows the current basket amount and the current basket's products.
@@ -12,17 +16,16 @@ use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
  */
 class BasketWidget extends BaseSubscriber
 {
-
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'sBasket::sGetBasket::after' => 'storeBasketResultToSession',
             'Enlight_Controller_Action_PostDispatch_Widgets_Checkout' => 'fixBasketWidgetForConnect',
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketWidgetForConnect'
-        );
+        ];
     }
 
-    /** @var  \ShopwarePlugins\Connect\Components\ConnectFactory */
+    /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
     protected $factory;
 
     protected function getFactory()
@@ -57,7 +60,7 @@ class BasketWidget extends BaseSubscriber
         // ajaxCart was removed from array, because when user puts
         // connect article it's displayed in ajax cart, but
         // then puts local article and connect is missing
-        if (!in_array($actionName, array('info', 'ajaxAmount'))) {
+        if (!in_array($actionName, ['info', 'ajaxAmount'])) {
             return;
         }
 
@@ -110,5 +113,4 @@ class BasketWidget extends BaseSubscriber
 
         $args->setReturn($basket);
     }
-
 }

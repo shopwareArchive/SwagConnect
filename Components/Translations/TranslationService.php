@@ -1,14 +1,19 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Translations;
 
 class TranslationService implements TranslationServiceInterface
 {
-    /** @var  \PDO|\Enlight_Components_Db_Adapter_Pdo_Mysql */
+    /** @var \PDO|\Enlight_Components_Db_Adapter_Pdo_Mysql */
     protected $db;
     protected $countryCode;
 
-    protected $translations = array();
+    protected $translations = [];
 
     public function __construct($db, $language)
     {
@@ -34,7 +39,7 @@ class TranslationService implements TranslationServiceInterface
      */
     private function getTranslatedCountryNames($countries)
     {
-        if (in_array($this->countryCode, array('DEU', 'AUT'))) {
+        if (in_array($this->countryCode, ['DEU', 'AUT'])) {
             $select = 'countryname';
         } else {
             $select = 'countryen';
@@ -52,6 +57,5 @@ class TranslationService implements TranslationServiceInterface
         }
 
         return $countries;
-
     }
 }

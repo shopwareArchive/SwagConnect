@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -99,7 +104,7 @@ abstract class BaseSubscriber extends SubscribeManager
     {
         $template = '';
         if ($this->Application()->Container()->has('shop')) {
-            if($this->Application()
+            if ($this->Application()
                     ->Container()
                     ->get('shop')
                     ->getTemplate()
@@ -112,7 +117,7 @@ abstract class BaseSubscriber extends SubscribeManager
         }
 
         $this->Application()->Template()->addTemplateDir(
-            $this->Path() . 'Views/'.$template, 'connect'
+            $this->Path() . 'Views/' . $template, 'connect'
         );
     }
 
@@ -148,5 +153,4 @@ abstract class BaseSubscriber extends SubscribeManager
 
         return false;
     }
-
 }

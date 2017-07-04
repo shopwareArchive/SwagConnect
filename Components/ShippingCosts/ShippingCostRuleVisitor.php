@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ShippingCosts;
 
@@ -9,8 +14,7 @@ use ShopwarePlugins\Connect\Components\Translations\TranslationServiceInterface;
 
 class ShippingCostRuleVisitor extends RulesVisitor
 {
-
-    public $rules = array();
+    public $rules = [];
     public $vatMode;
     public $vat;
 
@@ -37,7 +41,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
 
     public function stopVisitRules(Rules $rules)
     {
-
     }
 
     /**
@@ -71,7 +74,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
             return;
         }
 
-        $this->currentRule = array('type' => $type);
+        $this->currentRule = ['type' => $type];
     }
 
     /**
@@ -102,7 +105,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
         $this->currentRule['name'] = $rule->label;
     }
 
-
     public function visitDownstreamCharges(Rule\DownstreamCharges $rule)
     {
         // TODO: Implement visitDownstreamCharges() method.
@@ -112,7 +114,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
     {
         $this->currentRule['values'] = array_map(
             function ($value) {
-                return array('value' => $value);
+                return ['value' => $value];
             },
             $this->translationService->get('countries', $rule->countries)
         );
@@ -120,7 +122,7 @@ class ShippingCostRuleVisitor extends RulesVisitor
 
     public function visitFreeCarriageLimit(Rule\FreeCarriageLimit $rule)
     {
-        $this->currentRule['values'] = array(array('value' => $rule->freeLimit));
+        $this->currentRule['values'] = [['value' => $rule->freeLimit]];
     }
 
     public function visitWeightDecorator(Rule\WeightDecorator $rule)
@@ -159,7 +161,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
      * Merge a rule into the $rules property
      *
      * If multiple rules of the same type are existing, merge them in order to have a unified table
-     *
      */
     private function mergeCurrentRule()
     {

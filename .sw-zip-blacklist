@@ -1,9 +1,14 @@
 psh
+php-cs-fixer
+
+Tests
+
+phpunit.xml
 .gitignore
 .psh.yml
 .psh.yaml
 .psh.yml.dist
 .psh.yaml.dist
-Tests
 .travis.yml
-phpunit.xml
+.php_cs.dist
+.php_cs.cache

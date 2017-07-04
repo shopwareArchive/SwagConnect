@@ -1,7 +1,11 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
-
 
 class ErrorHandler
 {
@@ -11,7 +15,7 @@ class ErrorHandler
     /**
      * @var array
      */
-    private $messages = array();
+    private $messages = [];
 
     /**
      * @param \Exception $e
@@ -20,11 +24,12 @@ class ErrorHandler
     public function handle(\Exception $e, $prefix = null)
     {
         if ($e instanceof \Shopware\Connect\Exception\VerificationFailedException && $this->isPriceError($e)) {
-            $this->messages[self::TYPE_PRICE_ERROR][] = " &bull; " . $prefix . $e->getMessage();
+            $this->messages[self::TYPE_PRICE_ERROR][] = ' &bull; ' . $prefix . $e->getMessage();
+
             return;
         }
 
-        $this->messages[self::TYPE_DEFAULT_ERROR][] = " &bull; " . $prefix . $e->getMessage();
+        $this->messages[self::TYPE_DEFAULT_ERROR][] = ' &bull; ' . $prefix . $e->getMessage();
     }
 
     /**
@@ -33,7 +38,7 @@ class ErrorHandler
      */
     public function isPriceError(\Exception $e)
     {
-        switch($e->getMessage()){
+        switch ($e->getMessage()) {
             case 'The purchasePrice is not allowed to be 0 or smaller.':
             case 'The price is not allowed to be 0 or smaller.':
             case 'Fixed price is not allowed when export purchasePrice only':

@@ -1,6 +1,12 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
 use ShopwarePlugins\Connect\Components\Logger;
 
 /**
@@ -13,11 +19,11 @@ class CustomerGroup extends BaseSubscriber
 {
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PreDispatch_Backend_Base' => 'filterCustomerGroup',
             'Shopware\Models\Customer\Repository::getCustomerGroupsQueryBuilder::after' => 'filterCustomerGroupFromQueryBuilder',
             'Shopware\Models\Customer\Repository::getCustomerGroupsWithoutIdsQueryBuilder::before' => 'addToWithoutIdsQueryBuilder'
-        );
+        ];
     }
 
     /**
@@ -42,12 +48,13 @@ class CustomerGroup extends BaseSubscriber
             if ($request->getParam('showConnect', false)) {
                 return;
             }
-            $filter = $request->getParam('filter', array());
-            $filter[] = array("property" => "id", "value" => $this->getConnectCustomerGroupId(), 'expression' => '<>');
+            $filter = $request->getParam('filter', []);
+            $filter[] = ['property' => 'id', 'value' => $this->getConnectCustomerGroupId(), 'expression' => '<>'];
             $request->setParam('filter', $filter);
         } catch (\Exception $e) {
             $logger = new Logger(Shopware()->Db());
             $logger->write(true, 'filterCustomerGroup', $e->getMessage());
+
             return;
         }
     }
@@ -89,7 +96,7 @@ class CustomerGroup extends BaseSubscriber
         $userIds = $args->get('usedIds');
 
         if (!$userIds) {
-            $userIds = array();
+            $userIds = [];
         }
         $userIds[] = $this->getConnectCustomerGroupId();
 
@@ -105,7 +112,7 @@ class CustomerGroup extends BaseSubscriber
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->findOneBy(array('connectGroup' => true));
+        $model = $repo->findOneBy(['connectGroup' => true]);
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {
@@ -114,5 +121,4 @@ class CustomerGroup extends BaseSubscriber
 
         return null;
     }
-
 }

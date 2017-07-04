@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\Utils;
 
@@ -6,7 +11,6 @@ use Shopware\Connect\Units;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Unit;
-
 
 /**
  * Class UnitMapper
@@ -21,7 +25,7 @@ class UnitMapper
 
     private $manager;
 
-    /** @var  \Shopware\Connect\Units */
+    /** @var \Shopware\Connect\Units */
     private $sdkUnits;
 
     private $repository;
@@ -33,8 +37,7 @@ class UnitMapper
     public function __construct(
         Config $configComponent,
         ModelManager $manager
-    )
-    {
+    ) {
         $this->configComponent = $configComponent;
         $this->manager = $manager;
     }
@@ -61,7 +64,7 @@ class UnitMapper
 
         // search for same label in connect units
         $repository = $this->getUnitRepository();
-        $unitModel = $repository->findOneBy(array('unit' => $shopwareUnit));
+        $unitModel = $repository->findOneBy(['unit' => $shopwareUnit]);
 
         if ($unitModel) {
             $unitName = $unitModel->getName();
@@ -100,7 +103,7 @@ class UnitMapper
         // search for same key in Shopware units
         $repository = $this->getUnitRepository();
         /** @var \Shopware\Models\Article\Unit $unitModel */
-        $unitModel = $repository->findOneBy(array('unit' => $connectUnit));
+        $unitModel = $repository->findOneBy(['unit' => $connectUnit]);
 
         if ($unitModel) {
             return $unitModel->getUnit();
@@ -110,7 +113,7 @@ class UnitMapper
 
         // search for same label in Shopware units
         if ($connectUnits[$connectUnit]) {
-            $unitModel = $repository->findOneBy(array('name' => $connectUnits[$connectUnit]));
+            $unitModel = $repository->findOneBy(['name' => $connectUnits[$connectUnit]]);
 
             if ($unitModel) {
                 return $unitModel->getUnit();
@@ -120,7 +123,7 @@ class UnitMapper
         // search for same label in "de" Shopware units
         $deConnectUnits = $this->getSdkLocalizedUnits('de');
         if ($deConnectUnits[$connectUnit]) {
-            $unitModel = $repository->findOneBy(array('name' => $deConnectUnits[$connectUnit]));
+            $unitModel = $repository->findOneBy(['name' => $deConnectUnits[$connectUnit]]);
 
             if ($unitModel) {
                 return $unitModel->getUnit();
@@ -129,7 +132,7 @@ class UnitMapper
 
         if ($this->configComponent->getConfig('createUnitsAutomatically', false) == true) {
             // only german units for now
-            $units = $this->createUnits(array($connectUnit));
+            $units = $this->createUnits([$connectUnit]);
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $units[0];
 
@@ -155,13 +158,12 @@ class UnitMapper
     {
         $deConnectUnits = $this->getSdkLocalizedUnits('de');
 
-        $models = array();
+        $models = [];
 
-        foreach ($units as $unitKey)
-        {
-            $unit = $this->getUnitRepository()->findOneBy(array(
+        foreach ($units as $unitKey) {
+            $unit = $this->getUnitRepository()->findOneBy([
                 'unit' => $unitKey
-            ));
+            ]);
 
             if (!$unit) {
                 if (!isset($deConnectUnits[$unitKey])) {
@@ -200,7 +202,7 @@ class UnitMapper
      */
     private function getSdkLocalizedUnits($locale = 'en')
     {
-            return $this->getSdkUnits()->getLocalizedUnits($locale);
+        return $this->getSdkUnits()->getLocalizedUnits($locale);
     }
 
     /**
@@ -215,5 +217,4 @@ class UnitMapper
 
         return $this->repository;
     }
-
 }

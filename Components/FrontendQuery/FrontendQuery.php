@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\FrontendQuery;
 
@@ -19,8 +24,8 @@ class FrontendQuery
 
     /**
      * @param $articleId
-     * @return Article|null
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Article|null
      */
     public function getArticleById($articleId)
     {
@@ -35,8 +40,8 @@ class FrontendQuery
 
     /**
      * @param $detailId
-     * @return Detail|null
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Detail|null
      */
     public function getArticleDetailById($detailId)
     {
@@ -52,8 +57,8 @@ class FrontendQuery
     /**
      * @param $shopId
      * @param bool $checkActive
-     * @return Shop|null
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Shop|null
      */
     public function getShopById($shopId, $checkActive = false)
     {
@@ -72,8 +77,8 @@ class FrontendQuery
 
     /**
      * @param $categoryId
-     * @return Category|null
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Category|null
      */
     public function getCategoryById($categoryId)
     {
@@ -88,8 +93,8 @@ class FrontendQuery
 
     /**
      * @param $categoryId
-     * @return Shop|null
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Shop|null
      */
     public function getShopByCategoryId($categoryId)
     {

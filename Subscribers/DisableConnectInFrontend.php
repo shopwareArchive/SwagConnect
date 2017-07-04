@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -11,12 +16,11 @@ namespace ShopwarePlugins\Connect\Subscribers;
  */
 class DisableConnectInFrontend extends BaseSubscriber
 {
-
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail' => 'disableBuyButtonForConnect'
-        );
+        ];
     }
 
     /**
@@ -50,7 +54,7 @@ class DisableConnectInFrontend extends BaseSubscriber
     public function isConnectArticle($id)
     {
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
-        return Shopware()->Db()->fetchOne($sql, array($id));
-    }
 
+        return Shopware()->Db()->fetchOne($sql, [$id]);
+    }
 }

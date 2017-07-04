@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
@@ -95,7 +100,7 @@ class ConnectFactory
      */
     public function getSDK()
     {
-        if(!$this->sdk) {
+        if (!$this->sdk) {
             $this->sdk = $this->getContainer()->get('ConnectSDK');
         }
 
@@ -171,11 +176,11 @@ class ConnectFactory
          */
         $debugHost = $this->getConfigComponent()->getConfig('connectDebugHost');
         if (!empty($debugHost)) {
-            $debugHost = str_replace(array('http://', 'https://'),'', $debugHost);
+            $debugHost = str_replace(['http://', 'https://'], '', $debugHost);
              // Set the debugHost as environment vars for the DependencyResolver
             putenv("_SOCIALNETWORK_HOST={$debugHost}");
 
-            if (preg_match("/(stage[1-9]?.connect.*)|(connect.local$)/", $debugHost, $matches)) {
+            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)/', $debugHost, $matches)) {
                 // Use local or staging url
                 putenv("_TRANSACTION_HOST=transaction.{$matches[0]}");
             }
@@ -196,6 +201,7 @@ class ConnectFactory
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
             );
+
         return new SDK(
             $apiKey,
             $this->getSdkRoute($front),
@@ -246,15 +252,15 @@ class ConnectFactory
      */
     private function getSdkRoute($front)
     {
-        if ( ! $front->Router()) {
+        if (! $front->Router()) {
             return '';
         }
 
-        $url = $front->Router()->assemble(array(
+        $url = $front->Router()->assemble([
             'module' => 'backend',
             'controller' => 'connect_gateway',
             'fullPath' => true
-        ));
+        ]);
 
         if ($this->getConfigComponent()->hasSsl()) {
             $url = str_replace('http://', 'https://', $url);
@@ -268,7 +274,7 @@ class ConnectFactory
      */
     public function getHelper()
     {
-        if($this->helper === null) {
+        if ($this->helper === null) {
             $this->helper = new Helper(
                 $this->getModelManager(),
                 $this->getCategoryQuery(),
@@ -299,7 +305,8 @@ class ConnectFactory
     public function getBasketHelper()
     {
         $db = Shopware()->Db();
-        return new BasketHelper (
+
+        return new BasketHelper(
             $db,
             $this->getSDK(),
             $this->getHelper(),
@@ -359,7 +366,7 @@ class ConnectFactory
      */
     public function checkMinimumVersion($requiredVersion)
     {
-         $version = Shopware()->Config()->version;
+        $version = Shopware()->Config()->version;
 
         if ($version === '___VERSION___') {
             return true;
@@ -412,13 +419,13 @@ class ConnectFactory
             return $exportDomain;
         }
 
-        return Shopware()->Front()->Router()->assemble(array(
+        return Shopware()->Front()->Router()->assemble([
             'module' => 'frontend',
             'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
-        ));
+        ]);
     }
 
     /**

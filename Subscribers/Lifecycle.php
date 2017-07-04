@@ -1,10 +1,13 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Connect\Struct\PaymentStatus;
-use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
@@ -46,7 +49,7 @@ class Lifecycle extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
             'Shopware\Models\Article\Article::postPersist' => 'onUpdateArticle',
             'Shopware\Models\Article\Detail::postPersist' => 'onPersistDetail',
@@ -54,7 +57,7 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
             'Shopware\Models\Shop\Shop::preRemove' => 'onDeleteShop',
-        );
+        ];
     }
 
     /**
@@ -102,7 +105,7 @@ class Lifecycle extends BaseSubscriber
         // this will generate wrong Connect changes
         if ($changeSet['propertyGroup']) {
             $filterGroupId = $db->fetchOne(
-                "SELECT filtergroupID FROM s_articles WHERE id = ?", [$entity->getId()]
+                'SELECT filtergroupID FROM s_articles WHERE id = ?', [$entity->getId()]
             );
 
             $db->executeUpdate(
@@ -111,7 +114,6 @@ class Lifecycle extends BaseSubscriber
             );
         }
     }
-
 
     /**
      * @param \Enlight_Event_EventArgs $eventArgs
@@ -172,7 +174,6 @@ class Lifecycle extends BaseSubscriber
         $this->handleChange($entity);
     }
 
-
     /**
      * Generate changes for Article or Detail if necessary
      *
@@ -227,7 +228,7 @@ class Lifecycle extends BaseSubscriber
         try {
             if ($model instanceof \Shopware\Models\Article\Detail) {
                 $this->generateChangesForDetail($model, $forceExport);
-            } elseif ($model instanceof \Shopware\Models\Article\Article){
+            } elseif ($model instanceof \Shopware\Models\Article\Article) {
                 $this->generateChangesForArticle($model, $forceExport);
             }
         } catch (\Exception $e) {
@@ -293,10 +294,10 @@ class Lifecycle extends BaseSubscriber
         $shop = $eventArgs->get('entity');
         $shopId = $shop->getId();
         $exportLanguages = $this->getConnectConfig()->getConfig('exportLanguages');
-        $exportLanguages = $exportLanguages ?: array();
+        $exportLanguages = $exportLanguages ?: [];
 
         if (!in_array($shopId, $exportLanguages)) {
-           return;
+            return;
         }
 
         $exportLanguages = array_splice($exportLanguages, array_search($shopId, $exportLanguages), 1);
@@ -312,18 +313,19 @@ class Lifecycle extends BaseSubscriber
         $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
         if (!$detail->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
             $this->getConnectExport()->syncDeleteDetail($detail);
+
             return;
         }
 
         if ($this->autoUpdateProducts == 1 || $force === true) {
             $this->getConnectExport()->export(
-                array($attribute->getSourceId()), null, true
+                [$attribute->getSourceId()], null, true
             );
         } elseif ($this->autoUpdateProducts == 2) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
-                array('cron_update' => 1),
-                array('article_detail_id' => $detail->getId())
+                ['cron_update' => 1],
+                ['article_detail_id' => $detail->getId()]
             );
         }
     }
@@ -332,6 +334,7 @@ class Lifecycle extends BaseSubscriber
     {
         if (!$article->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
             $this->getConnectExport()->setDeleteStatusForVariants($article);
+
             return;
         }
 
@@ -342,8 +345,8 @@ class Lifecycle extends BaseSubscriber
         } elseif ($this->autoUpdateProducts == 2) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
-                array('cron_update' => 1),
-                array('article_id' => $article->getId())
+                ['cron_update' => 1],
+                ['article_id' => $article->getId()]
             );
         }
     }

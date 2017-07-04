@@ -1,10 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\CategoryQuery;
-use Doctrine\ORM\QueryBuilder;
 
 abstract class SwQuery implements CategoryQuery
 {
@@ -12,7 +16,7 @@ abstract class SwQuery implements CategoryQuery
      * @var ModelManager
      */
     protected $manager;
-    /** @var  RelevanceSorter */
+    /** @var RelevanceSorter */
     protected $relevanceSorter;
 
     public function __construct(ModelManager $manager, RelevanceSorter $relevanceSorter)
@@ -34,6 +38,7 @@ abstract class SwQuery implements CategoryQuery
         $repository = $this->manager->getRepository(
             'Shopware\Models\Article\Article'
         );
+
         return $repository;
     }
 
@@ -45,6 +50,7 @@ abstract class SwQuery implements CategoryQuery
         $repository = $this->manager->getRepository(
             'Shopware\Models\Category\Category'
         );
+
         return $repository;
     }
 }

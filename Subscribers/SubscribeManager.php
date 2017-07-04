@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -10,10 +15,9 @@ namespace ShopwarePlugins\Connect\Subscribers;
  */
 abstract class SubscribeManager extends \Enlight_Event_Subscriber
 {
-
     protected $debug = true;
 
-    protected $listeners = array();
+    protected $listeners = [];
 
     /**
      * Creates the event handlers for the listener.
@@ -22,13 +26,13 @@ abstract class SubscribeManager extends \Enlight_Event_Subscriber
      */
     public function __construct()
     {
-        foreach ($this->getSubscribedEvents() as $event => $listener)  {
+        foreach ($this->getSubscribedEvents() as $event => $listener) {
             if (!method_exists($this, $listener)) {
                 throw new \RuntimeException("{$listener} not implemented");
             }
             $handler = new \Enlight_Event_Handler_Default(
                 $event,
-                array($this, $listener)
+                [$this, $listener]
             );
             $this->listeners[] = $handler;
         }
@@ -50,6 +54,7 @@ abstract class SubscribeManager extends \Enlight_Event_Subscriber
     public function registerListener(\Enlight_Event_Handler $handler)
     {
         $this->listeners[] = $handler;
+
         return $this;
     }
 
@@ -61,7 +66,8 @@ abstract class SubscribeManager extends \Enlight_Event_Subscriber
      */
     public function removeListener(\Enlight_Event_Handler $handler)
     {
-        $this->listeners = array_diff($this->listeners, array($handler));
+        $this->listeners = array_diff($this->listeners, [$handler]);
+
         return $this;
     }
 }

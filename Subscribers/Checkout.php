@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -10,16 +15,12 @@ use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Reservation;
-use Shopware\Connect\Struct\TotalShippingCosts;
 use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
-use ShopwarePlugins\Connect\Components\Utils\CountryCodeResolver;
 use ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper;
-use Shopware\Plugin\Debug\Components\Utils;
-use ShopwarePlugins\Connect\Components\Utils\OrderPaymentStatusMapper;
 
 /**
  * Handles the whole checkout manipulation, which is required for the connect checkout
@@ -45,7 +46,7 @@ class Checkout extends BaseSubscriber
     protected $factory;
 
     /**
-     * @var ModelManager $manager
+     * @var ModelManager
      */
     protected $manager;
 
@@ -69,18 +70,17 @@ class Checkout extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForConnect',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveConnectProductsOnCheckoutFinish',
             'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
-        );
+        ];
     }
 
     public function updateSessionId(\Enlight_Event_EventArgs $args)
     {
         $this->newSessionId = $args->get('newSessionId');
     }
-
 
     /**
      * @return Logger
@@ -93,7 +93,6 @@ class Checkout extends BaseSubscriber
 
         return $this->logger;
     }
-
 
     protected function getFactory()
     {
@@ -144,7 +143,7 @@ class Checkout extends BaseSubscriber
 
         // send order to connect
         // this method must be called after external payments (Sofort, Billsafe)
-        if($actionName == 'finish' && !empty($view->sOrderNumber)) {
+        if ($actionName == 'finish' && !empty($view->sOrderNumber)) {
             try {
                 $this->checkoutReservedProducts($view->sOrderNumber);
             } catch (CheckoutException $e) {
@@ -159,18 +158,19 @@ class Checkout extends BaseSubscriber
         // and information about connect products is not available.
         if (!$hasConnectProduct) {
             $this->getHelper()->clearConnectReservation();
+
             return;
         }
 
-        if(!in_array($actionName, array('confirm', 'shippingPayment', 'cart', 'finish'))) {
+        if (!in_array($actionName, ['confirm', 'shippingPayment', 'cart', 'finish'])) {
             return;
         }
 
-        if(empty($view->sBasket) || !$request->isDispatched()) {
+        if (empty($view->sBasket) || !$request->isDispatched()) {
             return;
         }
 
-        if(!empty($view->sOrderNumber)) {
+        if (!empty($view->sOrderNumber)) {
             return;
         }
 
@@ -190,28 +190,27 @@ class Checkout extends BaseSubscriber
         $basketHelper->setBasket($view->sBasket);
 
         // If no messages are shown, yet, check products from remote shop and build message array
-        if(($connectMessages = Shopware()->Session()->connectMessages) === null) {
-            $connectMessages = array();
+        if (($connectMessages = Shopware()->Session()->connectMessages) === null) {
+            $connectMessages = [];
 
             $session = Shopware()->Session();
             $userData = $session['sOrderVariables']['sUserData'];
             // prepare an order to check products
             $order = new \Shopware\Connect\Struct\Order();
-            $order->orderItems = array();
+            $order->orderItems = [];
             $order->billingAddress = $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
-            $allProducts = array();
+            $allProducts = [];
 
-            foreach($basketHelper->getConnectProducts() as $shopId => $products) {
+            foreach ($basketHelper->getConnectProducts() as $shopId => $products) {
                 $products = $this->getHelper()->prepareConnectUnit($products);
                 $allProducts = array_merge($allProducts, $products);
                 // add order items in connect order
-                $order->orderItems = array_map(function(Product $product) use ($basketHelper) {
-                    return new OrderItem(array(
+                $order->orderItems = array_map(function (Product $product) use ($basketHelper) {
+                    return new OrderItem([
                         'product' => $product,
                         'count' => $basketHelper->getQuantityForProduct($product),
-                    ));
-
+                    ]);
                 }, $products);
             }
 
@@ -229,7 +228,7 @@ class Checkout extends BaseSubscriber
                 $checkResult = $sdk->checkProducts($order);
                 $basketHelper->setCheckResult($checkResult);
 
-                if($checkResult->hasErrors()) {
+                if ($checkResult->hasErrors()) {
                     $connectMessages = $checkResult->errors;
                 }
             } catch (\Exception $e) {
@@ -261,7 +260,7 @@ class Checkout extends BaseSubscriber
 
         // Set the sOrderVariables for the session based on the original content subarray of the basket array
         // @HL - docs?
-        if($actionName == 'confirm') {
+        if ($actionName == 'confirm') {
             $session = Shopware()->Session();
             /** @var $variables \ArrayObject */
             $variables = $session->offsetGet('sOrderVariables');
@@ -287,8 +286,8 @@ class Checkout extends BaseSubscriber
             $message = trim($connectMessage->message);
             $normalized = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $connectMessage->message));
             if (empty($normalized) || empty($message)) {
-                $normalized = "unknown-connect-error";
-                $message = "Unknown error";
+                $normalized = 'unknown-connect-error';
+                $message = 'Unknown error';
             }
             $translation = $namespace->get(
                 $normalized,
@@ -321,7 +320,7 @@ class Checkout extends BaseSubscriber
         $userData = $session['sOrderVariables']['sUserData'];
         $paymentName = $userData['additional']['payment']['name'];
 
-        if(($request->getActionName() != 'finish' && $request->getActionName() != 'payment')) {
+        if (($request->getActionName() != 'finish' && $request->getActionName() != 'payment')) {
             if (($request->getActionName() == 'confirm' && $paymentName == 'klarna_checkout')) {
                 // BEP-1010 Fix for Klarna checkout
             } else {
@@ -329,9 +328,9 @@ class Checkout extends BaseSubscriber
             }
         }
 
-        if(empty($session['sOrderVariables'])) {
-			return;
-		}
+        if (empty($session['sOrderVariables'])) {
+            return;
+        }
 
         if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
@@ -344,11 +343,11 @@ class Checkout extends BaseSubscriber
             $connectMessage = new \stdClass();
             $connectMessage->message = 'frontend_checkout_cart_connect_payment_not_allowed';
 
-            $connectMessages = array(
-                0 => array(
+            $connectMessages = [
+                0 => [
                     'connectmessage' => $connectMessage
-                )
-            );
+                ]
+            ];
 
             Shopware()->Session()->connectMessages = $this->translateConnectMessages($connectMessages);
             $controller->forward('confirm');
@@ -359,7 +358,7 @@ class Checkout extends BaseSubscriber
         }
 
         $order = new \Shopware\Connect\Struct\Order();
-        $order->orderItems = array();
+        $order->orderItems = [];
         $order->deliveryAddress = $this->getDeliveryAddress($userData);
 
         $basket = $session['sOrderVariables']['sBasket'];
@@ -370,7 +369,7 @@ class Checkout extends BaseSubscriber
         $order->paymentType = $orderPaymentMapper->mapShopwareOrderPaymentToConnect($orderPaymentName);
 
         foreach ($basket['content'] as $row) {
-            if(!empty($row['mode'])) {
+            if (!empty($row['mode'])) {
                 continue;
             }
 
@@ -385,17 +384,17 @@ class Checkout extends BaseSubscriber
 
             if (empty($products)) {
                 continue;
-            } else {
-                $product = $products[0];
             }
+            $product = $products[0];
 
-            if($product === null || $product->shopId === null) {
+
+            if ($product === null || $product->shopId === null) {
                 continue;
             }
 
             $orderItem = new \Shopware\Connect\Struct\OrderItem();
             $orderItem->product = $product;
-            $orderItem->count = (int)$row['quantity'];
+            $orderItem->count = (int) $row['quantity'];
             $order->orderItems[] = $orderItem;
         }
 
@@ -416,7 +415,7 @@ class Checkout extends BaseSubscriber
                 throw new \Exception('Error during reservation');
             }
 
-            if(!empty($reservation->messages)) {
+            if (!empty($reservation->messages)) {
                 $messages = $reservation->messages;
             }
         } catch (\Exception $e) {
@@ -429,7 +428,7 @@ class Checkout extends BaseSubscriber
             ));
         }
 
-        if(!empty($messages)) {
+        if (!empty($messages)) {
             Shopware()->Session()->connectMessages = $messages;
             $controller->forward('confirm');
         } else {
@@ -455,22 +454,23 @@ class Checkout extends BaseSubscriber
         $address->country = $userData['additional']['countryShipping']['iso3']; //when the user is not logged in
         $address->phone = $userData['billingaddress']['phone'];
         $address->email = $userData['additional']['user']['email'];
-        if(!empty($userData['additional']['stateShipping']['shortcode'])) {
+        if (!empty($userData['additional']['stateShipping']['shortcode'])) {
             $address->state = $userData['additional']['stateShipping']['shortcode'];
         }
         $address->firstName = $shippingData['firstname'];
         $address->surName = $shippingData['lastname'];
-        if(!empty($shippingData['company'])) {
+        if (!empty($shippingData['company'])) {
             $address->company = $shippingData['company'];
         }
         $address->street = $shippingData['street'];
         $address->streetNumber = (string) $shippingData['streetnumber'];
+
         return $address;
     }
 
     private function createDummyAddres($country='DEU')
     {
-        return new \Shopware\Connect\Struct\Address(array(
+        return new \Shopware\Connect\Struct\Address([
             'country' => $country,
             'firstName' => 'Shopware',
             'surName' => 'AG',
@@ -479,9 +479,8 @@ class Checkout extends BaseSubscriber
             'city' => 'Schöppingen',
             'phone' => '+49 (0) 2555 92885-0',
             'email' => 'info@shopware.com'
-        ));
+        ]);
     }
-
 
     /**
      * Hooks the sSaveOrder frontend method and reserves the connect products
@@ -498,9 +497,9 @@ class Checkout extends BaseSubscriber
         }
 
         $reservation = unserialize(Shopware()->Session()->connectReservation);
-        if($reservation !== null && $reservation !== false) {
+        if ($reservation !== null && $reservation !== false) {
             $result = $sdk->checkout($reservation, $orderNumber);
-            foreach($result as $shopId => $success) {
+            foreach ($result as $shopId => $success) {
                 if (!$success) {
                     $e = new CheckoutException("Could not checkout from warehouse {$shopId}");
                     $this->getLogger()->write(true, 'Error during checkout with this reservation: ' . json_encode($reservation, JSON_PRETTY_PRINT), $e, 'checkout');
@@ -524,7 +523,7 @@ class Checkout extends BaseSubscriber
             $id = Shopware()->Session()->sUserId;
 
             $sql = 'SELECT phone FROM s_user_billingaddress WHERE userID = :id';
-            $result = Shopware()->Db()->fetchOne($sql, array('id' => $id));
+            $result = Shopware()->Db()->fetchOne($sql, ['id' => $id]);
             if (!$result) {
                 $view->assign('phoneMissing', true);
             }
@@ -533,15 +532,15 @@ class Checkout extends BaseSubscriber
 
     protected function getNotAvailableMessageForProducts($products)
     {
-        $messages = array();
+        $messages = [];
         /** \Shopware\Connect\Struct\Product */
         foreach ($products as $product) {
-            $messages[] = new Message(array(
+            $messages[] = new Message([
                 'message' => 'Due to technical reasons, product %product is not available.',
-                'values' => array(
+                'values' => [
                     'product' => $product->title,
-                )
-            ));
+                ]
+            ]);
         }
 
         return $messages;
@@ -562,13 +561,13 @@ class Checkout extends BaseSubscriber
 
         foreach ($checkResult->shippingCosts as $shipping) {
             if ($shipping->isShippable === false) {
-                $connectMessages[] = new Message(array(
+                $connectMessages[] = new Message([
                     'message' => $namespace->get(
                             'frontend_checkout_cart_connect_not_shippable',
                             'Ihre Bestellung kann nicht geliefert werden',
                             true
                         )
-                ));
+                ]);
             }
         }
 

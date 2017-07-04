@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
@@ -18,7 +23,6 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
  */
 class Update
 {
-
     /**
      * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
@@ -46,8 +50,7 @@ class Update
      * @param Pdo $db
      * @param $version
      */
-    public function __construct
-    (
+    public function __construct(
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
@@ -90,23 +93,23 @@ class Update
             SET s_config = ?
             WHERE s_shop = "_last_update_"
             LIMIT 1; ',
-            array(time() - 8 * 60 * 60 * 24)
+            [time() - 8 * 60 * 60 * 24]
         );
     }
 
     private function createExportedFlag()
     {
         if (version_compare($this->version, '1.0.1', '<=')) {
-            $this->db->query("
+            $this->db->query('
                 ALTER TABLE `s_plugin_connect_items`
                 ADD COLUMN `exported` TINYINT(1) DEFAULT 0
-            ");
+            ');
 
-            $this->db->query("
+            $this->db->query('
                 UPDATE `s_plugin_connect_items`
                 SET `exported` = 1
-                WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL",
-                array(Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED)
+                WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL',
+                [Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED]
             );
         }
     }
@@ -114,7 +117,7 @@ class Update
     private function removeRedirectMenu()
     {
         if (version_compare($this->version, '1.0.4', '<=')) {
-            $connectItem = $this->bootstrap->Menu()->findOneBy(array('label' => 'Open Connect', 'action' => ''));
+            $connectItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Open Connect', 'action' => '']);
             if ($connectItem) {
                 $this->modelManager->remove($connectItem);
                 $this->modelManager->flush();
@@ -122,7 +125,8 @@ class Update
         }
     }
 
-    private function updateConnectAttribute(){
+    private function updateConnectAttribute()
+    {
         if (version_compare($this->version, '1.0.6', '<=')) {
             $result = $this->db->query("SELECT value FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
             $row = $result->fetch();
@@ -131,11 +135,11 @@ class Update
                 $attr = $row['value'];
             }
 
-            $this->db->query("
+            $this->db->query('
                     UPDATE `s_articles_attributes` 
-                    SET `connect_reference` = `attr" . $attr . "` 
+                    SET `connect_reference` = `attr' . $attr . '` 
                     WHERE connect_reference IS NULL;
-                ");
+                ');
 
             $this->db->query("DELETE FROM s_plugin_connect_config WHERE name = 'connectAttribute'");
         }
@@ -144,7 +148,6 @@ class Update
     private function addConnectDescriptionElement()
     {
         if (version_compare($this->version, '1.0.9', '<=')) {
-
             $tableName = $this->modelManager->getClassMetadata('Shopware\Models\Attribute\Article')->getTableName();
             $columnName = 'connect_product_description';
 
@@ -260,19 +263,19 @@ class Update
             $isExists = $this->db->query('
                 SELECT `id` FROM `s_core_states`
                 WHERE `name` = ? AND `group` = ?
-                ', array($name, $group)
+                ', [$name, $group]
             )->fetch();
 
             if ($isExists) {
                 return;
             }
 
-            $currentId++;
+            ++$currentId;
             $this->db->query('
                 INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
                 VALUES (?, ?, ?, ?, ?, ?)
-                ', array($currentId, $name, 'SC error', $currentId, $group, 0)
+                ', [$currentId, $name, 'SC error', $currentId, $group, 0]
             );
         }
     }
@@ -287,7 +290,7 @@ class Update
     {
         if (version_compare($this->version, '1.0.12', '<=')) {
             $rows = $this->db->fetchPairs(
-                "SELECT `name`, `value` FROM s_plugin_connect_config WHERE name = ? OR name = ?",
+                'SELECT `name`, `value` FROM s_plugin_connect_config WHERE name = ? OR name = ?',
                 ['longDescriptionField', 'shortDescriptionField']
             );
 
@@ -305,17 +308,17 @@ class Update
                 'shortDescriptionField' => $rows['longDescriptionField'],
             ];
 
-            $this->db->query("
+            $this->db->query('
                 UPDATE `s_plugin_connect_config`
                 SET `value` = ?
-                WHERE `name` = ?",
+                WHERE `name` = ?',
                 [$newValues['longDescriptionField'], 'longDescriptionField']
             );
 
-            $this->db->query("
+            $this->db->query('
                 UPDATE `s_plugin_connect_config`
                 SET `value` = ?
-                WHERE `name` = ?",
+                WHERE `name` = ?',
                 [$newValues['shortDescriptionField'], 'shortDescriptionField']
             );
         }
@@ -363,10 +366,10 @@ class Update
     private function addIndexToChangeTable()
     {
         if (version_compare($this->version, '1.0.16', '<=')) {
-            $this->db->query("
+            $this->db->query('
               ALTER TABLE `sw_connect_change`
               ADD INDEX `c_operation` (`c_operation`)
-             ");
+             ');
         }
     }
 

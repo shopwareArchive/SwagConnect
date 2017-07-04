@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
@@ -42,8 +47,7 @@ class Menu
         Config $configComponent,
         ModelManager $modelManager,
         $shopware526installed
-    )
-    {
+    ) {
         $this->bootstrap = $bootstrap;
         $this->configComponent = $configComponent;
         $this->modelManager = $modelManager;
@@ -112,7 +116,7 @@ class Menu
                 ]);
 
                 if ($this->shopware526installed) {
-                    $parent->setClass(Menu::CONNECT_CLASS);
+                    $parent->setClass(self::CONNECT_CLASS);
                     //if "Connect" menu does not exist
                     //it must not have pluginID, because on plugin uninstall
                     //it will be removed
@@ -201,7 +205,6 @@ class Menu
                     ]);
                 }
             }
-
         }
     }
 
@@ -216,20 +219,20 @@ class Menu
 
         //if it is sem demo marketplace it will not find the correct menu item
         $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
-            'class' => Menu::CONNECT_CLASS,
+            'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
 
         if (!$connectMainMenu) {
             $connectMainMenu = $this->bootstrap->createMenuItem([
-                'label' => Menu::CONNECT_LABEL,
-                'class' => Menu::CONNECT_CLASS,
+                'label' => self::CONNECT_LABEL,
+                'class' => self::CONNECT_CLASS,
                 'active' => 1,
             ]);
             $connectMainMenu->setPlugin(null);
         } else {
             //resets the label if it's changed (diff marketplace)
-            $connectMainMenu->setLabel(Menu::CONNECT_LABEL);
+            $connectMainMenu->setLabel(self::CONNECT_LABEL);
         }
 
         $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);

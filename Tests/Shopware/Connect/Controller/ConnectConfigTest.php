@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -6,7 +11,7 @@ use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 
 class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 {
-    public  function setUp()
+    public function setUp()
     {
         parent::setUp();
 
@@ -58,8 +63,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 
     public function testSaveGeneralAction()
     {
-
-        $expectations = array(
+        $expectations = [
             'id' => null,
             'activateProductsAutomatically' => '0',
             'createCategoriesAutomatically' => '1',
@@ -73,7 +77,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             'apiKey' => '58dfcc22-0ab7-4bf6-8eff-e0d2c9455019',
             'showShippingCostsSeparately' => '0',
             'articleImagesLimitImport' => '10',
-        );
+        ];
 
 
         $this->Request()
@@ -126,10 +130,10 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
 
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
+            ->setPost('data', [
                 'connectUnit' => 'ml',
                 'shopwareUnitKey' => 'l',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveUnitsMapping');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -143,13 +147,13 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
-                'exportPriceMode' => array('price', 'purchasePrice'),
+            ->setPost('data', [
+                'exportPriceMode' => ['price', 'purchasePrice'],
                 'priceGroupForPurchasePriceExport' => 'EK',
                 'priceFieldForPurchasePriceExport' => 'price',
                 'priceGroupForPriceExport' => 'EK',
                 'priceFieldForPriceExport' => 'price',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -164,11 +168,11 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
-                'exportPriceMode' => array('price'),
+            ->setPost('data', [
+                'exportPriceMode' => ['price'],
                 'priceGroupForPriceExport' => 'XX',
                 'priceFieldForPriceExport' => 'basePrice',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -183,12 +187,12 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
+            ->setPost('data', [
                 'priceGroupForPriceExport' => 'EK',
                 'priceGroupForPurchasePriceExport' => 'EK',
                 'priceFieldForPurchasePriceExport' => 'price',
                 'priceFieldForPriceExport' => 'basePrice',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -203,13 +207,13 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
-                'exportPriceMode' => array('price', 'purchasePrice'),
+            ->setPost('data', [
+                'exportPriceMode' => ['price', 'purchasePrice'],
                 'priceGroupForPriceExport' => 'EK',
                 'priceGroupForPurchasePriceExport' => 'XX',
                 'priceFieldForPurchasePriceExport' => 'basePrice',
                 'priceFieldForPriceExport' => 'price',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -224,13 +228,13 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('data', array(
-                'exportPriceMode' => array('price', 'purchasePrice'),
+            ->setPost('data', [
+                'exportPriceMode' => ['price', 'purchasePrice'],
                 'priceGroupForPriceExport' => 'EK',
                 'priceGroupForPurchasePriceExport' => 'EK',
                 'priceFieldForPurchasePriceExport' => 'pseudoPrice',
                 'priceFieldForPriceExport' => 'price',
-            ));
+            ]);
         $this->dispatch('backend/ConnectConfig/saveExport');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
@@ -238,4 +242,3 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
         $this->assertEquals('Preisfeld ist nicht gepflegt. Bei einigen Produkten ist der Preis 0', $this->View()->message);
     }
 }
- 

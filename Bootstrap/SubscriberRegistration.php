@@ -14,7 +14,7 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Container;
 
 class SubscriberRegistration
 {
@@ -73,7 +73,7 @@ class SubscriberRegistration
     private $lifecycle;
 
     /**
-     * @var ContainerInterface
+     * @var Container
      */
     private $container;
 
@@ -86,7 +86,7 @@ class SubscriberRegistration
      * @param SDK $SDK
      * @param ConnectFactory $connectFactory
      * @param Helper $helper
-     * @param ContainerInterface $container
+     * @param Container $container
      */
     public function __construct(
         Config $config,
@@ -97,7 +97,7 @@ class SubscriberRegistration
         SDK $SDK,
         ConnectFactory $connectFactory,
         Helper $helper,
-        ContainerInterface $container
+        Container $container
     ) {
         $this->config = $config;
         $this->modelManager = $modelManager;
@@ -201,6 +201,9 @@ class SubscriberRegistration
         ];
     }
 
+    /**
+     * @return array
+     */
     private function getSubscribersForUnverifiedKeys()
     {
         return [
@@ -208,7 +211,6 @@ class SubscriberRegistration
             $this->getLifecycleSubscriber()
         ];
     }
-
 
     /**
      * These subscribers will only be used, once the user has verified his api key
@@ -278,7 +280,7 @@ class SubscriberRegistration
     {
         if (!$this->lifecycle) {
             $this->lifecycle = new Lifecycle(
-                Shopware()->Models(),
+                $this->modelManager,
                 $this->config->getConfig('autoUpdateProducts', 1)
             );
         }

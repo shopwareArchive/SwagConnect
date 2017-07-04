@@ -11,11 +11,6 @@ cache:
 
 env:
   - SHOPWARE_VERSION: 5.2
-  - SHOPWARE_VERSION: 5.3
-
-matrix:
-  allow_failures:
-    - env: SHOPWARE_VERSION=5.3
 
 before_script:
     - git clone https://github.com/shopware/shopware.git /tmp/shopware
@@ -30,7 +25,7 @@ before_script:
     - ln -s vendor/shopware/plugin-dev-tools/psh56.phar psh56
     - ./psh56 travis:init
 
-script: ./psh56 travis:unit-coveralls
+script: ./psh56 travis:unit-coveralls && ./php-cs-fixer fix --dry-run
 
 notifications:
     email: false

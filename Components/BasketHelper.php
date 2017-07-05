@@ -641,7 +641,6 @@ class BasketHelper
             ->where('voucher.percental = true')
             ->setParameter('voucherCode', $voucherCode);
 
-
         return $builder->getQuery()->getResult();
     }
 

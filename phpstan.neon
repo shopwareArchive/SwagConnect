@@ -1,0 +1,8 @@
+parameters:
+    excludes_analyse:
+        - Library
+        - Tests/Shopware/Connect/Bootstrap.php
+        - vendor
+        - .githooks
+    autoload_files:
+        - Tests/Shopware/Connect/Bootstrap.php

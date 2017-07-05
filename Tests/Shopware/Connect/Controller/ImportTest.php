@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Controller;
 
 class ImportTest extends \Enlight_Components_Test_Controller_TestCase
 {

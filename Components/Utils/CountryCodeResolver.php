@@ -18,15 +18,29 @@ use Shopware\Models\Customer\Customer;
  */
 class CountryCodeResolver
 {
-    /** @var \Shopware\Components\Model\ModelManager */
+    /**
+     * @var \Shopware\Components\Model\ModelManager
+     */
     protected $modelManager;
-    /** @var \Shopware\Models\Country\Repository */
+
+    /**
+     * @var \Shopware\Models\Country\Repository
+     */
     protected $countryRepository;
-    /** @var string */
+
+    /**
+     * @var string
+     */
     protected $default = 'DEU';
-    /** @var \Shopware\Models\Customer\Customer */
+
+    /**
+     * @var \Shopware\Models\Customer\Customer
+     */
     protected $customer;
-    /** @var int */
+
+    /**
+     * @var int
+     */
     protected $countryId;
 
     /**
@@ -35,10 +49,10 @@ class CountryCodeResolver
      * @param null $countryId               CountryID - e.g. from session
      * @param string $default               Fallback
      */
-    public function __construct(ModelManager $modelManager, Customer $customer=null, $countryId=null, $default = 'DEU')
+    public function __construct(ModelManager $modelManager, Customer $customer = null, $countryId = null, $default = 'DEU')
     {
         $this->modelManager = $modelManager;
-        $this->default = 'DEU';
+        $this->default = $default;
         $this->customer = $customer;
         $this->countryId = $countryId;
     }

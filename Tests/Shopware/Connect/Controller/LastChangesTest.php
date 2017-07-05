@@ -5,7 +5,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Controller;
+
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class LastChangesTest extends ConnectTestHelper
 {

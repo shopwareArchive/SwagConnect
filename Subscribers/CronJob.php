@@ -55,6 +55,7 @@ class CronJob extends BaseSubscriber
     ) {
         parent::__construct();
         $this->connectExport = $connectExport;
+        $this->sdk = $sdk;
     }
 
     public function getSubscribedEvents()

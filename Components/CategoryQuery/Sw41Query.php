@@ -7,40 +7,62 @@
 
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
-use Shopware\Connect\Struct\Product;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Category\Category;
+use ShopwarePlugins\Connect\Components\CategoryQuery;
 
-class Sw41Query extends SwQuery
+class Sw41Query implements CategoryQuery
 {
     /**
-     * Return local SW categories for a given product
-     *
-     * @param Product $product
-     * @return \Shopware\Models\Category\Category[]
+     * @var ModelManager
      */
-    public function getCategoriesByProduct(Product $product)
+    protected $manager;
+
+    /**
+     * @var RelevanceSorter
+     */
+    protected $relevanceSorter;
+
+    /**
+     * @param ModelManager $manager
+     * @param RelevanceSorter $relevanceSorter
+     */
+    public function __construct(ModelManager $manager, RelevanceSorter $relevanceSorter)
     {
-        $repository = $this->getCategoryRepository();
-        $builder = $repository->createQueryBuilder('c');
-        $builder->join('c.attribute', 'ca');
-        $builder->select('c');
-        $builder->andWhere('ca.connectImportMapping = :mapping');
+        $this->manager = $manager;
+        $this->relevanceSorter = $relevanceSorter;
+    }
 
-        $builder->leftJoin('c.children', 'children');
-        $builder->andWhere('children.id IS NULL');
+    /**
+     * @return RelevanceSorter
+     */
+    public function getRelevanceSorter()
+    {
+        return $this->relevanceSorter;
+    }
 
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
+    /**
+     * @return \Shopware\Models\Article\Repository
+     */
+    protected function getArticleRepository()
+    {
+        $repository = $this->manager->getRepository(
+            'Shopware\Models\Article\Article'
+        );
 
-        /** @var $categories CategoryModel[] */
-        $categories = [];
-        foreach ($product->categories as $category) {
-            $categories = array_merge(
-                $query->setParameter('mapping', $category)->execute()
-            );
-        }
+        return $repository;
+    }
 
-        return $categories;
+    /**
+     * @return \Shopware\Models\Category\Repository
+     */
+    protected function getCategoryRepository()
+    {
+        $repository = $this->manager->getRepository(
+            'Shopware\Models\Category\Category'
+        );
+
+        return $repository;
     }
 
     /**

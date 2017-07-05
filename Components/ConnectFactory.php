@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
 use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
@@ -277,7 +278,7 @@ class ConnectFactory
         if ($this->helper === null) {
             $this->helper = new Helper(
                 $this->getModelManager(),
-                $this->getCategoryQuery(),
+                new Sw41Query($this->getModelManager(), new RelevanceSorter()),
                 $this->getProductQuery()
             );
         }
@@ -336,26 +337,6 @@ class ConnectFactory
             $this->getLocalProductQuery(),
             $this->getRemoteProductQuery()
         );
-    }
-
-    /**
-     * Returns category query depending on the current shopware version
-     *
-     * @return Sw41Query
-     */
-    public function getCategoryQuery()
-    {
-        return $this->getShopware41CategoryQuery();
-    }
-
-    /**
-     * Getter for the shopware >= 4.1 category query
-     *
-     * @return Sw41Query
-     */
-    public function getShopware41CategoryQuery()
-    {
-        return new Sw41Query($this->getModelManager(), new RelevanceSorter());
     }
 
     /**
@@ -449,6 +430,9 @@ class ConnectFactory
         return $this->marketplaceGateway;
     }
 
+    /**
+     * @return CountryCodeResolver
+     */
     public function getCountryCodeResolver()
     {
         $customer = null;

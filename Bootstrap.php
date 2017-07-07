@@ -377,6 +377,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                     $this->getConfigComponents(),
                     new ErrorHandler(),
                     $this->get('events')
+                ),
+                new \ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService(
+                    new \ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository($modelManager),
+                    $modelManager->getRepository(\Shopware\CustomModels\Connect\ProductStreamAttribute::class),
+                    $this->getConfigComponents(),
+                    $this->get('shopware_search.product_search'),
+                    $this->get('shopware_storefront.context_service')
                 )
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(

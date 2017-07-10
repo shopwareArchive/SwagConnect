@@ -10,15 +10,15 @@
     "currentVersion": "1.0.18",
     "changelog": {
         "de": {
-
+            "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
-
+            "1.0.18": "CON-4531 - Wrong value for automatically activated products; CON-4645 - Added events to use customAttributes for orders;"
         }
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.2.21",
+        "maximumVersion": "5.2.26",
         "blacklist": []
     }
 }

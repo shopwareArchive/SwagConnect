@@ -26,16 +26,22 @@ class CronJob extends BaseSubscriber
      */
     private $configComponent;
 
-    /** @var  SDK */
+    /**
+     * @var SDK
+     */
     protected $sdk;
 
+    /**
+     * @var ProductStreamService
+     */
     protected $streamService;
 
-    /** @var ConnectExport */
+    /**
+     * @var ConnectExport
+     */
     protected $connectExport;
 
     /**
-     * CronJob constructor.
      * @param SDK $sdk
      * @param ConnectExport $connectExport
      */
@@ -50,11 +56,11 @@ class CronJob extends BaseSubscriber
     public function getSubscribedEvents()
     {
         //todo@sb: fix cronjobs via bin/console
-        return array(
+        return [
             'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
             'Shopware_CronJob_ShopwareConnectUpdateProducts' => 'updateProducts',
             'Shopware_CronJob_ConnectExportDynamicStreams' => 'exportDynamicStreams',
-        );
+        ];
     }
 
     /**
@@ -115,6 +121,9 @@ class CronJob extends BaseSubscriber
         return true;
     }
 
+    /**
+     * @param \Shopware_Components_Cron_CronJob $job
+     */
     public function exportDynamicStreams(\Shopware_Components_Cron_CronJob $job)
     {
         /** @var ProductStreamService $streamService */

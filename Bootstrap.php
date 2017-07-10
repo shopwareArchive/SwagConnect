@@ -384,7 +384,9 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                     $this->getConfigComponents(),
                     $this->get('shopware_search.product_search'),
                     $this->get('shopware_storefront.context_service')
-                )
+                ),
+                $this->getConnectFactory()->getHelper(),
+                $this->getConfigComponents()
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $modelManager

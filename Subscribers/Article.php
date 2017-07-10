@@ -8,6 +8,7 @@ use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
@@ -47,17 +48,31 @@ class Article extends BaseSubscriber
      */
     private $productStreamService;
 
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @var Config
+     */
+    private $config;
+
     public function __construct(
         Gateway $connectGateway,
         ModelManager $modelManager,
         ConnectExport $connectExport,
-        ProductStreamService $productStreamService
+        ProductStreamService $productStreamService,
+        Helper $helper,
+        Config $config
     ) {
         parent::__construct();
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
         $this->connectExport = $connectExport;
         $this->productStreamService = $productStreamService;
+        $this->helper = $helper;
+        $this->config = $config;
     }
 
     public function getSubscribedEvents()
@@ -226,6 +241,11 @@ class Article extends BaseSubscriber
                 break;
             case 'deleteAllVariants':
                 if ($articleId = $request->getParam('articleId')) {
+                    /** @var ArticleModel $article */
+                    $article = $this->modelManager->find(ArticleModel::class, (int) $articleId);
+                    if (!$article) {
+                        return;
+                    }
                     $this->deleteAllVariants($articleId);
                 }
                 break;
@@ -237,38 +257,36 @@ class Article extends BaseSubscriber
     /**
      * @param int $articleId
      */
-    private function regenerateChangesForArticle($articleId)
+    public function regenerateChangesForArticle($articleId)
     {
         /** @var \Shopware\Models\Article\Article $article */
         $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
-
         if (!$article) {
             return;
         }
 
-        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
-
+        $attribute = $this->helper->getConnectAttributeByModel($article);
         if (!$attribute) {
             return;
         }
 
         // Check if entity is a connect product
-        if (!$this->getHelper()->isProductExported($attribute)) {
+        if (!$this->helper->isProductExported($attribute)) {
             return;
         }
 
-        $this->deleteAllVariants($articleId);
+        $this->deleteAllVariants($article);
 
-        if ($this->getConnectConfig()->getConfig('autoUpdateProducts', Config::UPDATE_AUTO) == Config::UPDATE_CRON_JOB) {
+        if ($this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO) == Config::UPDATE_CRON_JOB) {
             $this->modelManager->getConnection()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),
-                array('article_id' => $article->getId())
+                array('article_id' => $articleId)
             );
             return;
         }
 
-        $sourceIds = $this->getHelper()->getSourceIdsFromArticleId($articleId);
+        $sourceIds = $this->helper->getSourceIdsFromArticleId($articleId);
         $this->connectExport->export(
             $sourceIds,
             new ProductStreamsAssignments(
@@ -278,17 +296,10 @@ class Article extends BaseSubscriber
     }
 
     /**
-     * @param int $articleId
+     * @param ArticleModel $article
      */
-    private function deleteAllVariants($articleId)
+    private function deleteAllVariants(ArticleModel $article)
     {
-        /** @var ArticleModel $article */
-        $article = $this->modelManager->find(ArticleModel::class, (int) $articleId);
-
-        if (!$article) {
-            return;
-        }
-
         $this->connectExport->setDeleteStatusForVariants($article);
     }
 

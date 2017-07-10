@@ -25,7 +25,7 @@ before_script:
     - ln -s vendor/shopware/plugin-dev-tools/psh56.phar psh56
     - ./psh56 travis:init
 
-script: ./psh56 travis:unit-coveralls && ./php-cs-fixer fix --dry-run
+script: ./psh56 travis:unit-coveralls
 
 notifications:
     email: false

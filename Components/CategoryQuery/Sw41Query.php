@@ -8,8 +8,12 @@
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Article;
 use Shopware\Models\Category\Category;
+use Shopware\Models\Category\Category as CategoryModel;
 use ShopwarePlugins\Connect\Components\CategoryQuery;
+use Shopware\Models\Article\Repository as ArticleRepository;
+use Shopware\Models\Category\Repository as CategoryRepository;
 
 class Sw41Query implements CategoryQuery
 {
@@ -42,27 +46,25 @@ class Sw41Query implements CategoryQuery
     }
 
     /**
-     * @return \Shopware\Models\Article\Repository
+     * @return ArticleRepository
      */
     protected function getArticleRepository()
     {
-        $repository = $this->manager->getRepository(
-            'Shopware\Models\Article\Article'
+        return $this->manager->getRepository(
+            Article::class
         );
 
         return $repository;
     }
 
     /**
-     * @return \Shopware\Models\Category\Repository
+     * @return CategoryRepository
      */
     protected function getCategoryRepository()
     {
-        $repository = $this->manager->getRepository(
-            'Shopware\Models\Category\Category'
+        return $this->manager->getRepository(
+            CategoryModel::class
         );
-
-        return $repository;
     }
 
     /**
@@ -85,7 +87,7 @@ class Sw41Query implements CategoryQuery
         }
 
         $categories = [];
-        /** @var \Shopware\Models\Category\Category $category */
+        /** @var CategoryModel $category */
         foreach ($result as $category) {
             list($key, $name) = $this->extractCategory($category);
             $categories[$key] = $name;

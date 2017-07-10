@@ -192,14 +192,14 @@ class Article extends BaseSubscriber
                 }
 
                 // Check if entity is a connect product
-                $attribute = $this->getHelper()->getConnectAttributeByModel($article);
+                $attribute = $this->helper->getConnectAttributeByModel($article);
                 if (!$attribute) {
                     return;
                 }
 
                 // if article is not exported to Connect
                 // don't need to generate changes
-                if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+                if (!$this->helper->isProductExported($attribute) || !empty($attribute->getShopId())) {
                     return;
                 }
 
@@ -349,13 +349,13 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detail);
 
         if (!$attribute) {
             return;
         }
         // Check if entity is a connect product
-        if (!$this->getHelper()->isProductExported($attribute)) {
+        if (!$this->helper->isProductExported($attribute)) {
             return;
         }
 

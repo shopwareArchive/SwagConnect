@@ -259,6 +259,11 @@ class Article extends BaseSubscriber
      */
     public function regenerateChangesForArticle($articleId)
     {
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO);
+        if ($autoUpdateProducts == Config::UPDATE_MANUAL) {
+            return;
+        }
+
         /** @var \Shopware\Models\Article\Article $article */
         $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
         if (!$article) {
@@ -277,7 +282,7 @@ class Article extends BaseSubscriber
 
         $this->deleteAllVariants($article);
 
-        if ($this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO) == Config::UPDATE_CRON_JOB) {
+        if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->modelManager->getConnection()->update(
                 's_plugin_connect_items',
                 array('cron_update' => 1),

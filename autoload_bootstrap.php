@@ -29,6 +29,11 @@ $loader->registerNamespace(
     __DIR__ . '/Models/'
 );
 
+$loader->registerNamespace(
+    'Tests\ShopwarePlugins\Connect',
+    __DIR__ . '/Tests/Shopware/Connect/'
+);
+
 loadControllers();
 
 function loadControllers()

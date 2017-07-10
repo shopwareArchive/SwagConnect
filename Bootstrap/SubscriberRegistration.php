@@ -150,7 +150,6 @@ class SubscriberRegistration
         );
     }
 
-
     /**
      * Default subscribers can safely be used, even if the api key wasn't verified, yet
      *
@@ -241,7 +240,6 @@ class SubscriberRegistration
         return $subscribers;
     }
 
-
     /**
      * Creates checkout subscriber
      *
@@ -292,7 +290,6 @@ class SubscriberRegistration
 
         return $this->lifecycle;
     }
-
 
     /**
      * Collect updated Articles and Details

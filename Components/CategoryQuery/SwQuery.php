@@ -15,7 +15,7 @@ use ShopwarePlugins\Connect\Components\CategoryQuery;
 use Shopware\Models\Article\Repository as ArticleRepository;
 use Shopware\Models\Category\Repository as CategoryRepository;
 
-class Sw41Query implements CategoryQuery
+class SwQuery implements CategoryQuery
 {
     /**
      * @var ModelManager
@@ -53,8 +53,6 @@ class Sw41Query implements CategoryQuery
         return $this->manager->getRepository(
             Article::class
         );
-
-        return $repository;
     }
 
     /**

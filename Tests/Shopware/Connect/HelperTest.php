@@ -7,7 +7,6 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Unit;
 use ShopwarePlugins\Connect\Components\Helper;
 
@@ -140,7 +139,7 @@ class HelperTest extends ConnectTestHelper
 
         $helper = new Helper(
             $manager,
-            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\CategoryQuery\\Sw41Query')->disableOriginalConstructor()->getMock(),
+            $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\CategoryQuery\\SwQuery')->disableOriginalConstructor()->getMock(),
             $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\ProductQuery')->disableOriginalConstructor()->getMock()
         );
 

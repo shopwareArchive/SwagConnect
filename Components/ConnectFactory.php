@@ -10,7 +10,7 @@ namespace ShopwarePlugins\Connect\Components;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
-use ShopwarePlugins\Connect\Components\CategoryQuery\Sw41Query;
+use ShopwarePlugins\Connect\Components\CategoryQuery\SwQuery;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
@@ -278,7 +278,7 @@ class ConnectFactory
         if ($this->helper === null) {
             $this->helper = new Helper(
                 $this->getModelManager(),
-                new Sw41Query($this->getModelManager(), new RelevanceSorter()),
+                new SwQuery($this->getModelManager(), new RelevanceSorter()),
                 $this->getProductQuery()
             );
         }

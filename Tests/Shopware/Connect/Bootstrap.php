@@ -32,44 +32,12 @@ class SwagConnectTestKernel
 
         $_SERVER['HTTP_HOST'] = $shop->getHost();
 
-        self::loadControllers();
-
         Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__ . '/');
         Shopware()->Container()->get('ConnectSDK');
 
         Shopware()->Container()->set('thumbnail_manager', new ThumbnailManagerDummy());
         Shopware()->Container()->set('shopware_media.cache_optimizer_service', new OptimizerServiceDummy());
         Shopware()->Container()->set('shopware_media.optimizer_service', new OptimizerServiceDummy());
-    }
-
-    private static function loadControllers()
-    {
-        if (getenv('SHOPWARE_ENV') === 'swagconnectest') {
-            return;
-        }
-        $controllers = [
-            'Frontend/Connect.php',
-            'Frontend/ConnectProductGateway.php',
-
-            'Widgets/Connect.php',
-
-            'Backend/ConnectBaseController.php',
-            'Backend/Connect52.php',
-            'Backend/ConnectConfig.php',
-            'Backend/ConnectGatewayBaseController.php',
-            'Frontend/ConnectProductGateway.php',
-            'Backend/ConnectGateway.php',
-            'Backend/LastChanges.php',
-            'Backend/Import.php',
-        ];
-
-        foreach ($controllers as $controller) {
-            try {
-                require_once __DIR__ . '/../../../Controllers/' . $controller;
-            } catch (\Exception $e) {
-                continue;
-            }
-        }
     }
 }
 

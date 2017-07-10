@@ -5,4 +5,4 @@ parameters:
         - vendor
         - .githooks
     autoload_files:
-        - Tests/Shopware/Connect/Bootstrap.php
+        - autoload_bootstrap.php

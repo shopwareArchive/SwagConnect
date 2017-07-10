@@ -147,8 +147,6 @@ class ArticleTest extends ConnectTestHelper
         $this->subscriber->regenerateChangesForArticle(5);
     }
 
-
-
     public function testRegenerateSkipsWhenConnectAttributeIsMissing()
     {
         $articleId = 5;

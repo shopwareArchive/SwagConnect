@@ -321,6 +321,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             );
         }
 
-        $this->subscriberRegistration->registerSubscribers($this->assertMinimumVersion('5.2'));
+        $this->subscriberRegistration->registerSubscribers();
     }
 }

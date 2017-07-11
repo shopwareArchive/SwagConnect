@@ -5,6 +5,8 @@
  * file that was distributed with this source code.
  */
 
+namespace Tests\ShopwarePlugins\Connect\Service;
+
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\CustomModels\Connect\PaymentRepository as CustomPaymentRepository;

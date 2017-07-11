@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
@@ -111,7 +116,7 @@ class SubscriberRegistration
     }
 
     /**
-     * @param boolean $isShopware52
+     * @param bool $isShopware52
      */
     public function registerSubscribers($isShopware52)
     {
@@ -144,7 +149,6 @@ class SubscriberRegistration
             $this
         );
     }
-
 
     /**
      * Default subscribers can safely be used, even if the api key wasn't verified, yet
@@ -236,7 +240,6 @@ class SubscriberRegistration
         return $subscribers;
     }
 
-
     /**
      * Creates checkout subscriber
      *
@@ -287,7 +290,6 @@ class SubscriberRegistration
 
         return $this->lifecycle;
     }
-
 
     /**
      * Collect updated Articles and Details

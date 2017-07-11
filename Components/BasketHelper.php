@@ -609,7 +609,7 @@ class BasketHelper
     public function getOrderVariablesForSession($variables)
     {
         // Get a copy of the basket array in order to not mess up the state of the basket array
-        $basket = array_merge($this->basket);
+        $basket = $this->basket;
         $newVariables = $this->getDefaultTemplateVariables();
 
         // We need the manipulated content as the order is created from the session

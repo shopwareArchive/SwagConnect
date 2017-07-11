@@ -23,7 +23,7 @@ class Less extends BaseSubscriber
      * Provide the needed less files
      *
      * @param \Enlight_Event_EventArgs $args
-     * @return Doctrine\Common\Collections\ArrayCollection
+     * @return ArrayCollection
      */
     public function addLessFiles(\Enlight_Event_EventArgs $args)
     {

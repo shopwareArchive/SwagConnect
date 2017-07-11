@@ -8,6 +8,8 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Gateway\PDO;
+use Shopware\Connect\SDK;
+use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Property;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
@@ -28,6 +30,16 @@ use ShopwarePlugins\Connect\Components\VariantConfigurator;
 
 class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
 {
+    /**
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
+     * @var ConnectFactory
+     */
+    private $connectFactory;
+
     const IMAGE_PROVIDER_URL = 'http://www.shopware.de/ShopwareCommunityCenter/img/logo.png';
 
     public function setUp()
@@ -39,7 +51,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     * @return ConnectFactory
      */
     public function getConnectFactory()
     {
@@ -51,7 +63,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return \Shopware\Connect\SDK
+     * @return SDK
      */
     public function getSDK()
     {
@@ -78,9 +90,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     public function getExternalProductSourceId()
     {
         $sql = 'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NOT NULL';
-        $sourceId = Shopware()->Db()->fetchOne($sql);
 
-        return $sourceId;
+        return Shopware()->Db()->fetchOne($sql);
     }
 
     /**
@@ -91,6 +102,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
     }
 
+    /**
+     * @param string $class
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     */
     public function callPrivate($class, $method, $args)
     {
         $method = new \ReflectionMethod(
@@ -131,6 +148,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         );
     }
 
+    /**
+     * @param int $categoryId
+     * @param $mapping
+     */
     public function changeCategoryConnectMappingForCategoryTo($categoryId, $mapping)
     {
         $modelManager = Shopware()->Models();
@@ -153,6 +174,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $modelManager->flush();
     }
 
+    /**
+     * @param string $service
+     * @param string $command
+     * @param array $args
+     * @return mixed
+     */
     public static function dispatchRpcCall($service, $command, array $args)
     {
         $sdk = Shopware()->Container()->get('ConnectSDK');
@@ -166,12 +193,17 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return call_user_func_array([$callable['provider'], $callable['command']], $args);
     }
 
+    /**
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @return Product
+     */
     protected function getProduct($withImage = false, $withVariantImages = false)
     {
         $purchasePrice = 6.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $number = rand(1, 999999999);
-        $product =  new \Shopware\Connect\Struct\Product([
+        $product =  new Product([
             'shopId' => 3,
             'revisionId' => time(),
             'sourceId' => $number,
@@ -223,6 +255,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $product;
     }
 
+    /**
+     * @return array
+     */
     protected function getProperties()
     {
         return [
@@ -254,6 +289,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         ];
     }
 
+    /**
+     * @param int $number
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @return array
+     */
     protected function getProducts($number = 10, $withImage = false, $withVariantImages = false)
     {
         $products = [];
@@ -264,6 +305,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $products;
     }
 
+    /**
+     * @return array
+     */
     protected function getVariants()
     {
         $number = $groupId = rand(1, 999999999);
@@ -318,6 +362,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $variants;
     }
 
+    /**
+     * @return Article
+     */
     public function getLocalArticle()
     {
         $number = rand(1, 999999999);
@@ -380,6 +427,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return $article;
     }
 
+    /**
+     * @return ProductToShop
+     */
     public function getProductToShop()
     {
         $manager = Shopware()->Models();
@@ -405,6 +455,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         );
     }
 
+    /**
+     * @param string $number
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @return array
+     */
     protected function insertOrUpdateProducts($number, $withImage, $withVariantImages)
     {
         $commands = [];
@@ -422,6 +478,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         return array_keys($commands);
     }
 
+    /**
+     * @return array
+     */
     protected function getRandomUser()
     {
         $user = Shopware()->Db()->fetchRow('SELECT * FROM s_user WHERE id = 1 LIMIT 1');

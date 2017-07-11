@@ -16,7 +16,7 @@ use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Detail as ProductDetail;
 use Shopware\Models\Article\Unit;
-use Shopware\Models\Article\Image;
+use Shopware\Models\Customer\Group;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use ShopwarePlugins\Connect\Struct\ShopProductId;
 
@@ -31,9 +31,14 @@ class Helper
      */
     private $manager;
 
+    /**
+     * @var CategoryQuery
+     */
     private $connectCategoryQuery;
 
-    /** @var \ShopwarePlugins\Connect\Components\ProductQuery */
+    /**
+     * @var ProductQuery
+     */
     private $connectProductQuery;
 
     /**
@@ -52,14 +57,13 @@ class Helper
     }
 
     /**
-     * @return \Shopware\Models\Customer\Group
+     * @return Group
      */
     public function getDefaultCustomerGroup()
     {
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Group');
-        $customerGroup = $repository->findOneBy(['key' => 'EK']);
 
-        return $customerGroup;
+        return $repository->findOneBy(['key' => 'EK']);
     }
 
     /**
@@ -467,21 +471,7 @@ class Helper
      */
     public function getConnectCategoryForProduct($id)
     {
-        return $this->getCategoryQuery()->getConnectCategoryForProduct($id);
-    }
-
-    /**
-     * @param Product $product
-     * @return \Shopware\Models\Category\Category[]
-     */
-    public function getCategoriesByProduct(Product $product)
-    {
-        return $this->getCategoryQuery()->getCategoriesByProduct($product);
-    }
-
-    protected function getCategoryQuery()
-    {
-        return $this->connectCategoryQuery;
+        return $this->connectCategoryQuery->getConnectCategoryForProduct($id);
     }
 
     public function getMostRelevantConnectCategory($categories)
@@ -489,7 +479,7 @@ class Helper
         usort(
             $categories,
             [
-                $this->getCategoryQuery()->getRelevanceSorter(),
+                $this->connectCategoryQuery->getRelevanceSorter(),
                 'sortConnectCategoriesByRelevance'
             ]
         );

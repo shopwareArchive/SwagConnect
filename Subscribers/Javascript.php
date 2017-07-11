@@ -22,7 +22,7 @@ class Javascript extends BaseSubscriber
      * Provide the needed javascript files
      *
      * @param \Enlight_Event_EventArgs $args
-     * @return Doctrine\Common\Collections\ArrayCollection
+     * @return ArrayCollection
      */
     public function addJsFiles(\Enlight_Event_EventArgs $args)
     {

@@ -15,8 +15,14 @@ namespace ShopwarePlugins\Connect\Subscribers;
  */
 abstract class SubscribeManager extends \Enlight_Event_Subscriber
 {
+    /**
+     * @var bool
+     */
     protected $debug = true;
 
+    /**
+     * @var array
+     */
     protected $listeners = [];
 
     /**

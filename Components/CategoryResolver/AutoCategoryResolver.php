@@ -164,7 +164,7 @@ class AutoCategoryResolver implements CategoryResolver
 
         if (strlen($idPrefix) > 0) {
             // find child categories by given prefix
-            $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix, $categories) {
+            $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix) {
                 return strpos($key, $idPrefix) === 0 && strrpos($key, '/') === strlen($idPrefix);
             });
             $filteredCategories = array_intersect_key($categories, array_flip($childCategories));

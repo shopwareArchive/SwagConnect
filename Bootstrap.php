@@ -43,7 +43,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         if ($info) {
             return $info['currentVersion'];
         }
-
         throw new \Exception('The plugin has an invalid version file.');
     }
 

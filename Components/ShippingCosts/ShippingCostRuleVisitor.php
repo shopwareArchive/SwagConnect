@@ -14,6 +14,9 @@ use ShopwarePlugins\Connect\Components\Translations\TranslationServiceInterface;
 
 class ShippingCostRuleVisitor extends RulesVisitor
 {
+    /**
+     * @var array
+     */
     public $rules = [];
     public $vatMode;
     public $vat;
@@ -87,6 +90,9 @@ class ShippingCostRuleVisitor extends RulesVisitor
         $this->mergeCurrentRule();
     }
 
+    /**
+     * @param Rule\FixedPrice $rule
+     */
     public function visitFixedPrice(Rule\FixedPrice $rule)
     {
         foreach ($this->currentRule['values'] as &$data) {
@@ -118,11 +124,6 @@ class ShippingCostRuleVisitor extends RulesVisitor
             },
             $this->translationService->get('countries', $rule->countries)
         );
-    }
-
-    public function visitFreeCarriageLimit(Rule\FreeCarriageLimit $rule)
-    {
-        $this->currentRule['values'] = [['value' => $rule->freeLimit]];
     }
 
     public function visitWeightDecorator(Rule\WeightDecorator $rule)

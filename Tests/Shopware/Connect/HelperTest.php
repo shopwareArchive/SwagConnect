@@ -7,7 +7,6 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Unit;
 use ShopwarePlugins\Connect\Components\Helper;
 
@@ -100,21 +99,7 @@ class HelperTest extends ConnectTestHelper
         );
 
         $images = $this->callPrivate($this->getHelper(), 'getImagesById', 2);
-        $this->assertArrayCount(13, count($images));
-    }
-
-    public function testGetCategoriesByProduct()
-    {
-        $this->markTestSkipped('It fails in travis, but works locally');
-        //todo@sb: check if this test is still needed
-//        $this->resetConnectCategoryMappings();
-//        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
-//
-//        $sourceId = $this->getExternalProductSourceId();
-//        $products = $this->getHelper()->getRemoteProducts([$sourceId]);
-//        $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
-//
-//        $this->assertNotEmpty($categories);
+        $this->assertCount(13, count($images));
     }
 
     public function testUpdateUnitInRelatedProducts()

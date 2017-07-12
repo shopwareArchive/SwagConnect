@@ -2,7 +2,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-require_once __DIR__ . '/../../../../../../../../../autoload.php';
+require_once __DIR__ . '/../../../../../../../../../../autoload.php';
 
 use Shopware\Bundle\MediaBundle\OptimizerServiceInterface;
 use Shopware\Components\Thumbnail\Manager;

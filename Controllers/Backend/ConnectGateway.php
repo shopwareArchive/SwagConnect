@@ -5,9 +5,9 @@
  * file that was distributed with this source code.
  */
 
-namespace ShopwarePlugins\Connect\Controllers\Backend;
-
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\CSRFWhitelistAware;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Logger;
 
 /**
@@ -16,8 +16,11 @@ use ShopwarePlugins\Connect\Components\Logger;
  * @copyright Copyright (c) 2013, shopware AG (http://www.shopware.de)
  * @author    Heiner Lohaus
  */
-class ConnectGatewayBaseController extends \Enlight_Controller_Action implements CSRFWhitelistAware
+class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Action implements CSRFWhitelistAware
 {
+    /**
+     * @var Config
+     */
     private $configComponent;
 
     /**
@@ -52,15 +55,21 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action implements
         return Shopware()->Container()->get('swagconnect.rest_api_request');
     }
 
+    /**
+     * @return InstallerService
+     */
     public function getPluginManager()
     {
         return Shopware()->Container()->get('shopware_plugininstaller.plugin_manager');
     }
 
+    /**
+     * @return Config
+     */
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config(Shopware()->Models());
+            $this->configComponent = new Config(Shopware()->Models());
         }
 
         return $this->configComponent;
@@ -115,7 +124,7 @@ class ConnectGatewayBaseController extends \Enlight_Controller_Action implements
         $result = $apiRequest->verifyRequest($request);
 
         if ($result->isOk()) {
-            /** @var \Shopware\Bundle\PluginInstallerBundle\Service\InstallerService $pluginManager */
+            /** @var InstallerService $pluginManager */
             $pluginManager = $this->getPluginManager();
             $plugin = $pluginManager->getPluginByName('SwagConnect');
             $pluginManager->uninstallPlugin($plugin);

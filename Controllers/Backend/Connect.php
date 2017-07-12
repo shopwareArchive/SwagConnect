@@ -5,14 +5,11 @@
  * file that was distributed with this source code.
  */
 
-namespace ShopwarePlugins\Connect\Controllers\Backend;
-
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Models\Article\Article;
-use Shopware\Models\Article\Price;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
@@ -32,7 +29,9 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
      */
     private $factory;
 
-    /** @var \ShopwarePlugins\Connect\Components\Config */
+    /**
+     * @var \ShopwarePlugins\Connect\Components\Config
+     */
     private $configComponent;
 
     /**

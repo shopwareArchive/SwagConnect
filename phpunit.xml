@@ -1,8 +1,24 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="./Tests/Legacy/Shopware/Connect/Bootstrap.php" colors="true">
+<phpunit bootstrap="Tests/Bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="Shopware Connect Plugin">
-            <directory>Tests/</directory>
+        <testsuite name="SwagConnect legacy">
+            <directory>Tests/Legacy/</directory>
+        </testsuite>
+
+        <testsuite name="SwagConnect unit">
+            <directory>Tests/Unit/</directory>
+        </testsuite>
+
+        <testsuite name="SwagConnect integration">
+            <directory>Tests/Integration/</directory>
+        </testsuite>
+
+        <testsuite name="SwagConnect functional">
+            <directory>Tests/Functional/</directory>
+        </testsuite>
+
+        <testsuite name="SwagConnect regression">
+            <directory>Tests/Regression/</directory>
         </testsuite>
     </testsuites>
 

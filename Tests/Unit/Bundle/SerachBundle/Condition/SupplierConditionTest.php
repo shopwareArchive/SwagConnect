@@ -32,7 +32,6 @@ class SupplierConditionTest extends AbstractConnectUnitTest
 
     public function test_it_should_throw_exception_if_non_intergish_values_are_given()
     {
-        Shopware()->Container();
         $this->expectException(InvalidArgumentException::class);
         new SupplierCondition([ "asdfasdf" ]);
     }

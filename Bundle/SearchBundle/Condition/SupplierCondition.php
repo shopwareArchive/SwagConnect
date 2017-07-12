@@ -5,7 +5,7 @@ namespace ShopwarePlugins\Connect\Bundle\SearchBundle\Condition;
 use Assert\Assertion;
 use Shopware\Bundle\SearchBundle\ConditionInterface;
 
-class SupplierConditionTest implements ConditionInterface
+class SupplierCondition implements ConditionInterface
 {
     /**
      * @var int[]

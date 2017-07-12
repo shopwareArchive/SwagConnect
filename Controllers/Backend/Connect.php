@@ -6,8 +6,13 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Attribute;
+use Shopware\Models\Article\Repository as ArticleRepository;
+use Shopware\Models\Category\Category;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Models\Article\Article;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -19,23 +24,20 @@ use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use Shopware\Connect\SDK;
 
-/**
- * Class ConnectBaseController
- */
 class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
 {
     /**
-     * @var \ShopwarePlugins\Connect\Components\ConnectFactory
+     * @var ConnectFactory
      */
     private $factory;
 
     /**
-     * @var \ShopwarePlugins\Connect\Components\Config
+     * @var Config
      */
     private $configComponent;
 
     /**
-     * @var \ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettingsApplier
+     * @var MarketplaceSettingsApplier
      */
     private $marketplaceSettingsApplier;
 
@@ -45,7 +47,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     private $sdk;
 
     /**
-     * @var \ShopwarePlugins\Connect\Components\SnHttpClient
+     * @var SnHttpClient
      */
     private $snHttpClient;
 
@@ -55,11 +57,11 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     private $productStreamService;
 
     /**
-     * @return \Shopware\Components\Model\ModelManager
+     * @return ModelManager
      */
     public function getModelManager()
     {
-        return Shopware()->Models();
+        return $this->get('models');
     }
 
     /**
@@ -68,7 +70,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     public function getSDK()
     {
         if ($this->sdk === null) {
-            $this->sdk = Shopware()->Container()->get('ConnectSDK');
+            $this->sdk = $this->get('ConnectSDK');
         }
 
         return $this->sdk;
@@ -83,28 +85,25 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\ConnectFactory
+     * @return ConnectFactory
      */
     public function getConnectFactory()
     {
         if ($this->factory === null) {
-            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
+            $this->factory = new ConnectFactory();
         }
 
         return $this->factory;
     }
 
     /**
-     * @return \Shopware\Models\Article\Repository
+     * @return ArticleRepository
      */
     private function getArticleRepository()
     {
-        $manager = Shopware()->Models();
-        $repository = $manager->getRepository(
-            'Shopware\Models\Article\Article'
+        return $this->getModelManager()->getRepository(
+            Article::class
         );
-
-        return $repository;
     }
 
     /**
@@ -112,12 +111,9 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
      */
     private function getCategoryRepository()
     {
-        $manager = Shopware()->Models();
-        $repository = $manager->getRepository(
-            'Shopware\Models\Category\Category'
+        return $this->getModelManager()->getRepository(
+            Category::class
         );
-
-        return $repository;
     }
 
     /**
@@ -125,7 +121,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
      * it will be created
      *
      * @param $id
-     * @return null|\Shopware\Models\Category\Category
+     * @return null|Category
      */
     private function getCategoryModelById($id)
     {
@@ -419,7 +415,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
             }
             $currentLevel = $level;
 
-            /** @var \Shopware\Models\Category\Category $parentModel */
+            /** @var Category $parentModel */
             if (!$parent) {
                 // Top category level - use toCategoryModel
                 $parentModel = $toCategoryModel;
@@ -441,7 +437,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
                 $category = $categoryAttribute->getCategory();
             } else {
                 // Create category and attribute model
-                $category = new \Shopware\Models\Category\Category();
+                $category = new Category();
                 $category->setName($name);
                 $category->setParent($parentModel);
 
@@ -1209,12 +1205,12 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\Config
+     * @return Config
      */
     public function getConfigComponent()
     {
         if ($this->configComponent === null) {
-            $this->configComponent = new \ShopwarePlugins\Connect\Components\Config($this->getModelManager());
+            $this->configComponent = new Config($this->getModelManager());
         }
 
         return $this->configComponent;
@@ -1274,7 +1270,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         $articleIds = $this->Request()->getParam('ids');
         $categoryId = (int) $this->Request()->getParam('category');
 
-        /** @var \Shopware\Models\Category\Category $category */
+        /** @var Category $category */
         $category = $this->getCategoryModelById($categoryId);
         if (!is_null($category)) {
             foreach ($articleIds as $id) {

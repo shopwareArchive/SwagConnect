@@ -20,6 +20,9 @@ class ControllerPath extends BaseSubscriber
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public function getSubscribedEvents()
     {
         return [

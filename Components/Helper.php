@@ -315,9 +315,15 @@ class Helper
             if (!$model->getMainDetail()) {
                 return false;
             }
-            return $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
+            $connectAttribute = $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
+            $this->manager->refresh($connectAttribute);
+
+            return $connectAttribute;
         } elseif ($model instanceof ProductDetail) {
-            return $repository->findOneBy(array('articleDetailId' => $model->getId()));
+            $connectAttribute = $repository->findOneBy(array('articleDetailId' => $model->getId()));
+            $this->manager->refresh($connectAttribute);
+
+            return $connectAttribute;
         }
 
         return false;

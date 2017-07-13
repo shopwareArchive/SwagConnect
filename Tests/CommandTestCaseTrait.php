@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace ShopwarePlugins\Connect\Tests;
 
 use Shopware\Components\Console\Application;
 use Symfony\Component\Console\Input\StringInput;

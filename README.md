@@ -17,6 +17,11 @@ The test suite relies on the [plugin-dev-tools](https://github.com/shopwareLabs/
 1. Run `$ ./psh local:init` to initialize a testing environment on your local system.
 2. Run `$ ./psh local:unit` to execute all tests or `$ ./psh local:unit-coverage` to generate the code-coverage
 
+### Run tests without psh
+
+`$ export SHOPWARE_ENV=swagconnecttest`
+`$ ../../../../../../vendor/bin/phpunit`
+
 # General behaviour
 
 ## Uninstall

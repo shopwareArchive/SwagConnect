@@ -385,6 +385,10 @@ class ConnectExport
     public function syncDeleteDetail(Detail $detail)
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
+        // force fetching ConnectAttribute from DB
+        // if it was update via query builder
+        // changes are not visible, because of doctrine proxy cache
+        $this->manager->refresh($attribute);
 
         if (!$this->helper->isProductExported($attribute)) {
             return;

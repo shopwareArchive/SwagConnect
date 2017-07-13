@@ -315,15 +315,10 @@ class Helper
             if (!$model->getMainDetail()) {
                 return false;
             }
-            $connectAttribute = $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
-            $this->manager->refresh($connectAttribute);
 
-            return $connectAttribute;
+            return $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
         } elseif ($model instanceof ProductDetail) {
-            $connectAttribute = $repository->findOneBy(array('articleDetailId' => $model->getId()));
-            $this->manager->refresh($connectAttribute);
-
-            return $connectAttribute;
+            return $repository->findOneBy(array('articleDetailId' => $model->getId()));
         }
 
         return false;

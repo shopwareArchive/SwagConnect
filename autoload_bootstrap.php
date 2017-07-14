@@ -31,7 +31,7 @@ $loader->registerNamespace(
 
 $loader->registerNamespace(
     'Tests\ShopwarePlugins\Connect',
-    __DIR__ . '/Tests/Shopware/Connect/'
+    __DIR__ . '/Tests/Legacy/Shopware/Connect/'
 );
 
 loadControllers();

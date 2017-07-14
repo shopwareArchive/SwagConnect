@@ -5,7 +5,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace ShopwarePlugins\Connect\Tests;
+
+use Doctrine\DBAL\Connection;
 
 trait DatabaseTestCaseTrait
 {
@@ -25,5 +27,15 @@ trait DatabaseTestCaseTrait
     {
         $connection = Shopware()->Container()->get('dbal_connection');
         $connection->rollBack();
+    }
+
+    /**
+     * @param string $file
+     */
+    public function importFixtures($file)
+    {
+        /** @var Connection $connection */
+        $connection = Shopware()->Container()->get('dbal_connection');
+        $connection->executeQuery(file_get_contents($file));
     }
 }

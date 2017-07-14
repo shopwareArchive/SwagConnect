@@ -33,32 +33,6 @@ class HelperTest extends ConnectTestHelper
         $this->assertFalse($result);
     }
 
-    public function testHasBasketConnectProductsIsTrue()
-    {
-        // Bootstrap a shop object
-        /** @var \Shopware\Models\Shop\Repository $repo */
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
-        $shop = $repo->getActiveDefault();
-        $shop->registerResources(Shopware()->Container()->get('bootstrap'));
-
-        // todo@sb: Fix unit test
-//        $id = $this->getConnectProductArticleId();
-//        /** @var \Shopware\Models\Article\Detail $detail */
-//        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('articleId' => $id, 'kind' => 1));
-
-
-//        $this->Request()->setMethod('GET');
-//        $this->dispatch('/account/login');
-//
-//
-//        // Add connect product to basket
-//        $wasSuccessFul = Shopware()->Modules()->Basket()->sAddArticle($detail->getNumber());
-//
-//
-//        $result = $this->getHelper()->hasBasketConnectProducts(333);
-//        $this->assertFalse($result);
-    }
-
     public function testGetConnectAttributeByModel()
     {
         $attributes = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findBy(['articleId' => 14]);

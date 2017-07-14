@@ -75,26 +75,6 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     }
 
     /**
-     * @return int
-     */
-    public function getConnectProductArticleId($sourceId, $shopId=3)
-    {
-        $id = Shopware()->Db()->fetchOne(
-            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? and shop_id =  ? LIMIT 1',
-            [$sourceId, $shopId]
-        );
-
-        return $id;
-    }
-
-    public function getExternalProductSourceId()
-    {
-        $sql = 'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NOT NULL';
-
-        return Shopware()->Db()->fetchOne($sql);
-    }
-
-    /**
      * @return \ShopwarePlugins\Connect\Components\Helper
      */
     public function getHelper()
@@ -146,32 +126,6 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
-    }
-
-    /**
-     * @param int $categoryId
-     * @param $mapping
-     */
-    public function changeCategoryConnectMappingForCategoryTo($categoryId, $mapping)
-    {
-        $modelManager = Shopware()->Models();
-        $categoryRepository = $modelManager->getRepository('Shopware\Models\Category\Category');
-        $category = $categoryRepository->find($categoryId);
-
-        if (!$category) {
-            $this->fail('Could not find category with ID ' . $categoryId);
-        }
-
-        $attribute = $category->getAttribute() ?: new \Shopware\Models\Attribute\Category();
-        $attribute->setConnectImportMapping($mapping);
-        $attribute->setConnectExportMapping($mapping);
-        $category->setAttribute($attribute);
-        $attribute->setCategory($category);
-
-        $modelManager->persist($category);
-        $modelManager->persist($attribute);
-
-        $modelManager->flush();
     }
 
     /**

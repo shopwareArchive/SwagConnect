@@ -7,12 +7,14 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.0.18",
+    "currentVersion": "1.0.19",
     "changelog": {
         "de": {
+            "1.0.19": "CON-4675 - CronJobs sind nun ausführbar über `bin/console sw:cron:run`;",
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.0.19": "CON-4675 - CronJobs can be execute via `bin/console sw:cron:run`;",
             "1.0.18": "CON-4531 - Wrong value for automatically activated products; CON-4645 - Added events to use customAttributes for orders;"
         }
     },

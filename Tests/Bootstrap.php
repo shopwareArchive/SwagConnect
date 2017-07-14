@@ -5,9 +5,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
-
-require_once __DIR__ . '/../../../../../../../../../autoload.php';
+require_once __DIR__ . '/../../../../../../../autoload.php';
 
 use Shopware\Bundle\MediaBundle\OptimizerServiceInterface;
 use Shopware\Components\Thumbnail\Manager;
@@ -32,7 +30,7 @@ class SwagConnectTestKernel
 
         $_SERVER['HTTP_HOST'] = $shop->getHost();
 
-        Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__ . '/');
+        Shopware()->Loader()->registerNamespace('Tests\ShopwarePlugins\Connect', __DIR__ . '/Legacy/Shopware/Connect/');
         Shopware()->Container()->get('ConnectSDK');
 
         Shopware()->Container()->set('thumbnail_manager', new ThumbnailManagerDummy());

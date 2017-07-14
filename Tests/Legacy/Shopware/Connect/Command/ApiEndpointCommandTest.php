@@ -7,7 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Command;
 
-use Tests\ShopwarePlugins\Connect\CommandTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\CommandTestCaseTrait;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ApiEndpointCommandTest extends ConnectTestHelper

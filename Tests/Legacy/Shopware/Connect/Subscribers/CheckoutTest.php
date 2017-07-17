@@ -7,7 +7,7 @@ namespace Tests\ShopwarePlugins\Connect\Subscribers;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Subscribers\BaseSubscriber;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
-use Tests\ShopwarePlugins\Connect\DatabaseTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class CheckoutTest extends \PHPUnit_Framework_TestCase
 {

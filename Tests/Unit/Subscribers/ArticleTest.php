@@ -1,22 +1,20 @@
 <?php
 
-namespace Tests\ShopwarePlugins\Connect\Subscribers;
+namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
+use ShopwarePlugins\Connect\Components\Variant\StatefulVariantRegenerator;
 use ShopwarePlugins\Connect\Subscribers\Article;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Models\Article\Article as ArticleModel;
 use Doctrine\ORM\EntityRepository;
 use ShopwarePlugins\Connect\Components\Helper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
-use Doctrine\DBAL\Connection;
+use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 
-class ArticleTest extends ConnectTestHelper
+class ArticleTest extends AbstractConnectUnitTest
 {
     /**
      * @var Article
@@ -43,18 +41,24 @@ class ArticleTest extends ConnectTestHelper
      */
     private $config;
 
+    /**
+     * @var StatefulVariantRegenerator
+     */
+    private $variantRegenerator;
+
     public function setUp()
     {
         $this->modelManager = $this->createMock(ModelManager::class);
         $this->helper = $this->createMock(Helper::class);
         $this->connectExport = $this->createMock(ConnectExport::class);
         $this->config = $this->createMock(Config::class);
+        $this->variantRegenerator = $this->createMock(StatefulVariantRegenerator::class);
 
         $this->subscriber = new Article(
             $this->createMock(Gateway::class),
             $this->modelManager,
             $this->connectExport,
-            $this->createMock(ProductStreamService::class),
+            $this->variantRegenerator,
             $this->helper,
             $this->config
         );
@@ -84,21 +88,20 @@ class ArticleTest extends ConnectTestHelper
             ->with($connectAttribute)
             ->willReturn(true);
 
-        $this->connectExport->method('setDeleteStatusForVariants')
-            ->with($article);
-
         $this->config->method('getConfig')
             ->with('autoUpdateProducts', Config::UPDATE_AUTO)
             ->willReturn(Config::UPDATE_AUTO);
 
         $sourceIds = ['5', '5-101', '5-102', '5-103'];
-        $this->helper->method('getSourceIdsFromArticleId')
-            ->with($articleId)
+        $this->helper->method('getArticleSourceIds')
+            ->with([$articleId])
             ->willReturn($sourceIds);
 
-        $this->connectExport->expects($this->once())
-            ->method('export')
-            ->with($sourceIds, new ProductStreamsAssignments());
+        $this->variantRegenerator->method('setCurrentSourceIds')
+            ->with($articleId, $sourceIds);
+
+        $this->variantRegenerator->method('generateChanges')
+            ->with($articleId);
 
         $this->subscriber->regenerateChangesForArticle($articleId);
     }
@@ -161,54 +164,6 @@ class ArticleTest extends ConnectTestHelper
         $repositoryMock->method('find')
             ->with($articleId)
             ->willReturn($article);
-
-        $this->connectExport->expects($this->never())
-            ->method('export');
-
-        $this->subscriber->regenerateChangesForArticle($articleId);
-    }
-
-    public function testRegenerateWhenCronIsEnabled()
-    {
-        $articleId = 5;
-        $article = new ArticleModel();
-        $connectAttribute = new ConnectAttribute();
-
-        $repositoryMock = $this->createMock(EntityRepository::class);
-
-        $this->modelManager->method('getRepository')
-            ->with(ArticleModel::class)
-            ->willReturn($repositoryMock);
-
-        $repositoryMock->method('find')
-            ->with($articleId)
-            ->willReturn($article);
-
-        $this->helper->method('getConnectAttributeByModel')
-            ->with($article)
-            ->willReturn($connectAttribute);
-
-        $this->helper->method('isProductExported')
-            ->with($connectAttribute)
-            ->willReturn(true);
-
-        $this->connectExport->method('setDeleteStatusForVariants')
-            ->with($article);
-
-        $this->config->method('getConfig')
-            ->with('autoUpdateProducts', Config::UPDATE_AUTO)
-            ->willReturn(Config::UPDATE_CRON_JOB);
-
-        $connectionMock = $this->createMock(Connection::class);
-        $this->modelManager->method('getConnection')
-            ->willReturn($connectionMock);
-        $connectionMock->expects($this->once())
-            ->method('update')
-            ->with(
-                's_plugin_connect_items',
-                ['cron_update' => 1],
-                ['article_id' => $articleId]
-            );
 
         $this->connectExport->expects($this->never())
             ->method('export');

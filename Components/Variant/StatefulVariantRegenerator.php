@@ -6,7 +6,6 @@ use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\VariantRegenerator;
-use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
@@ -16,8 +15,9 @@ class StatefulVariantRegenerator implements VariantRegenerator
 
     private static $currentSourceIds = [];
 
-    private $sdk;
-
+    /**
+     * @var ConnectExport
+     */
     private $connectExport;
 
     /**
@@ -32,18 +32,15 @@ class StatefulVariantRegenerator implements VariantRegenerator
 
     /**
      * StatefulVariantRegenerator constructor.
-     * @param SDK $sdk
      * @param ConnectExport $connectExport
      * @param ProductStreamService $productStreamService
      * @param $autoUpdateProducts
      */
     public function __construct(
-        SDK $sdk,
         ConnectExport $connectExport,
         ProductStreamService $productStreamService,
         $autoUpdateProducts
     ) {
-        $this->sdk = $sdk;
         $this->connectExport = $connectExport;
         $this->productStreamService = $productStreamService;
         $this->autoUpdateProducts = $autoUpdateProducts;
@@ -85,7 +82,7 @@ class StatefulVariantRegenerator implements VariantRegenerator
             self::$currentSourceIds[$articleId]
         );
         foreach ($sourceIdsForDelete as $sourceId) {
-            $this->sdk->recordDelete($sourceId);
+            $this->connectExport->recordDelete($sourceId);
         }
 
         $this->connectExport->updateConnectItemsStatus($sourceIdsForDelete, Attribute::STATUS_DELETE);

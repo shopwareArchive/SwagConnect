@@ -583,6 +583,16 @@ class ConnectExport
     }
 
     /**
+     * Wrapper method
+     *
+     * @param string $sourceId
+     */
+    public function recordDelete($sourceId)
+    {
+        $this->sdk->recordDelete($sourceId);
+    }
+
+    /**
      * Deletes products hash
      */
     private function deleteAllConnectProducts()

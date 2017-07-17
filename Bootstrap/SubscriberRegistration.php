@@ -172,7 +172,6 @@ class SubscriberRegistration
                 $this->modelManager,
                 $this->connectFactory->getConnectExport(),
                 new StatefulVariantRegenerator(
-                    $this->SDK,
                     $this->connectFactory->getConnectExport(),
                     new ProductStreamService(
                         new ProductStreamRepository($this->modelManager),

@@ -9,12 +9,11 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Enlight_Event_EventManager;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\Struct\Message;
-use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
-use Shopware\Connect\Struct\Reservation;
 use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
@@ -66,8 +65,13 @@ class Checkout extends BaseSubscriber
 
         $this->manager = $manager;
         $this->eventManager = $eventManager;
+        $this->logger = new Logger(Shopware()->Db());
+        $this->factory = new ConnectFactory();
     }
 
+    /**
+     * @return array
+     */
     public function getSubscribedEvents()
     {
         return [
@@ -77,42 +81,26 @@ class Checkout extends BaseSubscriber
         ];
     }
 
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     */
     public function updateSessionId(\Enlight_Event_EventArgs $args)
     {
         $this->newSessionId = $args->get('newSessionId');
     }
 
     /**
-     * @return Logger
+     * @return string
      */
-    public function getLogger()
-    {
-        if (!$this->logger) {
-            $this->logger = new Logger(Shopware()->Db());
-        }
-
-        return $this->logger;
-    }
-
-    protected function getFactory()
-    {
-        if ($this->factory === null) {
-            $this->factory = new ConnectFactory();
-        }
-
-        return $this->factory;
-    }
-
     protected function getCountryCode()
     {
-        $countryCodeUtil = $this->getFactory()->getCountryCodeResolver();
+        $countryCodeUtil = $this->factory->getCountryCodeResolver();
 
         return $countryCodeUtil->getIso3CountryCode();
     }
 
     /**
      * Event listener method for the checkout confirm- and cartAction.
-     *
      *
      * @param \Enlight_Event_EventArgs $args
      * @throws CheckoutException
@@ -232,7 +220,7 @@ class Checkout extends BaseSubscriber
                     $connectMessages = $checkResult->errors;
                 }
             } catch (\Exception $e) {
-                $this->getLogger()->write(true, 'Error during checkout', $e, 'checkout');
+                $this->logger->write(true, 'Error during checkout', $e, 'checkout');
                 // If the checkout results in an exception because the remote shop is not available
                 // don't show the exception to the user but tell him to remove the products from that shop
                 $connectMessages = $this->getNotAvailableMessageForProducts($allProducts);
@@ -269,7 +257,7 @@ class Checkout extends BaseSubscriber
         }
 
         $view->assign($basketHelper->getConnectTemplateVariables($connectMessages));
-        $view->assign('showShippingCostsSeparately', $this->getFactory()->getConfigComponent()->getConfig('showShippingCostsSeparately', false));
+        $view->assign('showShippingCostsSeparately', $this->factory->getConfigComponent()->getConfig('showShippingCostsSeparately', false));
     }
 
     /**
@@ -419,7 +407,7 @@ class Checkout extends BaseSubscriber
                 $messages = $reservation->messages;
             }
         } catch (\Exception $e) {
-            $this->getLogger()->write(true, 'Error during reservation', $e, 'reservation');
+            $this->logger->write(true, 'Error during reservation', $e, 'reservation');
             $messages = $this->getNotAvailableMessageForProducts(array_map(
                 function ($orderItem) {
                     return $orderItem->product;
@@ -440,15 +428,15 @@ class Checkout extends BaseSubscriber
      * Helper method to create an address struct from shopware session info
      *
      * @param $userData
-     * @return \Shopware\Connect\Struct\Address
+     * @return Address
      */
     private function getDeliveryAddress($userData)
     {
         if (!$userData) {
-            return $this->createDummyAddres('DEU');
+            return $this->createDummyAddress('DEU');
         }
         $shippingData = $userData['shippingaddress'];
-        $address = new \Shopware\Connect\Struct\Address();
+        $address = new Address();
         $address->zip = $shippingData['zipcode'];
         $address->city = $shippingData['city'];
         $address->country = $userData['additional']['countryShipping']['iso3']; //when the user is not logged in
@@ -468,9 +456,13 @@ class Checkout extends BaseSubscriber
         return $address;
     }
 
-    private function createDummyAddres($country='DEU')
+    /**
+     * @param string $country
+     * @return Address
+     */
+    private function createDummyAddress($country = 'DEU')
     {
-        return new \Shopware\Connect\Struct\Address([
+        return new Address([
             'country' => $country,
             'firstName' => 'Shopware',
             'surName' => 'AG',
@@ -502,7 +494,7 @@ class Checkout extends BaseSubscriber
             foreach ($result as $shopId => $success) {
                 if (!$success) {
                     $e = new CheckoutException("Could not checkout from warehouse {$shopId}");
-                    $this->getLogger()->write(true, 'Error during checkout with this reservation: ' . json_encode($reservation, JSON_PRETTY_PRINT), $e, 'checkout');
+                    $this->logger->write(true, 'Error during checkout with this reservation: ' . json_encode($reservation, JSON_PRETTY_PRINT), $e, 'checkout');
                     throw $e;
                 }
             }
@@ -530,10 +522,13 @@ class Checkout extends BaseSubscriber
         }
     }
 
+    /**
+     * @param Product[] $products
+     * @return array
+     */
     protected function getNotAvailableMessageForProducts($products)
     {
         $messages = [];
-        /** \Shopware\Connect\Struct\Product */
         foreach ($products as $product) {
             $messages[] = new Message([
                 'message' => 'Due to technical reasons, product %product is not available.',

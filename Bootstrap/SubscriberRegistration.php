@@ -115,10 +115,7 @@ class SubscriberRegistration
         $this->container = $container;
     }
 
-    /**
-     * @param bool $isShopware52
-     */
-    public function registerSubscribers($isShopware52)
+    public function registerSubscribers()
     {
         try {
             $verified = $this->config->getConfig('apiKeyVerified', false);
@@ -128,7 +125,7 @@ class SubscriberRegistration
             $verified = false;
         }
 
-        $subscribers = $this->getDefaultSubscribers($isShopware52);
+        $subscribers = $this->getDefaultSubscribers();
 
         // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
@@ -153,14 +150,13 @@ class SubscriberRegistration
     /**
      * Default subscribers can safely be used, even if the api key wasn't verified, yet
      *
-     * @param bool $isShopware52
      * @return array
      */
-    private function getDefaultSubscribers($isShopware52)
+    private function getDefaultSubscribers()
     {
         return [
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\ControllerPath($isShopware52),
+            new \ShopwarePlugins\Connect\Subscribers\ControllerPath(),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
             new \ShopwarePlugins\Connect\Subscribers\CronJob(
                 $this->SDK,

@@ -15,18 +15,14 @@ namespace ShopwarePlugins\Connect\Subscribers;
  */
 class ControllerPath extends BaseSubscriber
 {
-    private $shopware52Installed = false;
-
-    /**
-     * ControllerPath constructor.
-     * @param bool $shopware52Installed
-     */
-    public function __construct($shopware52Installed)
+    public function __construct()
     {
         parent::__construct();
-        $this->shopware52Installed = $shopware52Installed;
     }
 
+    /**
+     * @return array
+     */
     public function getSubscribedEvents()
     {
         return [
@@ -52,10 +48,6 @@ class ControllerPath extends BaseSubscriber
     {
         $this->registerMyTemplateDir();
         $this->registerMySnippets();
-
-        if ($this->shopware52Installed) {
-            return $this->Path() . 'Controllers/Backend/Connect52.php';
-        }
 
         return $this->Path() . 'Controllers/Backend/Connect.php';
     }
@@ -83,11 +75,7 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathGateway(\Enlight_Event_EventArgs $args)
     {
-        if ($this->shopware52Installed) {
-            return $this->Path() . '/Controllers/Backend/ConnectGateway52.php';
-        }
-
-        return $this->Path() . 'Controllers/Backend/ConnectGateway.php';
+        return $this->Path() . '/Controllers/Backend/ConnectGateway.php';
     }
 
     /**

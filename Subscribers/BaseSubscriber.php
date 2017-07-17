@@ -7,6 +7,8 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use ShopwarePlugins\Connect\Components\Helper;
+
 /**
  * The base subscriber holds some default methods, which all other subscribers might need.
  * It also extends the SubscribeManager so that any subscriber can be registered as Enlight_Event_Subscriber
@@ -47,11 +49,17 @@ abstract class BaseSubscriber extends SubscribeManager
         return $this->Application()->Config();
     }
 
+    /**
+     * @return Helper
+     */
     public function getHelper()
     {
         return $this->bootstrap->getHelper();
     }
 
+    /**
+     * @return string
+     */
     public function Path()
     {
         return $this->bootstrap->Path();

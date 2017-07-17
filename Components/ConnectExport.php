@@ -571,6 +571,18 @@ class ConnectExport
     }
 
     /**
+     * @param $articleId
+     */
+    public function markArticleForCronUpdate($articleId)
+    {
+        $this->manager->getConnection()->update(
+            's_plugin_connect_items',
+            ['cron_update' => 1],
+            ['article_id' => (int) $articleId]
+        );
+    }
+
+    /**
      * Deletes products hash
      */
     private function deleteAllConnectProducts()

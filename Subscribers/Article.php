@@ -1,6 +1,7 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Models\Customer\Group;
@@ -10,7 +11,7 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use ShopwarePlugins\Connect\Components\VariantRegenerator;
 
 /**
  * Class Article
@@ -44,9 +45,9 @@ class Article extends BaseSubscriber
     private $connectExport;
 
     /**
-     * @var ProductStreamService
+     * @var VariantRegenerator
      */
-    private $productStreamService;
+    private $variantRegenerator;
 
     /**
      * @var Helper
@@ -62,7 +63,7 @@ class Article extends BaseSubscriber
         Gateway $connectGateway,
         ModelManager $modelManager,
         ConnectExport $connectExport,
-        ProductStreamService $productStreamService,
+        VariantRegenerator $variantRegenerator,
         Helper $helper,
         Config $config
     ) {
@@ -70,7 +71,7 @@ class Article extends BaseSubscriber
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
         $this->connectExport = $connectExport;
-        $this->productStreamService = $productStreamService;
+        $this->variantRegenerator = $variantRegenerator;
         $this->helper = $helper;
         $this->config = $config;
     }
@@ -123,6 +124,16 @@ class Article extends BaseSubscriber
                 if ($request->getParam('standard')) {
                     $this->generateMainVariantChange($request->getParam('id'));
                 }
+                break;
+            case 'createConfiguratorVariants':
+                if (!$articleId = $request->getParam('articleId')) {
+                    return;
+                }
+
+                $this->variantRegenerator->setInitialSourceIds(
+                    $articleId,
+                    $this->helper->getArticleSourceIds([$articleId])
+                );
                 break;
         }
     }
@@ -238,7 +249,8 @@ class Article extends BaseSubscriber
                     if (!$article) {
                         return;
                     }
-                    $this->deleteAllVariants($articleId);
+
+                    $this->deleteVariants($articleId);
                 }
                 break;
             default:
@@ -260,7 +272,7 @@ class Article extends BaseSubscriber
         $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
         if (!$article) {
             return;
-        }
+         }
 
         $attribute = $this->helper->getConnectAttributeByModel($article);
         if (!$attribute) {
@@ -272,32 +284,54 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $this->deleteAllVariants($article);
-
-        if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
-            $this->modelManager->getConnection()->update(
-                's_plugin_connect_items',
-                array('cron_update' => 1),
-                array('article_id' => $articleId)
-            );
-            return;
-        }
-
-        $sourceIds = $this->helper->getSourceIdsFromArticleId($articleId);
-        $this->connectExport->export(
-            $sourceIds,
-            new ProductStreamsAssignments(
-                ['assignments' => $this->productStreamService->collectRelatedStreamsAssignments([$articleId])]
-            )
+        $this->variantRegenerator->setCurrentSourceIds(
+            $articleId,
+            $this->helper->getArticleSourceIds([$articleId])
         );
+        $this->variantRegenerator->generateChanges($articleId);
     }
 
     /**
-     * @param ArticleModel $article
+     * Delete all variants of given product except main one
+     *
+     * @param int $articleId
      */
-    private function deleteAllVariants(ArticleModel $article)
+    private function deleteVariants($articleId)
     {
-        $this->connectExport->setDeleteStatusForVariants($article);
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO);
+        if ($autoUpdateProducts == Config::UPDATE_MANUAL) {
+            return;
+        }
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
+        if (!$article) {
+            return;
+        }
+
+        $connectAttribute = $this->helper->getConnectAttributeByModel($article);
+        if (!$connectAttribute) {
+            return;
+        }
+
+        // Check if entity is a connect product
+        if (!$this->helper->isProductExported($connectAttribute)) {
+            return;
+        }
+
+        $mainVariantSourceId = $connectAttribute->getSourceId();
+        $sourceIds = array_filter(
+            $this->helper->getArticleSourceIds([$article->getId()]),
+            function ($sourceId) use ($mainVariantSourceId) {
+                return $sourceId != $mainVariantSourceId;
+            }
+        );
+
+        foreach ($sourceIds as $sourceId) {
+            $this->getSDK()->recordDelete($sourceId);
+        }
+
+        $this->connectExport->updateConnectItemsStatus($sourceIds, Attribute::STATUS_DELETE);
     }
 
     public function addConnectFlagToProperties($data)

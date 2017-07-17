@@ -12,6 +12,7 @@ use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Variant\StatefulVariantRegenerator;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
@@ -169,21 +170,18 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($this->db->getConnection()),
                 $this->modelManager,
-                new ConnectExport(
-                    $this->helper,
+                $this->connectFactory->getConnectExport(),
+                new StatefulVariantRegenerator(
                     $this->SDK,
-                    $this->modelManager,
-                    new ProductsAttributesValidator(),
-                    $this->config,
-                    new ErrorHandler(),
-                    $this->eventManager
-                ),
-                new ProductStreamService(
-                    new ProductStreamRepository($this->modelManager),
-                    $this->modelManager->getRepository(ProductStreamAttribute::class),
-                    $this->config,
-                    $this->container->get('shopware_search.product_search'),
-                    $this->container->get('shopware_storefront.context_service')
+                    $this->connectFactory->getConnectExport(),
+                    new ProductStreamService(
+                        new ProductStreamRepository($this->modelManager),
+                        $this->modelManager->getRepository(ProductStreamAttribute::class),
+                        $this->config,
+                        $this->container->get('shopware_search.product_search'),
+                        $this->container->get('shopware_storefront.context_service')
+                    ),
+                    $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO)
                 ),
                 $this->helper,
                 $this->config

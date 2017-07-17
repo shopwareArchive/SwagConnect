@@ -46,7 +46,10 @@ class ArticleTest extends AbstractConnectUnitTest
      */
     private $variantRegenerator;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function prepareMocks()
     {
         $this->modelManager = $this->createMock(ModelManager::class);
         $this->helper = $this->createMock(Helper::class);

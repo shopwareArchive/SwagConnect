@@ -9,11 +9,11 @@ use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Tests\PhpUnitTestCasePolyfillTrait;
+use ShopwarePlugins\Connect\Tests\UnitTestCaseTrait;
 
 class StatefulVariantRegeneratorTest extends AbstractConnectUnitTest
 {
-    use PhpUnitTestCasePolyfillTrait;
+    use UnitTestCaseTrait;
 
     /**
      * @var StatefulVariantRegenerator
@@ -64,7 +64,6 @@ class StatefulVariantRegeneratorTest extends AbstractConnectUnitTest
             ->willReturn([$articleId => [$streamId => 'Shoes Stream']]);
 
         $this->variantRegenerator->generateChanges(6);
-
         $this->assertInstanceOf(ProductStreamsAssignments::class, $streamAssignments);
         $this->assertEquals([$articleId => [$streamId => 'Shoes Stream']], $streamAssignments->assignments);
     }

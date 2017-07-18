@@ -31,9 +31,9 @@ class ProductStreamRepository implements RepositoryInterface
 
     /**
      * @param ModelManager $manager
-     * @param Repository $productStreamRepository
+     * @param RepositoryInterface $productStreamRepository
      */
-    public function __construct(ModelManager $manager, Repository $productStreamRepository)
+    public function __construct(ModelManager $manager, RepositoryInterface $productStreamRepository)
     {
         $this->manager = $manager;
         $this->productStreamRepository = $productStreamRepository;

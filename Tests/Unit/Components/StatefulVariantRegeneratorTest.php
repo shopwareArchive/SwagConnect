@@ -20,8 +20,14 @@ class StatefulVariantRegeneratorTest extends AbstractConnectUnitTest
      */
     private $variantRegenerator;
 
+    /**
+     * @var ConnectExport
+     */
     private $connectExport;
 
+    /**
+     * @var ProductStreamService
+     */
     private $productStreamService;
 
     /**

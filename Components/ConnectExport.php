@@ -571,7 +571,7 @@ class ConnectExport
     }
 
     /**
-     * @param $articleId
+     * @param int $articleId
      */
     public function markArticleForCronUpdate($articleId)
     {

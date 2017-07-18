@@ -57,7 +57,6 @@ class ProductStreamService
     private $contextService;
 
     /**
-     * ProductStreamService constructor.
      * @param ProductStreamRepository $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
      * @param Config $config

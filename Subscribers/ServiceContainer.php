@@ -80,7 +80,7 @@ class ServiceContainer extends BaseSubscriber
         $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
 
         return new ProductStreamService(
-            new ProductStreamRepository($this->manager),
+            new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
             new Config($this->manager),
             $this->container->get('shopware_search.product_search'),

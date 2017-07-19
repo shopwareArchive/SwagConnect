@@ -1552,6 +1552,10 @@ class ConnectBaseController extends \Shopware_Controllers_Backend_ExtJs
                 $items = $connectExport->fetchConnectItems($sourceIds, false);
 
                 foreach ($items as $item) {
+                    if ($item['exported'] == false) {
+                        continue;
+                    }
+
                     if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
                         $this->getSDK()->recordDelete($item['sourceId']);
                         $removedRecords[] = $item['sourceId'];

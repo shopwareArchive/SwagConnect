@@ -143,6 +143,7 @@ class ConnectExport
         );
 
         $this->manager->beginTransaction();
+        $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
@@ -152,7 +153,6 @@ class ConnectExport
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
-            $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
             if ($excludeInactiveProducts && !$model->getActive()) {
                 $this->updateLocalConnectItem(
                     $connectAttribute->getSourceId(),
@@ -313,6 +313,7 @@ class ConnectExport
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
+                    bi.exported,
                     a.name as title,
                     IF (a.configurator_set_id IS NOT NULL, a.id, NULL) as groupId,
                     d.ordernumber as number
@@ -384,6 +385,11 @@ class ConnectExport
     public function syncDeleteDetail(Detail $detail)
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
+        // force fetching ConnectAttribute from DB
+        // if it was update via query builder
+        // changes are not visible, because of doctrine proxy cache
+        $this->manager->refresh($attribute);
+
         if (!$this->helper->isProductExported($attribute)) {
             return;
         }

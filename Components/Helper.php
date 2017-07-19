@@ -315,6 +315,7 @@ class Helper
             if (!$model->getMainDetail()) {
                 return false;
             }
+
             return $repository->findOneBy(array('articleDetailId' => $model->getMainDetail()->getId()));
         } elseif ($model instanceof ProductDetail) {
             return $repository->findOneBy(array('articleDetailId' => $model->getId()));

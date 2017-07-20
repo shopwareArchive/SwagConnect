@@ -277,8 +277,7 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $sourceIds = $this->helper->getArticleSourceIds([$articleId]);
-        $this->connectExport->export($sourceIds);
+        $this->connectExport->export($this->helper->getArticleSourceIds([$articleId]));
     }
 
     /**

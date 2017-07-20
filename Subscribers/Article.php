@@ -10,8 +10,6 @@ use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
-use ShopwarePlugins\Connect\Components\VariantRegenerator;
 
 /**
  * Class Article
@@ -45,11 +43,6 @@ class Article extends BaseSubscriber
     private $connectExport;
 
     /**
-     * @var VariantRegenerator
-     */
-    private $variantRegenerator;
-
-    /**
      * @var Helper
      */
     private $helper;
@@ -63,7 +56,6 @@ class Article extends BaseSubscriber
         Gateway $connectGateway,
         ModelManager $modelManager,
         ConnectExport $connectExport,
-        VariantRegenerator $variantRegenerator,
         Helper $helper,
         Config $config
     ) {
@@ -71,7 +63,6 @@ class Article extends BaseSubscriber
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
         $this->connectExport = $connectExport;
-        $this->variantRegenerator = $variantRegenerator;
         $this->helper = $helper;
         $this->config = $config;
     }
@@ -130,10 +121,7 @@ class Article extends BaseSubscriber
                     return;
                 }
 
-                $this->variantRegenerator->setInitialSourceIds(
-                    $articleId,
-                    $this->helper->getArticleSourceIds([$articleId])
-                );
+                $this->deleteVariants($articleId);
                 break;
         }
     }
@@ -284,11 +272,13 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $this->variantRegenerator->setCurrentSourceIds(
-            $articleId,
-            $this->helper->getArticleSourceIds([$articleId])
-        );
-        $this->variantRegenerator->generateChanges($articleId);
+        if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
+            $this->connectExport->markArticleForCronUpdate($articleId);
+            return;
+        }
+
+        $sourceIds = $this->helper->getArticleSourceIds([$articleId]);
+        $this->connectExport->export($sourceIds);
     }
 
     /**

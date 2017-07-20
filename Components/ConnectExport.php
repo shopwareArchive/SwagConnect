@@ -435,13 +435,20 @@ class ConnectExport
 
         $chunks = array_chunk($sourceIds, self::BATCH_SIZE);
 
+        $exported = false;
+        if ($status == Attribute::STATUS_DELETE) {
+            $exported = true;
+        }
+
         foreach ($chunks as $chunk) {
             $builder = $this->manager->getConnection()->createQueryBuilder();
             $builder->update('s_plugin_connect_items', 'ci')
                 ->set('ci.export_status', ':status')
+                ->set('ci.exported', ':exported')
                 ->where('source_id IN (:sourceIds)')
                 ->setParameter('sourceIds', $chunk, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
                 ->setParameter('status', $status)
+                ->setParameter('exported', $exported)
                 ->execute();
         }
     }

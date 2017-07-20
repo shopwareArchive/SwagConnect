@@ -156,7 +156,11 @@ class Lifecycle extends BaseSubscriber
         /** @var \Shopware\Models\Article\Detail $entity */
         $entity = $eventArgs->get('entity');
         if ($entity->getKind() !== 1) {
-            $this->getConnectExport()->syncDeleteDetail($entity);
+            $attribute = $this->getHelper()->getConnectAttributeByModel($entity);
+            if (!$this->getHelper()->isProductExported($attribute)) {
+                return;
+            }
+            $this->getConnectExport()->updateConnectItemsStatus([$attribute->getSourceId()], Attribute::STATUS_DELETE);
         }
     }
 

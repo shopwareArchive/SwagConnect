@@ -42,11 +42,6 @@ class ArticleTest extends AbstractConnectUnitTest
     private $config;
 
     /**
-     * @var StatefulVariantRegenerator
-     */
-    private $variantRegenerator;
-
-    /**
      * @before
      */
     public function prepareMocks()
@@ -55,13 +50,11 @@ class ArticleTest extends AbstractConnectUnitTest
         $this->helper = $this->createMock(Helper::class);
         $this->connectExport = $this->createMock(ConnectExport::class);
         $this->config = $this->createMock(Config::class);
-        $this->variantRegenerator = $this->createMock(StatefulVariantRegenerator::class);
 
         $this->subscriber = new Article(
             $this->createMock(Gateway::class),
             $this->modelManager,
             $this->connectExport,
-            $this->variantRegenerator,
             $this->helper,
             $this->config
         );
@@ -100,11 +93,8 @@ class ArticleTest extends AbstractConnectUnitTest
             ->with([$articleId])
             ->willReturn($sourceIds);
 
-        $this->variantRegenerator->method('setCurrentSourceIds')
-            ->with($articleId, $sourceIds);
-
-        $this->variantRegenerator->method('generateChanges')
-            ->with($articleId);
+        $this->connectExport->method('export')
+            ->with($sourceIds);
 
         $this->subscriber->regenerateChangesForArticle($articleId);
     }

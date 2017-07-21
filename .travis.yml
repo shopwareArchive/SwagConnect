@@ -28,7 +28,7 @@ before_script:
     - composer install
     - cd vendor/shopware/plugin-dev-tools
     - ls
-    - ls config
+    - ls -la config
     - ./install.sh
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
     - ln -s vendor/shopware/plugin-dev-tools/psh56.phar psh56

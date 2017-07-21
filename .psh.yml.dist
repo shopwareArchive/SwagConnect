@@ -49,5 +49,5 @@ environments:
         const:
             DB_PASSWORD: ""
             DB_USER: "travis"
-            DB_HOST: "localhost"
+            DB_HOST: "127.0.0.1"
             DB_PORT: "3306"

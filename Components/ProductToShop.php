@@ -238,11 +238,6 @@ class ProductToShop implements ProductToShopBase
             if (!empty($product->variant)) {
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
-
-            $categories = $this->categoryResolver->resolve($product->categories);
-            foreach ($categories as $category) {
-                $model->addCategory($category);
-            }
         } else {
             $model = $detail->getArticle();
             // fix for isMainVariant flag
@@ -251,6 +246,22 @@ class ProductToShop implements ProductToShopBase
             if ($detail->getId() === $mainDetail->getId()) {
                 $isMainVariant = true;
             }
+        }
+
+        /** @var \Shopware\Models\Category\Category $category */
+        foreach ($model->getCategories() as $category) {
+            $attribute = $category->getAttribute();
+            if (!$attribute) {
+                continue;
+            }
+
+            if ($attribute->getConnectImported()) {
+                $model->removeCategory($category);
+            }
+        }
+        $categories = $this->categoryResolver->resolve($product->categories);
+        foreach ($categories as $remoteCategory) {
+            $model->addCategory($remoteCategory);
         }
 
         if (!empty($product->sku)) {

@@ -240,7 +240,9 @@ class ProductToShop implements ProductToShopBase
             }
 
             $categories = $this->categoryResolver->resolve($product->categories);
-            $model->setCategories($categories);
+            foreach ($categories as $category) {
+                $model->addCategory($category);
+            }
         } else {
             $model = $detail->getArticle();
             // fix for isMainVariant flag

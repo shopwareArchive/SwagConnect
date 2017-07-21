@@ -26,12 +26,7 @@ before_script:
     - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
     - mkdir -p build/logs
     - composer install
-    - cd vendor/shopware/plugin-dev-tools
-    - ls
-    - ls -la config
-    - ./install.sh
-    - cd /tmp/shopware/engine/Shopware/Plugins/Local/Backend/SwagConnect
-    - ln -s vendor/shopware/plugin-dev-tools/psh56.phar psh56
+    - ln -sf vendor/shopware/plugin-dev-tools/psh56.phar psh56
     - ./psh56 travis:init
 
 script: ./psh56 travis:unit-coveralls

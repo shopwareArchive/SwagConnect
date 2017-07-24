@@ -1,14 +1,15 @@
 <?php
 
 namespace ShopwarePlugins\Connect\Subscribers;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
+use Shopware\CustomModels\Connect\Attribute;
+use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
 use Shopware\Models\Customer\Group;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Components\Helper;
 
 /**
  * Class Article
@@ -41,15 +42,29 @@ class Article extends BaseSubscriber
      */
     private $connectExport;
 
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @var Config
+     */
+    private $config;
+
     public function __construct(
         Gateway $connectGateway,
         ModelManager $modelManager,
-        ConnectExport $connectExport
+        ConnectExport $connectExport,
+        Helper $helper,
+        Config $config
     ) {
         parent::__construct();
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
         $this->connectExport = $connectExport;
+        $this->helper = $helper;
+        $this->config = $config;
     }
 
     public function getSubscribedEvents()
@@ -101,6 +116,13 @@ class Article extends BaseSubscriber
                     $this->generateMainVariantChange($request->getParam('id'));
                 }
                 break;
+            case 'createConfiguratorVariants':
+                if (!$articleId = $request->getParam('articleId')) {
+                    return;
+                }
+
+                $this->deleteVariants($articleId);
+                break;
         }
     }
 
@@ -114,7 +136,7 @@ class Article extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        switch($request->getActionName()) {
+        switch ($request->getActionName()) {
             case 'index':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
@@ -128,15 +150,7 @@ class Article extends BaseSubscriber
                 $subject->View()->extendsTemplate(
                     'backend/article/model/attribute_connect.js'
                 );
-
-//                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.2', '<')) {
-                    $subject->View()->assign('disableConnectPrice', 'true');
-//
-//                    $subject->View()->extendsTemplate(
-//                        'backend/article/model/price_attribute_connect.js'
-//                    );
-//                }
-
+                $subject->View()->assign('disableConnectPrice', 'true');
                 $subject->View()->extendsTemplate(
                     'backend/article/view/detail/connect_tab.js'
                 );
@@ -169,14 +183,14 @@ class Article extends BaseSubscriber
                 }
 
                 // Check if entity is a connect product
-                $attribute = $this->getHelper()->getConnectAttributeByModel($article);
+                $attribute = $this->helper->getConnectAttributeByModel($article);
                 if (!$attribute) {
                     return;
                 }
 
                 // if article is not exported to Connect
                 // don't need to generate changes
-                if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+                if (!$this->helper->isProductExported($attribute) || !empty($attribute->getShopId())) {
                     return;
                 }
 
@@ -197,7 +211,7 @@ class Article extends BaseSubscriber
                     array($article->getId())
                 );
 
-                $this->getConnectExport()->export($sourceIds, null, true);
+                $this->connectExport->export($sourceIds);
                 break;
             case 'createConfiguratorVariants':
                 // main detail should be updated as well, because shopware won't call lifecycle event
@@ -205,18 +219,108 @@ class Article extends BaseSubscriber
                 // otherwise $product->variant property is an empty array
                 // if main detail is not changed, Connect SDK won't generate change for it.
                 // ticket CON-3747
-                if ($request->getParam('articleId')) {
-                    $this->exportMainVariant($request->getParam('articleId'));
+                if (!$articleId = $request->getParam('articleId')) {
+                    return;
                 }
+
+                $this->regenerateChangesForArticle($articleId);
                 break;
             case 'getPropertyList':
                 $subject->View()->data = $this->addConnectFlagToProperties(
                     $subject->View()->data
                 );
                 break;
+            case 'deleteAllVariants':
+                if ($articleId = $request->getParam('articleId')) {
+                    /** @var ArticleModel $article */
+                    $article = $this->modelManager->find(ArticleModel::class, (int) $articleId);
+                    if (!$article) {
+                        return;
+                    }
+
+                    $this->deleteVariants($articleId);
+                }
+                break;
             default:
                 break;
         }
+    }
+
+    /**
+     * @param int $articleId
+     */
+    public function regenerateChangesForArticle($articleId)
+    {
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO);
+        if ($autoUpdateProducts == Config::UPDATE_MANUAL) {
+            return;
+        }
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
+        if (!$article) {
+            return;
+         }
+
+        $attribute = $this->helper->getConnectAttributeByModel($article);
+        if (!$attribute) {
+            return;
+        }
+
+        // Check if entity is a connect product
+        if (!$this->helper->isProductExported($attribute)) {
+            return;
+        }
+
+        if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
+            $this->connectExport->markArticleForCronUpdate($articleId);
+            return;
+        }
+
+        $this->connectExport->export($this->helper->getArticleSourceIds([$articleId]));
+    }
+
+    /**
+     * Delete all variants of given product except main one
+     *
+     * @param int $articleId
+     */
+    private function deleteVariants($articleId)
+    {
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', Config::UPDATE_AUTO);
+        if ($autoUpdateProducts == Config::UPDATE_MANUAL) {
+            return;
+        }
+
+        /** @var \Shopware\Models\Article\Article $article */
+        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
+        if (!$article) {
+            return;
+        }
+
+        $connectAttribute = $this->helper->getConnectAttributeByModel($article);
+        if (!$connectAttribute) {
+            return;
+        }
+
+        // Check if entity is a connect product
+        if (!$this->helper->isProductExported($connectAttribute)) {
+            return;
+        }
+
+        $mainVariantSourceId = $connectAttribute->getSourceId();
+        $sourceIds = array_filter(
+            $this->helper->getArticleSourceIds([$article->getId()]),
+            function ($sourceId) use ($mainVariantSourceId) {
+                return $sourceId != $mainVariantSourceId;
+            }
+        );
+
+        foreach ($sourceIds as $sourceId) {
+            $this->getSDK()->recordDelete($sourceId);
+        }
+
+        $this->connectExport->updateConnectItemsStatus($sourceIds, Attribute::STATUS_DELETE);
     }
 
     public function addConnectFlagToProperties($data)
@@ -265,13 +369,13 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detail);
 
         if (!$attribute) {
             return;
         }
         // Check if entity is a connect product
-        if (!$this->getHelper()->isProductExported($attribute)) {
+        if (!$this->helper->isProductExported($attribute)) {
             return;
         }
 
@@ -294,22 +398,6 @@ class Article extends BaseSubscriber
     }
 
     /**
-     * @return ConnectExport
-     */
-    public function getConnectExport()
-    {
-        return new ConnectExport(
-            $this->getHelper(),
-            $this->getSDK(),
-            Shopware()->Models(),
-            new ProductsAttributesValidator(),
-            $this->getConnectConfig(),
-            new ErrorHandler(),
-            Shopware()->Container()->get('events')
-        );
-    }
-
-    /**
      * When saving prices make sure, that the connectPrice is stored in net
      *
      * @param \Enlight_Hook_HookArgs $args
@@ -318,8 +406,6 @@ class Article extends BaseSubscriber
     {
         /** @var array $prices */
         $prices = $args->getReturn();
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $args->get('article');
 
         $connectCustomerGroup = $this->getConnectCustomerGroup();
         if (!$connectCustomerGroup) {
@@ -484,44 +570,5 @@ class Article extends BaseSubscriber
     {
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
         return Shopware()->Db()->fetchOne($sql, array($id));
-    }
-
-    /**
-     * Marks main variant for export
-     *
-     * @param int $articleId
-     */
-    private function exportMainVariant($articleId)
-    {
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->find((int)$articleId);
-
-        if (!$article) {
-            return;
-        }
-
-        $attribute = $this->getHelper()->getConnectAttributeByModel($article);
-
-        if (!$attribute) {
-            return;
-        }
-        // Check if entity is a connect product
-        if (!$this->getHelper()->isProductExported($attribute)) {
-            return;
-        }
-
-        if (!$this->hasPriceType()) {
-            return;
-        }
-
-        $detail = $article->getMainDetail();
-        $detailAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
-
-        try {
-            $this->connectExport->export([$detailAttribute->getSourceId()]);
-        } catch (\Exception $e) {
-            // If the update fails due to missing requirements
-            // (e.g. category assignment), continue without error
-        }
     }
 }

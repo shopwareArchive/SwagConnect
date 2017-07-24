@@ -771,13 +771,13 @@ class Helper
     }
 
     /**
-     * @param $articleId
+     * @param int $articleId
      * @return array
      */
     public function getSourceIdsFromArticleId($articleId)
     {
         $rows = $this->manager->getConnection()->fetchAll(
-            'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
+            'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ? AND exported = 1',
             array($articleId)
         );
 

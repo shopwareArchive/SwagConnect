@@ -11,7 +11,6 @@ use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 
 /**
  * Cronjob callback

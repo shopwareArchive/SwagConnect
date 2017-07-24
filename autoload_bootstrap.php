@@ -47,10 +47,7 @@ function loadControllers()
 
         'Widgets/Connect.php',
 
-        'Backend/ConnectBaseController.php',
-        'Backend/Connect52.php',
         'Backend/ConnectConfig.php',
-        'Backend/ConnectGatewayBaseController.php',
         'Frontend/ConnectProductGateway.php',
         'Backend/ConnectGateway.php',
         'Backend/LastChanges.php',

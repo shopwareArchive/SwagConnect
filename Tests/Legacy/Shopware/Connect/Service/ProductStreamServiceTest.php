@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Service;
 
+use Shopware\Components\ProductStream\RepositoryInterface;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
@@ -39,7 +40,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $manager = Shopware()->Models();
         $container = Shopware()->Container();
         $this->productStreamService = new ProductStreamService(
-            new ProductStreamRepository($manager),
+            new ProductStreamRepository($manager, $this->createMock(RepositoryInterface::class)),
             $manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute'),
             new Config($manager),
             $container->get('shopware_search.product_search'),
@@ -182,7 +183,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
     }
 
     /**
-     * @expectedException Doctrine\ORM\NoResultException
+     * @expectedException \Doctrine\ORM\NoResultException
      */
     public function testNotExistingStream()
     {

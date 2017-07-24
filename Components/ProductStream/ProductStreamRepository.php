@@ -7,13 +7,15 @@
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
+use Shopware\Bundle\SearchBundle\Criteria;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
 use Doctrine\DBAL\Connection;
+use Shopware\Components\ProductStream\RepositoryInterface;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 
-class ProductStreamRepository extends Repository
+class ProductStreamRepository implements RepositoryInterface
 {
     const CHUNK_LIMIT = 500;
 
@@ -23,13 +25,18 @@ class ProductStreamRepository extends Repository
     private $manager;
 
     /**
-     * ProductStreamRepository constructor.
-     * @param ModelManager $manager
+     * @var Repository
      */
-    public function __construct(ModelManager $manager)
+    private $productStreamRepository;
+
+    /**
+     * @param ModelManager $manager
+     * @param RepositoryInterface $productStreamRepository
+     */
+    public function __construct(ModelManager $manager, RepositoryInterface $productStreamRepository)
     {
-        parent::__construct($manager->getConnection());
         $this->manager = $manager;
+        $this->productStreamRepository = $productStreamRepository;
     }
 
     /**
@@ -402,5 +409,21 @@ class ProductStreamRepository extends Repository
             ->where('pss.stream_id = :streamId')
             ->setParameter('streamId', $streamId)
             ->execute()->fetchColumn();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepareCriteria(Criteria $criteria, $productStreamId)
+    {
+        $this->productStreamRepository->prepareCriteria($criteria, $productStreamId);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($serializedConditions)
+    {
+        return $this->productStreamRepository->unserialize($serializedConditions);
     }
 }

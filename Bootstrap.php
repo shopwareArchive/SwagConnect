@@ -37,6 +37,7 @@ use ShopwarePlugins\Connect\Components\ConnectFactory;
  */
 final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+
     /**
      * @var SubscriberRegistration
      */

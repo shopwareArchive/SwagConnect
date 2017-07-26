@@ -259,7 +259,17 @@ class ProductToShop implements ProductToShopBase
                 $model->removeCategory($category);
             }
         }
+
+        $detailAttribute = $detail->getAttribute();
+        if (!$detailAttribute) {
+            $detailAttribute = new AttributeModel();
+            $detail->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
+        }
+
         $categories = $this->categoryResolver->resolve($product->categories);
+        $hasMappedCategory = count($categories) > 0;
+        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
         foreach ($categories as $remoteCategory) {
             $model->addCategory($remoteCategory);
         }
@@ -276,13 +286,6 @@ class ProductToShop implements ProductToShopBase
             $connectAttribute->setIsMainVariant(true);
         }
         $connectAttribute->setGroupId($product->groupId);
-
-        $detailAttribute = $detail->getAttribute();
-        if (!$detailAttribute) {
-            $detailAttribute = new AttributeModel();
-            $detail->setAttribute($detailAttribute);
-            $detailAttribute->setArticle($model);
-        }
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         /*

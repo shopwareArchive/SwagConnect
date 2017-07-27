@@ -175,10 +175,10 @@ class ProductStreamService
     }
 
     /**
-     * @param $articleIds
+     * @param array $articleIds
      * @return array
      */
-    private function collectRelatedStreamsAssignments($articleIds)
+    public function collectRelatedStreamsAssignments(array $articleIds)
     {
         $assignment = [];
 

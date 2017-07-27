@@ -2,6 +2,7 @@
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
+use Shopware\Components\LogawareReflectionHelper;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\ProductStream\Repository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -22,9 +23,9 @@ class ProductStreamRepository extends Repository
      * ProductStreamRepository constructor.
      * @param ModelManager $manager
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(ModelManager $manager, LogawareReflectionHelper $reflectionHelper)
     {
-        parent::__construct($manager->getConnection());
+        parent::__construct($manager->getConnection(), $reflectionHelper);
         $this->manager = $manager;
     }
 

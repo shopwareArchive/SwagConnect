@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 5.2
- * Copyright © 2016 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -50,17 +33,16 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Returns the current version of the plugin.
      *
-     * @return string
      * @throws Exception
+     * @return string|void
      */
     public function getVersion()
     {
-        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR .'plugin.json'), true);
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'plugin.json'), true);
 
         if ($info) {
             return $info['currentVersion'];
         }
-
         throw new \Exception('The plugin has an invalid version file.');
     }
 
@@ -175,6 +157,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             Shopware()->Db(),
             $version
         );
+
         return $update->run();
     }
 
@@ -196,6 +179,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
                 $this->assertMinimumVersion('5.2.6')
             )
         );
+
         return $uninstall->run();
     }
 
@@ -305,7 +289,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     private function isInstalled()
     {
         $builder = Shopware()->Models()->createQueryBuilder();
-        $builder->select(array('plugins'))
+        $builder->select(['plugins'])
             ->from('Shopware\Models\Plugin\Plugin', 'plugins');
 
         $builder->where('plugins.label = :label');
@@ -337,6 +321,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             );
         }
 
-        $this->subscriberRegistration->registerSubscribers($this->assertMinimumVersion('5.2'));
+        $this->subscriberRegistration->registerSubscribers();
     }
 }

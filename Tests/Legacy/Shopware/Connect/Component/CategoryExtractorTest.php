@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
@@ -23,18 +28,18 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     private function createArticleA()
     {
-        $minimalTestArticle = array(
+        $minimalTestArticle = [
             'name' => 'TurnschuhA',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Turnschuh Inc.',
-            'categories' => array(
-                array('id' => 15),
-            ),
-            'mainDetail' => array(
+            'categories' => [
+                ['id' => 15],
+            ],
+            'mainDetail' => [
                 'number' => '9898',
-            ),
-        );
+            ],
+        ];
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
         /** @var \Shopware\Models\Article\Article $article */
@@ -43,18 +48,18 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     private function createArticleB()
     {
-        $minimalTestArticle = array(
+        $minimalTestArticle = [
             'name' => 'TurnschuhB',
             'active' => true,
             'tax' => 19,
             'supplier' => 'Turnschuh Inc.',
-            'categories' => array(
-                array('id' => 15),
-            ),
-            'mainDetail' => array(
+            'categories' => [
+                ['id' => 15],
+            ],
+            'mainDetail' => [
                 'number' => '9897',
-            ),
-        );
+            ],
+        ];
 
         $articleResource = \Shopware\Components\Api\Manager::getResource('article');
         /** @var \Shopware\Models\Article\Article $article */
@@ -76,17 +81,17 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         $detailB = $this->articleB->getMainDetail();
         $this->db->exec(
             'INSERT INTO s_plugin_connect_items (article_id, article_detail_id, shop_id, source_id, category) VALUES
-                (' . $this->articleA->getId() . ',' . $detailA->getId() .',1,' . $detailA->getNumber() .', "/bücher"),
-                (' . $this->articleB->getId() . ',' . $detailB->getId() .',1,' . $detailB->getNumber() .', "/bücher")
+                (' . $this->articleA->getId() . ',' . $detailA->getId() . ',1,' . $detailA->getNumber() . ', "/bücher"),
+                (' . $this->articleB->getId() . ',' . $detailB->getId() . ',1,' . $detailB->getNumber() . ', "/bücher")
             '
         );
 
-        $categories = array(
-            array('category_key' => '/Ski-unit', 'label' => 'Ski'),
-            array('category_key' => '/Kleidung-unit', 'label' => 'Kleidung'),
-            array('category_key' => '/Kleidung-unit/Hosen-unit', 'label' => 'Hosen', 'local_category_id' => 1),
-            array('category_key' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit', 'label' => 'Hosentraeger'),
-        );
+        $categories = [
+            ['category_key' => '/Ski-unit', 'label' => 'Ski'],
+            ['category_key' => '/Kleidung-unit', 'label' => 'Kleidung'],
+            ['category_key' => '/Kleidung-unit/Hosen-unit', 'label' => 'Hosen', 'local_category_id' => 1],
+            ['category_key' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit', 'label' => 'Hosentraeger'],
+        ];
 
         //inserts a category with map product
         $this->db->exec("
@@ -99,15 +104,15 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         ");
         $this->db->insert(
             's_plugin_connect_product_to_categories',
-            array(
+            [
                 'connect_category_id' => $this->db->lastInsertId(),
                 'articleID' => $this->articleB->getId(),
-            )
+            ]
         );
         $this->db->update(
             's_articles_attributes',
-            array('connect_mapped_category' => 1),
-            array('articleID=' . $this->articleB->getId())
+            ['connect_mapped_category' => 1],
+            ['articleID=' . $this->articleB->getId()]
         );
 
         // todo@sb: Improve me with mocks
@@ -115,10 +120,10 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             $this->db->insert('s_plugin_connect_categories', $category);
             $categoryId = $this->db->lastInsertId();
 
-            $this->db->insert('s_plugin_connect_product_to_categories', array(
+            $this->db->insert('s_plugin_connect_product_to_categories', [
                 'connect_category_id' => $categoryId,
                 'articleID' => $this->articleA->getId(),
-            ));
+            ]);
         }
 
         $this->configurationGateway = $this->getMockBuilder('\\Shopware\\Connect\\Gateway\\PDO')
@@ -154,8 +159,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function tearDown()
     {
-        $this->db->exec("DELETE FROM `s_plugin_connect_categories`");
-        $this->db->exec("DELETE FROM `s_plugin_connect_product_to_categories`");
+        $this->db->exec('DELETE FROM `s_plugin_connect_categories`');
+        $this->db->exec('DELETE FROM `s_plugin_connect_product_to_categories`');
         $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9898%"');
         $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9897%"');
         $this->db->exec('DELETE FROM s_articles WHERE name = "Turnschuh"');
@@ -168,91 +173,91 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     public function testExtractImportedCategories()
     {
         $attribute1 = new \Shopware\CustomModels\Connect\Attribute();
-        $attribute1->setCategory(array('/Ski' => 'Ski'));
+        $attribute1->setCategory(['/Ski' => 'Ski']);
         $attribute1->setStream('Awesome products');
 
         $attribute2 = new \Shopware\CustomModels\Connect\Attribute();
-        $attribute2->setCategory(array(
+        $attribute2->setCategory([
             '/Kleidung' => 'Kleidung',
             '/Kleidung/Hosen' => 'Hosen',
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
-        ));
+        ]);
         $attribute2->setStream('Awesome products');
 
         $attribute3 = new \Shopware\CustomModels\Connect\Attribute();
-        $attribute3->setCategory(array(
+        $attribute3->setCategory([
             '/Kleidung/Hosentraeger' => 'Hosentraeger',
             '/Kleidung/Nahrung & Getraenke' => 'Nahrung & Getraenke',
             '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke' => 'Alkoholische Getränke',
-        ));
+        ]);
         $attribute3->setStream('Awesome products');
 
         $this->attributeRepository->expects($this->once())
             ->method('findRemoteArticleAttributes')
-            ->willReturn(array(
+            ->willReturn([
                 $attribute1,
                 $attribute2,
                 $attribute3,
-            ));
+            ]);
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'name' => 'Ski',
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false,
-            ),
-            array(
+            ],
+            [
                 'name' => 'Kleidung',
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung',
                 'leaf' => false,
-                'children' => array(
-                    array(
+                'children' => [
+                    [
                         'name' => 'Hosen',
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung/Hosen',
                         'leaf' => true,
-                        'children' => array(),
-                        'cls' => "sc-tree-node",
+                        'children' => [],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false,
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => 'Hosentraeger',
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung/Hosentraeger',
                         'leaf' => true,
-                        'children' => array(),
-                        'cls' => "sc-tree-node",
+                        'children' => [],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false,
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => 'Nahrung & Getraenke',
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung/Nahrung & Getraenke',
                         'leaf' => false,
-                        'children' => array(
-                            array(
+                        'children' => [
+                            [
                                 'name' => 'Alkoholische Getränke',
                                 'id' => self::RANDOM_STRING,
                                 'categoryId' => '/Kleidung/Nahrung & Getraenke/Alkoholische Getränke',
                                 'leaf' => true,
-                                'children' => array(),
-                                'cls' => "sc-tree-node",
+                                'children' => [],
+                                'cls' => 'sc-tree-node',
                                 'expanded' => false,
-                            ),
-                        ),
-                        'cls' => "sc-tree-node",
+                            ],
+                        ],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false,
-                    )
-                ),
-                'cls' => "sc-tree-node",
+                    ]
+                ],
+                'cls' => 'sc-tree-node',
                 'expanded' => false,
-            ),
-        );
+            ],
+        ];
 
 
         $result = $this->categoryExtractor->extractImportedCategories();
@@ -264,101 +269,101 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $this->configurationGateway->expects($this->once())
             ->method('getConnectedShopIds')
-            ->willReturn(array(1, 2, 5,));
+            ->willReturn([1, 2, 5,]);
 
         $this->configurationGateway->expects($this->at(1))
             ->method('getShopConfiguration')
             ->with(1)
             ->willReturn(
-                new \Shopware\Connect\Struct\ShopConfiguration(array(
+                new \Shopware\Connect\Struct\ShopConfiguration([
                     'displayName' => 'Shop 1'
-                ))
+                ])
             );
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => 1,
                 'name' => 'Shop 1',
                 'leaf' => false,
-                'children' => array(),
+                'children' => [],
                 'iconCls' => 'sc-tree-node-icon',
-                'cls' => "sc-tree-node",
+                'cls' => 'sc-tree-node',
                 'expanded' => false,
-            ),
-        );
+            ],
+        ];
         $result = $this->categoryExtractor->getMainNodes();
         $this->assertEquals($expected, $result);
     }
 
     public function testGetTreeWithoutParent()
     {
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
         $result = $this->categoryExtractor->getRemoteCategoriesTree();
         $this->assertEquals($expected, $result);
     }
 
     public function testGetTreeWithoutParentAndIncludeChildren()
     {
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(
-                    array(
+                'children' => [
+                    [
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung-unit/Hosen-unit',
                         'name' => 'Hosen',
                         'leaf' => false,
-                        'children' => array(
-                            array(
+                        'children' => [
+                            [
                                 'id' => self::RANDOM_STRING,
                                 'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
                                 'name' => 'Hosentraeger',
                                 'leaf' => true,
-                                'children' => array(),
-                                'cls' => "sc-tree-node",
+                                'children' => [],
+                                'cls' => 'sc-tree-node',
                                 'expanded' => false
-                            ),
-                        ),
-                        'cls' => "sc-tree-node",
+                            ],
+                        ],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false
-                    ),
-                ),
-                'cls' => "sc-tree-node",
+                    ],
+                ],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
         $parent = null;
         $includeChildren = true;
         $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren);
@@ -367,46 +372,46 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function testGetTreeWithoutParentAndExcludeMapped()
     {
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(
-                    array(
+                'children' => [
+                    [
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung-unit/Hosen-unit',
                         'name' => 'Hosen',
                         'leaf' => false,
-                        'children' => array(
-                            array(
+                        'children' => [
+                            [
                                 'id' => self::RANDOM_STRING,
                                 'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
                                 'name' => 'Hosentraeger',
                                 'leaf' => true,
-                                'children' => array(),
-                                'cls' => "sc-tree-node",
+                                'children' => [],
+                                'cls' => 'sc-tree-node',
                                 'expanded' => false
-                            ),
-                        ),
-                        'cls' => "sc-tree-node",
+                            ],
+                        ],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false
-                    ),
-                ),
-                'cls' => "sc-tree-node",
+                    ],
+                ],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
         $parent = null;
         $includeChildren = true;
         $excludeMapped = true;
@@ -416,17 +421,17 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function testGetTreeWithParent()
     {
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit/Hosen-unit',
                 'name' => 'Hosen',
                 'leaf' => false,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
         $parent = '/Kleidung-unit';
         $result = $this->categoryExtractor->getRemoteCategoriesTree($parent);
         $this->assertEquals($expected, $result);
@@ -434,27 +439,27 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function testGetTreeWithParentAndIncludeChildren()
     {
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit/Hosen-unit',
                 'name' => 'Hosen',
                 'leaf' => false,
-                'children' => array(
-                    array(
+                'children' => [
+                    [
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
                         'name' => 'Hosentraeger',
                         'leaf' => true,
-                        'children' => array(),
-                        'cls' => "sc-tree-node",
+                        'children' => [],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false
-                    ),
-                ),
-                'cls' => "sc-tree-node",
+                    ],
+                ],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
         $parent = '/Kleidung-unit';
         $includeChildren = true;
         $result = $this->categoryExtractor->getRemoteCategoriesTree($parent, $includeChildren);
@@ -473,36 +478,36 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     public function testExtractByShopId()
     {
         $product = $this->getProduct();
-        $product->categories = array(
+        $product->categories = [
             '/Ski-unit' => 'Ski',
             '/Kleidung-unit' => 'Kleidung',
             '/Kleidung-unit/Hosen-unit' => 'Hosen',
             '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
 
-        );
+        ];
 
         $this->getProductToShop()->insertOrUpdate($product);
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
 
         $result = $this->categoryExtractor->extractByShopId(3);
         $this->assertEquals($expected, $result);
@@ -511,56 +516,56 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     public function testExtractByShopIdAndIncludeChildren()
     {
         $product = $this->getProduct();
-        $product->categories = array(
+        $product->categories = [
             '/Ski-unit' => 'Ski',
             '/Kleidung-unit' => 'Kleidung',
             '/Kleidung-unit/Hosen-unit' => 'Hosen',
             '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
 
-        );
+        ];
 
         $this->getProductToShop()->insertOrUpdate($product);
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(
-                    array(
+                'children' => [
+                    [
                         'id' => self::RANDOM_STRING,
                         'categoryId' => '/Kleidung-unit/Hosen-unit',
                         'name' => 'Hosen',
                         'leaf' => false,
-                        'children' => array(
-                            array(
+                        'children' => [
+                            [
                                 'id' => self::RANDOM_STRING,
                                 'categoryId' => '/Kleidung-unit/Hosen-unit/Hosentraeger-unit',
                                 'name' => 'Hosentraeger',
                                 'leaf' => true,
-                                'children' => array(),
-                                'cls' => "sc-tree-node",
+                                'children' => [],
+                                'cls' => 'sc-tree-node',
                                 'expanded' => false
-                            ),
-                        ),
-                        'cls' => "sc-tree-node",
+                            ],
+                        ],
+                        'cls' => 'sc-tree-node',
                         'expanded' => false
-                    ),
-                ),
-                'cls' => "sc-tree-node",
+                    ],
+                ],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
 
         $result = $this->categoryExtractor->extractByShopId(3, $includeChildren = true);
         $this->assertEquals($expected, $result);
@@ -569,7 +574,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     public function testGetStreamByShopId()
     {
         $shopId = 1;
-        for ($i=0; $i < 3; $i++) {
+        for ($i=0; $i < 3; ++$i) {
             $product = $this->getProduct();
             $product->shopId = $shopId;
             $product->stream = 'Awesome products';
@@ -577,7 +582,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             $this->getProductToShop()->insertOrUpdate($product);
         }
 
-        for ($i=0; $i < 3; $i++) {
+        for ($i=0; $i < 3; ++$i) {
             $product = $this->getProduct();
             $product->shopId = $shopId;
             $product->stream = 'Mobile devices';
@@ -586,28 +591,28 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         }
 
         $streams = $this->categoryExtractor->getStreamsByShopId($shopId);
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '1_stream_Awesome products',
                 'name' => 'Awesome products',
                 'leaf' => false,
-                'children' => array(),
+                'children' => [],
                 'iconCls' => 'sprite-product-streams',
-                'cls' => "sc-tree-node",
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '1_stream_Mobile devices',
                 'name' => 'Mobile devices',
                 'leaf' => false,
-                'children' => array(),
+                'children' => [],
                 'iconCls' => 'sprite-product-streams',
-                'cls' => "sc-tree-node",
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
 
         $this->assertEquals($expected, $streams);
     }
@@ -616,41 +621,41 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
     {
         $shopId = 3;
         $stream = 'Media devices';
-        for ($i=0; $i < 5; $i++) {
+        for ($i=0; $i < 5; ++$i) {
             $product = $this->getProduct();
             $product->shopId = $shopId;
             $product->stream = $stream;
-            $product->categories = array(
+            $product->categories = [
                 '/Ski-unit' => 'Ski',
                 '/Kleidung-unit' => 'Kleidung',
                 '/Kleidung-unit/Hosen-unit' => 'Hosen',
                 '/Kleidung-unit/Hosen-unit/Hosentraeger-unit' => 'Hosentraeger',
 
-            );
+            ];
 
             $this->getProductToShop()->insertOrUpdate($product);
         }
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Ski-unit',
                 'name' => 'Ski',
                 'leaf' => true,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-            array(
+            ],
+            [
                 'id' => self::RANDOM_STRING,
                 'categoryId' => '/Kleidung-unit',
                 'name' => 'Kleidung',
                 'leaf' => false,
-                'children' => array(),
-                'cls' => "sc-tree-node",
+                'children' => [],
+                'cls' => 'sc-tree-node',
                 'expanded' => false
-            ),
-        );
+            ],
+        ];
 
         $remoteCategories = $this->categoryExtractor->getRemoteCategoriesTreeByStream($stream, $shopId);
         $this->assertEquals($expected, $remoteCategories);
@@ -697,7 +702,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                     'name' => 'Hosentraeger',
                     'leaf' => true,
                     'children' => [],
-                    'cls' => "sc-tree-node",
+                    'cls' => 'sc-tree-node',
                     'expanded' => false
                 ]
             ],
@@ -705,4 +710,3 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
         );
     }
 }
- 

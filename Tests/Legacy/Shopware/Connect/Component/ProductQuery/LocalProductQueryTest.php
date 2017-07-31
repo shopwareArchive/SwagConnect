@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component\ProductQuery;
 
@@ -8,7 +13,6 @@ use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
-use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bundle\StoreFrontBundle\Struct\Media;
 use Shopware\Models\Property;
@@ -104,7 +108,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->productTranslator->expects($this->any())
             ->method('translateConfiguratorOption')
-            ->willReturn($this->translations);		
+            ->willReturn($this->translations);
 
         $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
             ->disableOriginalConstructor()
@@ -144,7 +148,8 @@ class LocalProductQueryTest extends ConnectTestHelper
      * @param string $imagePath
      * @return string
      */
-    public function getUrlCallback($imagePath) {
+    public function getUrlCallback($imagePath)
+    {
         if ($imagePath == '/media/image/tea_pavilion.jpg') {
             return 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         } elseif ($imagePath == '/media/image/tea.png') {
@@ -172,6 +177,7 @@ class LocalProductQueryTest extends ConnectTestHelper
                 $this->mediaService
             );
         }
+
         return $this->localProductQuery;
     }
 
@@ -207,7 +213,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row = [
             'sku' => 'SW10005',
             'sourceId' => '22',
-            'ean' => NULL,
+            'ean' => null,
             'title' => 'Glas -Teetasse 0,25l',
             'shortDescription' => 'Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius.',
             'vendor' =>  [
@@ -234,14 +240,14 @@ class LocalProductQueryTest extends ConnectTestHelper
         ];
 
         $productMedia = [];
-        for ($i = 1; $i < 12; $i++) {
+        for ($i = 1; $i < 12; ++$i) {
             $media = new Media();
             $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_product_image%s.jpg', $i));
             $productMedia[] = $media;
         }
 
         $variantMedia = [];
-        for ($i = 1; $i < 12; $i++) {
+        for ($i = 1; $i < 12; ++$i) {
             $media = new Media();
             $media->setFile(sprintf('http://myshop/media/image/2e/4f/tea_pavilion_variant_image%s.jpg', $i));
             $variantMedia[] = $media;
@@ -261,8 +267,8 @@ class LocalProductQueryTest extends ConnectTestHelper
         $expectedProduct->vendor['logo_url'] = 'http://myshop/media/image/2e/4f/tea_pavilion.jpg';
         $expectedProduct->url = $this->getProductBaseUrl() . '22';
         $expectedProduct->attributes = [
-            'quantity' => NULL,
-            'ref_quantity' => NULL,
+            'quantity' => null,
+            'ref_quantity' => null,
         ];
         $expectedProduct->translations = $this->translations;
         $expectedProduct->priceRanges = [
@@ -313,7 +319,7 @@ class LocalProductQueryTest extends ConnectTestHelper
             ]),
         ];
 
-		$expectedProduct->images = [
+        $expectedProduct->images = [
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image1.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image2.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_product_image3.jpg',
@@ -466,7 +472,6 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->assertCount(1, $this->getLocalProductQuery()->get([$this->article->getId()]));
     }
-
 
     public function tearDown()
     {

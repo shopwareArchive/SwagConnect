@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -18,7 +23,7 @@ class ProductStreams extends BaseSubscriber
     /** @var Config */
     protected $config;
 
-    /** @var  Helper */
+    /** @var Helper */
     protected $helper;
 
     /**
@@ -41,11 +46,11 @@ class ProductStreams extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
             'Enlight_Controller_Action_PostDispatch_Backend_ProductStream' => 'extendBackendProductStream',
             'Shopware_SearchBundleDBAL_Collect_Condition_Handlers' => 'registerConditionHandlers'
-        );
+        ];
     }
 
     public function getProductStreamService()
@@ -166,8 +171,8 @@ class ProductStreams extends BaseSubscriber
                 } elseif ($autoUpdate == Config::UPDATE_CRON_JOB) {
                     Shopware()->Db()->update(
                         's_plugin_connect_items',
-                        array('cron_update' => 1),
-                        array('article_id' => $articleId)
+                        ['cron_update' => 1],
+                        ['article_id' => $articleId]
                     );
                 }
                 break;

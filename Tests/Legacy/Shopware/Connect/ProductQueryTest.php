@@ -1,16 +1,18 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Verificator\Product;
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
-use ShopwarePlugins\Connect\Components\Translations\ProductTranslator;
 
 class ProductQueryTest extends ConnectTestHelper
 {
@@ -41,11 +43,11 @@ class ProductQueryTest extends ConnectTestHelper
                   ON DUPLICATE KEY UPDATE
                   `value` = VALUES(`value`)
               ',
-            array(
+            [
                 'priceFieldForPurchasePriceExport',
                 $purchasePriceField,
                 'export'
-            ));
+            ]);
     }
 
     public function getProductQuery()
@@ -57,15 +59,15 @@ class ProductQueryTest extends ConnectTestHelper
 
             $this->productTranslator->expects($this->any())
                 ->method('translate')
-                ->willReturn(array());
+                ->willReturn([]);
 
             $this->productTranslator->expects($this->any())
                 ->method('translateConfiguratorGroup')
-                ->willReturn(array());
+                ->willReturn([]);
 
             $this->productTranslator->expects($this->any())
                 ->method('translateConfiguratorOption')
-                ->willReturn(array());
+                ->willReturn([]);
 
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
             $configComponent = new Config(Shopware()->Models());
@@ -109,6 +111,7 @@ class ProductQueryTest extends ConnectTestHelper
                 )
             );
         }
+
         return $this->productQuery;
     }
 
@@ -116,7 +119,6 @@ class ProductQueryTest extends ConnectTestHelper
     {
         return Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($id);
     }
-
 
     public function testGetLocal()
     {
@@ -128,7 +130,7 @@ class ProductQueryTest extends ConnectTestHelper
         Shopware()->Models()->persist($detail);
         Shopware()->Models()->flush($detail);
 
-        $result = $this->getProductQuery()->getLocal(array(3));
+        $result = $this->getProductQuery()->getLocal([3]);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
@@ -149,14 +151,14 @@ class ProductQueryTest extends ConnectTestHelper
         $newProduct = $this->getProduct();
         $newProduct->minPurchaseQuantity = 4;
 
-        $this->dispatchRpcCall('products', 'toShop', array(
-            array(
-                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate(array(
+        $this->dispatchRpcCall('products', 'toShop', [
+            [
+                new \Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate([
                     'product' => $newProduct,
                     'revision' => time(),
-                ))
-            )
-        ));
+                ])
+            ]
+        ]);
 
         $result = $this->getProductQuery()->getRemote([$newProduct->sourceId], $newProduct->shopId);
         /** @var \Shopware\Connect\Struct\Product $product */
@@ -170,7 +172,6 @@ class ProductQueryTest extends ConnectTestHelper
         $this->assertEquals($newProduct->purchasePriceHash, $product->purchasePriceHash);
         $this->assertEquals($newProduct->offerValidUntil, $product->offerValidUntil);
         $this->assertEquals($newProduct->minPurchaseQuantity, $product->minPurchaseQuantity);
-
     }
 
     public function getProductBaseUrl()
@@ -179,18 +180,18 @@ class ProductQueryTest extends ConnectTestHelper
             return null;
         }
 
-        return Shopware()->Front()->Router()->assemble(array(
+        return Shopware()->Front()->Router()->assemble([
             'module' => 'frontend',
             'controller' => 'connect_product_gateway',
             'action' => 'product',
             'id' => '',
             'fullPath' => true
-        ));
+        ]);
     }
 
     public function testGetConnectProduct()
     {
-        $result = $this->getProductQuery()->getLocal(array(3));
+        $result = $this->getProductQuery()->getLocal([3]);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 
@@ -202,7 +203,7 @@ class ProductQueryTest extends ConnectTestHelper
 
         $model = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find(11);
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
-        $result = $this->getProductQuery()->getLocal(array(11));
+        $result = $this->getProductQuery()->getLocal([11]);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
 

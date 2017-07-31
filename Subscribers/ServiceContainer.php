@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -27,10 +32,10 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 
 class ServiceContainer extends BaseSubscriber
 {
-    /** @var ModelManager  */
+    /** @var ModelManager */
     private $manager;
 
-    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql  */
+    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql */
     private $db;
 
     /** @var Container */
@@ -55,7 +60,7 @@ class ServiceContainer extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
             'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
@@ -63,7 +68,7 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
-        );
+        ];
     }
 
     /**
@@ -75,7 +80,7 @@ class ServiceContainer extends BaseSubscriber
         $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
 
         return new ProductStreamService(
-            new ProductStreamRepository($this->manager),
+            new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
             new Config($this->manager),
             $this->container->get('shopware_search.product_search'),

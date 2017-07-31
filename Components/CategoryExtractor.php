@@ -1,31 +1,15 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
+
 namespace ShopwarePlugins\Connect\Components;
+
 use Shopware\Connect\Gateway;
 use Shopware\Models\Category\Category;
 use Shopware\CustomModels\Connect\AttributeRepository;
-use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 
 /**
@@ -87,7 +71,7 @@ class CategoryExtractor
      */
     public function extractImportedCategories()
     {
-        $categories = array();
+        $categories = [];
         /** @var \Shopware\CustomModels\Connect\Attribute $attribute */
         foreach ($this->attributeRepository->findRemoteArticleAttributes() as $attribute) {
             $categories = array_merge($categories, $attribute->getCategory());
@@ -113,7 +97,7 @@ class CategoryExtractor
      * @param array|null $categoryIds
      * @return array
      */
-    private function collectCategoryIds(Category $parentCategory, array $categoryIds = array())
+    private function collectCategoryIds(Category $parentCategory, array $categoryIds = [])
     {
         //is connect category
         if ($parentCategory->getAttribute()->getConnectImportedCategory()) {
@@ -131,8 +115,8 @@ class CategoryExtractor
      * Loads remote categories
      *
      * @param string|null $parent
-     * @param boolean|null $includeChildren
-     * @param boolean|null $excludeMapped
+     * @param bool|null $includeChildren
+     * @param bool|null $excludeMapped
      * @param int|null $shopId
      * @param string|null $stream
      * @return array
@@ -197,7 +181,7 @@ class CategoryExtractor
      *
      * @param string $stream
      * @param int $shopId
-     * @param boolean $hideMapped
+     * @param bool $hideMapped
      * @return array
      */
     public function getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped = false)
@@ -210,10 +194,10 @@ class CategoryExtractor
                 WHERE attributes.shop_id = ? AND attributes.stream = ?';
 
         if ($hideMapped) {
-            $sql .= " AND ar.connect_mapped_category IS NULL";
+            $sql .= ' AND ar.connect_mapped_category IS NULL';
         }
 
-        $rows = $this->db->fetchPairs($sql, array((int)$shopId, $stream));
+        $rows = $this->db->fetchPairs($sql, [(int) $shopId, $stream]);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false, false, false, $shopId, $stream);
     }
@@ -227,22 +211,22 @@ class CategoryExtractor
     public function getMainNodes($excludeMapped = null, $expanded = false)
     {
         // if parent is null collect shop names
-        $shops = array();
+        $shops = [];
         foreach ($this->configurationGateway->getConnectedShopIds() as $shopId) {
             if (!$this->hasShopItems($shopId, $excludeMapped)) {
                 continue;
             }
             $configuration = $this->configurationGateway->getShopConfiguration($shopId);
-            $shops[$shopId] = array(
+            $shops[$shopId] = [
                 'name' => $configuration->displayName,
                 'iconCls' => 'sc-tree-node-icon',
                 'icon' => $configuration->logoUrl,
-            );
+            ];
         }
 
         $tree = $this->convertTree($shops, false, $expanded);
-        array_walk($tree, function(&$node) {
-           $node['leaf'] = false;
+        array_walk($tree, function (&$node) {
+            $node['leaf'] = false;
         });
 
         return $tree;
@@ -265,7 +249,7 @@ class CategoryExtractor
             $sql .= ' AND aa.connect_mapped_category IS NULL';
         }
 
-        $count = $this->db->fetchOne($sql, array($shopId));
+        $count = $this->db->fetchOne($sql, [$shopId]);
 
         return (bool) $count;
     }
@@ -285,7 +269,7 @@ class CategoryExtractor
                 INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
                 INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
                 WHERE attributes.shop_id = ?';
-        $rows = $this->db->fetchPairs($sql, array($shopId));
+        $rows = $this->db->fetchPairs($sql, [$shopId]);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
     }
@@ -295,27 +279,27 @@ class CategoryExtractor
         $sql = 'SELECT DISTINCT(stream)
                 FROM `s_plugin_connect_items` attributes
                 WHERE attributes.shop_id = ?';
-        $rows = $this->db->fetchCol($sql, array($shopId));
+        $rows = $this->db->fetchCol($sql, [$shopId]);
 
-        $streams = array();
+        $streams = [];
         foreach ($rows as $streamName) {
             $id = sprintf('%s_stream_%s', $shopId, $streamName);
-            $streams[$id] = array(
+            $streams[$id] = [
                 'name' => $streamName,
                 'iconCls' => 'sprite-product-streams',
-            );
+            ];
         }
 
         $tree = $this->convertTree($streams, false);
-        array_walk($tree, function(&$node) {
+        array_walk($tree, function (&$node) {
             $node['leaf'] = false;
         });
 
         return $tree;
     }
 
-    public function getNodesByQuery($hideMapped, $query, $parent, $node) {
-
+    public function getNodesByQuery($hideMapped, $query, $parent, $node)
+    {
         switch ($parent) {
             case 'root':
                 $categories = $this->getMainNodes($hideMapped, true);
@@ -343,7 +327,6 @@ class CategoryExtractor
     }
 
     /**
-     *
      * @param $shopId
      * @param $query
      * @param $hideMapped
@@ -364,7 +347,7 @@ class CategoryExtractor
                 INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
                 WHERE attributes.shop_id = ?  AND (';
 
-        $params = array($shopId);
+        $params = [$shopId];
         foreach ($rows as $categoryKey => $label) {
             if ($categoryKey !== reset(array_keys($rows))) {
                 $sql .= ' OR ';
@@ -374,16 +357,16 @@ class CategoryExtractor
             $params[] = $categoryKey;
         }
 
-        $sql .= " )";
+        $sql .= ' )';
         $rows = $this->db->fetchCol($sql, $params);
-        $streams = array();
+        $streams = [];
 
         foreach ($rows as $streamName) {
             $id = sprintf('%s_stream_%s', $shopId, $streamName);
-            $streams[$id] = array(
+            $streams[$id] = [
                 'name' => $streamName,
                 'iconCls' => 'sprite-product-streams',
-            );
+            ];
         }
 
         $tree = $this->convertTree($streams, false, true);
@@ -395,7 +378,6 @@ class CategoryExtractor
     }
 
     /**
-     *
      * @param $shopId
      * @param $stream
      * @param $query
@@ -406,7 +388,7 @@ class CategoryExtractor
     {
         $rows = $this->getQueryCategories($query, $shopId, $stream, $hideMapped);
 
-        $rootCategories = array();
+        $rootCategories = [];
 
         foreach ($rows as $key => $name) {
             $position = strpos($key, '/', 1);
@@ -443,7 +425,7 @@ class CategoryExtractor
             $params[] = $item . '%';
         }
 
-        $sql .= " )";
+        $sql .= ' )';
 
         $rows = $this->db->fetchPairs($sql, $params);
 
@@ -465,24 +447,24 @@ class CategoryExtractor
 
     public function getUniqueParents($rows, $parent)
     {
-        $parents = array();
+        $parents = [];
 
         foreach ($rows as $key => $name) {
-            $position = strrpos($key, "/", 1);
+            $position = strrpos($key, '/', 1);
 
-            if($position === false ) {
+            if ($position === false) {
                 continue;
             }
 
-            while($position !== strlen($parent)) {
+            while ($position !== strlen($parent)) {
                 $newParent = substr($key, 0, $position);
-                $position = strrpos($newParent, "/", 1);
+                $position = strrpos($newParent, '/', 1);
 
-                if($position === false ) {
+                if ($position === false) {
                     break;
                 }
 
-                if(!in_array($newParent, $parents)) {
+                if (!in_array($newParent, $parents)) {
                     $parents[] = $newParent;
                 }
             }
@@ -494,16 +476,16 @@ class CategoryExtractor
     public function getCategoryNames($categoryKeys)
     {
         if (count($categoryKeys) === 0) {
-            return array();
+            return [];
         }
 
-        $params = array();
+        $params = [];
 
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat';
 
         foreach ($categoryKeys as $categoryKey) {
-            if($categoryKey === $categoryKeys[0]) {
+            if ($categoryKey === $categoryKeys[0]) {
                 $sql .= ' WHERE cat.category_key = ?';
             } else {
                 $sql .= ' OR cat.category_key = ?';
@@ -525,9 +507,9 @@ class CategoryExtractor
      */
     private function convertTree(array $tree, $includeChildren = true, $expanded = false, $checkLeaf = false, $shopId = null, $stream = null)
     {
-        $categories = array();
+        $categories = [];
         foreach ($tree as $id => $node) {
-            $children = array();
+            $children = [];
             if ($includeChildren === true && !empty($node['children'])) {
                 $children = $this->convertTree($node['children'], $includeChildren);
             }
@@ -545,7 +527,7 @@ class CategoryExtractor
                 $prefix .= sprintf('stream~%s~', $stream);
             }
 
-            $category = array(
+            $category = [
                 'name' => $node['name'],
                 'id' => $this->randomStringGenerator->generate($prefix . $id),
                 'categoryId' => $id,
@@ -553,7 +535,7 @@ class CategoryExtractor
                 'children' => $children,
                 'cls' => 'sc-tree-node',
                 'expanded' => $expanded
-            );
+            ];
 
             if ($checkLeaf && $category['leaf'] == true) {
                 $category['leaf'] = $this->isLeaf($id);
@@ -573,7 +555,7 @@ class CategoryExtractor
         return $categories;
     }
 
-    public function getQueryCategories($query, $shopId, $stream = null, $excludeMapped = false, $parent = "")
+    public function getQueryCategories($query, $shopId, $stream = null, $excludeMapped = false, $parent = '')
     {
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat
@@ -582,8 +564,8 @@ class CategoryExtractor
                 INNER JOIN `s_articles_attributes` ar ON ar.articleID = attributes.article_id
                 WHERE cat.label LIKE ? AND cat.category_key LIKE ? AND attributes.shop_id = ?';
         $whereParams = [
-            '%'.$query.'%',
-            $parent.'%',
+            '%' . $query . '%',
+            $parent . '%',
             $shopId,
         ];
 
@@ -607,8 +589,8 @@ class CategoryExtractor
                 FROM `s_plugin_connect_categories` cat
                 WHERE cat.category_key LIKE ?';
 
-        $count = $this->db->fetchOne($sql, array($categoryId.'/%'));
+        $count = $this->db->fetchOne($sql, [$categoryId . '/%']);
 
         return $count == 0;
     }
-} 
+}

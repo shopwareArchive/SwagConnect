@@ -1,9 +1,14 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Shopware\CustomModels\Connect;
 
-use Doctrine\ORM\Mapping as ORM,
-    Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM;
+use Shopware\Components\Model\ModelEntity;
 
 /**
  * Connect specific attributes for shopware Connect product streams
@@ -18,7 +23,7 @@ class ProductStreamAttribute extends ModelEntity
     const STREAM_RELATION_ACTIVE = 0;
 
     /**
-     * @var integer $id
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -26,21 +31,21 @@ class ProductStreamAttribute extends ModelEntity
     protected $id;
 
     /**
-     * @var integer $streamId
+     * @var int
      *
      * @ORM\Column(name="stream_id", type="integer", nullable=false)
      */
     protected $streamId;
 
     /**
-     * @var string $exportStatus
+     * @var string
      *
      * @ORM\Column(name="export_status", type="string", length=255, nullable=true)
      */
     protected $exportStatus;
 
     /**
-     * @var string $exportMessage
+     * @var string
      *
      * @ORM\Column(name="export_message", type="text", nullable=true)
      */

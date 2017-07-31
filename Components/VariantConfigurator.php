@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components;
@@ -73,7 +56,7 @@ class VariantConfigurator
         if (!$article->getConfiguratorSet()) {
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
-            $configSet->setArticles(array($article));
+            $configSet->setArticles([$article]);
             $article->setConfiguratorSet($configSet);
         } else {
             $configSet = $article->getConfiguratorSet();
@@ -118,7 +101,7 @@ class VariantConfigurator
     {
         $latestGroup = $this->manager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array(), array('position' => 'DESC'));
+            ->findOneBy([], ['position' => 'DESC']);
 
         $position = $latestGroup ? $latestGroup->getPosition() + 1 : 1;
 
@@ -164,7 +147,7 @@ class VariantConfigurator
     {
         $configSetOptions = $set->getOptions();
         /** @var \Shopware\Models\Article\Configurator\Option $option */
-        foreach($configSetOptions as $configSetOption) {
+        foreach ($configSetOptions as $configSetOption) {
             if ($configSetOption->getName() === $option->getName()
                 && $configSetOption->getGroup()->getName() === $option->getGroup()->getName()) {
                 return $set;
@@ -195,7 +178,7 @@ class VariantConfigurator
         }
 
         $repository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Group');
-        $group = $repository->findOneBy(array('name' => $groupName));
+        $group = $repository->findOneBy(['name' => $groupName]);
 
         if (empty($group)) {
             $group = $this->createConfiguratorGroup($groupName);
@@ -227,14 +210,14 @@ class VariantConfigurator
         }
 
         $optionsRepository = $this->manager->getRepository('Shopware\Models\Article\Configurator\Option');
-        $option = $optionsRepository->findOneBy(array('name' => $optionName, 'group' => $group));
+        $option = $optionsRepository->findOneBy(['name' => $optionName, 'group' => $group]);
 
         if (empty($option)) {
             $option = new Option();
             $option->setName($optionName);
             $option->setGroup($group);
             $optionPositionsCount = count($group->getOptions());
-            $optionPositionsCount++;
+            ++$optionPositionsCount;
             $option->setPosition($optionPositionsCount);
             $groupOptions = $group->getOptions();
             $groupOptions->add($option);
@@ -255,10 +238,10 @@ class VariantConfigurator
             }
 
             /** @var \Shopware\Models\Shop\Locale $locale */
-            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            $locale = $this->getLocaleRepository()->findOneBy(['locale' => LocaleMapper::getShopwareLocale($key)]);
 
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            $shop = $this->getShopRepository()->findOneBy(['locale' => $locale]);
             if (!$shop) {
                 continue;
             }
@@ -280,10 +263,10 @@ class VariantConfigurator
             }
 
             /** @var \Shopware\Models\Shop\Locale $locale */
-            $locale = $this->getLocaleRepository()->findOneBy(array('locale' => LocaleMapper::getShopwareLocale($key)));
+            $locale = $this->getLocaleRepository()->findOneBy(['locale' => LocaleMapper::getShopwareLocale($key)]);
 
             /** @var \Shopware\Models\Shop\Shop $shop */
-            $shop = $this->getShopRepository()->findOneBy(array('locale' => $locale));
+            $shop = $this->getShopRepository()->findOneBy(['locale' => $locale]);
             if (!$shop) {
                 continue;
             }
@@ -313,4 +296,4 @@ class VariantConfigurator
 
         return $this->localeRepository;
     }
-} 
+}

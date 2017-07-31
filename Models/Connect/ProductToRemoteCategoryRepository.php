@@ -1,31 +1,14 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Shopware\CustomModels\Connect;
 
-use Shopware\Components\Model\ModelRepository,
-    Doctrine\ORM\Query\Expr\Join;
+use Shopware\Components\Model\ModelRepository;
+use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * Class ProductToRemoteCategoryRepository
@@ -40,10 +23,10 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * @param int $offset
      * @return \Doctrine\ORM\Query
      */
-    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0, $hideMapped = true, $searchQuery = "")
+    public function findArticlesByRemoteCategory($remoteCategoryKey = null, $shopId, $stream = null, $limit = 10, $offset = 0, $hideMapped = true, $searchQuery = '')
     {
         $builder = $this->getEntityManager()->createQueryBuilder();
-        $builder->select(array(
+        $builder->select([
             'pci',
             'a.id as Article_id',
             'a.name as Article_name',
@@ -53,7 +36,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             'pci.purchasePrice as Price_basePrice',
             '(p.price * (1 + (t.tax / 100)) as Price_price',
             't.tax as Tax_name',
-        ))
+        ])
             ->from('Shopware\CustomModels\Connect\Attribute', 'pci')
             ->leftJoin('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc', Join::WITH, 'ptrc.articleId = pci.articleId')
             ->leftJoin('pci.article', 'a')
@@ -86,14 +69,14 @@ class ProductToRemoteCategoryRepository extends ModelRepository
                 ->setParameter('stream', $stream);
         }
 
-        if (trim($searchQuery) !== "") {
+        if (trim($searchQuery) !== '') {
             $builder->andWhere(
                 $builder->expr()->orX(
-                    $builder->expr()->orX("a.name LIKE :searchQuery"),
-                    $builder->expr()->orX("s.name LIKE :searchQuery"),
-                    $builder->expr()->orX("md.number LIKE :searchQuery")
+                    $builder->expr()->orX('a.name LIKE :searchQuery'),
+                    $builder->expr()->orX('s.name LIKE :searchQuery'),
+                    $builder->expr()->orX('md.number LIKE :searchQuery')
                 )
-            )->setParameter('searchQuery', '%'.$searchQuery.'%');
+            )->setParameter('searchQuery', '%' . $searchQuery . '%');
         }
 
         return $builder->getQuery();
@@ -119,9 +102,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $query->setHydrationMode($query::HYDRATE_OBJECT);
         $result = $query->getArrayResult();
 
-        return array_map(function($resultItem) {
+        return array_map(function ($resultItem) {
             return $resultItem['id'];
         }, $result);
     }
-
 }

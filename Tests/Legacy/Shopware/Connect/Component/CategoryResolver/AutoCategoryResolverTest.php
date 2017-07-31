@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
@@ -8,12 +13,12 @@ use Shopware\Models\Category\Category;
 
 class AutoCategoryResolverTest extends ConnectTestHelper
 {
-    /** @var  \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver */
+    /** @var \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver */
     private $categoryResolver;
     private $manager;
     private $categoryRepo;
 
-    /** @var \ShopwarePlugins\Connect\Components\Config   */
+    /** @var \ShopwarePlugins\Connect\Components\Config */
     private $config;
 
     public function setUp()
@@ -56,7 +61,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             'parentId' => $nikeCategory
         ]);
 
-        if (!$nikeBootsCategory){
+        if (!$nikeBootsCategory) {
             $nikeBootsCategory = $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
                 'categoryId' => '/spanish/nike/boots'
@@ -77,7 +82,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         $this->assertNull($this->categoryRepo->findOneByName('Spanish'));
         $this->assertEquals(
             $defaultCategoryId,
-            Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', array('Adidas'))
+            Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', ['Adidas'])
         );
         // only addidas/boots and nike/tshirts must be returned - CON-4549.
         $this->assertCount(2, $categoryModels);
@@ -86,63 +91,62 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         $this->assertEquals('Adidas', $categoryModels[1]->getParent()->getName());
         $this->assertEquals('Boots', $categoryModels[1]->getName());
 
-        Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("'. implode('","', $categories) .'")');
+        Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("' . implode('","', $categories) . '")');
     }
 
     public function testGenerateTree()
     {
-        $categories = array(
+        $categories = [
             '/Kleidung' => 'Kleidung',
             '/Kleidung/Hosen' => 'Hosen',
             '/Kleidung/Hosen/Hosentraeger' => 'Hosenträger',
             '/Nahrung & Getraenke' => 'Nahrung & Getränke',
             '/Nahrung & Getraenke/Alkoholische Getraenke' => 'Alkoholische Getränke',
             '/Nahrung & Getraenke/Alkoholische Getraenke/Bier' => 'Bier',
-        );
+        ];
 
-        $expected = array(
-            '/Kleidung' => array(
+        $expected = [
+            '/Kleidung' => [
                 'name' => 'Kleidung',
                 'categoryId' => '/Kleidung',
                 'leaf' => false,
-                'children' => array(
-                    '/Kleidung/Hosen' => array(
+                'children' => [
+                    '/Kleidung/Hosen' => [
                         'name' => 'Hosen',
                         'categoryId' => '/Kleidung/Hosen',
                         'leaf' => false,
-                        'children' => array(
-                            '/Kleidung/Hosen/Hosentraeger' => array(
+                        'children' => [
+                            '/Kleidung/Hosen/Hosentraeger' => [
                                 'name' => 'Hosenträger',
                                 'categoryId' => '/Kleidung/Hosen/Hosentraeger',
                                 'leaf' => true,
-                                'children' => array(),
-                            )
-                        ),
-                    ),
-                ),
-            ),
-            '/Nahrung & Getraenke' => array(
+                                'children' => [],
+                            ]
+                        ],
+                    ],
+                ],
+            ],
+            '/Nahrung & Getraenke' => [
                 'name' => 'Nahrung & Getränke',
                 'categoryId' => '/Nahrung & Getraenke',
                 'leaf' => false,
-                'children' => array(
-                    '/Nahrung & Getraenke/Alkoholische Getraenke' => array(
+                'children' => [
+                    '/Nahrung & Getraenke/Alkoholische Getraenke' => [
                         'name' => 'Alkoholische Getränke',
                         'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke',
                         'leaf' => false,
-                        'children' => array(
-                            '/Nahrung & Getraenke/Alkoholische Getraenke/Bier' => array(
+                        'children' => [
+                            '/Nahrung & Getraenke/Alkoholische Getraenke/Bier' => [
                                 'name' => 'Bier',
                                 'categoryId' => '/Nahrung & Getraenke/Alkoholische Getraenke/Bier',
                                 'leaf' => true,
-                                'children' => array(),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        );
+                                'children' => [],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $this->assertEquals($expected, $this->categoryResolver->generateTree($categories));
     }
 }
- 

@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -45,23 +28,23 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function getImportedProductCategoriesTreeAction()
     {
         $parent = $this->request->getParam('categoryId', 'root');
-        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
+        $hideMapped = (bool) $this->request->getParam('hideMappedProducts', false);
 
-        $query = $this->request->getParam('remoteCategoriesQuery', "");
+        $query = $this->request->getParam('remoteCategoriesQuery', '');
         $node = $this->request->getParam('id');
 
-        if (trim($query) !== "") {
+        if (trim($query) !== '') {
             try {
                 $categories = $this->getCategoryExtractor()->getNodesByQuery($hideMapped, $query, $parent, $node);
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => true,
                     'data' => $categories,
-                ));
+                ]);
             } catch (\InvalidArgumentException $e) {
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
                     'message' => $e->getMessage(),
-                ));
+                ]);
             }
 
             return;
@@ -89,24 +72,25 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                         'success' => false,
                         'message' => 'Node must contain shopId and stream',
                     ]);
+
                     return;
                 }
                 $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2], $matches[4]);
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $categories,
-        ));
+        ]);
     }
 
     public function loadArticlesByRemoteCategoryAction()
     {
         $category = $this->request->getParam('category', null);
         $shopId = $this->request->getParam('shopId', 0);
-        $limit = (int)$this->request->getParam('limit', 10);
-        $offset = (int)$this->request->getParam('start', 0);
-        $hideMapped = (bool)$this->request->getParam('hideMappedProducts', false);
+        $limit = (int) $this->request->getParam('limit', 10);
+        $offset = (int) $this->request->getParam('start', 0);
+        $hideMapped = (bool) $this->request->getParam('hideMappedProducts', false);
         $searchQuery = $this->request->getParam('remoteArticlesQuery', '');
 
         $stream = $this->request->getParam('stream', null);
@@ -129,18 +113,18 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
         $totalCount = $paginator->count();
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $query->getArrayResult(),
             'total' => $totalCount,
-        ));
+        ]);
     }
 
     public function loadBothArticleTypesAction()
     {
-        $categoryId = (int)$this->request->getParam('categoryId', 0);
-        $limit = (int)$this->request->getParam('limit', 10);
-        $offset = (int)$this->request->getParam('start', 0);
+        $categoryId = (int) $this->request->getParam('categoryId', 0);
+        $limit = (int) $this->request->getParam('limit', 10);
+        $offset = (int) $this->request->getParam('start', 0);
         $showOnlyConnectArticles = $this->request->getParam('showOnlyConnectArticles', null);
         $query = $this->request->getParam('localArticlesQuery', '');
 
@@ -152,41 +136,43 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $offset
         );
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $result['data'],
             'total' => $result['total'],
-        ));
+        ]);
     }
 
     public function assignArticlesToCategoryAction()
     {
-        $categoryId = (int)$this->request->getParam('categoryId', 0);
-        $articleIds = $this->request->getParam('articleIds', array());
+        $categoryId = (int) $this->request->getParam('categoryId', 0);
+        $articleIds = $this->request->getParam('articleIds', []);
 
         $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
 
         if ($categoryId == 0 || empty($articleIds)) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => $snippets->get(
                     'import/message/category_has_children',
                     'Invalid category or articles',
                     true
                 ),
-            ));
+            ]);
+
             return;
         }
 
         if ($this->getImportService()->hasCategoryChildren($categoryId)) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => $snippets->get(
                     'import/message/category_has_children',
                     'Category has subcategories, please make sure you have selected single one',
                     true
                 ),
-            ));
+            ]);
+
             return;
         }
 
@@ -194,20 +180,21 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getImportService()->assignCategoryToArticles($categoryId, $articleIds);
         } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => $snippets->get(
                     'import/message/failed_product_to_category_assignment',
                     'Category could not be assigned to products!',
                     true
                 ),
-            ));
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true
-        ));
+        ]);
     }
 
     /**
@@ -215,35 +202,37 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     public function unassignRemoteArticlesFromLocalCategoryAction()
     {
-        $articleIds = $this->request->getParam('articleIds', array());
+        $articleIds = $this->request->getParam('articleIds', []);
 
         try {
             $this->getImportService()->unAssignArticleCategories($articleIds);
         } catch (\Exception $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Categories could not be unassigned from products!',
-            ));
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true
-        ));
+        ]);
     }
 
     public function assignRemoteToLocalCategoryAction()
     {
-        $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
+        $localCategoryId = (int) $this->request->getParam('localCategoryId', 0);
         $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', null);
         $remoteCategoryLabel = $this->request->getParam('remoteCategoryLabel', null);
 
         if ($localCategoryId == 0 || !$remoteCategoryKey || !$remoteCategoryLabel) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Invalid local or remote category',
-            ));
+            ]);
+
             return;
         }
 
@@ -251,16 +240,17 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
         } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Remote category could not be mapped to local category!',
-            ));
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true
-        ));
+        ]);
     }
 
     /**
@@ -268,13 +258,14 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
      */
     public function unassignRemoteToLocalCategoryAction()
     {
-        $localCategoryId = (int)$this->request->getParam('localCategoryId', 0);
+        $localCategoryId = (int) $this->request->getParam('localCategoryId', 0);
 
         if ($localCategoryId == 0) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Invalid local or remote category',
-            ));
+            ]);
+
             return;
         }
 
@@ -283,16 +274,17 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getImportService()->unAssignArticleCategories($articleIds);
         } catch (\Exception $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Products from remote category could not be unassigned!',
-            ));
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true
-        ));
+        ]);
     }
 
     public function activateArticlesAction()
@@ -303,16 +295,17 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getImportService()->activateArticles($articleIds);
         } catch (\Exception $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'There is a problem with products activation!',
-            ));
+            ]);
+
             return;
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
-        ));
+        ]);
     }
 
     /**
@@ -323,20 +316,20 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $categoryId = $this->request->getParam('categoryId', 0);
 
         if (!$categoryId) {
-            return $this->View()->assign(array(
+            return $this->View()->assign([
                 'success' => false,
                 'error' => 'Please select a category for deactivation',
-            ));
+            ]);
         }
 
         /** @var \Shopware\Models\Category\Category $category */
-        $category = $this->getCategoryRepository()->findOneBy(array('id' => $categoryId));
+        $category = $this->getCategoryRepository()->findOneBy(['id' => $categoryId]);
 
         if (!$category) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'error' => 'Please select a valid category for deactivation',
-            ));
+            ]);
         }
 
         $categoryIds = $this->getCategoryExtractor()->getCategoryIdsCollection($category);
@@ -346,10 +339,10 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $changedCount = $this->getImportService()->deactivateLocalCategoriesByIds($categoryIds);
         }
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'deactivatedCategoriesCount' => $changedCount,
-        ));
+        ]);
     }
 
     /**
@@ -403,7 +396,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     /**
      * @return \Shopware\Connect\Gateway\PDO
      */
-    private function getPdoGateway(){
+    private function getPdoGateway()
+    {
         return new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection());
     }
 
@@ -485,4 +479,4 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         return $this->logger;
     }
-} 
+}

@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -8,9 +13,9 @@ class OrderDocument extends BaseSubscriber
 {
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Shopware_Models_Document_Order::processOrder::before' => 'makeShippingTaxRateAvailable'
-        );
+        ];
     }
 
     /**
@@ -33,8 +38,6 @@ class OrderDocument extends BaseSubscriber
         if ($orderUtil->hasLocalOrderConnectProducts($order->id)) {
             $this->setDefaultTaxRate($order);
         }
-
-
     }
 
     /**

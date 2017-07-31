@@ -1,26 +1,29 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
-use \Shopware\Models\Article\Image;
-use \Shopware\Models\Media\Media;
-use \Shopware\Models\Attribute\Media as MediaAttribute;
-use \Shopware\Models\Attribute\ArticleImage as ImageAttribute;
+use Shopware\Models\Article\Image;
+use Shopware\Models\Media\Media;
+use Shopware\Models\Attribute\Media as MediaAttribute;
+use Shopware\Models\Attribute\ArticleImage as ImageAttribute;
 use Symfony\Component\HttpFoundation\File\File;
 use Shopware\Models\Article\Supplier;
 use Shopware\Components\Thumbnail\Manager as ThumbnailManager;
 
-
 class ImageImport
 {
-
     /** @var \Shopware\Components\Model\ModelManager */
     protected $manager;
 
-    /** @var  Helper */
+    /** @var Helper */
     protected $helper;
 
     /**
@@ -28,7 +31,7 @@ class ImageImport
      */
     protected $thumbnailManager;
 
-    /** @var  \ShopwarePlugins\Connect\Components\Logger */
+    /** @var \ShopwarePlugins\Connect\Components\Logger */
     protected $logger;
 
     public function __construct(
@@ -52,7 +55,7 @@ class ImageImport
     public function hasArticleMainImage($articleId)
     {
         $builder = $this->manager->createQueryBuilder();
-        $builder->select(array('images'))
+        $builder->select(['images'])
             ->from('Shopware\Models\Article\Image', 'images')
             ->where('images.articleId = :articleId')
             ->andWhere('images.parentId IS NULL')
@@ -63,6 +66,7 @@ class ImageImport
             ->setMaxResults(1);
 
         $result = $builder->getQuery()->getResult();
+
         return !empty($result);
     }
 
@@ -92,8 +96,8 @@ class ImageImport
         }
 
         $ids = $builder->getQuery()->getArrayResult();
-        return array_map('array_pop', $ids);
 
+        return array_map('array_pop', $ids);
     }
 
     /**
@@ -230,7 +234,7 @@ class ImageImport
         $this->manager->flush();
 
         try {
-            $positions = array();
+            $positions = [];
             foreach ($article->getImages() as $image) {
                 $positions[] = $image->getPosition();
             }
@@ -291,7 +295,7 @@ class ImageImport
                 }
 
                 // 3) if it doesn't exist, import it
-                $importedImages = $this->importImages(array($imageUrl => $key), $article, $maxPosition);
+                $importedImages = $this->importImages([$imageUrl => $key], $article, $maxPosition);
                 $image = reset($importedImages);
                 $media = $image->getMedia();
 
@@ -358,7 +362,6 @@ class ImageImport
      */
     public function getImagesForDetail($articleDetailId)
     {
-
         $builder = $this->manager->createQueryBuilder();
         $builder->select('media.path')
             ->from('Shopware\Models\Article\Image', 'images')
@@ -369,7 +372,7 @@ class ImageImport
             ->orderBy('images.main', 'ASC')
             ->addOrderBy('images.position', 'ASC');
 
-        return array_map(function($image) {
+        return array_map(function ($image) {
             return $image['path'];
         },
             $builder->getQuery()->getArrayResult()
@@ -382,16 +385,16 @@ class ImageImport
      * @param array $imagesToCreate
      * @param Article|Detail $model
      * @param null|int $maxPosition
-     * @return \Shopware\Models\Article\Image
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      * @throws \Exception
+     * @return \Shopware\Models\Article\Image
      */
     private function importImages(array $imagesToCreate, $model, $maxPosition = null)
     {
         if (!$maxPosition) {
-            $positions = array();
+            $positions = [];
             foreach ($model->getImages() as $image) {
                 $positions[] = $image->getPosition();
             }
@@ -408,7 +411,7 @@ class ImageImport
 
         // If there is no main image set first image as main image
         $hasMainImage = $this->hasArticleMainImage($article->getId());
-        $importedImages = array();
+        $importedImages = [];
         /** @var \Shopware\Models\Media\Album $album */
         $album = $this->manager->find('Shopware\Models\Media\Album', -1);
         $tempDir = Shopware()->DocPath('media_temp');
@@ -470,7 +473,7 @@ class ImageImport
             throw new \RuntimeException('Model must be instance of Article or Detail!');
         }
 
-        $localArticleImagesFromConnect = array();
+        $localArticleImagesFromConnect = [];
 
         /** @var \Shopware\Models\Article\Image $image */
         foreach ($model->getImages() as $image) {
@@ -490,7 +493,7 @@ class ImageImport
                 continue;
             }
 
-            $localArticleImagesFromConnect[$connectHash] = array('image' => $image, 'media' => $media);
+            $localArticleImagesFromConnect[$connectHash] = ['image' => $image, 'media' => $media];
         }
 
         return $localArticleImagesFromConnect;
@@ -538,7 +541,6 @@ class ImageImport
         }
     }
 
-
     /**
      * Returns thumbnails size by album
      * @param $album \Shopware\Models\Media\Album
@@ -551,7 +553,7 @@ class ImageImport
         }
 
         $thumbnailSizes = $album->getSettings()->getThumbnailSize();
-        $sizesArray = array();
+        $sizesArray = [];
         $requiredSizeExists = false;
         foreach ($thumbnailSizes as $size) {
             if (strlen($size) == 0) {
@@ -571,5 +573,4 @@ class ImageImport
 
         return $sizesArray;
     }
-
 }

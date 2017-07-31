@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Subscribers;
 
@@ -92,8 +97,7 @@ class LifecycleTest extends ConnectTestHelper
             ->setMethod('POST')
             ->setPost('prices',
                 [
-                    0 =>
-                        [
+                    0 => [
                             'id' => $price->getId(),
                             'from' => 1,
                             'to' => 5,
@@ -102,10 +106,8 @@ class LifecycleTest extends ConnectTestHelper
                             'percent' => 0,
                             'cloned' => false,
                             'customerGroupKey' => 'EK',
-                            'customerGroup' =>
-                                [
-                                    0 =>
-                                        [
+                            'customerGroup' => [
+                                    0 => [
                                             'id' => 1,
                                             'key' => 'EK',
                                             'name' => 'Shopkunden',
@@ -136,7 +138,7 @@ class LifecycleTest extends ConnectTestHelper
             ->setPost('articleId', $articleId)
             ->setPost('standard', false)
             ->setPost('id', $detail->getId());
-        ;
+
 
         $this->dispatch('backend/Article/saveDetail');
 
@@ -149,7 +151,6 @@ class LifecycleTest extends ConnectTestHelper
         $this->assertEquals('update', $updateChange['c_operation']);
         $product = unserialize($updateChange['c_payload']);
         $this->assertEquals(200.00, $product->price);
-
     }
 
     private function insertVariants()

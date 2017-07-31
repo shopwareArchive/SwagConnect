@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductQuery;
 
@@ -33,7 +38,7 @@ class LocalProductQuery extends BaseProductQuery
     protected $baseProductUrl;
 
     /**
-     * @var \ShopwarePlugins\Connect\Components\Config $configComponent
+     * @var \ShopwarePlugins\Connect\Components\Config
      */
     protected $configComponent;
 
@@ -89,8 +94,7 @@ class LocalProductQuery extends BaseProductQuery
         MediaService $storeFrontMediaService,
         Enlight_Event_EventManager $eventManager,
         $mediaService = null
-    )
-    {
+    ) {
         parent::__construct($manager, $mediaService);
 
         $this->baseProductUrl = $baseProductUrl;
@@ -133,7 +137,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->leftJoin('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
         $builder->where('at.shopId IS NULL');
-        $selectColumns = array(
+        $selectColumns = [
             'a.id as localId',
             'd.id as detailId',
             'd.number as sku',
@@ -165,17 +169,17 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
             'a.lastStock',
-        );
+        ];
 
-        if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)){
+        if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)) {
             $selectColumns[] = 'a.description as shortDescription';
         }
 
-        if ($this->configComponent->getConfig(self::LONG_DESCRIPTION_FIELD, false)){
+        if ($this->configComponent->getConfig(self::LONG_DESCRIPTION_FIELD, false)) {
             $selectColumns[] = 'a.descriptionLong as longDescription';
         }
 
-        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)){
+        if ($this->configComponent->getConfig(self::CONNECT_DESCRIPTION_FIELD, false)) {
             $selectColumns[] = 'attribute.connectProductDescription as additionalDescription';
         }
 
@@ -183,7 +187,7 @@ class LocalProductQuery extends BaseProductQuery
             $selectColumns[] = "exportPrice.{$exportPriceColumn} as price";
         }
         if ($exportPurchasePriceColumn && $exportPurchasePriceColumn == 'detailPurchasePrice') {
-            $selectColumns[] = "d.purchasePrice as purchasePrice";
+            $selectColumns[] = 'd.purchasePrice as purchasePrice';
         } elseif ($exportPurchasePriceColumn) {
             $selectColumns[] = "exportPurchasePrice.{$exportPurchasePriceColumn} as purchasePrice";
         }
@@ -207,17 +211,18 @@ class LocalProductQuery extends BaseProductQuery
      */
     public function getConnectProducts($rows)
     {
-        $products = array();
+        $products = [];
         foreach ($rows as $row) {
             $products[] = $this->getConnectProduct($row);
         }
+
         return $products;
     }
 
     /**
      * @param $row
-     * @return Product
      * @throws NoLocalProductException
+     * @return Product
      */
     public function getConnectProduct($row)
     {
@@ -229,14 +234,14 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         $row['url'] = $this->getUrlForProduct($row['sourceId']);
-		$row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
+        $row['priceRanges'] = $this->preparePriceRanges($row['detailId']);
 
         $row['properties'] = $this->prepareProperties($row['localId']);
 
         $product = new ListProduct($row['localId'], $row['detailId'], $row['sku']);
 
         $sku = $row['sku'];
-        $row['images'] = array();
+        $row['images'] = [];
         $mediaFiles = $this->localMediaService->getProductMediaList([$product], $this->productContext);
         if (array_key_exists($sku, $mediaFiles) && $mediaFiles[$sku]) {
             $mediaFiles[$sku] = array_slice($mediaFiles[$sku], 0, self::IMAGE_LIMIT);
@@ -259,7 +264,7 @@ class LocalProductQuery extends BaseProductQuery
         $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {
-            $row['deliveryWorkDays'] = (int)$row['deliveryWorkDays'];
+            $row['deliveryWorkDays'] = (int) $row['deliveryWorkDays'];
         } else {
             $row['deliveryWorkDays'] = null;
         }
@@ -282,7 +287,7 @@ class LocalProductQuery extends BaseProductQuery
                 $row['attributes']['unit'] = $unitMapper->getConnectUnit($row['attributes']['unit']);
             }
 
-            $intRefQuantity = (int)$row['attributes']['ref_quantity'];
+            $intRefQuantity = (int) $row['attributes']['ref_quantity'];
             if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
                 $row['attributes']['ref_quantity'] = $intRefQuantity;
             }
@@ -321,7 +326,7 @@ class LocalProductQuery extends BaseProductQuery
                 'd.prices',
                 'price_join_for_export_price',
                 'with',
-                "price_join_for_export_price.from = 1 AND price_join_for_export_price.customerGroupKey = :priceCustomerGroup"
+                'price_join_for_export_price.from = 1 AND price_join_for_export_price.customerGroupKey = :priceCustomerGroup'
             );
             $builder->leftJoin('price_join_for_export_price.attribute', 'exportPrice');
         } else {
@@ -329,7 +334,7 @@ class LocalProductQuery extends BaseProductQuery
                 'd.prices',
                 'exportPrice',
                 'with',
-                "exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup"
+                'exportPrice.from = 1 AND exportPrice.customerGroupKey = :priceCustomerGroup'
             );
         }
 
@@ -339,7 +344,7 @@ class LocalProductQuery extends BaseProductQuery
                 'd.prices',
                 'price_join_for_export_purchase_price',
                 'with',
-                "price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup"
+                'price_join_for_export_purchase_price.from = 1 AND price_join_for_export_purchase_price.customerGroupKey = :purchasePriceCustomerGroup'
             );
             $builder->leftJoin('price_join_for_export_purchase_price.attribute', 'exportPurchasePrice');
         } elseif ($exportPurchasePriceColumn != 'detailPurchasePrice') {
@@ -347,7 +352,7 @@ class LocalProductQuery extends BaseProductQuery
                 'd.prices',
                 'exportPurchasePrice',
                 'with',
-                "exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup"
+                'exportPurchasePrice.from = 1 AND exportPurchasePrice.customerGroupKey = :purchasePriceCustomerGroup'
             );
         }
 
@@ -356,7 +361,7 @@ class LocalProductQuery extends BaseProductQuery
 
     public function getUrlForProduct($productId, $shopId = null)
     {
-        $shopId = (int)$shopId;
+        $shopId = (int) $shopId;
         $url = $this->baseProductUrl . $productId;
         if ($shopId > 0) {
             $url = $url . '/shId/' . $shopId;
@@ -365,7 +370,7 @@ class LocalProductQuery extends BaseProductQuery
         return $url;
     }
 
-	/**
+    /**
      * Select attributes  which are already mapped to marketplace
      *
      * @param QueryBuilder $builder
@@ -393,18 +398,18 @@ class LocalProductQuery extends BaseProductQuery
         $mappings = $this->marketplaceGateway->getMappings();
 
         return array_merge(
-            array_filter(array_combine(array_map(function($mapping) {
+            array_filter(array_combine(array_map(function ($mapping) {
                 return $mapping['shopwareAttributeKey'];
-            }, $mappings), array_map(function($mapping) {
+            }, $mappings), array_map(function ($mapping) {
                 return $mapping['attributeKey'];
-            }, $mappings)), function($mapping) {
+            }, $mappings)), function ($mapping) {
                 return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
             }),
             $this->attributeMapping
         );
     }
 
-	/**
+    /**
      * Check whether the product contains variants
      *
      * @param int $productId
@@ -414,7 +419,7 @@ class LocalProductQuery extends BaseProductQuery
     {
         $result = $this->manager->getConnection()->fetchColumn(
             'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
-            array((int)$productId)
+            [(int) $productId]
         );
 
         return $result > 0;
@@ -428,7 +433,7 @@ class LocalProductQuery extends BaseProductQuery
     {
         $prices = $this->getPriceRanges($detailId);
 
-        $priceRanges = array();
+        $priceRanges = [];
         foreach ($prices as $price) {
             $clonePrice = $price;
 
@@ -491,7 +496,7 @@ class LocalProductQuery extends BaseProductQuery
             $groupPosition = $property['groupPosition'];
         }
 
-        $propertyArray = array();
+        $propertyArray = [];
         foreach ($properties as $property) {
             $cloneProperty = $property;
             $cloneProperty['groupName'] = $groupName;
@@ -508,15 +513,15 @@ class LocalProductQuery extends BaseProductQuery
      */
     private function prepareVendor($row)
     {
-        $row['vendor'] = array(
+        $row['vendor'] = [
             'name' => $row['vendorName'],
             'url' => $row['vendorLink'],
             'logo_url' => null,
             'description' => $row['vendorDescription'],
             'page_title' => $row['vendorMetaTitle'],
-        );
+        ];
 
-        if($row['vendorImage']){
+        if ($row['vendorImage']) {
             $info = pathinfo($row['vendorImage']);
             $row['vendor']['logo_url'] = $this->getImagePath($info['basename']);
         }
@@ -543,18 +548,18 @@ class LocalProductQuery extends BaseProductQuery
         $builder->from('Shopware\Models\Article\Detail', 'd');
         $builder->join('d.configuratorOptions', 'cor');
         $builder->join('cor.group', 'cg');
-        $builder->select(array(
+        $builder->select([
             'cor.name as optionName',
             'cor.id as optionId',
             'cg.name as groupName',
             'cg.id as groupId',
-        ));
-        $builder->where("d.id = :detailId");
+        ]);
+        $builder->where('d.id = :detailId');
         $builder->setParameter(':detailId', $row['detailId']);
 
         $query = $builder->getQuery();
 
-        $configuratorData = array();
+        $configuratorData = [];
         $configs = $query->getArrayResult();
 
         foreach ($configs as $config) {
@@ -571,7 +576,7 @@ class LocalProductQuery extends BaseProductQuery
             try {
                 // todo@sb: test me
                 $this->productTranslator->validate($translation, count($configs));
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 unset($row['translations'][$key]);
             }
         }
@@ -579,4 +584,3 @@ class LocalProductQuery extends BaseProductQuery
         return $row;
     }
 }
-

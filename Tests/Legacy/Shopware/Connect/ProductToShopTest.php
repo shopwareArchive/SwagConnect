@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
@@ -6,7 +11,6 @@ use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\ProductUpdate;
 use Shopware\Connect\Struct\ShopConfiguration;
-use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
@@ -20,7 +24,7 @@ use Shopware\Models\Property;
 
 class ProductToShopTest extends ConnectTestHelper
 {
-    /** @var  \ShopwarePlugins\Connect\Components\ProductToShop */
+    /** @var \ShopwarePlugins\Connect\Components\ProductToShop */
     private $productToShop;
 
     /**
@@ -38,10 +42,10 @@ class ProductToShopTest extends ConnectTestHelper
     public function tearDown()
     {
         $conn = Shopware()->Db();
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'yd'));
-        $conn->delete('s_plugin_connect_config', array('name = ?' => 'm'));
+        $conn->delete('s_plugin_connect_config', ['name = ?' => 'activateProductsAutomatically']);
+        $conn->delete('s_plugin_connect_config', ['name = ?' => 'createUnitsAutomatically']);
+        $conn->delete('s_plugin_connect_config', ['name = ?' => 'yd']);
+        $conn->delete('s_plugin_connect_config', ['name = ?' => 'm']);
     }
 
     public function setUp()
@@ -49,8 +53,8 @@ class ProductToShopTest extends ConnectTestHelper
         parent::setUp();
 
         $this->db = Shopware()->Db();
-        $this->db->delete('s_plugin_connect_config', array('name = ?' => 'activateProductsAutomatically'));
-        $this->db->delete('s_plugin_connect_config', array('name = ?' => 'createUnitsAutomatically'));
+        $this->db->delete('s_plugin_connect_config', ['name = ?' => 'activateProductsAutomatically']);
+        $this->db->delete('s_plugin_connect_config', ['name = ?' => 'createUnitsAutomatically']);
 
         $this->gateway = new PDO($this->db->getConnection());
 
@@ -82,26 +86,26 @@ class ProductToShopTest extends ConnectTestHelper
             'SELECT COUNT(id)
               FROM s_articles_supplier as supplier
               WHERE supplier.name = :supplierName',
-            array('supplierName' => $vendorName)
+            ['supplierName' => $vendorName]
         )->fetchColumn();
 
         if ($vendorCount) {
-            Shopware()->Db()->delete('s_articles_supplier', array('name=?' => $vendorName));
+            Shopware()->Db()->delete('s_articles_supplier', ['name=?' => $vendorName]);
         }
     }
 
     public function truncateProperties()
     {
-        $this->db->query("SET FOREIGN_KEY_CHECKS = 0");
-        $this->db->query("TRUNCATE s_filter_articles");
-        $this->db->query("TRUNCATE s_filter_relations");
-        $this->db->query("TRUNCATE s_filter_attributes");
-        $this->db->query("TRUNCATE s_filter");
-        $this->db->query("TRUNCATE s_filter_options_attributes");
-        $this->db->query("TRUNCATE s_filter_options");
-        $this->db->query("TRUNCATE s_filter_values_attributes");
-        $this->db->query("TRUNCATE s_filter_values");
-        $this->db->query("SET FOREIGN_KEY_CHECKS = 1");
+        $this->db->query('SET FOREIGN_KEY_CHECKS = 0');
+        $this->db->query('TRUNCATE s_filter_articles');
+        $this->db->query('TRUNCATE s_filter_relations');
+        $this->db->query('TRUNCATE s_filter_attributes');
+        $this->db->query('TRUNCATE s_filter');
+        $this->db->query('TRUNCATE s_filter_options_attributes');
+        $this->db->query('TRUNCATE s_filter_options');
+        $this->db->query('TRUNCATE s_filter_values_attributes');
+        $this->db->query('TRUNCATE s_filter_values');
+        $this->db->query('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     public function testInsertArticle()
@@ -116,7 +120,7 @@ class ProductToShopTest extends ConnectTestHelper
               FROM s_plugin_connect_items
               LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
               WHERE s_plugin_connect_items.source_id = :sourceId',
-            array('sourceId' => $product->sourceId)
+            ['sourceId' => $product->sourceId]
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
@@ -124,9 +128,9 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $product->sourceId));
+            ->findOneBy(['sourceId' => $product->sourceId]);
         $detail = $connectAttribute->getArticleDetail();
-        
+
         $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
     }
 
@@ -136,13 +140,13 @@ class ProductToShopTest extends ConnectTestHelper
         $this->productToShop->insertOrUpdate($product);
         $productRepository = Shopware()->Models()->getRepository('Shopware\Models\Article\Article');
         /** @var \Shopware\Models\Article\Article $productModel */
-        $productModel = $productRepository->findOneBy(array('name' => $product->title));
+        $productModel = $productRepository->findOneBy(['name' => $product->title]);
 
         $articleTranslation = Shopware()->Db()->query(
             'SELECT objectdata
               FROM s_core_translations
               WHERE objectkey = :productId AND objectlanguage = 2 AND objecttype = :objectType',
-            array('productId' => $productModel->getId(), 'objectType' => 'article')
+            ['productId' => $productModel->getId(), 'objectType' => 'article']
         )->fetchColumn();
 
         $this->assertNotFalse($articleTranslation);
@@ -170,13 +174,13 @@ class ProductToShopTest extends ConnectTestHelper
             foreach ($variant->translations as $translation) {
                 // check configurator group translations
                 foreach ($translation->variantLabels as $groupKey => $groupTranslation) {
-                    $group = $groupRepository->findOneBy(array('name' => $groupKey));
+                    $group = $groupRepository->findOneBy(['name' => $groupKey]);
 
                     $objectData = Shopware()->Db()->query(
                         'SELECT objectdata
                           FROM s_core_translations
                           WHERE objectkey = :groupId AND objectlanguage = 2 AND objecttype = :objectType',
-                        array('groupId' => $group->getId(), 'objectType' => 'configuratorgroup')
+                        ['groupId' => $group->getId(), 'objectType' => 'configuratorgroup']
                     )->fetchColumn();
 
                     $objectData = unserialize($objectData);
@@ -184,12 +188,12 @@ class ProductToShopTest extends ConnectTestHelper
                 }
 
                 foreach ($translation->variantValues as $optionKey => $optionTranslation) {
-                    $option =  $optionRepository->findOneBy(array('name' => $optionKey));
+                    $option =  $optionRepository->findOneBy(['name' => $optionKey]);
                     $objectData = Shopware()->Db()->query(
                         'SELECT objectdata
                           FROM s_core_translations
                           WHERE objectkey = :optionId AND objectlanguage = 2 AND objecttype = :objectType',
-                        array('optionId' => $option->getId(), 'objectType' => 'configuratoroption')
+                        ['optionId' => $option->getId(), 'objectType' => 'configuratoroption']
                     )->fetchColumn();
 
                     $objectData = unserialize($objectData);
@@ -209,7 +213,7 @@ class ProductToShopTest extends ConnectTestHelper
 
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $variants[0]->sourceId));
+            ->findOneBy(['sourceId' => $variants[0]->sourceId]);
         $article = $connectAttribute->getArticle();
         // check articles details count
         $this->assertEquals(4, count($article->getDetails()));
@@ -218,10 +222,10 @@ class ProductToShopTest extends ConnectTestHelper
         // check configurator group
         $group = $this->modelManager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array('name' => 'Farbe'));
+            ->findOneBy(['name' => 'Farbe']);
         $this->assertNotNull($group);
         // check group options
-        $groupOptionValues = $articleOptionValues = array('Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot');
+        $groupOptionValues = $articleOptionValues = ['Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot'];
         foreach ($group->getOptions() as $option) {
             foreach ($groupOptionValues as $key => $groupOptionValue) {
                 if (strpos($option->getName(), $groupOptionValue) == 0) {
@@ -272,7 +276,7 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $variants[1]->sourceId));
+            ->findOneBy(['sourceId' => $variants[1]->sourceId]);
         $this->assertEquals($newTitle, $connectAttribute->getArticle()->getName());
         $this->assertEquals($newLongDesc, $connectAttribute->getArticle()->getDescriptionLong());
         $this->assertEquals($newShortDesc, $connectAttribute->getArticle()->getDescription());
@@ -318,7 +322,7 @@ class ProductToShopTest extends ConnectTestHelper
 
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $variants[2]->sourceId));
+            ->findOneBy(['sourceId' => $variants[2]->sourceId]);
 
         $article = $connectAttribute->getArticle();
         // check articles details count
@@ -332,7 +336,7 @@ class ProductToShopTest extends ConnectTestHelper
               FROM s_plugin_connect_items
               LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
               WHERE s_plugin_connect_items.source_id = :sourceId',
-            array('sourceId' => $variants[0]->sourceId)
+            ['sourceId' => $variants[0]->sourceId]
         )->fetchColumn();
 
         $this->assertEquals(0, $articlesCount);
@@ -341,7 +345,7 @@ class ProductToShopTest extends ConnectTestHelper
             'SELECT COUNT(s_plugin_connect_items.id)
               FROM s_plugin_connect_items
               WHERE s_plugin_connect_items.article_id = :articleId',
-            array('articleId' => $article->getId())
+            ['articleId' => $article->getId()]
         )->fetchColumn();
 
         $this->assertEquals(2, $attributesCount);
@@ -359,11 +363,11 @@ class ProductToShopTest extends ConnectTestHelper
               WHERE s_plugin_connect_items.purchase_price_hash = :purchasePriceHash
               AND s_plugin_connect_items.offer_valid_until = :offerValidUntil
               AND s_plugin_connect_items.source_id = :sourceId',
-            array(
+            [
                 'purchasePriceHash' => $product->purchasePriceHash,
                 'offerValidUntil' => $product->offerValidUntil,
                 'sourceId' => $product->sourceId,
-            )
+            ]
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
@@ -379,14 +383,14 @@ class ProductToShopTest extends ConnectTestHelper
               FROM s_plugin_connect_items
               LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
               WHERE s_plugin_connect_items.source_id = :sourceId',
-            array('sourceId' => $product->sourceId)
+            ['sourceId' => $product->sourceId]
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
 
         $purchasePrice = 8.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
-        $productUpdate = new ProductUpdate(array(
+        $productUpdate = new ProductUpdate([
             'price' => 10.99,
             'purchasePrice' => $purchasePrice,
             'purchasePriceHash' => hash_hmac(
@@ -395,14 +399,14 @@ class ProductToShopTest extends ConnectTestHelper
             ),
             'offerValidUntil' => $offerValidUntil,
             'availability' => 80,
-        ));
+        ]);
 
         $this->productToShop->update($product->shopId, $product->sourceId, $productUpdate);
 
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $product->sourceId));
+            ->findOneBy(['sourceId' => $product->sourceId]);
 
         $this->assertEquals($productUpdate->purchasePriceHash, $connectAttribute->getPurchasePriceHash());
         $this->assertEquals($productUpdate->offerValidUntil, $connectAttribute->getOfferValidUntil());
@@ -430,7 +434,7 @@ class ProductToShopTest extends ConnectTestHelper
               FROM s_plugin_connect_items
               LEFT JOIN s_articles ON (s_plugin_connect_items.article_id = s_articles.id)
               WHERE s_plugin_connect_items.source_id = :sourceId',
-            array('sourceId' => $product->sourceId)
+            ['sourceId' => $product->sourceId]
         )->fetchColumn();
 
         $this->assertEquals(1, $articlesCount);
@@ -441,7 +445,7 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $product->sourceId));
+            ->findOneBy(['sourceId' => $product->sourceId]);
 
         $this->assertEquals($newAvailability, $connectAttribute->getArticleDetail()->getInStock());
     }
@@ -459,7 +463,7 @@ class ProductToShopTest extends ConnectTestHelper
         /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
         $connectAttribute = $this->modelManager
             ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(array('sourceId' => $variants[3]->sourceId));
+            ->findOneBy(['sourceId' => $variants[3]->sourceId]);
 
         $this->assertEquals(1, $connectAttribute->getArticleDetail()->getKind());
         $this->assertEquals(
@@ -497,17 +501,17 @@ class ProductToShopTest extends ConnectTestHelper
         $childCategory = 'MassImport#' . rand(1, 999999999);
         $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
-        $product->categories = array_merge($product->categories, array(
+        $product->categories = array_merge($product->categories, [
             '/' . strtolower($parentCategory1) => $parentCategory1,
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
             '/' . strtolower($parentCategory2) => $parentCategory2,
-        ));
+        ]);
 
         $productToShop->insertOrUpdate($product);
 
         $categoryRepository = Shopware()->Models()->getRepository('Shopware\Models\Category\Category');
         /** @var \Shopware\Models\Category\Category $childCategoryModel */
-        $childCategoryModel = $categoryRepository->findOneBy(array('name' => $childCategory));
+        $childCategoryModel = $categoryRepository->findOneBy(['name' => $childCategory]);
 
         $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel);
         $this->assertEquals(
@@ -526,10 +530,10 @@ class ProductToShopTest extends ConnectTestHelper
     public function testAutomaticallyCreateUnits()
     {
         $conn = Shopware()->Db();
-        $conn->insert('s_plugin_connect_config', array(
+        $conn->insert('s_plugin_connect_config', [
             'name' => 'createUnitsAutomatically',
             'value' => '1'
-        ));
+        ]);
         $product = $this->getProduct();
         $unit = 'yd';
         $product->attributes['unit'] = $unit;
@@ -539,9 +543,9 @@ class ProductToShopTest extends ConnectTestHelper
         $this->productToShop->insertOrUpdate($product);
 
         /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy([
             'name' => $product->title
-        ));
+        ]);
         $this->assertInstanceOf('Shopware\Models\Article\Article', $article);
         $this->assertInstanceOf('Shopware\Models\Article\Unit', $article->getMainDetail()->getUnit());
         $this->assertEquals('yd', $article->getMainDetail()->getUnit()->getUnit());
@@ -569,7 +573,7 @@ class ProductToShopTest extends ConnectTestHelper
               FROM s_plugin_connect_config
               WHERE `name` = :configName
               AND groupName = :groupName',
-            array('configName' => 'm', 'groupName' => 'units')
+            ['configName' => 'm', 'groupName' => 'units']
         );
 
         $this->assertEquals(1, $query->fetchColumn());
@@ -586,7 +590,7 @@ class ProductToShopTest extends ConnectTestHelper
             'SELECT *
               FROM s_articles_supplier as supplier
               WHERE supplier.name = :supplierName',
-            array('supplierName' => $product->vendor['name'])
+            ['supplierName' => $product->vendor['name']]
         )->fetchObject();
 
         $this->assertEquals($product->vendor['name'], $supplier->name);
@@ -606,14 +610,14 @@ class ProductToShopTest extends ConnectTestHelper
             'SELECT *
               FROM s_articles_supplier as supplier
               WHERE supplier.name = :supplierName',
-            array('supplierName' => $product->vendor)
+            ['supplierName' => $product->vendor]
         )->fetchObject();
 
         $supplierAttr = $this->db->query(
             'SELECT *
               FROM s_articles_supplier_attributes as sa
               WHERE sa.supplierID = :supplierId',
-            array('supplierId' => $supplier->id)
+            ['supplierId' => $supplier->id]
         )->fetchObject();
 
         $this->assertEquals($product->vendor, $supplier->name);
@@ -630,17 +634,17 @@ class ProductToShopTest extends ConnectTestHelper
         $this->productToShop->insertOrUpdate($product);
 
         /** @var Article $article */
-        $article = $this->modelManager->getRepository(Article::class)->findOneBy(array(
+        $article = $this->modelManager->getRepository(Article::class)->findOneBy([
             'name' => $product->title
-        ));
+        ]);
 
         /** @var \Shopware\Connect\Struct\Property $firstProperty */
         $firstProperty = reset($product->properties);
 
         /** @var Property\Group $group */
-        $group = $this->modelManager->getRepository(Property\Group::class)->findOneBy(array(
+        $group = $this->modelManager->getRepository(Property\Group::class)->findOneBy([
             'name' => $firstProperty->groupName
-        ));
+        ]);
 
         $this->assertEquals(3, count($article->getPropertyValues()));
         $this->assertEquals(2, count($group->getOptions()));
@@ -666,9 +670,9 @@ class ProductToShopTest extends ConnectTestHelper
         $this->productToShop->insertOrUpdate($product);
 
         /** @var Article $article */
-        $article = $this->modelManager->getRepository(Article::class)->findOneBy(array(
+        $article = $this->modelManager->getRepository(Article::class)->findOneBy([
             'name' => $product->title
-        ));
+        ]);
 
         /** @var ProductStream $stream */
         $stream = $this->modelManager->getRepository(ProductStream::class)->findOneBy(['name' => $product->stream]);
@@ -690,18 +694,18 @@ class ProductToShopTest extends ConnectTestHelper
     public function testAutomaticallyActivateArticles()
     {
         $conn = Shopware()->Db();
-        $conn->insert('s_plugin_connect_config', array(
+        $conn->insert('s_plugin_connect_config', [
             'name' => 'activateProductsAutomatically',
             'value' => '1',
             'groupName' => 'general',
-        ));
+        ]);
 
         $product = $this->getProduct();
         $this->productToShop->insertOrUpdate($product);
         /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy([
             'name' => $product->title
-        ));
+        ]);
         $this->assertInstanceOf('Shopware\Models\Article\Article', $article);
         $this->assertInstanceOf('Shopware\Models\Article\Detail', $article->getMainDetail());
         $this->assertTrue($article->getActive(), 'Article is activated');
@@ -719,9 +723,9 @@ class ProductToShopTest extends ConnectTestHelper
 
         $this->productToShop->insertOrUpdate($product);
         /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy(array(
+        $article = $this->modelManager->getRepository('Shopware\Models\Article\Article')->findOneBy([
             'name' => $product->title
-        ));
+        ]);
 
         $this->assertFalse($article->getLastStock());
     }
@@ -742,12 +746,12 @@ class ProductToShopTest extends ConnectTestHelper
 
         $group = $this->modelManager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array('name' => 'Farbe'));
+            ->findOneBy(['name' => 'Farbe']);
         $this->assertNotNull($group);
 
         $group2 = $this->modelManager
             ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(array('name' => 'Farbe2'));
+            ->findOneBy(['name' => 'Farbe2']);
         $this->assertNotNull($group2);
 
         // check group options
@@ -772,4 +776,3 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals(0, strpos($colorValue2, 'Schwarz-Rot'));
     }
 }
- 

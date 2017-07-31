@@ -1,8 +1,13 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Shopware\CustomModels\Connect;
 
-use \Shopware\Components\Model\ModelRepository;
+use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
@@ -49,7 +54,7 @@ class ProductStreamAttributeRepository extends ModelRepository
             ->setParameter('exportedStatus', ProductStreamService::STATUS_EXPORT)
             ->setParameter('syncedStatus', ProductStreamService::STATUS_SYNCED);
 
-        return (bool)$qb->execute()->fetchColumn();
+        return (bool) $qb->execute()->fetchColumn();
     }
 
     public function resetExportedStatus()
@@ -73,7 +78,6 @@ class ProductStreamAttributeRepository extends ModelRepository
 
         $builder->execute();
     }
-
 
     /**
      * @param $name

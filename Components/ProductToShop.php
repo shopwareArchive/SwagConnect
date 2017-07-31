@@ -218,9 +218,6 @@ class ProductToShop implements ProductToShopBase
             if (!empty($product->variant)) {
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
-
-            $categories = $this->categoryResolver->resolve($product->categories);
-            $model->setCategories($categories);
         } else {
             $model = $detail->getArticle();
             // fix for isMainVariant flag
@@ -229,6 +226,32 @@ class ProductToShop implements ProductToShopBase
             if ($detail->getId() === $mainDetail->getId()) {
                 $isMainVariant = true;
             }
+        }
+
+        /** @var \Shopware\Models\Category\Category $category */
+        foreach ($model->getCategories() as $category) {
+            $attribute = $category->getAttribute();
+            if (!$attribute) {
+                continue;
+            }
+
+            if ($attribute->getConnectImported()) {
+                $model->removeCategory($category);
+            }
+        }
+
+        $detailAttribute = $detail->getAttribute();
+        if (!$detailAttribute) {
+            $detailAttribute = new AttributeModel();
+            $detail->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
+        }
+
+        $categories = $this->categoryResolver->resolve($product->categories);
+        $hasMappedCategory = count($categories) > 0;
+        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
+        foreach ($categories as $remoteCategory) {
+            $model->addCategory($remoteCategory);
         }
 
         if (!empty($product->sku)) {
@@ -243,13 +266,6 @@ class ProductToShop implements ProductToShopBase
             $connectAttribute->setIsMainVariant(true);
         }
         $connectAttribute->setGroupId($product->groupId);
-
-        $detailAttribute = $detail->getAttribute();
-        if (!$detailAttribute) {
-            $detailAttribute = new AttributeModel();
-            $detail->setAttribute($detailAttribute);
-            $detailAttribute->setArticle($model);
-        }
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         /*

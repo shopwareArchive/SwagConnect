@@ -145,6 +145,7 @@ class ConnectExport
         );
 
         $this->manager->beginTransaction();
+        $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
 
         foreach ($connectItems as &$item) {
             $model = $this->getArticleDetailById($item['articleDetailId']);
@@ -154,7 +155,6 @@ class ConnectExport
 
             $connectAttribute = $this->helper->getOrCreateConnectAttributeByModel($model);
 
-            $excludeInactiveProducts = $this->configComponent->getConfig('excludeInactiveProducts');
             if ($excludeInactiveProducts && !$model->getActive()) {
                 $this->updateLocalConnectItem(
                     $connectAttribute->getSourceId(),
@@ -315,6 +315,7 @@ class ConnectExport
                     bi.export_status as exportStatus,
                     bi.export_message as exportMessage,
                     bi.source_id as sourceId,
+                    bi.exported,
                     a.name as title,
                     IF (a.configurator_set_id IS NOT NULL, a.id, NULL) as groupId,
                     d.ordernumber as number
@@ -387,6 +388,11 @@ class ConnectExport
     public function syncDeleteDetail(Detail $detail)
     {
         $attribute = $this->helper->getConnectAttributeByModel($detail);
+        // force fetching ConnectAttribute from DB
+        // if it was update via query builder
+        // changes are not visible, because of doctrine proxy cache
+        $this->manager->refresh($attribute);
+
         if (!$this->helper->isProductExported($attribute)) {
             return;
         }
@@ -438,13 +444,20 @@ class ConnectExport
 
         $chunks = array_chunk($sourceIds, self::BATCH_SIZE);
 
+        $exported = false;
+        if ($status == Attribute::STATUS_DELETE) {
+            $exported = true;
+        }
+
         foreach ($chunks as $chunk) {
             $builder = $this->manager->getConnection()->createQueryBuilder();
             $builder->update('s_plugin_connect_items', 'ci')
                 ->set('ci.export_status', ':status')
+                ->set('ci.exported', ':exported')
                 ->where('source_id IN (:sourceIds)')
                 ->setParameter('sourceIds', $chunk, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY)
                 ->setParameter('status', $status)
+                ->setParameter('exported', $exported)
                 ->execute();
         }
     }
@@ -571,6 +584,28 @@ class ConnectExport
     {
         $this->deleteAllConnectProducts();
         $this->resetConnectItemsStatus();
+    }
+
+    /**
+     * @param int $articleId
+     */
+    public function markArticleForCronUpdate($articleId)
+    {
+        $this->manager->getConnection()->update(
+            's_plugin_connect_items',
+            ['cron_update' => 1],
+            ['article_id' => (int) $articleId]
+        );
+    }
+
+    /**
+     * Wrapper method
+     *
+     * @param string $sourceId
+     */
+    public function recordDelete($sourceId)
+    {
+        $this->sdk->recordDelete($sourceId);
     }
 
     /**

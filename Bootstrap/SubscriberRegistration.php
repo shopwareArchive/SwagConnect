@@ -12,11 +12,8 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Helper;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
@@ -166,15 +163,9 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\Article(
                 new PDO($this->db->getConnection()),
                 $this->modelManager,
-                new ConnectExport(
-                    $this->helper,
-                    $this->SDK,
-                    $this->modelManager,
-                    new ProductsAttributesValidator(),
-                    $this->config,
-                    new ErrorHandler(),
-                    $this->eventManager
-                )
+                $this->connectFactory->getConnectExport(),
+                $this->helper,
+                $this->config
             ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $this->modelManager
@@ -190,7 +181,7 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
                 $this->connectFactory->getConnectExport(),
                 new Config($this->modelManager),
-                $this->connectFactory->getHelper()
+                $this->helper
             ),
             new \ShopwarePlugins\Connect\Subscribers\Property(
                 $this->modelManager

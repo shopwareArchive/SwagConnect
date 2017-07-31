@@ -139,10 +139,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                new \ShopwarePlugins\Connect\Components\Config($this->em),
+                $this->db
             ),
             $this->configurationGateway,
-            $randomStringGenerator
+            $randomStringGenerator,
+            $this->db
         );
 
         $randomStringGenerator->expects($this->any())

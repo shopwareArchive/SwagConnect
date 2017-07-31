@@ -141,7 +141,8 @@ class ServiceContainer extends BaseSubscriber
                 $this->manager->getRepository(ConnectAttribute::class),
                 $autoCategoryResolver,
                 new PDO($this->db->getConnection()),
-                new RandomStringGenerator()
+                new RandomStringGenerator(),
+                $this->db
             )
         );
     }

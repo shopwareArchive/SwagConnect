@@ -68,7 +68,8 @@ class ImportServiceTest extends ConnectTestHelper
                 $this->connectAttributeRepository,
                 $autoCategoryResolver,
                 new PDO(Shopware()->Db()->getConnection()),
-                new RandomStringGenerator()
+                new RandomStringGenerator(),
+                Shopware()->Db()
             )
         );
     }

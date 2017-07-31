@@ -24,7 +24,7 @@ class SupplierConditionTest extends AbstractConnectUnitTest
 
     public function test_it_should_only_accept_integer()
     {
-        $condition = new SupplierCondition([ "1" ]);
+        $condition = new SupplierCondition(['1']);
 
         $this->assertInstanceOf(SupplierCondition::class, $condition);
         $this->assertInstanceOf(ConditionInterface::class, $condition);
@@ -33,6 +33,6 @@ class SupplierConditionTest extends AbstractConnectUnitTest
     public function test_it_should_throw_exception_if_non_intergish_values_are_given()
     {
         $this->expectException(InvalidArgumentException::class);
-        new SupplierCondition([ "asdfasdf" ]);
+        new SupplierCondition(['asdfasdf']);
     }
 }

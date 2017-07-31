@@ -1,29 +1,11 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Components\Marketplace;
-
 
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Components\Model\ModelManager;
@@ -49,8 +31,7 @@ class MarketplaceSettingsApplier
         Config $config,
         ModelManager $modelsManager,
         \Enlight_Components_Db_Adapter_Pdo_Mysql $db
-    )
-    {
+    ) {
         $this->configComponent = $config;
         $this->modelsManager = $modelsManager;
         $this->db = $db;
@@ -79,7 +60,7 @@ class MarketplaceSettingsApplier
 
     public function cleanUpMarketplaceSnippets()
     {
-        $marketplaceSnippetsArray = array(
+        $marketplaceSnippetsArray = [
             'config/api_key_description',
             'config/noindex_label',
             'config/connect_attribute_label',
@@ -113,7 +94,7 @@ class MarketplaceSettingsApplier
             'config/log_label',
             'text/home/page',
             'text/home_page',
-        );
+        ];
 
         $marketplaceSnippets = "'" . implode("','", $marketplaceSnippetsArray) . "'";
         $sql = "DELETE FROM `s_core_snippets` WHERE `name` IN ($marketplaceSnippets)";

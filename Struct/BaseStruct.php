@@ -1,10 +1,15 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Struct;
 
 abstract class BaseStruct
 {
-    public function __construct(array $values = array())
+    public function __construct(array $values = [])
     {
         foreach ($values as $name => $value) {
             $this->$name = $value;
@@ -13,17 +18,17 @@ abstract class BaseStruct
 
     public function __get($name)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . '.');
     }
 
     public function __set($name, $value)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . '.');
     }
 
     public function __unset($name)
     {
-        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . ".");
+        throw new \OutOfRangeException("Unknown property \${$name} in " . get_class($this) . '.');
     }
 
     public function __clone()

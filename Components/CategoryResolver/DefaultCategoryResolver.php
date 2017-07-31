@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryResolver;
 
@@ -14,12 +19,12 @@ class DefaultCategoryResolver implements CategoryResolver
     /**
      * @var ModelManager
      */
-    private  $manager;
+    private $manager;
 
     /**
      * @var \Shopware\CustomModels\Connect\RemoteCategoryRepository
      */
-    private  $remoteCategoryRepository;
+    private $remoteCategoryRepository;
 
     /**
      * @var \Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository
@@ -30,8 +35,7 @@ class DefaultCategoryResolver implements CategoryResolver
         ModelManager $manager,
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
@@ -42,9 +46,9 @@ class DefaultCategoryResolver implements CategoryResolver
      */
     public function resolve(array $categories)
     {
-        $localCategories = array();
+        $localCategories = [];
         /** @var \Shopware\CustomModels\Connect\RemoteCategory[] $remoteCategoriesModels */
-        $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(array('categoryKey' => array_keys($categories)));
+        $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(['categoryKey' => array_keys($categories)]);
 
         foreach ($remoteCategoriesModels as $remoteCategory) {
             $localCategory = $remoteCategory->getLocalCategory();
@@ -63,7 +67,7 @@ class DefaultCategoryResolver implements CategoryResolver
      */
     public function generateTree(array $categories, $idPrefix = '')
     {
-        return array();
+        return [];
     }
 
     /**
@@ -71,9 +75,9 @@ class DefaultCategoryResolver implements CategoryResolver
      */
     public function storeRemoteCategories(array $categories, $articleId)
     {
-        $remoteCategories = array();
+        $remoteCategories = [];
         foreach ($categories as $categoryKey => $category) {
-            $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $categoryKey));
+            $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $categoryKey]);
             if (!$remoteCategory) {
                 $remoteCategory = new RemoteCategory();
                 $remoteCategory->setCategoryKey($categoryKey);
@@ -84,12 +88,12 @@ class DefaultCategoryResolver implements CategoryResolver
         }
         $this->manager->flush();
 
-        /** @var  $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
+        /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
         foreach ($remoteCategories as $remoteCategory) {
-            $productToCategory = $this->productToRemoteCategoryRepository->findOneBy(array(
+            $productToCategory = $this->productToRemoteCategoryRepository->findOneBy([
                 'articleId' => $articleId,
                 'connectCategoryId' => $remoteCategory->getId(),
-            ));
+            ]);
             if ($productToCategory) {
                 continue;
             }
@@ -102,4 +106,4 @@ class DefaultCategoryResolver implements CategoryResolver
 
         $this->manager->flush();
     }
-} 
+}

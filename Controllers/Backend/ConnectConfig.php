@@ -1,25 +1,8 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2013 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 use ShopwarePlugins\Connect\Components\Config;
@@ -40,8 +23,7 @@ use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
  */
 class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Backend_ExtJs
 {
-
-    /** @var  \ShopwarePlugins\Connect\Components\Config */
+    /** @var \ShopwarePlugins\Connect\Components\Config */
     private $configComponent;
 
     /**
@@ -84,10 +66,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $generalConfig = $this->getConfigComponent()->getGeneralConfig();
 
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'data' => $generalConfig
-        ));
+        ]);
     }
 
     /**
@@ -102,14 +84,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             unset($data['id']);
             $this->getConfigComponent()->setGeneralConfigs($data);
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => true
-            ));
+            ]);
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => $e->getMessage()
-            ));
+            ]);
         }
     }
 
@@ -119,22 +101,22 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $enableLogging = $this->Request()->getParam('enableLogging');
             $this->getConfigComponent()->setConfig('logRequest', $enableLogging, null, 'general');
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => true
-            ));
+            ]);
         } catch (\Exception $e) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
-            ));
+            ]);
         }
     }
 
     public function getLoggingEnabledAction()
     {
-        $this->View()->assign(array(
+        $this->View()->assign([
             'success' => true,
             'enableLogging' => $this->getConfigComponent()->getConfig('logRequest', 0),
-        ));
+        ]);
     }
 
     /**
@@ -148,10 +130,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $importConfigArray = $this->getConfigComponent()->getImportConfig();
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $importConfigArray
-            )
+            ]
         );
     }
 
@@ -163,14 +145,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function saveImportAction()
     {
         $data = $this->Request()->getParam('data');
-        $data = !isset($data[0]) ? array($data) : $data;
+        $data = !isset($data[0]) ? [$data] : $data;
 
         $this->getConfigComponent()->setImportConfigs($data);
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true
-            )
+            ]
         );
     }
 
@@ -184,7 +166,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $exportConfigArray = $this->getConfigComponent()->getExportConfig();
         if (!array_key_exists('exportPriceMode', $exportConfigArray) || $this->isPriceTypeReset()) {
-            $exportConfigArray['exportPriceMode'] = array();
+            $exportConfigArray['exportPriceMode'] = [];
         }
 
 
@@ -198,10 +180,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $exportConfigArray
-            )
+            ]
         );
     }
 
@@ -226,13 +208,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         if ($isPricingMappingAllowed) {
             $this->View()->assign(
-                array(
+                [
                     'success' => true,
                     'isPricingMappingAllowed' => $isPricingMappingAllowed,
                     'isPriceModeEnabled' => true,
                     'isPurchasePriceModeEnabled' => true,
-                )
+                ]
             );
+
             return;
         }
 
@@ -242,18 +225,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         if ($this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
-        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE)
-        {
+        || $this->getSDK()->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE) {
             $isPurchasePriceModeEnabled = true;
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'isPricingMappingAllowed' => $isPricingMappingAllowed,
                 'isPriceModeEnabled' => $isPriceModeEnabled,
                 'isPurchasePriceModeEnabled' => $isPurchasePriceModeEnabled,
-            )
+            ]
         );
     }
 
@@ -272,14 +254,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $isPriceTypeReset = $this->isPriceTypeReset();
 
         if ($isModified === false && $this->getSDK()->getPriceType() !== \Shopware\Connect\SDK::PRICE_TYPE_NONE) {
-
-            $data = !isset($data[0]) ? array($data) : $data;
+            $data = !isset($data[0]) ? [$data] : $data;
             $this->getConfigComponent()->setExportConfigs($data);
             $this->View()->assign(
-                array(
+                [
                     'success' => true,
-                )
+                ]
             );
+
             return;
         }
 
@@ -294,14 +276,15 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             unset($data['priceFieldForPriceExport']);
             unset($data['priceGroupForPriceExport']);
         } else {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                     'config/export/priceFieldIsNotSupported',
                     'Price field is not maintained. Some of the products have price = 0',
                     true
                 )
-            ));
+            ]);
+
             return;
         }
 
@@ -309,14 +292,15 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             && $data['priceFieldForPurchasePriceExport'] == $data['priceFieldForPriceExport']
             && $data['priceGroupForPurchasePriceExport'] == $data['priceGroupForPriceExport']
         ) {
-            $this->View()->assign(array(
+            $this->View()->assign([
                 'success' => false,
                 'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                     'config/export/error/same_price_fields',
                     'Endkunden-VK und Listenverkaufspreis müssen an verschiedene Felder angeschlossen sein',
                     true
                 )
-            ));
+            ]);
+
             return;
         }
 
@@ -329,28 +313,30 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             || $priceType == \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
         ) {
             /** @var \Shopware\Models\Customer\Group $groupPrice */
-            $groupPrice = $this->getCustomerGroupRepository()->findOneBy(array('key' => $data['priceGroupForPriceExport']));
+            $groupPrice = $this->getCustomerGroupRepository()->findOneBy(['key' => $data['priceGroupForPriceExport']]);
             if (!$groupPrice) {
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/invalid_customer_group',
                         'Ungültige Kundengruppe',
                         true
                     )
-                ));
+                ]);
+
                 return;
             }
 
             if ($this->getPriceGateway()->countProductsWithConfiguredPrice($groupPrice, $data['priceFieldForPriceExport']) === 0) {
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
                         'Price field is not maintained. Some of the products have price = 0',
                         true
                     )
-                ));
+                ]);
+
                 return;
             }
         }
@@ -359,30 +345,32 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             || $priceType == \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
         ) {
             /** @var \Shopware\Models\Customer\Group $groupPurchasePrice */
-            $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy(array(
+            $groupPurchasePrice = $this->getCustomerGroupRepository()->findOneBy([
                 'key' => $data['priceGroupForPurchasePriceExport']
-            ));
+            ]);
             if (!$groupPurchasePrice && !$detailPurchasePrice) {
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/invalid_customer_group',
                         'Ungültige Kundengruppe',
                         true
                     )
-                ));
+                ]);
+
                 return;
             }
 
             if ($this->getPriceGateway()->countProductsWithConfiguredPrice($groupPurchasePrice, $data['priceFieldForPurchasePriceExport']) === 0) {
-                $this->View()->assign(array(
+                $this->View()->assign([
                     'success' => false,
                     'message' => Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
                         'config/export/priceFieldIsNotSupported',
                         'Price field is not maintained. Some of the products have price = 0',
                         true
                     )
-                ));
+                ]);
+
                 return;
             }
         }
@@ -396,7 +384,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         try {
-            $data = !isset($data[0]) ? array($data) : $data;
+            $data = !isset($data[0]) ? [$data] : $data;
             $response = $this->getSnHttpClient()->sendRequestToConnect(
                 'account/settings',
                 ['priceType' => $priceType]
@@ -414,12 +402,13 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             $ids = $connectExport->getExportArticlesIds();
             $sourceIds = $this->getHelper()->getArticleSourceIds($ids);
             $errors = $connectExport->export($sourceIds);
-        }catch (\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, 'Save export settings', $e->getMessage() . $e->getTraceAsString());
-            $this->View()->assign(array(
+            $this->View()->assign([
                     'success' => false,
                     'message' => $e->getMessage()
-                ));
+                ]);
+
             return;
         }
 
@@ -429,17 +418,18 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 $msg .= implode("<br>\n", $type);
             }
 
-            $this->View()->assign(array(
+            $this->View()->assign([
                     'success' => false,
                     'message' => $msg
-                ));
+                ]);
+
             return;
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true
-            )
+            ]
         );
     }
 
@@ -470,21 +460,23 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $response = $this->getSnHttpClient()->sendRequestToConnect('account/reset/price-type');
         $responseBody = json_decode($response->getBody());
 
-        if(!$responseBody->success) {
+        if (!$responseBody->success) {
             $this->View()->assign([
                 'success' => false,
                 'message' => $responseBody->message
             ]);
+
             return;
         }
 
-        try{
+        try {
             $this->resetExportedProducts();
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->View()->assign([
                 'success' => false,
                 'message' => $responseBody->message
             ]);
+
             return;
         }
 
@@ -505,15 +497,16 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         $responseBody = json_decode($response->getBody());
 
-        if(!$responseBody->success) {
+        if (!$responseBody->success) {
             $this->View()->assign([
                 'success' => false,
                 'message' => $responseBody->message
             ]);
+
             return;
         }
 
-        try{
+        try {
             $this->resetExportedProducts();
 
             //remove the existing api key
@@ -521,11 +514,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
             //recreate the register menu
             $this->get('swagconnect.menu_service')->createRegisterMenu();
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->View()->assign([
                 'success' => false,
                 'message' => $responseBody->message
             ]);
+
             return;
         }
 
@@ -538,7 +532,8 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      * WARNING This code remove the current product changes
      * This is a single call operation and its danger one
      */
-    private function resetExportedProducts(){
+    private function resetExportedProducts()
+    {
         $builder = $this->getModelManager()->getConnection()->createQueryBuilder();
         $builder->delete('sw_connect_change')
             ->where('c_operation IN (:changes)')
@@ -608,12 +603,11 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $total = Shopware()->Models()->getQueryCount($query);
         $data = $query->getArrayResult();
 
-        $this->View()->assign(array(
+        $this->View()->assign([
                 'success' => true,
                 'data' => $data,
                 'total' => $total
-            ));
-
+            ]);
     }
 
     /**
@@ -631,7 +625,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         return $this->configComponent;
     }
 
-	/**
+    /**
      * The getUnitsAction function is an ExtJs event listener method of the
      * connect module. The function is used to load store
      * required in the units mapping.
@@ -648,25 +642,24 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             true
         );
 
-        $unitsMappingArray[] = array(
+        $unitsMappingArray[] = [
             'shopwareUnitName' => $unitName,
             'shopwareUnitKey' => UnitMapper::ADOPT_UNIT_KEY,
-        );
+        ];
 
         foreach ($units as $unit) {
-            $unitsMappingArray[] = array(
+            $unitsMappingArray[] = [
                 'shopwareUnitName' => $unit->getName(),
                 'shopwareUnitKey' => $unit->getUnit()
-            );
+            ];
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $unitsMappingArray
-            )
+            ]
         );
-
     }
 
     /**
@@ -677,10 +670,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function saveUnitsMappingAction()
     {
         $data = $this->Request()->getParam('data');
-        $data = !isset($data[0]) ? array($data) : $data;
+        $data = !isset($data[0]) ? [$data] : $data;
 
         //prepares units for adoption
-        $adoptUnitKeys = array();
+        $adoptUnitKeys = [];
         foreach ($data as $index => $unit) {
             if ($unit['shopwareUnitKey'] == UnitMapper::ADOPT_UNIT_KEY) {
                 $adoptUnitKeys[] = $unit['connectUnit'];
@@ -698,7 +691,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Article\Unit');
         foreach ($data as $unit) {
             /** @var \Shopware\Models\Article\Unit $unitModel */
-            $unitModel = $repository->findOneBy(array('unit' => $unit['shopwareUnitKey']));
+            $unitModel = $repository->findOneBy(['unit' => $unit['shopwareUnitKey']]);
             if (!$unitModel) {
                 continue;
             }
@@ -706,9 +699,9 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true
-            )
+            ]
         );
     }
 
@@ -722,25 +715,25 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $connectUnits = new Units();
         $connectUnitsArray = $connectUnits->getLocalizedUnits('de');
-        $unitsArray = array();
-        $hideAssigned = (int)$this->Request()->getParam('hideAssignedUnits', 1);
+        $unitsArray = [];
+        $hideAssigned = (int) $this->Request()->getParam('hideAssignedUnits', 1);
 
         foreach ($this->getConfigComponent()->getUnitsMappings() as $connectUnit => $localUnit) {
             if ($hideAssigned == true && strlen($localUnit) > 0) {
                 continue;
             }
-            $unitsArray[] = array(
+            $unitsArray[] = [
                 'connectUnit' => $connectUnit,
                 'name' => $connectUnitsArray[$connectUnit],
                 'shopwareUnitKey' => $localUnit
-            );
+            ];
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $unitsArray
-            )
+            ]
         );
     }
 
@@ -757,17 +750,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         try {
             $this->View()->assign(
-                array(
+                [
                     'success' => true,
                     'time' => $seconds,
-                )
+                ]
             );
         } catch (\Exception $e) {
             $this->View()->assign(
-                array(
+                [
                     'success' => false,
                     'message' => $e->getMessage(),
-                )
+                ]
             );
         }
     }
@@ -780,29 +773,29 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
             if ($verified) {
                 $marketplaceAttributes = $this->getSDK()->getMarketplaceProductAttributes();
 
-                $attributes = array();
+                $attributes = [];
                 foreach ($marketplaceAttributes as $attributeKey => $attributeLabel) {
-                    $attributes[] = array(
+                    $attributes[] = [
                         'attributeKey' => $attributeKey,
                         'attributeLabel' => $attributeLabel,
                         'shopwareAttributeKey' => ''
-                    );
+                    ];
                 }
             } else {
-                $attributes = array();
+                $attributes = [];
             }
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // ignore this exception because sometimes
             // connect plugin is not configured and tries to
             // read marketplace attributes
-            $attributes = array();
+            $attributes = [];
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $attributes
-            )
+            ]
         );
     }
 
@@ -810,17 +803,17 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         try {
             $data = $this->Request()->getParam('data');
-            $data = !isset($data[0]) ? array($data) : $data;
+            $data = !isset($data[0]) ? [$data] : $data;
             $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
             $marketplaceGateway->setMarketplaceMapping($data);
 
-            $this->View()->assign(array('success' => true));
-        } catch(\Exception $e) {
+            $this->View()->assign(['success' => true]);
+        } catch (\Exception $e) {
             $this->View()->assign(
-                array(
+                [
                     'success' => false,
                     'message' => $e->getMessage()
-                )
+                ]
             );
         }
     }
@@ -830,13 +823,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
 
         $mappings = array_map(function ($attribute) use ($marketplaceGateway) {
-                return array(
+            return [
                     'shopwareAttributeKey' => $attribute->getName(),
                     'shopwareAttributeLabel' => $attribute->getLabel(),
                     'attributeKey' => $marketplaceGateway->findMarketplaceMappingFor($attribute->getName()),
-                );
-
-            }, array_values(
+                ];
+        }, array_values(
                 array_filter(
                     Shopware()->Models()->getRepository('Shopware\Models\Article\Element')->findAll(),
                     function ($attribute) {
@@ -847,10 +839,10 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         );
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $mappings
-            )
+            ]
         );
     }
 
@@ -862,14 +854,14 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     public function getExportCustomerGroupsAction()
     {
         $builder = $this->getCustomerGroupRepository()->createQueryBuilder('groups');
-        $builder->select(array(
+        $builder->select([
             'groups.id as id',
             'groups.key as key',
             'groups.name as name',
             'groups.tax as tax',
             'groups.taxInput as taxInput',
             'groups.mode as mode'
-        ));
+        ]);
 
         $query = $builder->getQuery();
 
@@ -880,11 +872,11 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
 
         //return the data and total count
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $data,
                 'total' => $total,
-            )
+            ]
         );
     }
 
@@ -896,20 +888,21 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
      */
     public function getExportPriceGroupsAction()
     {
-        $groups = array();
+        $groups = [];
 
         $customerGroupKey = $this->Request()->getParam('customerGroup', 'EK');
         $priceExportMode = $this->Request()->getParam('priceExportMode');
         /** @var \Shopware\Models\Customer\Group $customerGroup */
-        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(array('key' => $customerGroupKey));
+        $customerGroup = $this->getCustomerGroupRepository()->findOneBy(['key' => $customerGroupKey]);
         if (!$customerGroup) {
             $this->View()->assign(
-                array(
+                [
                     'success' => true,
                     'data' => $groups,
                     'total' => count($groups),
-                )
+                ]
             );
+
             return;
         }
 
@@ -921,13 +914,12 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         ) {
             $groups[] = $this->getConfigComponent()->collectExportPrice($priceExportMode, $customerGroupKey);
         } else {
-
             $productCount = $this->getPriceGateway()->countProducts($customerGroup);
             $priceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'price');
             $basePriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'baseprice');
             $pseudoPriceConfiguredProducts = $this->getPriceGateway()->countProductsWithConfiguredPrice($customerGroup, 'pseudoprice');
 
-            $groups[] = array(
+            $groups[] = [
                 'price' => false,
                 'priceAvailable' => $priceConfiguredProducts > 0,
                 'priceConfiguredProducts' => $priceConfiguredProducts,
@@ -938,15 +930,15 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 'pseudoPriceAvailable' => $pseudoPriceConfiguredProducts > 0,
                 'pseudoPriceConfiguredProducts' => $pseudoPriceConfiguredProducts,
                 'productCount' => $productCount
-            );
+            ];
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
                 'data' => $groups,
                 'total' => count($groups),
-            )
+            ]
         );
     }
 
@@ -956,7 +948,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $connection->beginTransaction();
 
         try {
-            $units = array_filter($this->getConfigComponent()->getUnitsMappings(), function($unit) {
+            $units = array_filter($this->getConfigComponent()->getUnitsMappings(), function ($unit) {
                 return strlen($unit) == 0;
             });
 
@@ -965,21 +957,22 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
                 $this->getHelper()->updateUnitInRelatedProducts($unit, $unit->getUnit());
             }
             $connection->commit();
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $connection->rollBack();
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign(
-                array(
+                [
                     'success' => false,
-                )
+                ]
             );
+
             return;
         }
 
         $this->View()->assign(
-            array(
+            [
                 'success' => true,
-            )
+            ]
         );
     }
 

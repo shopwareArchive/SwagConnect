@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.0.20",
+    "currentVersion": "1.1.0",
     "changelog": {
         "de": {
             "1.0.20": "CON-4735 - Fix duplicate entry for s_articles_categories; CON-4611 - Änderungen an inaktiven Produkten werden nicht mehr getracked; CON-4698 - Fix neu generierte Varianten;",
@@ -22,7 +22,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.2.26",
+        "maximumVersion": "5.3.0",
         "blacklist": []
     }
 }

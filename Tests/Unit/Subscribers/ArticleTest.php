@@ -1,9 +1,13 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
 use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\Variant\StatefulVariantRegenerator;
 use ShopwarePlugins\Connect\Subscribers\Article;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;

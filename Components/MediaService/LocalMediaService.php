@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\MediaService;
 
@@ -17,8 +22,7 @@ class LocalMediaService implements MediaService
         Gateway\ProductMediaGatewayInterface $productMedia,
         Gateway\VariantMediaGatewayInterface $variantMedia,
         CoreMediaService $coreMediaService
-    )
-    {
+    ) {
         $this->productMediaGateway = $productMedia;
         $this->variantMediaGateway = $variantMedia;
         $this->coreMediaService = $coreMediaService;
@@ -53,6 +57,6 @@ class LocalMediaService implements MediaService
      */
     public function getProductMedia($product, Struct\ShopContextInterface $context)
     {
-       return $this->coreMediaService->getProductMedia($product, $context);
+        return $this->coreMediaService->getProductMedia($product, $context);
     }
 }

@@ -5,9 +5,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace Tests\ShopwarePlugins\Connect\Command;
 
 use ShopwarePlugins\Connect\Tests\CommandTestCaseTrait;
+use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
 class ApiEndpointCommandTest extends ConnectTestHelper
 {

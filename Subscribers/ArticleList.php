@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -12,12 +17,11 @@ class ArticleList extends BaseSubscriber
 {
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Shopware_Controllers_Backend_ArticleList_SQLParts' => 'onFilterArticle',
             'Enlight_Controller_Action_PostDispatch_Backend_ArticleList' => 'extentBackendArticleList'
-        );
+        ];
     }
-
 
     /**
      * If the 'connect' filter is checked, only show products imported from connect
@@ -32,16 +36,15 @@ class ArticleList extends BaseSubscriber
         list($sqlParams, $filterSql, $categorySql, $imageSQL, $order) = $args->getReturn();
 
         if ($filterBy == 'connect') {
-            $imageSQL = "
+            $imageSQL = '
                 LEFT JOIN s_plugin_connect_items as connect_items
                 ON connect_items.article_id = articles.id
-            ";
+            ';
 
-            $filterSql .= " AND connect_items.shop_id > 0 ";
+            $filterSql .= ' AND connect_items.shop_id > 0 ';
         }
 
-        return array($sqlParams, $filterSql, $categorySql, $imageSQL, $order);
-
+        return [$sqlParams, $filterSql, $categorySql, $imageSQL, $order];
     }
 
     /**
@@ -56,7 +59,7 @@ class ArticleList extends BaseSubscriber
         $subject = $args->getSubject();
         $request = $subject->Request();
 
-        switch($request->getActionName()) {
+        switch ($request->getActionName()) {
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
@@ -90,10 +93,11 @@ class ArticleList extends BaseSubscriber
     private function markConnectProducts($data)
     {
         $articleIds = array_map(function ($row) {
-            if ((int)$row['Article_id'] > 0) {
-                return (int)$row['Article_id'];
+            if ((int) $row['Article_id'] > 0) {
+                return (int) $row['Article_id'];
             }
-            return (int)$row['articleId'];
+
+            return (int) $row['articleId'];
         }, $data);
 
         if (empty($articleIds)) {
@@ -110,8 +114,8 @@ class ArticleList extends BaseSubscriber
             return $row['article_id'];
         }, Shopware()->Db()->fetchAll($sql));
 
-        foreach($data as $idx => $row) {
-            if ((int)$row['Article_id'] > 0) {
+        foreach ($data as $idx => $row) {
+            if ((int) $row['Article_id'] > 0) {
                 $articleId = $row['Article_id'];
             } else {
                 $articleId = $row['articleId'];
@@ -132,7 +136,7 @@ class ArticleList extends BaseSubscriber
      */
     private function addConnectColumn($data)
     {
-        $data[] = array(
+        $data[] = [
             'entity' => 'Article',
             'field' => 'connect',
             'type' => 'boolean',
@@ -140,7 +144,8 @@ class ArticleList extends BaseSubscriber
             'allowInGrid' => true,
             'nullable' => false,
 
-        );
+        ];
+
         return $data;
     }
 }

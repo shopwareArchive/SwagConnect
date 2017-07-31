@@ -1,8 +1,12 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Unit;
 use ShopwarePlugins\Connect\Components\Helper;
 
@@ -29,35 +33,9 @@ class HelperTest extends ConnectTestHelper
         $this->assertFalse($result);
     }
 
-    public function testHasBasketConnectProductsIsTrue()
-    {
-        // Bootstrap a shop object
-        /** @var \Shopware\Models\Shop\Repository $repo */
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
-        $shop = $repo->getActiveDefault();
-        $shop->registerResources(Shopware()->Container()->get('bootstrap'));
-
-        // todo@sb: Fix unit test
-//        $id = $this->getConnectProductArticleId();
-//        /** @var \Shopware\Models\Article\Detail $detail */
-//        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('articleId' => $id, 'kind' => 1));
-
-
-//        $this->Request()->setMethod('GET');
-//        $this->dispatch('/account/login');
-//
-//
-//        // Add connect product to basket
-//        $wasSuccessFul = Shopware()->Modules()->Basket()->sAddArticle($detail->getNumber());
-//
-//
-//        $result = $this->getHelper()->hasBasketConnectProducts(333);
-//        $this->assertFalse($result);
-    }
-
     public function testGetConnectAttributeByModel()
     {
-        $attributes = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findBy(array('articleId' => 14));
+        $attributes = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute')->findBy(['articleId' => 14]);
         foreach ($attributes as $attribute) {
             Shopware()->Models()->remove($attribute);
         }
@@ -81,8 +59,8 @@ class HelperTest extends ConnectTestHelper
 
     public function _testGetImagesById()
     {
-        $images = array();
-        for ($i = 0; $i < 10; $i++) {
+        $images = [];
+        for ($i = 0; $i < 10; ++$i) {
             $images[] = self::IMAGE_PROVIDER_URL . '?' . rand(0, 9999);
         }
 
@@ -95,21 +73,7 @@ class HelperTest extends ConnectTestHelper
         );
 
         $images = $this->callPrivate($this->getHelper(), 'getImagesById', 2);
-        $this->assertArrayCount(13, count($images));
-    }
-
-    public function testGetCategoriesByProduct()
-    {
-        $this->markTestSkipped('It fails in travis, but works locally');
-        //todo@sb: check if this test is still needed
-//        $this->resetConnectCategoryMappings();
-//        $this->changeCategoryConnectMappingForCategoryTo(12, '/bücher'); // 12 == Tees im Demoshop
-//
-//        $sourceId = $this->getExternalProductSourceId();
-//        $products = $this->getHelper()->getRemoteProducts([$sourceId]);
-//        $categories = $this->getHelper()->getCategoriesByProduct($products[0]);
-//
-//        $this->assertNotEmpty($categories);
+        $this->assertCount(13, count($images));
     }
 
     public function testUpdateUnitInRelatedProducts()
@@ -136,10 +100,10 @@ class HelperTest extends ConnectTestHelper
         ->getMock();
 
         $connection->expects($this->any())->method('prepare')->with(
-            "UPDATE s_articles_details sad
+            'UPDATE s_articles_details sad
             LEFT JOIN s_articles_attributes saa ON sad.id = saa.articledetailsID
             SET sad.unitID = :unitId
-            WHERE saa.connect_remote_unit = :remoteUnit"
+            WHERE saa.connect_remote_unit = :remoteUnit'
         )->willReturn($statement);
 
         $statement->expects($this->at(0))->method('bindValue')->with(':unitId', $localUnit->getId(), \PDO::PARAM_INT);
@@ -160,9 +124,9 @@ class HelperTest extends ConnectTestHelper
 
     public function testIsMainVariant()
     {
-        $article = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->findOneBy(array('id' => 5));
+        $article = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->findOneBy(['id' => 5]);
         $this->getHelper()->getOrCreateConnectAttributeByModel($article);
-        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('id' => 253));
+        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(['id' => 253]);
         $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
 
         $this->assertTrue($this->getHelper()->isMainVariant('5'));
@@ -172,7 +136,7 @@ class HelperTest extends ConnectTestHelper
     public function testGenerateSourceId()
     {
         /** @var \Shopware\Models\Article\Detail $detail */
-        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(array('kind' => 2));
+        $detail = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->findOneBy(['kind' => 2]);
 
         $detailSourceId = sprintf(
             '%s-%s',
@@ -180,7 +144,7 @@ class HelperTest extends ConnectTestHelper
             $detail->getId()
         );
         $this->assertEquals($this->getHelper()->generateSourceId($detail), $detailSourceId);
-        $articleSourceId = (string)$detail->getArticle()->getId();
+        $articleSourceId = (string) $detail->getArticle()->getId();
 
         $this->assertEquals($this->getHelper()->generateSourceId($detail->getArticle()->getMainDetail()), $articleSourceId);
     }

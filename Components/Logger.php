@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
@@ -10,8 +15,7 @@ namespace ShopwarePlugins\Connect\Components;
  */
 class Logger
 {
-
-    /** @var  \PDO|\Enlight_Components_Db_Adapter_Pdo_Mysql */
+    /** @var \PDO|\Enlight_Components_Db_Adapter_Pdo_Mysql */
     protected $db;
 
     protected $enabled;
@@ -44,13 +48,13 @@ class Logger
 
         if ($request && !$custom) {
             $document = simplexml_load_string($request);
-            if ($document)  {
+            if ($document) {
                 $service = $document->service;
                 $command = $document->command;
             }
         }
 
-        if (!$this->enabled && !in_array($command, array('checkProducts', 'reserveProducts', 'buy'))) {
+        if (!$this->enabled && !in_array($command, ['checkProducts', 'reserveProducts', 'buy'])) {
             return;
         }
 
@@ -58,7 +62,7 @@ class Logger
             INSERT INTO `s_plugin_connect_log`
             (`isError`, `service`, `command`, `request`, `response`, `time`)
             VALUES (?, ?, ?, ?, ?, NOW())
-        ', array($isError, $service, $command, $request, $response));
+        ', [$isError, $service, $command, $request, $response]);
 
         $this->cleanup();
     }

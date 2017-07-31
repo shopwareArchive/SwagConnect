@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+
+<?php
+$return = 0;
+
+/**
+ * @param $exitCode
+ */
+function doExit($exitCode)
+{
+    if ($exitCode > 0) {
+        exit(1);
+    }
+}
+
+$addedFiles = [];
+exec('git diff --diff-filter=TXAMRU --cached --name-only', $addedFiles, $return);
+
+$csFixerOutput = [];
+exec('./php-cs-fixer fix --dry-run --diff >&2', $csFixerOutput, $return);
+doExit($return);
+
+if (count($addedFiles) > 0 && version_compare(phpversion(), '7.0.0', '>')) {
+    $phpStanOutput = [];
+    $files = implode(' ', $addedFiles);
+    exec("./phpstan analyse -c phpstan.neon -l 0 $files >&2", $phpStanOutput, $return);
+}
+
+doExit($return);

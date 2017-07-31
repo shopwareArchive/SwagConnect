@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
@@ -50,11 +55,11 @@ class CronJob extends BaseSubscriber
     ) {
         parent::__construct();
         $this->connectExport = $connectExport;
+        $this->sdk = $sdk;
     }
 
     public function getSubscribedEvents()
     {
-        //todo@sb: fix cronjobs via bin/console
         return [
             'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
             'Shopware_CronJob_ShopwareConnectUpdateProducts' => 'updateProducts',
@@ -165,7 +170,6 @@ class CronJob extends BaseSubscriber
 
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
-
             } catch (\RuntimeException $e) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
                 $streamService->log($streamId, $e->getMessage());
@@ -175,11 +179,11 @@ class CronJob extends BaseSubscriber
             if ($errorMessages) {
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
 
-                $errorMessagesText = "";
-                $displayedErrorTypes = array(
+                $errorMessagesText = '';
+                $displayedErrorTypes = [
                     ErrorHandler::TYPE_DEFAULT_ERROR,
                     ErrorHandler::TYPE_PRICE_ERROR
-                );
+                ];
 
                 foreach ($displayedErrorTypes as $displayedErrorType) {
                     $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);

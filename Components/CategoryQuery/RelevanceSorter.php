@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\CategoryQuery;
 
@@ -21,7 +26,8 @@ class RelevanceSorter
      * @param $b
      * @return int
      */
-    public function sortConnectCategoriesByRelevance($a, $b) {
+    public function sortConnectCategoriesByRelevance($a, $b)
+    {
         if ($a == $b) {
             return 0;
         }
@@ -33,19 +39,17 @@ class RelevanceSorter
             return -1;
         } elseif ($count_b < $count_a) {
             return 1;
-        } else {
-            $parts_a = explode('/', $a);
-            $parts_b = explode('/', $b);
-
-            $last_element_length_a = strlen(array_pop($parts_a, -1));
-            $last_element_length_b = strlen(array_pop($parts_b, -1));
-
-            if ($last_element_length_a == $last_element_length_b) {
-                return 0;
-            }
-
-            return ($last_element_length_a < $last_element_length_b) ? -1 : 1;
-
         }
+        $parts_a = explode('/', $a);
+        $parts_b = explode('/', $b);
+
+        $last_element_length_a = strlen(array_pop($parts_a));
+        $last_element_length_b = strlen(array_pop($parts_b));
+
+        if ($last_element_length_a == $last_element_length_b) {
+            return 0;
+        }
+
+        return ($last_element_length_a < $last_element_length_b) ? -1 : 1;
     }
 }

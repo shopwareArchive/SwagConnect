@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Bootstrap;
 
@@ -12,9 +17,6 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
-use Shopware\CustomModels\Connect\ProductStreamAttribute;
 
 class SubscriberRegistration
 {
@@ -110,10 +112,7 @@ class SubscriberRegistration
         $this->container = $container;
     }
 
-    /**
-     * @param boolean $isShopware52
-     */
-    public function registerSubscribers($isShopware52)
+    public function registerSubscribers()
     {
         try {
             $verified = $this->config->getConfig('apiKeyVerified', false);
@@ -123,7 +122,7 @@ class SubscriberRegistration
             $verified = false;
         }
 
-        $subscribers = $this->getDefaultSubscribers($isShopware52);
+        $subscribers = $this->getDefaultSubscribers();
 
         // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
@@ -145,18 +144,16 @@ class SubscriberRegistration
         );
     }
 
-
     /**
      * Default subscribers can safely be used, even if the api key wasn't verified, yet
      *
-     * @param bool $isShopware52
      * @return array
      */
-    private function getDefaultSubscribers($isShopware52)
+    private function getDefaultSubscribers()
     {
         return [
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\ControllerPath($isShopware52),
+            new \ShopwarePlugins\Connect\Subscribers\ControllerPath(),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
             new \ShopwarePlugins\Connect\Subscribers\CronJob(
                 $this->SDK,
@@ -230,7 +227,6 @@ class SubscriberRegistration
         return $subscribers;
     }
 
-
     /**
      * Creates checkout subscriber
      *
@@ -281,7 +277,6 @@ class SubscriberRegistration
 
         return $this->lifecycle;
     }
-
 
     /**
      * Collect updated Articles and Details

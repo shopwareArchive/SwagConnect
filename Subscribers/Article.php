@@ -1,6 +1,12 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Subscribers;
+
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
@@ -69,13 +75,13 @@ class Article extends BaseSubscriber
 
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
             'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
             'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
-        );
+        ];
     }
 
     /**
@@ -98,6 +104,7 @@ class Article extends BaseSubscriber
         if (!$this->customerGroupRepository) {
             $this->customerGroupRepository = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
         }
+
         return $this->customerGroupRepository;
     }
 
@@ -208,7 +215,7 @@ class Article extends BaseSubscriber
 
                 $sourceIds = Shopware()->Db()->fetchCol(
                     'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
-                    array($article->getId())
+                    [$article->getId()]
                 );
 
                 $this->connectExport->export($sourceIds);
@@ -257,10 +264,10 @@ class Article extends BaseSubscriber
         }
 
         /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
+        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int) $articleId);
         if (!$article) {
             return;
-         }
+        }
 
         $attribute = $this->helper->getConnectAttributeByModel($article);
         if (!$attribute) {
@@ -274,6 +281,7 @@ class Article extends BaseSubscriber
 
         if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->connectExport->markArticleForCronUpdate($articleId);
+
             return;
         }
 
@@ -293,7 +301,7 @@ class Article extends BaseSubscriber
         }
 
         /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int)$articleId);
+        $article = $this->modelManager->getRepository(ArticleModel::class)->find((int) $articleId);
         if (!$article) {
             return;
         }
@@ -358,7 +366,7 @@ class Article extends BaseSubscriber
      */
     public function generateMainVariantChange($detailId)
     {
-        $detail = $this->getDetailRepository()->findOneBy(array('id' => $detailId));
+        $detail = $this->getDetailRepository()->findOneBy(['id' => $detailId]);
 
         if (!$detail instanceof \Shopware\Models\Article\Detail) {
             return;
@@ -385,10 +393,10 @@ class Article extends BaseSubscriber
 
         $groupId = $attribute->getGroupId() ? $attribute->getGroupId() : $attribute->getArticleId();
 
-        $mainVariant = new MakeMainVariant(array(
+        $mainVariant = new MakeMainVariant([
             'sourceId' => $attribute->getSourceId(),
             'groupId' => $groupId
-        ));
+        ]);
 
         try {
             $this->getSDK()->makeMainVariant($mainVariant);
@@ -412,7 +420,7 @@ class Article extends BaseSubscriber
             return;
         }
         $connectCustomerGroupKey = $connectCustomerGroup->getKey();
-        $defaultPrices = array();
+        $defaultPrices = [];
         foreach ($prices as $key => $priceData) {
             if ($priceData['customerGroupKey'] == $connectCustomerGroupKey) {
                 return;
@@ -423,7 +431,7 @@ class Article extends BaseSubscriber
         }
 
         foreach ($defaultPrices as $price) {
-            $prices[] = array(
+            $prices[] = [
                 'from' => $price['from'],
                 'to' => $price['to'],
                 'price' => $price['price'],
@@ -433,7 +441,7 @@ class Article extends BaseSubscriber
                 'customerGroup' => $connectCustomerGroup,
                 'article' => $price['article'],
                 'articleDetail' => $price['articleDetail'],
-            );
+            ];
         }
 
         $args->setReturn($prices);
@@ -446,7 +454,7 @@ class Article extends BaseSubscriber
     {
         $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
-        $model = $repo->findOneBy(array('connectGroup' => true));
+        $model = $repo->findOneBy(['connectGroup' => true]);
 
         $customerGroup = null;
         if ($model && $model->getCustomerGroup()) {
@@ -480,7 +488,7 @@ class Article extends BaseSubscriber
             return;
         }
 
-        $params = array();
+        $params = [];
         /** @var \Shopware\Models\Article\Configurator\Option $option */
         foreach ($detailModel->getConfiguratorOptions() as $option) {
             $groupId = $option->getGroup()->getId();
@@ -564,11 +572,12 @@ class Article extends BaseSubscriber
      * to the SDK
      *
      * @param $id
-     * @return boolean|int
+     * @return bool|int
      */
     private function getRemoteShopId($id)
     {
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
-        return Shopware()->Db()->fetchOne($sql, array($id));
+
+        return Shopware()->Db()->fetchOne($sql, [$id]);
     }
 }

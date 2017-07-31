@@ -1,31 +1,14 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Shopware\CustomModels\Connect;
 
-use Doctrine\ORM\Mapping as ORM,
-    Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM;
+use Shopware\Components\Model\ModelEntity;
 
 /**
  * Describes Shopware Connect categories
@@ -36,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM,
 class RemoteCategory extends ModelEntity
 {
     /**
-     * @var integer $id
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -44,21 +27,21 @@ class RemoteCategory extends ModelEntity
     protected $id;
 
     /**
-     * @var string $categoryKey
+     * @var string
      *
      * @ORM\Column(name="category_key", type="string", length=255, unique=true, nullable=false)
      */
     protected $categoryKey;
 
     /**
-     * @var string $label
+     * @var string
      *
      * @ORM\Column(name="label", type="string", length=255, nullable=false)
      */
     protected $label;
 
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(name="local_category_id", type="integer", nullable=true)
      */
     protected $localCategoryId;
@@ -114,7 +97,7 @@ class RemoteCategory extends ModelEntity
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getLocalCategoryId()
     {
@@ -122,7 +105,7 @@ class RemoteCategory extends ModelEntity
     }
 
     /**
-     * @param integer $id
+     * @param int $id
      */
     public function setLocalCategoryId($id)
     {

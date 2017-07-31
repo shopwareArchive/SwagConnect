@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
@@ -9,7 +14,6 @@ use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use Shopware\Bundle\SearchBundle\Criteria;
-use Shopware\Bundle\SearchBundle\ConditionInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use Shopware\Bundle\SearchBundle\Condition\CategoryCondition;
 use Shopware\Bundle\SearchBundle\Condition\CustomerGroupCondition;
@@ -53,7 +57,6 @@ class ProductStreamService
     private $contextService;
 
     /**
-     * ProductStreamService constructor.
      * @param ProductStreamRepository $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
      * @param Config $config
@@ -95,14 +98,14 @@ class ProductStreamService
         }
 
         return new ProductStreamsAssignments(
-            array('assignments' => $assignment)
+            ['assignments' => $assignment]
         );
     }
 
     /**
      * @param $streamId
-     * @return ProductStreamsAssignments
      * @throws \Exception
+     * @return ProductStreamsAssignments
      */
     public function getStreamAssignments($streamId)
     {
@@ -114,7 +117,7 @@ class ProductStreamService
         $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
         return new ProductStreamsAssignments(
-            array('assignments' => $assignment)
+            ['assignments' => $assignment]
         );
     }
 
@@ -130,7 +133,7 @@ class ProductStreamService
             return false;
         }
 
-        return (boolean) $attribute->getConnectIsRemote();
+        return (bool) $attribute->getConnectIsRemote();
     }
 
     /**
@@ -177,7 +180,7 @@ class ProductStreamService
      */
     public function collectRelatedStreamsAssignments(array $articleIds)
     {
-        $assignment = array();
+        $assignment = [];
 
         $collection = $this->productStreamRepository->fetchAllPreviousExportedStreams($articleIds);
 
@@ -392,7 +395,7 @@ class ProductStreamService
      */
     public function changeStatus($streamId, $status)
     {
-        $streamAttr = $this->streamAttrRepository->findOneBy(array('streamId' => (int) $streamId));
+        $streamAttr = $this->streamAttrRepository->findOneBy(['streamId' => (int) $streamId]);
 
         if (!$streamAttr) {
             $streamAttr = $this->streamAttrRepository->create();
@@ -410,7 +413,7 @@ class ProductStreamService
     public function log($streamId, $message)
     {
         /** @var ProductStreamAttribute $streamAttr */
-        $streamAttr = $this->streamAttrRepository->findOneBy(array('streamId' => $streamId));
+        $streamAttr = $this->streamAttrRepository->findOneBy(['streamId' => $streamId]);
         $streamAttr->setExportMessage($message);
 
         $this->streamAttrRepository->save($streamAttr);

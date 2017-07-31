@@ -1,31 +1,14 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Shopware\CustomModels\Connect;
 
-use Doctrine\ORM\Mapping as ORM,
-    Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM;
+use Shopware\Components\Model\ModelEntity;
 
 /**
  * Contains oneToMany connection
@@ -37,7 +20,7 @@ use Doctrine\ORM\Mapping as ORM,
 class ProductToRemoteCategory extends ModelEntity
 {
     /**
-     * @var integer $id
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -45,7 +28,7 @@ class ProductToRemoteCategory extends ModelEntity
     protected $id;
 
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(name="connect_category_id", type="integer", nullable=false)
      */
     protected $connectCategoryId;
@@ -61,7 +44,7 @@ class ProductToRemoteCategory extends ModelEntity
     protected $connectCategory;
 
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(name="articleID", type="integer", nullable=false)
      */
     protected $articleId;

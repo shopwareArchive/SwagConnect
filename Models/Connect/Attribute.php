@@ -1,31 +1,14 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2012 shopware AG
- *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Shopware\CustomModels\Connect;
 
-use Doctrine\ORM\Mapping as ORM,
-    Shopware\Components\Model\ModelEntity;
+use Doctrine\ORM\Mapping as ORM;
+use Shopware\Components\Model\ModelEntity;
 
 /**
  * Connect specific attributes for shopware Connect products
@@ -35,7 +18,6 @@ use Doctrine\ORM\Mapping as ORM,
  */
 class Attribute extends ModelEntity
 {
-
     const STATUS_INSERT = 'insert';
     const STATUS_UPDATE = 'update';
     const STATUS_SYNCED = 'synced';
@@ -45,7 +27,7 @@ class Attribute extends ModelEntity
     const STATUS_INACTIVE = 'inactive';
 
     /**
-     * @var integer $id
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -54,7 +36,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var integer $articleId
+     * @var int
      *
      * @ORM\Column(name="article_id", type="integer", nullable=true)
      */
@@ -62,7 +44,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var integer $articleDetailId
+     * @var int
      *
      * @ORM\Column(name="article_detail_id", type="integer", nullable=true)
      */
@@ -70,7 +52,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $shopId
+     * @var string
      *
      * @ORM\Column(name="shop_id", type="string", nullable=true)
      */
@@ -78,7 +60,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $sourceId
+     * @var string
      *
      * @ORM\Column(name="source_id", type="string", nullable=true)
      */
@@ -86,7 +68,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $exportStatus
+     * @var string
      *
      * @ORM\Column(name="export_status", type="text", nullable=true)
      */
@@ -94,14 +76,14 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $exportMessage
+     * @var string
      *
      * @ORM\Column(name="export_message", type="text", nullable=true)
      */
      protected $exportMessage;
 
     /**
-     * @var boolean $exportStatus
+     * @var bool
      *
      * @ORM\Column(name="exported", type="boolean", nullable=true)
      */
@@ -109,7 +91,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $category
+     * @var string
      *
      * @ORM\Column(name="category", type="text", nullable=true)
      */
@@ -117,7 +99,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var float $purchasePrice
+     * @var float
      *
      * @ORM\Column(name="purchase_price", type="float", nullable=true)
      */
@@ -125,7 +107,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var integer $fixedPrice
+     * @var int
      *
      * @ORM\Column(name="fixed_price", type="integer", nullable=true)
      */
@@ -133,7 +115,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $updatePrice
+     * @var string
      *
      * @ORM\Column(name="update_price", type="string", nullable=true)
      */
@@ -141,7 +123,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $updateImage
+     * @var string
      *
      * @ORM\Column(name="update_image", type="string", nullable=true)
      */
@@ -149,7 +131,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $updateLongDescription
+     * @var string
      *
      * @ORM\Column(name="update_long_description", type="string", nullable=true)
      */
@@ -157,7 +139,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $updateShortDescription
+     * @var string
      *
      * @ORM\Column(name="update_short_description", type="string", nullable=true)
      */
@@ -165,14 +147,14 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $updateAdditionalDescription
+     * @var string
      *
      * @ORM\Column(name="update_additional_description", type="string", nullable=true)
      */
      protected $updateAdditionalDescription;
 
     /**
-     * @var string $updateName
+     * @var string
      *
      * @ORM\Column(name="update_name", type="string", nullable=true)
      */
@@ -180,7 +162,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var string $lastUpdate
+     * @var string
      *
      * @ORM\Column(name="last_update", type="text", nullable=true)
      */
@@ -188,7 +170,7 @@ class Attribute extends ModelEntity
 
 
     /**
-     * @var integer $lastUpdateFlag
+     * @var int
      *
      * @ORM\Column(name="last_update_flag", type="integer", nullable=true)
      */
@@ -217,26 +199,26 @@ class Attribute extends ModelEntity
     protected $articleDetail;
 
     /**
-    * @var integer
+    * @var int
     * @ORM\Column(name="group_id", type="integer", nullable=true)
     */
     protected $groupId;
 
     /**
-    * @var boolean
+    * @var bool
     * @ORM\Column(name="is_main_variant", type="boolean", nullable=true)
     */
     protected $isMainVariant;
 
     /**
-     * @var string $purchasePriceHash
+     * @var string
      *
      * @ORM\Column(name="purchase_price_hash", type="string", nullable=false)
      */
     protected $purchasePriceHash;
 
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(name="offer_valid_until", type="integer", nullable=false)
      */
     protected $offerValidUntil;
@@ -248,7 +230,7 @@ class Attribute extends ModelEntity
     protected $stream;
 
     /**
-     * @var boolean
+     * @var bool
      * @ORM\Column(name="cron_update", type="boolean", nullable=true)
      */
     protected $cronUpdate;
@@ -315,7 +297,7 @@ class Attribute extends ModelEntity
     public function setCategory($categories)
     {
         if (is_string($categories)) {
-            $categories = array($categories);
+            $categories = [$categories];
         }
         $this->category = json_encode($categories);
     }
@@ -325,7 +307,7 @@ class Attribute extends ModelEntity
      */
     public function getCategory()
     {
-        return json_decode($this->category, true) ?: array();
+        return json_decode($this->category, true) ?: [];
     }
 
     /**
@@ -361,7 +343,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isExported()
     {
@@ -369,7 +351,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @param boolean $exported
+     * @param bool $exported
      */
     public function setExported($exported)
     {
@@ -603,7 +585,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isIsMainVariant()
     {
@@ -611,7 +593,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @param boolean $isMainVariant
+     * @param bool $isMainVariant
      */
     public function setIsMainVariant($isMainVariant)
     {
@@ -667,7 +649,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isCronUpdate()
     {
@@ -675,7 +657,7 @@ class Attribute extends ModelEntity
     }
 
     /**
-     * @param boolean $cronUpdate
+     * @param bool $cronUpdate
      */
     public function setCronUpdate($cronUpdate)
     {

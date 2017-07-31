@@ -1,8 +1,11 @@
 <?php
-
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Tests\ShopwarePlugins\Connect\Subscribers;
-
 
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Subscribers\BaseSubscriber;

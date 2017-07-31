@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components;
 
@@ -62,8 +67,7 @@ class ImportService
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
         AutoCategoryResolver $categoryResolver,
         CategoryExtractor $categoryExtractor
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->productResource = $productResource;
         $this->categoryRepository = $categoryRepository;
@@ -74,11 +78,12 @@ class ImportService
         $this->categoryExtractor = $categoryExtractor;
     }
 
-    public function findBothArticlesType($categoryId, $query = "", $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
+    public function findBothArticlesType($categoryId, $query = '', $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
     {
         if ($categoryId == 0) {
-            return array();
+            return [];
         }
+
         return $this->productResource->filter($this->getAst($categoryId, $query, $showOnlyConnectArticles), $offset, $limit);
     }
 
@@ -93,7 +98,7 @@ class ImportService
 
     public function assignCategoryToArticles($categoryId, array $articleIds)
     {
-        $articles = $this->articleRepository->findBy(array('id' => $articleIds));
+        $articles = $this->articleRepository->findBy(['id' => $articleIds]);
 
         if (empty($articles)) {
             throw new \RuntimeException('Invalid article ids');
@@ -135,7 +140,7 @@ class ImportService
             // cast all items in $articleIds to int
             // before use them in WHERE IN clause
             foreach ($articleIds as $key => $articleId) {
-                $articleIds[$key] = (int)$articleId;
+                $articleIds[$key] = (int) $articleId;
             }
 
             $connection = $this->manager->getConnection();
@@ -143,17 +148,16 @@ class ImportService
 
             try {
                 $attributeStatement = $connection->prepare(
-                    'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(", ", $articleIds) . ')'
+                    'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
                 );
                 $attributeStatement->execute();
 
-                $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+                $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');
                 $categoriesStatement->execute();
 
-                $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(", ", $articleIds) . ')');
+                $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
                 $categoryLogStatement->execute();
                 $connection->commit();
-
             } catch (\Exception $e) {
                 $connection->rollBack();
                 throw new \Exception($e->getMessage());
@@ -174,16 +178,16 @@ class ImportService
             FROM s_articles_categories sac
             LEFT JOIN s_articles_attributes saa ON sac.articleID = saa.articleID
             WHERE sac.categoryID = :categoryId AND saa.connect_mapped_category = 1';
-        $rows = $connection->fetchAll($sql, array(':categoryId' => $localCategoryId));
+        $rows = $connection->fetchAll($sql, [':categoryId' => $localCategoryId]);
 
-        return array_map(function($row) {
+        return array_map(function ($row) {
             return $row['articleID'];
         }, $rows);
     }
 
     /**
      * @param array $categoryIds
-     * @return integer
+     * @return int
      */
     public function deactivateLocalCategoriesByIds(array $categoryIds)
     {
@@ -212,13 +216,13 @@ class ImportService
     public function importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel)
     {
         /** @var \Shopware\Models\Category\Category $localCategory */
-        $localCategory = $this->categoryRepository->find((int)$localCategoryId);
+        $localCategory = $this->categoryRepository->find((int) $localCategoryId);
         if (!$localCategory) {
             throw new \RuntimeException('Local category not found!');
         }
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(array('categoryKey' => $remoteCategoryKey));
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $remoteCategoryKey]);
         if (!$remoteCategory) {
             throw new \RuntimeException('Remote category not found!');
         }
@@ -226,14 +230,14 @@ class ImportService
         // collect his child categories and
         // generate remote category tree by given remote category
         $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey, true);
-        $remoteCategoryNodes = array(
-            array(
+        $remoteCategoryNodes = [
+            [
                 'name' => $remoteCategoryLabel,
                 'categoryId' => $remoteCategoryKey,
                 'leaf' => empty($remoteCategoryChildren) ? true : false,
                 'children' => $remoteCategoryChildren,
-            )
-        );
+            ]
+        ];
 
         // create same category structure as Shopware Connect structure
         $categories = $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
@@ -242,7 +246,7 @@ class ImportService
             $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
 
             while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
-                $articles = $this->articleRepository->findBy(array('id' => $currentIdBatch));
+                $articles = $this->articleRepository->findBy(['id' => $currentIdBatch]);
                 /** @var \Shopware\Models\Article\Article $article */
                 foreach ($articles as $article) {
                     $article->addCategory($category['model']);
@@ -306,7 +310,7 @@ class ImportService
                 }
             }
             $connection->commit();
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $connection->rollBack();
 
             throw $e;
@@ -325,7 +329,7 @@ class ImportService
             $sql = 'SELECT sac.categoryID
             FROM s_articles_categories sac
             LEFT JOIN s_categories_attributes attr ON sac.categoryID = attr.categoryID
-            WHERE attr.connect_imported_category = 1 AND sac.articleID IN (' . implode(", ", $currentIdBatch) . ') GROUP BY sac.categoryID';
+            WHERE attr.connect_imported_category = 1 AND sac.articleID IN (' . implode(', ', $currentIdBatch) . ') GROUP BY sac.categoryID';
             $rows = $this->manager->getConnection()->fetchAll($sql);
 
             $remoteCategoryIds = array_merge($remoteCategoryIds, array_map(function ($row) {
@@ -346,10 +350,10 @@ class ImportService
     public function getArticlesWithAutoImportedCategories()
     {
         $statement = $this->manager->getConnection()->prepare(
-            "SELECT b.article_id, b.category
+            'SELECT b.article_id, b.category
             FROM s_plugin_connect_items b
             LEFT JOIN s_plugin_connect_product_to_categories a ON b.article_id = a.articleID
-            WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id"
+            WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id'
         );
         $statement->execute();
 
@@ -368,145 +372,145 @@ class ImportService
     /**
      * Helper function to create filter values
      * @param int $categoryId
-     * @param boolean $showOnlyConnectArticles
+     * @param bool $showOnlyConnectArticles
      * @param string $query
      * @return array
      */
-    private function getAst($categoryId, $query = "", $showOnlyConnectArticles = true)
+    private function getAst($categoryId, $query = '', $showOnlyConnectArticles = true)
     {
-        $ast = array (
-            array (
+        $ast = [
+            [
                 'type' => 'nullaryOperators',
                 'token' => 'ISMAIN',
-            )
-        );
+            ]
+        ];
 
         if (trim($query) !== '') {
-            $queryArray = array(
-                array (
+            $queryArray = [
+                [
                     'type' => 'boolOperators',
                     'token' => 'AND',
-                ),
-                array (
+                ],
+                [
                     'type' => 'subOperators',
                     'token' => '(',
-                ),
-                array (
+                ],
+                [
                     'type' => 'attribute',
                     'token' => 'ARTICLE.NAME'
-                ),
-                array (
+                ],
+                [
                     'type' => 'binaryOperator',
                     'token' => '~'
-                ),
-                array (
+                ],
+                [
                     'type' => 'values',
-                    'token' => '"'. $query .'"'
-                ),
-                array (
+                    'token' => '"' . $query . '"'
+                ],
+                [
                     'type' => 'boolOperators',
                     'token' => 'OR',
-                ),
-                array (
+                ],
+                [
                     'type' => 'attribute',
                     'token' => 'SUPPLIER.NAME'
-                ),
-                array (
+                ],
+                [
                     'type' => 'binaryOperator',
                     'token' => '~'
-                ),
-                array (
+                ],
+                [
                     'type' => 'values',
-                    'token' => '"'. $query .'"'
-                ),
-                array (
+                    'token' => '"' . $query . '"'
+                ],
+                [
                     'type' => 'boolOperators',
                     'token' => 'OR',
-                ),
-                array (
+                ],
+                [
                     'type' => 'attribute',
                     'token' => 'DETAIL.NUMBER'
-                ),
-                array (
+                ],
+                [
                     'type' => 'binaryOperator',
                     'token' => '~'
-                ),
-                array (
+                ],
+                [
                     'type' => 'values',
-                    'token' => '"'. $query .'"'
-                ),
-                array (
+                    'token' => '"' . $query . '"'
+                ],
+                [
                     'type' => 'subOperators',
                     'token' => ')',
-                )
-            );
+                ]
+            ];
             $ast = array_merge($ast, $queryArray);
-        };
+        }
 
-        $categoryArray = array(
-            array (
+        $categoryArray = [
+            [
             'type' => 'boolOperators',
             'token' => 'AND',
-            ),
-            array (
+            ],
+            [
                 'type' => 'subOperators',
                 'token' => '(',
-            ),
-            array (
+            ],
+            [
                 'type' => 'attribute',
                 'token' => 'CATEGORY.PATH',
-            ),
-            array (
+            ],
+            [
                 'type' => 'binaryOperators',
                 'token' => '=',
-            ),
-            array (
+            ],
+            [
                 'type' => 'values',
                 'token' => '"%|' . $categoryId . '|%"',
-            ),
-            array (
+            ],
+            [
                 'type' => 'boolOperators',
                 'token' => 'OR',
-            ),
-            array (
+            ],
+            [
                 'type' => 'attribute',
                 'token' => 'CATEGORY.ID',
-            ),
-            array (
+            ],
+            [
                 'type' => 'binaryOperators',
                 'token' => '=',
-            ),
-            array (
+            ],
+            [
                 'type' => 'values',
                 'token' => $categoryId,
-            ),
-            array (
+            ],
+            [
                 'type' => 'subOperators',
                 'token' => ')',
-            )
-        );
+            ]
+        ];
 
         $ast = array_merge($ast, $categoryArray);
 
         if ($showOnlyConnectArticles === true) {
-            $ast = array_merge($ast, array(
-                array (
+            $ast = array_merge($ast, [
+                [
                     'type' => 'boolOperators',
                     'token' => 'AND',
-                ),
-                array (
+                ],
+                [
                     'type' => 'attribute',
                     'token' => 'ATTRIBUTE.CONNECTMAPPEDCATEGORY',
-                ),
-                array (
+                ],
+                [
                     'type' => 'binaryOperators',
                     'token' => '!=',
-                ),
-                array (
+                ],
+                [
                     'type' => 'values',
                     'token' => 'NULL',
-                ),
-            ));
+                ],
+            ]);
         }
 
         return $ast;

@@ -59,8 +59,6 @@ class CategoryExtractor
      */
     private $db;
 
-    private $categoryIds = array();
-
     /**
      * @param AttributeRepository $attributeRepository
      * @param CategoryResolver $categoryResolver

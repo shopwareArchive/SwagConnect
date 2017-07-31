@@ -676,7 +676,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 new \ShopwarePlugins\Connect\Components\Config($this->em)
             ),
             $this->configurationGateway,
-            $randomStringGenerator
+            $randomStringGenerator,
+            $this->db
         );
 
         $argument = sprintf('shopId%s~%s', $shopId, '/Kleidung-unit/Hosen-unit/Hosentraeger-unit');

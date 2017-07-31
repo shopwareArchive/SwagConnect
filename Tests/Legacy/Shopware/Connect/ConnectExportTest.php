@@ -98,13 +98,16 @@ class ConnectExportTest extends ConnectTestHelper
         $this->manager->persist($detail);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
-        $connectAttribute->setExportStatus(Attribute::STATUS_INSERT);
-        $connectAttribute->setExported(true);
+        $connectAttribute->setExportStatus(null);
+        $connectAttribute->setExported(false);
         $this->manager->persist($connectAttribute);
         $this->manager->flush();
         $this->manager->clear();
 
-        $errors = $this->connectExport->export(array(3));
+        $this->connectExport->export([3]);
+
+        Shopware()->Db()->executeUpdate('UPDATE s_articles_details SET purchaseprice = ? WHERE id = ?', [10.01, $detail->getId()]);
+        $errors = $this->connectExport->export([3]);
 
         $this->assertEmpty($errors);
         $sql = 'SELECT export_status, export_message, exported FROM s_plugin_connect_items WHERE article_detail_id = ?';
@@ -126,13 +129,13 @@ class ConnectExportTest extends ConnectTestHelper
         $this->manager->persist($detail);
         $this->manager->flush();
 
-        $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
-        $errors = $this->connectExport->export(array(4));
+        $this->getHelper()->getOrCreateConnectAttributeByModel($model);
+        $errors = $this->connectExport->export([4]);
 
         $this->assertNotEmpty($errors);
 
         $sql = 'SELECT export_status, export_message FROM s_plugin_connect_items WHERE article_id = ?';
-        $row = Shopware()->Db()->fetchRow($sql, array(4));
+        $row = Shopware()->Db()->fetchRow($sql, [4]);
 
         $this->assertEquals('error-price', $row['export_status']);
         $this->assertContains('Ein Preisfeld für dieses Produkt ist nicht gepfegt', $row['export_message']);

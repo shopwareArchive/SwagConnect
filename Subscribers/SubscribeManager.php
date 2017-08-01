@@ -32,8 +32,6 @@ abstract class SubscribeManager extends \Enlight_Event_Subscriber
      */
     public function __construct()
     {
-        parent::__construct();
-
         foreach ($this->getSubscribedEvents() as $event => $listener) {
             if (!method_exists($this, $listener)) {
                 throw new \RuntimeException("{$listener} not implemented");

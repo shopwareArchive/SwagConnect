@@ -43,8 +43,8 @@ class RelevanceSorter
         $parts_a = explode('/', $a);
         $parts_b = explode('/', $b);
 
-        $last_element_length_a = strlen(array_pop($parts_a, -1));
-        $last_element_length_b = strlen(array_pop($parts_b, -1));
+        $last_element_length_a = strlen(array_pop($parts_a));
+        $last_element_length_b = strlen(array_pop($parts_b));
 
         if ($last_element_length_a == $last_element_length_b) {
             return 0;

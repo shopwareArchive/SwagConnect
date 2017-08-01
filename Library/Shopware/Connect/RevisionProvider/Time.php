@@ -38,8 +38,9 @@ class Time extends RevisionProvider
      */
     public function next()
     {
-        if (!isset($time)) {
+        if ($this->iteration > 99999 || !isset($this->time)) {
             $this->time = microtime(true);
+            $this->iteration = 0;
         }
 
         return sprintf('%.5f%05d', $this->time, $this->iteration++);

@@ -7,8 +7,6 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\CustomModels\Connect\Attribute;
-use Shopware\Models\Article\Configurator\Group;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -103,12 +101,15 @@ class ConnectExportTest extends ConnectTestHelper
         $this->manager->persist($detail);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
-        $connectAttribute->setExportStatus(Attribute::STATUS_INSERT);
-        $connectAttribute->setExported(true);
+        $connectAttribute->setExportStatus(null);
+        $connectAttribute->setExported(false);
         $this->manager->persist($connectAttribute);
         $this->manager->flush();
         $this->manager->clear();
 
+        $this->connectExport->export([3]);
+
+        Shopware()->Db()->executeUpdate('UPDATE s_articles_details SET purchaseprice = ? WHERE id = ?', [10.01, $detail->getId()]);
         $errors = $this->connectExport->export([3]);
 
         $this->assertEmpty($errors);

@@ -9,6 +9,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Components\Model\ModelManager;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;

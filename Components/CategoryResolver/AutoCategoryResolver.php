@@ -76,6 +76,7 @@ class AutoCategoryResolver implements CategoryResolver
             $remoteCategories = array_merge($remoteCategories, $this->convertTreeToEntities($node['children'], $mainCategory));
         }
 
+        // Collect all, not only leaf categories. Some customers use them to assign products.
         // Do not fetch them from database by name as before.
         // it is possible to have more than one subcategory "Boots" - CON-4589
         return array_map(function ($category) {

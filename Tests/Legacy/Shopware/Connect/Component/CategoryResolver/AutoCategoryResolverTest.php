@@ -49,7 +49,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             'parentId' => $defaultCategoryId
         ]);
         if (!$bootsCategory) {
-            $bootsCategory = $this->categoryResolver->convertNodeToEntity([
+            $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
                 'categoryId' => '/spanish/boots'
             ], $defaultCategory);

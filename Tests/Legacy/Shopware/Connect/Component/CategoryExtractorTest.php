@@ -144,10 +144,12 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                new \ShopwarePlugins\Connect\Components\Config($this->em),
+                $this->db
             ),
             $this->configurationGateway,
-            $randomStringGenerator
+            $randomStringGenerator,
+            $this->db
         );
 
         $randomStringGenerator->expects($this->any())
@@ -679,7 +681,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 new \ShopwarePlugins\Connect\Components\Config($this->em)
             ),
             $this->configurationGateway,
-            $randomStringGenerator
+            $randomStringGenerator,
+            $this->db
         );
 
         $argument = sprintf('shopId%s~%s', $shopId, '/Kleidung-unit/Hosen-unit/Hosentraeger-unit');

@@ -5,8 +5,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ShopwarePlugins\Connect\Tests\Unit\Bundle\SearchBundle\Condition;
-namespace ShopwarePlugins\Connect\Tests;
+namespace ShopwarePlugins\Connect\Tests\Regression;
 
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use Shopware\CustomModels\Connect\AttributeRepository;
@@ -14,6 +13,7 @@ use ShopwarePlugins\Connect\Components\CategoryResolver;
 use Shopware\Connect\Gateway;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 
 class CON4761 extends AbstractConnectUnitTest
 {
@@ -129,7 +129,7 @@ class CON4761 extends AbstractConnectUnitTest
                     'name' => 'Hosen',
                     'leaf' => true,
                     'children' => [],
-                    'cls' => "sc-tree-node",
+                    'cls' => 'sc-tree-node',
                     'expanded' => false
                 ],
                 [
@@ -138,7 +138,7 @@ class CON4761 extends AbstractConnectUnitTest
                     'name' => 'Mantel',
                     'leaf' => true,
                     'children' => [],
-                    'cls' => "sc-tree-node",
+                    'cls' => 'sc-tree-node',
                     'expanded' => false
                 ],
             ],

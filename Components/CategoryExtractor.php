@@ -55,9 +55,7 @@ class CategoryExtractor
         Gateway $configurationGateway,
         RandomStringGenerator $randomStringGenerator,
         Pdo $db
-    )
-    {
-
+    ) {
         $this->attributeRepository = $attributeRepository;
         $this->categoryResolver = $categoryResolver;
         $this->configurationGateway = $configurationGateway;

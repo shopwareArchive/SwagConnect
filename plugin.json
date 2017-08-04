@@ -7,15 +7,17 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.0",
+    "currentVersion": "1.1.1",
     "changelog": {
         "de": {
+            "1.1.1": "CON-4761 - Kategoriebaum lässt sich komplett ausklappen; CON-4762 - Kategoriezuweisung wurde gefixed; CON-4731 - Dopplete revisions gefixed;",
             "1.1.0": "CON-4663 - Shopware 5.3 Kompatiblität;",
             "1.0.20": "CON-4735 - Fix duplicate entry for s_articles_categories; CON-4611 - Änderungen an inaktiven Produkten werden nicht mehr getracked; CON-4698 - Fix neu generierte Varianten;",
             "1.0.19": "CON-4675 - CronJobs sind nun ausführbar über `bin/console sw:cron:run`;",
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.1": "CON-4761 - Category tree can now be expanded completely; CON-4762 - Category assignment was fixed; CON-4731 - Duplicate revisions fixed;",
             "1.1.0": "CON-4663 - Shopware 5.3 compatibility;",
             "1.0.20": "CON-4735 - Fix duplicate entry for s_articles_categories; CON-4611 - Prevent change generation of inactive products; CON-4698 - Fix regenerated Variants; ",
             "1.0.19": "CON-4675 - CronJobs can be execute via `bin/console sw:cron:run`;",

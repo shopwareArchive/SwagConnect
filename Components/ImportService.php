@@ -249,6 +249,11 @@ class ImportService
                 $articles = $this->articleRepository->findBy(['id' => $currentIdBatch]);
                 /** @var \Shopware\Models\Article\Article $article */
                 foreach ($articles as $article) {
+                    /** @var \Shopware\Models\Category\Category $categoryModel */
+                    $categoryModel = $category['model'];
+                    if ($article->getCategories()->contains($categoryModel->getParent())) {
+                        $article->removeCategory($categoryModel->getParent());
+                    }
                     $article->addCategory($category['model']);
                     $attribute = $article->getAttribute();
                     $attribute->setConnectMappedCategory(true);

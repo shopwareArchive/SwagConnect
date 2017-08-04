@@ -66,22 +66,22 @@ class AutoCategoryResolver implements CategoryResolver
         // example:
         // Deutsch/Category/Subcategory
         // English/Category/Subcategory
-        $leafCategories = [];
+        $remoteCategories = [];
         foreach ($tree as $node) {
             $mainCategory = $this->categoryRepository->findOneBy([
                 'name' => $node['name'],
                 'parentId' => 1,
             ]);
 
-            // collect only leaf categories from current tree
-            $leafCategories = array_merge($leafCategories, $this->convertTreeToEntities($node['children'], $mainCategory));
+            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToEntities($node['children'], $mainCategory));
         }
 
-        // return only leaf categories. Do not fetch them from database by name as before.
+        // Collect all, not only leaf categories. Some customers use them to assign products.
+        // Do not fetch them from database by name as before.
         // it is possible to have more than one subcategory "Boots" - CON-4589
         return array_map(function ($category) {
             return $category['model'];
-        }, $leafCategories);
+        }, $remoteCategories);
     }
 
     /**
@@ -90,10 +90,10 @@ class AutoCategoryResolver implements CategoryResolver
      *
      * @param array $node
      * @param null Category $parent
-     * @param array $leafCollection
+     * @param array $categories
      * @return array
      */
-    public function convertTreeToEntities(array $node, Category $parent = null, $leafCollection = [])
+    public function convertTreeToEntities(array $node, Category $parent = null, $categories = [])
     {
         if (!$parent) {
             //full load of category entity
@@ -110,17 +110,17 @@ class AutoCategoryResolver implements CategoryResolver
                 $categoryModel = $this->convertNodeToEntity($category, $parent);
             }
 
+            $categories[] = [
+                'model' => $categoryModel,
+                'categoryKey' => $category['categoryId'],
+            ];
+
             if (!empty($category['children'])) {
-                $leafCollection = $this->convertTreeToEntities($category['children'], $categoryModel, $leafCollection);
-            } else {
-                $leafCollection[] = [
-                    'model' => $categoryModel,
-                    'categoryKey' => $category['categoryId'],
-                ];
+                $categories = $this->convertTreeToEntities($category['children'], $categoryModel, $categories);
             }
         }
 
-        return $leafCollection;
+        return $categories;
     }
 
     /**

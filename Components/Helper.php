@@ -84,7 +84,7 @@ class Helper
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $product->shopId);
-        $query->setParameter('sourceId', $product->sourceId);
+        $query->setParameter('sourceId', (string) $product->sourceId);
         $result = $query->getResult(
             $mode
         );
@@ -114,7 +114,7 @@ class Helper
 
         $query = $builder->getQuery();
         $query->setParameter('shopId', $product->shopId);
-        $query->setParameter('sourceId', $product->sourceId);
+        $query->setParameter('sourceId', (string) $product->sourceId);
 
         $result = $query->getResult(
             $mode
@@ -143,7 +143,7 @@ class Helper
         $query = $builder->getQuery();
 
         $query->setParameter('shopId', $shopId);
-        $query->setParameter('sourceId', $sourceId);
+        $query->setParameter('sourceId', (string) $sourceId);
         $result = $query->getResult(
             $query::HYDRATE_OBJECT
         );

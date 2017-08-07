@@ -13,6 +13,7 @@ use ShopwarePlugins\Connect\Bootstrap\Setup;
 use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
 use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * @category  Shopware
@@ -155,6 +156,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $this,
             Shopware()->Models(),
             Shopware()->Db(),
+            new Logger(Shopware()->Db()),
             $version
         );
 

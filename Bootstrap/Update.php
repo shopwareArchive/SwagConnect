@@ -14,6 +14,7 @@ use Shopware\Models\Attribute\Configuration;
 use Shopware\Models\Order\Status;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
+use ShopwarePlugins\Connect\Components\Logger;
 
 /**
  * Updates existing versions of the plugin
@@ -44,21 +45,29 @@ class Update
     protected $version;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * Setup constructor.
      * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
      * @param $version
+     * @param Logger|null $logger
      */
     public function __construct(
         \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
+        Logger $logger,
         $version
     ) {
         $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
+        $this->logger = $logger;
         $this->version = $version;
     }
 
@@ -408,6 +417,11 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX source_id (source_id, shop_id)');
             } catch (\Exception $e) {
                 // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
             }
         }
     }

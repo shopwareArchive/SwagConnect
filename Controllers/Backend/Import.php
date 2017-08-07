@@ -385,7 +385,8 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
                 $this->getAutoCategoryResolver(),
                 $this->getPdoGateway(),
-                new \ShopwarePlugins\Connect\Components\RandomStringGenerator()
+                new \ShopwarePlugins\Connect\Components\RandomStringGenerator(),
+                Shopware()->Db()
             );
         }
 

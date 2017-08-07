@@ -10,6 +10,7 @@ namespace ShopwarePlugins\Connect\Components;
 use Shopware\Connect\Gateway;
 use Shopware\Models\Category\Category;
 use Shopware\CustomModels\Connect\AttributeRepository;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 
 /**
  * Class CategoryExtractor
@@ -42,8 +43,6 @@ class CategoryExtractor
      */
     private $db;
 
-    private $categoryIds = [];
-
     /**
      * @param AttributeRepository $attributeRepository
      * @param CategoryResolver $categoryResolver
@@ -54,14 +53,14 @@ class CategoryExtractor
         AttributeRepository $attributeRepository,
         CategoryResolver $categoryResolver,
         Gateway $configurationGateway,
-        RandomStringGenerator $randomStringGenerator
+        RandomStringGenerator $randomStringGenerator,
+        Pdo $db
     ) {
         $this->attributeRepository = $attributeRepository;
         $this->categoryResolver = $categoryResolver;
         $this->configurationGateway = $configurationGateway;
         $this->randomStringGenerator = $randomStringGenerator;
-
-        $this->db = Shopware()->Db();
+        $this->db = $db;
     }
 
     /**
@@ -117,6 +116,7 @@ class CategoryExtractor
      * @param bool|null $includeChildren
      * @param bool|null $excludeMapped
      * @param int|null $shopId
+     * @param string|null $stream
      * @return array
      */
     public function getRemoteCategoriesTree($parent = null, $includeChildren = false, $excludeMapped = false, $shopId = null, $stream = null)
@@ -158,10 +158,18 @@ class CategoryExtractor
         }
 
         $rows = $this->db->fetchPairs($sql, $whereParams);
+
         $parent = $parent ?: '';
         // if parent is an empty string, filter only main categories, otherwise
         // filter only first child categories
-        $rows = $this->convertTree($this->categoryResolver->generateTree($rows, $parent), $includeChildren, false, false, $shopId);
+        $rows = $this->convertTree(
+            $this->categoryResolver->generateTree($rows, $parent),
+            $includeChildren,
+            false,
+            false,
+            $shopId,
+            $stream
+        );
 
         return $rows;
     }

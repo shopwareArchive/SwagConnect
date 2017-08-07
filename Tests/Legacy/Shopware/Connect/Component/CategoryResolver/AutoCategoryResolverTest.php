@@ -44,6 +44,17 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             'id' => $defaultCategoryId
         ]);
 
+        $bootsCategory = $this->categoryRepo->findOneBy([
+            'name' => 'Boots',
+            'parentId' => $defaultCategoryId
+        ]);
+        if (!$bootsCategory) {
+            $this->categoryResolver->convertNodeToEntity([
+                'name' => 'Boots',
+                'categoryId' => '/spanish/boots'
+            ], $defaultCategory);
+        }
+
         $nikeCategory = $this->categoryRepo->findOneBy([
             'name' => 'Nike',
             'parentId' => $defaultCategoryId
@@ -62,7 +73,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         ]);
 
         if (!$nikeBootsCategory) {
-            $nikeBootsCategory = $this->categoryResolver->convertNodeToEntity([
+            $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
                 'categoryId' => '/spanish/nike/boots'
             ], $nikeCategory);
@@ -84,12 +95,12 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $defaultCategoryId,
             Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', ['Adidas'])
         );
-        // only addidas/boots and nike/tshirts must be returned - CON-4549.
-        $this->assertCount(2, $categoryModels);
-        $this->assertEquals($nikeCategory->getId(), $categoryModels[0]->getParent()->getId());
-        $this->assertEquals('Tshirts', $categoryModels[0]->getName());
-        $this->assertEquals('Adidas', $categoryModels[1]->getParent()->getName());
-        $this->assertEquals('Boots', $categoryModels[1]->getName());
+
+        $this->assertCount(4, $categoryModels);
+        $this->assertEquals($nikeCategory->getId(), $categoryModels[0]->getId());
+        $this->assertEquals('Tshirts', $categoryModels[1]->getName());
+        $this->assertEquals('Adidas', $categoryModels[2]->getName());
+        $this->assertEquals('Boots', $categoryModels[3]->getName());
 
         Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("' . implode('","', $categories) . '")');
     }

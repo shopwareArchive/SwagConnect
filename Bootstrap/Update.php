@@ -79,6 +79,7 @@ class Update
         $this->fixMarketplaceUrl();
         $this->addIndexToChangeTable();
         $this->removeDuplicatedMenuItems();
+        $this->addConnectItemsIndex();
 
         return true;
     }
@@ -393,6 +394,21 @@ class Update
                 $this->modelManager->remove($menuItem);
             }
             $this->modelManager->flush();
+        }
+    }
+
+    /**
+     * Create an index by source_id and shop_id.
+     * It's most used combination to search for products in this table
+     */
+    private function addConnectItemsIndex()
+    {
+        if (version_compare($this->version, '1.1.1', '<=')) {
+            try {
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX source_id (source_id, shop_id)');
+            } catch (\Exception $e) {
+                // ignore it if exists
+            }
         }
     }
 }

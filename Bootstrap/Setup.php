@@ -295,7 +295,8 @@ class Setup
              `revision` decimal(20,10) DEFAULT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
-             KEY `article_id` (`article_id`)
+             KEY `article_id` (`article_id`),
+             INDEX source_id (source_id, shop_id);
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", '
             CREATE TABLE IF NOT EXISTS `sw_connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,

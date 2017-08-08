@@ -414,7 +414,9 @@ class Update
     {
         if (version_compare($this->version, '1.1.1', '<=')) {
             try {
+                $this->db->query('ALTER TABLE s_plugin_connect_items MODIFY group_id VARCHAR(64)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX source_id (source_id, shop_id)');
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX group_id (group_id, shop_id)');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

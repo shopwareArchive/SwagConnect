@@ -7,14 +7,14 @@
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
-use Shopware\Bundle\SearchBundle\ProductSearch;
+use Shopware\Bundle\SearchBundle\ProductSearchInterface;
 use Shopware\Bundle\SearchBundle\ProductSearchResult;
 use Shopware\Bundle\StoreFrontBundle\Struct\ProductContext;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use Shopware\Bundle\SearchBundle\Criteria;
-use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
+use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\SearchBundle\Condition\CategoryCondition;
 use Shopware\Bundle\SearchBundle\Condition\CustomerGroupCondition;
 use ShopwarePlugins\Connect\Components\Config;
@@ -50,25 +50,29 @@ class ProductStreamService
     /** @var Config */
     private $config;
 
-    /** @var ProductSearch */
+    /**
+     * @var ProductSearchInterface
+     */
     private $productSearchService;
 
-    /** @var ContextService */
+    /**
+     * @var ContextServiceInterface
+     */
     private $contextService;
 
     /**
      * @param ProductStreamRepository $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
      * @param Config $config
-     * @param ProductSearch $productSearchService
-     * @param ContextService $contextService
+     * @param ProductSearchInterface $productSearchService
+     * @param ContextServiceInterface $contextService
      */
     public function __construct(
         ProductStreamRepository $productStreamRepository,
         ProductStreamAttributeRepository $streamAttrRepository,
         Config $config,
-        ProductSearch $productSearchService,
-        ContextService $contextService
+        ProductSearchInterface $productSearchService,
+        ContextServiceInterface $contextService
     ) {
         $this->productStreamRepository = $productStreamRepository;
         $this->streamAttrRepository = $streamAttrRepository;

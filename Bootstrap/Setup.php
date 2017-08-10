@@ -286,7 +286,7 @@ class Setup
              `update_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'inherit',
              `last_update` longtext COLLATE utf8_unicode_ci,
              `last_update_flag` int(11) DEFAULT NULL,
-             `group_id` INT(11) NULL DEFAULT NULL,
+             `group_id` VARCHAR (64) NULL DEFAULT NULL,
              `is_main_variant` TINYINT(1) NULL DEFAULT NULL,
              `purchase_price_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
              `offer_valid_until` int(10) NOT NULL,
@@ -295,7 +295,9 @@ class Setup
              `revision` decimal(20,10) DEFAULT NULL,
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
-             KEY `article_id` (`article_id`)
+             KEY `article_id` (`article_id`),
+             INDEX source_id (source_id, shop_id),
+             INDEX group_id (group_id, shop_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", '
             CREATE TABLE IF NOT EXISTS `sw_connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,

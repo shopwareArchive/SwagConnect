@@ -407,13 +407,13 @@ class Update
     }
 
     /**
-     * Create an index by source_id and shop_id.
-     * It's most used combination to search for products in this table
+     * Create most used indexes in s_plugin_connect_items table.
      */
     private function addConnectItemsIndex()
     {
         if (version_compare($this->version, '1.1.1', '<=')) {
             try {
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX stream(shop_id, stream)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items MODIFY group_id VARCHAR(64)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX source_id (source_id, shop_id)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX group_id (group_id, shop_id)');

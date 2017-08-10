@@ -123,25 +123,17 @@ class CategoryExtractor
     {
         $sql = '
             SELECT pcc.category_key, pcc.label
-            FROM `s_plugin_connect_categories` pcc
-            INNER JOIN `s_plugin_connect_product_to_categories` pcptc
-            ON pcptc.connect_category_id = pcc.id
-            INNER JOIN `s_plugin_connect_items` pci
-            ON pci.article_id = pcptc.articleID
-            INNER JOIN `s_articles_attributes` ar
-            ON ar.articleID = pci.article_id
+            FROM s_plugin_connect_items pci
+            INNER JOIN `s_plugin_connect_product_to_categories` pcptc ON pci.article_id = pcptc.articleID
+            INNER JOIN `s_plugin_connect_categories` pcc ON pcptc.connect_category_id = pcc.id
         ';
 
         $whereParams = [];
         $whereSql = [];
-        if ($parent !== null) {
-            $whereSql[] = 'pcc.category_key LIKE ?';
-            $whereParams[] = $parent . '/%';
-        }
 
         if ($shopId > 0) {
             $whereSql[] = 'pci.shop_id = ?';
-            $whereParams[] = $shopId;
+            $whereParams[] = (string) $shopId;
         }
 
         if ($stream) {
@@ -149,7 +141,13 @@ class CategoryExtractor
             $whereParams[] = $stream;
         }
 
+        if ($parent !== null) {
+            $whereSql[] = 'pcc.category_key LIKE ?';
+            $whereParams[] = $parent . '/%';
+        }
+
         if ($excludeMapped === true) {
+            $sql .= ' INNER JOIN `s_articles_attributes` ar ON ar.articleDetailsID = pci.article_detail_id';
             $whereSql[] = 'ar.connect_mapped_category IS NULL';
         }
 
@@ -184,17 +182,17 @@ class CategoryExtractor
      */
     public function getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped = false)
     {
-        $sql = 'SELECT category_key, label
-                FROM `s_plugin_connect_categories` cat
-                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
-                INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
-                INNER JOIN `s_articles_attributes` ar ON ar.articleID = attributes.article_id
-                WHERE attributes.shop_id = ? AND attributes.stream = ?';
-
+        $sql = 'SELECT cat.category_key, cat.label
+                FROM s_plugin_connect_items attributes
+                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON attributes.article_id = prod_to_cat.articleID
+                INNER JOIN `s_plugin_connect_categories` cat ON prod_to_cat.connect_category_id = cat.id';
+        $whereClause = ' WHERE attributes.shop_id = ? AND attributes.stream = ?';
         if ($hideMapped) {
-            $sql .= ' AND ar.connect_mapped_category IS NULL';
+            $sql .= ' INNER JOIN `s_articles_attributes` ar ON ar.articleDetailsID = attributes.article_detail_id';
+            $whereClause .= ' AND ar.connect_mapped_category IS NULL';
         }
 
+        $sql .= $whereClause;
         $rows = $this->db->fetchPairs($sql, [(int) $shopId, $stream]);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), false, false, false, $shopId, $stream);
@@ -239,17 +237,20 @@ class CategoryExtractor
     {
         $sql = 'SELECT COUNT(pci.id)
                 FROM `s_plugin_connect_items` pci
-                INNER JOIN `s_articles_attributes` aa ON aa.articleID = pci.article_id
-                WHERE pci.shop_id = ?
         ';
 
+        $whereClause = ' WHERE pci.shop_id = ?';
+
         if ($excludeMapped === true) {
-            $sql .= ' AND aa.connect_mapped_category IS NULL';
+            $sql .= ' INNER JOIN `s_articles_attributes` aa ON aa.articleDetailsID = pci.article_detail_id';
+            $whereClause .= ' AND aa.connect_mapped_category IS NULL';
         }
 
-        $count = $this->db->fetchOne($sql, [$shopId]);
+        $sql .= $whereClause;
 
-        return (bool) $count;
+        $count = $this->db->fetchOne($sql, [(string) $shopId]);
+
+        return $count > 0;
     }
 
     /**
@@ -277,7 +278,7 @@ class CategoryExtractor
         $sql = 'SELECT DISTINCT(stream)
                 FROM `s_plugin_connect_items` attributes
                 WHERE attributes.shop_id = ?';
-        $rows = $this->db->fetchCol($sql, [$shopId]);
+        $rows = $this->db->fetchCol($sql, [(string) $shopId]);
 
         $streams = [];
         foreach ($rows as $streamName) {

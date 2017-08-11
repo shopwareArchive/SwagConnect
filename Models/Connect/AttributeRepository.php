@@ -77,35 +77,35 @@ class AttributeRepository extends ModelRepository
     }
 
     /**
-     * List with all changed products which are comming from Connect
+     * List with all changed products which are coming from Connect
      *
      * @param int $start
      * @param int $limit
      * @param array $order
-     * @return \Shopware\Components\Model\QueryBuilder
+     * @return \Doctrine\DBAL\Query\QueryBuilder
      */
     public function getChangedProducts($start, $limit, array $order = [])
     {
-        $builder = $this->_em->createQueryBuilder();
-        $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
-        $builder->join('at.article', 'a');
-        $builder->join('at.articleDetail', 'd');
-        $builder->join('d.attribute', 'cad');
-        $builder->leftJoin('d.prices', 'p', \Doctrine\ORM\Query\Expr\Join::WITH, "p.from = 1 AND p.customerGroupKey = 'EK'");
-        $builder->leftJoin('a.supplier', 's');
-        $builder->leftJoin('a.tax', 't');
+        $builder = $this->_em->getConnection()->createQueryBuilder();
+        $builder->from('s_plugin_connect_items', 'at');
+        $builder->join('at', 's_articles', 'a', 'at.article_id = a.id');
+        $builder->join('at', 's_articles_details', 'd', 'at.article_detail_id = d.id');
+        $builder->join('at', 's_articles_attributes', 'cad', 'at.article_detail_id = cad.articleDetailsId');
+        $builder->leftJoin('at', 's_articles_prices', 'p', "p.from = 1 AND p.pricegroup = 'EK'");
+        $builder->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id');
+        $builder->leftJoin('a', 's_core_tax', 't', 'a.taxID = t.id');
 
         $builder->select([
-            'at.lastUpdate',
-            'at.lastUpdateFlag as lastUpdateFlag',
+            'at.last_update as lastUpdate',
+            'at.last_update_flag as lastUpdateFlag',
             'a.id as articleId',
             'd.id',
-            'd.number as number',
+            'd.ordernumber as number',
             'd.inStock as inStock',
-            'cad.connectProductDescription as additionalDescription',
+            'cad.connect_product_description as additionalDescription',
             'a.name as name',
             'a.description',
-            'a.descriptionLong',
+            'a.description_long as descriptionLong',
             's.name as supplier',
             'a.active as active',
             't.tax as tax',
@@ -113,14 +113,16 @@ class AttributeRepository extends ModelRepository
             'at.category'
         ]);
 
-        $builder->where('at.shopId IS NOT NULL')
-            ->andWHere('at.lastUpdateFlag IS NOT NULL')
-            ->andWHere('at.lastUpdateFlag > 0');
+        $builder->where('at.shop_id IS NOT NULL')
+            ->andWHere('at.last_update_flag IS NOT NULL')
+            ->andWHere('at.last_update_flag > 0');
 
-        $builder->addOrderBy($order);
-        $query = $builder->getQuery();
-        $query->setFirstResult($start);
-        $query->setMaxResults($limit);
+        if (isset($order[0]) && isset($order['property']) && isset($order['direction'])) {
+            $builder->addOrderBy($order['property'], $order['direction']);
+        }
+
+        $builder->setFirstResult($start);
+        $builder->setMaxResults($limit);
 
         return $builder;
     }

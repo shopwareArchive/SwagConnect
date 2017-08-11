@@ -117,8 +117,8 @@ class AttributeRepository extends ModelRepository
             ->andWHere('at.last_update_flag IS NOT NULL')
             ->andWHere('at.last_update_flag > 0');
 
-        if (isset($order[0]) && isset($order['property']) && isset($order['direction'])) {
-            $builder->addOrderBy($order['property'], $order['direction']);
+        if (isset($order[0]) && isset($order[0]['property']) && isset($order[0]['direction'])) {
+            $builder->addOrderBy($order[0]['property'], $order[0]['direction']);
         }
 
         $builder->setFirstResult($start);

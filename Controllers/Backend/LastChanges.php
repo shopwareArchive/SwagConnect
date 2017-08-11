@@ -20,16 +20,16 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
      */
     public function getChangedProductsAction()
     {
+        /** @var \Shopware\CustomModels\Connect\AttributeRepository $connectAttributeRepository */
         $connectAttributeRepository = $this->getModelManager()->getRepository('\Shopware\CustomModels\Connect\Attribute');
-        $query = $connectAttributeRepository->getChangedProducts(
+        $builder = $connectAttributeRepository->getChangedProducts(
             $this->Request()->getParam('start', 0),
             $this->Request()->getParam('limit', 20),
             $this->Request()->getParam('sort', [])
+        );
 
-        )->getQuery();
-
-        $total = $this->getModelManager()->getQueryCount($query);
-        $data = $query->getArrayResult();
+        $total = $builder->execute()->rowCount();
+        $data = $builder->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($data as $key => $record) {
             $data[$key]['images'] = implode('|', $this->getImageImport()->getImagesForDetail($record['id']));

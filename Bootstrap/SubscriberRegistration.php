@@ -123,14 +123,24 @@ class SubscriberRegistration
         }
 
         $subscribers = $this->getDefaultSubscribers();
+        $newSubscribers = $this->getNewSubscribers();
 
         // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
             $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
+
+            $newSubscribers = array_merge($newSubscribers, [
+                new \ShopwarePlugins\Connect\Subscribers\BasketWidget(
+                    $this->pluginBootstrap->getBasketHelper(),
+                    $this->helper
+                ),
+            ]);
             // These subscribers are used if the api key is not valid
         } else {
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
+
+        $this->eventManager->addSubscriber(...$newSubscribers);
 
         /** @var $subscriber \ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {
@@ -142,11 +152,11 @@ class SubscriberRegistration
             [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
             $this
         );
-
-        $newSubscribers = $this->getNewSubscribers();
-        $this->eventManager->addSubscriber(...$newSubscribers);
     }
 
+    /**
+     * @return array
+     */
     private function getNewSubscribers()
     {
         return [
@@ -231,7 +241,6 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             $this->createCheckoutSubscriber(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less(),

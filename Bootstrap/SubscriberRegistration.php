@@ -142,6 +142,25 @@ class SubscriberRegistration
             [\Doctrine\ORM\Events::onFlush, \Doctrine\ORM\Events::postFlush],
             $this
         );
+
+        $newSubscribers = $this->getNewSubscribers();
+        $this->eventManager->addSubscriber(...$newSubscribers);
+    }
+
+    private function getNewSubscribers()
+    {
+        return [
+            new \ShopwarePlugins\Connect\Subscribers\Article(
+                new PDO($this->db->getConnection()),
+                $this->modelManager,
+                $this->connectFactory->getConnectExport(),
+                $this->helper,
+                $this->config,
+                $this->connectFactory->getSDK(),
+                $this->container->get('snippets'),
+                $this->pluginBootstrap->Path()
+            ),
+        ];
     }
 
     /**
@@ -160,13 +179,6 @@ class SubscriberRegistration
                 $this->connectFactory->getConnectExport()
             ),
             new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
-            new \ShopwarePlugins\Connect\Subscribers\Article(
-                new PDO($this->db->getConnection()),
-                $this->modelManager,
-                $this->connectFactory->getConnectExport(),
-                $this->helper,
-                $this->config
-            ),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $this->modelManager
             ),

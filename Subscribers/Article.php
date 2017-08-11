@@ -7,6 +7,8 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Shopware\Connect\SDK;
+use Enlight\Event\SubscriberInterface;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Struct\Change\FromShop\MakeMainVariant;
@@ -16,12 +18,13 @@ use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
+use Shopware\Models\Article\Detail;
 
 /**
  * Class Article
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class Article extends BaseSubscriber
+class Article implements SubscriberInterface
 {
     /**
      * @var \Shopware\Connect\Gateway\PDO
@@ -58,22 +61,42 @@ class Article extends BaseSubscriber
      */
     private $config;
 
+    /**
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
     public function __construct(
         Gateway $connectGateway,
         ModelManager $modelManager,
         ConnectExport $connectExport,
         Helper $helper,
-        Config $config
+        Config $config,
+        SDK $sdk,
+        \Shopware_Components_Snippet_Manager $snippetManager,
+        $pluginPath
     ) {
-        parent::__construct();
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
         $this->connectExport = $connectExport;
         $this->helper = $helper;
         $this->config = $config;
+        $this->sdk = $sdk;
+        $this->snippetManager = $snippetManager;
+        $this->pluginPath = $pluginPath;
     }
 
-    public function getSubscribedEvents()
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
@@ -90,7 +113,7 @@ class Article extends BaseSubscriber
     public function getDetailRepository()
     {
         if (!$this->detailRepository) {
-            $this->detailRepository = $this->modelManager->getRepository('Shopware\Models\Article\Detail');
+            $this->detailRepository = $this->modelManager->getRepository(Detail::class);
         }
 
         return $this->detailRepository;
@@ -102,7 +125,7 @@ class Article extends BaseSubscriber
     public function getCustomerGroupRepository()
     {
         if (!$this->customerGroupRepository) {
-            $this->customerGroupRepository = $this->modelManager->getRepository('Shopware\Models\Customer\Group');
+            $this->customerGroupRepository = $this->modelManager->getRepository(Group::class);
         }
 
         return $this->customerGroupRepository;
@@ -145,15 +168,15 @@ class Article extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'index':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
                 $subject->View()->extendsTemplate(
                     'backend/article/connect.js'
                 );
                 break;
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
                 $subject->View()->extendsTemplate(
                     'backend/article/model/attribute_connect.js'
                 );
@@ -325,7 +348,7 @@ class Article extends BaseSubscriber
         );
 
         foreach ($sourceIds as $sourceId) {
-            $this->getSDK()->recordDelete($sourceId);
+            $this->sdk->recordDelete($sourceId);
         }
 
         $this->connectExport->updateConnectItemsStatus($sourceIds, Attribute::STATUS_DELETE);
@@ -399,7 +422,7 @@ class Article extends BaseSubscriber
         ]);
 
         try {
-            $this->getSDK()->makeMainVariant($mainVariant);
+            $this->sdk->makeMainVariant($mainVariant);
         } catch (\Exception $e) {
             // if sn is not available, proceed without exception
         }
@@ -579,5 +602,20 @@ class Article extends BaseSubscriber
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
 
         return Shopware()->Db()->fetchOne($sql, [$id]);
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasPriceType()
+    {
+        if ($this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
+            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
+            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -96,6 +96,9 @@ class Article implements SubscriberInterface
         $this->pluginPath = $pluginPath;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
         return [

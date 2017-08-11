@@ -160,6 +160,10 @@ class SubscriberRegistration
                 $this->container->get('snippets'),
                 $this->pluginBootstrap->Path()
             ),
+            new \ShopwarePlugins\Connect\Subscribers\ArticleList(
+                $this->pluginBootstrap->Path(),
+                $this->container->get('snippets')
+            ),
         ];
     }
 
@@ -178,7 +182,6 @@ class SubscriberRegistration
                 $this->SDK,
                 $this->connectFactory->getConnectExport()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $this->modelManager
             ),

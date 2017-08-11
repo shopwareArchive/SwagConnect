@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Subscribers\Article;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\ModelManager;
@@ -60,7 +61,9 @@ class ArticleTest extends AbstractConnectUnitTest
             $this->modelManager,
             $this->connectExport,
             $this->helper,
-            $this->config
+            $this->config,
+            (new ConnectFactory())->getSDK(),
+            $this->createMock(\Shopware_Components_Snippet_Manager::class)
         );
     }
 

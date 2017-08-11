@@ -11,9 +11,12 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\SDK;
+use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
@@ -174,6 +177,10 @@ class SubscriberRegistration
                 $this->pluginBootstrap->Path(),
                 $this->container->get('snippets')
             ),
+            new \ShopwarePlugins\Connect\Subscribers\Category(
+                $this->container->get('dbal_connection'),
+                $this->createProductStreamService()
+            ),
         ];
     }
 
@@ -191,9 +198,6 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\CronJob(
                 $this->SDK,
                 $this->connectFactory->getConnectExport()
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Category(
-                $this->modelManager
             ),
             new \ShopwarePlugins\Connect\Subscribers\Connect(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
@@ -325,5 +329,22 @@ class SubscriberRegistration
 
             $this->productUpdates[] = $entity;
         }
+    }
+
+    /**
+     * @return ProductStreamService
+     */
+    private function createProductStreamService()
+    {
+        /** @var ProductStreamAttributeRepository $streamAttrRepository */
+        $streamAttrRepository = $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+
+        return new ProductStreamService(
+            new ProductStreamRepository($this->modelManager, $this->container->get('shopware_product_stream.repository')),
+            $streamAttrRepository,
+            new Config($this->modelManager),
+            $this->container->get('shopware_search.product_search'),
+            $this->container->get('shopware_storefront.context_service')
+        );
     }
 }

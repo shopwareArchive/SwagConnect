@@ -7,19 +7,25 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventManager;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Address;
 use Shopware\Connect\Struct\CheckResult;
 use Shopware\Connect\Struct\Message;
 use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Exceptions\CheckoutException;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 use ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Payment\Payment;
 
 /**
  * Handles the whole checkout manipulation, which is required for the connect checkout
@@ -27,7 +33,7 @@ use ShopwarePlugins\Connect\Components\Utils\OrderPaymentMapper;
  * Class Checkout
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class Checkout extends BaseSubscriber
+class Checkout implements SubscriberInterface
 {
     /**
      * @var Logger
@@ -55,27 +61,50 @@ class Checkout extends BaseSubscriber
     protected $eventManager;
 
     /**
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
+     * @var BasketHelper
+     */
+    private $basketHelper;
+
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
      * @param ModelManager $manager
+     * @param Enlight_Event_EventManager $eventManager
+     * @param SDK $sdk
+     * @param BasketHelper $basketHelper
+     * @param Helper $helper
      */
     public function __construct(
         ModelManager $manager,
-        Enlight_Event_EventManager $eventManager
+        Enlight_Event_EventManager $eventManager,
+        SDK $sdk,
+        BasketHelper $basketHelper,
+        Helper $helper
     ) {
-        parent::__construct();
-
         $this->manager = $manager;
         $this->eventManager = $eventManager;
         $this->logger = new Logger(Shopware()->Db());
         $this->factory = new ConnectFactory();
+        $this->sdk = $sdk;
+        $this->basketHelper = $basketHelper;
+        $this->helper = $helper;
     }
 
     /**
      * @return array
      */
-    public function getSubscribedEvents()
+    public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketForConnect',
+            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => [ 'fixBasketForConnect' => -1 ],
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveConnectProductsOnCheckoutFinish',
             'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
         ];
@@ -116,22 +145,22 @@ class Checkout extends BaseSubscriber
         $sessionId = Shopware()->SessionID();
 
         $userId = Shopware()->Session()->sUserId;
-        $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($sessionId, $userId);
+        $hasConnectProduct = $this->helper->hasBasketConnectProducts($sessionId, $userId);
 
         if ($hasConnectProduct === false && $this->newSessionId) {
-            $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($this->newSessionId);
+            $hasConnectProduct = $this->helper->hasBasketConnectProducts($this->newSessionId);
         }
 
         $view->hasConnectProduct = $hasConnectProduct;
 
-        if ($actionName == 'ajax_add_article') {
-            $this->registerMyTemplateDir();
+        if ($actionName === 'ajax_add_article') {
+            $view->addTemplateDir('Views/responsive', 'connect');
             $view->extendsTemplate('frontend/connect/ajax_add_article.tpl');
         }
 
         // send order to connect
         // this method must be called after external payments (Sofort, Billsafe)
-        if ($actionName == 'finish' && !empty($view->sOrderNumber)) {
+        if ($actionName === 'finish' && !empty($view->sOrderNumber)) {
             try {
                 $this->checkoutReservedProducts($view->sOrderNumber);
             } catch (CheckoutException $e) {
@@ -145,7 +174,7 @@ class Checkout extends BaseSubscriber
         // $hasConnectProduct will be false, because order is already finished
         // and information about connect products is not available.
         if (!$hasConnectProduct) {
-            $this->getHelper()->clearConnectReservation();
+            $this->helper->clearConnectReservation();
 
             return;
         }
@@ -166,16 +195,10 @@ class Checkout extends BaseSubscriber
             $this->enforcePhoneNumber($view);
         }
 
-        $this->registerMyTemplateDir();
-        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $view->extendsTemplate('frontend/connect/checkout.tpl');
-        }
-
-        $sdk = $this->getSDK();
+        $view->addTemplateDir('Views/responsive', 'connect');
 
         // Wrap the basket array in order to make it some more readable
-        $basketHelper = $this->getBasketHelper();
-        $basketHelper->setBasket($view->sBasket);
+        $this->basketHelper->setBasket($view->sBasket);
 
         // If no messages are shown, yet, check products from remote shop and build message array
         if (($connectMessages = Shopware()->Session()->connectMessages) === null) {
@@ -190,19 +213,19 @@ class Checkout extends BaseSubscriber
 
             $allProducts = [];
 
-            foreach ($basketHelper->getConnectProducts() as $shopId => $products) {
-                $products = $this->getHelper()->prepareConnectUnit($products);
+            foreach ($this->basketHelper->getConnectProducts() as $shopId => $products) {
+                $products = $this->helper->prepareConnectUnit($products);
                 $allProducts = array_merge($allProducts, $products);
                 // add order items in connect order
-                $order->orderItems = array_map(function (Product $product) use ($basketHelper) {
+                $order->orderItems = array_map(function (Product $product) {
                     return new OrderItem([
                         'product' => $product,
-                        'count' => $basketHelper->getQuantityForProduct($product),
+                        'count' => $this->basketHelper->getQuantityForProduct($product),
                     ]);
                 }, $products);
             }
 
-            $this->Application()->Container()->get('events')->notify(
+            $this->eventManager->notify(
                 'Connect_Merchant_Create_Order_Before',
                 [
                     //we use clone to not be able to modify the connect order
@@ -211,10 +234,10 @@ class Checkout extends BaseSubscriber
                 ]
             );
 
-            /** @var $checkResult \Shopware\Connect\Struct\CheckResult */
             try {
-                $checkResult = $sdk->checkProducts($order);
-                $basketHelper->setCheckResult($checkResult);
+                /** @var $checkResult \Shopware\Connect\Struct\CheckResult */
+                $checkResult = $this->sdk->checkProducts($order);
+                $this->basketHelper->setCheckResult($checkResult);
 
                 if ($checkResult->hasErrors()) {
                     $connectMessages = $checkResult->errors;
@@ -235,28 +258,28 @@ class Checkout extends BaseSubscriber
 
         // If no products are bought from the local shop, move the first connect shop into
         // the content section. Also set that shop's id in the template
-        $shopId = $basketHelper->fixBasket();
+        $shopId = $this->basketHelper->fixBasket();
         if ($shopId) {
             $view->shopId = $shopId;
         }
         // Increase amount and shipping costs by the amount of connect shipping costs
-        $basketHelper->recalculate($basketHelper->getCheckResult());
+        $this->basketHelper->recalculate($this->basketHelper->getCheckResult());
 
-        $connectMessages = $this->getNotShippableMessages($basketHelper->getCheckResult(), $connectMessages);
+        $connectMessages = $this->getNotShippableMessages($this->basketHelper->getCheckResult(), $connectMessages);
 
-        $view->assign($basketHelper->getDefaultTemplateVariables());
+        $view->assign($this->basketHelper->getDefaultTemplateVariables());
 
         // Set the sOrderVariables for the session based on the original content subarray of the basket array
         // @HL - docs?
-        if ($actionName == 'confirm') {
+        if ($actionName === 'confirm') {
             $session = Shopware()->Session();
             /** @var $variables \ArrayObject */
             $variables = $session->offsetGet('sOrderVariables');
 
-            $session->offsetSet('sOrderVariables', $basketHelper->getOrderVariablesForSession($variables));
+            $session->offsetSet('sOrderVariables', $this->basketHelper->getOrderVariablesForSession($variables));
         }
 
-        $view->assign($basketHelper->getConnectTemplateVariables($connectMessages));
+        $view->assign($this->basketHelper->getConnectTemplateVariables($connectMessages));
         $view->assign('showShippingCostsSeparately', $this->factory->getConfigComponent()->getConfig('showShippingCostsSeparately', false));
     }
 
@@ -303,13 +326,11 @@ class Checkout extends BaseSubscriber
         $request = $controller->Request();
         $view = $controller->View();
         $session = Shopware()->Session();
-        $sdk = $this->getSDK();
-        $helper = $this->getHelper();
         $userData = $session['sOrderVariables']['sUserData'];
         $paymentName = $userData['additional']['payment']['name'];
 
-        if (($request->getActionName() != 'finish' && $request->getActionName() != 'payment')) {
-            if (($request->getActionName() == 'confirm' && $paymentName == 'klarna_checkout')) {
+        if (($request->getActionName() !== 'finish' && $request->getActionName() !== 'payment')) {
+            if (($request->getActionName() === 'confirm' && $paymentName === 'klarna_checkout')) {
                 // BEP-1010 Fix for Klarna checkout
             } else {
                 return;
@@ -320,7 +341,7 @@ class Checkout extends BaseSubscriber
             return;
         }
 
-        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (!$this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
@@ -362,13 +383,13 @@ class Checkout extends BaseSubscriber
             }
 
             $articleDetailId = $row['additional_details']['articleDetailsID'];
-            if ($helper->isRemoteArticleDetailDBAL($articleDetailId) === false) {
+            if ($this->helper->isRemoteArticleDetailDBAL($articleDetailId) === false) {
                 continue;
             }
-            $shopProductId = $helper->getShopProductId($articleDetailId);
+            $shopProductId = $this->helper->getShopProductId($articleDetailId);
 
-            $products = $helper->getRemoteProducts([$shopProductId->sourceId], $shopProductId->shopId);
-            $products = $this->getHelper()->prepareConnectUnit($products);
+            $products = $this->helper->getRemoteProducts([$shopProductId->sourceId], $shopProductId->shopId);
+            $products = $this->helper->prepareConnectUnit($products);
 
             if (empty($products)) {
                 continue;
@@ -397,7 +418,7 @@ class Checkout extends BaseSubscriber
             );
 
             /** @var $reservation \Shopware\Connect\Struct\Reservation */
-            $reservation = $sdk->reserveProducts($order);
+            $reservation = $this->sdk->reserveProducts($order);
 
             if (!$reservation || !$reservation->success) {
                 throw new \Exception('Error during reservation');
@@ -482,15 +503,13 @@ class Checkout extends BaseSubscriber
      */
     public function checkoutReservedProducts($orderNumber)
     {
-        $sdk = $this->getSDK();
-
         if (empty($orderNumber)) {
             return;
         }
 
         $reservation = unserialize(Shopware()->Session()->connectReservation);
         if ($reservation !== null && $reservation !== false) {
-            $result = $sdk->checkout($reservation, $orderNumber);
+            $result = $this->sdk->checkout($reservation, $orderNumber);
             foreach ($result as $shopId => $success) {
                 if (!$success) {
                     $e = new CheckoutException("Could not checkout from warehouse {$shopId}");
@@ -498,7 +517,7 @@ class Checkout extends BaseSubscriber
                     throw $e;
                 }
             }
-            $this->getHelper()->clearConnectReservation();
+            $this->helper->clearConnectReservation();
         }
     }
 
@@ -511,7 +530,7 @@ class Checkout extends BaseSubscriber
      */
     public function enforcePhoneNumber($view)
     {
-        if (Shopware()->Session()->sUserId && $this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (Shopware()->Session()->sUserId && $this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             $id = Shopware()->Session()->sUserId;
 
             $sql = 'SELECT phone FROM s_user_billingaddress WHERE userID = :id';
@@ -575,9 +594,9 @@ class Checkout extends BaseSubscriber
      */
     private function setOrderStatusError($orderNumber)
     {
-        $repo = $this->manager->getRepository('Shopware\Models\Order\Order');
+        $repo = $this->manager->getRepository(Order::class);
 
-        /** @var \Shopware\Models\Order\Order $order */
+        /** @var Order $order */
         $order = $repo->findOneBy(['number' => $orderNumber]);
 
         $repoStatus = $this->manager->getRepository(Status::class);
@@ -599,8 +618,8 @@ class Checkout extends BaseSubscriber
             return false;
         }
 
-        $paymentRepository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
-        /** @var \Shopware\Models\Payment\Payment $payment */
+        $paymentRepository = Shopware()->Models()->getRepository(Payment::class);
+        /** @var Payment $payment */
         $payment = $paymentRepository->find($paymentId);
 
         if (!$payment) {

@@ -37,9 +37,6 @@ class DisableConnectInFrontend extends BaseSubscriber
 
         if ($this->isConnectArticle($article['articleID'])) {
             $this->registerMyTemplateDir();
-            if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-                $view->extendsTemplate('frontend/connect/detail.tpl');
-            }
             $view->assign('hideConnect', true);
         }
     }

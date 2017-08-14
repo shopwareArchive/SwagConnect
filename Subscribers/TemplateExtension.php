@@ -29,13 +29,7 @@ class TemplateExtension extends BaseSubscriber
 
     public function addConnectStyle(\Enlight_Event_EventArgs $args)
     {
-        /** @var $subject \Enlight_Controller_Action */
-        $subject = $args->getSubject();
-
         $this->registerMyTemplateDir();
-        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $subject->View()->extendsTemplate('frontend/connect/index/index.tpl');
-        }
     }
 
     /**
@@ -151,9 +145,6 @@ class TemplateExtension extends BaseSubscriber
         $helper = $this->getHelper();
 
         $this->registerMyTemplateDir();
-        if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-            $view->extendsTemplate('frontend/connect/detail.tpl');
-        }
 
         $articleData = $view->getAssign('sArticle');
         if (empty($articleData['articleID'])) {

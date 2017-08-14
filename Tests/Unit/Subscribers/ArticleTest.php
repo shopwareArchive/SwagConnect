@@ -63,7 +63,8 @@ class ArticleTest extends AbstractConnectUnitTest
             $this->helper,
             $this->config,
             (new ConnectFactory())->getSDK(),
-            $this->createMock(\Shopware_Components_Snippet_Manager::class)
+            $this->createMock(\Shopware_Components_Snippet_Manager::class),
+            ''
         );
     }
 

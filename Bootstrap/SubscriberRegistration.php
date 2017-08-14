@@ -137,6 +137,13 @@ class SubscriberRegistration
                     $this->pluginBootstrap->getBasketHelper(),
                     $this->helper
                 ),
+                $checkoutSubscriber = new Checkout(
+                    $this->modelManager,
+                    $this->eventManager,
+                    $this->connectFactory->getSDK(),
+                    $this->connectFactory->getBasketHelper(),
+                    $this->connectFactory->getHelper()
+                )
             ]);
             // These subscribers are used if the api key is not valid
         } else {
@@ -180,7 +187,7 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $this->container->get('dbal_connection'),
                 $this->createProductStreamService()
-            ),
+            )
         ];
     }
 
@@ -243,7 +250,6 @@ class SubscriberRegistration
     {
         $subscribers = [
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
-            $this->createCheckoutSubscriber(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
             new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
@@ -253,26 +259,6 @@ class SubscriberRegistration
         ];
 
         return $subscribers;
-    }
-
-    /**
-     * Creates checkout subscriber
-     *
-     * @return Checkout
-     */
-    private function createCheckoutSubscriber()
-    {
-        $checkoutSubscriber = new Checkout(
-            $this->modelManager,
-            $this->eventManager
-        );
-        foreach ($checkoutSubscriber->getListeners() as $listener) {
-            if ($listener->getName() === 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
-                $listener->setPosition(-1);
-            }
-        }
-
-        return $checkoutSubscriber;
     }
 
     /**

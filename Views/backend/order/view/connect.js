@@ -69,37 +69,6 @@ Ext.define('Shopware.apps.Order.view.list.List-Customizing', {
         }
 
         return me.callOverridden(arguments);
-    },
-
-    /**
-     * Formats the customer column.
-     * If no company name is set, the function will return the customer firstName + lastName.
-     * If the order contains some comments (customer, internal, external) the return value
-     * will be extend with a xTemplate which displays a comment image with a tooltip.
-     *
-     * @Override
-     * @param [string] value    - The field value
-     * @param [string] metaData - The model meta data
-     * @param [string] record   - The whole data model
-     * @return [string]
-     */
-    customerColumn: function(value, metaData, record, colIndex, store, view) {
-        var me = this,
-            name,
-            shipping = record.getShipping();
-
-        if (shipping instanceof Ext.data.Store && shipping.first() instanceof Ext.data.Model) {
-            shipping = shipping.first();
-            if (shipping.get('company').length > 0) {
-                name = shipping.get('company');
-            } else {
-                name = Ext.String.trim(shipping.get('firstName') + ' ' + shipping.get('lastName'));
-            }
-
-            return name;
-        }
-
-        return me.callOverridden(arguments);
     }
 });
 //{/block}

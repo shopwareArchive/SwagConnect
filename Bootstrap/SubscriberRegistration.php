@@ -187,7 +187,13 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\Category(
                 $this->container->get('dbal_connection'),
                 $this->createProductStreamService()
-            )
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\Connect(
+                $this->config,
+                $this->SDK,
+                $this->container->get('snippets'),
+                $this->pluginBootstrap->Path()
+            ),
         ];
     }
 
@@ -206,7 +212,6 @@ class SubscriberRegistration
                 $this->SDK,
                 $this->connectFactory->getConnectExport()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Connect(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,

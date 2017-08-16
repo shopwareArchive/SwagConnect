@@ -15,6 +15,8 @@ use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Logger;
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 /**
  * @category  Shopware
  * @package   Shopware\Plugins\SwagConnect
@@ -225,10 +227,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             'Shopware\\Connect',
             $this->Path() . 'Library/Shopware/Connect/'
         );
-        $this->Application()->Loader()->registerNamespace(
-            'Firebase\\JWT',
-            $this->Path() . 'Library/Firebase/JWT/'
-        );
+
         $this->Application()->Loader()->registerNamespace(
             'ShopwarePlugins\\Connect',
             $this->Path()

@@ -12,5 +12,8 @@
   "scripts": {
     "post-install-cmd": "./.githooks/install-hooks.sh",
     "post-update-cmd": "./.githooks/install-hooks.sh"
+  },
+  "require": {
+    "firebase/php-jwt": "^3.0"
   }
 }

@@ -28,7 +28,6 @@
             <exclude>
                 <directory>./Tests</directory>
                 <directory>./vendor</directory>
-                <directory>Library</directory>
             </exclude>
         </whitelist>
     </filter>

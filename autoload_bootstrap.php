@@ -9,15 +9,6 @@ require __DIR__ . '/../../../../../../autoload.php';
 require __DIR__ . '/Bootstrap.php';
 
 $loader = new Enlight_Loader();
-$loader->registerNamespace(
-    'Shopware\\Connect',
-    __DIR__ . '/Library/Shopware/Connect/'
-);
-
-$loader->registerNamespace(
-    'Firebase\\JWT',
-    __DIR__ . '/Library/Firebase/JWT/'
-);
 
 $loader->registerNamespace(
     'ShopwarePlugins\\Connect',

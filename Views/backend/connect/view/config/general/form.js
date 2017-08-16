@@ -107,7 +107,7 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             elements = [];
 
-        if (defaultMarketplace && defaultMarketplace == false) {
+        if (window.defaultMarketplace == false && typeof(window.defaultMarketplace) !== 'undefined') {
             // extended import settings are available
             // only for SEM shops
             elements.push(me.getImportSettingsFieldset());

@@ -1,9 +1,28 @@
 //{namespace name=backend/connect/view/main}
 
+/**
+ * In old SW versions we need to overwrite the whole shipping attribute module
+  */
 //{block name="backend/shipping/model/attribute"}
-//{$smarty.block.parent}
+//{if $useOldConnectShippingAttributeExtension}
+
+Ext.define('Shopware.apps.Shipping.model.Attribute', {
+    extend: 'Ext.data.Model',
+
+    fields: [
+        { name: 'id', type: 'int' },
+        { name: 'dispatchId', type: 'int', useNull: true },
+        { name: 'connectAllowed', type: 'int' }
+    ]
+});
+//{else}
+//    {$smarty.block.parent}
+//{/if}
 //{/block}
 
+/**
+ * This block does not exist before 4.2.0
+ */
 //{block name="backend/shipping/model/attribute/fields" append}
    { name: 'connectAllowed', type: 'int' },
 //{/block}

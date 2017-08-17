@@ -140,13 +140,18 @@ class SubscriberRegistration
                     $this->pluginBootstrap->getBasketHelper(),
                     $this->helper
                 ),
-                $checkoutSubscriber = new Checkout(
+                new Checkout(
                     $this->modelManager,
                     $this->eventManager,
                     $this->connectFactory->getSDK(),
                     $this->connectFactory->getBasketHelper(),
                     $this->connectFactory->getHelper()
-                )
+                ),
+                new \ShopwarePlugins\Connect\Subscribers\Dispatches(
+                    $this->helper,
+                    $this->pluginBootstrap->Path(),
+                    $this->container->get('snippets')
+                ),
             ]);
             // These subscribers are used if the api key is not valid
         } else {
@@ -274,7 +279,6 @@ class SubscriberRegistration
         $subscribers = [
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
             new \ShopwarePlugins\Connect\Subscribers\Javascript(),
             new \ShopwarePlugins\Connect\Subscribers\Less(),
             $this->getLifecycleSubscriber()

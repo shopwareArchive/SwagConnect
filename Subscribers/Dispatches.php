@@ -7,12 +7,45 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\Helper;
+
 /**
  * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
  */
-class Dispatches extends BaseSubscriber
+class Dispatches implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @param Helper $helper
+     * @param string $pluginPath
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     */
+    public function __construct(Helper $helper, $pluginPath, \Shopware_Components_Snippet_Manager $snippetManager)
+    {
+        $this->helper = $helper;
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Shipping' => 'onPostDispatchBackendShipping',
@@ -35,7 +68,7 @@ class Dispatches extends BaseSubscriber
         }
 
         // If no connect products are in basket, don't modify anything
-        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (!$this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
@@ -75,8 +108,9 @@ class Dispatches extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
+
                 $subject->View()->extendsTemplate(
                     'backend/shipping/connect.js'
                 );

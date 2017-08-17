@@ -14,9 +14,12 @@ use Shopware\Connect\Gateway;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class CON4761 extends AbstractConnectUnitTest
 {
+    use DatabaseTestCaseTrait;
+
     /**
      * @var CategoryExtractor
      */

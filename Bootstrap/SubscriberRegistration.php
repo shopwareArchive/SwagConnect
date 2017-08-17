@@ -15,10 +15,12 @@ use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
+use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\ControllerPath;
+use ShopwarePlugins\Connect\Subscribers\CustomerGroup;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -208,6 +210,10 @@ class SubscriberRegistration
                 $this->config,
                 $this->helper
             ),
+            new CustomerGroup(
+                $this->modelManager,
+                new Logger(Shopware()->Db())
+            )
         ];
     }
 
@@ -220,7 +226,6 @@ class SubscriberRegistration
     {
         return [
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,

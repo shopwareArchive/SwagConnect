@@ -150,7 +150,9 @@ class SubscriberRegistration
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
         }
 
-        $this->eventManager->addSubscriber(...$newSubscribers);
+        foreach ($newSubscribers as $newSubscriber) {
+            $this->eventManager->addSubscriber($newSubscriber);
+        }
 
         /** @var $subscriber \ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
         foreach ($subscribers as $subscriber) {

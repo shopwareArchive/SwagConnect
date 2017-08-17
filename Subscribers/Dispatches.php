@@ -9,9 +9,6 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 /**
  * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
- *
- * Class Dispatches
- * @package ShopwarePlugins\Connect\Components\Subscribers
  */
 class Dispatches extends BaseSubscriber
 {
@@ -80,11 +77,6 @@ class Dispatches extends BaseSubscriber
             case 'load':
                 $this->registerMyTemplateDir();
                 $this->registerMySnippets();
-                // The version is needed as in older sw-versions the attribute cannot be extended easily
-                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.0', '<')) {
-                    $subject->View()->assign('useOldConnectShippingAttributeExtension', true);
-                }
-
                 $subject->View()->extendsTemplate(
                     'backend/shipping/connect.js'
                 );

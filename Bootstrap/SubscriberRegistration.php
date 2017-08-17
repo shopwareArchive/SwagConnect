@@ -152,6 +152,8 @@ class SubscriberRegistration
                     $this->pluginBootstrap->Path(),
                     $this->container->get('snippets')
                 ),
+                new \ShopwarePlugins\Connect\Subscribers\Javascript(),
+                new \ShopwarePlugins\Connect\Subscribers\Less()
             ]);
             // These subscribers are used if the api key is not valid
         } else {
@@ -279,8 +281,6 @@ class SubscriberRegistration
         $subscribers = [
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            new \ShopwarePlugins\Connect\Subscribers\Javascript(),
-            new \ShopwarePlugins\Connect\Subscribers\Less(),
             $this->getLifecycleSubscriber()
 
         ];

@@ -8,10 +8,14 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Enlight\Event\SubscriberInterface;
 
-class Javascript extends BaseSubscriber
+class Javascript implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Theme_Compiler_Collect_Plugin_Javascript' =>  'addJsFiles'

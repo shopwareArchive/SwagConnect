@@ -29,9 +29,6 @@ use Shopware\Models\Payment\Payment;
 
 /**
  * Handles the whole checkout manipulation, which is required for the connect checkout
- *
- * Class Checkout
- * @package ShopwarePlugins\Connect\Subscribers
  */
 class Checkout implements SubscriberInterface
 {
@@ -154,7 +151,6 @@ class Checkout implements SubscriberInterface
         $view->hasConnectProduct = $hasConnectProduct;
 
         if ($actionName === 'ajax_add_article') {
-            $view->addTemplateDir('Views/responsive', 'connect');
             $view->extendsTemplate('frontend/connect/ajax_add_article.tpl');
         }
 
@@ -194,8 +190,6 @@ class Checkout implements SubscriberInterface
         if (Shopware()->Config()->get('requirePhoneField')) {
             $this->enforcePhoneNumber($view);
         }
-
-        $view->addTemplateDir('Views/responsive', 'connect');
 
         // Wrap the basket array in order to make it some more readable
         $this->basketHelper->setBasket($view->sBasket);

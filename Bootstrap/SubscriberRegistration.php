@@ -18,10 +18,29 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use ShopwarePlugins\Connect\Subscribers\Article;
+use ShopwarePlugins\Connect\Subscribers\ArticleList;
+use ShopwarePlugins\Connect\Subscribers\BasketWidget;
+use ShopwarePlugins\Connect\Subscribers\Category;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
+use ShopwarePlugins\Connect\Subscribers\Connect;
 use ShopwarePlugins\Connect\Subscribers\ControllerPath;
+use ShopwarePlugins\Connect\Subscribers\CronJob;
 use ShopwarePlugins\Connect\Subscribers\CustomerGroup;
+use ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend;
+use ShopwarePlugins\Connect\Subscribers\Dispatches;
+use ShopwarePlugins\Connect\Subscribers\Javascript;
+use ShopwarePlugins\Connect\Subscribers\Less;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
+use ShopwarePlugins\Connect\Subscribers\OrderDocument;
+use ShopwarePlugins\Connect\Subscribers\PaymentSubscriber;
+use ShopwarePlugins\Connect\Subscribers\ProductStreams;
+use ShopwarePlugins\Connect\Subscribers\Property;
+use ShopwarePlugins\Connect\Subscribers\Search;
+use ShopwarePlugins\Connect\Subscribers\ServiceContainer;
+use ShopwarePlugins\Connect\Subscribers\Supplier;
+use ShopwarePlugins\Connect\Subscribers\TemplateExtension;
+use ShopwarePlugins\Connect\Subscribers\Voucher;
 use Symfony\Component\DependencyInjection\Container;
 
 class SubscriberRegistration
@@ -42,8 +61,6 @@ class SubscriberRegistration
     private $db;
 
     /**
-     * @TODO: Subscribers should not depend on the Bootstrap class. If you see a possible solution refactor it please.
-     *
      * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
     private $pluginBootstrap;
@@ -128,51 +145,14 @@ class SubscriberRegistration
             $verified = false;
         }
 
-        $newSubscribers = $this->getNewSubscribers();
-
-        // Some subscribers may only be used, if the SDK is verified
+        $subscribers = $this->getDefaultSubscribers();
         if ($verified) {
-            $newSubscribers = array_merge($newSubscribers, [
-                new \ShopwarePlugins\Connect\Subscribers\BasketWidget(
-                    $this->pluginBootstrap->getBasketHelper(),
-                    $this->helper
-                ),
-                new Checkout(
-                    $this->modelManager,
-                    $this->eventManager,
-                    $this->connectFactory->getSDK(),
-                    $this->connectFactory->getBasketHelper(),
-                    $this->connectFactory->getHelper()
-                ),
-                new \ShopwarePlugins\Connect\Subscribers\Dispatches(
-                    $this->helper,
-                    $this->pluginBootstrap->Path(),
-                    $this->container->get('snippets')
-                ),
-                new \ShopwarePlugins\Connect\Subscribers\Javascript(),
-                new \ShopwarePlugins\Connect\Subscribers\Less()
-            ]);
-            // These subscribers are used if the api key is not valid
+            $subscribers = array_merge($subscribers, $this->getVerifiedSubscribers());
         } else {
-            $newSubscribers = array_merge($newSubscribers, [
-                new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(
-                    $this->pluginBootstrap->Path(), $this->container->get('db')
-                ),
-                new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(
-                    $this->pluginBootstrap->Path(),
-                    $this->container->get('snippets'),
-                    $this->SDK,
-                    $this->helper
-                ),
-                new \ShopwarePlugins\Connect\Subscribers\Voucher(
-                    $this->helper,
-                    $this->connectFactory->getBasketHelper(),
-                    $this->container->get('snippets')
-                ),
-            ]);
+            $subscribers = array_merge($subscribers, $this->getNotVerifiedSubscribers());
         }
 
-        foreach ($newSubscribers as $newSubscriber) {
+        foreach ($subscribers as $newSubscriber) {
             $this->eventManager->addSubscriber($newSubscriber);
         }
 
@@ -185,39 +165,29 @@ class SubscriberRegistration
     /**
      * @return array
      */
-    private function getNewSubscribers()
+    private function getDefaultSubscribers()
     {
         return [
-            new \ShopwarePlugins\Connect\Subscribers\Article(
+            new Article(
                 new PDO($this->db->getConnection()),
                 $this->modelManager,
                 $this->connectFactory->getConnectExport(),
                 $this->helper,
                 $this->config,
-                $this->connectFactory->getSDK(),
-                $this->container->get('snippets'),
-                $this->pluginBootstrap->Path()
+                $this->connectFactory->getSDK()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\ArticleList(
-                $this->pluginBootstrap->Path(),
-                $this->container->get('snippets')
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Category(
+            new ArticleList(),
+            new Category(
                 $this->container->get('dbal_connection'),
                 $this->createProductStreamService()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Connect(
+            new Connect(
                 $this->config,
                 $this->SDK,
-                $this->container->get('snippets'),
-                $this->pluginBootstrap->Path()
-            ),
-            new ControllerPath(
-                $this->pluginBootstrap->Path(),
-                $this->container,
                 $this->container->get('snippets')
             ),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(
+            new ControllerPath($this->pluginBootstrap->Path()),
+            new CronJob(
                 $this->SDK,
                 $this->connectFactory->getConnectExport(),
                 $this->config,
@@ -228,39 +198,22 @@ class SubscriberRegistration
                 new Logger(Shopware()->Db())
             ),
             $this->getLifecycleSubscriber(),
-            new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\PaymentSubscriber(
-                $this->pluginBootstrap->Path(),
-                $this->helper
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
+            new OrderDocument(),
+            new PaymentSubscriber($this->helper),
+            new ProductStreams(
                 $this->connectFactory->getConnectExport(),
                 new Config($this->modelManager),
                 $this->helper,
-                $this->SDK,
-                $this->pluginBootstrap->Path(),
-                $this->container->get('snippets')
+                $this->SDK
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Property(
-                $this->modelManager,
-                $this->pluginBootstrap->Path(),
-                $this->container->get('snippets')
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Search(
-                $this->modelManager,
-                $this->pluginBootstrap->Path(),
-                $this->container->get('snippets')
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
+            new Property($this->modelManager),
+            new Search($this->modelManager),
+            new ServiceContainer(
                 $this->modelManager,
                 $this->db,
                 $this->container
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Supplier(
-                $this->pluginBootstrap->Path(),
-                $this->container->get('snippets'),
-                $this->container->get('dbal_connection')
-            ),
+            new Supplier($this->container->get('dbal_connection'))
         ];
     }
 
@@ -339,5 +292,49 @@ class SubscriberRegistration
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );
+    }
+
+    /**
+     * @return array
+     */
+    private function getVerifiedSubscribers()
+    {
+        return [
+            new BasketWidget(
+                $this->pluginBootstrap->getBasketHelper(),
+                $this->helper
+            ),
+            new Checkout(
+                $this->modelManager,
+                $this->eventManager,
+                $this->connectFactory->getSDK(),
+                $this->connectFactory->getBasketHelper(),
+                $this->connectFactory->getHelper()
+            ),
+            new Dispatches($this->helper),
+            new Javascript(),
+            new Less()
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getNotVerifiedSubscribers()
+    {
+        return [
+            new DisableConnectInFrontend(
+                $this->container->get('db')
+            ),
+            new TemplateExtension(
+                $this->SDK,
+                $this->helper
+            ),
+            new Voucher(
+                $this->helper,
+                $this->connectFactory->getBasketHelper(),
+                $this->container->get('snippets')
+            )
+        ];
     }
 }

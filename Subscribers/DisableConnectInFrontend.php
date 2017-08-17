@@ -17,21 +17,15 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 class DisableConnectInFrontend implements SubscriberInterface
 {
     /**
-     * @var string
-     */
-    private $pluginPath;
-    /**
      * @var Enlight_Components_Db_Adapter_Pdo_Mysql
      */
     private $db;
 
     /**
-     * @param string $pluginPath
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      */
-    public function __construct($pluginPath, Enlight_Components_Db_Adapter_Pdo_Mysql $db)
+    public function __construct(Enlight_Components_Db_Adapter_Pdo_Mysql $db)
     {
-        $this->pluginPath = $pluginPath;
         $this->db = $db;
     }
 
@@ -57,7 +51,6 @@ class DisableConnectInFrontend implements SubscriberInterface
 
         $article = $view->getAssign('sArticle');
         if ($this->isConnectArticle($article['articleID'])) {
-            $view->addTemplateDir($this->pluginPath . '/Views/responsive', 'connect');
             $view->assign('hideConnect', true);
         }
     }

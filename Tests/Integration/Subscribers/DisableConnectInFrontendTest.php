@@ -20,15 +20,15 @@ class DisableConnectInFrontendTest extends \PHPUnit_Framework_TestCase
 
     public function test_it_can_be_created()
     {
-        $subscriber = new DisableConnectInFrontend('', $this->createMock(\Enlight_Components_Db_Adapter_Pdo_Mysql::class));
+        $subscriber = new DisableConnectInFrontend($this->createMock(\Enlight_Components_Db_Adapter_Pdo_Mysql::class));
 
         $this->assertInstanceOf(DisableConnectInFrontend::class, $subscriber);
         $this->assertInstanceOf(SubscriberInterface::class, $subscriber);
     }
 
-    public function test_it_should_disable_buy_button_in_frontend_if_api_key_is_invalid()
+    public function test_it_should_not_disable_button_if_product_is_not_a_connect_product()
     {
-        $subscriber = new DisableConnectInFrontend('', Shopware()->Container()->get('db'));
+        $subscriber = new DisableConnectInFrontend(Shopware()->Container()->get('db'));
 
         $args = new \Enlight_Event_EventArgs();
 
@@ -46,7 +46,7 @@ class DisableConnectInFrontendTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::SPACHTELMASSE_ARTICLE_ID, $view->getAssign('sArticle')['articleID']);
     }
 
-    public function test_it_should_()
+    public function test_it_should_disable_buy_button_if_api_key_is_invalid()
     {
         /** @var Connection $connection */
         $connection = Shopware()->Container()->get('dbal_connection');
@@ -54,7 +54,7 @@ class DisableConnectInFrontendTest extends \PHPUnit_Framework_TestCase
             'INSERT INTO s_plugin_connect_items (article_id, purchase_price_hash, offer_valid_until, stream, shop_id) VALUES (?, "hash", 123, 1, 1)', [ self::SPACHTELMASSE_ARTICLE_ID]
         );
 
-        $subscriber = new DisableConnectInFrontend('', Shopware()->Container()->get('db'));
+        $subscriber = new DisableConnectInFrontend(Shopware()->Container()->get('db'));
 
         $args = new \Enlight_Event_EventArgs();
         $controllerMock = $this->createMock(\Enlight_Controller_Action::class);

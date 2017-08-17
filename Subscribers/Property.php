@@ -18,27 +18,12 @@ class Property implements SubscriberInterface
     private $modelManager;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @param ModelManager $modelManager
-     * @param string $pluginPath
      */
     public function __construct(
-        ModelManager $modelManager,
-        $pluginPath,
-        \Shopware_Components_Snippet_Manager $snippetManager
+        ModelManager $modelManager
     ) {
         $this->modelManager = $modelManager;
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
     }
 
     /**
@@ -62,9 +47,6 @@ class Property implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $subject->View()->extendsTemplate(
                     'backend/property/view/main/group_grid_connect.js'
                 );

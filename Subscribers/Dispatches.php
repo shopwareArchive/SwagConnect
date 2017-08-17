@@ -21,25 +21,11 @@ class Dispatches implements SubscriberInterface
     private $helper;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @param Helper $helper
-     * @param string $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
-    public function __construct(Helper $helper, $pluginPath, \Shopware_Components_Snippet_Manager $snippetManager)
+    public function __construct(Helper $helper)
     {
         $this->helper = $helper;
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
     }
 
     /**
@@ -108,9 +94,6 @@ class Dispatches implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $subject->View()->extendsTemplate(
                     'backend/shipping/connect.js'
                 );

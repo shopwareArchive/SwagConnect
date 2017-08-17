@@ -23,22 +23,15 @@ class PaymentSubscriber implements SubscriberInterface
     private $paymentService;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
      * @var Helper
      */
     private $helper;
 
     /**
-     * @param string $pluginPath
      * @param Helper $helper
      */
-    public function __construct($pluginPath, Helper $helper)
+    public function __construct(Helper $helper)
     {
-        $this->pluginPath = $pluginPath;
         $this->helper = $helper;
     }
 
@@ -76,8 +69,6 @@ class PaymentSubscriber implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-
                 $subject->View()->extendsTemplate(
                     'backend/payment/model/connect_attribute.js'
                 );

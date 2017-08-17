@@ -21,28 +21,12 @@ class Search implements SubscriberInterface
     private $modelManager;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @param ModelManager $modelManager
-     * @param $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
     public function __construct(
-        ModelManager $modelManager,
-        $pluginPath,
-        \Shopware_Components_Snippet_Manager $snippetManager
+        ModelManager $modelManager
     ) {
         $this->modelManager = $modelManager;
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
     }
 
     /**
@@ -66,9 +50,6 @@ class Search implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'search':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $entity = $request->getParam('entity', null);
 
                 switch ($entity) {

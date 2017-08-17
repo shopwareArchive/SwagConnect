@@ -41,37 +41,21 @@ class ProductStreams implements SubscriberInterface
     private $sdk;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @param ConnectExport $connectExport
      * @param Config $config
      * @param Helper $helper
      * @param SDK $sdk
-     * @param $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
     public function __construct(
         ConnectExport $connectExport,
         Config $config,
         Helper $helper,
-        SDK $sdk,
-        $pluginPath,
-        \Shopware_Components_Snippet_Manager $snippetManager
+        SDK $sdk
     ) {
         $this->connectExport = $connectExport;
         $this->config = $config;
         $this->helper = $helper;
         $this->sdk = $sdk;
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
     }
 
     /**
@@ -146,17 +130,11 @@ class ProductStreams implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'index':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/connect_app.js'
                 );
                 break;
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
                 );

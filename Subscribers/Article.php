@@ -67,24 +67,20 @@ class Article implements SubscriberInterface
     private $sdk;
 
     /**
-     * @var \Shopware_Components_Snippet_Manager
+     * @param Gateway $connectGateway
+     * @param ModelManager $modelManager
+     * @param ConnectExport $connectExport
+     * @param Helper $helper
+     * @param Config $config
+     * @param SDK $sdk
      */
-    private $snippetManager;
-
-    /**
-     * @var string
-     */
-    private $pluginPath;
-
     public function __construct(
         Gateway $connectGateway,
         ModelManager $modelManager,
         ConnectExport $connectExport,
         Helper $helper,
         Config $config,
-        SDK $sdk,
-        \Shopware_Components_Snippet_Manager $snippetManager,
-        $pluginPath
+        SDK $sdk
     ) {
         $this->connectGateway = $connectGateway;
         $this->modelManager = $modelManager;
@@ -92,8 +88,6 @@ class Article implements SubscriberInterface
         $this->helper = $helper;
         $this->config = $config;
         $this->sdk = $sdk;
-        $this->snippetManager = $snippetManager;
-        $this->pluginPath = $pluginPath;
     }
 
     /**
@@ -171,15 +165,11 @@ class Article implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'index':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
                 $subject->View()->extendsTemplate(
                     'backend/article/connect.js'
                 );
                 break;
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
                 $subject->View()->extendsTemplate(
                     'backend/article/model/attribute_connect.js'
                 );

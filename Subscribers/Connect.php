@@ -37,22 +37,15 @@ class Connect implements SubscriberInterface
     private $snippetManager;
 
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
      * @param Config $config
      * @param SDK $sdk
      * @param \Shopware_Components_Snippet_Manager $snippetManager
-     * @param string $pluginPath
      */
-    public function __construct(Config $config, SDK $sdk, \Shopware_Components_Snippet_Manager $snippetManager, $pluginPath)
+    public function __construct(Config $config, SDK $sdk, \Shopware_Components_Snippet_Manager $snippetManager)
     {
         $this->config = $config;
         $this->sdk = $sdk;
         $this->snippetManager = $snippetManager;
-        $this->pluginPath = $pluginPath;
     }
 
     /**
@@ -155,7 +148,6 @@ class Connect implements SubscriberInterface
         $view->marketplaceLogo = $this->config->getConfig('marketplaceLogo', self::MARKETPLACE_LOGO);
         $view->purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
 
-        $view->addTemplateDir($this->pluginPath . 'Views/');
         $view->extendsTemplate('backend/connect/menu_entry.tpl');
     }
 }

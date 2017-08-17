@@ -19,34 +19,21 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 class TemplateExtension implements SubscriberInterface
 {
     /**
-     * @var string
-     */
-    private $pluginPath;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @var SDK
      */
     private $sdk;
+
     /**
      * @var Helper
      */
     private $helper;
 
     /**
-     * @param string $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      * @param SDK $sdk
      * @param Helper $helper
      */
-    public function __construct($pluginPath, \Shopware_Components_Snippet_Manager $snippetManager, SDK $sdk, Helper $helper)
+    public function __construct(SDK $sdk, Helper $helper)
     {
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
         $this->sdk = $sdk;
         $this->helper = $helper;
     }
@@ -59,15 +46,7 @@ class TemplateExtension implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'addConnectTemplateVariablesToDetail',
-            'Enlight_Controller_Action_PostDispatch_Frontend' => 'addConnectStyle'
         ];
-    }
-
-    public function addConnectStyle(\Enlight_Event_EventArgs $args)
-    {
-        /** @var \Enlight_Controller_Action $subject */
-        $subject = $args->getSubject();
-        $subject->View()->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
     }
 
     /**
@@ -83,9 +62,6 @@ class TemplateExtension implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
                 $subject->View()->extendsTemplate(
                     'backend/order/view/connect.js'
                 );
@@ -178,8 +154,6 @@ class TemplateExtension implements SubscriberInterface
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
         $view = $action->View();
-
-        $action->View()->addTemplateDir($this->pluginPath . 'Views/responsive', 'connect');
 
         $articleData = $view->getAssign('sArticle');
         if (empty($articleData['articleID'])) {

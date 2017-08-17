@@ -8,7 +8,6 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ControllerPath implements SubscriberInterface
 {
@@ -18,28 +17,11 @@ class ControllerPath implements SubscriberInterface
     private $pluginPath;
 
     /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @param string $pluginPath
-     * @param ContainerInterface $container
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
-    public function __construct(
-        $pluginPath,
-        ContainerInterface $container,
-        \Shopware_Components_Snippet_Manager $snippetManager
-    ) {
+    public function __construct($pluginPath)
+    {
         $this->pluginPath = $pluginPath;
-        $this->container = $container;
-        $this->snippetManager = $snippetManager;
     }
 
     /**
@@ -67,9 +49,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathBackend(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
         return $this->pluginPath . 'Controllers/Backend/Connect.php';
     }
 
@@ -82,9 +61,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetLastChangesControllerPath(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
         return $this->pluginPath . 'Controllers/Backend/LastChanges.php';
     }
 
@@ -96,9 +72,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathGateway(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
         return $this->pluginPath . '/Controllers/Backend/ConnectGateway.php';
     }
 
@@ -110,8 +83,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathFrontend(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
-
         return $this->pluginPath . 'Controllers/Frontend/Connect.php';
     }
 
@@ -123,8 +94,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathFrontendConnectControllerGateway(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
-
         return $this->pluginPath . 'Controllers/Frontend/ConnectProductGateway.php';
     }
 
@@ -137,9 +106,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathConnectConfig(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
-
         return $this->pluginPath . 'Controllers/Backend/ConnectConfig.php';
     }
 

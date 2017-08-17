@@ -13,28 +13,15 @@ use Enlight\Event\SubscriberInterface;
 class Supplier implements SubscriberInterface
 {
     /**
-     * @var string
-     */
-    private $pluginPath;
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
      * @var Connection
      */
     private $connection;
 
     /**
-     * @param string $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
      * @param Connection $connection
      */
-    public function __construct($pluginPath, \Shopware_Components_Snippet_Manager $snippetManager, Connection $connection)
+    public function __construct(Connection $connection)
     {
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
         $this->connection = $connection;
     }
 
@@ -59,8 +46,6 @@ class Supplier implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . 'Views/');
                 $subject->View()->extendsTemplate(
                     'backend/supplier/list.js'
                 );

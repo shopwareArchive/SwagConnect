@@ -18,25 +18,6 @@ use Enlight\Event\SubscriberInterface;
 class ArticleList implements SubscriberInterface
 {
     /**
-     * @var string
-     */
-    private $pluginPath;
-    /**
-     * @var \Shopware_Components_Snippet_Manager
-     */
-    private $snippetManager;
-
-    /**
-     * @param $pluginPath
-     * @param \Shopware_Components_Snippet_Manager $snippetManager
-     */
-    public function __construct($pluginPath, \Shopware_Components_Snippet_Manager $snippetManager)
-    {
-        $this->pluginPath = $pluginPath;
-        $this->snippetManager = $snippetManager;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public static function getSubscribedEvents()
@@ -85,8 +66,6 @@ class ArticleList implements SubscriberInterface
 
         switch ($request->getActionName()) {
             case 'load':
-                $subject->View()->addTemplateDir($this->pluginPath . '/Views', 'connect');
-                $this->snippetManager->addConfigDir($this->pluginPath . '/Snippets');
                 $subject->View()->extendsTemplate(
                     'backend/article_list/connect.js'
                 );

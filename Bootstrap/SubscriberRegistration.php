@@ -151,6 +151,11 @@ class SubscriberRegistration
             // These subscribers are used if the api key is not valid
         } else {
             $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
+            $newSubscribers = array_merge($newSubscribers,
+                new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(
+                    $this->pluginBootstrap->Path(), $this->container->get('db')
+                )
+            );
         }
 
         foreach ($newSubscribers as $newSubscriber) {
@@ -253,7 +258,6 @@ class SubscriberRegistration
     private function getSubscribersForUnverifiedKeys()
     {
         return [
-            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
             $this->getLifecycleSubscriber()
         ];
     }

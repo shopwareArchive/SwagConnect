@@ -9,7 +9,7 @@ namespace ShopwarePlugins\Connect\Tests\Integration\Subscribers;
 
 use ShopwarePlugins\Connect\Tests\CommandTestCaseTrait;
 
-class CronJob extends \PHPUnit_Framework_TestCase
+class CronJobTest extends \PHPUnit_Framework_TestCase
 {
     use CommandTestCaseTrait;
 

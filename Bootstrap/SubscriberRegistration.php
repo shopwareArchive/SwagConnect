@@ -201,7 +201,13 @@ class SubscriberRegistration
                 $this->pluginBootstrap->Path(),
                 $this->container,
                 $this->container->get('snippets')
-            )
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\CronJob(
+                $this->SDK,
+                $this->connectFactory->getConnectExport(),
+                $this->config,
+                $this->helper
+            ),
         ];
     }
 
@@ -215,10 +221,6 @@ class SubscriberRegistration
         return [
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(
-                $this->SDK,
-                $this->connectFactory->getConnectExport()
-            ),
             new \ShopwarePlugins\Connect\Subscribers\Payment(),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,

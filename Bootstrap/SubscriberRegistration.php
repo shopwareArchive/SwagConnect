@@ -157,7 +157,6 @@ class SubscriberRegistration
             ]);
             // These subscribers are used if the api key is not valid
         } else {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
             $newSubscribers = array_merge($newSubscribers, [
                 new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(
                     $this->pluginBootstrap->Path(), $this->container->get('db')
@@ -225,7 +224,8 @@ class SubscriberRegistration
             new CustomerGroup(
                 $this->modelManager,
                 new Logger(Shopware()->Db())
-            )
+            ),
+            $this->getLifecycleSubscriber()
         ];
     }
 
@@ -260,16 +260,6 @@ class SubscriberRegistration
     }
 
     /**
-     * @return array
-     */
-    private function getSubscribersForUnverifiedKeys()
-    {
-        return [
-            $this->getLifecycleSubscriber()
-        ];
-    }
-
-    /**
      * These subscribers will only be used, once the user has verified his api key
      * This will prevent the users from having shopware Connect extensions in their frontend
      * even if they cannot use shopware Connect due to the missing / wrong api key
@@ -281,7 +271,6 @@ class SubscriberRegistration
         $subscribers = [
             new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
             new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            $this->getLifecycleSubscriber()
 
         ];
 
@@ -312,7 +301,11 @@ class SubscriberRegistration
         if (!$this->lifecycle) {
             $this->lifecycle = new Lifecycle(
                 $this->modelManager,
-                $this->config->getConfig('autoUpdateProducts', 1)
+                $this->config->getConfig('autoUpdateProducts', 1),
+                $this->helper,
+                $this->SDK,
+                $this->config,
+                $this->connectFactory->getConnectExport()
             );
         }
 

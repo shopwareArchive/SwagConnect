@@ -18,6 +18,7 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
+use ShopwarePlugins\Connect\Subscribers\ControllerPath;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -196,6 +197,11 @@ class SubscriberRegistration
                 $this->container->get('snippets'),
                 $this->pluginBootstrap->Path()
             ),
+            new ControllerPath(
+                $this->pluginBootstrap->Path(),
+                $this->container,
+                $this->container->get('snippets')
+            )
         ];
     }
 
@@ -208,7 +214,6 @@ class SubscriberRegistration
     {
         return [
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\ControllerPath(),
             new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
             new \ShopwarePlugins\Connect\Subscribers\CronJob(
                 $this->SDK,

@@ -7,23 +7,45 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-/**
- * Register some controllers
- *
- * Class ControllerPath
- * @package ShopwarePlugins\Connect\Components\Subscribers
- */
-class ControllerPath extends BaseSubscriber
+use Enlight\Event\SubscriberInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+class ControllerPath implements SubscriberInterface
 {
-    public function __construct()
-    {
-        parent::__construct();
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @param string $pluginPath
+     * @param ContainerInterface $container
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     */
+    public function __construct(
+        $pluginPath,
+        ContainerInterface $container,
+        \Shopware_Components_Snippet_Manager $snippetManager
+    ) {
+        $this->pluginPath = $pluginPath;
+        $this->container = $container;
+        $this->snippetManager = $snippetManager;
     }
 
     /**
      * @return array
      */
-    public function getSubscribedEvents()
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectGateway' => 'onGetControllerPathGateway',
@@ -32,8 +54,7 @@ class ControllerPath extends BaseSubscriber
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_Connect' => 'onGetControllerPathBackend',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_LastChanges' => 'onGetLastChangesControllerPath',
             'Enlight_Controller_Dispatcher_ControllerPath_Backend_ConnectConfig' => 'onGetControllerPathConnectConfig',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport',
-            'Enlight_Controller_Dispatcher_ControllerPath_Backend_ShippingGroups' => 'onGetControllerPathShippingGroups'
+            'Enlight_Controller_Dispatcher_ControllerPath_Backend_Import' => 'onGetControllerPathImport'
         ];
     }
 
@@ -46,10 +67,10 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathBackend(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
-        $this->registerMySnippets();
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
-        return $this->Path() . 'Controllers/Backend/Connect.php';
+        return $this->pluginPath . 'Controllers/Backend/Connect.php';
     }
 
     /**
@@ -61,10 +82,10 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetLastChangesControllerPath(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
-        $this->registerMySnippets();
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
-        return $this->Path() . 'Controllers/Backend/LastChanges.php';
+        return $this->pluginPath . 'Controllers/Backend/LastChanges.php';
     }
 
     /**
@@ -75,7 +96,10 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathGateway(\Enlight_Event_EventArgs $args)
     {
-        return $this->Path() . '/Controllers/Backend/ConnectGateway.php';
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
+
+        return $this->pluginPath . '/Controllers/Backend/ConnectGateway.php';
     }
 
     /**
@@ -86,9 +110,9 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathFrontend(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
 
-        return $this->Path() . 'Controllers/Frontend/Connect.php';
+        return $this->pluginPath . 'Controllers/Frontend/Connect.php';
     }
 
     /**
@@ -99,9 +123,9 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathFrontendConnectControllerGateway(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
 
-        return $this->Path() . 'Controllers/Frontend/ConnectProductGateway.php';
+        return $this->pluginPath . 'Controllers/Frontend/ConnectProductGateway.php';
     }
 
     /**
@@ -113,10 +137,10 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathConnectConfig(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
-        $this->registerMySnippets();
+        $this->container->get('Template')->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+        $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
-        return $this->Path() . 'Controllers/Backend/ConnectConfig.php';
+        return $this->pluginPath . 'Controllers/Backend/ConnectConfig.php';
     }
 
     /**
@@ -128,14 +152,6 @@ class ControllerPath extends BaseSubscriber
      */
     public function onGetControllerPathImport(\Enlight_Event_EventArgs $args)
     {
-        return $this->Path() . 'Controllers/Backend/Import.php';
-    }
-
-    public function onGetControllerPathShippingGroups(\Enlight_Event_EventArgs $args)
-    {
-        $this->registerMyTemplateDir();
-        $this->registerMySnippets();
-
-        return $this->Path() . 'Controllers/Backend/ShippingGroups.php';
+        return $this->pluginPath . 'Controllers/Backend/Import.php';
     }
 }

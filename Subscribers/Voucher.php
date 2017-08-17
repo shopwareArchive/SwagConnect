@@ -7,15 +7,46 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\BasketHelper;
+use ShopwarePlugins\Connect\Components\Helper;
+
 /**
  * Handle vouchers, remove discounts and don't allow percentaged vouchers for connect baskets
- *
- * Class Voucher
- * @package ShopwarePlugins\Connect\Subscribers
  */
-class Voucher extends BaseSubscriber
+class Voucher implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @var BasketHelper
+     */
+    private $basketHelper;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @param Helper $helper
+     * @param BasketHelper $basketHelper
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     */
+    public function __construct(Helper $helper, BasketHelper $basketHelper, \Shopware_Components_Snippet_Manager $snippetManager)
+    {
+        $this->helper = $helper;
+        $this->basketHelper = $basketHelper;
+        $this->snippetManager = $snippetManager;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware_Modules_Basket_AddVoucher_Start' => 'preventPercentagedVoucher',
@@ -34,13 +65,13 @@ class Voucher extends BaseSubscriber
      */
     public function removeDiscount(\Enlight_Event_EventArgs $args)
     {
-        $message = Shopware()->Snippets()->getNamespace('frontend/connect/checkout')->get(
+        $message = $this->snippetManager->getNamespace('frontend/connect/checkout')->get(
             'noPercentagedDiscountsAllowed',
             'In Kombination mit connect-Produkten sind keine prozentualen Rabatte möglich.',
             true
         );
 
-        if ($this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if ($this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             $stmt = Shopware()->Db()->query(
                 'DELETE FROM s_order_basket WHERE sessionID=? AND modus=3',
                 [Shopware()->SessionID()]
@@ -65,28 +96,26 @@ class Voucher extends BaseSubscriber
     {
         $code = $args->getCode();
 
-        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (!$this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             return null;
         }
 
-        $basketHelper = $this->getBasketHelper();
-
-        $message = Shopware()->Snippets()->getNamespace('frontend/connect/checkout')->get(
+        $message = $this->snippetManager->getNamespace('frontend/connect/checkout')->get(
             'noPercentagedVoucherAllowed',
             'In Kombination mit connect-Produkten sind keine prozentualen Gutscheine möglich.',
             true
         );
 
         // Exclude general percentaged vouchers
-        $result = $basketHelper->findPercentagedVouchers($code);
+        $result = $this->basketHelper->findPercentagedVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
 
             return true;
         }
 
-        // Exclude individual percentaged vouchers
-        $result = $basketHelper->findPercentagedIndividualVouchers($code);
+        // Exclude $this->basketHelper percentaged vouchers
+        $result = $this->basketHelper->findPercentagedIndividualVouchers($code);
         if (!empty($result)) {
             Shopware()->Template()->assign('sVoucherError', $message);
 

@@ -7,11 +7,10 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-/**
- * Class Payment
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Payment extends BaseSubscriber
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\Helper;
+
+class PaymentSubscriber implements SubscriberInterface
 {
     /**
      * @var \Shopware\Models\Payment\Repository
@@ -24,9 +23,29 @@ class Payment extends BaseSubscriber
     private $paymentService;
 
     /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @param string $pluginPath
+     * @param Helper $helper
+     */
+    public function __construct($pluginPath, Helper $helper)
+    {
+        $this->pluginPath = $pluginPath;
+        $this->helper = $helper;
+    }
+
+    /**
      * @return array
      */
-    public function getSubscribedEvents()
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Payment' => 'extendBackendPayment',
@@ -40,7 +59,7 @@ class Payment extends BaseSubscriber
     public function getPaymentService()
     {
         if ($this->paymentService == null) {
-            $this->paymentService = $this->Application()->Container()->get('swagconnect.payment_service');
+            $this->paymentService = Shopware()->Container()->get('swagconnect.payment_service');
         }
 
         return $this->paymentService;
@@ -57,7 +76,7 @@ class Payment extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
 
                 $subject->View()->extendsTemplate(
                     'backend/payment/model/connect_attribute.js'
@@ -91,23 +110,23 @@ class Payment extends BaseSubscriber
         $paymentMeans = $args->getReturn();
 
         $sessionId = Shopware()->SessionID();
-        $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($sessionId);
+        $hasConnectProduct = $this->helper->hasBasketConnectProducts($sessionId);
 
         if ($hasConnectProduct === true) {
             foreach ($paymentMeans as $key => &$payment) {
-                /** @var \Shopware\Models\Payment\Payment $model */
-                $model = $this->getPaymentRepository()->find($payment['id']);
-                if (!$model) {
+                /** @var \Shopware\Models\Payment\Payment $payment */
+                $payment = $this->getPaymentRepository()->find($payment['id']);
+                if (!$payment) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                if (!$model->getAttribute()) {
+                if (!$payment->getAttribute()) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                $attribute = $model->getAttribute();
+                $attribute = $payment->getAttribute();
                 if (method_exists($attribute, 'getConnectIsAllowed') === true
                     && $attribute->getConnectIsAllowed() == 0) {
                     unset($paymentMeans[$key]);

@@ -619,7 +619,7 @@ class Checkout implements SubscriberInterface
         }
 
         $paymentRepository = Shopware()->Models()->getRepository(Payment::class);
-        /** @var Payment $payment */
+        /** @var PaymentSubscriber $payment */
         $payment = $paymentRepository->find($paymentId);
 
         if (!$payment) {

@@ -8,43 +8,76 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Enlight\Event\SubscriberInterface;
+use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Bundle\SearchBundleDBAL\ConditionHandler\SupplierConditionHandler;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Helper;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
-class ProductStreams extends BaseSubscriber
+class ProductStreams implements SubscriberInterface
 {
-    /** @var ConnectExport */
+    /**
+     * @var ConnectExport
+     */
     protected $connectExport;
 
-    /** @var Config */
+    /**
+     * @var Config
+     */
     protected $config;
 
-    /** @var Helper */
+    /**
+     * @var Helper
+     */
     protected $helper;
 
     /**
-     * ProductStreams constructor.
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
      * @param ConnectExport $connectExport
      * @param Config $config
      * @param Helper $helper
+     * @param SDK $sdk
+     * @param $pluginPath
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
     public function __construct(
         ConnectExport $connectExport,
         Config $config,
-        Helper $helper
-
+        Helper $helper,
+        SDK $sdk,
+        $pluginPath,
+        \Shopware_Components_Snippet_Manager $snippetManager
     ) {
-        parent::__construct();
         $this->connectExport = $connectExport;
         $this->config = $config;
         $this->helper = $helper;
+        $this->sdk = $sdk;
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Backend_ProductStream' => 'preProductStream',
@@ -53,9 +86,12 @@ class ProductStreams extends BaseSubscriber
         ];
     }
 
+    /**
+     * @return ProductStreamService
+     */
     public function getProductStreamService()
     {
-        return $this->Application()->Container()->get('swagconnect.product_stream_service');
+        return Shopware()->Container()->get('swagconnect.product_stream_service');
     }
 
     public function preProductStream(\Enlight_Event_EventArgs $args)
@@ -73,7 +109,7 @@ class ProductStreams extends BaseSubscriber
                 if ($productStreamService->isStreamExported($streamId)) {
                     $assignments = $productStreamService->getStreamAssignments($streamId);
                     $this->removeArticlesFromStream($streamId, $assignments, $assignments->getArticleIds());
-                    $this->getSDK()->recordStreamDelete($streamId);
+                    $this->sdk->recordStreamDelete($streamId);
                     $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_DELETE);
                 }
                 break;
@@ -110,15 +146,16 @@ class ProductStreams extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'index':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
+
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/connect_app.js'
                 );
                 break;
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
                 $subject->View()->extendsTemplate(
                     'backend/product_stream/view/selected_list/connect_product.js'
@@ -182,32 +219,32 @@ class ProductStreams extends BaseSubscriber
     }
 
     /**
-     * @param $streamId
-     * @param $assignments
+     * @param int $streamId
+     * @param ProductStreamsAssignments $assignments
      * @param array $articleIds
      */
     private function removeArticlesFromStream($streamId, $assignments, array $articleIds)
     {
         $removedRecords = [];
         $productStreamService = $this->getProductStreamService();
-        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $sourceIds = $this->helper->getArticleSourceIds($articleIds);
         $items = $this->connectExport->fetchConnectItems($sourceIds, false);
 
         foreach ($items as $item) {
             if ($productStreamService->allowToRemove($assignments, $streamId, $item['articleId'])) {
-                $this->getSDK()->recordDelete($item['sourceId']);
+                $this->sdk->recordDelete($item['sourceId']);
                 $removedRecords[] = $item['sourceId'];
             } else {
                 //updates items with the new streams
                 $streamCollection = $assignments->getStreamsByArticleId($item['articleId']);
-                if (!$this->getHelper()->isMainVariant($item['sourceId']) || !$streamCollection) {
+                if (!$this->helper->isMainVariant($item['sourceId']) || !$streamCollection) {
                     continue;
                 }
 
                 //removes current stream from the collection
                 unset($streamCollection[$streamId]);
 
-                $this->getSDK()->recordStreamAssignment(
+                $this->sdk->recordStreamAssignment(
                     $item['sourceId'],
                     $streamCollection,
                     $item['groupId']

@@ -7,27 +7,44 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 
-/**
- * Class Property
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Property extends BaseSubscriber
+class Property implements SubscriberInterface
 {
     /**
      * @var ModelManager
      */
     private $modelManager;
 
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @param ModelManager $modelManager
+     * @param string $pluginPath
+     */
     public function __construct(
-        ModelManager $modelManager
+        ModelManager $modelManager,
+        $pluginPath,
+        \Shopware_Components_Snippet_Manager $snippetManager
     ) {
-        parent::__construct();
         $this->modelManager = $modelManager;
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Property' => 'extendBackendProperty',
@@ -45,8 +62,8 @@ class Property extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
                 $subject->View()->extendsTemplate(
                     'backend/property/view/main/group_grid_connect.js'

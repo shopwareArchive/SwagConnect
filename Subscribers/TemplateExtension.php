@@ -7,18 +7,54 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * Loads various template extensions
- *
- * Class TemplateExtension
- * @package ShopwarePlugins\Connect\Subscribers
  */
-class TemplateExtension extends BaseSubscriber
+class TemplateExtension implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @var SDK
+     */
+    private $sdk;
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @param string $pluginPath
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     * @param SDK $sdk
+     * @param Helper $helper
+     */
+    public function __construct($pluginPath, \Shopware_Components_Snippet_Manager $snippetManager, SDK $sdk, Helper $helper)
+    {
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
+        $this->sdk = $sdk;
+        $this->helper = $helper;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onPostDispatchBackendOrder',
@@ -29,7 +65,9 @@ class TemplateExtension extends BaseSubscriber
 
     public function addConnectStyle(\Enlight_Event_EventArgs $args)
     {
-        $this->registerMyTemplateDir();
+        /** @var \Enlight_Controller_Action $subject */
+        $subject = $args->getSubject();
+        $subject->View()->addTemplateDir($this->pluginPath . 'Views/responsive/', 'connect');
     }
 
     /**
@@ -45,8 +83,9 @@ class TemplateExtension extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
+
                 $subject->View()->extendsTemplate(
                     'backend/order/view/connect.js'
                 );
@@ -77,8 +116,6 @@ class TemplateExtension extends BaseSubscriber
      */
     private function markConnectOrders($data)
     {
-        $sdk = $this->getSDK();
-
         $orderIds = array_map(function ($orderView) {
             return (int) $orderView['id'];
         }, $data);
@@ -120,7 +157,7 @@ class TemplateExtension extends BaseSubscriber
             $data[$idx]['connectOrderId'] = $result['connect_order_id'];
 
             if (!isset($shopNames[$result['connect_shop_id']])) {
-                $shopNames[$result['connect_shop_id']] = $sdk->getShop($result['connect_shop_id'])->name;
+                $shopNames[$result['connect_shop_id']] = $this->sdk->getShop($result['connect_shop_id'])->name;
             }
 
             $data[$idx]['connectShop'] = $shopNames[$result['connect_shop_id']];
@@ -141,22 +178,20 @@ class TemplateExtension extends BaseSubscriber
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
         $view = $action->View();
-        $sdk = $this->getSDK();
-        $helper = $this->getHelper();
 
-        $this->registerMyTemplateDir();
+        $action->View()->addTemplateDir($this->pluginPath . 'Views/responsive', 'connect');
 
         $articleData = $view->getAssign('sArticle');
         if (empty($articleData['articleID'])) {
             return;
         }
 
-        if ($helper->isRemoteArticleDetail($articleData['articleDetailsID']) === false) {
+        if ($this->helper->isRemoteArticleDetail($articleData['articleDetailsID']) === false) {
             return;
         }
 
-        $shopProductId = $helper->getShopProductId($articleData['articleDetailsID']);
-        $products = $helper->getRemoteProducts([$shopProductId->sourceId], $shopProductId->shopId);
+        $shopProductId = $this->helper->getShopProductId($articleData['articleDetailsID']);
+        $products = $this->helper->getRemoteProducts([$shopProductId->sourceId], $shopProductId->shopId);
 
         if (empty($products)) {
             return;
@@ -172,7 +207,7 @@ class TemplateExtension extends BaseSubscriber
             $product->$name = round($product->$name, 2);
         }
 
-        $shop = $sdk->getShop($product->shopId);
+        $shop = $this->sdk->getShop($product->shopId);
 
         $modelsManager = Shopware()->Models();
         /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */

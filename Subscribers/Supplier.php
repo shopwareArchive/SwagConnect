@@ -7,15 +7,50 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-class Supplier extends BaseSubscriber
+use Doctrine\DBAL\Connection;
+use Enlight\Event\SubscriberInterface;
+
+class Supplier implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var string
+     */
+    private $pluginPath;
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @param string $pluginPath
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     * @param Connection $connection
+     */
+    public function __construct($pluginPath, \Shopware_Components_Snippet_Manager $snippetManager, Connection $connection)
+    {
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
+        $this->connection = $connection;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Supplier' => 'extentBackendSupplier',
         ];
     }
 
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     */
     public function extentBackendSupplier(\Enlight_Event_EventArgs $args)
     {
         /** @var $subject \Enlight_Controller_Action */
@@ -24,8 +59,8 @@ class Supplier extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Views/');
                 $subject->View()->extendsTemplate(
                     'backend/supplier/list.js'
                 );
@@ -40,6 +75,10 @@ class Supplier extends BaseSubscriber
         }
     }
 
+    /**
+     * @param array $suppliers
+     * @return array
+     */
     protected function markConnectSuppliers($suppliers)
     {
         $supplierIds = array_map(function ($row) {
@@ -55,11 +94,14 @@ class Supplier extends BaseSubscriber
         return $suppliers;
     }
 
+    /**
+     * @param array $supplierIds
+     * @return array
+     */
     protected function getConnectSuppliers($supplierIds)
     {
-        /** @var Doctrine\DBAL\Connection $conn */
-        $conn = Shopware()->Models()->getConnection();
-        $builder = $conn->createQueryBuilder();
+        /** @var \Doctrine\DBAL\Connection $conn */
+        $builder = $this->connection->createQueryBuilder();
         $builder->select('supplierID')
             ->from('s_articles_supplier_attributes', 'sa')
             ->where('sa.supplierID IN (:supplierIds)')

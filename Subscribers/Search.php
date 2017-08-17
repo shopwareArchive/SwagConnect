@@ -7,30 +7,48 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Property\Group;
 use Shopware\Models\Property\Option;
 use Shopware\Models\Property\Value;
 
-/**
- * Class Property
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Search extends BaseSubscriber
+class Search implements SubscriberInterface
 {
     /**
      * @var ModelManager
      */
     private $modelManager;
 
+    /**
+     * @var string
+     */
+    private $pluginPath;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    private $snippetManager;
+
+    /**
+     * @param ModelManager $modelManager
+     * @param $pluginPath
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     */
     public function __construct(
-        ModelManager $modelManager
+        ModelManager $modelManager,
+        $pluginPath,
+        \Shopware_Components_Snippet_Manager $snippetManager
     ) {
-        parent::__construct();
         $this->modelManager = $modelManager;
+        $this->pluginPath = $pluginPath;
+        $this->snippetManager = $snippetManager;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Search' => 'extendBackendPropertySearch',
@@ -48,8 +66,8 @@ class Search extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'search':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
+                $subject->View()->addTemplateDir($this->pluginPath . 'Views/', 'connect');
+                $this->snippetManager->addConfigDir($this->pluginPath . 'Snippets/');
 
                 $entity = $request->getParam('entity', null);
 
@@ -72,7 +90,12 @@ class Search extends BaseSubscriber
         }
     }
 
-    public function markRecordsAsConnect($data, $modelName)
+    /**
+     * @param array $data
+     * @param string $modelName
+     * @return array
+     */
+    private function markRecordsAsConnect($data, $modelName)
     {
         $result = [];
 

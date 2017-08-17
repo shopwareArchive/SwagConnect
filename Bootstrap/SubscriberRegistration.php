@@ -128,13 +128,10 @@ class SubscriberRegistration
             $verified = false;
         }
 
-        $subscribers = $this->getDefaultSubscribers();
         $newSubscribers = $this->getNewSubscribers();
 
         // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
-
             $newSubscribers = array_merge($newSubscribers, [
                 new \ShopwarePlugins\Connect\Subscribers\BasketWidget(
                     $this->pluginBootstrap->getBasketHelper(),
@@ -160,18 +157,23 @@ class SubscriberRegistration
             $newSubscribers = array_merge($newSubscribers, [
                 new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(
                     $this->pluginBootstrap->Path(), $this->container->get('db')
-                )
+                ),
+                new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(
+                    $this->pluginBootstrap->Path(),
+                    $this->container->get('snippets'),
+                    $this->SDK,
+                    $this->helper
+                ),
+                new \ShopwarePlugins\Connect\Subscribers\Voucher(
+                    $this->helper,
+                    $this->connectFactory->getBasketHelper(),
+                    $this->container->get('snippets')
+                ),
             ]);
         }
 
         foreach ($newSubscribers as $newSubscriber) {
             $this->eventManager->addSubscriber($newSubscriber);
-        }
-
-        /** @var $subscriber \ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriber->setBootstrap($this->pluginBootstrap);
-            $this->eventManager->registerSubscriber($subscriber);
         }
 
         $this->modelManager->getEventManager()->addEventListener(
@@ -225,56 +227,41 @@ class SubscriberRegistration
                 $this->modelManager,
                 new Logger(Shopware()->Db())
             ),
-            $this->getLifecycleSubscriber()
-        ];
-    }
-
-    /**
-     * Default subscribers can safely be used, even if the api key wasn't verified, yet
-     *
-     * @return array
-     */
-    private function getDefaultSubscribers()
-    {
-        return [
+            $this->getLifecycleSubscriber(),
             new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\Payment(),
+            new \ShopwarePlugins\Connect\Subscribers\PaymentSubscriber(
+                $this->pluginBootstrap->Path(),
+                $this->helper
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
+                $this->connectFactory->getConnectExport(),
+                new Config($this->modelManager),
+                $this->helper,
+                $this->SDK,
+                $this->pluginBootstrap->Path(),
+                $this->container->get('snippets')
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\Property(
+                $this->modelManager,
+                $this->pluginBootstrap->Path(),
+                $this->container->get('snippets')
+            ),
+            new \ShopwarePlugins\Connect\Subscribers\Search(
+                $this->modelManager,
+                $this->pluginBootstrap->Path(),
+                $this->container->get('snippets')
+            ),
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,
                 $this->db,
                 $this->container
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Supplier(),
-            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
-                $this->connectFactory->getConnectExport(),
-                new Config($this->modelManager),
-                $this->helper
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Property(
-                $this->modelManager
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\Search(
-                $this->modelManager
+            new \ShopwarePlugins\Connect\Subscribers\Supplier(
+                $this->pluginBootstrap->Path(),
+                $this->container->get('snippets'),
+                $this->container->get('dbal_connection')
             ),
         ];
-    }
-
-    /**
-     * These subscribers will only be used, once the user has verified his api key
-     * This will prevent the users from having shopware Connect extensions in their frontend
-     * even if they cannot use shopware Connect due to the missing / wrong api key
-     *
-     * @return array
-     */
-    private function getSubscribersForVerifiedKeys()
-    {
-        $subscribers = [
-            new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
-            new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-
-        ];
-
-        return $subscribers;
     }
 
     /**

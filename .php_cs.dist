@@ -1,6 +1,6 @@
 <?php
 $finder = PhpCsFixer\Finder::create()
-    ->exclude([ 'Library' ])
+    ->exclude([ 'vendor' ])
     ->in(__DIR__)
 ;
 

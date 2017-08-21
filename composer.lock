@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "235344347dd44dad6c1c9a449cd1aa52",
+    "content-hash": "2baf395e244d74e9d2f3624693517f20",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -48,6 +48,44 @@
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
             "time": "2015-07-22T18:31:08+00:00"
+        },
+        {
+            "name": "shopware/connect-sdk",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shopware/Connect-SDK.git",
+                "reference": "941901e3a922dc742c917ba9393f8d524a252e42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/941901e3a922dc742c917ba9393f8d524a252e42",
+                "reference": "941901e3a922dc742c917ba9393f8d524a252e42",
+                "shasum": ""
+            },
+            "require-dev": {
+                "behat/behat": "2.4.*@stable",
+                "phake/phake": "@stable",
+                "phpunit/phpunit": ">=4.8.35 <6@stable"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Shopware\\Connect": [
+                        "src/main",
+                        "test"
+                    ]
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "PHP SDK to integrate your shop with Shopware Connect",
+            "support": {
+                "source": "https://github.com/shopware/Connect-SDK/tree/master",
+                "issues": "https://github.com/shopware/Connect-SDK/issues"
+            },
+            "time": "2017-07-21 05:57:48"
         }
     ],
     "packages-dev": [
@@ -83,6 +121,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "shopware/connect-sdk": 20,
         "shopware/plugin-dev-tools": 20
     },
     "prefer-stable": false,

@@ -224,11 +224,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     public function registerMyLibrary()
     {
         $this->Application()->Loader()->registerNamespace(
-            'Shopware\\Connect',
-            $this->Path() . 'Library/Shopware/Connect/'
-        );
-
-        $this->Application()->Loader()->registerNamespace(
             'ShopwarePlugins\\Connect',
             $this->Path()
         );

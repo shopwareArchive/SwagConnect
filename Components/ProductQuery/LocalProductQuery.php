@@ -165,6 +165,7 @@ class LocalProductQuery extends BaseProductQuery
             'u.unit',
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
+            'd.packUnit as packageUnit',
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
@@ -277,10 +278,11 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailId']);
         unset($row['detailKind']);
 
-        if ((array_key_exists('unit', $row['attributes']) && $row['attributes']['unit'])
-            && (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity'])
-            && (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])
-        ) {
+        if (
+            (array_key_exists('unit', $row['attributes']) && $row['attributes']['unit']) &&
+            (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity']) &&
+            (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity']))
+        {
             //Map local unit to connect unit
             if ($row['attributes']['unit']) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
@@ -296,7 +298,9 @@ class LocalProductQuery extends BaseProductQuery
             $row['attributes']['quantity'] = null;
             $row['attributes']['ref_quantity'] = null;
         }
-
+        if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])){
+           $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT] = null;
+        }
         $product = new Product($row);
 
         $this->eventManager->notify(
@@ -398,13 +402,25 @@ class LocalProductQuery extends BaseProductQuery
         $mappings = $this->marketplaceGateway->getMappings();
 
         return array_merge(
-            array_filter(array_combine(array_map(function ($mapping) {
-                return $mapping['shopwareAttributeKey'];
-            }, $mappings), array_map(function ($mapping) {
-                return $mapping['attributeKey'];
-            }, $mappings)), function ($mapping) {
-                return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
-            }),
+            array_filter(
+                array_combine(
+                    array_map(
+                        function ($mapping) {
+                            return $mapping['shopwareAttributeKey'];
+                            },
+                        $mappings
+                    ),
+                    array_map(
+                        function ($mapping) {
+                            return $mapping['attributeKey'];
+                            },
+                        $mappings
+                    )
+                ),
+                function ($mapping) {
+                    return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
+                }
+            ),
             $this->attributeMapping
         );
     }

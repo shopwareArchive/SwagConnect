@@ -32,7 +32,8 @@ abstract class BaseProductQuery
         'weight' => Product::ATTRIBUTE_WEIGHT,
         'unit' => Product::ATTRIBUTE_UNIT,
         'referenceUnit' => 'ref_quantity',
-        'purchaseUnit' => 'quantity'
+        'purchaseUnit' => 'quantity',
+        'packageUnit' => Product::ATTRIBUTE_PACKAGEUNIT
     ];
 
     /**

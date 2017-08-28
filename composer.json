@@ -3,17 +3,22 @@
   "require-dev": {
     "shopware/plugin-dev-tools": "dev-master"
   },
+  "require": {
+    "firebase/php-jwt": "^3.0",
+    "shopware/connect-sdk": "dev-master"
+  },
   "repositories": [
     {
       "type": "vcs",
       "url": "https://github.com/shopwareLabs/plugin-dev-tools"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/shopware/Connect-SDK"
     }
   ],
   "scripts": {
     "post-install-cmd": "./.githooks/install-hooks.sh",
     "post-update-cmd": "./.githooks/install-hooks.sh"
-  },
-  "require": {
-    "firebase/php-jwt": "^3.0"
   }
 }

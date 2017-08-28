@@ -446,9 +446,9 @@ class Update
                 );
                 $result = $this->db->query('SELECT pcc.id, pcc.local_category_id
                                 FROM s_plugin_connect_categories pcc
-                                WHERE pcc.local_category_id is not null');
+                                WHERE pcc.local_category_id ID NOT NULL');
 
-                while ($row=$result->fetch()) {
+                while ($row = $result->fetch()) {
                     $this->db->query(
                         'INSERT INTO `s_plugin_connect_categories_to_local_categories`
                         (`remote_category_id`, `local_category_id`)

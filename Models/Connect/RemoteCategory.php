@@ -9,6 +9,7 @@ namespace Shopware\CustomModels\Connect;
 
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\ModelEntity;
+use Shopware\Models\Category\Category;
 
 /**
  * Describes Shopware Connect categories
@@ -115,7 +116,7 @@ class RemoteCategory extends ModelEntity
     /**
      * @param \Shopware\Models\Category\Category $localCategory
      */
-    public function addLocalCategory($localCategory)
+    public function addLocalCategory(Category $localCategory)
     {
         if (!$this->localCategories->contains($localCategory)) {
             $this->localCategories->add($localCategory);
@@ -125,7 +126,7 @@ class RemoteCategory extends ModelEntity
     /**
      * @param \Shopware\Models\Category\Category $localCategory
      */
-    public function removeLocalCategory($localCategory)
+    public function removeLocalCategory(Category $localCategory)
     {
         $this->localCategories->remove($localCategory);
     }

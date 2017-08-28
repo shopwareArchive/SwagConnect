@@ -446,7 +446,7 @@ class Update
                 );
                 $result = $this->db->query('SELECT pcc.id, pcc.local_category_id
                                 FROM s_plugin_connect_categories pcc
-                                WHERE pcc.local_category_id ID NOT NULL');
+                                WHERE pcc.local_category_id IS NOT NULL');
 
                 while ($row = $result->fetch()) {
                     $this->db->query(

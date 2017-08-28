@@ -41,20 +41,20 @@ class RemoteCategory extends ModelEntity
     protected $label;
 
     /**
-     * @var int
-     * @ORM\Column(name="local_category_id", type="integer", nullable=true)
-     */
-    protected $localCategoryId;
-
-    /**
-     * @var \Shopware\Models\Category\Category
+     * @var \Doctrine\Common\Collections\ArrayCollection
      *
-     * @ORM\OneToOne(targetEntity="Shopware\Models\Category\Category")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="local_category_id", referencedColumnName="id")
-     * })
+     * @ORM\ManyToMany(targetEntity="Shopware\Models\Category\Category")
+     * @ORM\JoinTable(name="s_plugin_connect_categories_to_local_categories",
+     *      joinColumns={@ORM\JoinColumn(name="remote_category_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="local_category_id", referencedColumnName="id")}
+     *      )
      */
-    protected $localCategory;
+    protected $localCategories;
+
+    public function __construct()
+    {
+        $this->localCategories = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * @return int
@@ -97,34 +97,36 @@ class RemoteCategory extends ModelEntity
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function getLocalCategoryId()
+    public function hasLocalCategories()
     {
-        return $this->localCategoryId;
+        return !$this->localCategories->isEmpty();
     }
 
     /**
-     * @param int $id
+     * @return array
      */
-    public function setLocalCategoryId($id)
+    public function getLocalCategories()
     {
-        $this->localCategoryId = $id;
-    }
-
-    /**
-     * @return \Shopware\Models\Category\Category
-     */
-    public function getLocalCategory()
-    {
-        return $this->localCategory;
+        return $this->localCategories->toArray();
     }
 
     /**
      * @param \Shopware\Models\Category\Category $localCategory
      */
-    public function setLocalCategory($localCategory)
+    public function addLocalCategory($localCategory)
     {
-        $this->localCategory = $localCategory;
+        if (!$this->localCategories->contains($localCategory)) {
+            $this->localCategories->add($localCategory);
+        }
+    }
+
+    /**
+     * @param \Shopware\Models\Category\Category $localCategory
+     */
+    public function removeLocalCategory($localCategory)
+    {
+        $this->localCategories->remove($localCategory);
     }
 }

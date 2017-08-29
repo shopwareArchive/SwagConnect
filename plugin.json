@@ -30,7 +30,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.3.0",
+        "maximumVersion": "5.3.2",
         "blacklist": []
     }
 }

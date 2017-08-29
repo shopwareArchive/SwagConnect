@@ -13,23 +13,15 @@ use Shopware\Models\Category\Category;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Config;
+use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 
-class AutoCategoryResolver implements CategoryResolver
+class AutoCategoryResolver extends CategoryResolver
 {
-    /**
-     * @var ModelManager
-     */
-    private $manager;
-
     /**
      * @var CategoryRepository
      */
     private $categoryRepository;
-
-    /**
-     * @var \Shopware\CustomModels\Connect\RemoteCategoryRepository
-     */
-    private $remoteCategoryRepository;
 
     /**
      * @var Config
@@ -42,16 +34,25 @@ class AutoCategoryResolver implements CategoryResolver
      * @param CategoryRepository $categoryRepository
      * @param RemoteCategoryRepository $remoteCategoryRepository
      * @param Config $config
+     * @param ProductToRemoteCategoryRepository $productToRemoteCategoryRepository
      */
     public function __construct(
         ModelManager $manager,
         CategoryRepository $categoryRepository,
         RemoteCategoryRepository $remoteCategoryRepository,
-        Config $config
+        Config $config,
+        ProductToRemoteCategoryRepository $productToRemoteCategoryRepository = null
     ) {
-        $this->manager = $manager;
+        if (!$productToRemoteCategoryRepository) {
+            $productToRemoteCategoryRepository = $this->manager->getRepository(ProductToRemoteCategory::class);
+        }
+        parent::__construct(
+            $manager,
+            $remoteCategoryRepository,
+            $productToRemoteCategoryRepository
+        );
+
         $this->categoryRepository = $categoryRepository;
-        $this->remoteCategoryRepository = $remoteCategoryRepository;
         $this->config = $config;
     }
 
@@ -187,11 +188,6 @@ class AutoCategoryResolver implements CategoryResolver
         }
 
         return $tree;
-    }
-
-    public function storeRemoteCategories(array $categories, $articleId)
-    {
-        // Shops connected to SEM projects don't need to store Shopware Connect categories
     }
 
     /**

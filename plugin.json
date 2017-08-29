@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.3",
+    "currentVersion": "1.1.4",
     "changelog": {
         "de": {
             "1.1.2": "CON-4751 - Index auf source_id in s_plugin_connect_items hinzugefügt; CON-4758 - Performance bei Connect-Import verbessert; CON-4773 - Refaktorierung, danke an <a href=\"https://github.com/aragon999\">aragon999</a>;",

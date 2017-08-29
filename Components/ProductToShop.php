@@ -384,13 +384,9 @@ class ProductToShop implements ProductToShopBase
             $detail->setWeight($product->attributes['weight']);
         }
 
-        error_log(print_r($product->title . ":", true), 3, '/home/vagrant/log/test.log');
-        error_log(print_r($product->attributes, true), 3, '/home/vagrant/log/test.log');
-        error_log(print_r("------------------------", true), 3, '/home/vagrant/log/test.log');
         //set package unit
         if (array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $product->attributes)) {
             $detail->setPackUnit($product->attributes[Product::ATTRIBUTE_PACKAGEUNIT]);
-            error_log(print_r($product->attributes, true), 3, '/home/vagrant/log/test.log');
         }
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally

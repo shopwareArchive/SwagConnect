@@ -281,8 +281,7 @@ class LocalProductQuery extends BaseProductQuery
         if (
             (array_key_exists('unit', $row['attributes']) && $row['attributes']['unit']) &&
             (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity']) &&
-            (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity']))
-        {
+            (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])) {
             //Map local unit to connect unit
             if ($row['attributes']['unit']) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
@@ -298,8 +297,8 @@ class LocalProductQuery extends BaseProductQuery
             $row['attributes']['quantity'] = null;
             $row['attributes']['ref_quantity'] = null;
         }
-        if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])){
-           $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT] = null;
+        if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])) {
+            $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT] = null;
         }
         $product = new Product($row);
 
@@ -407,13 +406,13 @@ class LocalProductQuery extends BaseProductQuery
                     array_map(
                         function ($mapping) {
                             return $mapping['shopwareAttributeKey'];
-                            },
+                        },
                         $mappings
                     ),
                     array_map(
                         function ($mapping) {
                             return $mapping['attributeKey'];
-                            },
+                        },
                         $mappings
                     )
                 ),

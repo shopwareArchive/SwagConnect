@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Models\Category\Category;
@@ -33,7 +34,8 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $this->manager,
             $this->categoryRepo,
             $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-            $this->config
+            $this->config,
+            $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }
 

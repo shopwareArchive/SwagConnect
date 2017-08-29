@@ -34,8 +34,7 @@ abstract class CategoryResolver
         ModelManager $manager,
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;

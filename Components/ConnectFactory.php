@@ -12,7 +12,6 @@ use Shopware\Connect\Gateway\PDO;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
 use ShopwarePlugins\Connect\Components\CategoryQuery\SwQuery;
 use Shopware\Connect\SDK;
-use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
@@ -191,12 +190,8 @@ class ConnectFactory
         $logger = new Logger(Shopware()->Db());
         $eventManager = $this->getContainer()->get('events');
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
-            new AutoCategoryResolver(
-                $manager,
-                $manager->getRepository('Shopware\Models\Category\Category'),
-                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $this->getConfigComponent()
-            ) :
+            $this->getContainer()->get('swagconnect.auto_category_resolver')
+            :
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),

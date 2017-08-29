@@ -68,6 +68,7 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
+            'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
         ];
     }
 
@@ -127,13 +128,6 @@ class ServiceContainer extends BaseSubscriber
      */
     public function onImportService()
     {
-        $autoCategoryResolver = new AutoCategoryResolver(
-            $this->manager,
-            $this->manager->getRepository(CategoryModel::class),
-            $this->manager->getRepository(RemoteCategory::class),
-            new Config($this->manager)
-        );
-
         return new ImportService(
             $this->manager,
             $this->container->get('multi_edit.product'),
@@ -141,10 +135,10 @@ class ServiceContainer extends BaseSubscriber
             $this->manager->getRepository(ArticleModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class),
-            $autoCategoryResolver,
+            $this->container->get('swagconnect.auto_category_resolver'),
             new CategoryExtractor(
                 $this->manager->getRepository(ConnectAttribute::class),
-                $autoCategoryResolver,
+                $this->container->get('swagconnect.auto_category_resolver'),
                 new PDO($this->db->getConnection()),
                 new RandomStringGenerator(),
                 $this->db
@@ -159,6 +153,20 @@ class ServiceContainer extends BaseSubscriber
     {
         return new \ShopwarePlugins\Connect\Components\AutoCategoryReverter(
             $this->container->get('swagconnect.import_service')
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     */
+    public function onAutoCategoryResolver()
+    {
+        return new AutoCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(CategoryModel::class),
+            $this->manager->getRepository(RemoteCategory::class),
+            new Config($this->manager),
+            $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }
 }

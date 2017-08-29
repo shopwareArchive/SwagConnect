@@ -21,6 +21,9 @@ use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Property;
+use Shopware\Models\Category\Category;
+use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 
 class ProductToShopTest extends ConnectTestHelper
 {
@@ -72,8 +75,8 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new DefaultCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
             Shopware()->Container()->get('events')
@@ -488,9 +491,10 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new AutoCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $config
+                $this->modelManager->getRepository(Category::class),
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $config,
+                $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
             Shopware()->Container()->get('events')

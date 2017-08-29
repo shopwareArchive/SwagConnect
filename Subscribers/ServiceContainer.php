@@ -15,6 +15,7 @@ use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
@@ -69,6 +70,7 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
+            'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
         ];
     }
 
@@ -166,6 +168,18 @@ class ServiceContainer extends BaseSubscriber
             $this->manager->getRepository(CategoryModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             new Config($this->manager),
+            $this->manager->getRepository(ProductToRemoteCategory::class)
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     */
+    public function onDefaultCategoryResolver()
+    {
+        return new DefaultCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }

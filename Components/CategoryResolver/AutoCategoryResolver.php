@@ -44,7 +44,7 @@ class AutoCategoryResolver extends CategoryResolver
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository = null
     ) {
         if (!$productToRemoteCategoryRepository) {
-            $productToRemoteCategoryRepository = $this->manager->getRepository(ProductToRemoteCategory::class);
+            $productToRemoteCategoryRepository = $manager->getRepository(ProductToRemoteCategory::class);
         }
         parent::__construct(
             $manager,

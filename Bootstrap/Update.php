@@ -434,7 +434,7 @@ class Update
      */
     private function createRemoteToLocalCategoriesTable()
     {
-        if (version_compare($this->version, '1.1.2', '<=')) {
+        if (version_compare($this->version, '1.1.3', '<=')) {
             try {
                 $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories_to_local_categories` (
                   `remote_category_id` int(11) NOT NULL,

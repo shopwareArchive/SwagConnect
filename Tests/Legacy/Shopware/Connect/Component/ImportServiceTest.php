@@ -10,6 +10,7 @@ namespace Tests\ShopwarePlugins\Connect\Component;
 use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
@@ -58,7 +59,7 @@ class ImportServiceTest extends ConnectTestHelper
             $this->manager,
             $this->categoryRepository,
             $this->remoteCategoryRepository,
-            new \ShopwarePlugins\Connect\Components\Config($this->manager)
+            ConfigFactory::getConfigInstance()
         );
 
         $this->importService = new ImportService(

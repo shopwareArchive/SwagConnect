@@ -7,7 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Subscribers;
 
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
@@ -45,7 +45,7 @@ class LifecycleTest extends ConnectTestHelper
 
         $this->manager = Shopware()->Models();
         $this->db = Shopware()->Db();
-        $this->config = new Config($this->manager);
+        $this->config = ConfigFactory::getConfigInstance();
         $this->connectExport = new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),

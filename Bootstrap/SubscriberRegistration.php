@@ -176,7 +176,7 @@ class SubscriberRegistration
                 $this->config,
                 $this->connectFactory->getSDK()
             ),
-            new ArticleList(),
+            new ArticleList($this->container->get('db')),
             new Category(
                 $this->container->get('dbal_connection'),
                 $this->createProductStreamService()

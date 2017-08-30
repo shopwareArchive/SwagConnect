@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
 
 /**
  * Implements a 'connect' filter for the article list
@@ -17,6 +18,19 @@ use Enlight\Event\SubscriberInterface;
  */
 class ArticleList implements SubscriberInterface
 {
+    /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    /**
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
+     */
+    public function __construct(Enlight_Components_Db_Adapter_Pdo_Mysql $db)
+    {
+        $this->db = $db;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -115,7 +129,7 @@ class ArticleList implements SubscriberInterface
 
         $connectArticleIds = array_map(function ($row) {
             return $row['article_id'];
-        }, Shopware()->Db()->fetchAll($sql));
+        }, $this->db->fetchAll($sql));
 
         foreach ($data as $idx => $row) {
             if ((int) $row['Article_id'] > 0) {

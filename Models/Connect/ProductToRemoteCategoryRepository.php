@@ -106,4 +106,28 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             return $resultItem['id'];
         }, $result);
     }
+
+    /**
+     * @param $articleId
+     * return ProductToRemoteCategory[]
+     */
+    public function getArticleRemoteCategories($articleId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('ptrc');
+        $builder->where('ptrc.articleId = :articleId');
+        $builder->setParameter('articleId', $articleId);
+
+        $query = $builder->getQuery();
+        return $query->getResult();
+    }
+
+    /**
+     * @param ProductToRemoteCategory $productToRemoteCategory
+     */
+    public function deleteCategoryAssignment(ProductToRemoteCategory $productToRemoteCategory)
+    {
+        $this->getEntityManager()->remove($productToRemoteCategory);
+        $this->getEntityManager()->flush();
+    }
 }

@@ -15,4 +15,10 @@ use Shopware\Components\Model\ModelRepository;
  */
 class RemoteCategoryRepository extends ModelRepository
 {
+    public function findAllCategoriesWithoutAssignments()
+    {
+        $builder = $this->getEntityManager()->createQueryBuilder();
+
+
+    }
 }

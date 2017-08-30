@@ -88,6 +88,19 @@ class DefaultCategoryResolver implements CategoryResolver
         }
         $this->manager->flush();
 
+        file_put_contents('dump', 'yes', FILE_APPEND);
+        $this->addProductToRemoteCategory($remoteCategories, $articleId);
+        $this->removeProductsFromRemoteCategory($remoteCategories, $articleId);
+
+        $this->manager->flush();
+    }
+
+    /**
+     * @param RemoteCategory[] $remoteCategories
+     * @param $articleId
+     */
+    private function addProductToRemoteCategory($remoteCategories, $articleId)
+    {
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
         foreach ($remoteCategories as $remoteCategory) {
             $productToCategory = $this->productToRemoteCategoryRepository->findOneBy([
@@ -103,7 +116,31 @@ class DefaultCategoryResolver implements CategoryResolver
             $productToCategory->setConnectCategory($remoteCategory);
             $this->manager->persist($productToCategory);
         }
+    }
 
-        $this->manager->flush();
+    /**
+     * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
+     * @param $articleId
+     */
+    private function removeProductsFromRemoteCategory($assignedCategories, $articleId)
+    {
+        $currentProductCategories = $this->productToRemoteCategoryRepository->getArticleRemoteCategories($articleId);
+
+        /** @var ProductToRemoteCategory $currentProductCategory */
+        foreach ($currentProductCategories as $currentProductCategory) {
+            $categoryAssigned = false;
+
+            /** @var RemoteCategory $assignedCategory */
+            foreach ($assignedCategories as $assignedCategory) {
+                if ($assignedCategory->getId() == $currentProductCategory->getConnectCategoryId()) {
+                    $categoryAssigned = true;
+                }
+            }
+
+            if ($categoryAssigned == false) {
+                //DELETE PRODUCT ASSIGNMENT
+                $this->productToRemoteCategoryRepository->deleteCategoryAssignment($currentProductCategory);
+            }
+        }
     }
 }

@@ -229,7 +229,7 @@ class Article implements SubscriberInterface
                     $this->modelManager->flush();
                 }
 
-                $sourceIds = Shopware()->Db()->fetchCol(
+                $sourceIds = $this->modelManager->getConnection()->fetchColumn(
                     'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                     [$article->getId()]
                 );
@@ -468,7 +468,7 @@ class Article implements SubscriberInterface
      */
     public function getConnectCustomerGroup()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\CustomerGroup');
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
         $model = $repo->findOneBy(['connectGroup' => true]);
 
@@ -499,7 +499,7 @@ class Article implements SubscriberInterface
         }
 
         /** @var \Shopware\Models\Article\Detail $detailModel */
-        $detailModel = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail')->find($detailId);
+        $detailModel = $this->modelManager->getRepository(Detail::class)->find($detailId);
         if (!$detailModel) {
             return;
         }
@@ -548,7 +548,7 @@ class Article implements SubscriberInterface
         }
 
         /** @var \Shopware\Models\Article\Article $articleModel */
-        $articleModel = Shopware()->Models()->getRepository('Shopware\Models\Article\Article')->find($articleId);
+        $articleModel = $this->modelManager->getRepository(ArticleModel::class)->find($articleId);
         if (!$articleModel) {
             return;
         }
@@ -569,8 +569,8 @@ class Article implements SubscriberInterface
         // sellNotInStock is opposite on articleLastStock
         // when it's true, lastStock must be false
         $articleModel->setLastStock(!$shopConfiguration->sellNotInStock);
-        Shopware()->Models()->persist($articleModel);
-        Shopware()->Models()->flush();
+        $this->modelManager->persist($articleModel);
+        $this->modelManager->flush();
 
         // modify assigned article
         if ($shopConfiguration->sellNotInStock) {
@@ -587,14 +587,15 @@ class Article implements SubscriberInterface
      * Not using the default helper-methods here, in order to keep this small and without any dependencies
      * to the SDK
      *
-     * @param $id
+     * @param $articleId
      * @return bool|int
      */
-    private function getRemoteShopId($id)
+    private function getRemoteShopId($articleId)
     {
-        $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
-
-        return Shopware()->Db()->fetchOne($sql, [$id]);
+        return $this->modelManager->getConnection()->fetchColumn(
+            'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL',
+            [$articleId]
+        );
     }
 
     /**

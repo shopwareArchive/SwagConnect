@@ -19,3 +19,4 @@ psh.yaml
 vendor
 build/
 .php_cs.cache
+.psh.yml.dist

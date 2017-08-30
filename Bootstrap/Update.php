@@ -89,6 +89,7 @@ class Update
         $this->addIndexToChangeTable();
         $this->removeDuplicatedMenuItems();
         $this->addConnectItemsIndex();
+        $this->createRemoteToLocalCategoriesTable();
 
         return true;
     }
@@ -417,6 +418,44 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_items MODIFY group_id VARCHAR(64)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX source_id (source_id, shop_id)');
                 $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX group_id (group_id, shop_id)');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    /**
+     * Create the mapping table between connect remote categories and local categories.
+     */
+    private function createRemoteToLocalCategoriesTable()
+    {
+        if (version_compare($this->version, '1.1.3', '<=')) {
+            try {
+                $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories_to_local_categories` (
+                  `remote_category_id` int(11) NOT NULL,
+                  `local_category_id` int(11) unsigned NOT NULL,
+                  PRIMARY KEY (`remote_category_id`, `local_category_id`),
+                  CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE,
+                  CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE
+                  ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
+                );
+                $result = $this->db->query('SELECT pcc.id, pcc.local_category_id
+                                FROM s_plugin_connect_categories pcc
+                                WHERE pcc.local_category_id IS NOT NULL');
+
+                while ($row = $result->fetch()) {
+                    $this->db->query(
+                        'INSERT INTO `s_plugin_connect_categories_to_local_categories`
+                        (`remote_category_id`, `local_category_id`)
+                        VALUES (?, ?)',
+                        [$row['id'],$row['local_category_id']]
+                    );
+                }
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

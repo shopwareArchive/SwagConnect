@@ -121,6 +121,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             $this->db->insert('s_plugin_connect_categories', $category);
             $categoryId = $this->db->lastInsertId();
 
+            $this->db->insert('s_plugin_connect_categories_to_local_categories', ['local_category_id' => 1, 'remote_category_id' => $categoryId]);
+
             $this->db->insert('s_plugin_connect_product_to_categories', [
                 'connect_category_id' => $categoryId,
                 'articleID' => $this->articleA->getId(),

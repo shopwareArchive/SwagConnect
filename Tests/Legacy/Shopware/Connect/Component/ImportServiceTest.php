@@ -94,7 +94,7 @@ class ImportServiceTest extends ConnectTestHelper
         $localCategory = $this->categoryRepository->find(6);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
-        $remoteCategory->setLocalCategory($localCategory);
+        $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
 
@@ -158,7 +158,7 @@ class ImportServiceTest extends ConnectTestHelper
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
-        $remoteCategory->setLocalCategory($localCategory);
+        $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
 

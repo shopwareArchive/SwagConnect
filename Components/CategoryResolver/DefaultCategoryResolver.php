@@ -88,7 +88,6 @@ class DefaultCategoryResolver implements CategoryResolver
         }
         $this->manager->flush();
 
-        file_put_contents('dump', 'yes', FILE_APPEND);
         $this->addProductToRemoteCategory($remoteCategories, $articleId);
         $this->removeProductsFromRemoteCategory($remoteCategories, $articleId);
 

@@ -119,6 +119,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->setParameter('articleId', $articleId);
 
         $query = $builder->getQuery();
+
         return $query->getResult();
     }
 

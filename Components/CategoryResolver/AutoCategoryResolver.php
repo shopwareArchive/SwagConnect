@@ -143,7 +143,7 @@ class AutoCategoryResolver implements CategoryResolver
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $category['categoryId']]);
         if ($remoteCategory) {
-            $remoteCategory->setLocalCategory($categoryModel);
+            $remoteCategory->addLocalCategory($categoryModel);
             $this->manager->persist($remoteCategory);
         }
 

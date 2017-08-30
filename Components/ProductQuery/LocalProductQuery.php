@@ -166,6 +166,8 @@ class LocalProductQuery extends BaseProductQuery
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
             'd.packUnit as packageUnit',
+            'd.minPurchase as basicUnit',
+            'd.supplierNumber as manufacturerNumber',
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
@@ -297,8 +299,17 @@ class LocalProductQuery extends BaseProductQuery
             $row['attributes']['quantity'] = null;
             $row['attributes']['ref_quantity'] = null;
         }
+
         if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])) {
-            $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT] = null;
+            unset($row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT]);
+        }
+
+        if (!(array_key_exists(Product::ATTRIBUTE_MANUFACTURERNUMBER, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_MANUFACTURERNUMBER])) {
+            unset($row['attributes'][Product::ATTRIBUTE_MANUFACTURERNUMBER]);
+        }
+
+        if (!(array_key_exists(Product::ATTRIBUTE_BASICUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_BASICUNIT])) {
+            unset($row['attributes'][Product::ATTRIBUTE_BASICUNIT]);
         }
         $product = new Product($row);
 

@@ -33,7 +33,9 @@ abstract class BaseProductQuery
         'unit' => Product::ATTRIBUTE_UNIT,
         'referenceUnit' => Product::ATTRIBUTE_REFERENCE_QUANTITY,
         'purchaseUnit' => Product::ATTRIBUTE_QUANTITY,
-        'packageUnit' => Product::ATTRIBUTE_PACKAGEUNIT
+        'packageUnit' => Product::ATTRIBUTE_PACKAGEUNIT,
+        'basicUnit' => Product::ATTRIBUTE_BASICUNIT,
+        'manufacturerNumber' => Product::ATTRIBUTE_MANUFACTURERNUMBER
     ];
 
     /**

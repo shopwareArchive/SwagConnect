@@ -108,7 +108,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
     }
 
     /**
-     * @param $articleId
+     * @param int $articleId
      * return ProductToRemoteCategory[]
      */
     public function getArticleRemoteCategories($articleId)
@@ -121,14 +121,5 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $query = $builder->getQuery();
 
         return $query->getResult();
-    }
-
-    /**
-     * @param ProductToRemoteCategory $productToRemoteCategory
-     */
-    public function deleteCategoryAssignment(ProductToRemoteCategory $productToRemoteCategory)
-    {
-        $this->getEntityManager()->remove($productToRemoteCategory);
-        $this->getEntityManager()->flush();
     }
 }

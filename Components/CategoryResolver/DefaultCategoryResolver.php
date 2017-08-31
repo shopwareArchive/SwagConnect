@@ -138,7 +138,8 @@ class DefaultCategoryResolver implements CategoryResolver
 
             if ($categoryAssigned == false) {
                 //DELETE PRODUCT ASSIGNMENT
-                $this->productToRemoteCategoryRepository->deleteCategoryAssignment($currentProductCategory);
+                $this->manager->remove($currentProductCategory);
+                $this->manager->flush();
             }
         }
     }

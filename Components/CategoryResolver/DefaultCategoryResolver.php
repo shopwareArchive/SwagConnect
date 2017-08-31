@@ -121,22 +121,17 @@ class DefaultCategoryResolver implements CategoryResolver
      * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
      * @param $articleId
      */
-    private function removeProductsFromRemoteCategory($assignedCategories, $articleId)
+    private function removeProductsFromRemoteCategory(array $assignedCategories, $articleId)
     {
         $currentProductCategories = $this->productToRemoteCategoryRepository->getArticleRemoteCategories($articleId);
 
+        $assignedCategoryIds = array_map(function (RemoteCategory $assignedCategory) {
+            $assignedCategory->getId();
+        }, $assignedCategories);
+
         /** @var ProductToRemoteCategory $currentProductCategory */
         foreach ($currentProductCategories as $currentProductCategory) {
-            $categoryAssigned = false;
-
-            /** @var RemoteCategory $assignedCategory */
-            foreach ($assignedCategories as $assignedCategory) {
-                if ($assignedCategory->getId() == $currentProductCategory->getConnectCategoryId()) {
-                    $categoryAssigned = true;
-                }
-            }
-
-            if ($categoryAssigned == false) {
+            if (!in_array($currentProductCategory->getConnectCategoryId(), $assignedCategoryIds)) {
                 //DELETE PRODUCT ASSIGNMENT
                 $this->manager->remove($currentProductCategory);
                 $this->manager->flush();

@@ -17,6 +17,7 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
 
 class ProductStreams implements SubscriberInterface
 {
@@ -41,21 +42,29 @@ class ProductStreams implements SubscriberInterface
     private $sdk;
 
     /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    /**
      * @param ConnectExport $connectExport
      * @param Config $config
      * @param Helper $helper
      * @param SDK $sdk
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      */
     public function __construct(
         ConnectExport $connectExport,
         Config $config,
         Helper $helper,
-        SDK $sdk
+        SDK $sdk,
+        Enlight_Components_Db_Adapter_Pdo_Mysql $db
     ) {
         $this->connectExport = $connectExport;
         $this->config = $config;
         $this->helper = $helper;
         $this->sdk = $sdk;
+        $this->db = $db;
     }
 
     /**
@@ -184,7 +193,7 @@ class ProductStreams implements SubscriberInterface
                 if ($autoUpdate == Config::UPDATE_AUTO) {
                     $this->connectExport->export($sourceIds, $streamAssignments);
                 } elseif ($autoUpdate == Config::UPDATE_CRON_JOB) {
-                    Shopware()->Db()->update(
+                    $this->db->update(
                         's_plugin_connect_items',
                         ['cron_update' => 1],
                         ['article_id' => $articleId]

@@ -204,7 +204,8 @@ class SubscriberRegistration
                 $this->connectFactory->getConnectExport(),
                 new Config($this->modelManager),
                 $this->helper,
-                $this->SDK
+                $this->SDK,
+                $this->container->get('db')
             ),
             new Property($this->modelManager),
             new Search($this->modelManager),

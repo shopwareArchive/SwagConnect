@@ -124,6 +124,28 @@ class AutoCategoryResolver implements CategoryResolver
     }
 
     /**
+     * Loop through category tree and fetch ids
+     *
+     * @param array $node
+     * @param array $categories
+     * @return array
+     */
+    public function convertTreeToKeys(array $node, $categories = [])
+    {
+        foreach ($node as $category) {
+            $categories[] = [
+                'categoryKey' => $category['categoryId'],
+            ];
+
+            if (!empty($category['children'])) {
+                $categories = $this->convertTreeToKeys($category['children'], $categories);
+            }
+        }
+
+        return $categories;
+    }
+
+    /**
      * @param array $category
      * @param Category $parent
      * @return Category

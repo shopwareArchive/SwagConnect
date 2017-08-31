@@ -148,7 +148,9 @@ class ServiceContainer extends BaseSubscriber
                 new PDO($this->db->getConnection()),
                 new RandomStringGenerator(),
                 $this->db
-            )
+            ),
+            $this->container->get('CategoryDenormalization'),
+            $this->container->get('shopware_attribute.data_persister')
         );
     }
 

@@ -8,6 +8,8 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\Connection;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
+use Shopware\Components\Model\CategoryDenormalization;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\Product;
@@ -58,6 +60,16 @@ class ImportService
      */
     private $categoryExtractor;
 
+    /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
+     * @var DataPersister
+     */
+    private $dataPersister;
+
     public function __construct(
         ModelManager $manager,
         Product $productResource,
@@ -66,7 +78,9 @@ class ImportService
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
         AutoCategoryResolver $categoryResolver,
-        CategoryExtractor $categoryExtractor
+        CategoryExtractor $categoryExtractor,
+        CategoryDenormalization $categoryDenormalization,
+        DataPersister $dataPersister
     ) {
         $this->manager = $manager;
         $this->productResource = $productResource;
@@ -76,6 +90,8 @@ class ImportService
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
         $this->autoCategoryResolver = $categoryResolver;
         $this->categoryExtractor = $categoryExtractor;
+        $this->categoryDenormalization = $categoryDenormalization;
+        $this->dataPersister = $dataPersister;
     }
 
     public function findBothArticlesType($categoryId, $query = '', $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
@@ -211,9 +227,9 @@ class ImportService
      * @param int $localCategoryId
      * @param string $remoteCategoryKey
      * @param string $remoteCategoryLabel
-     * @return void
+     * @return array
      */
-    public function importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel)
+    public function createCategoriesFromRemoteCategoires($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel)
     {
         /** @var \Shopware\Models\Category\Category $localCategory */
         $localCategory = $this->categoryRepository->find((int) $localCategoryId);
@@ -240,29 +256,7 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
-
-        foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
-
-            while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
-                $articles = $this->articleRepository->findBy(['id' => $currentIdBatch]);
-                /** @var \Shopware\Models\Article\Article $article */
-                foreach ($articles as $article) {
-                    /** @var \Shopware\Models\Category\Category $categoryModel */
-                    $categoryModel = $category['model'];
-                    if ($article->getCategories()->contains($categoryModel->getParent())) {
-                        $article->removeCategory($categoryModel->getParent());
-                    }
-                    $article->addCategory($category['model']);
-                    $attribute = $article->getAttribute();
-                    $attribute->setConnectMappedCategory(true);
-                    $this->manager->persist($article);
-                    $this->manager->persist($attribute);
-                }
-                $this->manager->flush();
-            }
-        }
+        return $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory);
     }
 
     /**
@@ -519,5 +513,27 @@ class ImportService
         }
 
         return $ast;
+    }
+
+    /**
+     * @param $categories
+     * @throws \Exception
+     */
+    public function assignCategoriesToProducts($categories)
+    {
+        foreach ($categories as $category) {
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
+
+            foreach($articleIds as $articleId) {
+                $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
+                $this->dataPersister->persist(
+                    [
+                        'connect_mapped_category' => 1
+                    ],
+                    's_articles_attributes',
+                    $articleId
+                );
+            }
+        }
     }
 }

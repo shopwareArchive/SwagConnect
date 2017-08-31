@@ -237,7 +237,29 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         try {
-            $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
+            $categories = $this->getImportService()->createCategoriesFromRemoteCategoires($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
+        } catch (\RuntimeException $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign([
+                'success' => false,
+                'error' => 'Remote category could not be mapped to local category!',
+            ]);
+
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+            'categories' => json_encode($categories)
+        ]);
+    }
+
+    public function assignCategoriesToProductsAction()
+    {
+        $categories = json_decode($this->request->getParam('categories', []));
+
+        try {
+            $this->getImportService()->assignCategoriesToProducts($categories);
         } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign([

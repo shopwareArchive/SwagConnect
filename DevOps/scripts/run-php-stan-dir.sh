@@ -9,4 +9,3 @@
 ./phpstan analyse -c phpstan.neon -l 0 Services
 ./phpstan analyse -c phpstan.neon -l 0 Struct
 ./phpstan analyse -c phpstan.neon -l 0 Subscribers
-./phpstan analyse -c phpstan.neon -l 0 Views

@@ -612,7 +612,7 @@ class Checkout implements SubscriberInterface
             return false;
         }
 
-        $paymentRepository = Shopware()->Models()->getRepository(Payment::class);
+        $paymentRepository = $this->manager->getRepository(Payment::class);
         /** @var PaymentSubscriber $payment */
         $payment = $paymentRepository->find($paymentId);
 

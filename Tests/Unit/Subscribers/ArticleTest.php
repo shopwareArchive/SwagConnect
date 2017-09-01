@@ -55,16 +55,13 @@ class ArticleTest extends AbstractConnectUnitTest
         $this->helper = $this->createMock(Helper::class);
         $this->connectExport = $this->createMock(ConnectExport::class);
         $this->config = $this->createMock(Config::class);
-
         $this->subscriber = new Article(
             $this->createMock(Gateway::class),
             $this->modelManager,
             $this->connectExport,
             $this->helper,
             $this->config,
-            (new ConnectFactory())->getSDK(),
-            $this->createMock(\Shopware_Components_Snippet_Manager::class),
-            ''
+            (new ConnectFactory())->getSDK()
         );
     }
 
@@ -184,5 +181,19 @@ class ArticleTest extends AbstractConnectUnitTest
             ->method('export');
 
         $this->subscriber->regenerateChangesForArticle(5);
+    }
+
+    public function test_subscribed_events()
+    {
+        $this->assertSame(
+            [
+                'Shopware_Controllers_Backend_Article::preparePricesAssociatedData::after' => 'enforceConnectPriceWhenSaving',
+                'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
+                'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
+                'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
+                'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
+            ],
+            Article::getSubscribedEvents()
+        );
     }
 }

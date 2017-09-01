@@ -42,6 +42,7 @@ use ShopwarePlugins\Connect\Subscribers\Supplier;
 use ShopwarePlugins\Connect\Subscribers\TemplateExtension;
 use ShopwarePlugins\Connect\Subscribers\Voucher;
 use Symfony\Component\DependencyInjection\Container;
+use Shopware\Models\Payment\Payment;
 
 class SubscriberRegistration
 {
@@ -199,7 +200,10 @@ class SubscriberRegistration
             ),
             $this->getLifecycleSubscriber(),
             new OrderDocument(),
-            new PaymentSubscriber($this->helper),
+            new PaymentSubscriber(
+                $this->helper,
+                $this->modelManager->getRepository(Payment::class)
+            ),
             new ProductStreams(
                 $this->connectFactory->getConnectExport(),
                 new Config($this->modelManager),
@@ -242,7 +246,6 @@ class SubscriberRegistration
         if (!$this->lifecycle) {
             $this->lifecycle = new Lifecycle(
                 $this->modelManager,
-                $this->config->getConfig('autoUpdateProducts', 1),
                 $this->helper,
                 $this->SDK,
                 $this->config,

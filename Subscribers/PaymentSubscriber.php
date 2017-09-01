@@ -9,14 +9,10 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
 use ShopwarePlugins\Connect\Components\Helper;
+use Shopware\Models\Payment\Repository as PaymentRepository;
 
 class PaymentSubscriber implements SubscriberInterface
 {
-    /**
-     * @var \Shopware\Models\Payment\Repository
-     */
-    private $repository;
-
     /**
      * @var \ShopwarePlugins\Connect\Services\PaymentService
      */
@@ -28,11 +24,18 @@ class PaymentSubscriber implements SubscriberInterface
     private $helper;
 
     /**
-     * @param Helper $helper
+     * @var PaymentRepository
      */
-    public function __construct(Helper $helper)
+    private $paymentRepository;
+
+    /**
+     * @param Helper $helper
+     * @param PaymentRepository $paymentRepository
+     */
+    public function __construct(Helper $helper, PaymentRepository $paymentRepository)
     {
         $this->helper = $helper;
+        $this->paymentRepository = $paymentRepository;
     }
 
     /**
@@ -106,7 +109,7 @@ class PaymentSubscriber implements SubscriberInterface
         if ($hasConnectProduct === true) {
             foreach ($paymentMeans as $key => &$payment) {
                 /** @var \Shopware\Models\Payment\Payment $payment */
-                $payment = $this->getPaymentRepository()->find($payment['id']);
+                $payment = $this->paymentRepository->find($payment['id']);
                 if (!$payment) {
                     unset($paymentMeans[$key]);
                     continue;
@@ -127,17 +130,5 @@ class PaymentSubscriber implements SubscriberInterface
 
             $args->setReturn($paymentMeans);
         }
-    }
-
-    /**
-     * @return \Shopware\Models\Payment\Repository
-     */
-    public function getPaymentRepository()
-    {
-        if (!$this->repository) {
-            $this->repository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
-        }
-
-        return $this->repository;
     }
 }

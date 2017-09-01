@@ -26,4 +26,14 @@ class JavascriptTest extends \PHPUnit_Framework_TestCase
         $result = $subscriber->addJsFiles(new \Enlight_Event_EventArgs());
         $this->assertCount(1, $result);
     }
+
+    public function test_subscribed_events()
+    {
+        $this->assertSame(
+            [
+                'Theme_Compiler_Collect_Plugin_Javascript' =>  'addJsFiles'
+            ],
+            Javascript::getSubscribedEvents()
+        );
+    }
 }

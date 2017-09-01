@@ -36,7 +36,10 @@ class Voucher implements SubscriberInterface
      * @param BasketHelper $basketHelper
      * @param \Shopware_Components_Snippet_Manager $snippetManager
      */
-    public function __construct(Helper $helper, BasketHelper $basketHelper, \Shopware_Components_Snippet_Manager $snippetManager)
+    public function __construct(
+        Helper $helper,
+        BasketHelper $basketHelper,
+        \Shopware_Components_Snippet_Manager $snippetManager)
     {
         $this->helper = $helper;
         $this->basketHelper = $basketHelper;

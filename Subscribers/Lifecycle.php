@@ -29,11 +29,6 @@ class Lifecycle implements SubscriberInterface
     private $manager;
 
     /**
-     * @var int
-     */
-    private $autoUpdateProducts;
-
-    /**
      * @var Helper
      */
     private $helper;
@@ -54,7 +49,6 @@ class Lifecycle implements SubscriberInterface
 
     /**
      * @param ModelManager $modelManager
-     * @param int $autoUpdateProducts
      * @param Helper $helper
      * @param SDK $sdk
      * @param Config $config
@@ -62,14 +56,12 @@ class Lifecycle implements SubscriberInterface
      */
     public function __construct(
         ModelManager $modelManager,
-        $autoUpdateProducts,
         Helper $helper,
         SDK $sdk,
         Config $config,
         ConnectExport $connectExport
     ) {
         $this->manager = $modelManager;
-        $this->autoUpdateProducts = $autoUpdateProducts;
         $this->helper = $helper;
         $this->sdk = $sdk;
         $this->config = $config;
@@ -337,11 +329,12 @@ class Lifecycle implements SubscriberInterface
             return;
         }
 
-        if ($this->autoUpdateProducts == 1 || $force === true) {
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
+        if ($autoUpdateProducts == 1 || $force === true) {
             $this->connectExport->export(
                 [$attribute->getSourceId()], null
             );
-        } elseif ($this->autoUpdateProducts == 2) {
+        } elseif ($autoUpdateProducts == 2) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
@@ -362,11 +355,12 @@ class Lifecycle implements SubscriberInterface
             return;
         }
 
-        if ($this->autoUpdateProducts == 1 || $force === true) {
+        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
+        if ($autoUpdateProducts == 1 || $force === true) {
             $sourceIds = $this->helper->getSourceIdsFromArticleId($article->getId());
 
             $this->connectExport->export($sourceIds, null);
-        } elseif ($this->autoUpdateProducts == 2) {
+        } elseif ($autoUpdateProducts == 2) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
@@ -432,9 +426,9 @@ class Lifecycle implements SubscriberInterface
      */
     private function hasPriceType()
     {
-        if ($this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
-            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
-            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
+        if ($this->sdk->getPriceType() === SDK::PRICE_TYPE_PURCHASE
+            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_RETAIL
+            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_BOTH
         ) {
             return true;
         }

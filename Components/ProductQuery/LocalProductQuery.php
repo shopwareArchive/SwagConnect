@@ -281,23 +281,23 @@ class LocalProductQuery extends BaseProductQuery
         unset($row['detailKind']);
 
         if (
-            (array_key_exists('unit', $row['attributes']) && $row['attributes']['unit']) &&
-            (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity']) &&
-            (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])) {
+            (array_key_exists(Product::ATTRIBUTE_UNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_UNIT]) &&
+            (array_key_exists(Product::ATTRIBUTE_QUANTITY, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_QUANTITY]) &&
+            (array_key_exists(Product::ATTRIBUTE_REFERENCE_QUANTITY, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
             //Map local unit to connect unit
-            if ($row['attributes']['unit']) {
+            if ($row['attributes'][Product::ATTRIBUTE_UNIT]) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
-                $row['attributes']['unit'] = $unitMapper->getConnectUnit($row['attributes']['unit']);
+                $row['attributes'][Product::ATTRIBUTE_UNIT] = $unitMapper->getConnectUnit($row['attributes'][Product::ATTRIBUTE_UNIT]);
             }
 
-            $intRefQuantity = (int) $row['attributes']['ref_quantity'];
-            if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
-                $row['attributes']['ref_quantity'] = $intRefQuantity;
+            $intRefQuantity = (int) $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY];
+            if ($row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] - $intRefQuantity <= 0.0001) {
+                $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] = $intRefQuantity;
             }
         } else {
-            unset($row['attributes']['unit']);
-            $row['attributes']['quantity'] = null;
-            $row['attributes']['ref_quantity'] = null;
+            unset($row['attributes'][Product::ATTRIBUTE_UNIT]);
+            $row['attributes'][Product::ATTRIBUTE_QUANTITY] = null;
+            $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] = null;
         }
 
         if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])) {

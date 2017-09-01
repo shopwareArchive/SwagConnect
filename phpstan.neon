@@ -6,3 +6,5 @@ parameters:
         - .githooks
     autoload_files:
         - autoload_bootstrap.php
+        - vendor/autoload.php
+        - Tests/Bootstrap.php

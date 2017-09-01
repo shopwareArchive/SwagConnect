@@ -16,6 +16,8 @@ use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Article;
+use Shopware\Models\Order\Shipping;
+use Shopware\Models\Order\Billing;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
@@ -78,18 +80,21 @@ class ProductFromShopTest extends ConnectTestHelper
         $args->setReturn($this->user);
     }
 
-    public function testBuy()
+    public function testBuyWithSameBillingAndShippingAddress()
     {
         $address = new Address([
             'firstName' => 'John',
             'surName' => 'Doe',
             'zip' => '48153',
+            'company' => 'shopware AG',
             'street' => 'Eggeroderstraße',
             'streetNumber' => '6',
             'city' => 'Schöppingen',
             'country' => 'DEU',
             'email' => 'info@shopware.com',
-            'phone' => '0000123'
+            'phone' => '0000123',
+            'additionalAddressLine1' => 'oben',
+            'additionalAddressLine2' => 'klingeln',
         ]);
         $orderNumber = $this->productFromShop->buy(new Order([
             'orderShop' => '3',
@@ -115,7 +120,152 @@ class ProductFromShopTest extends ConnectTestHelper
         ]));
 
         $order = $this->getOrderByNumber($orderNumber);
+        $shipping = new Shipping();
+        $billing = new Billing();
         $this->assertEquals($orderNumber, $order->getNumber());
+        $this->assertEquals($shipping->fromArray($address), $order->getShipping());
+        $this->assertEquals($billing->fromArray($address), $order->getBilling());
+        $this->assertEquals(1, count($order->getDetails()));
+        $orderItem = $order->getDetails()[1];
+        $this->assertEquals(44.44, $orderItem->getPrice());
+        $this->assertEquals('Milchschnitte', $orderItem->getArticleName());
+        $this->assertEquals(3, $orderItem->getQuantity());
+    }
+
+    public function testBuyWithDifferentBillingAndShippingAddress()
+    {
+        $address1 = new Address([
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'company' => 'shopware AG',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123',
+            'additionalAddressLine1' => 'oben',
+            'additionalAddressLine2' => 'klingeln',
+        ]);
+        $address2 = new Address([
+            'firstName' => 'Jonny',
+            'surName' => 'Depp',
+            'zip' => '42354',
+            'company' => 'eCommerce UG',
+            'street' => 'Hype-Boulevard',
+            'streetNumber' => '66',
+            'city' => 'LA',
+            'country' => 'DEU',
+            'email' => 'e@commerce.com',
+            'phone' => '987123',
+            'additionalAddressLine1' => 'keine Klingel',
+            'additionalAddressLine2' => 'einfach laut klopfen',
+        ]);
+        $orderNumber = $this->productFromShop->buy(new Order([
+            'orderShop' => '3',
+            'localOrderId' => rand(0, 99999),
+            'deliveryAddress' => $address1,
+            'billingAddress' => $address2,
+            'products' => [
+                new OrderItem([
+                    'count' => 1,
+                    'product' => new Product([
+                        'shopId' => '3',
+                        'sourceId' => '2',
+                        'price' => 44.44,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Milchschnitte',
+                        'categories' => []
+                    ])
+                ])
+            ]
+        ]));
+
+        $order = $this->getOrderByNumber($orderNumber);
+        $shipping = new Shipping();
+        $billing = new Billing();
+        $this->assertEquals($orderNumber, $order->getNumber());
+        $this->assertEquals($shipping->fromArray($address1), $order->getShipping());
+        $this->assertEquals($billing->fromArray($address2), $order->getBilling());
+        $this->assertEquals(1, count($order->getDetails()));
+        $orderItem = $order->getDetails()[0];
+        $this->assertEquals(44.44, $orderItem->getPrice());
+        $this->assertEquals('Milchschnitte', $orderItem->getArticleName());
+        $this->assertEquals(1, $orderItem->getQuantity());
+    }
+
+    public function testBuyWithMultipleOrderItems()
+    {
+        $address = new Address([
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'company' => 'shopware AG',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123',
+            'additionalAddressLine1' => 'oben',
+            'additionalAddressLine2' => 'klingeln',
+        ]);
+        $orderNumber = $this->productFromShop->buy(new Order([
+            'orderShop' => '3',
+            'localOrderId' => rand(0, 99999),
+            'deliveryAddress' => $address,
+            'billingAddress' => $address,
+            'products' => [
+                new OrderItem([
+                    'count' => 1,
+                    'product' => new Product([
+                        'shopId' => '3',
+                        'sourceId' => '2',
+                        'price' => 44.44,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Milchschnitte',
+                        'categories' => []
+                    ])
+                ]),
+                new OrderItem([
+                    'count' => 3,
+                    'product' => new Product([
+                        'shopId' => '3',
+                        'sourceId' => '4',
+                        'price' => 55.87,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Fritteusen-Bountys',
+                        'categories' => []
+                    ])
+                ])
+            ]
+        ]));
+
+        $order = $this->getOrderByNumber($orderNumber);
+        $shipping = new Shipping();
+        $billing = new Billing();
+        $this->assertEquals($orderNumber, $order->getNumber());
+        $this->assertEquals($shipping->fromArray($address), $order->getShipping());
+        $this->assertEquals($billing->fromArray($address), $order->getBilling());
+        $this->assertEquals(2, count($order->getDetails()));
+        $orderItem = $order->getDetails()[0];
+        $this->assertEquals(44.44, $orderItem->getPrice());
+        $this->assertEquals('Milchschnitte', $orderItem->getArticleName());
+        $this->assertEquals(1, $orderItem->getQuantity());
+        $orderItem = $order->getDetails()[1];
+        $this->assertEquals(55.87, $orderItem->getPrice());
+        $this->assertEquals('Fritteusen-Bountys', $orderItem->getArticleName());
+        $this->assertEquals(3, $orderItem->getQuantity());
     }
 
     /**

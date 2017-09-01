@@ -160,6 +160,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function tearDown()
     {
+        $this->db->exec('DELETE FROM `s_plugin_connect_categories_to_local_categories`');
         $this->db->exec('DELETE FROM `s_plugin_connect_categories`');
         $this->db->exec('DELETE FROM `s_plugin_connect_product_to_categories`');
         $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9898%"');

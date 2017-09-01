@@ -336,6 +336,9 @@ class ProductFromShop implements ProductFromShopBase
 
         return [
             'company' => $address->company ?: '',
+            'department' => $address->department ?: '',
+            'additionalAddressLine1' => $address->additionalAddressLine1 ?: '',
+            'additionalAddressLine2' => $address->additionalAddressLine2 ?: '',
             'salutation' => 'mr',
             'lastName' => $address->surName,
             'firstName' => $address->firstName,

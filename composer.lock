@@ -85,7 +85,7 @@
                 "source": "https://github.com/shopware/Connect-SDK/tree/master",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-07-21 05:57:48"
+            "time": "2017-07-21T05:57:48+00:00"
         }
     ],
     "packages-dev": [
@@ -115,7 +115,7 @@
                 "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-06-01 06:09:40"
+            "time": "2017-06-01T06:09:40+00:00"
         }
     ],
     "aliases": [],

@@ -12,6 +12,7 @@ use Shopware\Connect\Struct\PriceRange;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
 use Shopware\Bundle\StoreFrontBundle\Struct\Media;
@@ -61,7 +62,7 @@ class LocalProductQueryTest extends ConnectTestHelper
 
         $this->db = Shopware()->Db();
         $this->manager = Shopware()->Models();
-        $this->config = new Config($this->manager);
+        $this->config = ConfigFactory::getConfigInstance();
         $this->createArticle();
 
         $this->translations = [
@@ -163,7 +164,7 @@ class LocalProductQueryTest extends ConnectTestHelper
     {
         if (!$this->localProductQuery) {
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-            $configComponent = new Config(Shopware()->Models());
+            $configComponent = ConfigFactory::getConfigInstance();
 
             $this->localProductQuery = new LocalProductQuery(
                 Shopware()->Models(),

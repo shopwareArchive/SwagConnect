@@ -76,7 +76,9 @@ class ImportServiceTest extends ConnectTestHelper
                 new PDO(Shopware()->Db()->getConnection()),
                 new RandomStringGenerator(),
                 Shopware()->Db()
-            )
+            ),
+            Shopware()->Container()->get('CategoryDenormalization'),
+            Shopware()->Container()->get('shopware_attribute.data_persister')
         );
     }
 

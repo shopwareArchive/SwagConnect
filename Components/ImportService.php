@@ -524,7 +524,7 @@ class ImportService
         foreach ($categories as $category) {
             $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
 
-            foreach($articleIds as $articleId) {
+            foreach ($articleIds as $articleId) {
                 $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
                 $this->dataPersister->persist(
                     [

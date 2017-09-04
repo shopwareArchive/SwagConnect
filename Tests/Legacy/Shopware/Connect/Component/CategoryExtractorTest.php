@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
@@ -120,6 +121,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
             $this->db->insert('s_plugin_connect_categories', $category);
             $categoryId = $this->db->lastInsertId();
 
+            $this->db->insert('s_plugin_connect_categories_to_local_categories', ['local_category_id' => 1, 'remote_category_id' => $categoryId]);
+
             $this->db->insert('s_plugin_connect_product_to_categories', [
                 'connect_category_id' => $categoryId,
                 'articleID' => $this->articleA->getId(),
@@ -144,7 +147,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                ConfigFactory::getConfigInstance()
             ),
             $this->configurationGateway,
             $randomStringGenerator,
@@ -677,7 +680,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                ConfigFactory::getConfigInstance()
             ),
             $this->configurationGateway,
             $randomStringGenerator,

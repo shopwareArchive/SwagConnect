@@ -51,12 +51,9 @@ class DefaultCategoryResolver implements CategoryResolver
         $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(['categoryKey' => array_keys($categories)]);
 
         foreach ($remoteCategoriesModels as $remoteCategory) {
-            $localCategory = $remoteCategory->getLocalCategory();
-            if (!$localCategory) {
-                continue;
+            if ($remoteCategory->hasLocalCategories()) {
+                $localCategories = array_merge($localCategories, $remoteCategory->getLocalCategories());
             }
-
-            $localCategories[] = $localCategory;
         }
 
         return $localCategories;

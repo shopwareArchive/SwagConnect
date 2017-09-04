@@ -35,11 +35,10 @@ function loadControllers()
     $controllers = [
         'Frontend/Connect.php',
         'Frontend/ConnectProductGateway.php',
-
         'Widgets/Connect.php',
-
         'Backend/ConnectConfig.php',
         'Frontend/ConnectProductGateway.php',
+        'Backend/Connect.php',
         'Backend/ConnectGateway.php',
         'Backend/LastChanges.php',
         'Backend/Import.php',

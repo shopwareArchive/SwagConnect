@@ -7,10 +7,10 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
-use ShopwarePlugins\Connect\Components\Config;
 
 class ConnectExportTest extends ConnectTestHelper
 {
@@ -43,13 +43,13 @@ class ConnectExportTest extends ConnectTestHelper
         parent::setUp();
 
         $this->manager = Shopware()->Models();
-        $this->config = new Config($this->manager);
+        $this->config = ConfigFactory::getConfigInstance();
         $this->connectExport = new ConnectExport(
             $this->getHelper(),
             $this->getSDK(),
             $this->manager,
             new ProductsAttributesValidator(),
-            new Config($this->manager),
+            $this->config,
             new ErrorHandler(),
             Shopware()->Container()->get('events')
         );

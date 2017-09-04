@@ -134,7 +134,6 @@ class DefaultCategoryResolver implements CategoryResolver
             if (!in_array($currentProductCategory->getConnectCategoryId(), $assignedCategoryIds)) {
                 //DELETE PRODUCT ASSIGNMENT
                 $this->manager->remove($currentProductCategory);
-                $this->manager->flush();
             }
         }
     }

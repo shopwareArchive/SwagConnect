@@ -26,14 +26,20 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     private $remoteCategoryRepository;
 
     /**
+     * @var ModelManager
+     */
+    private $manager;
+
+    /**
      * @before
      */
     public function prepareMocks()
     {
         $this->remoteCategoryRepository = $this->createMock(RemoteCategoryRepository::class);
+        $this->manager = $this->createMock(ModelManager::class);
 
         $this->defaultCategoryResolver = new DefaultCategoryResolver(
-            $this->createMock(ModelManager::class),
+            $this->manager,
             $this->remoteCategoryRepository,
             $this->createMock(ProductToRemoteCategoryRepository::class)
         );
@@ -43,6 +49,12 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     {
         $articleId = 4;
         $categories = ['Category 1'];
+
+        $this->manager->expects($this->exactly(2))
+            ->method('flush');
+
+        $this->manager->expects($this->never())
+            ->method('remove');
 
         $this->defaultCategoryResolver->storeRemoteCategories($categories, $articleId);
     }

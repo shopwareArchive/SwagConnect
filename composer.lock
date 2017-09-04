@@ -56,12 +56,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "26310a899ae3eb17a8f6bdc83974059cd7cac89e"
+                "reference": "5cd177fbc9c33b9f0fde95fc27da15a170e90307"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/26310a899ae3eb17a8f6bdc83974059cd7cac89e",
-                "reference": "26310a899ae3eb17a8f6bdc83974059cd7cac89e",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/5cd177fbc9c33b9f0fde95fc27da15a170e90307",
+                "reference": "5cd177fbc9c33b9f0fde95fc27da15a170e90307",
                 "shasum": ""
             },
             "require-dev": {
@@ -86,7 +86,7 @@
                 "source": "https://github.com/shopware/Connect-SDK/tree/master",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-08-30 14:52:53"
+            "time": "2017-09-04 06:13:50"
         }
     ],
     "packages-dev": [

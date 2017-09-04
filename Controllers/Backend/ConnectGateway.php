@@ -9,6 +9,7 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\CSRFWhitelistAware;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 
 /**
  * @category  Shopware
@@ -69,7 +70,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Ac
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new Config(Shopware()->Models());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

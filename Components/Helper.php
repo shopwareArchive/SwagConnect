@@ -530,7 +530,7 @@ class Helper
     {
         foreach ($products as &$p) {
             if ($p->attributes['unit']) {
-                $configComponent = new Config($this->manager);
+                $configComponent = ConfigFactory::getConfigInstance();
                 /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
                 $unitMapper = new UnitMapper(
                     $configComponent,

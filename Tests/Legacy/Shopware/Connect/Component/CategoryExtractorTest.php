@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
@@ -146,7 +147,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                ConfigFactory::getConfigInstance()
             ),
             $this->configurationGateway,
             $randomStringGenerator,
@@ -679,7 +680,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                new \ShopwarePlugins\Connect\Components\Config($this->em)
+                ConfigFactory::getConfigInstance()
             ),
             $this->configurationGateway,
             $randomStringGenerator,

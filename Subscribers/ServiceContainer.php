@@ -16,6 +16,7 @@ use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
@@ -25,7 +26,6 @@ use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\Components\DependencyInjection\Container;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Category\Category as CategoryModel;
 use Shopware\Models\Article\Article as ArticleModel;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
@@ -92,7 +92,7 @@ class ServiceContainer implements SubscriberInterface
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            new Config($this->manager),
+            ConfigFactory::getConfigInstance(),
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );
@@ -134,7 +134,7 @@ class ServiceContainer implements SubscriberInterface
     public function onRestApiRequest()
     {
         return new RestApiRequest(
-            new Config($this->manager)
+            ConfigFactory::getConfigInstance()
         );
     }
 
@@ -147,7 +147,7 @@ class ServiceContainer implements SubscriberInterface
             $this->manager,
             $this->manager->getRepository(CategoryModel::class),
             $this->manager->getRepository(RemoteCategory::class),
-            new Config($this->manager)
+            ConfigFactory::getConfigInstance()
         );
 
         return new ImportService(

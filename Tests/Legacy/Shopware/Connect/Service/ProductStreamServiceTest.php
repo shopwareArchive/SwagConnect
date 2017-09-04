@@ -8,10 +8,10 @@
 namespace Tests\ShopwarePlugins\Connect\Service;
 
 use Shopware\Components\ProductStream\RepositoryInterface;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Components\Config;
 
 class ProductStreamServiceTest extends ConnectTestHelper
 {
@@ -42,7 +42,7 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $this->productStreamService = new ProductStreamService(
             new ProductStreamRepository($manager, $this->createMock(RepositoryInterface::class)),
             $manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute'),
-            new Config($manager),
+            ConfigFactory::getConfigInstance(),
             $container->get('shopware_search.product_search'),
             $container->get('shopware_storefront.context_service')
         );

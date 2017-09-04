@@ -7,7 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 
@@ -261,6 +261,6 @@ class ConfigTest extends ConnectTestHelper
 
     private function getConfigComponent()
     {
-        return new Config(Shopware()->Models());
+        return ConfigFactory::getConfigInstance();
     }
 }

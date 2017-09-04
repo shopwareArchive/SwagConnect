@@ -11,10 +11,14 @@ use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Helper;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
  * Loads various template extensions
+ *
+ * Class TemplateExtension
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class TemplateExtension implements SubscriberInterface
 {
@@ -183,9 +187,8 @@ class TemplateExtension implements SubscriberInterface
 
         $shop = $this->sdk->getShop($product->shopId);
 
-        $modelsManager = Shopware()->Models();
         /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config($modelsManager);
+        $configComponent = ConfigFactory::getConfigInstance();
         $view->assign([
             'connectProduct' => $product,
             'connectShop' => $shop,

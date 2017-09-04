@@ -23,6 +23,7 @@ use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use Shopware\Connect\SDK;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 
 class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
 {
@@ -1210,7 +1211,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     public function getConfigComponent()
     {
         if ($this->configComponent === null) {
-            $this->configComponent = new Config($this->getModelManager());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

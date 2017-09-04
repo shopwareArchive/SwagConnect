@@ -19,6 +19,12 @@ use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
+/**
+ * Cronjob callback
+ *
+ * Class CronJob
+ * @package ShopwarePlugins\Connect\Subscribers
+ */
 class CronJob implements SubscriberInterface
 {
     /**

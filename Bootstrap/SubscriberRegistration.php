@@ -11,17 +11,10 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\SDK;
-use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
-use ShopwarePlugins\Connect\Components\Logger;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
-use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
-use ShopwarePlugins\Connect\Subscribers\Article;
-use ShopwarePlugins\Connect\Subscribers\ArticleList;
-use ShopwarePlugins\Connect\Subscribers\BasketWidget;
-use ShopwarePlugins\Connect\Subscribers\Category;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use ShopwarePlugins\Connect\Subscribers\ControllerPath;
@@ -206,7 +199,7 @@ class SubscriberRegistration
             ),
             new ProductStreams(
                 $this->connectFactory->getConnectExport(),
-                new Config($this->modelManager),
+                $this->config,
                 $this->helper,
                 $this->SDK,
                 $this->container->get('db')
@@ -220,6 +213,61 @@ class SubscriberRegistration
             ),
             new Supplier($this->container->get('dbal_connection'))
         ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getSubscribersForUnverifiedKeys()
+    {
+        return [
+            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
+            $this->getLifecycleSubscriber()
+        ];
+    }
+
+    /**
+     * These subscribers will only be used, once the user has verified his api key
+     * This will prevent the users from having shopware Connect extensions in their frontend
+     * even if they cannot use shopware Connect due to the missing / wrong api key
+     *
+     * @return array
+     */
+    private function getSubscribersForVerifiedKeys()
+    {
+        $subscribers = [
+            new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
+            $this->createCheckoutSubscriber(),
+            new \ShopwarePlugins\Connect\Subscribers\Voucher(),
+            new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
+            new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
+            new \ShopwarePlugins\Connect\Subscribers\Javascript(),
+            new \ShopwarePlugins\Connect\Subscribers\Less(),
+            $this->getLifecycleSubscriber()
+
+        ];
+
+        return $subscribers;
+    }
+
+    /**
+     * Creates checkout subscriber
+     *
+     * @return Checkout
+     */
+    private function createCheckoutSubscriber()
+    {
+        $checkoutSubscriber = new Checkout(
+            $this->modelManager,
+            $this->eventManager
+        );
+        foreach ($checkoutSubscriber->getListeners() as $listener) {
+            if ($listener->getName() === 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
+                $listener->setPosition(-1);
+            }
+        }
+
+        return $checkoutSubscriber;
     }
 
     /**
@@ -292,7 +340,7 @@ class SubscriberRegistration
         return new ProductStreamService(
             new ProductStreamRepository($this->modelManager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            new Config($this->modelManager),
+            $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );

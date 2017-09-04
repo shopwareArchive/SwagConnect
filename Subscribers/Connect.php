@@ -10,8 +10,12 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use Shopware;
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 
+/**
+ * Class Connect
+ * @package ShopwarePlugins\Connect\Subscribers
+ */
 class Connect implements SubscriberInterface
 {
     const MARKETPLACE_NAME = 'Shopware Connect';

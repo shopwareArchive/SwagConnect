@@ -1,14 +1,11 @@
 <?php
-//$mock = $this->createMock(Repository::class);
-//$mock->method('my_method')->willReturn(123);
-
 /**
  * (c) shopware AG <info@shopware.com>
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
+namespace ShopwarePlugins\Connect\Tests\Unit\Components\CategoryResolver;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;

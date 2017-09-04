@@ -13,6 +13,7 @@ use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Property;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
@@ -23,7 +24,6 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
@@ -109,7 +109,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models()),
+            ConfigFactory::getConfigInstance(),
             new ErrorHandler(),
             Shopware()->Container()->get('events')
         );
@@ -392,7 +392,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getHelper(),
             Shopware()->Models(),
             $this->getImageImport(),
-            new Config(Shopware()->Models()),
+            ConfigFactory::getConfigInstance(),
             new VariantConfigurator(
                 $manager,
                 new PdoProductTranslationsGateway(Shopware()->Db())

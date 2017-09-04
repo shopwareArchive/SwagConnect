@@ -5,6 +5,8 @@
  * file that was distributed with this source code.
  */
 
+use ShopwarePlugins\Connect\Components\ConfigFactory;
+
 /**
  * Class Shopware_Controllers_Backend_Import
  */
@@ -452,7 +454,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $this->getModelManager(),
                 $this->getCategoryRepository(),
                 $this->getRemoteCategoryRepository(),
-                new \ShopwarePlugins\Connect\Components\Config($this->getModelManager())
+                ConfigFactory::getConfigInstance()
             );
         }
 

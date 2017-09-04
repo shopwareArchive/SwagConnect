@@ -15,6 +15,7 @@ use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
@@ -63,7 +64,7 @@ class ProductToShopTest extends ConnectTestHelper
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            ConfigFactory::getConfigInstance(),
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -474,12 +475,12 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
-        $config =  new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
+        $config =  ConfigFactory::getConfigInstance();
         $productToShop = new ProductToShop(
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            $config,
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())

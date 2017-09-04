@@ -10,7 +10,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\ProductStream\ProductStream;
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
@@ -226,7 +226,7 @@ class CronJob extends BaseSubscriber
     private function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new Config(Shopware()->Models());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

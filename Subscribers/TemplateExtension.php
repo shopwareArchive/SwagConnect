@@ -7,7 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
@@ -183,9 +183,8 @@ class TemplateExtension extends BaseSubscriber
 
         $shop = $sdk->getShop($product->shopId);
 
-        $modelsManager = Shopware()->Models();
         /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-        $configComponent = new Config($modelsManager);
+        $configComponent = ConfigFactory::getConfigInstance();
         $view->assign([
             'connectProduct' => $product,
             'connectShop' => $shop,

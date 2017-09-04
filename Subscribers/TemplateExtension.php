@@ -9,7 +9,6 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
-use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;

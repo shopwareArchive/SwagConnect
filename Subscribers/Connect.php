@@ -10,7 +10,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use Shopware;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\Config;
 
 /**
  * Class Connect

@@ -334,6 +334,7 @@ class Lifecycle implements SubscriberInterface
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         if (!$detail->getActive() && $this->config->getConfig('excludeInactiveProducts')) {
             $this->connectExport->syncDeleteDetail($detail);
+
             return;
         }
 

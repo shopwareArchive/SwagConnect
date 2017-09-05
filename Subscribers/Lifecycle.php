@@ -48,6 +48,11 @@ class Lifecycle implements SubscriberInterface
     private $connectExport;
 
     /**
+     * @var int
+     */
+    private $autoUpdateProducts;
+
+    /**
      * @param ModelManager $modelManager
      * @param Helper $helper
      * @param SDK $sdk
@@ -66,6 +71,7 @@ class Lifecycle implements SubscriberInterface
         $this->sdk = $sdk;
         $this->config = $config;
         $this->connectExport = $connectExport;
+        $this->autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
     }
 
     /**
@@ -328,16 +334,14 @@ class Lifecycle implements SubscriberInterface
         $attribute = $this->helper->getConnectAttributeByModel($detail);
         if (!$detail->getActive() && $this->config->getConfig('excludeInactiveProducts')) {
             $this->connectExport->syncDeleteDetail($detail);
-
             return;
         }
 
-        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
-        if ($autoUpdateProducts == 1 || $force === true) {
+        if ($this->isAutoUpdateEnabled($force)) {
             $this->connectExport->export(
                 [$attribute->getSourceId()], null
             );
-        } elseif ($autoUpdateProducts == 2) {
+        } elseif ($this->autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
@@ -358,18 +362,26 @@ class Lifecycle implements SubscriberInterface
             return;
         }
 
-        $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
-        if ($autoUpdateProducts == 1 || $force === true) {
+        if ($this->isAutoUpdateEnabled($force)) {
             $sourceIds = $this->helper->getSourceIdsFromArticleId($article->getId());
 
             $this->connectExport->export($sourceIds, null);
-        } elseif ($autoUpdateProducts == 2) {
+        } elseif ($this->autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
                 ['article_id' => $article->getId()]
             );
         }
+    }
+
+    /**
+     * @param bool $force
+     * @return bool
+     */
+    private function isAutoUpdateEnabled($force)
+    {
+        return $this->autoUpdateProducts == Config::UPDATE_AUTO || $force === true;
     }
 
     /**

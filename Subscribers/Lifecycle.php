@@ -68,6 +68,9 @@ class Lifecycle implements SubscriberInterface
         $this->connectExport = $connectExport;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
         return [

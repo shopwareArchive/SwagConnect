@@ -87,6 +87,9 @@ class ProductStreams implements SubscriberInterface
         return Shopware()->Container()->get('swagconnect.product_stream_service');
     }
 
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     */
     public function preProductStream(\Enlight_Event_EventArgs $args)
     {
         /** @var $subject \Enlight_Controller_Action */

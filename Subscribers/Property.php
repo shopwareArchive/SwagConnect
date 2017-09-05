@@ -111,7 +111,12 @@ class Property implements SubscriberInterface
         }
     }
 
-    public function markRecordsAsConnect($data, $modelName)
+    /**
+     * @param array $data
+     * @param string $modelName
+     * @return array
+     */
+    public function markRecordsAsConnect(array $data, $modelName)
     {
         $result = [];
 
@@ -134,7 +139,11 @@ class Property implements SubscriberInterface
         return $result;
     }
 
-    public function markAssignsAsConnect($data)
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function markAssignsAsConnect(array $data)
     {
         // The set assigns display assigned Groups
         // The "Groups" in the frontend are actually "s_filter_options" in the database and the entity is called Option ?!

@@ -12,6 +12,9 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 class OrderDocument implements SubscriberInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
         return [

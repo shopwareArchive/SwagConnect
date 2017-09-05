@@ -45,7 +45,8 @@ class ArticleList implements SubscriberInterface
     /**
      * If the 'connect' filter is checked, only show products imported from connect
      *
-     * @param   \Enlight_Event_EventArgs $args
+     * @param \Enlight_Event_EventArgs $args
+     * @return array
      */
     public function onFilterArticle(\Enlight_Event_EventArgs $args)
     {

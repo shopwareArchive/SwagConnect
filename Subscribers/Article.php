@@ -19,6 +19,7 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
 use Shopware\Models\Article\Detail;
+use Shopware\Models\Attribute\CustomerGroup as CustomerGroupAttribute;
 
 /**
  * Class Article
@@ -468,7 +469,7 @@ class Article implements SubscriberInterface
      */
     public function getConnectCustomerGroup()
     {
-        $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        $repo = $this->modelManager->getRepository(CustomerGroupAttribute::class);
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
         $model = $repo->findOneBy(['connectGroup' => true]);
 

@@ -10,6 +10,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use ShopwarePlugins\Connect\Components\Helper;
 use Shopware\Models\Payment\Repository as PaymentRepository;
+use ShopwarePlugins\Connect\Services\PaymentService;
 
 class PaymentSubscriber implements SubscriberInterface
 {
@@ -39,7 +40,7 @@ class PaymentSubscriber implements SubscriberInterface
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
@@ -50,7 +51,7 @@ class PaymentSubscriber implements SubscriberInterface
     }
 
     /**
-     * @return mixed
+     * @return PaymentService
      */
     public function getPaymentService()
     {

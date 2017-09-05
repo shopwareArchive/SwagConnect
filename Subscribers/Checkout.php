@@ -96,7 +96,7 @@ class Checkout implements SubscriberInterface
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
@@ -613,7 +613,7 @@ class Checkout implements SubscriberInterface
         }
 
         $paymentRepository = $this->manager->getRepository(Payment::class);
-        /** @var PaymentSubscriber $payment */
+        /** @var Payment $payment */
         $payment = $paymentRepository->find($paymentId);
 
         if (!$payment) {

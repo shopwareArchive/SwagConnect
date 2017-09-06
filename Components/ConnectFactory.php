@@ -196,7 +196,8 @@ class ConnectFactory
                 $manager->getRepository('Shopware\Models\Category\Category'),
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $this->getConfigComponent()
-            ) :
+            )
+            :
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),

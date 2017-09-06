@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
@@ -59,7 +60,8 @@ class ImportServiceTest extends ConnectTestHelper
             $this->manager,
             $this->categoryRepository,
             $this->remoteCategoryRepository,
-            ConfigFactory::getConfigInstance()
+            ConfigFactory::getConfigInstance(),
+            $this->manager->getRepository(ProductToRemoteCategory::class)
         );
 
         $this->importService = new ImportService(

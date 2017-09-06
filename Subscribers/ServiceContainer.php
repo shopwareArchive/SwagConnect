@@ -15,7 +15,7 @@ use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
@@ -42,21 +42,27 @@ class ServiceContainer extends BaseSubscriber
     /** @var Container */
     private $container;
 
+    /** @var Config */
+    private $config;
+
     /**
      * ServiceContainer constructor.
      * @param ModelManager $manager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param Container $container
+     * @param Config $config
      */
     public function __construct(
         ModelManager $manager,
         Enlight_Components_Db_Adapter_Pdo_Mysql $db,
-        Container $container
+        Container $container,
+        Config $config
     ) {
         parent::__construct();
         $this->manager = $manager;
         $this->db = $db;
         $this->container = $container;
+        $this->config = $config;
     }
 
     public function getSubscribedEvents()
@@ -85,7 +91,7 @@ class ServiceContainer extends BaseSubscriber
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            ConfigFactory::getConfigInstance(),
+            $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );
@@ -120,9 +126,7 @@ class ServiceContainer extends BaseSubscriber
 
     public function onRestApiRequest()
     {
-        return new RestApiRequest(
-            ConfigFactory::getConfigInstance()
-        );
+        return new RestApiRequest($this->config);
     }
 
     /**
@@ -167,7 +171,7 @@ class ServiceContainer extends BaseSubscriber
             $this->manager,
             $this->manager->getRepository(CategoryModel::class),
             $this->manager->getRepository(RemoteCategory::class),
-            ConfigFactory::getConfigInstance(),
+            $this->config,
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }

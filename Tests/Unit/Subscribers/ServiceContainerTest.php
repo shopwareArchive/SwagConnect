@@ -14,6 +14,7 @@ use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Services\PaymentService;
@@ -53,6 +54,11 @@ class ServiceContainerTest extends AbstractConnectUnitTest
     private $db;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @before
      */
     public function prepareMocks()
@@ -60,11 +66,13 @@ class ServiceContainerTest extends AbstractConnectUnitTest
         $this->modelManager = $this->createMock(ModelManager::class);
         $this->diContainer = $this->createMock(Container::class);
         $this->db = $this->createMock(Enlight_Components_Db_Adapter_Pdo_Mysql::class);
+        $this->config = $this->createMock(Config::class);
 
         $this->serviceContainer = new ServiceContainer(
             $this->modelManager,
             $this->db,
-            $this->diContainer
+            $this->diContainer,
+            $this->config
         );
     }
 

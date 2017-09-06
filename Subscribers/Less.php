@@ -37,7 +37,7 @@ class Less implements SubscriberInterface
 
             //less files to compile
             [
-                dirname(__DIR__) . '/Views/responsive/frontend/_public/src/less/all.less'
+                dirname(__DIR__) . '/Views/frontend/_public/src/less/all.less'
             ],
 
             //import directory

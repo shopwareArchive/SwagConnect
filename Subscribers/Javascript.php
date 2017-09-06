@@ -31,7 +31,7 @@ class Javascript implements SubscriberInterface
     public function addJsFiles(\Enlight_Event_EventArgs $args)
     {
         $jsPath = [
-            dirname(__DIR__) . '/Views/responsive/frontend/_public/src/js/jquery.connect.js'
+            dirname(__DIR__) . '/Views/frontend/_public/src/js/jquery.connect.js'
         ];
 
         return new ArrayCollection($jsPath);

@@ -22,7 +22,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Progress', {
     /**
      * Contains the batch size for each request of the generation.
      */
-    batchSize: 5,
+    batchSize: 50,
 
     /**
      * Contains array with article detail ids which have to exported

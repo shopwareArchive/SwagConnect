@@ -899,11 +899,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             url: '{url action=exportStream}',
             method: 'POST',
             params: {
+                'offset': offset,
+                'limit': limit,
                 'streamIds[]': streamIds,
                 'currentStreamIndex': currentStreamIndex,
-                'articleDetailIds[]': articleDetailIds,
-                'offset': offset,
-                'limit': limit
+                'articleDetailIds[]': articleDetailIds
             },
             success: function(response, opts) {
                 var sticky = false;

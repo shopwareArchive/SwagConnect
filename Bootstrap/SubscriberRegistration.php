@@ -317,6 +317,15 @@ class SubscriberRegistration
             ),
             new Dispatches($this->helper),
             new Javascript(),
+            new TemplateExtension(
+                $this->SDK,
+                $this->helper
+            ),
+            new Voucher(
+                $this->helper,
+                $this->connectFactory->getBasketHelper(),
+                $this->container->get('snippets')
+            ),
             new Less()
         ];
     }
@@ -329,15 +338,6 @@ class SubscriberRegistration
         return [
             new DisableConnectInFrontend(
                 $this->container->get('db')
-            ),
-            new TemplateExtension(
-                $this->SDK,
-                $this->helper
-            ),
-            new Voucher(
-                $this->helper,
-                $this->connectFactory->getBasketHelper(),
-                $this->container->get('snippets')
             )
         ];
     }

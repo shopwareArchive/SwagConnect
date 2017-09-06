@@ -28,7 +28,7 @@ class LessTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(ArrayCollection::class, $result);
         $this->assertEquals([], $result[0]->getConfig());
-        $this->assertStringEndsWith('/Views/responsive/frontend/_public/src/less/all.less', $result[0]->getFiles()[0]);
+        $this->assertStringEndsWith('/Views/frontend/_public/src/less/all.less', $result[0]->getFiles()[0]);
     }
 
     public function test_subscribed_events()

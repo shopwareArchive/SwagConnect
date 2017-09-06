@@ -37,7 +37,7 @@ class CheckoutTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame(
             [
-                'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => [ 'fixBasketForConnect' => '-1' ],
+                'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => [ 'fixBasketForConnect', '-1' ],
                 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'reserveConnectProductsOnCheckoutFinish',
                 'Shopware_Modules_Admin_Regenerate_Session_Id' => 'updateSessionId',
             ],

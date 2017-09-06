@@ -19,8 +19,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $remoteCategoryRepository;
 
-    private $autoCategoryResolver;
-
     private $categoryRepository;
 
     private $logger;

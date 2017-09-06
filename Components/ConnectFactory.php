@@ -416,7 +416,7 @@ class ConnectFactory
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new Config($this->getModelManager());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

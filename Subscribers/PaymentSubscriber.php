@@ -108,27 +108,26 @@ class PaymentSubscriber implements SubscriberInterface
         $hasConnectProduct = $this->helper->hasBasketConnectProducts($sessionId);
 
         if ($hasConnectProduct === true) {
-            foreach ($paymentMeans as $key => &$payment) {
-                /** @var \Shopware\Models\Payment\Payment $payment */
-                $payment = $this->paymentRepository->find($payment['id']);
-                if (!$payment) {
+            foreach ($paymentMeans as $key => $payment) {
+                /** @var \Shopware\Models\Payment\Payment $paymentModel */
+                $paymentModel = $this->paymentRepository->find($payment['id']);
+                if (!$paymentModel) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                if (!$payment->getAttribute()) {
+                if (!$paymentModel->getAttribute()) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                $attribute = $payment->getAttribute();
+                $attribute = $paymentModel->getAttribute();
                 if (method_exists($attribute, 'getConnectIsAllowed') === true
                     && $attribute->getConnectIsAllowed() == 0) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
             }
-
             $args->setReturn($paymentMeans);
         }
     }

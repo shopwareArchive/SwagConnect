@@ -402,13 +402,20 @@ class ProductStreamRepository implements RepositoryInterface
     public function countProductsInStaticStream($streamId)
     {
         $builder = $this->manager->getConnection()->createQueryBuilder();
-
-        return $builder->select('COUNT(ad.id) as productCount')
+        $builder->select('COUNT(ad.id) as productCount')
             ->from('s_articles_details', 'ad')
-            ->leftJoin('ad', 's_product_streams_selection', 'pss', 'ad.articleID = pss.article_id')
-            ->where('pss.stream_id = :streamId')
-            ->setParameter('streamId', $streamId)
-            ->execute()->fetchColumn();
+            ->leftJoin('ad', 's_product_streams_selection', 'pss', 'ad.articleID = pss.article_id');
+
+        if (is_array($streamId)) {
+            $streamIds = array_map('intval', $streamId);
+            $builder->where('pss.stream_id IN (:streamIds)')
+                ->setParameter('streamIds', $streamIds, Connection::PARAM_INT_ARRAY);
+        } else {
+            $builder->where('pss.stream_id = :streamId')
+                ->setParameter('streamId', (int) $streamId);
+        }
+
+        return $builder->execute()->fetchColumn();
     }
 
     /**

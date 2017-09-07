@@ -887,13 +887,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
     },
 
-    startStreamExport: function(streamIds, articleDetailIds, batchSize, window, currentStreamIndex, offset) {
+    startStreamExport: function(streamIds, sourceIdCount, batchSize, window, currentStreamIndex, offset) {
         offset = parseInt(offset) || 0;
         var limit = batchSize;
 
         var me = this,
-            list = me.getExportStreamList(),
-            messages = [];
+            list = me.getExportStreamList();
 
         Ext.Ajax.request({
             url: '{url action=exportStream}',
@@ -902,8 +901,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 'offset': offset,
                 'limit': limit,
                 'streamIds[]': streamIds,
-                'currentStreamIndex': currentStreamIndex,
-                'articleDetailIds[]': articleDetailIds
+                'currentStreamIndex': currentStreamIndex
             },
             success: function(response, opts) {
                 var sticky = false;
@@ -913,7 +911,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         if (!operation.success && operation.messages) {
                             if(operation.messages.price && operation.messages.price.length > 0){
                                 var priceMsg = Ext.String.format(
-                                    me.messages.priceErrorMessage, operation.messages.price.length, articleDetailIds.length
+                                    me.messages.priceErrorMessage, operation.messages.price.length, sourceIdCount
                                 );
                                 me.createGrowlMessage(me.messages.exportStreamTitle, priceMsg, true);
                             }
@@ -936,18 +934,17 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             false
                         );
 
-                        window.progressField.updateText(Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length));
+                        window.progressField.updateText(Ext.String.format(window.snippets.process, operation.newOffset, sourceIdCount));
                         window.progressField.updateProgress(
-                            operation.newOffset / articleDetailIds.length,
-                            Ext.String.format(window.snippets.process, operation.newOffset, articleDetailIds.length),
+                            operation.newOffset / sourceIdCount,
+                            Ext.String.format(window.snippets.process, operation.newOffset, sourceIdCount),
                             false
                         );
 
                         if (operation.hasMoreIterations) {
-                            articleDetailIds = operation.articleDetailIds;
                             currentStreamIndex = operation.nextStreamIndex;
                             offset = operation.newOffset;
-                            me.startStreamExport(streamIds, articleDetailIds, batchSize, window, currentStreamIndex, offset);
+                            me.startStreamExport(streamIds, sourceIdCount, batchSize, window, currentStreamIndex, offset);
                         } else {
                             window.inProcess = false;
                             window.cancelButton.setDisabled(false);
@@ -1136,7 +1133,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             url: '{url action=getStreamProductsCount}',
             method: 'POST',
             params: {
-                'id': ids[0]
+                'ids[]': ids
             },
             success: function(response) {
                 if (response.responseText) {
@@ -1159,7 +1156,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     } else {
                         Ext.create('Shopware.apps.Connect.view.export.stream.Progress', {
                             streamIds: ids,
-                            articleDetailIds: operation.sourceIds
+                            sourceIdsCount: operation.sourceIdsCount
                         }).show();
                     }
                 }

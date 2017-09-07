@@ -24,6 +24,7 @@ use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Subscribers\Connect;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 
 class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
 {
@@ -1313,26 +1314,20 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
     public function getStreamProductsCountAction()
     {
-        $streamId = $this->request->getParam('id', null);
+        $streamIds = $this->request->getParam('ids', []);
 
-        if ($streamId === null) {
+        if (empty($streamIds)) {
             $this->View()->assign([
                 'success' => false,
                 'message' => 'No stream selected'
             ]);
         }
 
-        $streamsAssignments = $this->getStreamAssignments($streamId);
-
-        if (!$streamsAssignments) {
-            return;
-        }
-
-        $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
+        $sourceIdsCount = $this->getProductStreamService()->countProductsInStaticStream($streamIds);
 
         $this->View()->assign([
             'success' => true,
-            'sourceIds' => $sourceIds
+            'sourceIdsCount' => $sourceIdsCount
         ]);
     }
 
@@ -1342,7 +1337,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         $currentStreamIndex = $this->request->getParam('currentStreamIndex', 0);
         $offset = $this->request->getParam('offset', 0);
         $limit = $this->request->getParam('limit', 1);
-        $articleDetailIds = $this->request->getParam('articleDetailIds', []);
 
         $streamId = $streamIds[$currentStreamIndex];
 
@@ -1364,14 +1358,15 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
 
         $nextStreamIndex = $currentStreamIndex;
-        $newArticleDetailIds = $articleDetailIds;
         $newOffset = $offset + $limit;
         $hasMoreIterations = true;
 
         $processedStreams = $currentStreamIndex;
+        $sourceIdsCount = $this->getProductStreamService()->countProductsInStaticStream($streamIds);
 
         //In this case all the products from a single stream were exported successfully but there are still more streams to be processed.
-        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
+        if ($newOffset > $sourceIdsCount && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
+            //todo@sb: Change status and set message in 1 query
             $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $productStreamService->log($streamId, 'Success');
             $nextStreamIndex = $currentStreamIndex + 1;
@@ -1382,23 +1377,20 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
                 return;
             }
 
-            $sourceIds = $this->getHelper()->getArticleSourceIds($streamsAssignments->getArticleIds());
-            $newArticleDetailIds = $sourceIds;
             $newOffset = 0;
         }
 
         //In this case all the products from all streams were exported successfully.
-        if ($newOffset > count($articleDetailIds) && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
+        if ($newOffset > $sourceIdsCount && $currentStreamIndex + 1 > (count($streamIds) - 1)) {
             $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             $hasMoreIterations = false;
-            $newOffset = count($articleDetailIds);
+            $newOffset = $sourceIdsCount;
             $processedStreams = count($streamIds);
         }
 
 
         $this->View()->assign([
             'success' => true,
-            'articleDetailIds' => $newArticleDetailIds,
             'nextStreamIndex' => $nextStreamIndex,
             'newOffset' => $newOffset,
             'hasMoreIterations' => $hasMoreIterations,
@@ -1458,6 +1450,10 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
     }
 
+    /**
+     * @param int $streamId
+     * @return bool|ProductStreamsAssignments
+     */
     private function getStreamAssignments($streamId)
     {
         $productStreamService = $this->getProductStreamService();
@@ -1476,7 +1472,13 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         return $streamsAssignments;
     }
 
-    private function exportStreamProducts($streamId, $sourceIds, $streamsAssignments)
+    /**
+     * @param int $streamId
+     * @param array $sourceIds
+     * @param ProductStreamsAssignments $streamsAssignments
+     * @return bool
+     */
+    private function exportStreamProducts($streamId, array $sourceIds, $streamsAssignments)
     {
         $productStreamService = $this->getProductStreamService();
         $connectExport = $this->getConnectExport();

@@ -25,9 +25,9 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Progress', {
     batchSize: 50,
 
     /**
-     * Contains array with article detail ids which have to exported
+     * Number of sourceIds which will be exported
      */
-    articleDetailIds: [],
+    sourceIdsCount: 0,
 
     /**
      * Contains array with article detail ids which have to exported
@@ -75,7 +75,7 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Progress', {
         me.progressField = Ext.create('Ext.ProgressBar', {
             animate: true,
             name: 'productExportBar',
-            text: Ext.String.format(me.snippets.process, 0, me.articleDetailIds.length),
+            text: Ext.String.format(me.snippets.process, 0, me.sourceIdsCount),
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',
@@ -108,11 +108,11 @@ Ext.define('Shopware.apps.Connect.view.export.stream.Progress', {
                 me.startButton.setDisabled(true);
                 me.cancelButton.setDisabled(true);
 
-                me.fireEvent('startStreamExport', me.streamIds, me.articleDetailIds, me.batchSize, me);
+                me.fireEvent('startStreamExport', me.streamIds, me.sourceIdsCount, me.batchSize, me);
             }
         });
 
-        var totalTime = me.articleDetailIds.length / me.batchSize * 1.5 / 60;
+        var totalTime = me.sourceIdsCount / me.batchSize * 1.5 / 60;
         totalTime = Ext.Number.toFixed(totalTime, 0);
 
         var notice = Ext.create('Ext.container.Container', {

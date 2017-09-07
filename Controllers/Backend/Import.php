@@ -58,14 +58,9 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 $categories = $this->getCategoryExtractor()->getStreamsByShopId($parent);
                 break;
             case strpos($parent, '_stream_') > 0:
-//                list($shopId, $stream) = explode('_stream_', $parent);
-//                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
-//                break;
-                $this->View()->assign([
-                    'success' => false,
-                    'message' => "please select a category",
-                ]);
-                return;
+                list($shopId, $stream) = explode('_stream_', $parent);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTreeByStream($stream, $shopId, $hideMapped);
+                break;
             default:
                 // given id must have following structure:
                 // shopId5~/english/boots/nike
@@ -101,9 +96,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $stream = $this->request->getParam('stream', null);
 
         if (strpos($category, '_stream_') > 0) {
-            $stream = explode('_stream_', $category);
-            $stream = $stream[1];
-            $category = null;
+
+            $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
+
+            $this->View()->assign([
+                'success' => false,
+                'message' => $snippets->get(
+                    'import/message/dont_select_streams',
+                    'Please select a category instead of a stream',
+                    false
+                ),
+            ]);
+
+            return;
         }
 
         $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category,

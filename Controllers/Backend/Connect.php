@@ -1366,9 +1366,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
         //In this case all the products from a single stream were exported successfully but there are still more streams to be processed.
         if ($newOffset > $sourceIdsCount && $currentStreamIndex + 1 <= (count($streamIds) - 1)) {
-            //todo@sb: Change status and set message in 1 query
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
-            $productStreamService->log($streamId, 'Success');
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT, 'Success');
             $nextStreamIndex = $currentStreamIndex + 1;
 
             $streamsAssignments = $this->getStreamAssignments($streamIds[$nextStreamIndex]);
@@ -1496,8 +1494,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
 
         if (!empty($errorMessages)) {
-            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-
             $errorMessagesText = '';
             $displayedErrorTypes = [
                 ErrorHandler::TYPE_DEFAULT_ERROR,
@@ -1508,7 +1504,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
                 $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
             }
 
-            $productStreamService->log($streamId, $errorMessagesText);
+            $productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $errorMessagesText);
 
             $this->View()->assign([
                 'success' => false,

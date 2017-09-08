@@ -7,7 +7,6 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
-use Doctrine\DBAL\DBALException;
 use Shopware\Connect\Struct\Product;
 use Shopware\CustomModels\Connect\AttributeRepository;
 use Shopware\Models\Article\Article as ProductModel;

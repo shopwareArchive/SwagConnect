@@ -396,7 +396,7 @@ class ProductStreamRepository implements RepositoryInterface
     }
 
     /**
-     * @param $streamId
+     * @param int|array $streamId
      * @return bool|string
      */
     public function countProductsInStaticStream($streamId)

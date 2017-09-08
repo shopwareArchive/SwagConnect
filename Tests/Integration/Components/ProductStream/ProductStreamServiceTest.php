@@ -10,7 +10,6 @@ namespace ShopwarePlugins\Connect\Tests\Integration\Components\ProductStream;
 use Shopware\Bundle\SearchBundle\ProductSearchInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
-use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
@@ -29,7 +28,7 @@ class ProductStreamServiceTest extends \PHPUnit_Framework_TestCase
     private $productStreamAttributeRepository;
 
     /**
-     * @var Connection $connection
+     * @var Connection
      */
     private $connection;
 

@@ -111,7 +111,7 @@ class ImportTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('category', '3_stream_Awesome products');
+            ->setPost('category', 'Awesome products');
         $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());

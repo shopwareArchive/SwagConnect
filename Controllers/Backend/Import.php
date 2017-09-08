@@ -95,7 +95,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         $stream = $this->request->getParam('stream', null);
 
-        if ($category && strpos($category, '_stream_') > 0) {
+        if (strpos($category, '_stream_') > 0) {
 
             $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
 

@@ -104,7 +104,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 'message' => $snippets->get(
                     'import/message/dont_select_streams',
                     'Please select a category instead of a stream',
-                    false
+                    true
                 ),
             ]);
 

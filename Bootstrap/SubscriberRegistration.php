@@ -12,6 +12,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
@@ -175,12 +176,13 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,
                 $this->db,
-                $this->container
+                $this->container,
+                $this->config
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),
             new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
                 $this->connectFactory->getConnectExport(),
-                new Config($this->modelManager),
+                ConfigFactory::getConfigInstance(),
                 $this->helper
             ),
             new \ShopwarePlugins\Connect\Subscribers\Property(

@@ -32,7 +32,6 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
-use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
 
 /**

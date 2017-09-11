@@ -22,7 +22,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
             ->getMock();
 
         $this->configMock = $this->getMockBuilder('\ShopwarePlugins\Connect\Components\Config')
-            ->setConstructorArgs([Shopware()->Models()])
+            ->setConstructorArgs([Shopware()->Models(), Shopware()->Container()->get('shopware.plugin.cached_config_reader')])
             ->setMethods(['getConfig'])
             ->getMock();
 

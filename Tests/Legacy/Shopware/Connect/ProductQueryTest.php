@@ -8,7 +8,7 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\Struct\Verificator\Product;
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
@@ -70,7 +70,7 @@ class ProductQueryTest extends ConnectTestHelper
                 ->willReturn([]);
 
             /** @var \ShopwarePlugins\Connect\Components\Config $configComponent */
-            $configComponent = new Config(Shopware()->Models());
+            $configComponent = ConfigFactory::getConfigInstance();
 
             $this->localMediaService = $this->getMockBuilder('\\ShopwarePlugins\\Connect\\Components\\MediaService\\LocalMediaService')
                 ->disableOriginalConstructor()

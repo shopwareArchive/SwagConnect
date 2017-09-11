@@ -15,12 +15,16 @@ use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Property;
+use Shopware\Models\Category\Category;
+use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 
 class ProductToShopTest extends ConnectTestHelper
 {
@@ -63,7 +67,7 @@ class ProductToShopTest extends ConnectTestHelper
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            ConfigFactory::getConfigInstance(),
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -72,8 +76,8 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new DefaultCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
             Shopware()->Container()->get('events')
@@ -474,12 +478,12 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
-        $config =  new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
+        $config =  ConfigFactory::getConfigInstance();
         $productToShop = new ProductToShop(
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            $config,
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -488,9 +492,10 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new AutoCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $config
+                $this->modelManager->getRepository(Category::class),
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $config,
+                $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
             Shopware()->Container()->get('events')

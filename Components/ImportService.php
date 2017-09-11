@@ -10,7 +10,7 @@ namespace ShopwarePlugins\Connect\Components;
 use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Components\MultiEdit\Resource\Product;
+use Shopware\Components\MultiEdit\Resource\ResourceInterface;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Article\Repository as ArticleRepository;
@@ -24,7 +24,7 @@ class ImportService
     private $manager;
 
     /**
-     * @var \Shopware\Components\MultiEdit\Resource\Product
+     * @var \Shopware\Components\MultiEdit\Resource\ResourceInterface
      */
     private $productResource;
 
@@ -60,7 +60,7 @@ class ImportService
 
     public function __construct(
         ModelManager $manager,
-        Product $productResource,
+        ResourceInterface $productResource,
         CategoryRepository $categoryRepository,
         ArticleRepository$articleRepository,
         RemoteCategoryRepository $remoteCategoryRepository,

@@ -9,7 +9,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 
 use Shopware\Connect\SDK;
 use Shopware;
-use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 
 /**
  * Class Connect
@@ -125,7 +125,7 @@ class Connect extends BaseSubscriber
     private function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new Config(Shopware()->Models());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

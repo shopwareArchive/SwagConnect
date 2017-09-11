@@ -19,8 +19,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $remoteCategoryRepository;
 
-    private $autoCategoryResolver;
-
     private $categoryRepository;
 
     private $logger;
@@ -383,7 +381,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $modelManager = Shopware()->Models();
             $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
-                $this->getAutoCategoryResolver(),
+                $this->container->get('swagconnect.auto_category_resolver'),
                 $this->getPdoGateway(),
                 new \ShopwarePlugins\Connect\Components\RandomStringGenerator(),
                 Shopware()->Db()
@@ -440,23 +438,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private function getAutoCategoryReverter()
     {
         return $this->container->get('swagconnect.auto_category_reverter');
-    }
-
-    /**
-     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
-     */
-    private function getAutoCategoryResolver()
-    {
-        if (!$this->autoCategoryResolver) {
-            $this->autoCategoryResolver = new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                $this->getModelManager(),
-                $this->getCategoryRepository(),
-                $this->getRemoteCategoryRepository(),
-                new \ShopwarePlugins\Connect\Components\Config($this->getModelManager())
-            );
-        }
-
-        return $this->autoCategoryResolver;
     }
 
     /**

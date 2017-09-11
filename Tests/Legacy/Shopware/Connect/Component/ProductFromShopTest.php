@@ -16,6 +16,7 @@ use Shopware\Connect\Struct\OrderItem;
 use Shopware\Connect\Struct\Product;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Article;
+use Shopware\Models\Order\Billing;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ProductFromShop;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
@@ -62,8 +63,6 @@ class ProductFromShopTest extends ConnectTestHelper
         $this->user = $this->getRandomUser();
         $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
-
-
         $this->productFromShop = new ProductFromShop(
             $this->getHelper(),
             Shopware()->Models(),
@@ -78,18 +77,22 @@ class ProductFromShopTest extends ConnectTestHelper
         $args->setReturn($this->user);
     }
 
-    public function testBuy()
+    public function testBuyWithSameBillingAndShippingAddress()
     {
         $address = new Address([
+            'department' => 'Sales',
             'firstName' => 'John',
             'surName' => 'Doe',
             'zip' => '48153',
+            'company' => 'shopware AG',
             'street' => 'Eggeroderstraße',
             'streetNumber' => '6',
             'city' => 'Schöppingen',
             'country' => 'DEU',
             'email' => 'info@shopware.com',
-            'phone' => '0000123'
+            'phone' => '0000123',
+            'additionalAddressLine1' => 'oben',
+            'additionalAddressLine2' => 'klingeln',
         ]);
         $orderNumber = $this->productFromShop->buy(new Order([
             'orderShop' => '3',
@@ -115,7 +118,104 @@ class ProductFromShopTest extends ConnectTestHelper
         ]));
 
         $order = $this->getOrderByNumber($orderNumber);
-        $this->assertEquals($orderNumber, $order->getNumber());
+
+        $this->assertEquals('John', $order->getShipping()->getFirstName());
+        $this->assertEquals('Doe', $order->getShipping()->getLastName());
+        $this->assertEquals('48153', $order->getShipping()->getZipCode());
+        $this->assertEquals('shopware AG', $order->getShipping()->getCompany());
+        $this->assertEquals('Eggeroderstraße', $order->getShipping()->getStreet());
+        $this->assertEquals('Schöppingen', $order->getShipping()->getCity());
+        $this->assertEquals('oben', $order->getShipping()->getAdditionalAddressLine1());
+        $this->assertEquals('klingeln', $order->getShipping()->getAdditionalAddressLine2());
+        $this->assertEquals('Sales', $order->getShipping()->getDepartment());
+
+        $this->assertEquals('John', $order->getBilling()->getFirstName());
+        $this->assertEquals('Doe', $order->getBilling()->getLastName());
+        $this->assertEquals('48153', $order->getBilling()->getZipCode());
+        $this->assertEquals('shopware AG', $order->getBilling()->getCompany());
+        $this->assertEquals('Eggeroderstraße', $order->getBilling()->getStreet());
+        $this->assertEquals('Schöppingen', $order->getBilling()->getCity());
+        $this->assertEquals('oben', $order->getBilling()->getAdditionalAddressLine1());
+        $this->assertEquals('klingeln', $order->getBilling()->getAdditionalAddressLine2());
+        $this->assertEquals('Sales', $order->getBilling()->getDepartment());
+    }
+
+    public function testBuyWithDifferentBillingAndShippingAddress()
+    {
+        $address1 = new Address([
+            'department' => 'Sales',
+            'firstName' => 'John',
+            'surName' => 'Doe',
+            'zip' => '48153',
+            'company' => 'shopware AG',
+            'street' => 'Eggeroderstraße',
+            'streetNumber' => '6',
+            'city' => 'Schöppingen',
+            'country' => 'DEU',
+            'email' => 'info@shopware.com',
+            'phone' => '0000123',
+            'additionalAddressLine1' => 'oben',
+            'additionalAddressLine2' => 'klingeln',
+        ]);
+        $address2 = new Address([
+            'department' => 'DEV',
+            'firstName' => 'Jonny',
+            'surName' => 'Depp',
+            'zip' => '42354',
+            'company' => 'eCommerce UG',
+            'street' => 'Hype-Boulevard',
+            'streetNumber' => '66',
+            'city' => 'LA',
+            'country' => 'DEU',
+            'email' => 'e@commerce.com',
+            'phone' => '987123',
+            'additionalAddressLine1' => 'keine Klingel',
+            'additionalAddressLine2' => 'einfach laut klopfen',
+        ]);
+        $orderNumber = $this->productFromShop->buy(new Order([
+            'orderShop' => '3',
+            'localOrderId' => rand(0, 99999),
+            'deliveryAddress' => $address1,
+            'billingAddress' => $address2,
+            'products' => [
+                new OrderItem([
+                    'count' => 1,
+                    'product' => new Product([
+                        'shopId' => '3',
+                        'sourceId' => '2',
+                        'price' => 44.44,
+                        'purchasePrice' => 33.33,
+                        'fixedPrice' => false,
+                        'currency' => 'EUR',
+                        'availability' => 3,
+                        'title' => 'Milchschnitte',
+                        'categories' => []
+                    ])
+                ])
+            ]
+        ]));
+
+        $order = $this->getOrderByNumber($orderNumber);
+
+        $this->assertEquals('John', $order->getShipping()->getFirstName());
+        $this->assertEquals('Doe', $order->getShipping()->getLastName());
+        $this->assertEquals('48153', $order->getShipping()->getZipCode());
+        $this->assertEquals('shopware AG', $order->getShipping()->getCompany());
+        $this->assertEquals('Eggeroderstraße', $order->getShipping()->getStreet());
+        $this->assertEquals('Schöppingen', $order->getShipping()->getCity());
+        $this->assertEquals('oben', $order->getShipping()->getAdditionalAddressLine1());
+        $this->assertEquals('klingeln', $order->getShipping()->getAdditionalAddressLine2());
+        $this->assertEquals('Sales', $order->getShipping()->getDepartment());
+
+        $this->assertEquals('Jonny', $order->getBilling()->getFirstName());
+        $this->assertEquals('Depp', $order->getBilling()->getLastName());
+        $this->assertEquals('42354', $order->getBilling()->getZipCode());
+        $this->assertEquals('eCommerce UG', $order->getBilling()->getCompany());
+        $this->assertEquals('Hype-Boulevard', $order->getBilling()->getStreet());
+        $this->assertEquals('LA', $order->getBilling()->getCity());
+        $this->assertEquals('keine Klingel', $order->getBilling()->getAdditionalAddressLine1());
+        $this->assertEquals('einfach laut klopfen', $order->getBilling()->getAdditionalAddressLine2());
+        $this->assertEquals('DEV', $order->getBilling()->getDepartment());
     }
 
     /**

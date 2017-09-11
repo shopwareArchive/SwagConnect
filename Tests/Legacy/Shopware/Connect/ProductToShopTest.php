@@ -504,11 +504,13 @@ class ProductToShopTest extends ConnectTestHelper
         $product = $this->getProduct();
         $parentCategory1 = 'MassImport#' . rand(1, 999999999);
         $childCategory = 'MassImport#' . rand(1, 999999999);
+        $childCategory2 = 'MassImport#' . rand(1, 999999999);
         $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
         $product->categories = array_merge($product->categories, [
             '/' . strtolower($parentCategory1) => $parentCategory1,
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
+            '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) . '/' . strtolower($childCategory2) => $childCategory2,
             '/' . strtolower($parentCategory2) => $parentCategory2,
         ]);
 
@@ -529,7 +531,7 @@ class ProductToShopTest extends ConnectTestHelper
 
         $assignCategories = $article->getCategories();
         $this->assertEquals(1, count($assignCategories));
-        $this->assertEquals($childCategory, $assignCategories[0]->getName());
+        $this->assertEquals($childCategory2, $assignCategories[0]->getName());
     }
 
     public function testAutomaticallyCreateUnits()

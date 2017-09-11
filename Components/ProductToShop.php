@@ -250,6 +250,9 @@ class ProductToShop implements ProductToShopBase
         $hasMappedCategory = count($categories) > 0;
         $detailAttribute->setConnectMappedCategory($hasMappedCategory);
         foreach ($categories as $remoteCategory) {
+            if ($model->getCategories()->contains($remoteCategory->getParent())) {
+                $model->removeCategory($remoteCategory->getParent());
+            }
             $model->addCategory($remoteCategory);
         }
 

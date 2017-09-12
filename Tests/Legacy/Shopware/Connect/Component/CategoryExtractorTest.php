@@ -8,6 +8,7 @@
 namespace Tests\ShopwarePlugins\Connect\Component;
 
 use ShopwarePlugins\Connect\Components\ConfigFactory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 
 class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelper
@@ -147,7 +148,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                ConfigFactory::getConfigInstance()
+                ConfigFactory::getConfigInstance(),
+                $this->em->getRepository(ProductToRemoteCategory::class)
             ),
             $this->configurationGateway,
             $randomStringGenerator,
@@ -161,6 +163,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
 
     public function tearDown()
     {
+        $this->db->exec('DELETE FROM `s_plugin_connect_categories_to_local_categories`');
         $this->db->exec('DELETE FROM `s_plugin_connect_categories`');
         $this->db->exec('DELETE FROM `s_plugin_connect_product_to_categories`');
         $this->db->exec('DELETE FROM sw_connect_change WHERE c_entity_id LIKE "9898%"');
@@ -680,7 +683,8 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em,
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                ConfigFactory::getConfigInstance()
+                ConfigFactory::getConfigInstance(),
+                $this->em->getRepository(ProductToRemoteCategory::class)
             ),
             $this->configurationGateway,
             $randomStringGenerator,

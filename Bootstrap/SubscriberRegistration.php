@@ -176,7 +176,8 @@ class SubscriberRegistration
             new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
                 $this->modelManager,
                 $this->db,
-                $this->container
+                $this->container,
+                $this->config
             ),
             new \ShopwarePlugins\Connect\Subscribers\Supplier(),
             new \ShopwarePlugins\Connect\Subscribers\ProductStreams(

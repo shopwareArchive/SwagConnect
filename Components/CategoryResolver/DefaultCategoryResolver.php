@@ -8,39 +8,9 @@
 namespace ShopwarePlugins\Connect\Components\CategoryResolver;
 
 use ShopwarePlugins\Connect\Components\CategoryResolver;
-use Shopware\CustomModels\Connect\ProductToRemoteCategory;
-use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
-use Shopware\CustomModels\Connect\RemoteCategory;
-use Shopware\CustomModels\Connect\RemoteCategoryRepository;
-use Shopware\Components\Model\ModelManager;
 
-class DefaultCategoryResolver implements CategoryResolver
+class DefaultCategoryResolver extends CategoryResolver
 {
-    /**
-     * @var ModelManager
-     */
-    private $manager;
-
-    /**
-     * @var \Shopware\CustomModels\Connect\RemoteCategoryRepository
-     */
-    private $remoteCategoryRepository;
-
-    /**
-     * @var \Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository
-     */
-    private $productToRemoteCategoryRepository;
-
-    public function __construct(
-        ModelManager $manager,
-        RemoteCategoryRepository $remoteCategoryRepository,
-        ProductToRemoteCategoryRepository $productToRemoteCategoryRepository
-    ) {
-        $this->manager = $manager;
-        $this->remoteCategoryRepository = $remoteCategoryRepository;
-        $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
-    }
-
     /**
      * {@inheritdoc}
      */

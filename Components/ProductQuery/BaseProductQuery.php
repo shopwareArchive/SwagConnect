@@ -31,8 +31,11 @@ abstract class BaseProductQuery
     protected $attributeMapping = [
         'weight' => Product::ATTRIBUTE_WEIGHT,
         'unit' => Product::ATTRIBUTE_UNIT,
-        'referenceUnit' => 'ref_quantity',
-        'purchaseUnit' => 'quantity'
+        'referenceUnit' => Product::ATTRIBUTE_REFERENCE_QUANTITY,
+        'purchaseUnit' => Product::ATTRIBUTE_QUANTITY,
+        'packageUnit' => Product::ATTRIBUTE_PACKAGEUNIT,
+        'basicUnit' => Product::ATTRIBUTE_BASICUNIT,
+        'manufacturerNumber' => Product::ATTRIBUTE_MANUFACTURERNUMBER
     ];
 
     /**

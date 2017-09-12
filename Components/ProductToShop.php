@@ -32,7 +32,6 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
-use Shopware\Models\Article\Price;
 use Shopware\Models\Article\Supplier;
 
 /**
@@ -382,6 +381,21 @@ class ProductToShop implements ProductToShopBase
         // set weight
         if (array_key_exists('weight', $product->attributes) && $product->attributes['weight']) {
             $detail->setWeight($product->attributes['weight']);
+        }
+
+        //set package unit
+        if (array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $product->attributes)) {
+            $detail->setPackUnit($product->attributes[Product::ATTRIBUTE_PACKAGEUNIT]);
+        }
+
+        //set basic unit
+        if (array_key_exists(Product::ATTRIBUTE_BASICUNIT, $product->attributes)) {
+            $detail->setMinPurchase($product->attributes[Product::ATTRIBUTE_BASICUNIT]);
+        }
+
+        //set manufacturer no.
+        if (array_key_exists(Product::ATTRIBUTE_MANUFACTURERNUMBER, $product->attributes)) {
+            $detail->setSupplierNumber($product->attributes[Product::ATTRIBUTE_MANUFACTURERNUMBER]);
         }
 
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally

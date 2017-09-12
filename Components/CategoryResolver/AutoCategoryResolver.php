@@ -73,51 +73,47 @@ class AutoCategoryResolver extends CategoryResolver
                 'name' => $node['name'],
                 'parentId' => 1,
             ]);
+            // if connectTree has a Subtree starting with Spanish but MerchantShop has no mainCategory Spanish
+            // the categories below Spanish won't be created
+            if ($mainCategory == null) {
+                continue;
+            }
 
-            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToEntities($node['children'], $mainCategory));
+            $remoteCategories = $this->convertTreeToKeys($node['children'], $mainCategory->getId());
         }
 
         // Collect all, not only leaf categories. Some customers use them to assign products.
         // Do not fetch them from database by name as before.
         // it is possible to have more than one subcategory "Boots" - CON-4589
         return array_map(function ($category) {
-            return $category['model'];
+            return $category['categoryKey'];
         }, $remoteCategories);
     }
 
     /**
-     * Loop categories tree recursive and
-     * create same structure with entities
+     * Loop through category tree and fetch ids
      *
      * @param array $node
-     * @param null Category $parent
+     * @param string $parentId
+     * @param bool $returnOnlyLeafs
      * @param array $categories
      * @return array
      */
-    public function convertTreeToEntities(array $node, Category $parent = null, $categories = [])
+    public function convertTreeToKeys(array $node, $parentId, $returnOnlyLeafs = true, $categories = [])
     {
-        if (!$parent) {
-            //full load of category entity
-            $parent = $this->config->getDefaultShopCategory();
-        }
-
         foreach ($node as $category) {
-            $categoryModel = $this->categoryRepository->findOneBy([
-                'name' => $category['name'],
-                'parentId' => $parent->getId()
-            ]);
+            $categoryId = $this->checkAndCreateLocalCategory($category, $parentId);
 
-            if (!$categoryModel) {
-                $categoryModel = $this->convertNodeToEntity($category, $parent);
+            if ((!$returnOnlyLeafs) || (empty($category['children']))) {
+                $categories[] = [
+                    'categoryKey' => $categoryId,
+                    'parentId' => $parentId,
+                    'remoteCategory' => $category['categoryId']
+                ];
             }
 
-            $categories[] = [
-                'model' => $categoryModel,
-                'categoryKey' => $category['categoryId'],
-            ];
-
             if (!empty($category['children'])) {
-                $categories = $this->convertTreeToEntities($category['children'], $categoryModel, $categories);
+                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $returnOnlyLeafs, $categories);
             }
         }
 
@@ -126,13 +122,17 @@ class AutoCategoryResolver extends CategoryResolver
 
     /**
      * @param array $category
-     * @param Category $parent
+     * @param string $parentId
      * @return Category
      */
-    public function convertNodeToEntity(array $category, Category $parent)
+    public function convertNodeToEntity(array $category, $parentId)
     {
         $categoryModel = new Category();
         $categoryModel->fromArray($this->getCategoryData($category['name']));
+
+        $parent = $this->categoryRepository->findOneBy([
+            'id' => $parentId
+        ]);
         $categoryModel->setParent($parent);
 
         $this->manager->persist($categoryModel);
@@ -226,5 +226,24 @@ class AutoCategoryResolver extends CategoryResolver
                     'attribute6' => null,
                 ],
         ];
+    }
+
+    /**
+     * @param array $category
+     * @param string $parentId
+     * @return Category
+     */
+    private function checkAndCreateLocalCategory($category, $parentId)
+    {
+        $categoryModel = $this->categoryRepository->findOneBy([
+            'name' => $category['name'],
+            'parentId' => $parentId
+        ]);
+
+        if (!$categoryModel) {
+            $categoryModel = $this->convertNodeToEntity($category, $parentId);
+        }
+
+        return $categoryModel->getId();
     }
 }

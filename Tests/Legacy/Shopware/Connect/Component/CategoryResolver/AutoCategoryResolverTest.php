@@ -11,7 +11,6 @@ use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use Shopware\Models\Category\Category;
 
 class AutoCategoryResolverTest extends ConnectTestHelper
 {
@@ -46,6 +45,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         $defaultCategory = $this->categoryRepo->findOneBy([
             'id' => $defaultCategoryId
         ]);
+        $this->assertEquals('Deutsch', $defaultCategory->getName());
 
         $bootsCategory = $this->categoryRepo->findOneBy([
             'name' => 'Boots',
@@ -54,7 +54,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         if (!$bootsCategory) {
             $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
-                'categoryId' => '/spanish/boots'
+                'categoryId' => '/deutsch/boots'
             ], $defaultCategory);
         }
 
@@ -66,7 +66,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         if (!$nikeCategory) {
             $nikeCategory = $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Nike',
-                'categoryId' => '/spanish/nike'
+                'categoryId' => '/deutsch/nike'
             ], $defaultCategory);
         }
 
@@ -78,33 +78,30 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         if (!$nikeBootsCategory) {
             $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
-                'categoryId' => '/spanish/nike/boots'
+                'categoryId' => '/deutsch/nike/boots'
             ], $nikeCategory);
         }
 
         $categories = [
-            '/spanish/nike/tshirts' => 'Tshirts',
-            '/spanish/nike' => 'Nike',
-            '/spanish/adidas/boots' => 'Boots',
-            '/spanish/adidas' => 'Adidas',
-            '/spanish' => 'Spanish',
+            '/deutsch/nike/tshirts' => 'Tshirts',
+            '/deutsch/nike' => 'Nike',
+            '/deutsch/adidas/boots' => 'Boots',
+            '/deutsch/adidas' => 'Adidas',
+            '/deutsch' => 'Deutsch',
         ];
 
         $categoryModels = $this->categoryResolver->resolve($categories);
 
-        //Spanish category must not be created
-        $this->assertNull($this->categoryRepo->findOneByName('Spanish'));
         $this->assertEquals(
             $defaultCategoryId,
             Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', ['Adidas'])
         );
 
-        $this->assertCount(4, $categoryModels);
-        $this->assertEquals($nikeCategory->getId(), $categoryModels[0]->getId());
-        $this->assertEquals('Tshirts', $categoryModels[1]->getName());
-        $this->assertEquals('Adidas', $categoryModels[2]->getName());
-        $this->assertEquals('Boots', $categoryModels[3]->getName());
+        $this->assertCount(2, $categoryModels);
+        $this->assertEquals('Tshirts', $this->categoryRepo->findOneById($categoryModels[0])->getName());
+        $this->assertEquals('Boots', $this->categoryRepo->findOneById($categoryModels[1])->getName());
 
+        unset($categories['/deutsch']);
         Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("' . implode('","', $categories) . '")');
     }
 

@@ -218,7 +218,8 @@ class ConnectFactory
                 $this->getProductTranslationsGateway(),
                 $categoryResolver,
                 $this->getConnectPDOGateway(),
-                $eventManager
+                $eventManager,
+                $this->getContainer()->get('CategoryDenormalization')
             ),
             new ProductFromShop(
                 $helper,

@@ -9,6 +9,7 @@ namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
 use Shopware\Connect\Gateway;
+use Shopware\Components\Model\CategoryDenormalization;
 use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
@@ -100,6 +101,11 @@ class ProductToShop implements ProductToShopBase
     private $eventManager;
 
     /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -110,6 +116,7 @@ class ProductToShop implements ProductToShopBase
      * @param CategoryResolver $categoryResolver
      * @param Gateway $connectGateway
      * @param \Enlight_Event_EventManager $eventManager
+     * @param CategoryDenormalization $categoryDenormalization
      */
     public function __construct(
         Helper $helper,
@@ -121,7 +128,8 @@ class ProductToShop implements ProductToShopBase
         ProductTranslationsGateway $productTranslationsGateway,
         CategoryResolver $categoryResolver,
         Gateway $connectGateway,
-        \Enlight_Event_EventManager $eventManager
+        \Enlight_Event_EventManager $eventManager,
+        CategoryDenormalization $categoryDenormalization
     ) {
         $this->helper = $helper;
         $this->manager = $manager;
@@ -133,6 +141,7 @@ class ProductToShop implements ProductToShopBase
         $this->categoryResolver = $categoryResolver;
         $this->connectGateway = $connectGateway;
         $this->eventManager = $eventManager;
+        $this->categoryDenormalization = $categoryDenormalization;
     }
 
     /**
@@ -244,16 +253,6 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
-        }
-
-        $categories = $this->categoryResolver->resolve($product->categories);
-        $hasMappedCategory = count($categories) > 0;
-        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
-        foreach ($categories as $remoteCategory) {
-            if ($model->getCategories()->contains($remoteCategory->getParent())) {
-                $model->removeCategory($remoteCategory->getParent());
-            }
-            $model->addCategory($remoteCategory);
         }
 
         if (!empty($product->sku)) {
@@ -435,6 +434,20 @@ class ProductToShop implements ProductToShopBase
         }
 
         $this->manager->flush();
+
+        //article has to be flushed
+        $categories = $this->categoryResolver->resolve($product->categories);
+        $hasMappedCategory = count($categories) > 0;
+        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
+        $this->categoryDenormalization->disableTransactions();
+        foreach ($categories as $category) {
+            $this->categoryDenormalization->addAssignment($model->getId(), $category);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
+                [$model->getId(),  $category]
+            );
+        }
+        $this->categoryDenormalization->enableTransactions();
 
         $defaultCustomerGroup = $this->helper->getDefaultCustomerGroup();
         // Only set prices, if fixedPrice is active or price updates are configured

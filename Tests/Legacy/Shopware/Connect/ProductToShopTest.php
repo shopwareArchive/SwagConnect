@@ -80,7 +80,8 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 
@@ -498,15 +499,17 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
 
         $product = $this->getProduct();
-        $parentCategory1 = 'MassImport#' . rand(1, 999999999);
+        $parentCategory1 = 'Deutsch';
         $childCategory = 'MassImport#' . rand(1, 999999999);
         $childCategory2 = 'MassImport#' . rand(1, 999999999);
         $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
+        //product categories already contains "/deutsch" and "/deutsch/bücher" from $this->getProduct()
         $product->categories = array_merge($product->categories, [
             '/' . strtolower($parentCategory1) => $parentCategory1,
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
@@ -526,12 +529,27 @@ class ProductToShopTest extends ConnectTestHelper
             $childCategoryModel->getParent()->getName()
         );
 
+        $categoryRepository = Shopware()->Models()->getRepository('Shopware\Models\Category\Category');
+        /** @var \Shopware\Models\Category\Category $childCategoryModel */
+        $childCategoryModel2 = $categoryRepository->findOneBy(['name' => $childCategory2]);
+        $this->assertInstanceOf('Shopware\Models\Category\Category', $childCategoryModel2);
+        $this->assertEquals(
+            $childCategoryModel->getName(),
+            $childCategoryModel2->getParent()->getName()
+        );
+        $this->assertEquals(
+            $childCategory2,
+            $childCategoryModel2->getName()
+        );
+
         /** @var Article $article */
         $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
         $assignCategories = $article->getCategories();
-        $this->assertEquals(1, count($assignCategories));
-        $this->assertEquals($childCategory2, $assignCategories[0]->getName());
+        $this->assertEquals(2, count($assignCategories));
+        //this category is assigned to the product when it is created
+        $this->assertEquals('Bücher', $assignCategories[0]->getName());
+        $this->assertEquals($childCategory2, $assignCategories[1]->getName());
     }
 
     public function testAutomaticallyCreateUnits()

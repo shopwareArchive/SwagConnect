@@ -97,13 +97,13 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
         if (strpos($category, '_stream_') > 0) {
 
-            $snippets = Shopware()->Snippets()->getNamespace('backend/connect/view/main');
+            $snippets = $this->get('snippets')->getNamespace('backend/connect/view/main');
 
             $this->View()->assign([
                 'success' => false,
                 'message' => $snippets->get(
                     'import/message/dont_select_streams',
-                    'Please select a category instead of a stream',
+                    'Please select a Category to display its products',
                     true
                 ),
             ]);

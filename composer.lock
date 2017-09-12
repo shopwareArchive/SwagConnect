@@ -4,7 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bb6ceae4ec359f7e031180d59c9fa398",
     "content-hash": "2baf395e244d74e9d2f3624693517f20",
     "packages": [
         {
@@ -48,7 +47,7 @@
             ],
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
-            "time": "2015-07-22 18:31:08"
+            "time": "2015-07-22T18:31:08+00:00"
         },
         {
             "name": "shopware/connect-sdk",
@@ -56,12 +55,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "26310a899ae3eb17a8f6bdc83974059cd7cac89e"
+                "reference": "c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/26310a899ae3eb17a8f6bdc83974059cd7cac89e",
-                "reference": "26310a899ae3eb17a8f6bdc83974059cd7cac89e",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a",
+                "reference": "c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a",
                 "shasum": ""
             },
             "require-dev": {
@@ -86,7 +85,7 @@
                 "source": "https://github.com/shopware/Connect-SDK/tree/master",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-08-30T14:52:53+00:00"
+            "time": "2017-09-04T09:09:26+00:00"
         }
     ],
     "packages-dev": [

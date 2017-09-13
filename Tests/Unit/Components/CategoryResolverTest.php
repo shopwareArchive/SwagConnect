@@ -13,6 +13,7 @@ use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use ShopwarePlugins\Connect\Components\CategoryResolver;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Category\Repository;
 use ShopwarePlugins\Connect\Tests\Unit\Builders\RemoteCategoryBuilder;
 use ShopwarePlugins\Connect\Tests\UnitTestCaseTrait;
 
@@ -43,6 +44,11 @@ class CategoryResolverTest extends AbstractConnectUnitTest
     private $remoteProductToCategoryRepository;
 
     /**
+     * @var /Shopware/Models/Category/Repository
+     */
+    private $categoryRepository;
+
+    /**
      * @before
      */
     public function prepareMocks()
@@ -50,13 +56,15 @@ class CategoryResolverTest extends AbstractConnectUnitTest
         $this->modelManager = $this->createMock(ModelManager::class);
         $this->remoteCategoryRepository = $this->createMock(RemoteCategoryRepository::class);
         $this->remoteProductToCategoryRepository = $this->createMock(ProductToRemoteCategoryRepository::class);
+        $this->categoryRepository = $this->createMock(Repository::class);
 
         $this->categoryResolver = $this->getMockForAbstractClass(
             CategoryResolver::class,
         [
             $this->modelManager,
             $this->remoteCategoryRepository,
-            $this->remoteProductToCategoryRepository
+            $this->remoteProductToCategoryRepository,
+            $this->categoryRepository
         ]
         );
     }

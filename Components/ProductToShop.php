@@ -433,12 +433,14 @@ class ProductToShop implements ProductToShopBase
             $this->manager->flush($detail);
         }
 
-        $this->manager->flush();
-
-        //article has to be flushed
         $categories = $this->categoryResolver->resolve($product->categories);
         $hasMappedCategory = count($categories) > 0;
         $detailAttribute->setConnectMappedCategory($hasMappedCategory);
+
+        //article has to be flushed
+        $this->manager->persist($detailAttribute);
+        $this->manager->flush();
+
         $this->categoryDenormalization->disableTransactions();
         foreach ($categories as $category) {
             $this->categoryDenormalization->addAssignment($model->getId(), $category);

@@ -179,14 +179,15 @@ class ServiceContainer extends BaseSubscriber
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver
      */
     public function onDefaultCategoryResolver()
     {
         return new DefaultCategoryResolver(
             $this->manager,
             $this->manager->getRepository(RemoteCategory::class),
-            $this->manager->getRepository(ProductToRemoteCategory::class)
+            $this->manager->getRepository(ProductToRemoteCategory::class),
+            $this->manager->getRepository(CategoryModel::class)
         );
     }
 }

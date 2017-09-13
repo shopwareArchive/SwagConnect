@@ -203,10 +203,9 @@ class ImportServiceTest extends ConnectTestHelper
     {
         $this->manager->getConnection()->setTransactionIsolation(\Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED);
         $this->manager->getConnection()->beginTransaction();
-        $localCategory = $this->categoryRepository->find(14);
+        $localCategory = $this->categoryRepository->find(35);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
-
 
         $this->importService->importRemoteCategory($localCategory->getId(), $remoteCategory->getCategoryKey(), $remoteCategory->getLabel());
 
@@ -215,7 +214,7 @@ class ImportServiceTest extends ConnectTestHelper
             'parent' => $localCategory->getId()
             ]);
 
-        $this->assertTrue($createdLocalCategory!=null);
+        $this->assertInstanceOf(Category::class,$createdLocalCategory);
 
         $expectedArticleCount = count(
             $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey())

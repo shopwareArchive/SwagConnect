@@ -55,7 +55,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
                 'categoryId' => '/deutsch/boots'
-            ], $defaultCategory);
+            ], $defaultCategory->getId());
         }
 
         $nikeCategory = $this->categoryRepo->findOneBy([
@@ -67,7 +67,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $nikeCategory = $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Nike',
                 'categoryId' => '/deutsch/nike'
-            ], $defaultCategory);
+            ], $defaultCategory->getId());
         }
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
@@ -79,7 +79,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             $this->categoryResolver->convertNodeToEntity([
                 'name' => 'Boots',
                 'categoryId' => '/deutsch/nike/boots'
-            ], $nikeCategory);
+            ], $nikeCategory->getId());
         }
 
         $categories = [

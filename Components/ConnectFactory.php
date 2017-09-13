@@ -201,7 +201,8 @@ class ConnectFactory
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),
+                $manager->getRepository('Shopware\Models\Category\Category')
             );
 
         return new SDK(

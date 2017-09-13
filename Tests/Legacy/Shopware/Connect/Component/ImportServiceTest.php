@@ -214,7 +214,7 @@ class ImportServiceTest extends ConnectTestHelper
             'parent' => $localCategory->getId()
             ]);
 
-        $this->assertInstanceOf(Category::class,$createdLocalCategory);
+        $this->assertInstanceOf(Category::class, $createdLocalCategory);
 
         $expectedArticleCount = count(
             $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey())

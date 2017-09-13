@@ -8,7 +8,13 @@
 namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Models\Article\Unit;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Category\Category;
+use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Helper;
+use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 
 class HelperTest extends ConnectTestHelper
 {
@@ -147,6 +153,65 @@ class HelperTest extends ConnectTestHelper
         $articleSourceId = (string) $detail->getArticle()->getId();
 
         $this->assertEquals($this->getHelper()->generateSourceId($detail->getArticle()->getMainDetail()), $articleSourceId);
+    }
+
+    public function testGetConnectCategoriesForProductAndAutResolveCategories()
+    {
+        $manager = Shopware()->Models();
+        $article = $manager->getRepository(Article::class)->findOneBy(['id' => 5]);
+        $manager->getConnection()->executeQuery(
+            'DELETE FROM `s_articles_categories` WHERE `articleID` = :articleID',
+            [':articleID' => $article->getId()]
+        );
+        //test with leaf category and not leafcategory
+        //ids come from default fixture they shouldn't change
+        $notLeafCategoryId = 9;
+        $count = $manager->getConnection()->executeQuery(
+            'SELECT COUNT(*) FROM `s_categories` WHERE `parent` = :parentID',
+            [':parentID' => $notLeafCategoryId]
+        )->fetchColumn();
+        $this->assertGreaterThan(0, $count);
+        $leafCategoryId = 14;
+        $count = $manager->getConnection()->executeQuery(
+            'SELECT COUNT(*) FROM `s_categories` WHERE `parent` = :parentID',
+            [':parentID' => $leafCategoryId]
+        )->fetchColumn();
+        $this->assertEquals(0, $count);
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+            [$article->getId(), $notLeafCategoryId]
+        );
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+            [$article->getId(), $leafCategoryId]
+        );
+
+        $categories = $this->getHelper()->getConnectCategoryForProduct($article->getId());
+
+        $autoCategoryResolver = new AutoCategoryResolver(
+            $manager,
+            $manager->getRepository(Category::class),
+            $manager->getRepository(RemoteCategory::class),
+            ConfigFactory::getConfigInstance(),
+            $manager->getRepository(ProductToRemoteCategory::class)
+        );
+
+        $categoryKeys = $autoCategoryResolver->resolve($categories);
+
+        $this->assertCount(2, $categoryKeys);
+        $this->assertGreaterThan(count($categoryKeys), count($categories));
+
+        $name = $manager->getConnection()->executeQuery(
+            'SELECT `description` FROM `s_categories` WHERE `id` = :categoryID',
+            [':categoryID' => $categoryKeys[0]]
+        )->fetchColumn();
+        $this->assertEquals('Edelbrände', $name);
+
+        $name = $manager->getConnection()->executeQuery(
+            'SELECT `description` FROM `s_categories` WHERE `id` = :categoryID',
+            [':categoryID' => $categoryKeys[1]]
+        )->fetchColumn();
+        $this->assertEquals('Freizeitwelten', $name);
     }
 
     private function resetConnectCategoryMappings()

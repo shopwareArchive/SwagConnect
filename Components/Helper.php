@@ -130,6 +130,17 @@ class Helper
         return null;
     }
 
+    /**
+     * Get article detail by his number
+     *
+     * @param string $number
+     * @return null|ProductDetail
+     */
+    public function getDetailByNumber($number)
+    {
+        return $this->manager->getRepository(ProductDetail::class)->findOneBy(['number' => $number]);
+    }
+
     public function getConnectArticleModel($sourceId, $shopId)
     {
         $builder = $this->manager->createQueryBuilder();

@@ -181,7 +181,7 @@ class ConnectFactory
              // Set the debugHost as environment vars for the DependencyResolver
             putenv("_SOCIALNETWORK_HOST={$debugHost}");
 
-            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)/', $debugHost, $matches)) {
+            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)|(connect-devops.com)/', $debugHost, $matches)) {
                 // Use local or staging url
                 putenv("_TRANSACTION_HOST=transaction.{$matches[0]}");
             }

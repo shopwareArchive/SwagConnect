@@ -206,7 +206,7 @@ class ProductToShop implements ProductToShopBase
         $isMainVariant = false;
         if ($detail === null) {
             $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
-            if ($product->groupId > 0) {
+            if ($product->groupId !== null) {
                 $model = $this->helper->getArticleByRemoteProduct($product);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
@@ -813,6 +813,9 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
+        // Do not remove flush. It's needed when remove article,
+        // because duplication of ordernumber. Even with remove before
+        // persist calls mysql throws exception "Duplicate entry"
         $this->manager->flush();
     }
 

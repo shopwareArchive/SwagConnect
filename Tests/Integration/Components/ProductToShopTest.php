@@ -93,6 +93,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $variants[2]->sku = $variants[1]->sku;
 
         foreach ($variants as $variant) {
+            $variant->groupId = 'donum';
             $this->productToShop->insertOrUpdate($variant);
         }
 
@@ -143,10 +144,10 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals($variants[1]->sku, $variants[0]->sku);
 
         $variants[3]->sku = $variants[0]->sku;
-        $this->productToShop->insertOrUpdate($variants[0]);
-        $this->productToShop->insertOrUpdate($variants[1]);
-        $this->productToShop->insertOrUpdate($variants[2]);
-        $this->productToShop->insertOrUpdate($variants[3]);
+
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
 
         $connectItems = $this->manager->getConnection()->fetchAll(
             'SELECT article_id, article_detail_id, source_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',

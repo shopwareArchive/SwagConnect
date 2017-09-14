@@ -11,11 +11,16 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\RemoteCategoryRepository;
+use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
+use ShopwarePlugins\Connect\Tests\Unit\Builders\RemoteCategoryBuilder;
 
 class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 {
+
+    use RemoteCategoryBuilder;
+
     /**
      * @var DefaultCategoryResolver
      */
@@ -52,36 +57,24 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
         );
     }
 
-    public function test_store_remote_categories_success()
+    public function testResolveCategories()
     {
-        $articleId = 4;
-        $categories = ['Category 1' => 'Category 1'];
+        $localCategory = new Category();
 
-        $this->manager->expects($this->exactly(2))
-            ->method('flush');
+        $germanCategory = $this->newRemoteCategory(3)->buildRemoteCategory();
+        $germanCategory->setCategoryKey('/deutsch');
+        $germanCategory->addLocalCategory($localCategory);
 
-        $this->manager->expects($this->never())
-            ->method('remove');
+        $bookCategory = $this->newRemoteCategory(4)->buildRemoteCategory();
+        $bookCategory->setCategoryKey('/deutsch/buecher');
 
-        $this->defaultCategoryResolver->storeRemoteCategories($categories, $articleId);
-    }
+        $this->remoteCategoryRepository
+            ->method('findBy')
+            ->with(['categoryKey' => [$germanCategory->getCategoryKey(), $bookCategory->getCategoryKey()]])
+            ->willReturn([$germanCategory, $bookCategory]);
 
-    public function test_store_remote_categories_remove_category()
-    {
-        $articleId = 4;
-        $categories = ['Category 1' => 'Category 1'];
-
-        $productToRemoteCategory = new ProductToRemoteCategory();
-        $productToRemoteCategory->setArticleId($articleId);
-        $productToRemoteCategory->setConnectCategoryId('Category 2');
-
-        $this->productToRemoteCategoryRepository->method('getArticleRemoteCategories')
-            ->with($articleId)
-            ->willReturn([$productToRemoteCategory]);
-
-        $this->manager->expects($this->once())
-            ->method('remove');
-
-        $this->defaultCategoryResolver->storeRemoteCategories($categories, $articleId);
+        $result = $this->defaultCategoryResolver->resolve([$germanCategory->getCategoryKey() => null, $bookCategory->getCategoryKey() => null]);
+        $this->assertCount(1, $result);
+        $this->assertEquals($localCategory, $result[0]);
     }
 }

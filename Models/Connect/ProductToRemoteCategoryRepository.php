@@ -9,6 +9,7 @@ namespace Shopware\CustomModels\Connect;
 
 use Shopware\Components\Model\ModelRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Shopware\Components\Model\QueryBuilder;
 
 /**
  * Class ProductToRemoteCategoryRepository
@@ -121,5 +122,39 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $query = $builder->getQuery();
 
         return $query->getResult();
+    }
+
+    /**
+     * @param int $articleId
+     * @return string[]
+     */
+    public function getArticleRemoteCategoryIds($articleId){
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('ptrc.connectCategoryId');
+        $builder->where('ptrc.articleId = :articleId');
+        $builder->setParameter('articleId', $articleId);
+
+        $query = $builder->getQuery();
+        $result = $query->getResult($query::HYDRATE_SCALAR);
+
+        $test = array_map(
+            function ($row){
+             return $row['connectCategoryId'];
+            },
+            $result
+        );
+        return $test;
+    }
+
+    /**
+     * @param int $categoryId
+     */
+    public function deleteByConnectCategoryId($categoryId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
+        $builder->where('ptrc.connectCategoryId = :ccid');
+        $builder->setParameter(':ccid', $categoryId);
+        $builder->getQuery()->execute();
     }
 }

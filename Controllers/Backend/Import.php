@@ -94,9 +94,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $stream = $this->request->getParam('stream', null);
 
         if (strpos($category, '_stream_') > 0) {
-            $stream = explode('_stream_', $category);
-            $stream = $stream[1];
-            $category = null;
+
+            $snippets = $this->get('snippets')->getNamespace('backend/connect/view/main');
+
+            $this->View()->assign([
+                'success' => false,
+                'message' => $snippets->get(
+                    'import/message/dont_select_streams',
+                    'Please select a Category to display its products',
+                    true
+                ),
+            ]);
+
+            return;
         }
 
         $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category,

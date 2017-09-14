@@ -394,10 +394,11 @@ class ProductStreamService
     }
 
     /**
-     * @param $streamId
-     * @param $status
+     * @param int $streamId
+     * @param string $status
+     * @param string $exportMessage
      */
-    public function changeStatus($streamId, $status)
+    public function changeStatus($streamId, $status, $exportMessage = null)
     {
         $streamAttr = $this->streamAttrRepository->findOneBy(['streamId' => (int) $streamId]);
 
@@ -407,12 +408,16 @@ class ProductStreamService
         }
 
         $streamAttr->setExportStatus($status);
+        if ($exportMessage !== null) {
+            $streamAttr->setExportMessage($exportMessage);
+        }
         $this->streamAttrRepository->save($streamAttr);
     }
 
     /**
      * @param $streamId
      * @param $message
+     * @deprecated Use changeStatus instead. Will be removed in version 1.2.0
      */
     public function log($streamId, $message)
     {

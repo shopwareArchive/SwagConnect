@@ -769,7 +769,10 @@ class ProductToShop implements ProductToShopBase
         $this->deleteDetail($detail);
     }
 
-    public function deleteDetail(DetailModel $detailModel)
+    /**
+     * @param DetailModel $detailModel
+     */
+    private function deleteDetail(DetailModel $detailModel)
     {
         $this->eventManager->notify(
             'Connect_Merchant_Delete_Product_Before',

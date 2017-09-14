@@ -7,8 +7,8 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
-use Doctrine\DBAL\DBALException;
 use Shopware\Connect\Struct\Product;
+use Shopware\CustomModels\Connect\AttributeRepository;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Components\Model\ModelManager;
 use Doctrine\ORM\Query;
@@ -571,44 +571,13 @@ class Helper
             return [];
         }
 
+        /** @var AttributeRepository $repo */
+        $repo = $this->manager->getRepository(ConnectAttribute::class);
+
         return array_merge(
-            $this->getSourceIds($articleIds, 1),
-            $this->getSourceIds($articleIds, 2)
+            $repo->findSourceIds($articleIds, 1),
+            $repo->findSourceIds($articleIds, 2)
         );
-    }
-
-    private function getSourceIds(array $articleIds, $kind)
-    {
-        $customProductsTableExists = false;
-        try {
-            $builder = $this->manager->getConnection()->createQueryBuilder();
-            $builder->select('id');
-            $builder->from('s_plugin_custom_products_template');
-            $builder->setMaxResults(1);
-            $builder->execute()->fetch();
-
-            $customProductsTableExists = true;
-        } catch (DBALException $e) {
-            // ignore it
-            // custom products is not installed
-        }
-
-        // main variants should be collected first, because they
-        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
-        $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->select('spci.source_id')
-            ->from('s_plugin_connect_items', 'spci')
-            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
-            ->where('sad.articleID IN (:articleIds) AND sad.kind = :kind AND spci.shop_id IS NULL')
-            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
-            ->setParameter('kind', $kind, \PDO::PARAM_INT);
-
-        if ($customProductsTableExists) {
-            $builder->leftJoin('spci', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'spci.article_id = spcptpr.article_id')
-                ->andWhere('spcptpr.template_id IS NULL');
-        }
-
-        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**

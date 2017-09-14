@@ -8,6 +8,8 @@
 namespace Shopware\CustomModels\Connect;
 
 use Shopware\Components\Model\ModelRepository;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Connection;
 
 /**
  * Class AttributeRepository
@@ -125,5 +127,44 @@ class AttributeRepository extends ModelRepository
         $builder->setMaxResults($limit);
 
         return $builder;
+    }
+
+    /**
+     * @param array $articleIds
+     * @param int $kind
+     * @return array
+     */
+    public function findSourceIds(array $articleIds, $kind)
+    {
+        $customProductsTableExists = false;
+        try {
+            $builder = $this->_em->getConnection()->createQueryBuilder();
+            $builder->select('id');
+            $builder->from('s_plugin_custom_products_template');
+            $builder->setMaxResults(1);
+            $builder->execute()->fetch();
+
+            $customProductsTableExists = true;
+        } catch (DBALException $e) {
+            // ignore it
+            // custom products is not installed
+        }
+
+        // main variants should be collected first, because they
+        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
+        $builder = $this->_em->getConnection()->createQueryBuilder();
+        $builder->select('spci.source_id')
+            ->from('s_plugin_connect_items', 'spci')
+            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
+            ->where('sad.articleID IN (:articleIds) AND sad.kind = :kind AND spci.shop_id IS NULL')
+            ->setParameter(':articleIds', $articleIds, Connection::PARAM_INT_ARRAY)
+            ->setParameter('kind', $kind, \PDO::PARAM_INT);
+
+        if ($customProductsTableExists) {
+            $builder->leftJoin('spci', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'spci.article_id = spcptpr.article_id')
+                ->andWhere('spcptpr.template_id IS NULL');
+        }
+
+        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
 }

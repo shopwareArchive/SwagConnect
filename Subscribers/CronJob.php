@@ -171,14 +171,11 @@ class CronJob extends BaseSubscriber
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             } catch (\RuntimeException $e) {
-                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-                $streamService->log($streamId, $e->getMessage());
+                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $e->getMessage());
                 continue;
             }
 
             if ($errorMessages) {
-                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR);
-
                 $errorMessagesText = '';
                 $displayedErrorTypes = [
                     ErrorHandler::TYPE_DEFAULT_ERROR,
@@ -189,7 +186,7 @@ class CronJob extends BaseSubscriber
                     $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
                 }
 
-                $streamService->log($streamId, $errorMessagesText);
+                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $errorMessagesText);
             }
         }
     }

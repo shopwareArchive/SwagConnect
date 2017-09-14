@@ -184,7 +184,9 @@ class ProductToShop implements ProductToShopBase
         if (!empty($product->sku)) {
             $number = 'SC-' . $product->shopId . '-' . $product->sku;
             $duplicatedDetail = $this->helper->getDetailByNumber($number);
-            if ($duplicatedDetail) {
+            if ($duplicatedDetail
+                && $this->helper->getConnectAttributeByModel($duplicatedDetail)->getSourceId() != $product->sourceId
+            ) {
                 $this->deleteDetail($duplicatedDetail);
             }
         } else {

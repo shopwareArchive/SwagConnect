@@ -194,24 +194,80 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $product1->sku = 'abcxyz';
         $this->productToShop->insertOrUpdate($product1);
 
+        $articleId1 = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$product1->sourceId, $product1->shopId]
+        );
+
+        $this->assertGreaterThan(0, $articleId1);
+
         $product2 = $this->getProduct();
         $product2->sku = 'abcxyz';
         $this->productToShop->insertOrUpdate($product2);
 
-        $articleId = $this->manager->getConnection()->fetchColumn(
-            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
-            [$product1->sourceId, $product1->shopId]
-        );
-        $article = $this->manager->getConnection()->fetchColumn(
+        // Verify that first article has been removed
+        $article1 = $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(id) FROM s_articles WHERE id = ?',
-            [$articleId]
+            [$articleId1]
         );
-        $this->assertEquals(0, $article);
-
-        $details = $this->manager->getConnection()->fetchColumn(
+        $this->assertEquals(0, $article1);
+        $details1 = $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(id) FROM s_articles_details WHERE articleID = ?',
-            [$articleId]
+            [$articleId1]
         );
-        $this->assertEquals(0, $details);
+
+        $this->assertEquals(0, $details1);
+
+        // Verify that second article is available in DB
+        $articleId2 = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$product2->sourceId, $product2->shopId]
+        );
+        $this->assertGreaterThan(0, $articleId2);
+        $article2 = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles WHERE id = ?',
+            [$articleId2]
+        );
+        $this->assertEquals(1, $article2);
+        $details2 = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles_details WHERE articleID = ?',
+            [$articleId2]
+        );
+        $this->assertGreaterThan(0, $details2);
+    }
+
+    /**
+     * Article won't be removed when product has same sku and sourceId.
+     */
+    public function test_update_product_with_same_sku()
+    {
+        $product = $this->getProduct();
+        $product->sku = 'abcxyz';
+        $this->productToShop->insertOrUpdate($product);
+
+        $connectItems = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$product->sourceId, $product->shopId]
+        );
+
+        $expectedArticleId = $connectItems[0]['article_id'];
+        $expectedArticleDetailId = $connectItems[0]['article_detail_id'];
+        $this->assertCount(1, $connectItems);
+        $this->assertGreaterThan(0, $expectedArticleId);
+        $this->assertGreaterThan(0, $expectedArticleDetailId);
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $connectItemsNew = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$product->sourceId, $product->shopId]
+        );
+
+        $actualArticleId = $connectItemsNew[0]['article_id'];
+        $actualArticleDetailId = $connectItemsNew[0]['article_detail_id'];
+
+        $this->assertCount(1, $connectItems);
+        $this->assertEquals($expectedArticleId, $actualArticleId);
+        $this->assertEquals($expectedArticleDetailId, $actualArticleDetailId);
     }
 }

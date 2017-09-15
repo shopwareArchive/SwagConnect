@@ -148,7 +148,9 @@ class ServiceContainer extends BaseSubscriber
                 new PDO($this->db->getConnection()),
                 new RandomStringGenerator(),
                 $this->db
-            )
+            ),
+            $this->container->get('CategoryDenormalization'),
+            $this->container->get('shopware_attribute.data_persister')
         );
     }
 
@@ -177,14 +179,15 @@ class ServiceContainer extends BaseSubscriber
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver
      */
     public function onDefaultCategoryResolver()
     {
         return new DefaultCategoryResolver(
             $this->manager,
             $this->manager->getRepository(RemoteCategory::class),
-            $this->manager->getRepository(ProductToRemoteCategory::class)
+            $this->manager->getRepository(ProductToRemoteCategory::class),
+            $this->manager->getRepository(CategoryModel::class)
         );
     }
 }

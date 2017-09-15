@@ -66,6 +66,7 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     public function testResolveCategories()
     {
         $localCategory = new Category();
+        $localCategory->setId(5);
 
         $germanCategory = $this->newRemoteCategory(3)->buildRemoteCategory();
         $germanCategory->setCategoryKey('/deutsch');
@@ -81,6 +82,6 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 
         $result = $this->defaultCategoryResolver->resolve([$germanCategory->getCategoryKey() => null, $bookCategory->getCategoryKey() => null]);
         $this->assertCount(1, $result);
-        $this->assertEquals($localCategory, $result[0]);
+        $this->assertEquals($localCategory->getId(), $result[0]);
     }
 }

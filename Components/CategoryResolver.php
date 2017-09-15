@@ -172,86 +172,48 @@ abstract class CategoryResolver
      */
     private function checkAndCreateLocalCategory($category, $parentId)
     {
-        $categoryModel = $this->categoryRepository->findOneBy([
-            'name' => $category['name'],
-            'parentId' => $parentId
-        ]);
+        $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
+            FROM `s_categories`
+            WHERE `parent` = :parentId AND `description` = :description',
+            [':parentId' => $parentId, ':description' => $category['name']]);
 
-        if (!$categoryModel) {
-            $categoryModel = $this->convertNodeToEntity($category, $parentId);
+        if (!$id) {
+            return $this->createLocalCategory($category, $parentId);
         }
 
-        return $categoryModel->getId();
+        return $id;
     }
 
     /**
      * @param array $category
      * @param int $parentId
-     * @return Category
+     * @return int
      */
-    public function convertNodeToEntity(array $category, $parentId)
+    public function createLocalCategory(array $category, $parentId)
     {
-        $categoryModel = new Category();
-        $categoryModel->fromArray($this->getCategoryData($category['name']));
+        $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
+            FROM `s_categories`
+            WHERE `id` = ?',
+            [$parentId]);
+        $suffix = ($path) ? "$parentId|" : "|$parentId|";
+        $path = $path . $suffix;
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`) 
+            VALUES (?, ?, ?, 1)',
+            [$category['name'], $parentId, $path]);
+        $localCategoryId = $this->manager->getConnection()->fetchColumn('SELECT LAST_INSERT_ID()');
 
-        $parent = $this->categoryRepository->findOneBy([
-            'id' => (int) $parentId
-        ]);
-        $categoryModel->setParent($parent);
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 
+            VALUES (?, 1)',
+            [$localCategoryId]);
 
-        $this->manager->persist($categoryModel);
+        $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` 
+            FROM `s_plugin_connect_categories`
+            WHERE `category_key` = ?',
+            [$category['categoryId']]);
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`) 
+            VALUES (?, ?)',
+            [$remoteCategoryId, $localCategoryId]);
 
-        $categoryAttribute = $categoryModel->getAttribute();
-        $categoryAttribute->setConnectImportedCategory(true);
-        $this->manager->persist($categoryAttribute);
-
-        /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $category['categoryId']]);
-        if ($remoteCategory) {
-            $remoteCategory->addLocalCategory($categoryModel);
-            $this->manager->persist($remoteCategory);
-        }
-
-        $this->manager->flush();
-
-        return $categoryModel;
-    }
-
-    /**
-     * Generate category data array
-     * it's used to create category and
-     * attribute from array
-     *
-     * @param string $name
-     * @return array
-     */
-    private function getCategoryData($name)
-    {
-        return [
-            'name' => $name,
-            'active' => true,
-            'childrenCount' => 0,
-            'text' => $name,
-            'attribute' => [
-                'id' => 0,
-                'parent' => 0,
-                'name' => 'Deutsch',
-                'position' => 0,
-                'active' => true,
-                'childrenCount' => 0,
-                'text' => '',
-                'cls' => '',
-                'leaf' => false,
-                'allowDrag' => false,
-                'parentId' => 0,
-                'categoryId' => null,
-                'attribute1' => null,
-                'attribute2' => null,
-                'attribute3' => null,
-                'attribute4' => null,
-                'attribute5' => null,
-                'attribute6' => null,
-            ],
-        ];
+        return $localCategoryId;
     }
 }

@@ -51,20 +51,28 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             'name' => 'Boots',
             'parentId' => $defaultCategoryId
         ]);
+
+        $createdCategories = [
+            '/deutsch/boots' => 'Boots',
+            '/deutsch/nike' => 'Nike',
+            '/deutsch/nike/boots' => 'Boots'
+        ];
+        $this->createRemoteCategories($createdCategories);
+
         if (!$bootsCategory) {
-            $this->categoryResolver->convertNodeToEntity([
+            $this->categoryResolver->createLocalCategory([
                 'name' => 'Boots',
                 'categoryId' => '/deutsch/boots'
             ], $defaultCategory->getId());
         }
 
-        $nikeCategory = $this->categoryRepo->findOneBy([
+        $nikeCategoryId = $this->categoryRepo->findOneBy([
             'name' => 'Nike',
             'parentId' => $defaultCategoryId
         ]);
 
-        if (!$nikeCategory) {
-            $nikeCategory = $this->categoryResolver->convertNodeToEntity([
+        if (!$nikeCategoryId) {
+            $nikeCategoryId = $this->categoryResolver->createLocalCategory([
                 'name' => 'Nike',
                 'categoryId' => '/deutsch/nike'
             ], $defaultCategory->getId());
@@ -72,14 +80,14 @@ class AutoCategoryResolverTest extends ConnectTestHelper
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
             'name' => 'Boots',
-            'parentId' => $nikeCategory
+            'parentId' => $nikeCategoryId
         ]);
 
         if (!$nikeBootsCategory) {
-            $this->categoryResolver->convertNodeToEntity([
+            $this->categoryResolver->createLocalCategory([
                 'name' => 'Boots',
                 'categoryId' => '/deutsch/nike/boots'
-            ], $nikeCategory->getId());
+            ], $nikeCategoryId);
         }
 
         $categories = [
@@ -90,7 +98,11 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             '/deutsch' => 'Deutsch',
         ];
 
+        $this->createRemoteCategories($categories);
+
         $categoryModels = $this->categoryResolver->resolve($categories);
+
+        $this->deleteRemoteCategories(array_merge($categories, $createdCategories));
 
         $this->assertEquals(
             $defaultCategoryId,
@@ -159,5 +171,30 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             ],
         ];
         $this->assertEquals($expected, $this->categoryResolver->generateTree($categories));
+    }
+
+    /**
+     * @param $categories
+     * @return void
+     */
+    private function createRemoteCategories($categories)
+    {
+        foreach ($categories as $key => $value) {
+            $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
+              VALUES (?, ?)',
+                [$key, $value]);
+        }
+    }
+
+    /**
+     * @param $categories
+     */
+    private function deleteRemoteCategories($categories)
+    {
+        foreach ($categories as $key => $value) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
+              WHERE `category_key` = ? AND `label` = ?',
+                [$key, $value]);
+        }
     }
 }

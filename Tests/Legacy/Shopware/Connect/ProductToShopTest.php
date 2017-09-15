@@ -516,6 +516,11 @@ class ProductToShopTest extends ConnectTestHelper
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) . '/' . strtolower($childCategory2) => $childCategory2,
             '/' . strtolower($parentCategory2) => $parentCategory2,
         ];
+        foreach ($product->categories as $key => $value) {
+            $this->modelManager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
+              VALUES (?, ?)',
+                [$key, $value]);
+        }
 
         $productToShop->insertOrUpdate($product);
 
@@ -548,6 +553,12 @@ class ProductToShopTest extends ConnectTestHelper
         $assignCategories = $article->getCategories();
         $this->assertEquals(1, count($assignCategories));
         $this->assertEquals($childCategory2, $assignCategories[0]->getName());
+
+        foreach ($product->categories as $key => $value) {
+            $this->modelManager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
+              WHERE `category_key` = ? AND `label` = ?',
+                [$key, $value]);
+        }
     }
 
     public function testAutomaticallyCreateUnits()

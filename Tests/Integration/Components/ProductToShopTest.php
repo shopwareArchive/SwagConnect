@@ -22,6 +22,7 @@ use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
+use Shopware\Models\Category\Category;
 
 class ProductToShopTest extends \PHPUnit_Framework_TestCase
 {
@@ -73,10 +74,12 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
             new DefaultCategoryResolver(
                 $this->manager,
                 $this->manager->getRepository(RemoteCategory::class),
-                $this->manager->getRepository(ProductToRemoteCategory::class)
+                $this->manager->getRepository(ProductToRemoteCategory::class),
+                $this->manager->getRepository(Category::class)
             ),
             new PDO($this->db->getConnection()),
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 

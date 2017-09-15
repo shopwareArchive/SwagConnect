@@ -106,12 +106,10 @@ abstract class CategoryResolver
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
         foreach ($remoteCategories as $remoteCategory) {
             if (!in_array($remoteCategory->getId(), $productToCategories)) {
-
                 $productToCategory = new ProductToRemoteCategory();
                 $productToCategory->setArticleId($articleId);
                 $productToCategory->setConnectCategory($remoteCategory);
                 $this->manager->persist($productToCategory);
-
             }
         }
     }

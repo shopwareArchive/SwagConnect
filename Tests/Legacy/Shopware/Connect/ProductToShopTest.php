@@ -77,10 +77,12 @@ class ProductToShopTest extends ConnectTestHelper
             new DefaultCategoryResolver(
                 $this->modelManager,
                 $this->modelManager->getRepository(RemoteCategory::class),
-                $this->modelManager->getRepository(ProductToRemoteCategory::class)
+                $this->modelManager->getRepository(ProductToRemoteCategory::class),
+                $this->modelManager->getRepository(Category::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 
@@ -498,19 +500,22 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
 
         $product = $this->getProduct();
-        $parentCategory1 = 'MassImport#' . rand(1, 999999999);
+        $parentCategory1 = 'Deutsch';
         $childCategory = 'MassImport#' . rand(1, 999999999);
+        $childCategory2 = 'MassImport#' . rand(1, 999999999);
         $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
-        $product->categories = array_merge($product->categories, [
+        $product->categories = [
             '/' . strtolower($parentCategory1) => $parentCategory1,
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
+            '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) . '/' . strtolower($childCategory2) => $childCategory2,
             '/' . strtolower($parentCategory2) => $parentCategory2,
-        ]);
+        ];
 
         $productToShop->insertOrUpdate($product);
 
@@ -524,12 +529,25 @@ class ProductToShopTest extends ConnectTestHelper
             $childCategoryModel->getParent()->getName()
         );
 
+        $categoryRepository = Shopware()->Models()->getRepository(Category::class);
+        /** @var \Shopware\Models\Category\Category $childCategoryModel */
+        $childCategoryModel2 = $categoryRepository->findOneBy(['name' => $childCategory2]);
+        $this->assertInstanceOf(Category::class, $childCategoryModel2);
+        $this->assertEquals(
+            $childCategoryModel->getName(),
+            $childCategoryModel2->getParent()->getName()
+        );
+        $this->assertEquals(
+            $childCategory2,
+            $childCategoryModel2->getName()
+        );
+
         /** @var Article $article */
         $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
         $assignCategories = $article->getCategories();
         $this->assertEquals(1, count($assignCategories));
-        $this->assertEquals($childCategory, $assignCategories[0]->getName());
+        $this->assertEquals($childCategory2, $assignCategories[0]->getName());
     }
 
     public function testAutomaticallyCreateUnits()

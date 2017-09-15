@@ -8,6 +8,8 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\Connection;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
+use Shopware\Components\Model\CategoryDenormalization;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\ResourceInterface;
@@ -58,6 +60,16 @@ class ImportService
      */
     private $categoryExtractor;
 
+    /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
+     * @var DataPersister
+     */
+    private $dataPersister;
+
     public function __construct(
         ModelManager $manager,
         ResourceInterface $productResource,
@@ -66,7 +78,9 @@ class ImportService
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
         AutoCategoryResolver $categoryResolver,
-        CategoryExtractor $categoryExtractor
+        CategoryExtractor $categoryExtractor,
+        CategoryDenormalization $categoryDenormalization,
+        DataPersister $dataPersister
     ) {
         $this->manager = $manager;
         $this->productResource = $productResource;
@@ -76,6 +90,8 @@ class ImportService
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
         $this->autoCategoryResolver = $categoryResolver;
         $this->categoryExtractor = $categoryExtractor;
+        $this->categoryDenormalization = $categoryDenormalization;
+        $this->dataPersister = $dataPersister;
     }
 
     public function findBothArticlesType($categoryId, $query = '', $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
@@ -240,27 +256,35 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
+        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), false);
 
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
-
-            while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
-                $articles = $this->articleRepository->findBy(['id' => $currentIdBatch]);
-                /** @var \Shopware\Models\Article\Article $article */
-                foreach ($articles as $article) {
-                    /** @var \Shopware\Models\Category\Category $categoryModel */
-                    $categoryModel = $category['model'];
-                    if ($article->getCategories()->contains($categoryModel->getParent())) {
-                        $article->removeCategory($categoryModel->getParent());
-                    }
-                    $article->addCategory($category['model']);
-                    $attribute = $article->getAttribute();
-                    $attribute->setConnectMappedCategory(true);
-                    $this->manager->persist($article);
-                    $this->manager->persist($attribute);
-                }
-                $this->manager->flush();
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory']);
+            foreach ($articleIds as $articleId) {
+                $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
+                $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+                    [$articleId,  $category['categoryKey']]
+                );
+                $this->manager->getConnection()->executeQuery(
+                    'DELETE FROM `s_articles_categories` WHERE `articleID` = :articleID AND `categoryID` = :categoryID',
+                    [
+                        ':articleID' => $articleId,
+                        ':categoryID' => $category['parentId']
+                    ]
+                );
+                $detailId = $this->manager->getConnection()->fetchColumn(
+                    'SELECT id FROM `s_articles_details` WHERE `articleID` = :articleID',
+                    ['articleID' => $articleId]
+                );
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT  INTO `s_articles_attributes` (`articleID`, `articledetailsID`, `connect_mapped_category`) 
+                        VALUES (?, ?, 1)
+                        ON DUPLICATE KEY UPDATE `connect_mapped_category` = 1
+                    ',
+                    [$articleId,  $detailId]
+                );
             }
         }
     }

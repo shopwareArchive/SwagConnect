@@ -94,19 +94,14 @@ class CategoryResolverTest extends AbstractConnectUnitTest
         $productToGermanCategory = new ProductToRemoteCategory();
         $productToGermanCategory->setArticleId($articleId);
         $productToGermanCategory->setConnectCategory($germanCategory);
-        $this->remoteProductToCategoryRepository
-            ->expects($this->at(0))
-            ->method('findOneBy')
-            ->with(['articleId' => $articleId, 'connectCategoryId' => $germanCategory->getId()])
-            ->willReturn($productToGermanCategory);
+
         $productToBookCategory = new ProductToRemoteCategory();
         $productToBookCategory->setArticleId($articleId);
         $productToBookCategory->setConnectCategory($bookCategory);
-        $this->remoteProductToCategoryRepository
-            ->expects($this->at(1))
-            ->method('findOneBy')
-            ->with(['articleId' => $articleId, 'connectCategoryId' => $bookCategory->getId()])
-            ->willReturn($productToBookCategory);
+
+        $this->remoteProductToCategoryRepository->method('getArticleRemoteCategoryIds')
+            ->with($articleId)
+            ->willReturn([$germanCategory->getId(), $bookCategory->getId()]);
 
         $this->modelManager->expects($this->any())->method('persist')->with($this->captureAllArg($persistArgs));
 
@@ -132,5 +127,28 @@ class CategoryResolverTest extends AbstractConnectUnitTest
         $this->assertEquals($germanCategory, $productToGermanCategory->getConnectCategory());
         $this->assertEquals($bookCategory, $productToBookCategory->getConnectCategory());
         $this->assertEquals($fantasyCategory, $productToFantasyCategory->getConnectCategory());
+    }
+
+    public function test_store_remote_categories_remove_category()
+    {
+        $articleId = 4;
+        $categories = ['Category 1' => 'Category 1'];
+
+        $productToRemoteCategory = new ProductToRemoteCategory();
+        $productToRemoteCategory->setArticleId($articleId);
+        $productToRemoteCategory->setConnectCategoryId('Category 2');
+
+        $this->remoteProductToCategoryRepository->method('getArticleRemoteCategories')
+            ->with($articleId)
+            ->willReturn([$productToRemoteCategory]);
+
+        $this->remoteProductToCategoryRepository->method('getArticleRemoteCategoryIds')
+            ->with($articleId)
+            ->willReturn([$productToRemoteCategory->getConnectCategoryId()]);
+
+        $this->remoteProductToCategoryRepository->expects($this->once())->method('deleteByConnectCategoryId')->with($productToRemoteCategory->getConnectCategoryId());
+        $this->remoteCategoryRepository->expects($this->once())->method('deleteById')->with($productToRemoteCategory->getConnectCategoryId());
+
+        $this->categoryResolver->storeRemoteCategories($categories, $articleId);
     }
 }

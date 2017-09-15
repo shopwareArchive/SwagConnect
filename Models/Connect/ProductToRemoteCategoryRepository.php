@@ -9,7 +9,6 @@ namespace Shopware\CustomModels\Connect;
 
 use Shopware\Components\Model\ModelRepository;
 use Doctrine\ORM\Query\Expr\Join;
-use Shopware\Components\Model\QueryBuilder;
 
 /**
  * Class ProductToRemoteCategoryRepository
@@ -128,7 +127,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * @param int $articleId
      * @return string[]
      */
-    public function getArticleRemoteCategoryIds($articleId){
+    public function getArticleRemoteCategoryIds($articleId)
+    {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
         $builder->where('ptrc.articleId = :articleId');
@@ -138,11 +138,12 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $result = $query->getResult($query::HYDRATE_SCALAR);
 
         $test = array_map(
-            function ($row){
-             return $row['connectCategoryId'];
+            function ($row) {
+                return $row['connectCategoryId'];
             },
             $result
         );
+
         return $test;
     }
 

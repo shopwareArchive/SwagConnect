@@ -8,17 +8,16 @@
 namespace ShopwarePlugins\Connect\Tests\Unit\Components\CategoryResolver;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Category\Category;
+use Shopware\Models\Category\Repository;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 use ShopwarePlugins\Connect\Tests\Unit\Builders\RemoteCategoryBuilder;
 
 class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 {
-
     use RemoteCategoryBuilder;
 
     /**
@@ -42,6 +41,11 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     private $productToRemoteCategoryRepository;
 
     /**
+     * @var Repository
+     */
+    private $categoryRepository;
+
+    /**
      * @before
      */
     public function prepareMocks()
@@ -62,6 +66,7 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     public function testResolveCategories()
     {
         $localCategory = new Category();
+        $localCategory->setId(5);
 
         $germanCategory = $this->newRemoteCategory(3)->buildRemoteCategory();
         $germanCategory->setCategoryKey('/deutsch');
@@ -77,6 +82,6 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 
         $result = $this->defaultCategoryResolver->resolve([$germanCategory->getCategoryKey() => null, $bookCategory->getCategoryKey() => null]);
         $this->assertCount(1, $result);
-        $this->assertEquals($localCategory, $result[0]);
+        $this->assertEquals($localCategory->getId(), $result[0]);
     }
 }

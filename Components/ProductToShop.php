@@ -9,6 +9,7 @@ namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
 use Shopware\Connect\Gateway;
+use Shopware\Components\Model\CategoryDenormalization;
 use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
@@ -100,6 +101,11 @@ class ProductToShop implements ProductToShopBase
     private $eventManager;
 
     /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
      * @param Helper $helper
      * @param ModelManager $manager
      * @param ImageImport $imageImport
@@ -110,6 +116,7 @@ class ProductToShop implements ProductToShopBase
      * @param CategoryResolver $categoryResolver
      * @param Gateway $connectGateway
      * @param \Enlight_Event_EventManager $eventManager
+     * @param CategoryDenormalization $categoryDenormalization
      */
     public function __construct(
         Helper $helper,
@@ -121,7 +128,8 @@ class ProductToShop implements ProductToShopBase
         ProductTranslationsGateway $productTranslationsGateway,
         CategoryResolver $categoryResolver,
         Gateway $connectGateway,
-        \Enlight_Event_EventManager $eventManager
+        \Enlight_Event_EventManager $eventManager,
+        CategoryDenormalization $categoryDenormalization
     ) {
         $this->helper = $helper;
         $this->manager = $manager;
@@ -133,6 +141,7 @@ class ProductToShop implements ProductToShopBase
         $this->categoryResolver = $categoryResolver;
         $this->connectGateway = $connectGateway;
         $this->eventManager = $eventManager;
+        $this->categoryDenormalization = $categoryDenormalization;
     }
 
     /**
@@ -225,7 +234,6 @@ class ProductToShop implements ProductToShopBase
             $detail->setActive($model->getActive());
 
             $detail->setArticle($model);
-
             if (!empty($product->variant)) {
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
@@ -258,13 +266,6 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
-        }
-
-        $categories = $this->categoryResolver->resolve($product->categories);
-        $hasMappedCategory = count($categories) > 0;
-        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
-        foreach ($categories as $remoteCategory) {
-            $model->addCategory($remoteCategory);
         }
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
@@ -443,7 +444,24 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($connectAttribute);
         $this->manager->persist($detail);
 
+        $categories = $this->categoryResolver->resolve($product->categories);
+        if (count($categories) > 0) {
+            $detailAttribute->setConnectMappedCategory(true);
+        }
+
+        //article has to be flushed
+        $this->manager->persist($detailAttribute);
         $this->manager->flush();
+
+        $this->categoryDenormalization->disableTransactions();
+        foreach ($categories as $category) {
+            $this->categoryDenormalization->addAssignment($model->getId(), $category);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
+                [$model->getId(),  $category]
+            );
+        }
+        $this->categoryDenormalization->enableTransactions();
 
         $defaultCustomerGroup = $this->helper->getDefaultCustomerGroup();
         // Only set prices, if fixedPrice is active or price updates are configured
@@ -452,6 +470,7 @@ class ProductToShop implements ProductToShopBase
         }
         // If the price is not being update, update the purchasePrice anyway
         $this->setPurchasePrice($detail, $product->purchasePrice, $defaultCustomerGroup);
+
         $this->manager->clear();
 
         $this->addArticleTranslations($model, $product);

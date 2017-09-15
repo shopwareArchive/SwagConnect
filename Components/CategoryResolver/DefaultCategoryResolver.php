@@ -26,7 +26,9 @@ class DefaultCategoryResolver extends CategoryResolver
             }
         }
 
-        return $localCategories;
+        return array_map(function ($category) {
+            return $category->getId();
+        }, $localCategories);
     }
 
     /**

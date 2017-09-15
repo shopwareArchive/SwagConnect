@@ -112,6 +112,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
         $this->modelManager
             ->method('getRepository')
             ->will($this->returnValueMap([
+                [Category::class, $this->createMock(CategoryRepository::class)],
                 [RemoteCategory::class, $this->createMock(RemoteCategoryRepository::class)],
                 [ProductToRemoteCategory::class, $this->createMock(ProductToRemoteCategoryRepository::class)],
             ]));

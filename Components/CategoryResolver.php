@@ -147,7 +147,7 @@ abstract class CategoryResolver
     public function convertTreeToKeys(array $node, $parentId, $returnOnlyLeafs = true, $categories = [])
     {
         foreach ($node as $category) {
-            $categoryId = $this->checkAndCreateLocalCategory($category, $parentId);
+            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId);
 
             if ((!$returnOnlyLeafs) || (empty($category['children']))) {
                 $categories[] = [
@@ -166,30 +166,32 @@ abstract class CategoryResolver
     }
 
     /**
-     * @param array $category
+     * @param string $categoryName
+     * @param string $categoryKey
      * @param int $parentId
      * @return int
      */
-    private function checkAndCreateLocalCategory($category, $parentId)
+    private function checkAndCreateLocalCategory($categoryName, $categoryKey,$parentId)
     {
         $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_categories`
             WHERE `parent` = :parentId AND `description` = :description',
-            [':parentId' => $parentId, ':description' => $category['name']]);
+            [':parentId' => $parentId, ':description' => $categoryName]);
 
         if (!$id) {
-            return $this->createLocalCategory($category, $parentId);
+            return $this->createLocalCategory($categoryName, $categoryKey, $parentId);
         }
 
         return $id;
     }
 
     /**
-     * @param array $category
+     * @param string $categoryName
+     * @param string $categoryKey
      * @param int $parentId
      * @return int
      */
-    public function createLocalCategory(array $category, $parentId)
+    public function createLocalCategory($categoryName, $categoryKey, $parentId)
     {
         $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
             FROM `s_categories`
@@ -199,7 +201,7 @@ abstract class CategoryResolver
         $path = $path . $suffix;
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`) 
             VALUES (?, ?, ?, 1)',
-            [$category['name'], $parentId, $path]);
+            [$categoryName, $parentId, $path]);
         $localCategoryId = $this->manager->getConnection()->fetchColumn('SELECT LAST_INSERT_ID()');
 
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 
@@ -209,7 +211,7 @@ abstract class CategoryResolver
         $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_plugin_connect_categories`
             WHERE `category_key` = ?',
-            [$category['categoryId']]);
+            [$categoryKey]);
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`) 
             VALUES (?, ?)',
             [$remoteCategoryId, $localCategoryId]);

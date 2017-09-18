@@ -52,7 +52,7 @@ class CategoryResolverTest extends ConnectTestHelper
               VALUES (?, ?)',
             ['/deutsch/test12345', 'Test12345']);
 
-        $this->categoryResolver->createLocalCategory(['name' => 'Test12345', 'categoryId' => '/deutsch/test12345'], 3);
+        $this->categoryResolver->createLocalCategory('Test12345', '/deutsch/test12345', 3);
 
         $parentId = $this->manager->getConnection()->fetchColumn('SELECT `parent` FROM `s_categories` WHERE `description` = "Test12345"');
         $this->assertEquals('3', $parentId);

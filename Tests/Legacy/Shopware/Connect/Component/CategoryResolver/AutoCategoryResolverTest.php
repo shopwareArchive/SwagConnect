@@ -60,10 +60,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         $this->createRemoteCategories($createdCategories);
 
         if (!$bootsCategory) {
-            $this->categoryResolver->createLocalCategory([
-                'name' => 'Boots',
-                'categoryId' => '/deutsch/boots'
-            ], $defaultCategory->getId());
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId());
         }
 
         $nikeCategoryId = $this->categoryRepo->findOneBy([
@@ -72,10 +69,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         ]);
 
         if (!$nikeCategoryId) {
-            $nikeCategoryId = $this->categoryResolver->createLocalCategory([
-                'name' => 'Nike',
-                'categoryId' => '/deutsch/nike'
-            ], $defaultCategory->getId());
+            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId());
         }
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
@@ -84,10 +78,7 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         ]);
 
         if (!$nikeBootsCategory) {
-            $this->categoryResolver->createLocalCategory([
-                'name' => 'Boots',
-                'categoryId' => '/deutsch/nike/boots'
-            ], $nikeCategoryId);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId);
         }
 
         $categories = [

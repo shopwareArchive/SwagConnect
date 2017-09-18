@@ -449,8 +449,9 @@ class ProductToShop implements ProductToShopBase
         }
 
         $categories = $this->categoryResolver->resolve($product->categories);
-        $hasMappedCategory = count($categories) > 0;
-        $detailAttribute->setConnectMappedCategory($hasMappedCategory);
+        if (count($categories) > 0) {
+            $detailAttribute->setConnectMappedCategory(true);
+        }
 
         //article has to be flushed
         $this->manager->persist($detailAttribute);

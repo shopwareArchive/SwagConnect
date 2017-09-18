@@ -16,6 +16,7 @@ use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 
 class ImportServiceTest extends ConnectTestHelper
 {
@@ -38,7 +39,7 @@ class ImportServiceTest extends ConnectTestHelper
     private $articleRepository;
 
     /**
-     * @var \ShopwarePlugins\Connect\Models\Connect\ProductToRemoteCategoryRepository
+     * @var ProductToRemoteCategoryRepository
      */
     private $productToRemoteCategoriesRepository;
 

@@ -190,6 +190,18 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
+        if (!empty($product->sku)) {
+            $number = 'SC-' . $product->shopId . '-' . $product->sku;
+            $duplicatedDetail = $this->helper->getDetailByNumber($number);
+            if ($duplicatedDetail
+                && $this->helper->getConnectAttributeByModel($duplicatedDetail)->getSourceId() != $product->sourceId
+            ) {
+                $this->deleteDetail($duplicatedDetail);
+            }
+        } else {
+            $number = 'SC-' . $product->shopId . '-' . $product->sourceId;
+        }
+
         $detail = $this->helper->getArticleDetailModelByProduct($product);
         $detail = $this->eventManager->filter(
             'Connect_Merchant_Get_Article_Detail_After',
@@ -201,10 +213,9 @@ class ProductToShop implements ProductToShopBase
         );
 
         $isMainVariant = false;
-
         if ($detail === null) {
             $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
-            if ($product->groupId > 0) {
+            if ($product->groupId !== null) {
                 $model = $this->helper->getArticleByRemoteProduct($product);
                 if (!$model instanceof \Shopware\Models\Article\Article) {
                     $model = $this->helper->createProductModel($product);
@@ -236,6 +247,8 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
+        $detail->setNumber($number);
+
         /** @var \Shopware\Models\Category\Category $category */
         foreach ($model->getCategories() as $category) {
             $attribute = $category->getAttribute();
@@ -253,12 +266,6 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
-        }
-
-        if (!empty($product->sku)) {
-            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sku);
-        } else {
-            $detail->setNumber('SC-' . $product->shopId . '-' . $product->sourceId);
         }
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
@@ -435,18 +442,7 @@ class ProductToShop implements ProductToShopBase
         );
 
         $this->manager->persist($connectAttribute);
-
         $this->manager->persist($detail);
-
-        // some articles from connect have long sourceId
-        // like OXID articles. They use md5 hash, but it is not supported
-        // in shopware.
-        if (strlen($detail->getNumber()) > 30) {
-            $detail->setNumber('SC-' . $product->shopId . '-' . $detail->getId());
-
-            $this->manager->persist($detail);
-            $this->manager->flush($detail);
-        }
 
         $categories = $this->categoryResolver->resolve($product->categories);
         if (count($categories) > 0) {
@@ -804,36 +800,49 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
+        $this->deleteDetail($detail);
+    }
 
+    /**
+     * @param DetailModel $detailModel
+     */
+    private function deleteDetail(DetailModel $detailModel)
+    {
         $this->eventManager->notify(
             'Connect_Merchant_Delete_Product_Before',
             [
                 'subject' => $this,
-                'articleDetail' => $detail
+                'articleDetail' => $detailModel
             ]
         );
 
 
-        $article = $detail->getArticle();
-        $isOnlyOneVariant = false;
-        if (count($article->getDetails()) === 1) {
-            $isOnlyOneVariant = true;
-        }
-
+        $article = $detailModel->getArticle();
+        $isMainVariant = $detailModel->getKind() === 1;
         // Not sure why, but the Attribute can be NULL
-        $attribute = $this->helper->getConnectAttributeByModel($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detailModel);
+        $this->manager->remove($detailModel);
+
         if ($attribute) {
             $this->manager->remove($attribute);
         }
 
+        if (count($details = $article->getDetails()) === 1) {
+            $details->clear();
+            $this->manager->remove($article);
+        }
+
         // if removed variant is main variant
         // find first variant which is not main and mark it
-        if ($detail->getKind() === 1) {
+        if ($isMainVariant) {
             /** @var \Shopware\Models\Article\Detail $variant */
             foreach ($article->getDetails() as $variant) {
-                if ($variant->getId() != $detail->getId()) {
+                if ($variant->getId() != $detailModel->getId()) {
                     $variant->setKind(1);
                     $article->setMainDetail($variant);
+                    $connectAttribute = $this->helper->getConnectAttributeByModel($variant);
+                    $connectAttribute->setIsMainVariant(true);
+                    $this->manager->persist($connectAttribute);
                     $this->manager->persist($article);
                     $this->manager->persist($variant);
                     break;
@@ -841,14 +850,10 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
-        $this->manager->remove($detail);
-        if ($isOnlyOneVariant === true) {
-            $article->getDetails()->clear();
-            $this->manager->remove($article);
-        }
-
+        // Do not remove flush. It's needed when remove article,
+        // because duplication of ordernumber. Even with remove before
+        // persist calls mysql throws exception "Duplicate entry"
         $this->manager->flush();
-        $this->manager->clear();
     }
 
     /**

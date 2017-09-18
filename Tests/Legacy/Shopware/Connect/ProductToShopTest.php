@@ -336,6 +336,7 @@ class ProductToShopTest extends ConnectTestHelper
             ->findOneBy(['sourceId' => $variants[2]->sourceId]);
 
         $article = $connectAttribute->getArticle();
+        $this->modelManager->refresh($article);
         // check articles details count
         $this->assertEquals(3, count($article->getDetails()));
 

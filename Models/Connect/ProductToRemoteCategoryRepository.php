@@ -127,7 +127,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * @param int $articleId
      * @return string[]
      */
-    public function getArticleRemoteCategoryIds($articleId)
+    public function getArticlesByRemoteCategoryIds($articleId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');

@@ -171,7 +171,7 @@ abstract class CategoryResolver
      * @param int $parentId
      * @return int
      */
-    private function checkAndCreateLocalCategory($categoryName, $categoryKey,$parentId)
+    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId)
     {
         $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_categories`

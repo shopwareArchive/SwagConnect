@@ -438,14 +438,14 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * Check whether the product contains variants
      *
-     * @param int $productId
+     * @param int $articleId
      * @return bool
      */
-    public function hasVariants($productId)
+    public function hasVariants($articleId)
     {
         $result = $this->manager->getConnection()->fetchColumn(
             'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
-            [(int) $productId]
+            [(int) $articleId]
         );
 
         return $result > 0;

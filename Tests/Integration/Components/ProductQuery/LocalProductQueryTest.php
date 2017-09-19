@@ -82,6 +82,11 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($product->variant);
     }
 
+    public function test_has_variants()
+    {
+        $this->assertTrue($this->localProductQuery->hasVariants(2));
+    }
+
     private function getProductBaseUrl()
     {
         if (!Shopware()->Front()->Router()) {

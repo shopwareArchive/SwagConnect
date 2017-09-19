@@ -275,6 +275,11 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedArticleDetailId, $actualArticleDetailId);
     }
 
+    /**
+     * Insert 4 remote variants. Then delete them one by one.
+     * Main variant must be removed at the end.
+     * Then the whole product will be removed.
+     */
     public function test_delete_variant_by_variant()
     {
         $variants = $this->getVariants();

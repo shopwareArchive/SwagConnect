@@ -366,6 +366,7 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row['unit'] = null;
         $row['localId'] = $this->article->getId();
         $row['detailId'] = $this->article->getMainDetail()->getId();
+        $row['configuratorSetId'] = null;
 
         $this->assertEquals($expectedProduct, $this->getLocalProductQuery()->getConnectProduct($row));
     }

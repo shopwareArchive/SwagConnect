@@ -274,4 +274,57 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedArticleId, $actualArticleId);
         $this->assertEquals($expectedArticleDetailId, $actualArticleDetailId);
     }
+
+    /**
+     * Insert 4 remote variants. Then delete them one by one.
+     * Main variant must be removed at the end.
+     * Then the whole product will be removed.
+     */
+    public function test_delete_variant_by_variant()
+    {
+        $variants = $this->getVariants();
+
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $articleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$variants[0]->sourceId, $variants[0]->shopId]
+        );
+        $connectItems = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id, source_id, shop_id FROM s_plugin_connect_items WHERE article_id = ?',
+            [$articleId]
+        );
+        $this->assertCount(4, $connectItems);
+        // verify that $variants[0] is main variant
+        $this->assertEquals($variants[0]->sourceId, $connectItems[0]['source_id']);
+        $kind = $this->manager->getConnection()->fetchColumn(
+            'SELECT kind FROM s_articles_details WHERE id = ?',
+            [$connectItems[0]['article_detail_id']]
+        );
+        $this->assertEquals(1, $kind);
+
+        $this->productToShop->delete($variants[3]->shopId, $variants[3]->sourceId);
+        $this->productToShop->delete($variants[2]->shopId, $variants[2]->sourceId);
+        $this->productToShop->delete($variants[1]->shopId, $variants[1]->sourceId);
+        $this->productToShop->delete($variants[0]->shopId, $variants[0]->sourceId);
+
+        $newConnectItems = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id, source_id, shop_id FROM s_plugin_connect_items WHERE article_id = ?',
+            [$articleId]
+        );
+        $this->assertCount(0, $newConnectItems);
+
+        $detailsCount = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles_details WHERE articleID = ?',
+            [$articleId]
+        );
+        $this->assertEquals(0, $detailsCount);
+        $articleCount = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles WHERE id = ?',
+            [$articleId]
+        );
+        $this->assertEquals(0, $articleCount);
+    }
 }

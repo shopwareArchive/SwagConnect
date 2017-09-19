@@ -245,6 +245,13 @@ class ProductToShop implements ProductToShopBase
             if ($detail->getId() === $mainDetail->getId()) {
                 $isMainVariant = true;
             }
+
+            if (empty($product->variant) && $model->getConfiguratorSet()) {
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE s_articles SET configurator_set_id = NULL WHERE id = ?',
+                    [$model->getId()]
+                );
+            }
         }
 
         $detail->setNumber($number);

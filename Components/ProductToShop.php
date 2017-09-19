@@ -234,6 +234,7 @@ class ProductToShop implements ProductToShopBase
             $detail->setActive($model->getActive());
 
             $detail->setArticle($model);
+            $model->getDetails()->add($detail);
             if (!empty($product->variant)) {
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
@@ -266,6 +267,7 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
+            $detailAttribute->setArticleDetail($detail);
         }
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
@@ -818,6 +820,7 @@ class ProductToShop implements ProductToShopBase
 
 
         $article = $detailModel->getArticle();
+        $this->manager->refresh($article);
         $isMainVariant = $detailModel->getKind() === 1;
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
@@ -830,6 +833,10 @@ class ProductToShop implements ProductToShopBase
         if (count($details = $article->getDetails()) === 1) {
             $details->clear();
             $this->manager->remove($article);
+            $this->manager->flush();
+            $this->manager->clear();
+
+            return;
         }
 
         // if removed variant is main variant
@@ -841,6 +848,9 @@ class ProductToShop implements ProductToShopBase
                     $variant->setKind(1);
                     $article->setMainDetail($variant);
                     $connectAttribute = $this->helper->getConnectAttributeByModel($variant);
+                    if (!$connectAttribute) {
+                        continue;
+                    }
                     $connectAttribute->setIsMainVariant(true);
                     $this->manager->persist($connectAttribute);
                     $this->manager->persist($article);

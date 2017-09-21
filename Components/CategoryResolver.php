@@ -130,7 +130,9 @@ abstract class CategoryResolver
         foreach ($currentProductCategoryIds as $currentProductCategoryId) {
             if (!in_array($currentProductCategoryId, $assignedCategoryIds)) {
                 $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId);
-                $this->remoteCategoryRepository->deleteById($currentProductCategoryId);
+                if ($this->productToRemoteCategoryRepository->getProductCountByCategoryId($currentProductCategoryId) > 0) {
+                    $this->remoteCategoryRepository->deleteById($currentProductCategoryId);
+                }
             }
         }
     }

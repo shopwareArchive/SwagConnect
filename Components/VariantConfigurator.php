@@ -57,6 +57,7 @@ class VariantConfigurator
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
             $configSet->setArticles([$article]);
+//            $configSet->setType($product->configuratorSetType);
             $article->setConfiguratorSet($configSet);
         } else {
             $configSet = $article->getConfiguratorSet();

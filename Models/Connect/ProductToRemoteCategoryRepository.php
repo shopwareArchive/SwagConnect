@@ -158,4 +158,18 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->setParameter(':ccid', $categoryId);
         $builder->getQuery()->execute();
     }
+
+    /**
+    * @param int $categoryId
+    * @return int
+    */
+    public function getProductCountByCategoryId($categoryId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('COUNT(ptrc.articleId)');
+        $builder->where('ptrc.connectCategoryId = :ccid');
+        $builder->setParameter(':ccid', $categoryId);
+
+        return $builder->getQuery()->getSingleScalarResult();
+    }
 }

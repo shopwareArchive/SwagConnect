@@ -147,7 +147,6 @@ class CategoryResolverTest extends AbstractConnectUnitTest
             ->willReturn([$productToRemoteCategory->getConnectCategoryId()]);
 
         $this->remoteProductToCategoryRepository->expects($this->once())->method('deleteByConnectCategoryId')->with($productToRemoteCategory->getConnectCategoryId());
-        $this->remoteCategoryRepository->expects($this->once())->method('deleteById')->with($productToRemoteCategory->getConnectCategoryId());
 
         $this->categoryResolver->storeRemoteCategories($categories, $articleId);
     }

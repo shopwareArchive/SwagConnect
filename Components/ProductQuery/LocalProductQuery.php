@@ -136,6 +136,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('a.tax', 't');
         $builder->leftJoin('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
+        $builder->leftJoin('a.configuratorSet', 'configSet');
         $builder->where('at.shopId IS NULL');
         $selectColumns = [
             'a.id as localId',
@@ -172,6 +173,7 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
             'a.lastStock',
+            'configSet.type as configuratorSetType'
         ];
 
         if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)) {
@@ -272,7 +274,7 @@ class LocalProductQuery extends BaseProductQuery
             $row['deliveryWorkDays'] = null;
         }
 
-        if ($this->hasVariants($row['localId'])) {
+        if ($this->hasVariants($row)) {
             $row['groupId'] = $row['localId'];
         }
 
@@ -438,17 +440,12 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * Check whether the product contains variants
      *
-     * @param int $productId
+     * @param array $row
      * @return bool
      */
-    public function hasVariants($productId)
+    public function hasVariants($row)
     {
-        $result = $this->manager->getConnection()->fetchColumn(
-            'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
-            [(int) $productId]
-        );
-
-        return $result > 0;
+        return array_key_exists('configuratorSetType', $row);
     }
 
     /**

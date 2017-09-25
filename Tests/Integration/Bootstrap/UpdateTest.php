@@ -92,6 +92,32 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('8', $result['number']);
     }
 
+    public function testRecreateRemoteCategoriesAndProductAssignmentsRestoresAllCategoriesWithForcedClosedConnection()
+    {
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_items');
+
+        $categories = [
+            '/deutsch' => 'Deutsch',
+        ];
+        $categoriesJson = json_encode($categories);
+
+        for ($i = 1; $i < 110; ++$i) {
+            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+                [$i, 1, $categoriesJson]
+            );
+        }
+
+        $this->update->run();
+
+        $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
+        $this->assertEquals('1', $result['number']);
+
+        $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories')->fetch();
+        $this->assertEquals('109', $result['number']);
+    }
+
     public function testRecreateRemoteCategoriesAndProductAssignmentsAssignesAllCategories()
     {
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');

@@ -474,6 +474,7 @@ class Update
             try {
                 $result = $this->db->query('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL');
 
+                $i = 0;
                 while ($row = $result->fetch()) {
                     $categories = json_decode($row['category'], true);
                     $countAssignedCategories = $this->db->query('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
@@ -498,6 +499,9 @@ class Update
                                     [$categoryId, $row['article_id']]);
                             }
                         }
+                    }
+                    if ($i++ % 100 == 0) {
+                        $this->db->closeConnection();
                     }
                 }
             } catch (\Exception $e) {

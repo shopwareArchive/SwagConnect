@@ -93,13 +93,4 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
         $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories WHERE articleID = 3')->fetch();
         $this->assertEquals('4', $result['number']);
     }
-
-    public function invokeMethod(&$object, $methodName, array $parameters = [])
-    {
-        $reflection = new \ReflectionClass(get_class($object));
-        $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
-
-        return $method->invokeArgs($object, $parameters);
-    }
 }

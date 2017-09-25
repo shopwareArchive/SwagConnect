@@ -90,6 +90,7 @@ class Update
         $this->removeDuplicatedMenuItems();
         $this->addConnectItemsIndex();
         $this->createRemoteToLocalCategoriesTable();
+        $this->recreateRemoteCategoriesAndProductAssignments();
 
         return true;
     }
@@ -455,6 +456,49 @@ class Update
                         VALUES (?, ?)',
                         [$row['id'],$row['local_category_id']]
                     );
+                }
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function recreateRemoteCategoriesAndProductAssignments()
+    {
+        if (version_compare($this->version, '1.1.4', '<=')) {
+            try {
+                $result = $this->db->query('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE exported IS NULL');
+
+                while ($row = $result->fetch()) {
+                    $categories = json_decode($row['category'], true);
+                    $countAssignedCategories = $this->db->query('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
+                        [$row['article_id']]
+                    )->fetch();
+
+                    if (!count($categories) == $countAssignedCategories['categoriesCount']) {
+                        foreach ($categories as $categoryKey => $category) {
+                            $result = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
+                                [$categoryKey]);
+                            if (!($res = $result->fetch())) {
+                                $this->db->query('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
+                                    [$categoryKey, $category]);
+                                $categoryId = $this->db->lastInsertId('s_plugin_connect_categories');
+                            } else {
+                                $categoryId = $res['id'];
+                            }
+                            $result = $this->db->query('SELECT `id` FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
+                                [$categoryId, $row['article_id']]);
+                            if (!$result->fetch()) {
+                                $this->db->query('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
+                                    [$categoryId, $row['article_id']]);
+                            }
+                        }
+                    }
                 }
             } catch (\Exception $e) {
                 // ignore it if exists

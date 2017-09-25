@@ -478,9 +478,9 @@ class Update
                     $categories = json_decode($row['category'], true);
                     $countAssignedCategories = $this->db->query('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
                         [$row['article_id']]
-                    )->fetch();
+                    )->fetchColumn();
 
-                    if (count($categories) != $countAssignedCategories['categoriesCount']) {
+                    if (count($categories) != $countAssignedCategories) {
                         foreach ($categories as $categoryKey => $category) {
                             $selectedCategory = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
                                 [$categoryKey]);

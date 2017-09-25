@@ -149,27 +149,16 @@ class ProductToRemoteCategoryRepository extends ModelRepository
 
     /**
      * @param int $categoryId
+     * @param int $articleId
      */
-    public function deleteByConnectCategoryId($categoryId)
+    public function deleteByConnectCategoryId($categoryId, $articleId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
         $builder->where('ptrc.connectCategoryId = :ccid');
+        $builder->andWhere('ptrc.articleId = :articleId');
         $builder->setParameter(':ccid', $categoryId);
+        $builder->setParameter(':articleId', $articleId);
         $builder->getQuery()->execute();
-    }
-
-    /**
-    * @param int $categoryId
-    * @return int
-    */
-    public function getProductCountByCategoryId($categoryId)
-    {
-        $builder = $this->createQueryBuilder('ptrc');
-        $builder->select('COUNT(ptrc.articleId)');
-        $builder->where('ptrc.connectCategoryId = :ccid');
-        $builder->setParameter(':ccid', $categoryId);
-
-        return $builder->getQuery()->getSingleScalarResult();
     }
 }

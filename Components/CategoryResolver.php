@@ -90,8 +90,8 @@ abstract class CategoryResolver
 
         $this->manager->flush();
 
-        $this->addProductToRemoteCategory($remoteCategories, $articleId);
         $this->removeProductsFromRemoteCategory($remoteCategories, $articleId);
+        $this->addProductToRemoteCategory($remoteCategories, $articleId);
 
         $this->manager->flush();
     }
@@ -129,10 +129,7 @@ abstract class CategoryResolver
         /** @var int $currentProductCategoryId */
         foreach ($currentProductCategoryIds as $currentProductCategoryId) {
             if (!in_array($currentProductCategoryId, $assignedCategoryIds)) {
-                $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId);
-                if ($this->productToRemoteCategoryRepository->getProductCountByCategoryId($currentProductCategoryId) > 0) {
-                    $this->remoteCategoryRepository->deleteById($currentProductCategoryId);
-                }
+                $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId, $articleId);
             }
         }
     }

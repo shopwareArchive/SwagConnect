@@ -75,14 +75,14 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $test31Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test3/test31"')->fetchColumn();
 
         //Assert that new Categories are created
-        $this->assertInternalType('string', $test3Id);
-        $this->assertInternalType('string', $test31Id);
+        $this->assertGreaterThan(0, $test3Id);
+        $this->assertGreaterThan(0, $test31Id);
 
         $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
             [3, $test1Id])->fetchColumn();
 
         //Assert that old category is still assigned
-        $this->assertInternalType('string', $productToCategoryId);
+        $this->assertGreaterThan(0, $productToCategoryId);
 
         $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
             [3, $test2Id])->fetchColumn();
@@ -95,12 +95,12 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         //Assert that new, not-leaf category is assigned
         //This is necessary that ext.js find all products in not-leaf categories in import window
-        $this->assertInternalType('string', $productToCategoryId);
+        $this->assertGreaterThan(0, $productToCategoryId);
 
         $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
             [3, $test31Id])->fetchColumn();
 
         //Assert that new, leaf category is assigned
-        $this->assertInternalType('string', $productToCategoryId);
+        $this->assertGreaterThan(0, $productToCategoryId);
     }
 }

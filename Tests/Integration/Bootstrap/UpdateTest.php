@@ -61,6 +61,37 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('4', $result['number']);
     }
 
+    public function testRecreateRemoteCategoriesAndProductAssignmentsRestoresAllCategoriesWithMultipleProducts()
+    {
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_items');
+
+        $categories = [
+            '/deutsch' => 'Deutsch',
+            '/deutsch/test1' => 'Test 1',
+            '/deutsch/test1/test11' => 'Test 1.1',
+            '/deutsch/test2' => 'Test 2',
+        ];
+        $categoriesJson = json_encode($categories);
+
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+            [3, 1, $categoriesJson]
+        );
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+            [4, 1, $categoriesJson]
+        );
+
+
+        $this->update->run();
+
+        $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
+        $this->assertEquals('4', $result['number']);
+
+        $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories WHERE articleID = 3 OR articleID = 4')->fetch();
+        $this->assertEquals('8', $result['number']);
+    }
+
     public function testRecreateRemoteCategoriesAndProductAssignmentsAssignesAllCategories()
     {
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');

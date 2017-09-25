@@ -482,18 +482,18 @@ class Update
 
                     if (count($categories) != $countAssignedCategories['categoriesCount']) {
                         foreach ($categories as $categoryKey => $category) {
-                            $result = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
+                            $selectedCategory = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
                                 [$categoryKey]);
-                            if (!($res = $result->fetch())) {
+                            if (!($res = $selectedCategory->fetch())) {
                                 $this->db->query('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
                                     [$categoryKey, $category]);
                                 $categoryId = $this->db->lastInsertId('s_plugin_connect_categories');
                             } else {
                                 $categoryId = $res['id'];
                             }
-                            $result = $this->db->query('SELECT `id` FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
+                            $selectedProductToCategory = $this->db->query('SELECT `id` FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
                                 [$categoryId, $row['article_id']]);
-                            if (!$result->fetch()) {
+                            if (!$selectedProductToCategory->fetch()) {
                                 $this->db->query('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
                                     [$categoryId, $row['article_id']]);
                             }

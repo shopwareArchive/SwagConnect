@@ -472,7 +472,7 @@ class Update
     {
         if (version_compare($this->version, '1.1.4', '<=')) {
             try {
-                $result = $this->db->query('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE exported IS NULL');
+                $result = $this->db->query('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL');
 
                 while ($row = $result->fetch()) {
                     $categories = json_decode($row['category'], true);
@@ -480,7 +480,7 @@ class Update
                         [$row['article_id']]
                     )->fetch();
 
-                    if (!count($categories) == $countAssignedCategories['categoriesCount']) {
+                    if (count($categories) != $countAssignedCategories['categoriesCount']) {
                         foreach ($categories as $categoryKey => $category) {
                             $result = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
                                 [$categoryKey]);

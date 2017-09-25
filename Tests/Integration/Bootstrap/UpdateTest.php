@@ -15,6 +15,9 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
 
+    /**
+     * @var Update
+     */
     private $update;
     private $manager;
 
@@ -42,13 +45,14 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
             '/deutsch/test1/test11' => 'Test 1.1',
             '/deutsch/test2' => 'Test 2',
         ];
-        $categoriesJSON = json_encode($categories);
+        $categoriesJson = json_encode($categories);
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, exported, category) VALUES (?, ?, ?)',
-            [3, null, $categoriesJSON]
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+            [3, 1, $categoriesJson]
         );
 
-        $this->invokeMethod($this->update, 'recreateRemoteCategoriesAndProductAssignments');
+
+        $this->update->run();
 
         $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
         $this->assertEquals('4', $result['number']);
@@ -75,13 +79,13 @@ class UpdateTest extends \PHPUnit_Framework_TestCase
                 [$categoryKey, $category]);
         }
 
-        $categoriesJSON = json_encode($categories);
+        $categoriesJson = json_encode($categories);
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, exported, category) VALUES (?, ?, ?)',
-            [3, null, $categoriesJSON]
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+            [3, 1, $categoriesJson]
         );
 
-        $this->invokeMethod($this->update, 'recreateRemoteCategoriesAndProductAssignments');
+        $this->update->run();
 
         $result = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
         $this->assertEquals('4', $result['number']);

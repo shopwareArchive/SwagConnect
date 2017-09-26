@@ -275,9 +275,9 @@ class SubscriberRegistration
     {
         $updates = [];
         foreach ($productUpdates as $entity) {
-            if($entity instanceof \Shopware\Models\Article\Configurator\Set) {
+            if ($entity instanceof \Shopware\Models\Article\Configurator\Set) {
                 foreach ($entity->getArticles() as $article) {
-                        $updates[] = $article;
+                    $updates[] = $article;
                 }
             } else {
                 $updates[] = $entity;
@@ -312,7 +312,7 @@ class SubscriberRegistration
     public function onFlush(\Doctrine\ORM\Event\OnFlushEventArgs $eventArgs)
     {
         /** @var $em ModelManager */
-        $em  = $eventArgs->getEntityManager();
+        $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
         // Entity updates

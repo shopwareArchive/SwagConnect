@@ -13,6 +13,7 @@ use Shopware\Components\Model\CategoryDenormalization;
 use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
 use Shopware\Components\Model\ModelManager;
@@ -227,7 +228,10 @@ class ProductToShop implements ProductToShopBase
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
         } else {
+            /** @var Article $model */
             $model = $detail->getArticle();
+            $configSet = $model->getConfiguratorSet();
+            $configSet->setType($product->configuratorSetType);
             // fix for isMainVariant flag
             // in connect attribute table
             $mainDetail = $model->getMainDetail();

@@ -258,11 +258,33 @@ class SubscriberRegistration
      */
     public function postFlush(\Doctrine\ORM\Event\PostFlushEventArgs $eventArgs)
     {
-        foreach ($this->productUpdates as $entity) {
+        $updates = $this->expandConfigSetsToProducts($this->productUpdates);
+
+        foreach ($updates as $entity) {
             $this->getLifecycleSubscriber()->handleChange($entity);
         }
 
         $this->productUpdates = [];
+    }
+
+    /**
+     * @param array $productUpdates
+     * @return array
+     */
+    private function expandConfigSetsToProducts($productUpdates)
+    {
+        $updates = [];
+        foreach ($productUpdates as $entity) {
+            if($entity instanceof \Shopware\Models\Article\Configurator\Set) {
+                foreach ($entity->getArticles() as $article) {
+                        $updates[] = $article;
+                }
+            } else {
+                $updates[] = $entity;
+            }
+        }
+
+        return $updates;
     }
 
     /**
@@ -297,6 +319,7 @@ class SubscriberRegistration
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
             if (!$entity instanceof \Shopware\Models\Article\Article
                 && !$entity instanceof \Shopware\Models\Article\Detail
+                && !$entity instanceof \Shopware\Models\Article\Configurator\Set
             ) {
                 continue;
             }

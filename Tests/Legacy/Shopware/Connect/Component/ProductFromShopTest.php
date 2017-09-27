@@ -47,7 +47,7 @@ class ProductFromShopTest extends ConnectTestHelper
         $manager->persist($defaultShop);
         $manager->flush();
 
-        $translator = new \Shopware_Components_Translation();
+        $translator = new \Shopware_Components_Translation($manager->getConnection());
         $translationData = [
             'dispatch_name' => 'Standard delivery',
             'dispatch_status_link' => 'http://track.me',

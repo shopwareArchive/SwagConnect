@@ -90,7 +90,7 @@ abstract class CategoryResolver
 
         $this->manager->flush();
 
-        $this->removeProductsFromRemoteCategory($remoteCategories, $articleId);
+        $this->removeProductsFromNotAssignedRemoteCategories($remoteCategories, $articleId);
         $this->addProductToRemoteCategory($remoteCategories, $articleId);
 
         $this->manager->flush();

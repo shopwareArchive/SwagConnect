@@ -125,9 +125,9 @@ class ProductToRemoteCategoryRepository extends ModelRepository
 
     /**
      * @param int $articleId
-     * @return string[]
+     * @return int[]
      */
-    public function getArticleRemoteCategoryIds($articleId)
+    public function getRemoteCategoryIds($articleId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
@@ -137,14 +137,12 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $query = $builder->getQuery();
         $result = $query->getResult($query::HYDRATE_SCALAR);
 
-        $test = array_map(
+        return array_map(
             function ($row) {
                 return $row['connectCategoryId'];
             },
             $result
         );
-
-        return $test;
     }
 
     /**

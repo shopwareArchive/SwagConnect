@@ -247,6 +247,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     me.mainWindow = me.getView('main.Window').create({
                         'action': me.subApplication.action
                     }).show();
+                    window.closeWindow();
                 } else {
                     //otherwise we have to call this function recursive with the next offset
                     me.recoverConnectCategories( window, totalCount, articlesProcessed);

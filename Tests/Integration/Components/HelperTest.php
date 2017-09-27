@@ -218,7 +218,7 @@ class HelperTest extends ConnectTestHelper
         $this->assertEquals('Edelbrände', $name);
     }
 
-    public function testApplyMigrationsRestoresAllCategories()
+    public function testRecreateConnectCategoriesRestoresAllCategories()
     {
         $manager = Shopware()->Models();
         $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
@@ -237,17 +237,16 @@ class HelperTest extends ConnectTestHelper
             [3, 1, $categoriesJson]
         );
 
-        $count = $this->getHelper()->applyMigrations(0, 50);
-        $this->assertEquals(1, $count);
+        $this->getHelper()->recreateConnectCategories(0, 50);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
-        $this->assertEquals('4', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_categories')->fetchColumn();
+        $this->assertEquals('4', $result);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories WHERE articleID = 3')->fetch();
-        $this->assertEquals('4', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE articleID = 3')->fetchColumn();
+        $this->assertEquals('4', $result);
     }
 
-    public function testApplyMigrationsRestoresAllCategoriesWithMultipleProducts()
+    public function testRecreateConnectCategoriesRestoresAllCategoriesWithMultipleProducts()
     {
         $manager = Shopware()->Models();
         $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
@@ -269,17 +268,16 @@ class HelperTest extends ConnectTestHelper
             [4, 1, $categoriesJson]
         );
 
-        $count = $this->getHelper()->applyMigrations(0, 50);
-        $this->assertEquals(2, $count);
+        $this->getHelper()->recreateConnectCategories(0, 50);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
-        $this->assertEquals('4', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_categories')->fetchColumn();
+        $this->assertEquals('4', $result);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories WHERE articleID = 3 OR articleID = 4')->fetch();
-        $this->assertEquals('8', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE articleID = 3 OR articleID = 4')->fetchColumn();
+        $this->assertEquals('8', $result);
     }
 
-    public function testApplyMigrationsRestoresAllCategoriesInMultipleBatches()
+    public function testRecreateConnectCategoriesRestoresAllCategoriesInMultipleBatches()
     {
         $manager = Shopware()->Models();
         $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
@@ -297,21 +295,18 @@ class HelperTest extends ConnectTestHelper
             );
         }
 
-        $count = $this->getHelper()->applyMigrations(0, 50);
-        $this->assertEquals(109, $count);
-        $count = $this->getHelper()->applyMigrations(50, 50);
-        $this->assertEquals(109, $count);
-        $count = $this->getHelper()->applyMigrations(100, 10);
-        $this->assertEquals(109, $count);
+        $this->getHelper()->recreateConnectCategories(0, 50);
+        $this->getHelper()->recreateConnectCategories(50, 50);
+        $this->getHelper()->recreateConnectCategories(100, 50);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
-        $this->assertEquals('1', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_categories')->fetchColumn();
+        $this->assertEquals('1', $result);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories')->fetch();
-        $this->assertEquals('109', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories')->fetchColumn();
+        $this->assertEquals('109', $result);
     }
 
-    public function testApplyMigrationsAssignesAllCategories()
+    public function testRecreateConnectCategoriesAssignesAllCategories()
     {
         $manager = Shopware()->Models();
         $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
@@ -336,14 +331,13 @@ class HelperTest extends ConnectTestHelper
             [3, 1, $categoriesJson]
         );
 
-        $count = $this->getHelper()->applyMigrations(0, 50);
-        $this->assertEquals(1, $count);
+        $this->getHelper()->recreateConnectCategories(0, 50);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_categories')->fetch();
-        $this->assertEquals('4', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_categories')->fetchColumn();
+        $this->assertEquals('4', $result);
 
-        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) AS number FROM s_plugin_connect_product_to_categories WHERE articleID = 3')->fetch();
-        $this->assertEquals('4', $result['number']);
+        $result = $manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE articleID = 3')->fetchColumn();
+        $this->assertEquals('4', $result);
     }
 
     public function testCheckIfConnectCategoriesHaveToBeRecreatedReturnsTrue()
@@ -352,7 +346,7 @@ class HelperTest extends ConnectTestHelper
         $manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
 
         $result = $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated();
-        $this->assertEquals(true, $result);
+        $this->assertTrue($result);
     }
 
     public function testCheckIfConnectCategoriesHaveToBeRecreatedReturnsFalseIfValueIsOne()
@@ -361,7 +355,7 @@ class HelperTest extends ConnectTestHelper
         $manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "1")');
 
         $result = $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated();
-        $this->assertEquals(false, $result);
+        $this->assertFalse($result);
     }
 
     public function testCheckIfConnectCategoriesHaveToBeRecreatedReturnsFalseIfValueIsNegative()
@@ -370,12 +364,36 @@ class HelperTest extends ConnectTestHelper
         $manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "-1")');
 
         $result = $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated();
-        $this->assertEquals(false, $result);
+        $this->assertFalse($result);
     }
 
     public function testCheckIfConnectCategoriesHaveToBeRecreatedReturnsFalseIfEntryDoesNotExist()
     {
         $result = $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated();
-        $this->assertEquals(false, $result);
+        $this->assertFalse($result);
+    }
+
+    public function testGetProductCountForCategoryRecovery()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_items');
+
+        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id) VALUES (4, 1)');
+        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id) VALUES (3, 1)');
+        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id) VALUES (5, null)');
+
+        $count = $this->getHelper()->getProductCountForCategoryRecovery();
+        $this->assertEquals(2, $count);
+    }
+
+    public function testGetProductCountForCategoryRecoveryReturnsZero()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_items');
+
+        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id) VALUES (5, null)');
+
+        $count = $this->getHelper()->getProductCountForCategoryRecovery();
+        $this->assertEquals(0, $count);
     }
 }

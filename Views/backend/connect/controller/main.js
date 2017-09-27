@@ -181,7 +181,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             default:
                 var recreateConnectCategories;
                 me.sendAjaxRequest(
-                    '{url controller=Connect action=checkForDataMigration}',
+                    '{url controller=Import action=connectCategoriesNeedRecovery}',
                     {},
                     function(response) {
                         recreateConnectCategories = response.data.recreateConnectCategories;
@@ -191,7 +191,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                                     msg: me.messages.applyMigrationsMessage,
                                     buttons: Ext.Msg.YESNO,
                                     icon: Ext.Msg.QUESTION,
-                                    fn: me.applyMigrations,
+                                    fn: me.startRecoveryOfConnectCategories,
                                     scope: me
                                 }
                             );
@@ -207,10 +207,17 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         }
     },
 
-    startMigration: function (window, offset) {
+    /**
+     * Recovers ConnectCategories in batch way and updates progress bar
+     * @param window the progress window
+     * Qparam totalCount Count of products
+     * @param offset the actual offset
+     */
+    recoverConnectCategories: function (window, totalCount, offset) {
         offset = parseInt(offset) || 0;
-        var batchsize = 100;
-        var limit = offset + batchsize;
+        totalCount = parseInt(totalCount) || 0;
+        var batchsize = 50;
+        var articlesProcessed = offset + batchsize;
 
         var me = this,
             message = me.messages.migrationsMessage,
@@ -219,26 +226,23 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         window.inProcess = true;
 
         Ext.Ajax.request({
-            url: '{url action=applyMigrations}',
+            url: '{url action=applyConnectCategoriesRecovery}',
             method: 'POST',
             params: {
                 'offset': offset,
-                'limit': limit,
                 'batchsize': batchsize
             },
             success: function(response, opts) {
-                var operation = Ext.decode(response.responseText);
-                var doneDetails = limit;
-                var totalCount = operation.data.totalCount;
+                var doneDetails = articlesProcessed;
 
                 window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, totalCount));
                 window.progressField.updateProgress(
-                    limit / totalCount,
+                    articlesProcessed / totalCount,
                     Ext.String.format(window.snippets.process, doneDetails, totalCount),
                     true
                 );
 
-                if (limit >= totalCount) {
+                if (articlesProcessed >= totalCount) {
                     window.closeWindow();
                     me.createGrowlMessage(title, message, false);
                     me.mainWindow = me.getView('main.Window').create({
@@ -246,7 +250,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     }).show();
                 } else {
                     //otherwise we have to call this function recursive with the next offset
-                    me.startMigration( window, limit);
+                    me.recoverConnectCategories( window, totalCount, articlesProcessed);
                 }
             },
             failure: function(operation) {
@@ -256,16 +260,28 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
     },
 
-    applyMigrations: function(buttonId, text, opt) {
+    /**
+     * Callback function from messages box that asks the user wether he wants to start the migration
+     * if 'yes' is clicked it starts the migration
+     * @param buttonId
+     * @param text
+     * @param opt
+     */
+    startRecoveryOfConnectCategories: function(buttonId, text, opt) {
         var me = this;
-        console.log(buttonId);
+        var totalCount = 0;
         if (buttonId === 'yes') {
-            me.mainWindow = me.getView('main.Progress').create().show();
-            me.startMigration(me.mainWindow);
+            me.sendAjaxRequest(
+                '{url controller=Import action=productCountForCategoryRecovery}',
+                {},
+                function(response) {
+                    totalCount = response.data.totalCount;
+                    me.mainWindow = me.getView('main.Progress').create().show();
+                    me.mainWindow.progressField.updateText(Ext.String.format(me.mainWindow.snippets.process, 0, totalCount));
+                    me.recoverConnectCategories(me.mainWindow, totalCount);
+                }
+            );
         } else {
-
-            console.log(me);
-
             me.mainWindow = me.getView('main.Window').create({
                 'action': me.subApplication.action
             }).show();

@@ -21,16 +21,6 @@ Ext.define('Shopware.apps.Connect.view.main.Progress', {
     inProcess: false,
 
     /**
-     * Contains the batch size for each request of the generation.
-     */
-    batchSize: 200,
-
-    /**
-     * Contains array with source ids which have to exported
-     */
-    sourceIds: [],
-
-    /**
      * Contains all snippets for the component
      * @object
      */
@@ -56,8 +46,8 @@ Ext.define('Shopware.apps.Connect.view.main.Progress', {
         var me = this;
 
         me.progressField = Ext.create('Ext.ProgressBar', {
-            name: 'productExportBar',
-            text: Ext.String.format(me.snippets.process, 0, me.sourceIds.length),
+            name: 'CategoryRecreationBar',
+            text: Ext.String.format(me.snippets.process, 0, 0),
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',

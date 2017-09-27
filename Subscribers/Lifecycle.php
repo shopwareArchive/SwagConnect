@@ -163,6 +163,7 @@ class Lifecycle extends BaseSubscriber
             if (!$this->getHelper()->isProductExported($attribute)) {
                 return;
             }
+            $this->getSDK()->recordDelete($attribute->getSourceId());
             $this->getConnectExport()->updateConnectItemsStatus([$attribute->getSourceId()], Attribute::STATUS_DELETE);
         }
     }

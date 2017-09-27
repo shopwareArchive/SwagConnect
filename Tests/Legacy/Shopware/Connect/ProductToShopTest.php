@@ -118,6 +118,7 @@ class ProductToShopTest extends ConnectTestHelper
     {
         $product = $this->getProduct();
         $product->minPurchaseQuantity = 5;
+        $product->categories = [];
 
         $this->productToShop->insertOrUpdate($product);
 
@@ -138,6 +139,10 @@ class ProductToShopTest extends ConnectTestHelper
         $detail = $connectAttribute->getArticleDetail();
 
         $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
+        $this->assertNull(
+            $detail->getAttribute()->getConnectMappedCategory(),
+            'connect_mapped_category must be null when product does not contain mapped category'
+        );
     }
 
     public function testInsertArticleTranslations()
@@ -331,6 +336,7 @@ class ProductToShopTest extends ConnectTestHelper
             ->findOneBy(['sourceId' => $variants[2]->sourceId]);
 
         $article = $connectAttribute->getArticle();
+        $this->modelManager->refresh($article);
         // check articles details count
         $this->assertEquals(3, count($article->getDetails()));
 
@@ -548,6 +554,7 @@ class ProductToShopTest extends ConnectTestHelper
         $assignCategories = $article->getCategories();
         $this->assertEquals(1, count($assignCategories));
         $this->assertEquals($childCategory2, $assignCategories[0]->getName());
+        $this->assertEquals(1, $article->getAttribute()->getConnectMappedCategory());
     }
 
     public function testAutomaticallyCreateUnits()

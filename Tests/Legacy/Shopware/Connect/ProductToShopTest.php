@@ -25,9 +25,13 @@ use Shopware\Models\Property;
 use Shopware\Models\Category\Category;
 use Shopware\CustomModels\Connect\RemoteCategory;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class ProductToShopTest extends ConnectTestHelper
 {
+
+    use DatabaseTestCaseTrait;
+
     /** @var \ShopwarePlugins\Connect\Components\ProductToShop */
     private $productToShop;
 

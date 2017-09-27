@@ -11,9 +11,13 @@ use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class ConnectExportTest extends ConnectTestHelper
 {
+
+    use DatabaseTestCaseTrait;
+
     /**
      * @var \ShopwarePlugins\Connect\Components\ConnectExport
      */

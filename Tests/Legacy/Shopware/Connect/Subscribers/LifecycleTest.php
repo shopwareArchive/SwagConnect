@@ -10,11 +10,15 @@ namespace Tests\ShopwarePlugins\Connect\Subscribers;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 class LifecycleTest extends ConnectTestHelper
 {
+
+    use DatabaseTestCaseTrait;
+
     /**
      * @var \Shopware\Components\Model\ModelManager
      */

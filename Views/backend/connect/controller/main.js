@@ -243,7 +243,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 );
 
                 if (articlesProcessed >= totalCount) {
-                    window.closeWindow();
                     me.createGrowlMessage(title, message, false);
                     me.mainWindow = me.getView('main.Window').create({
                         'action': me.subApplication.action

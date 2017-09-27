@@ -472,38 +472,7 @@ class Update
     {
         if (version_compare($this->version, '1.1.4', '<=')) {
             try {
-                $result = $this->db->query('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL');
-
-                $i = 0;
-                while ($row = $result->fetch()) {
-                    $categories = json_decode($row['category'], true);
-                    $countAssignedCategories = $this->db->query('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
-                        [$row['article_id']]
-                    )->fetchColumn();
-
-                    if (count($categories) != $countAssignedCategories) {
-                        foreach ($categories as $categoryKey => $category) {
-                            $selectedCategory = $this->db->query('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
-                                [$categoryKey]);
-                            if (!($res = $selectedCategory->fetch())) {
-                                $this->db->query('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
-                                    [$categoryKey, $category]);
-                                $categoryId = $this->db->lastInsertId('s_plugin_connect_categories');
-                            } else {
-                                $categoryId = $res['id'];
-                            }
-                            $selectedProductToCategory = $this->db->query('SELECT `id` FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
-                                [$categoryId, $row['article_id']]);
-                            if (!$selectedProductToCategory->fetch()) {
-                                $this->db->query('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
-                                    [$categoryId, $row['article_id']]);
-                            }
-                        }
-                    }
-                    if ($i++ % 100 == 0) {
-                        $this->db->closeConnection();
-                    }
-                }
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

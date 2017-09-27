@@ -110,7 +110,12 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         importConnectCategoriesMessage: '{s name=mapping/importConnectCategoriesMessage}Do you want to import all subcategories of »[0]« to you category »[1]«?{/s}',
         importAssignCategoryConfirm: '{s name=import/message/confirm_assign_category}Assign the selected »[0]« products to the category selected below.{/s}',
         allProductsMarkedForExportWithCron: '{s name=export/all/marked_for_export_with_cron}All products have been marked for export with CronJob.{/s}',
-        error: '{s name=connect/error}error{/s}'
+        error: '{s name=connect/error}error{/s}',
+
+        applyMigrationsTitle: '{s name=connect/import/dataMigrations/title}Apply Datamigrations?{/s}',
+        applyMigrationsMessage: '{s name=connect/import/dataMigrations/message}Datamigrations have to be done. Would you like to do the migrations now?{/s}',
+        migrationsMessageTitle:  '{s name=connect/import/migrations/message/title}Datamigration{/s}',
+        migrationsMessage:  '{s name=connect/import/migrations/message}Datamigration successfully applied{/s}'
     },
 
 
@@ -174,10 +179,96 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 });
                 break;
             default:
-                me.mainWindow = me.getView('main.Window').create({
-                    'action': me.subApplication.action
-                }).show();
+                var recreateConnectCategories;
+                me.sendAjaxRequest(
+                    '{url controller=Connect action=checkForDataMigration}',
+                    {},
+                    function(response) {
+                        recreateConnectCategories = response.data.recreateConnectCategories;
+                        if (recreateConnectCategories) {
+                            Ext.Msg.show({
+                                    title: me.messages.applyMigrationsTitle,
+                                    msg: me.messages.applyMigrationsMessage,
+                                    buttons: Ext.Msg.YESNO,
+                                    icon: Ext.Msg.QUESTION,
+                                    fn: me.applyMigrations,
+                                    scope: me
+                                }
+                            );
+                        } else {
+                            me.mainWindow = me.getView('main.Window').create({
+                                'action': me.subApplication.action
+                            }).show();
+                        }
+                    }
+                );
                 break;
+
+        }
+    },
+
+    startMigration: function (window, offset) {
+        offset = parseInt(offset) || 0;
+        var batchsize = 100;
+        var limit = offset + batchsize;
+
+        var me = this,
+            message = me.messages.migrationsMessage,
+            title = me.messages.migrationsMessageTitle;
+
+        window.inProcess = true;
+
+        Ext.Ajax.request({
+            url: '{url action=applyMigrations}',
+            method: 'POST',
+            params: {
+                'offset': offset,
+                'limit': limit,
+                'batchsize': batchsize
+            },
+            success: function(response, opts) {
+                var operation = Ext.decode(response.responseText);
+                var doneDetails = limit;
+                var totalCount = operation.data.totalCount;
+
+                window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, totalCount));
+                window.progressField.updateProgress(
+                    limit / totalCount,
+                    Ext.String.format(window.snippets.process, doneDetails, totalCount),
+                    true
+                );
+
+                if (limit >= totalCount) {
+                    window.closeWindow();
+                    me.createGrowlMessage(title, message, false);
+                    me.mainWindow = me.getView('main.Window').create({
+                        'action': me.subApplication.action
+                    }).show();
+                } else {
+                    //otherwise we have to call this function recursive with the next offset
+                    me.startMigration( window, limit);
+                }
+            },
+            failure: function(operation) {
+                me.createGrowlMessage(title, operation.responseText, true);
+                window.inProcess = false;
+            }
+        });
+    },
+
+    applyMigrations: function(buttonId, text, opt) {
+        var me = this;
+        console.log(buttonId);
+        if (buttonId === 'yes') {
+            me.mainWindow = me.getView('main.Progress').create().show();
+            me.startMigration(me.mainWindow);
+        } else {
+
+            console.log(me);
+
+            me.mainWindow = me.getView('main.Window').create({
+                'action': me.subApplication.action
+            }).show();
         }
     },
 

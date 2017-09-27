@@ -491,6 +491,17 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         ]);
     }
 
+    public function checkForDataMigrationAction()
+    {
+        $result = $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated();
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'recreateConnectCategories' => $result,
+            ]
+        ]);
+    }
+
     /**
      * Returns a flat array of connect categories
      *
@@ -886,6 +897,29 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
             $this->View()->assign([
                 'success' => false,
                 'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Called when ConnectCategories have to be recreated
+     */
+    public function applyMigrationsAction()
+    {
+        $batchsize = $this->Request()->getPost('batchsize');
+        $offset = $this->Request()->getPost('offset');
+        try {
+            $totalCount = $this->getHelper()->applyMigrations((int) $offset, (int) $batchsize);
+            $this->View()->assign([
+                'success' => true,
+                'data' => [
+                    'totalCount' => $totalCount
+                ]
+            ]);
+        } catch (Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'messages' => [ErrorHandler::TYPE_DEFAULT_ERROR => [$e->getMessage()]]
             ]);
         }
     }

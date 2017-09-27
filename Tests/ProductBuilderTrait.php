@@ -38,6 +38,7 @@ trait ProductBuilderTrait
             'shortDescription' => 'Ein Produkt aus shopware Connect',
             'longDescription' => 'Ein Produkt aus shopware Connect',
             'additionalDescription' => 'Ein Produkt aus shopware Connect',
+            'configuratorSetType'=> 3,
             'vendor' => [
                 'url' => 'http://connect.shopware.de/',
                 'name' => 'shopware Connect',

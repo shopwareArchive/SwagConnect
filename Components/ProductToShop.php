@@ -242,8 +242,10 @@ class ProductToShop implements ProductToShopBase
         } else {
             /** @var Article $model */
             $model = $detail->getArticle();
-            $configSet = $model->getConfiguratorSet();
-            $configSet->setType($product->configuratorSetType);
+            if (!empty($product->variant)) {
+                $configSet = $model->getConfiguratorSet();
+                $configSet->setType($product->configuratorSetType);
+            }
             // fix for isMainVariant flag
             // in connect attribute table
             $mainDetail = $model->getMainDetail();

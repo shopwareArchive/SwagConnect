@@ -99,7 +99,7 @@ class CategoryResolverTest extends AbstractConnectUnitTest
         $productToBookCategory->setArticleId($articleId);
         $productToBookCategory->setConnectCategory($bookCategory);
 
-        $this->remoteProductToCategoryRepository->method('getArticleRemoteCategoryIds')
+        $this->remoteProductToCategoryRepository->method('getRemoteCategoryIds')
             ->with($articleId)
             ->willReturn([$germanCategory->getId(), $bookCategory->getId()]);
 
@@ -142,12 +142,11 @@ class CategoryResolverTest extends AbstractConnectUnitTest
             ->with($articleId)
             ->willReturn([$productToRemoteCategory]);
 
-        $this->remoteProductToCategoryRepository->method('getArticleRemoteCategoryIds')
+        $this->remoteProductToCategoryRepository->method('getRemoteCategoryIds')
             ->with($articleId)
             ->willReturn([$productToRemoteCategory->getConnectCategoryId()]);
 
         $this->remoteProductToCategoryRepository->expects($this->once())->method('deleteByConnectCategoryId')->with($productToRemoteCategory->getConnectCategoryId());
-        $this->remoteCategoryRepository->expects($this->once())->method('deleteById')->with($productToRemoteCategory->getConnectCategoryId());
 
         $this->categoryResolver->storeRemoteCategories($categories, $articleId);
     }

@@ -232,8 +232,9 @@ class ProductToShop implements ProductToShopBase
 
             $detail = new DetailModel();
             $detail->setActive($model->getActive());
-
+            $this->manager->persist($detail);
             $detail->setArticle($model);
+            $model->getDetails()->add($detail);
             if (!empty($product->variant)) {
                 $this->variantConfigurator->configureVariantAttributes($product, $detail);
             }
@@ -272,7 +273,9 @@ class ProductToShop implements ProductToShopBase
         if (!$detailAttribute) {
             $detailAttribute = new AttributeModel();
             $detail->setAttribute($detailAttribute);
+            $model->setAttribute($detailAttribute);
             $detailAttribute->setArticle($model);
+            $detailAttribute->setArticleDetail($detail);
         }
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
@@ -448,14 +451,14 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
-        $this->manager->persist($connectAttribute);
-        $this->manager->persist($detail);
-
         $categories = $this->categoryResolver->resolve($product->categories);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }
 
+        $this->manager->persist($connectAttribute);
+        $this->manager->persist($model);
+        $this->manager->persist($detail);
         //article has to be flushed
         $this->manager->persist($detailAttribute);
         $this->manager->flush();
@@ -823,9 +826,7 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
-
         $article = $detailModel->getArticle();
-        $isMainVariant = $detailModel->getKind() === 1;
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
         $this->manager->remove($detailModel);
@@ -834,20 +835,18 @@ class ProductToShop implements ProductToShopBase
             $this->manager->remove($attribute);
         }
 
-        if (count($details = $article->getDetails()) === 1) {
-            $details->clear();
-            $this->manager->remove($article);
-        }
-
         // if removed variant is main variant
         // find first variant which is not main and mark it
-        if ($isMainVariant) {
+        if ($detailModel->getKind() === 1) {
             /** @var \Shopware\Models\Article\Detail $variant */
             foreach ($article->getDetails() as $variant) {
                 if ($variant->getId() != $detailModel->getId()) {
                     $variant->setKind(1);
                     $article->setMainDetail($variant);
                     $connectAttribute = $this->helper->getConnectAttributeByModel($variant);
+                    if (!$connectAttribute) {
+                        continue;
+                    }
                     $connectAttribute->setIsMainVariant(true);
                     $this->manager->persist($connectAttribute);
                     $this->manager->persist($article);
@@ -857,10 +856,18 @@ class ProductToShop implements ProductToShopBase
             }
         }
 
+        if (count($details = $article->getDetails()) === 1) {
+            $details->clear();
+            $this->manager->remove($article);
+        }
+
         // Do not remove flush. It's needed when remove article,
         // because duplication of ordernumber. Even with remove before
         // persist calls mysql throws exception "Duplicate entry"
         $this->manager->flush();
+        // always clear entity manager, because $article->getDetails() returns
+        // more than 1 detail, but all of them were removed except main one.
+        $this->manager->clear();
     }
 
     /**

@@ -91,9 +91,6 @@ class AutoCategoryResolver extends CategoryResolver
     public function generateTree(array $categories, $idPrefix = '')
     {
         $tree = [];
-        uksort($categories, function ($a, $b) {
-            return strlen($a) - strlen($b);
-        });
 
         if (strlen($idPrefix) > 0) {
             // find child categories by given prefix

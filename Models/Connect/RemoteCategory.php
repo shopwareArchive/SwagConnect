@@ -42,6 +42,16 @@ class RemoteCategory extends ModelEntity
     protected $label;
 
     /**
+     * @deprecated
+     */
+    protected $localCategoryId;
+
+    /**
+     * @deprecated
+     */
+    protected $localCategory;
+
+    /**
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="Shopware\Models\Category\Category")
@@ -129,5 +139,22 @@ class RemoteCategory extends ModelEntity
     public function removeLocalCategory(Category $localCategory)
     {
         $this->localCategories->remove($localCategory);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function getLocalCategoryId()
+    {
+        return $this->localCategoryId;
+    }
+
+    /**
+     * @param int $id
+     * @deprecated
+     */
+    public function setLocalCategoryId($id)
+    {
+        $this->localCategoryId = $id;
     }
 }

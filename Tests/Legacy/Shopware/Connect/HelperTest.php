@@ -205,13 +205,13 @@ class HelperTest extends ConnectTestHelper
             'SELECT `description` FROM `s_categories` WHERE `id` = :categoryID',
             [':categoryID' => $categoryKeys[0]]
         )->fetchColumn();
-        $this->assertEquals('Edelbrände', $name);
+        $this->assertEquals('Freizeitwelten', $name);
 
         $name = $manager->getConnection()->executeQuery(
             'SELECT `description` FROM `s_categories` WHERE `id` = :categoryID',
             [':categoryID' => $categoryKeys[1]]
         )->fetchColumn();
-        $this->assertEquals('Freizeitwelten', $name);
+        $this->assertEquals('Edelbrände', $name);
     }
 
     private function resetConnectCategoryMappings()

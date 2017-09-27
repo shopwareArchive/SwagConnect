@@ -322,4 +322,27 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(0, $articleCount);
     }
+
+    /**
+     * Import variant, set empty variant and groupId properties.
+     * Import it again, configurator_set_id column must be null.
+     * By this way Variants checkbox will be deselected
+     */
+    public function test_migrate_variant_to_article()
+    {
+        $variants = $this->getVariants();
+
+        $this->productToShop->insertOrUpdate($variants[0]);
+
+        $variants[0]->variant = [];
+        $variants[0]->groupId = null;
+        $this->productToShop->insertOrUpdate($variants[0]);
+
+        $articleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$variants[0]->sourceId, $variants[0]->shopId]
+        );
+        $configuratorSetId = $this->manager->getConnection()->fetchColumn('SELECT configurator_set_id FROM s_articles WHERE id = ?', [$articleId]);
+        $this->assertNull($configuratorSetId);
+    }
 }

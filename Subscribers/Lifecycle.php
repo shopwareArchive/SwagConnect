@@ -58,6 +58,8 @@ class Lifecycle extends BaseSubscriber
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
             'Shopware\Models\Shop\Shop::preRemove' => 'onDeleteShop',
+            'Shopware\Models\Category\Category::preRemove' => 'onPreDeleteCategory',
+            'Shopware\Models\Category\Category::postRemove' => 'onPostDeleteCategory'
         ];
     }
 
@@ -146,6 +148,29 @@ class Lifecycle extends BaseSubscriber
     {
         $entity = $eventArgs->get('entity');
         $this->getConnectExport()->setDeleteStatusForVariants($entity);
+    }
+
+    /**
+     * Callback function to delete an product from connect
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onPreDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
+    {
+        $category = $eventArgs->get('entity');
+        $this->getConnectExport()->markProductsInToBeDeletedCategories($category);
+    }
+
+    /**
+     * Callback function to delete an product from connect
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onPostDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
+    {
+        $this->getConnectExport()->handleMarkedProducts();
     }
 
     /**

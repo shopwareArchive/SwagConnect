@@ -166,7 +166,7 @@ class ImportService
             $connection->beginTransaction();
 
             try {
-                if ($categoryId != null) {
+                if ($categoryId !== null) {
                     $this->unAssignArticlesFromCategory($articleIds, $categoryId);
                 } else {
                     $this->unAssignArticlesFromAllCategories($articleIds);
@@ -550,6 +550,7 @@ class ImportService
      */
     private function unAssignArticlesFromCategory(array $articleIds, $categoryId)
     {
+        $categories = [];
         $categories[] = $categoryId;
         $childCategories = $this->manager->getConnection()->executeQuery('SELECT id FROM s_categories WHERE path LIKE ?',
             ["%|$categoryId|%"]);

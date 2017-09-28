@@ -130,6 +130,8 @@ class ConnectExportTest extends ConnectTestHelper
      */
     public function testExportErrors()
     {
+        Shopware()->Db()->executeUpdate('UPDATE s_filter SET sortmode = 1');
+
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(4);
         $detail = $model->getMainDetail();
         $detail->setPurchasePrice(0);

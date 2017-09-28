@@ -9,9 +9,12 @@ namespace Tests\ShopwarePlugins\Connect;
 
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\Product;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class SDKTest extends ConnectTestHelper
 {
+
+    use DatabaseTestCaseTrait;
     /**
      * @var \Shopware\Components\Model\ModelManager
      */
@@ -111,6 +114,12 @@ class SDKTest extends ConnectTestHelper
 
     public function testExportProductWithPurchasePrice()
     {
+
+        Shopware()->Db()->executeQuery(
+            "INSERT INTO s_plugin_connect_items (article_id, article_detail_id, shop_id, source_id, export_status, export_message, exported, category, purchase_price, fixed_price, free_delivery, update_price, update_image, update_long_description, update_short_description, update_additional_description, update_name, last_update, last_update_flag, group_id, is_main_variant, purchase_price_hash, offer_valid_until, stream, cron_update, revision)
+                    VALUES (3, 3, null, '3', null, null, 0, null, null, null, null, 'inherit', 'inherit', 'inherit', 'inherit', 'inherit', 'inherit', null, null, null, null, '', 0, '', null, null);"
+        );
+
         $model = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute')->findOneBy(['articleId' => 3]);
         $model->setExportMessage(null);
         $this->manager->persist($model);

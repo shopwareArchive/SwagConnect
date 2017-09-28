@@ -13,9 +13,12 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Components\ProductQuery\LocalProductQuery;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class ProductQueryTest extends ConnectTestHelper
 {
+    use DatabaseTestCaseTrait;
+
     protected $productQuery;
 
     protected $productTranslator;
@@ -24,10 +27,8 @@ class ProductQueryTest extends ConnectTestHelper
 
     protected $contextService;
 
-    public function setUp()
+    private function applyFixtures()
     {
-        parent::setUp();
-
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
             $purchasePriceField = 'detailPurchasePrice';
         } else {
@@ -36,6 +37,10 @@ class ProductQueryTest extends ConnectTestHelper
 
         Shopware()->Db()->executeQuery(
             "DELETE FROM s_plugin_connect_config WHERE `name` = 'priceFieldForPurchasePriceExport'"
+        );
+        Shopware()->Db()->executeQuery(
+            "INSERT INTO s_plugin_connect_items (article_id, article_detail_id, shop_id, source_id, export_status, export_message, exported, category, purchase_price, fixed_price, free_delivery, update_price, update_image, update_long_description, update_short_description, update_additional_description, update_name, last_update, last_update_flag, group_id, is_main_variant, purchase_price_hash, offer_valid_until, stream, cron_update, revision)
+                    VALUES (3, 3, null, '3', null, null, 0, null, null, null, null, 'inherit', 'inherit', 'inherit', 'inherit', 'inherit', 'inherit', null, null, null, null, '', 0, '', null, null);"
         );
         Shopware()->Db()->executeQuery(
             'INSERT IGNORE INTO s_plugin_connect_config (`name`, `value`, `groupName`)
@@ -122,6 +127,7 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function testGetLocal()
     {
+        $this->applyFixtures();
         $article = $this->getShopProduct(3);
         /** @var \Shopware\Models\Article\Detail $detail */
         $detail = $article->getMainDetail();
@@ -148,6 +154,7 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function testGetRemote()
     {
+        $this->applyFixtures();
         $newProduct = $this->getProduct();
         $newProduct->minPurchaseQuantity = 4;
 
@@ -191,6 +198,7 @@ class ProductQueryTest extends ConnectTestHelper
 
     public function testGetConnectProduct()
     {
+        $this->applyFixtures();
         $result = $this->getProductQuery()->getLocal([3]);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];

@@ -142,15 +142,18 @@ class ImportService
     }
 
     /**
-     * Unassign all categories from given article ids
+     * Unassign categories from given article ids
+     * for the given categoryId and all childcategories
+     * or for all categories if $categoryId is null
      * Set connect_mapped_category flag in article
      * attributes to NULL
      *
      * @param array $articleIds
+     * @param int|null $categoryId
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Exception
      */
-    public function unAssignArticleCategories(array $articleIds)
+    public function unAssignArticleCategories(array $articleIds, $categoryId = null)
     {
         if (!empty($articleIds)) {
             // cast all items in $articleIds to int
@@ -163,16 +166,12 @@ class ImportService
             $connection->beginTransaction();
 
             try {
-                $attributeStatement = $connection->prepare(
-                    'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
-                );
-                $attributeStatement->execute();
+                if ($categoryId != null) {
+                    $this->unAssignArticlesFromCategory($articleIds, $categoryId);
+                } else {
+                    $this->unAssignArticlesFromAllCategories($articleIds);
+                }
 
-                $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');
-                $categoriesStatement->execute();
-
-                $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
-                $categoryLogStatement->execute();
                 $connection->commit();
             } catch (\Exception $e) {
                 $connection->rollBack();
@@ -543,5 +542,80 @@ class ImportService
         }
 
         return $ast;
+    }
+
+    /**
+     * @param array $articleIds
+     * @param $categoryId
+     */
+    private function unAssignArticlesFromCategory(array $articleIds, $categoryId)
+    {
+        $categories[] = $categoryId;
+        $childCategories = $this->manager->getConnection()->executeQuery('SELECT id FROM s_categories WHERE path LIKE ?',
+            ["%|$categoryId|%"]);
+
+        while ($childCategory = $childCategories->fetchColumn()) {
+            $categories[] = (int) $childCategory;
+        }
+
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ') AND categoryID IN (' . implode(', ', $categories) . ')');
+        $categoriesStatement->execute();
+
+        //Deletes all entries in s_articles_categories_ro that are not in the Path to a assigned category
+        //need the nested select because mysql got an error otherwise
+        //see: https://stackoverflow.com/questions/45494/mysql-error-1093-cant-specify-target-table-for-update-in-from-clause
+        $this->manager->getConnection()->executeQuery('
+                  DELETE FROM s_articles_categories_ro
+                  WHERE id NOT IN 
+                    (SELECT id FROM 
+                      (SELECT DISTINCT s_articles_categories_ro.id AS id FROM s_articles_categories_ro 
+                        INNER JOIN s_articles_categories ON s_articles_categories.articleID = s_articles_categories_ro.articleID
+                        INNER JOIN s_categories ON s_articles_categories.categoryID = s_categories.id
+                        WHERE (s_categories.path LIKE CONCAT("%|", s_articles_categories_ro.categoryID, "|%") OR s_categories.id = s_articles_categories_ro.categoryID) 
+                      ) AS temp
+                    )
+                  ');
+
+        //we have to check the parent category too, because we can have following entries in s_articles_category_id:
+        //|articleID|categoryID|parentCategoryID
+        //|        1|         3|              5
+        //|        1|         3|              6
+        // -> category 6 got deleted from article but isn't delete in previous statement because categoryID is valid
+        $this->manager->getConnection()->executeQuery('
+                  DELETE FROM s_articles_categories_ro
+                  WHERE parentCategoryID NOT IN 
+                    (SELECT categoryID
+                      FROM s_articles_categories
+                      WHERE s_articles_categories.articleID = s_articles_categories_ro.articleID
+                    )
+                  ');
+
+
+        $attributeStatement = $this->manager->getConnection()->prepare('
+                    UPDATE s_articles_attributes 
+                    SET connect_mapped_category = NULL 
+                    WHERE articleID IN (' . implode(', ', $articleIds) . ') 
+                      AND articleID NOT IN 
+                        (SELECT DISTINCT articleID FROM s_articles_categories)
+                ');
+        $attributeStatement->execute();
+    }
+
+    /**
+     * Unassign all categories from given article ids
+     * @param array $articleIds
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    private function unAssignArticlesFromAllCategories(array $articleIds)
+    {
+        $attributeStatement = $this->manager->getConnection()->prepare(
+            'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
+        );
+        $attributeStatement->execute();
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');
+        $categoriesStatement->execute();
+        $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
+        $categoryLogStatement->execute();
     }
 }

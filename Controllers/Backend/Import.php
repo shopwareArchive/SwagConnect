@@ -234,9 +234,9 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     public function unassignRemoteArticlesFromLocalCategoryAction()
     {
         $articleIds = $this->request->getParam('articleIds', []);
-
+        $categoryId = (int) $this->request->getParam('categoryId');
         try {
-            $this->getImportService()->unAssignArticleCategories($articleIds);
+            $this->getImportService()->unAssignArticleCategories($articleIds, $categoryId);
         } catch (\Exception $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign([

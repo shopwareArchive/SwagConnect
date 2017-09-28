@@ -352,13 +352,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     onUnAssignArticlesFromCategory: function() {
         var me = this;
         var articleIds = [];
+        var categoryId = me.getLocalCategoryTree().getSelectionModel().getSelection()[0].get('id');
         var localProductSelection = me.getLocalProductsGrid().getSelectionModel().getSelection();
 
         for (var i = 0; i < localProductSelection.length; i++) {
             articleIds.push(localProductSelection[i].get('Article_id'));
         }
 
-        me.unAssignArticlesFromCategory(articleIds, true);
+        me.unAssignArticlesFromCategory(articleIds, categoryId, true);
     },
 
     onUnAssignArticleFromCategory: function(record) {
@@ -373,7 +374,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         });
     },
 
-    unAssignArticlesFromCategory: function(articleIds, reload) {
+    unAssignArticlesFromCategory: function(articleIds, categoryId, reload) {
         var me = this;
         var panel = me.getImportPanel();
 
@@ -387,7 +388,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             url: '{url controller=Import action=unassignRemoteArticlesFromLocalCategory}',
             method: 'POST',
             params: {
-                'articleIds[]': articleIds
+                'articleIds[]': articleIds,
+                'categoryId': categoryId
             },
             success: function(response, opts) {
                 panel.setLoading(false);

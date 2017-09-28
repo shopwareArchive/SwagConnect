@@ -16,6 +16,7 @@ Ext.define('Shopware.apps.Connect', {
     loadPath: '{url action=load}',
     views: [
         'main.Window',
+        'main.Progress',
         'main.Panel',
 
         'export.Window',

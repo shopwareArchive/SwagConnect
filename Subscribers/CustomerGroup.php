@@ -7,17 +7,36 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Logger;
 
-/**
- * Hides the connect customer group for actions other then article
- *
- * Class CustomerGroup
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class CustomerGroup extends BaseSubscriber
+class CustomerGroup implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var ModelManager
+     */
+    private $modelManager;
+
+    /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
+     * @param ModelManager $modelManager
+     * @param Logger $logger
+     */
+    public function __construct(ModelManager $modelManager, Logger $logger)
+    {
+        $this->modelManager = $modelManager;
+        $this->logger = $logger;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Backend_Base' => 'filterCustomerGroup',
@@ -37,7 +56,7 @@ class CustomerGroup extends BaseSubscriber
         $controller = $args->get('subject');
         $request = $controller->Request();
 
-        if ($request->getActionName() != 'getCustomerGroups') {
+        if ($request->getActionName() !== 'getCustomerGroups') {
             return;
         }
 
@@ -52,8 +71,7 @@ class CustomerGroup extends BaseSubscriber
             $filter[] = ['property' => 'id', 'value' => $this->getConnectCustomerGroupId(), 'expression' => '<>'];
             $request->setParam('filter', $filter);
         } catch (\Exception $e) {
-            $logger = new Logger(Shopware()->Db());
-            $logger->write(true, 'filterCustomerGroup', $e->getMessage());
+            $this->logger->write(true, 'filterCustomerGroup', $e->getMessage());
 
             return;
         }
@@ -108,9 +126,9 @@ class CustomerGroup extends BaseSubscriber
      *
      * @return int|null
      */
-    public function getConnectCustomerGroupId()
+    private function getConnectCustomerGroupId()
     {
-        $repo = Shopware()->Models()->getRepository('Shopware\Models\Attribute\CustomerGroup');
+        $repo = $this->modelManager->getRepository('Shopware\Models\Attribute\CustomerGroup');
         /** @var \Shopware\Models\Attribute\CustomerGroup $model */
         $model = $repo->findOneBy(['connectGroup' => true]);
 

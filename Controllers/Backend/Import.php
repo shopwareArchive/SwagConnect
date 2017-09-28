@@ -5,6 +5,8 @@
  * file that was distributed with this source code.
  */
 
+use ShopwarePlugins\Connect\Components\ConnectFactory;
+
 /**
  * Class Shopware_Controllers_Backend_Import
  */
@@ -22,6 +24,28 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     private $categoryRepository;
 
     private $logger;
+
+    private $factory;
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\Helper
+     */
+    public function getHelper()
+    {
+        return $this->getConnectFactory()->getHelper();
+    }
+
+    /**
+     * @return ConnectFactory
+     */
+    public function getConnectFactory()
+    {
+        if ($this->factory === null) {
+            $this->factory = new ConnectFactory();
+        }
+
+        return $this->factory;
+    }
 
     public function getImportedProductCategoriesTreeAction()
     {
@@ -468,5 +492,25 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         return $this->logger;
+    }
+
+    public function connectCategoriesNeedRecoveryAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'recreateConnectCategories' => $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated(),
+            ]
+        ]);
+    }
+
+    public function productCountForCategoryRecoveryAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'totalCount' => $this->getHelper()->getProductCountForCategoryRecovery(),
+            ]
+        ]);
     }
 }

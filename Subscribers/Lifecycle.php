@@ -7,13 +7,15 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
-use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\Models\Order\Order;
 
 /**
@@ -22,12 +24,31 @@ use Shopware\Models\Order\Order;
  * Class Lifecycle
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class Lifecycle extends BaseSubscriber
+class Lifecycle implements SubscriberInterface
 {
     /**
      * @var \Shopware\Components\Model\ModelManager
      */
     private $manager;
+
+    /**
+     * @var Helper
+     */
+    private $helper;
+    /**
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * @var ConnectExport
+     */
+    private $connectExport;
 
     /**
      * @var int
@@ -38,17 +59,30 @@ class Lifecycle extends BaseSubscriber
      * Lifecycle constructor.
      *
      * @param ModelManager $modelManager
-     * @param int $autoUpdateProducts
+     * @param Helper $helper
+     * @param SDK $sdk
+     * @param Config $config
+     * @param ConnectExport $connectExport
      */
-    public function __construct(ModelManager $modelManager, $autoUpdateProducts)
-    {
-        parent::__construct();
-
+    public function __construct(
+        ModelManager $modelManager,
+        Helper $helper,
+        SDK $sdk,
+        Config $config,
+        ConnectExport $connectExport
+    ) {
         $this->manager = $modelManager;
-        $this->autoUpdateProducts = $autoUpdateProducts;
+        $this->helper = $helper;
+        $this->sdk = $sdk;
+        $this->config = $config;
+        $this->connectExport = $connectExport;
+        $this->autoUpdateProducts = $this->config->getConfig('autoUpdateProducts', 1);
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware\Models\Article\Article::preUpdate' => 'onPreUpdate',
@@ -63,22 +97,6 @@ class Lifecycle extends BaseSubscriber
         ];
     }
 
-    /**
-     * @return ConnectExport
-     */
-    public function getConnectExport()
-    {
-        return new ConnectExport(
-            $this->getHelper(),
-            $this->getSDK(),
-            $this->manager,
-            new ProductsAttributesValidator(),
-            $this->getConnectConfig(),
-            new ErrorHandler(),
-            Shopware()->Container()->get('events')
-        );
-    }
-
     public function onPreUpdate(\Enlight_Event_EventArgs $eventArgs)
     {
         /** @var \Shopware\Models\Article\Article $entity */
@@ -86,14 +104,14 @@ class Lifecycle extends BaseSubscriber
         $db = Shopware()->Db();
 
         // Check if entity is a connect product
-        $attribute = $this->getHelper()->getConnectAttributeByModel($entity);
+        $attribute = $this->helper->getConnectAttributeByModel($entity);
         if (!$attribute) {
             return;
         }
 
         // if article is not exported to Connect
         // don't need to generate changes
-        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
+        if (!$this->helper->isProductExported($attribute) || !empty($attribute->getShopId())) {
             return;
         }
 
@@ -147,7 +165,7 @@ class Lifecycle extends BaseSubscriber
     public function onDeleteArticle(\Enlight_Event_EventArgs $eventArgs)
     {
         $entity = $eventArgs->get('entity');
-        $this->getConnectExport()->setDeleteStatusForVariants($entity);
+        $this->connectExport->setDeleteStatusForVariants($entity);
     }
 
     /**
@@ -184,12 +202,12 @@ class Lifecycle extends BaseSubscriber
         /** @var \Shopware\Models\Article\Detail $entity */
         $entity = $eventArgs->get('entity');
         if ($entity->getKind() !== 1) {
-            $attribute = $this->getHelper()->getConnectAttributeByModel($entity);
-            if (!$this->getHelper()->isProductExported($attribute)) {
+            $attribute = $this->helper->getConnectAttributeByModel($entity);
+            if (!$this->helper->isProductExported($attribute)) {
                 return;
             }
-            $this->getSDK()->recordDelete($attribute->getSourceId());
-            $this->getConnectExport()->updateConnectItemsStatus([$attribute->getSourceId()], Attribute::STATUS_DELETE);
+            $this->sdk->recordDelete($attribute->getSourceId());
+            $this->connectExport->updateConnectItemsStatus([$attribute->getSourceId()], Attribute::STATUS_DELETE);
         }
     }
 
@@ -227,7 +245,7 @@ class Lifecycle extends BaseSubscriber
         }
 
         // Check if entity is a connect product
-        $attribute = $this->getHelper()->getConnectAttributeByModel($model);
+        $attribute = $this->helper->getConnectAttributeByModel($model);
         if (!$attribute) {
             return;
         }
@@ -235,8 +253,8 @@ class Lifecycle extends BaseSubscriber
         // if article is not exported to Connect
         // or at least one article detail from same article is not exported
         // don't need to generate changes
-        if (!$this->getHelper()->isProductExported($attribute) || !empty($attribute->getShopId())) {
-            if (!$this->getHelper()->hasExportedVariants($attribute)) {
+        if (!$this->helper->isProductExported($attribute) || !empty($attribute->getShopId())) {
+            if (!$this->helper->hasExportedVariants($attribute)) {
                 return;
             }
         }
@@ -281,14 +299,14 @@ class Lifecycle extends BaseSubscriber
 
         /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
-        $articleAttribute = $this->getHelper()->getConnectAttributeByModel($article);
+        $articleAttribute = $this->helper->getConnectAttributeByModel($article);
         if (!$articleAttribute) {
             return;
         }
 
         // if article is not exported to Connect
         // don't need to generate changes
-        if (!$this->getHelper()->isProductExported($articleAttribute) || !empty($articleAttribute->getShopId())) {
+        if (!$this->helper->isProductExported($articleAttribute) || !empty($articleAttribute->getShopId())) {
             return;
         }
 
@@ -298,7 +316,7 @@ class Lifecycle extends BaseSubscriber
 
         // Mark the article detail for connect export
         try {
-            $this->getHelper()->getOrCreateConnectAttributeByModel($detail);
+            $this->helper->getOrCreateConnectAttributeByModel($detail);
             $forceExport = false;
             $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
             // if detail number has been changed
@@ -324,7 +342,7 @@ class Lifecycle extends BaseSubscriber
         /** @var \Shopware\Models\Shop\Shop $shop */
         $shop = $eventArgs->get('entity');
         $shopId = $shop->getId();
-        $exportLanguages = $this->getConnectConfig()->getConfig('exportLanguages');
+        $exportLanguages = $this->config->getConfig('exportLanguages');
         $exportLanguages = $exportLanguages ?: [];
 
         if (!in_array($shopId, $exportLanguages)) {
@@ -332,7 +350,7 @@ class Lifecycle extends BaseSubscriber
         }
 
         $exportLanguages = array_splice($exportLanguages, array_search($shopId, $exportLanguages), 1);
-        $this->getConnectConfig()->setConfig('exportLanguages', $exportLanguages, null, 'export');
+        $this->config->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 
     /**
@@ -341,18 +359,18 @@ class Lifecycle extends BaseSubscriber
      */
     private function generateChangesForDetail(\Shopware\Models\Article\Detail $detail, $force = false)
     {
-        $attribute = $this->getHelper()->getConnectAttributeByModel($detail);
-        if (!$detail->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
-            $this->getConnectExport()->syncDeleteDetail($detail);
+        $attribute = $this->helper->getConnectAttributeByModel($detail);
+        if (!$detail->getActive() && $this->config->getConfig('excludeInactiveProducts')) {
+            $this->connectExport->syncDeleteDetail($detail);
 
             return;
         }
 
-        if ($this->autoUpdateProducts == 1 || $force === true) {
-            $this->getConnectExport()->export(
-                [$attribute->getSourceId()], null, true
+        if ($this->isAutoUpdateEnabled($force)) {
+            $this->connectExport->export(
+                [$attribute->getSourceId()], null
             );
-        } elseif ($this->autoUpdateProducts == 2) {
+        } elseif ($this->autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
@@ -361,25 +379,38 @@ class Lifecycle extends BaseSubscriber
         }
     }
 
+    /**
+     * @param \Shopware\Models\Article\Article $article
+     * @param bool $force
+     */
     private function generateChangesForArticle(\Shopware\Models\Article\Article $article, $force = false)
     {
-        if (!$article->getActive() && $this->getConnectConfig()->getConfig('excludeInactiveProducts')) {
-            $this->getConnectExport()->setDeleteStatusForVariants($article);
+        if (!$article->getActive() && $this->config->getConfig('excludeInactiveProducts')) {
+            $this->connectExport->setDeleteStatusForVariants($article);
 
             return;
         }
 
-        if ($this->autoUpdateProducts == 1 || $force === true) {
-            $sourceIds = $this->getHelper()->getSourceIdsFromArticleId($article->getId());
+        if ($this->isAutoUpdateEnabled($force)) {
+            $sourceIds = $this->helper->getSourceIdsFromArticleId($article->getId());
 
-            $this->getConnectExport()->export($sourceIds, null, true);
-        } elseif ($this->autoUpdateProducts == 2) {
+            $this->connectExport->export($sourceIds, null);
+        } elseif ($this->autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->manager->getConnection()->update(
                 's_plugin_connect_items',
                 ['cron_update' => 1],
                 ['article_id' => $article->getId()]
             );
         }
+    }
+
+    /**
+     * @param bool $force
+     * @return bool
+     */
+    private function isAutoUpdateEnabled($force)
+    {
+        return $this->autoUpdateProducts == Config::UPDATE_AUTO || $force === true;
     }
 
     /**
@@ -398,7 +429,7 @@ class Lifecycle extends BaseSubscriber
         $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
 
         try {
-            $this->getSDK()->updateOrderStatus($orderStatus);
+            $this->sdk->updateOrderStatus($orderStatus);
         } catch (\Exception $e) {
             // if sn is not available, proceed without exception
         }
@@ -428,9 +459,24 @@ class Lifecycle extends BaseSubscriber
     private function generateChangeForPaymentStatus(PaymentStatus $paymentStatus)
     {
         try {
-            $this->getSDK()->updatePaymentStatus($paymentStatus);
+            $this->sdk->updatePaymentStatus($paymentStatus);
         } catch (\Exception $e) {
             // if sn is not available, proceed without exception
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasPriceType()
+    {
+        if ($this->sdk->getPriceType() === SDK::PRICE_TYPE_PURCHASE
+            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_RETAIL
+            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_BOTH
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

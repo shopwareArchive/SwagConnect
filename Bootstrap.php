@@ -194,6 +194,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
+        $this->get('template')->addTemplateDir($this->Path() . 'Views/', 'connect');
+        $this->get('snippets')->addConfigDir($this->Path() . 'Snippets/');
         $this->registerMyLibrary();
         $this->registerSubscribers();
     }

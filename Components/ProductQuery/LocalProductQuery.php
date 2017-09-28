@@ -172,6 +172,7 @@ class LocalProductQuery extends BaseProductQuery
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
             'a.lastStock',
+            'a.configuratorSetId',
         ];
 
         if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)) {
@@ -262,8 +263,6 @@ class LocalProductQuery extends BaseProductQuery
             }
         }
 
-        //todo@sb: find better way to collect configuration option translations
-        $row = $this->applyConfiguratorOptions($row);
         $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {
@@ -272,13 +271,14 @@ class LocalProductQuery extends BaseProductQuery
             $row['deliveryWorkDays'] = null;
         }
 
-        if ($this->hasVariants($row['localId'])) {
+        if ($row['configuratorSetId'] > 0) {
             $row['groupId'] = $row['localId'];
+            $row = $this->applyConfiguratorOptions($row);
         }
 
-        unset($row['localId']);
-        unset($row['detailId']);
-        unset($row['detailKind']);
+        foreach (['localId', 'detailId', 'detailKind', 'configuratorSetId'] as $fieldName) {
+            unset($row[$fieldName]);
+        }
 
         if (
             (array_key_exists(Product::ATTRIBUTE_UNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_UNIT]) &&
@@ -438,14 +438,14 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * Check whether the product contains variants
      *
-     * @param int $productId
+     * @param int $articleId
      * @return bool
      */
-    public function hasVariants($productId)
+    public function hasVariants($articleId)
     {
         $result = $this->manager->getConnection()->fetchColumn(
             'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
-            [(int) $productId]
+            [(int) $articleId]
         );
 
         return $result > 0;

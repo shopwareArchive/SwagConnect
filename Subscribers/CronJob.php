@@ -7,11 +7,13 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\ProductStream\ProductStream;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
@@ -23,7 +25,7 @@ use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
  * Class CronJob
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class CronJob extends BaseSubscriber
+class CronJob implements SubscriberInterface
 {
     /**
      * @var \ShopwarePlugins\Connect\Components\Config
@@ -46,19 +48,31 @@ class CronJob extends BaseSubscriber
     protected $connectExport;
 
     /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
      * @param SDK $sdk
      * @param ConnectExport $connectExport
+     * @param Config $configComponent
      */
     public function __construct(
         SDK $sdk,
-        ConnectExport $connectExport
+        ConnectExport $connectExport,
+        Config $configComponent,
+        Helper $helper
     ) {
-        parent::__construct();
         $this->connectExport = $connectExport;
         $this->sdk = $sdk;
+        $this->configComponent = $configComponent;
+        $this->helper = $helper;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware_CronJob_ShopwareConnectImportImages' => 'importImages',
@@ -74,7 +88,7 @@ class CronJob extends BaseSubscriber
     {
         return new ImageImport(
             Shopware()->Models(),
-            $this->getHelper(),
+            $this->helper,
             Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
@@ -88,7 +102,7 @@ class CronJob extends BaseSubscriber
      */
     public function importImages(\Shopware_Components_Cron_CronJob $job)
     {
-        $limit = $this->getConfigComponent()->getConfig('articleImagesLimitImport', 10);
+        $limit = $this->configComponent->getConfig('articleImagesLimitImport', 10);
         $this->getImageImport()->import($limit);
 
         return true;
@@ -145,7 +159,7 @@ class CronJob extends BaseSubscriber
                 //removes all products from this stream
                 $streamService->markProductsToBeRemovedFromStream($streamId);
             } else {
-                $articleIds = $this->getHelper()->getArticleIdsByNumber($orderNumbers);
+                $articleIds = $this->helper->getArticleIdsByNumber($orderNumbers);
 
                 $streamService->markProductsToBeRemovedFromStream($streamId);
                 $streamService->createStreamRelation($streamId, $articleIds);
@@ -166,7 +180,7 @@ class CronJob extends BaseSubscriber
                     $exportArticleIds = array_diff($exportArticleIds, $removeArticleIds);
                 }
 
-                $sourceIds = $this->getHelper()->getArticleSourceIds($exportArticleIds);
+                $sourceIds = $this->helper->getArticleSourceIds($exportArticleIds);
 
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
                 $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
@@ -197,11 +211,11 @@ class CronJob extends BaseSubscriber
      */
     private function removeArticlesFromStream(array $articleIds)
     {
-        $sourceIds = $this->getHelper()->getArticleSourceIds($articleIds);
+        $sourceIds = $this->helper->getArticleSourceIds($articleIds);
         $items = $this->connectExport->fetchConnectItems($sourceIds, false);
 
         foreach ($items as $item) {
-            $this->getSDK()->recordDelete($item['sourceId']);
+            $this->sdk->recordDelete($item['sourceId']);
         }
 
         $this->getStreamService()->removeMarkedStreamRelations();
@@ -214,18 +228,9 @@ class CronJob extends BaseSubscriber
     private function getStreamService()
     {
         if (!$this->streamService) {
-            $this->streamService = $this->Application()->Container()->get('swagconnect.product_stream_service');
+            $this->streamService = Shopware()->Container()->get('swagconnect.product_stream_service');
         }
 
         return $this->streamService;
-    }
-
-    private function getConfigComponent()
-    {
-        if (!$this->configComponent) {
-            $this->configComponent = ConfigFactory::getConfigInstance();
-        }
-
-        return $this->configComponent;
     }
 }

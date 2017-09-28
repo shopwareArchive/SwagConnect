@@ -125,9 +125,9 @@ class ProductToRemoteCategoryRepository extends ModelRepository
 
     /**
      * @param int $articleId
-     * @return string[]
+     * @return int[]
      */
-    public function getArticleRemoteCategoryIds($articleId)
+    public function getRemoteCategoryIds($articleId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
@@ -137,39 +137,26 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $query = $builder->getQuery();
         $result = $query->getResult($query::HYDRATE_SCALAR);
 
-        $test = array_map(
+        return array_map(
             function ($row) {
                 return $row['connectCategoryId'];
             },
             $result
         );
-
-        return $test;
     }
 
     /**
      * @param int $categoryId
+     * @param int $articleId
      */
-    public function deleteByConnectCategoryId($categoryId)
+    public function deleteByConnectCategoryId($categoryId, $articleId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
         $builder->where('ptrc.connectCategoryId = :ccid');
+        $builder->andWhere('ptrc.articleId = :articleId');
         $builder->setParameter(':ccid', $categoryId);
+        $builder->setParameter(':articleId', $articleId);
         $builder->getQuery()->execute();
-    }
-
-    /**
-    * @param int $categoryId
-    * @return int
-    */
-    public function getProductCountByCategoryId($categoryId)
-    {
-        $builder = $this->createQueryBuilder('ptrc');
-        $builder->select('COUNT(ptrc.articleId)');
-        $builder->where('ptrc.connectCategoryId = :ccid');
-        $builder->setParameter(':ccid', $categoryId);
-
-        return $builder->getQuery()->getSingleScalarResult();
     }
 }

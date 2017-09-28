@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect\Command;
+namespace ShopwarePlugins\Connect\Tests\Integration\Command;
 
 use ShopwarePlugins\Connect\Tests\CommandTestCaseTrait;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;

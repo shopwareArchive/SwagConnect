@@ -243,6 +243,21 @@ class Helper
     }
 
     /**
+     * Returns wether connect categories have to be recreated or not
+     * @return bool
+     */
+    public function checkIfConnectCategoriesHaveToBeRecreated()
+    {
+        $configComponent = ConfigFactory::getConfigInstance();
+        $result = $configComponent->getConfig('recreateConnectCategories');
+        if ($result === 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Returns a remote connectProduct e.g. for checkout maniputlations
      *
      * @param array $ids
@@ -802,5 +817,65 @@ class Helper
         return array_map(function ($row) {
             return $row['article_id'];
         }, $result);
+    }
+
+    /**
+     * Recreates ConnectCategories wit the specified offset and batchsize
+     * @param int $offset
+     * @param int $batchsize
+     */
+    public function recreateConnectCategories($offset, $batchsize)
+    {
+        $result = $this->manager->getConnection()->executeQuery('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
+            [$batchsize, $offset],
+            [\PDO::PARAM_INT, \PDO::PARAM_INT]
+        );
+
+        while ($row = $result->fetch()) {
+            $categories = json_decode($row['category'], true);
+            $countAssignedCategories = $this->manager->getConnection()->executeQuery('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
+                [$row['article_id']]
+            )->fetchColumn();
+
+            if (count($categories) != $countAssignedCategories) {
+                foreach ($categories as $categoryKey => $category) {
+                    $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
+                        [$categoryKey]);
+                    if (!($res = $selectedCategory->fetch())) {
+                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
+                            [$categoryKey, $category]);
+                        $categoryId = (int) $this->manager->getConnection()->lastInsertId();
+                    } else {
+                        $categoryId = (int) $res['id'];
+                    }
+                    $selectedProductToCategory = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
+                        [$categoryId, (int) $row['article_id']]
+                    )->fetchColumn();
+                    if ((int) $selectedProductToCategory === 0) {
+                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
+                            [$categoryId, (int) $row['article_id']]
+                            );
+                    }
+                }
+            }
+        }
+
+        $totalCount = $this->getProductCountForCategoryRecovery();
+        if ($batchsize + $offset >= $totalCount) {
+            $configComponent = ConfigFactory::getConfigInstance();
+            $configComponent->setConfig('recreateConnectCategories', 1);
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getProductCountForCategoryRecovery()
+    {
+        return (int) $this->manager->getConnection()->executeQuery('
+          SELECT COUNT(*) 
+          FROM (
+            SELECT COUNT(*) FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id`
+          ) AS Z')->fetchColumn();
     }
 }

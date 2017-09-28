@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  */
 
-use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 /**
  * Class Shopware_Controllers_Backend_Import
@@ -21,11 +21,31 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     private $remoteCategoryRepository;
 
-    private $autoCategoryResolver;
-
     private $categoryRepository;
 
     private $logger;
+
+    private $factory;
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\Helper
+     */
+    public function getHelper()
+    {
+        return $this->getConnectFactory()->getHelper();
+    }
+
+    /**
+     * @return ConnectFactory
+     */
+    public function getConnectFactory()
+    {
+        if ($this->factory === null) {
+            $this->factory = new ConnectFactory();
+        }
+
+        return $this->factory;
+    }
 
     public function getImportedProductCategoriesTreeAction()
     {
@@ -98,9 +118,18 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $stream = $this->request->getParam('stream', null);
 
         if (strpos($category, '_stream_') > 0) {
-            $stream = explode('_stream_', $category);
-            $stream = $stream[1];
-            $category = null;
+            $snippets = $this->get('snippets')->getNamespace('backend/connect/view/main');
+
+            $this->View()->assign([
+                'success' => false,
+                'message' => $snippets->get(
+                    'import/message/dont_select_streams',
+                    'Please select a Category to display its products',
+                    true
+                ),
+            ]);
+
+            return;
         }
 
         $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category,
@@ -385,7 +414,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $modelManager = Shopware()->Models();
             $this->categoryExtractor = new \ShopwarePlugins\Connect\Components\CategoryExtractor(
                 $modelManager->getRepository('Shopware\CustomModels\Connect\Attribute'),
-                $this->getAutoCategoryResolver(),
+                $this->container->get('swagconnect.auto_category_resolver'),
                 $this->getPdoGateway(),
                 new \ShopwarePlugins\Connect\Components\RandomStringGenerator(),
                 Shopware()->Db()
@@ -445,23 +474,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
-     */
-    private function getAutoCategoryResolver()
-    {
-        if (!$this->autoCategoryResolver) {
-            $this->autoCategoryResolver = new \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver(
-                $this->getModelManager(),
-                $this->getCategoryRepository(),
-                $this->getRemoteCategoryRepository(),
-                ConfigFactory::getConfigInstance()
-            );
-        }
-
-        return $this->autoCategoryResolver;
-    }
-
-    /**
      * @return \Shopware\Models\Category\Repository
      */
     private function getCategoryRepository()
@@ -480,5 +492,25 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         return $this->logger;
+    }
+
+    public function connectCategoriesNeedRecoveryAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'recreateConnectCategories' => $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated(),
+            ]
+        ]);
+    }
+
+    public function productCountForCategoryRecoveryAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'totalCount' => $this->getHelper()->getProductCountForCategoryRecovery(),
+            ]
+        ]);
     }
 }

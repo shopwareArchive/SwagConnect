@@ -106,4 +106,57 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             return $resultItem['id'];
         }, $result);
     }
+
+    /**
+     * @param int $articleId
+     * return ProductToRemoteCategory[]
+     */
+    public function getArticleRemoteCategories($articleId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('ptrc');
+        $builder->where('ptrc.articleId = :articleId');
+        $builder->setParameter('articleId', $articleId);
+
+        $query = $builder->getQuery();
+
+        return $query->getResult();
+    }
+
+    /**
+     * @param int $articleId
+     * @return int[]
+     */
+    public function getRemoteCategoryIds($articleId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('ptrc.connectCategoryId');
+        $builder->where('ptrc.articleId = :articleId');
+        $builder->setParameter('articleId', $articleId);
+
+        $query = $builder->getQuery();
+        $result = $query->getResult($query::HYDRATE_SCALAR);
+
+        return array_map(
+            function ($row) {
+                return $row['connectCategoryId'];
+            },
+            $result
+        );
+    }
+
+    /**
+     * @param int $categoryId
+     * @param int $articleId
+     */
+    public function deleteByConnectCategoryId($categoryId, $articleId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
+        $builder->where('ptrc.connectCategoryId = :ccid');
+        $builder->andWhere('ptrc.articleId = :articleId');
+        $builder->setParameter(':ccid', $categoryId);
+        $builder->setParameter(':articleId', $articleId);
+        $builder->getQuery()->execute();
+    }
 }

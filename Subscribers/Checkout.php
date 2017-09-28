@@ -450,6 +450,7 @@ class Checkout implements SubscriberInterface
         if (!$userData) {
             return $this->createDummyAddress('DEU');
         }
+
         $shippingData = $userData['shippingaddress'];
         $address = new Address();
         $address->zip = $shippingData['zipcode'];
@@ -459,6 +460,15 @@ class Checkout implements SubscriberInterface
         $address->email = $userData['additional']['user']['email'];
         if (!empty($userData['additional']['stateShipping']['shortcode'])) {
             $address->state = $userData['additional']['stateShipping']['shortcode'];
+        }
+        if (!empty($shippingData['department'])) {
+            $address->department = $shippingData['department'];
+        }
+        if (!empty($shippingData['additionalAddressLine1'])) {
+            $address->additionalAddressLine1 = $shippingData['additionalAddressLine1'];
+        }
+        if (!empty($shippingData['additionalAddressLine2'])) {
+            $address->additionalAddressLine2 = $shippingData['additionalAddressLine2'];
         }
         $address->firstName = $shippingData['firstname'];
         $address->surName = $shippingData['lastname'];
@@ -502,6 +512,7 @@ class Checkout implements SubscriberInterface
         }
 
         $reservation = unserialize(Shopware()->Session()->connectReservation);
+
         if ($reservation !== null && $reservation !== false) {
             $result = $this->sdk->checkout($reservation, $orderNumber);
             foreach ($result as $shopId => $success) {

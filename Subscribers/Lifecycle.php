@@ -20,6 +20,9 @@ use Shopware\Models\Order\Order;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from connect
+ *
+ * Class Lifecycle
+ * @package ShopwarePlugins\Connect\Subscribers
  */
 class Lifecycle implements SubscriberInterface
 {
@@ -53,6 +56,8 @@ class Lifecycle implements SubscriberInterface
     private $autoUpdateProducts;
 
     /**
+     * Lifecycle constructor.
+     *
      * @param ModelManager $modelManager
      * @param Helper $helper
      * @param SDK $sdk
@@ -90,9 +95,6 @@ class Lifecycle implements SubscriberInterface
         ];
     }
 
-    /**
-     * @param \Enlight_Event_EventArgs $eventArgs
-     */
     public function onPreUpdate(\Enlight_Event_EventArgs $eventArgs)
     {
         /** @var \Shopware\Models\Article\Article $entity */
@@ -179,6 +181,7 @@ class Lifecycle implements SubscriberInterface
             if (!$this->helper->isProductExported($attribute)) {
                 return;
             }
+            $this->sdk->recordDelete($attribute->getSourceId());
             $this->connectExport->updateConnectItemsStatus([$attribute->getSourceId()], Attribute::STATUS_DELETE);
         }
     }

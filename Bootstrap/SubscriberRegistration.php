@@ -216,7 +216,8 @@ class SubscriberRegistration
             new ServiceContainer(
                 $this->modelManager,
                 $this->db,
-                $this->container
+                $this->container,
+                $this->config
             ),
             new Supplier($this->container->get('dbal_connection'))
         ];

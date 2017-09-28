@@ -185,7 +185,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
             'categories' => [
-                '/bücher' => 'Bücher',
+                '/deutsch/bücher' => 'Bücher',
+                '/deutsch' => 'Deutsch',
             ],
             'translations' => [
                 'en' => new Translation([
@@ -402,10 +403,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),
+                $manager->getRepository('Shopware\Models\Category\Category')
             ),
             new PDO(Shopware()->Db()->getConnection()),
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 

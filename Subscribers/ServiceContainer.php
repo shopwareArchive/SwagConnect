@@ -16,7 +16,8 @@ use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
@@ -49,20 +50,26 @@ class ServiceContainer implements SubscriberInterface
      */
     private $container;
 
+    /** @var Config */
+    private $config;
+
     /**
      * ServiceContainer constructor.
      * @param ModelManager $manager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param Container $container
+     * @param Config $config
      */
     public function __construct(
         ModelManager $manager,
         Enlight_Components_Db_Adapter_Pdo_Mysql $db,
-        Container $container
+        Container $container,
+        Config $config
     ) {
         $this->manager = $manager;
         $this->db = $db;
         $this->container = $container;
+        $this->config = $config;
     }
 
     /**
@@ -78,6 +85,8 @@ class ServiceContainer implements SubscriberInterface
             'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
+            'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
+            'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
         ];
     }
 
@@ -92,7 +101,7 @@ class ServiceContainer implements SubscriberInterface
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            ConfigFactory::getConfigInstance(),
+            $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );
@@ -133,9 +142,7 @@ class ServiceContainer implements SubscriberInterface
      */
     public function onRestApiRequest()
     {
-        return new RestApiRequest(
-            ConfigFactory::getConfigInstance()
-        );
+        return new RestApiRequest($this->config);
     }
 
     /**
@@ -143,13 +150,6 @@ class ServiceContainer implements SubscriberInterface
      */
     public function onImportService()
     {
-        $autoCategoryResolver = new AutoCategoryResolver(
-            $this->manager,
-            $this->manager->getRepository(CategoryModel::class),
-            $this->manager->getRepository(RemoteCategory::class),
-            ConfigFactory::getConfigInstance()
-        );
-
         return new ImportService(
             $this->manager,
             $this->container->get('multi_edit.product'),
@@ -157,14 +157,16 @@ class ServiceContainer implements SubscriberInterface
             $this->manager->getRepository(ArticleModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class),
-            $autoCategoryResolver,
+            $this->container->get('swagconnect.auto_category_resolver'),
             new CategoryExtractor(
                 $this->manager->getRepository(ConnectAttribute::class),
-                $autoCategoryResolver,
+                $this->container->get('swagconnect.auto_category_resolver'),
                 new PDO($this->db->getConnection()),
                 new RandomStringGenerator(),
                 $this->db
-            )
+            ),
+            $this->container->get('CategoryDenormalization'),
+            $this->container->get('shopware_attribute.data_persister')
         );
     }
 
@@ -175,6 +177,33 @@ class ServiceContainer implements SubscriberInterface
     {
         return new \ShopwarePlugins\Connect\Components\AutoCategoryReverter(
             $this->container->get('swagconnect.import_service')
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     */
+    public function onAutoCategoryResolver()
+    {
+        return new AutoCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(CategoryModel::class),
+            $this->manager->getRepository(RemoteCategory::class),
+            $this->config,
+            $this->manager->getRepository(ProductToRemoteCategory::class)
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver
+     */
+    public function onDefaultCategoryResolver()
+    {
+        return new DefaultCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(RemoteCategory::class),
+            $this->manager->getRepository(ProductToRemoteCategory::class),
+            $this->manager->getRepository(CategoryModel::class)
         );
     }
 }

@@ -7,6 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component;
 
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
@@ -15,6 +16,7 @@ use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 
 class ImportServiceTest extends ConnectTestHelper
 {
@@ -36,6 +38,11 @@ class ImportServiceTest extends ConnectTestHelper
 
     private $articleRepository;
 
+    /**
+     * @var ProductToRemoteCategoryRepository
+     */
+    private $productToRemoteCategoriesRepository;
+
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
@@ -54,12 +61,14 @@ class ImportServiceTest extends ConnectTestHelper
         $this->categoryRepository = $this->manager->getRepository('Shopware\Models\Category\Category');
         $this->remoteCategoryRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory');
         $this->connectAttributeRepository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\Attribute');
+        $this->productToRemoteCategoriesRepository = Shopware()->Models()->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory');
         $this->articleRepository = $this->manager->getRepository('Shopware\Models\Article\Article');
         $autoCategoryResolver = new AutoCategoryResolver(
             $this->manager,
             $this->categoryRepository,
             $this->remoteCategoryRepository,
-            ConfigFactory::getConfigInstance()
+            ConfigFactory::getConfigInstance(),
+            $this->manager->getRepository(ProductToRemoteCategory::class)
         );
 
         $this->importService = new ImportService(
@@ -76,7 +85,9 @@ class ImportServiceTest extends ConnectTestHelper
                 new PDO(Shopware()->Db()->getConnection()),
                 new RandomStringGenerator(),
                 Shopware()->Db()
-            )
+            ),
+            Shopware()->Container()->get('CategoryDenormalization'),
+            Shopware()->Container()->get('shopware_attribute.data_persister')
         );
     }
 
@@ -92,7 +103,7 @@ class ImportServiceTest extends ConnectTestHelper
         // map buecher category to some local category
         $localCategory = $this->categoryRepository->find(6);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
         $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
@@ -156,7 +167,7 @@ class ImportServiceTest extends ConnectTestHelper
         $this->manager->persist($localCategory);
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
         $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
@@ -187,5 +198,34 @@ class ImportServiceTest extends ConnectTestHelper
         $assignedArticleIds = $this->importService->findRemoteArticleIdsByCategoryId($localCategory->getId());
 
         $this->assertEquals($articleIds, $assignedArticleIds);
+    }
+
+    public function testImportRemoteCategory()
+    {
+        $this->manager->getConnection()->setTransactionIsolation(\Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED);
+        $this->manager->getConnection()->beginTransaction();
+        $localCategory = $this->categoryRepository->find(35);
+        /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
+
+        $this->importService->importRemoteCategory($localCategory->getId(), $remoteCategory->getCategoryKey(), $remoteCategory->getLabel());
+
+        $createdLocalCategory = $this->categoryRepository->findOneBy([
+            'name' => $remoteCategory->getLabel(),
+            'parent' => $localCategory->getId()
+            ]);
+
+        $this->assertInstanceOf(Category::class, $createdLocalCategory);
+
+        $expectedArticleCount = count(
+            $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey())
+        );
+        $actualArticleCount = (int) $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
+            [':categoryID' => $createdLocalCategory->getId()]
+        );
+        $this->assertEquals($expectedArticleCount, $actualArticleCount);
+        //rollback changes to make test repeatable
+        $this->manager->getConnection()->rollback();
     }
 }

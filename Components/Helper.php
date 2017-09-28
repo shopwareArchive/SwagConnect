@@ -7,8 +7,8 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
-use Doctrine\DBAL\DBALException;
 use Shopware\Connect\Struct\Product;
+use Shopware\CustomModels\Connect\AttributeRepository;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Components\Model\ModelManager;
 use Doctrine\ORM\Query;
@@ -130,6 +130,17 @@ class Helper
         return null;
     }
 
+    /**
+     * Get article detail by his number
+     *
+     * @param string $number
+     * @return null|ProductDetail
+     */
+    public function getDetailByNumber($number)
+    {
+        return $this->manager->getRepository(ProductDetail::class)->findOneBy(['number' => $number]);
+    }
+
     public function getConnectArticleModel($sourceId, $shopId)
     {
         $builder = $this->manager->createQueryBuilder();
@@ -229,6 +240,21 @@ class Helper
         ';
 
         $this->manager->getConnection()->exec($sql);
+    }
+
+    /**
+     * Returns wether connect categories have to be recreated or not
+     * @return bool
+     */
+    public function checkIfConnectCategoriesHaveToBeRecreated()
+    {
+        $configComponent = ConfigFactory::getConfigInstance();
+        $result = $configComponent->getConfig('recreateConnectCategories');
+        if ($result === 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -571,44 +597,13 @@ class Helper
             return [];
         }
 
+        /** @var AttributeRepository $repo */
+        $repo = $this->manager->getRepository(ConnectAttribute::class);
+
         return array_merge(
-            $this->getSourceIds($articleIds, 1),
-            $this->getSourceIds($articleIds, 2)
+            $repo->findSourceIds($articleIds, 1),
+            $repo->findSourceIds($articleIds, 2)
         );
-    }
-
-    private function getSourceIds(array $articleIds, $kind)
-    {
-        $customProductsTableExists = false;
-        try {
-            $builder = $this->manager->getConnection()->createQueryBuilder();
-            $builder->select('id');
-            $builder->from('s_plugin_custom_products_template');
-            $builder->setMaxResults(1);
-            $builder->execute()->fetch();
-
-            $customProductsTableExists = true;
-        } catch (DBALException $e) {
-            // ignore it
-            // custom products is not installed
-        }
-
-        // main variants should be collected first, because they
-        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
-        $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->select('spci.source_id')
-            ->from('s_plugin_connect_items', 'spci')
-            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
-            ->where('sad.articleID IN (:articleIds) AND sad.kind = :kind AND spci.shop_id IS NULL')
-            ->setParameter(':articleIds', $articleIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
-            ->setParameter('kind', $kind, \PDO::PARAM_INT);
-
-        if ($customProductsTableExists) {
-            $builder->leftJoin('spci', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'spci.article_id = spcptpr.article_id')
-                ->andWhere('spcptpr.template_id IS NULL');
-        }
-
-        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -822,5 +817,65 @@ class Helper
         return array_map(function ($row) {
             return $row['article_id'];
         }, $result);
+    }
+
+    /**
+     * Recreates ConnectCategories wit the specified offset and batchsize
+     * @param int $offset
+     * @param int $batchsize
+     */
+    public function recreateConnectCategories($offset, $batchsize)
+    {
+        $result = $this->manager->getConnection()->executeQuery('SELECT `article_id`, `category` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
+            [$batchsize, $offset],
+            [\PDO::PARAM_INT, \PDO::PARAM_INT]
+        );
+
+        while ($row = $result->fetch()) {
+            $categories = json_decode($row['category'], true);
+            $countAssignedCategories = $this->manager->getConnection()->executeQuery('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
+                [$row['article_id']]
+            )->fetchColumn();
+
+            if (count($categories) != $countAssignedCategories) {
+                foreach ($categories as $categoryKey => $category) {
+                    $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ?',
+                        [$categoryKey]);
+                    if (!($res = $selectedCategory->fetch())) {
+                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
+                            [$categoryKey, $category]);
+                        $categoryId = (int) $this->manager->getConnection()->lastInsertId();
+                    } else {
+                        $categoryId = (int) $res['id'];
+                    }
+                    $selectedProductToCategory = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
+                        [$categoryId, (int) $row['article_id']]
+                    )->fetchColumn();
+                    if ((int) $selectedProductToCategory === 0) {
+                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
+                            [$categoryId, (int) $row['article_id']]
+                            );
+                    }
+                }
+            }
+        }
+
+        $totalCount = $this->getProductCountForCategoryRecovery();
+        if ($batchsize + $offset >= $totalCount) {
+            $configComponent = ConfigFactory::getConfigInstance();
+            $configComponent->setConfig('recreateConnectCategories', 1);
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getProductCountForCategoryRecovery()
+    {
+        return (int) $this->manager->getConnection()->executeQuery('
+          SELECT COUNT(*) 
+          FROM (
+            SELECT COUNT(*) FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id`
+          ) AS Z')->fetchColumn();
     }
 }

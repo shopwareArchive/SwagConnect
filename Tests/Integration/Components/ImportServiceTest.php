@@ -294,7 +294,6 @@ class ImportServiceTest extends ConnectTestHelper
             'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
             [':categoryID' => $createdLocalCategory->getId()]
         );
-
         $this->assertEquals($expectedArticleCount, $actualArticleCount);
     }
 }

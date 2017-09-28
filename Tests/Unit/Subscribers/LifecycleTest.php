@@ -79,6 +79,8 @@ class LifecycleTest extends AbstractConnectUnitTest
                 'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
                 'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
                 'Shopware\Models\Shop\Shop::preRemove' => 'onDeleteShop',
+                'Shopware\Models\Category\Category::preRemove' => 'onPreDeleteCategory',
+                'Shopware\Models\Category\Category::postRemove' => 'onPostDeleteCategory'
             ],
             Lifecycle::getSubscribedEvents()
         );

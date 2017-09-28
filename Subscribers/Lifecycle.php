@@ -177,7 +177,7 @@ class Lifecycle implements SubscriberInterface
     public function onPreDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
     {
         $category = $eventArgs->get('entity');
-        $this->getConnectExport()->markProductsInToBeDeletedCategories($category);
+        $this->connectExport->markProductsInToBeDeletedCategories($category);
     }
 
     /**
@@ -188,7 +188,7 @@ class Lifecycle implements SubscriberInterface
      */
     public function onPostDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
     {
-        $this->getConnectExport()->handleMarkedProducts();
+        $this->connectExport->handleMarkedProducts();
     }
 
     /**

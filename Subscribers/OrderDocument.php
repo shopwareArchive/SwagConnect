@@ -7,11 +7,15 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
-class OrderDocument extends BaseSubscriber
+class OrderDocument implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware_Models_Document_Order::processOrder::before' => 'makeShippingTaxRateAvailable'
@@ -49,7 +53,7 @@ class OrderDocument extends BaseSubscriber
      *
      * @param $order
      */
-    public function setDefaultTaxRate($order)
+    private function setDefaultTaxRate($order)
     {
         $taxRate = round(($order->invoice_shipping / $order->invoice_shipping_net) * 100 - 100, 2);
 

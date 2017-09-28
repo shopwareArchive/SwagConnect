@@ -7,15 +7,31 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\Helper;
+
 /**
  * Extends the dispatch module and removes non-connect aware dispatches, if connect products are in the basket
- *
- * Class Dispatches
- * @package ShopwarePlugins\Connect\Components\Subscribers
  */
-class Dispatches extends BaseSubscriber
+class Dispatches implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @param Helper $helper
+     */
+    public function __construct(Helper $helper)
+    {
+        $this->helper = $helper;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Shipping' => 'onPostDispatchBackendShipping',
@@ -38,7 +54,7 @@ class Dispatches extends BaseSubscriber
         }
 
         // If no connect products are in basket, don't modify anything
-        if (!$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (!$this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
@@ -78,13 +94,6 @@ class Dispatches extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-                // The version is needed as in older sw-versions the attribute cannot be extended easily
-                if (\Shopware::VERSION != '__VERSION__' && version_compare(\Shopware::VERSION, '4.2.0', '<')) {
-                    $subject->View()->assign('useOldConnectShippingAttributeExtension', true);
-                }
-
                 $subject->View()->extendsTemplate(
                     'backend/shipping/connect.js'
                 );

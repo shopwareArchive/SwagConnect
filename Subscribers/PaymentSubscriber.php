@@ -7,26 +7,42 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
-/**
- * Class Payment
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Payment extends BaseSubscriber
-{
-    /**
-     * @var \Shopware\Models\Payment\Repository
-     */
-    private $repository;
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\Helper;
+use Shopware\Models\Payment\Repository as PaymentRepository;
+use ShopwarePlugins\Connect\Services\PaymentService;
 
+class PaymentSubscriber implements SubscriberInterface
+{
     /**
      * @var \ShopwarePlugins\Connect\Services\PaymentService
      */
     private $paymentService;
 
     /**
-     * @return array
+     * @var Helper
      */
-    public function getSubscribedEvents()
+    private $helper;
+
+    /**
+     * @var PaymentRepository
+     */
+    private $paymentRepository;
+
+    /**
+     * @param Helper $helper
+     * @param PaymentRepository $paymentRepository
+     */
+    public function __construct(Helper $helper, PaymentRepository $paymentRepository)
+    {
+        $this->helper = $helper;
+        $this->paymentRepository = $paymentRepository;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Payment' => 'extendBackendPayment',
@@ -35,12 +51,12 @@ class Payment extends BaseSubscriber
     }
 
     /**
-     * @return mixed
+     * @return PaymentService
      */
     public function getPaymentService()
     {
         if ($this->paymentService == null) {
-            $this->paymentService = $this->Application()->Container()->get('swagconnect.payment_service');
+            $this->paymentService = Shopware()->Container()->get('swagconnect.payment_service');
         }
 
         return $this->paymentService;
@@ -57,8 +73,6 @@ class Payment extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-
                 $subject->View()->extendsTemplate(
                     'backend/payment/model/connect_attribute.js'
                 );
@@ -91,43 +105,30 @@ class Payment extends BaseSubscriber
         $paymentMeans = $args->getReturn();
 
         $sessionId = Shopware()->SessionID();
-        $hasConnectProduct = $this->getHelper()->hasBasketConnectProducts($sessionId);
+        $hasConnectProduct = $this->helper->hasBasketConnectProducts($sessionId);
 
         if ($hasConnectProduct === true) {
-            foreach ($paymentMeans as $key => &$payment) {
-                /** @var \Shopware\Models\Payment\Payment $model */
-                $model = $this->getPaymentRepository()->find($payment['id']);
-                if (!$model) {
+            foreach ($paymentMeans as $key => $payment) {
+                /** @var \Shopware\Models\Payment\Payment $paymentModel */
+                $paymentModel = $this->paymentRepository->find($payment['id']);
+                if (!$paymentModel) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                if (!$model->getAttribute()) {
+                if (!$paymentModel->getAttribute()) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
 
-                $attribute = $model->getAttribute();
+                $attribute = $paymentModel->getAttribute();
                 if (method_exists($attribute, 'getConnectIsAllowed') === true
                     && $attribute->getConnectIsAllowed() == 0) {
                     unset($paymentMeans[$key]);
                     continue;
                 }
             }
-
             $args->setReturn($paymentMeans);
         }
-    }
-
-    /**
-     * @return \Shopware\Models\Payment\Repository
-     */
-    public function getPaymentRepository()
-    {
-        if (!$this->repository) {
-            $this->repository = Shopware()->Models()->getRepository('Shopware\Models\Payment\Payment');
-        }
-
-        return $this->repository;
     }
 }

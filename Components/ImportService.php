@@ -562,34 +562,8 @@ class ImportService
         $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ') AND categoryID IN (' . implode(', ', $categories) . ')');
         $categoriesStatement->execute();
 
-        //Deletes all entries in s_articles_categories_ro that are not in the Path to a assigned category
-        //need the nested select because mysql got an error otherwise
-        //see: https://stackoverflow.com/questions/45494/mysql-error-1093-cant-specify-target-table-for-update-in-from-clause
-        $this->manager->getConnection()->executeQuery('
-                  DELETE FROM s_articles_categories_ro
-                  WHERE id NOT IN 
-                    (SELECT id FROM 
-                      (SELECT DISTINCT s_articles_categories_ro.id AS id FROM s_articles_categories_ro 
-                        INNER JOIN s_articles_categories ON s_articles_categories.articleID = s_articles_categories_ro.articleID
-                        INNER JOIN s_categories ON s_articles_categories.categoryID = s_categories.id
-                        WHERE (s_categories.path LIKE CONCAT("%|", s_articles_categories_ro.categoryID, "|%") OR s_categories.id = s_articles_categories_ro.categoryID) 
-                      ) AS temp
-                    )
-                  ');
-
-        //we have to check the parent category too, because we can have following entries in s_articles_category_id:
-        //|articleID|categoryID|parentCategoryID -> actually this one is the child -> core-naming fuck up
-        //|        1|         3|              5
-        //|        1|         3|              6
-        // -> category 6 got deleted from article but isn't delete in previous statement because categoryID is valid
-        $this->manager->getConnection()->executeQuery('
-                  DELETE FROM s_articles_categories_ro
-                  WHERE parentCategoryID NOT IN 
-                    (SELECT categoryID
-                      FROM s_articles_categories
-                      WHERE s_articles_categories.articleID = s_articles_categories_ro.articleID
-                    )
-                  ');
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ') AND parentCategoryID IN (' . implode(', ', $categories) . ')');
+        $categoriesStatement->execute();
 
         $attributeStatement = $this->manager->getConnection()->prepare('
                     UPDATE s_articles_attributes 

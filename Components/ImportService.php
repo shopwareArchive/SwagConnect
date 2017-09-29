@@ -578,7 +578,7 @@ class ImportService
                   ');
 
         //we have to check the parent category too, because we can have following entries in s_articles_category_id:
-        //|articleID|categoryID|parentCategoryID
+        //|articleID|categoryID|parentCategoryID -> actually this one is the child -> core-naming fuck up
         //|        1|         3|              5
         //|        1|         3|              6
         // -> category 6 got deleted from article but isn't delete in previous statement because categoryID is valid
@@ -591,13 +591,16 @@ class ImportService
                     )
                   ');
 
-
         $attributeStatement = $this->manager->getConnection()->prepare('
                     UPDATE s_articles_attributes 
                     SET connect_mapped_category = NULL 
                     WHERE articleID IN (' . implode(', ', $articleIds) . ') 
-                      AND articleID NOT IN 
-                        (SELECT DISTINCT articleID FROM s_articles_categories)
+                      AND 
+                        (SELECT COUNT(*) FROM s_articles_categories 
+                            INNER JOIN s_categories_attributes ON s_articles_categories.categoryID = s_categories_attributes.categoryID
+                            WHERE s_articles_categories.articleID = s_articles_attributes.articleID 
+                                AND s_categories_attributes.connect_imported_category = 1
+                        ) = 0
                 ');
         $attributeStatement->execute();
     }

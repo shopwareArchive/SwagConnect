@@ -176,6 +176,9 @@ class Lifecycle implements SubscriberInterface
      */
     public function onPreDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
     {
+        if ($this->autoUpdateProducts===Config::UPDATE_MANUAL) {
+            return;
+        }
         $category = $eventArgs->get('entity');
         $this->connectExport->markProductsInToBeDeletedCategories($category);
     }
@@ -188,7 +191,11 @@ class Lifecycle implements SubscriberInterface
      */
     public function onPostDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
     {
-        $this->connectExport->handleMarkedProducts();
+        // if update is set to auto we have to export all marked products
+        // else cron_job will do it or user does it manually
+        if ($this->autoUpdateProducts===Config::UPDATE_AUTO) {
+            $this->connectExport->handleMarkedProducts();
+        }
     }
 
     /**

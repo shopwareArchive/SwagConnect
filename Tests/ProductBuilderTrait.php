@@ -21,6 +21,7 @@ trait ProductBuilderTrait
      * @param bool $withImage
      * @param bool $withVariantImages
      * @return Product
+     * @deprecated uses random data don't use in future tests
      */
     public function getProduct($withImage = false, $withVariantImages = false)
     {
@@ -82,6 +83,7 @@ trait ProductBuilderTrait
 
     /**
      * @return Product[]
+     * @deprecated uses random data don't use in future tests
      */
     protected function getVariants()
     {
@@ -112,6 +114,129 @@ trait ProductBuilderTrait
             $variant = $this->getProduct(true);
             $variantSourceId = $mainVariant->sourceId . '-' . $i;
             $variant->title = 'MassImport #' . $variantSourceId;
+            $variant->sourceId = $variantSourceId;
+            $variant->ean = $variantSourceId;
+            $variantColor = array_pop($color);
+            $variant->variant['Farbe'] = $variantColor['de'];
+            $variant->groupId = $groupId;
+            $variant->translations = [
+                'en' => new Translation([
+                    'title' => 'MassImport #' . $variantSourceId . ' EN',
+                    'longDescription' => $mainVariant->longDescription . ' EN',
+                    'shortDescription' => $mainVariant->shortDescription . ' EN',
+                    'variantLabels' => [
+                        'Farbe' => 'Color',
+                    ],
+                    'variantValues' => [
+                        $variantColor['de'] => $variantColor['en'],
+                    ],
+                ]),
+            ];
+
+            $variants[] = $variant;
+        }
+
+        return $variants;
+    }
+
+    /**
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @param string $sourceId
+     * @param int $ean
+     * @param string $sku
+     * @param string $title
+     * @return Product
+     */
+    public function getProductNonRand($withImage = false, $withVariantImages = false, $sourceId = '133738', $ean = 133738, $sku = 'sku#133738' , $title = 'testProduct')
+    {
+        $purchasePrice = 6.99;
+        $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
+        $product =  new Product([
+            'shopId' => 3,
+            'revisionId' => time(),
+            'sourceId' => (string) $sourceId,
+            'ean' => $ean,
+            'sku' => $sku,
+            'url' => 'http://shopware.de',
+            'title' => $title,
+            'shortDescription' => 'Ein Produkt aus shopware Connect',
+            'longDescription' => 'Ein Produkt aus shopware Connect',
+            'additionalDescription' => 'Ein Produkt aus shopware Connect',
+            'configuratorSetType'=> 3,
+            'vendor' => [
+                'url' => 'http://connect.shopware.de/',
+                'name' => 'shopware Connect',
+                'logo_url' => $this->imageProviderUrl,
+                'page_title' => 'shopware Connect title',
+                'description' => 'shopware Connect description'
+            ],
+            'stream' => 'Awesome products',
+            'price' => 9.99,
+            'purchasePrice' => $purchasePrice,
+            'purchasePriceHash' => hash_hmac(
+                'sha256',
+                sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+            ),
+            'offerValidUntil' => $offerValidUntil,
+            'availability' => 100,
+            'categories' => [
+                '/bücher' => 'Bücher',
+            ],
+            'translations' => [
+                'en' => new Translation([
+                    'title' => $title . ' EN',
+                    'longDescription' => 'Ein Produkt aus shopware Connect EN',
+                    'shortDescription' => 'Ein Produkt aus shopware Connect short EN',
+                    'additionalDescription' => 'Ein Produkt aus shopware Verbinden Sie mit zusätzlicher Beschreibung EN',
+                    'url' => 'http://shopware.de',
+                ])
+            ]
+        ]);
+
+        if ($withImage) {
+            $product->images = [$this->imageProviderUrl . '?' . '133738'];
+        }
+
+        if ($withVariantImages) {
+            $product->variantImages = [$this->imageProviderUrl . '?' . '133738' . '-variantImage'];
+        }
+
+        return $product;
+    }
+
+    /**
+     * @param int $groupId
+     * @return Product[]
+     */
+    protected function getVariantsNonRand($groupId = 133738)
+    {
+        $color = [
+            ['de' => 'Weiss-Blau' . 'test', 'en' => 'White-Blue'],
+            ['de' => 'Weiss-Rot' . 'test', 'en' => 'White-Red'],
+            ['de' => 'Blau-Rot' . 'test', 'en' => 'Blue-Red'],
+            ['de' => 'Schwarz-Rot' . 'test', 'en' => 'Black-Red'],
+        ];
+
+        $variants = [];
+        $mainVariant = $this->getProductNonRand(true);
+        $mainVariantColor = array_pop($color);
+        $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
+        $mainVariant->groupId = $groupId;
+        $variants[] = $mainVariant;
+
+        //add translations
+        $mainVariant->translations['en']->variantLabels = [
+            'Farbe' => 'Color',
+        ];
+        $mainVariant->translations['en']->variantValues = [
+            $mainVariantColor['de'] => $mainVariantColor['en'],
+        ];
+
+        for ($i = 0; $i < 4 - 1; ++$i) {
+            $variant = $this->getProduct(true);
+            $variantSourceId = $mainVariant->sourceId . '-' . $i;
+            $variant->title = 'variant #' . ($i+2) . '|SourceId:' . $variantSourceId;
             $variant->sourceId = $variantSourceId;
             $variant->ean = $variantSourceId;
             $variantColor = array_pop($color);

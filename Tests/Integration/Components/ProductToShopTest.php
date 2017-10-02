@@ -275,6 +275,62 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedArticleDetailId, $actualArticleDetailId);
     }
 
+    public function test_insert_variants()
+    {
+        $variants = $this->getVariantsNonRand();
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $mainProduct = $variants[0];
+
+        //verify that the connect items model is correct
+        $articleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$mainProduct->sourceId, $mainProduct->shopId]
+        );
+        $connectItems = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id, source_id, shop_id FROM s_plugin_connect_items WHERE article_id = ?',
+            [$articleId]
+        );
+        $this->assertCount(4, $connectItems);
+        // verify that $variants[0] is main variant
+        $this->assertEquals($variants[0]->sourceId, $connectItems[0]['source_id']);
+        $kind = $this->manager->getConnection()->fetchColumn(
+            'SELECT kind FROM s_articles_details WHERE id = ?',
+            [$connectItems[0]['article_detail_id']]
+        );
+        $this->assertEquals(1, $kind);
+
+        // verify that the sw article is correct
+        $article = $this->manager->getConnection()->fetchAssoc(
+            'SELECT name, description, description_long, main_detail_id, configurator_set_id FROM s_articles WHERE id = ?',
+            [$articleId]
+        );
+
+        $this->assertEquals($article['name'], 'variant #4|SourceId:133738-2');
+        $this->assertEquals($article['description'], 'Ein Produkt aus shopware Connect');
+        $this->assertEquals($article['description_long'], 'Ein Produkt aus shopware Connect');
+
+        // verify that the s_detail model is correct
+        $detail = $this->manager->getConnection()->fetchAssoc(
+            'SELECT articleID, ordernumber, kind, instock, ean, purchaseprice FROM s_articles_details WHERE id = ?',
+            [$article['main_detail_id']]
+        );
+
+        $expected = [
+            'articleID' => $articleId,
+            'ordernumber' => 'SC-3-sku#133738',
+            'kind' => '1',
+            'instock' => '100',
+            'ean' => '133738',
+            'purchaseprice' => '6.99'
+
+        ];
+
+        $this->assertEquals($expected,$detail);
+    }
+
     /**
      * Insert 4 remote variants. Then delete them one by one.
      * Main variant must be removed at the end.
@@ -344,5 +400,9 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         );
         $configuratorSetId = $this->manager->getConnection()->fetchColumn('SELECT configurator_set_id FROM s_articles WHERE id = ?', [$articleId]);
         $this->assertNull($configuratorSetId);
+    }
+
+    public function test_set_price()
+    {
     }
 }

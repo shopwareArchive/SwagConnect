@@ -12,13 +12,14 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
+use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Models\Category\Category;
 
-class LifecycleTest extends ConnectTestHelper
+class LifecycleTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
+    use ConnectTestHelperTrait;
 
     private $manager;
     private $config;

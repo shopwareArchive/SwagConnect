@@ -369,8 +369,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             if (response !== 'yes') {
                 return false;
             }
-
-            me.unAssignArticlesFromCategory([record.get('Article_id')], true);
+            var categoryId = me.getLocalCategoryTree().getSelectionModel().getSelection()[0].get('id');
+            me.unAssignArticlesFromCategory([record.get('Article_id')], categoryId, true);
         });
     },
 

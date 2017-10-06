@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
+namespace ShopwarePlugins\Connect\Tests\Integration\Components\CategoryResolver;
 
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;

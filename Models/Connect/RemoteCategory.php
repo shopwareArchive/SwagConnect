@@ -10,6 +10,7 @@ namespace Shopware\CustomModels\Connect;
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\ModelEntity;
 use Shopware\Models\Category\Category;
+use Shopware\Models\Attribute\Category as CategoryAttribute;
 
 /**
  * Describes Shopware Connect categories
@@ -130,6 +131,13 @@ class RemoteCategory extends ModelEntity
     {
         if (!$this->localCategories->contains($localCategory)) {
             $this->localCategories->add($localCategory);
+            if ($localCategory->getAttribute()) {
+                $localCategory->getAttribute()->setConnectImportedCategory(1);
+            } else {
+                $attribute = new CategoryAttribute();
+                $attribute->setConnectImportedCategory(1);
+                $localCategory->setAttribute($attribute);
+            }
         }
     }
 

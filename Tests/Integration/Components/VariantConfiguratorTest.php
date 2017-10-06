@@ -42,13 +42,11 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
      */
     private $helper;
 
-
     /**
      * @before
      */
     public function prepare()
     {
-
         $this->manager = Shopware()->Models();
         $this->db = Shopware()->Db();
         $connectFactory = new ConnectFactory();
@@ -117,7 +115,6 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
         $mainVariant->getDetails()->add($detail);
 
         foreach ($variants as $variant) {
-
             $this->variantConfigurator->configureVariantAttributes($variant, $detail);
         }
 
@@ -139,8 +136,5 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
         foreach ($options as $option) {
             $this->assertContains($option->getName(), $colorOptions);
         }
-
-
     }
-
 }

@@ -227,7 +227,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $discounts = [3, 2, 1, 0];
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 4; ++$i) {
             $data = [
                 'from' => $i * 10,
                 'to' => $i < 3 ? ($i + 1) * 10 : PriceRange::ANY,

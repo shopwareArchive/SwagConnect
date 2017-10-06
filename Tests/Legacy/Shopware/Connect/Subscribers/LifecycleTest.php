@@ -16,7 +16,6 @@ use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 class LifecycleTest extends ConnectTestHelper
 {
-
     use DatabaseTestCaseTrait;
 
     /**

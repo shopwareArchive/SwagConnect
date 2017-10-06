@@ -148,7 +148,7 @@ trait ProductBuilderTrait
      * @param string $title
      * @return Product
      */
-    public function getProductNonRand($withImage = false, $withVariantImages = false, $sourceId = '133738', $ean = 133738, $sku = 'sku#133738' , $title = 'testProduct')
+    public function getProductNonRand($withImage = false, $withVariantImages = false, $sourceId = '133738', $ean = 133738, $sku = 'sku#133738', $title = 'testProduct')
     {
         $purchasePrice = 6.99;
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year

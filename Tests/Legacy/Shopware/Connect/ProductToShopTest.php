@@ -29,7 +29,6 @@ use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class ProductToShopTest extends ConnectTestHelper
 {
-
     use DatabaseTestCaseTrait;
 
     /** @var \ShopwarePlugins\Connect\Components\ProductToShop */

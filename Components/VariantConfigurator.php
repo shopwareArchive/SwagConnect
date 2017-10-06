@@ -57,12 +57,12 @@ class VariantConfigurator
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
             $configSet->setArticles([$article]);
-            $configSet->setType($product->configuratorSetType);
             $article->setConfiguratorSet($configSet);
         } else {
             $configSet = $article->getConfiguratorSet();
-            $configSet->setType($product->configuratorSetType);
         }
+
+        $configSet->setType($product->configuratorSetType);
 
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);

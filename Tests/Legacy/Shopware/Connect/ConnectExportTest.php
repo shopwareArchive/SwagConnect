@@ -15,7 +15,6 @@ use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
 class ConnectExportTest extends ConnectTestHelper
 {
-
     use DatabaseTestCaseTrait;
 
     /**

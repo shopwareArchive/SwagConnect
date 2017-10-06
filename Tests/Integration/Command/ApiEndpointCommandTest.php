@@ -8,9 +8,8 @@
 namespace ShopwarePlugins\Connect\Tests\Integration\Command;
 
 use ShopwarePlugins\Connect\Tests\CommandTestCaseTrait;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class ApiEndpointCommandTest extends ConnectTestHelper
+class ApiEndpointCommandTest extends \PHPUnit_Framework_TestCase
 {
     use CommandTestCaseTrait;
 

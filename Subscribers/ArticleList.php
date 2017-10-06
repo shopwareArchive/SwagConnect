@@ -7,26 +7,46 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
+
 /**
  * Implements a 'connect' filter for the article list
  *
  * Class ArticleList
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class ArticleList extends BaseSubscriber
+class ArticleList implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    /**
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
+     */
+    public function __construct(Enlight_Components_Db_Adapter_Pdo_Mysql $db)
+    {
+        $this->db = $db;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Shopware_Controllers_Backend_ArticleList_SQLParts' => 'onFilterArticle',
-            'Enlight_Controller_Action_PostDispatch_Backend_ArticleList' => 'extentBackendArticleList'
+            'Enlight_Controller_Action_PostDispatch_Backend_ArticleList' => 'extendBackendArticleList'
         ];
     }
 
     /**
      * If the 'connect' filter is checked, only show products imported from connect
      *
-     * @param   \Enlight_Event_EventArgs $args
+     * @param \Enlight_Event_EventArgs $args
+     * @return array
      */
     public function onFilterArticle(\Enlight_Event_EventArgs $args)
     {
@@ -35,7 +55,7 @@ class ArticleList extends BaseSubscriber
 
         list($sqlParams, $filterSql, $categorySql, $imageSQL, $order) = $args->getReturn();
 
-        if ($filterBy == 'connect') {
+        if ($filterBy === 'connect') {
             $imageSQL = '
                 LEFT JOIN s_plugin_connect_items as connect_items
                 ON connect_items.article_id = articles.id
@@ -53,7 +73,7 @@ class ArticleList extends BaseSubscriber
      * @event Enlight_Controller_Action_PostDispatch_Backend_ArticleList
      * @param \Enlight_Event_EventArgs $args
      */
-    public function extentBackendArticleList(\Enlight_Event_EventArgs $args)
+    public function extendBackendArticleList(\Enlight_Event_EventArgs $args)
     {
         /** @var $subject \Enlight_Controller_Action */
         $subject = $args->getSubject();
@@ -61,8 +81,6 @@ class ArticleList extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
                 $subject->View()->extendsTemplate(
                     'backend/article_list/connect.js'
                 );
@@ -112,7 +130,7 @@ class ArticleList extends BaseSubscriber
 
         $connectArticleIds = array_map(function ($row) {
             return $row['article_id'];
-        }, Shopware()->Db()->fetchAll($sql));
+        }, $this->db->fetchAll($sql));
 
         foreach ($data as $idx => $row) {
             if ((int) $row['Article_id'] > 0) {

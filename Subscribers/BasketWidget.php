@@ -7,6 +7,10 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Components\BasketHelper;
+use ShopwarePlugins\Connect\Components\Helper;
+
 /**
  * The basket widget shows the current basket amount and the current basket's products.
  * It needs to be modified in order to show the connect products / valuess
@@ -14,34 +18,38 @@ namespace ShopwarePlugins\Connect\Subscribers;
  * Class BasketWidget
  * @package ShopwarePlugins\Connect\Subscribers
  */
-class BasketWidget extends BaseSubscriber
+class BasketWidget implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var BasketHelper
+     */
+    private $basketHelper;
+
+    /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
+     * @param BasketHelper $basketHelper
+     * @param Helper $helper
+     */
+    public function __construct(BasketHelper $basketHelper, Helper $helper)
+    {
+        $this->basketHelper = $basketHelper;
+        $this->helper = $helper;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'sBasket::sGetBasket::after' => 'storeBasketResultToSession',
             'Enlight_Controller_Action_PostDispatch_Widgets_Checkout' => 'fixBasketWidgetForConnect',
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'fixBasketWidgetForConnect'
         ];
-    }
-
-    /** @var \ShopwarePlugins\Connect\Components\ConnectFactory */
-    protected $factory;
-
-    protected function getFactory()
-    {
-        if ($this->factory === null) {
-            $this->factory = new \ShopwarePlugins\Connect\Components\ConnectFactory();
-        }
-
-        return $this->factory;
-    }
-
-    protected function getCountryCode()
-    {
-        $countryCodeUtil = $this->getFactory()->getCountryCodeResolver();
-
-        return $countryCodeUtil->getIso3CountryCode();
     }
 
     /**
@@ -66,25 +74,24 @@ class BasketWidget extends BaseSubscriber
 
         // If the basket is empty or does not contain connect products return
         $basket = Shopware()->Session()->connectGetBasket;
-        if (empty($basket) || !$this->getHelper()->hasBasketConnectProducts(Shopware()->SessionID())) {
+        if (empty($basket) || !$this->helper->hasBasketConnectProducts(Shopware()->SessionID())) {
             return;
         }
 
-        $basketHelper = $this->getBasketHelper();
-        $basketHelper->setBasket($basket);
+        $this->basketHelper->setBasket($basket);
 
         // Return if we don't have any connect products
-        $connectProducts = $basketHelper->getConnectProducts();
+        $connectProducts = $this->basketHelper->getConnectProducts();
         if (empty($connectProducts)) {
             return;
         }
 
         // Fix the basket for connect
-        $basketHelper->fixBasket();
-        $vars = $basketHelper->getDefaultTemplateVariables();
+        $this->basketHelper->fixBasket();
+        $vars = $this->basketHelper->getDefaultTemplateVariables();
 
         // Fix the basket widget template
-        if ($actionName == 'ajaxCart') {
+        if ($actionName === 'ajaxCart') {
             $view->sBasket = $vars['sBasket'];
 
             $view->sShippingcosts = $view->sBasket['sShippingcosts'];

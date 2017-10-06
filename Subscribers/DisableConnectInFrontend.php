@@ -7,16 +7,32 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
+
 /**
  * The DisableConnectInFrontend subscriber is used, if the user's api key is not valid. In this case, connect products
  * cannot be ordered in the frontend.
- *
- * Class DisableConnectInFrontend
- * @package ShopwarePlugins\Connect\Subscribers
  */
-class DisableConnectInFrontend extends BaseSubscriber
+class DisableConnectInFrontend implements SubscriberInterface
 {
-    public function getSubscribedEvents()
+    /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private $db;
+
+    /**
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
+     */
+    public function __construct(Enlight_Components_Db_Adapter_Pdo_Mysql $db)
+    {
+        $this->db = $db;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail' => 'disableBuyButtonForConnect'
@@ -29,17 +45,12 @@ class DisableConnectInFrontend extends BaseSubscriber
      */
     public function disableBuyButtonForConnect(\Enlight_Event_EventArgs $args)
     {
-        /** \Shopware_Controllers_Frontend_Detail $controller */
+        /** @var \Shopware_Controllers_Frontend_Detail $controller */
         $controller = $args->getSubject();
         $view = $controller->View();
 
         $article = $view->getAssign('sArticle');
-
         if ($this->isConnectArticle($article['articleID'])) {
-            $this->registerMyTemplateDir();
-            if ($this->Application()->Container()->get('shop')->getTemplate()->getVersion() < 3) {
-                $view->extendsTemplate('frontend/connect/detail.tpl');
-            }
             $view->assign('hideConnect', true);
         }
     }
@@ -51,10 +62,10 @@ class DisableConnectInFrontend extends BaseSubscriber
      * @param $id
      * @return string
      */
-    public function isConnectArticle($id)
+    private function isConnectArticle($id)
     {
         $sql = 'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL';
 
-        return Shopware()->Db()->fetchOne($sql, [$id]);
+        return $this->db->fetchOne($sql, [$id]);
     }
 }

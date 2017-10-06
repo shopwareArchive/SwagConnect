@@ -7,27 +7,29 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 
-/**
- * Class Property
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Property extends BaseSubscriber
+class Property implements SubscriberInterface
 {
     /**
      * @var ModelManager
      */
     private $modelManager;
 
+    /**
+     * @param ModelManager $modelManager
+     */
     public function __construct(
         ModelManager $modelManager
     ) {
-        parent::__construct();
         $this->modelManager = $modelManager;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Property' => 'extendBackendProperty',
@@ -45,9 +47,6 @@ class Property extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'load':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-
                 $subject->View()->extendsTemplate(
                     'backend/property/view/main/group_grid_connect.js'
                 );
@@ -112,7 +111,12 @@ class Property extends BaseSubscriber
         }
     }
 
-    public function markRecordsAsConnect($data, $modelName)
+    /**
+     * @param array $data
+     * @param string $modelName
+     * @return array
+     */
+    public function markRecordsAsConnect(array $data, $modelName)
     {
         $result = [];
 
@@ -135,7 +139,11 @@ class Property extends BaseSubscriber
         return $result;
     }
 
-    public function markAssignsAsConnect($data)
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function markAssignsAsConnect(array $data)
     {
         // The set assigns display assigned Groups
         // The "Groups" in the frontend are actually "s_filter_options" in the database and the entity is called Option ?!

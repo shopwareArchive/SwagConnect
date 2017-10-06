@@ -7,30 +7,32 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Property\Group;
 use Shopware\Models\Property\Option;
 use Shopware\Models\Property\Value;
 
-/**
- * Class Property
- * @package ShopwarePlugins\Connect\Subscribers
- */
-class Search extends BaseSubscriber
+class Search implements SubscriberInterface
 {
     /**
      * @var ModelManager
      */
     private $modelManager;
 
+    /**
+     * @param ModelManager $modelManager
+     */
     public function __construct(
         ModelManager $modelManager
     ) {
-        parent::__construct();
         $this->modelManager = $modelManager;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Search' => 'extendBackendPropertySearch',
@@ -48,9 +50,6 @@ class Search extends BaseSubscriber
 
         switch ($request->getActionName()) {
             case 'search':
-                $this->registerMyTemplateDir();
-                $this->registerMySnippets();
-
                 $entity = $request->getParam('entity', null);
 
                 switch ($entity) {
@@ -72,7 +71,12 @@ class Search extends BaseSubscriber
         }
     }
 
-    public function markRecordsAsConnect($data, $modelName)
+    /**
+     * @param array $data
+     * @param string $modelName
+     * @return array
+     */
+    private function markRecordsAsConnect($data, $modelName)
     {
         $result = [];
 

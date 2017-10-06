@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\CustomModels\Connect\PaymentRepository;
@@ -30,16 +31,23 @@ use Shopware\Models\Category\Category as CategoryModel;
 use Shopware\Models\Article\Article as ArticleModel;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 
-class ServiceContainer extends BaseSubscriber
+class ServiceContainer implements SubscriberInterface
 {
-    /** @var ModelManager */
+    /**
+     * @var ModelManager
+     */
     private $manager;
 
-    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql */
+    /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
     private $db;
 
-    /** @var Container */
+    /**
+     * @var Container
+     */
     private $container;
 
     /** @var Config */
@@ -58,14 +66,16 @@ class ServiceContainer extends BaseSubscriber
         Container $container,
         Config $config
     ) {
-        parent::__construct();
         $this->manager = $manager;
         $this->db = $db;
         $this->container = $container;
         $this->config = $config;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
@@ -86,7 +96,7 @@ class ServiceContainer extends BaseSubscriber
     public function onProductStreamService()
     {
         /** @var ProductStreamAttributeRepository $streamAttrRepository */
-        $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+        $streamAttrRepository = $this->manager->getRepository(ProductStreamAttribute::class);
 
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
@@ -119,11 +129,17 @@ class ServiceContainer extends BaseSubscriber
         );
     }
 
+    /**
+     * @return FrontendQuery
+     */
     public function onCreateFrontendQuery()
     {
         return new FrontendQuery($this->manager);
     }
 
+    /**
+     * @return RestApiRequest
+     */
     public function onRestApiRequest()
     {
         return new RestApiRequest($this->config);

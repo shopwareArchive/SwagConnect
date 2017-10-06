@@ -451,13 +451,16 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
+        $this->manager->persist($model);
+        $this->manager->flush();
+
+        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
         $categories = $this->categoryResolver->resolve($product->categories);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }
 
         $this->manager->persist($connectAttribute);
-        $this->manager->persist($model);
         $this->manager->persist($detail);
         //article has to be flushed
         $this->manager->persist($detailAttribute);
@@ -498,7 +501,6 @@ class ProductToShop implements ProductToShopBase
             // import only specific images for variant
             $this->imageImport->importImagesForDetail($product->variantImages, $detail);
         }
-        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
 
         $this->eventManager->notify(
             'Connect_ProductToShop_InsertOrUpdate_After',

@@ -8,9 +8,11 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\Connection;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
+use Shopware\Components\Model\CategoryDenormalization;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Components\MultiEdit\Resource\Product;
+use Shopware\Components\MultiEdit\Resource\ResourceInterface;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\RemoteCategoryRepository;
 use Shopware\Models\Article\Repository as ArticleRepository;
@@ -24,7 +26,7 @@ class ImportService
     private $manager;
 
     /**
-     * @var \Shopware\Components\MultiEdit\Resource\Product
+     * @var \Shopware\Components\MultiEdit\Resource\ResourceInterface
      */
     private $productResource;
 
@@ -58,15 +60,27 @@ class ImportService
      */
     private $categoryExtractor;
 
+    /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
+     * @var DataPersister
+     */
+    private $dataPersister;
+
     public function __construct(
         ModelManager $manager,
-        Product $productResource,
+        ResourceInterface $productResource,
         CategoryRepository $categoryRepository,
         ArticleRepository$articleRepository,
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
         AutoCategoryResolver $categoryResolver,
-        CategoryExtractor $categoryExtractor
+        CategoryExtractor $categoryExtractor,
+        CategoryDenormalization $categoryDenormalization,
+        DataPersister $dataPersister
     ) {
         $this->manager = $manager;
         $this->productResource = $productResource;
@@ -76,6 +90,8 @@ class ImportService
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
         $this->autoCategoryResolver = $categoryResolver;
         $this->categoryExtractor = $categoryExtractor;
+        $this->categoryDenormalization = $categoryDenormalization;
+        $this->dataPersister = $dataPersister;
     }
 
     public function findBothArticlesType($categoryId, $query = '', $showOnlyConnectArticles = true, $limit = 10, $offset = 0)
@@ -126,15 +142,18 @@ class ImportService
     }
 
     /**
-     * Unassign all categories from given article ids
+     * Unassign categories from given article ids
+     * for the given categoryId and all childcategories
+     * or for all categories if $categoryId is null
      * Set connect_mapped_category flag in article
      * attributes to NULL
      *
      * @param array $articleIds
+     * @param int|null $categoryId
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Exception
      */
-    public function unAssignArticleCategories(array $articleIds)
+    public function unAssignArticleCategories(array $articleIds, $categoryId = null)
     {
         if (!empty($articleIds)) {
             // cast all items in $articleIds to int
@@ -147,16 +166,12 @@ class ImportService
             $connection->beginTransaction();
 
             try {
-                $attributeStatement = $connection->prepare(
-                    'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
-                );
-                $attributeStatement->execute();
+                if ($categoryId !== null) {
+                    $this->unAssignArticlesFromCategory($articleIds, $categoryId);
+                } else {
+                    $this->unAssignArticlesFromAllCategories($articleIds);
+                }
 
-                $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');
-                $categoriesStatement->execute();
-
-                $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
-                $categoryLogStatement->execute();
                 $connection->commit();
             } catch (\Exception $e) {
                 $connection->rollBack();
@@ -240,27 +255,35 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToEntities($remoteCategoryNodes, $localCategory);
+        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), false);
 
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['categoryKey']);
-
-            while ($currentIdBatch = array_splice($articleIds, 0, 10)) {
-                $articles = $this->articleRepository->findBy(['id' => $currentIdBatch]);
-                /** @var \Shopware\Models\Article\Article $article */
-                foreach ($articles as $article) {
-                    /** @var \Shopware\Models\Category\Category $categoryModel */
-                    $categoryModel = $category['model'];
-                    if ($article->getCategories()->contains($categoryModel->getParent())) {
-                        $article->removeCategory($categoryModel->getParent());
-                    }
-                    $article->addCategory($category['model']);
-                    $attribute = $article->getAttribute();
-                    $attribute->setConnectMappedCategory(true);
-                    $this->manager->persist($article);
-                    $this->manager->persist($attribute);
-                }
-                $this->manager->flush();
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory']);
+            foreach ($articleIds as $articleId) {
+                $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
+                $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+                    [$articleId,  $category['categoryKey']]
+                );
+                $this->manager->getConnection()->executeQuery(
+                    'DELETE FROM `s_articles_categories` WHERE `articleID` = :articleID AND `categoryID` = :categoryID',
+                    [
+                        ':articleID' => $articleId,
+                        ':categoryID' => $category['parentId']
+                    ]
+                );
+                $detailId = $this->manager->getConnection()->fetchColumn(
+                    'SELECT id FROM `s_articles_details` WHERE `articleID` = :articleID',
+                    ['articleID' => $articleId]
+                );
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT  INTO `s_articles_attributes` (`articleID`, `articledetailsID`, `connect_mapped_category`) 
+                        VALUES (?, ?, 1)
+                        ON DUPLICATE KEY UPDATE `connect_mapped_category` = 1
+                    ',
+                    [$articleId,  $detailId]
+                );
             }
         }
     }
@@ -519,5 +542,58 @@ class ImportService
         }
 
         return $ast;
+    }
+
+    /**
+     * @param array $articleIds
+     * @param $categoryId
+     */
+    private function unAssignArticlesFromCategory(array $articleIds, $categoryId)
+    {
+        $categories = [];
+        $categories[] = $categoryId;
+        $childCategories = $this->manager->getConnection()->executeQuery('SELECT id FROM s_categories WHERE path LIKE ?',
+            ["%|$categoryId|%"]);
+
+        while ($childCategory = $childCategories->fetchColumn()) {
+            $categories[] = (int) $childCategory;
+        }
+
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ') AND categoryID IN (' . implode(', ', $categories) . ')');
+        $categoriesStatement->execute();
+
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ') AND parentCategoryID IN (' . implode(', ', $categories) . ')');
+        $categoriesStatement->execute();
+
+        $attributeStatement = $this->manager->getConnection()->prepare('
+                    UPDATE s_articles_attributes 
+                    SET connect_mapped_category = NULL 
+                    WHERE articleID IN (' . implode(', ', $articleIds) . ') 
+                      AND 
+                        (SELECT COUNT(*) FROM s_articles_categories 
+                            INNER JOIN s_categories_attributes ON s_articles_categories.categoryID = s_categories_attributes.categoryID
+                            WHERE s_articles_categories.articleID = s_articles_attributes.articleID 
+                                AND s_categories_attributes.connect_imported_category = 1
+                        ) = 0
+                ');
+        $attributeStatement->execute();
+    }
+
+    /**
+     * Unassign all categories from given article ids
+     * @param array $articleIds
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    private function unAssignArticlesFromAllCategories(array $articleIds)
+    {
+        $attributeStatement = $this->manager->getConnection()->prepare(
+            'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
+        );
+        $attributeStatement->execute();
+        $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');
+        $categoriesStatement->execute();
+        $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
+        $categoryLogStatement->execute();
     }
 }

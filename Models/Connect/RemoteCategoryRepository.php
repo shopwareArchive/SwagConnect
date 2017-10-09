@@ -15,4 +15,12 @@ use Shopware\Components\Model\ModelRepository;
  */
 class RemoteCategoryRepository extends ModelRepository
 {
+    public function deleteById($remoteCategoryId)
+    {
+        $builder = $this->createQueryBuilder('rc');
+        $builder->delete('Shopware\CustomModels\Connect\RemoteCategory', 'rc');
+        $builder->where('rc.id = :rcid');
+        $builder->setParameter(':rcid', $remoteCategoryId);
+        $builder->getQuery()->execute();
+    }
 }

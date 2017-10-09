@@ -100,8 +100,8 @@ class ImportTest extends \Enlight_Components_Test_Controller_TestCase
         $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
-        $this->assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $this->assertFalse($this->View()->success);
+        $this->assertTrue(is_string($this->View()->message), 'Returned message must a string');
     }
 
     /**
@@ -111,7 +111,7 @@ class ImportTest extends \Enlight_Components_Test_Controller_TestCase
     {
         $this->Request()
             ->setMethod('POST')
-            ->setPost('category', '3_stream_Awesome products');
+            ->setPost('category', 'Awesome products');
         $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
 
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());

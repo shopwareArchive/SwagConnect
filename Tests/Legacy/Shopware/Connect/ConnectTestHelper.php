@@ -13,6 +13,7 @@ use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Property;
 use Shopware\Connect\Struct\Translation;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
@@ -23,7 +24,6 @@ use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Shopware\CustomModels\Connect\Attribute;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
@@ -109,7 +109,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getSDK(),
             Shopware()->Models(),
             new ProductsAttributesValidator(),
-            new Config(Shopware()->Models()),
+            ConfigFactory::getConfigInstance(),
             new ErrorHandler(),
             Shopware()->Container()->get('events')
         );
@@ -185,7 +185,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
             'categories' => [
-                '/bücher' => 'Bücher',
+                '/deutsch/bücher' => 'Bücher',
+                '/deutsch' => 'Deutsch',
             ],
             'translations' => [
                 'en' => new Translation([
@@ -392,7 +393,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             $this->getHelper(),
             Shopware()->Models(),
             $this->getImageImport(),
-            new Config(Shopware()->Models()),
+            ConfigFactory::getConfigInstance(),
             new VariantConfigurator(
                 $manager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -402,10 +403,12 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),
+                $manager->getRepository('Shopware\Models\Category\Category')
             ),
             new PDO(Shopware()->Db()->getConnection()),
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 

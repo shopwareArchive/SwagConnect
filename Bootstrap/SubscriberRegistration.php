@@ -14,9 +14,35 @@ use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
+
+use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use ShopwarePlugins\Connect\Subscribers\Article;
+use ShopwarePlugins\Connect\Subscribers\ArticleList;
+use ShopwarePlugins\Connect\Subscribers\BasketWidget;
+use ShopwarePlugins\Connect\Subscribers\Category;
 use ShopwarePlugins\Connect\Subscribers\Checkout;
+use ShopwarePlugins\Connect\Subscribers\Connect;
+use ShopwarePlugins\Connect\Subscribers\ControllerPath;
+use ShopwarePlugins\Connect\Subscribers\CronJob;
+use ShopwarePlugins\Connect\Subscribers\CustomerGroup;
+use ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend;
+use ShopwarePlugins\Connect\Subscribers\Dispatches;
+use ShopwarePlugins\Connect\Subscribers\Javascript;
+use ShopwarePlugins\Connect\Subscribers\Less;
 use ShopwarePlugins\Connect\Subscribers\Lifecycle;
+use ShopwarePlugins\Connect\Subscribers\OrderDocument;
+use ShopwarePlugins\Connect\Subscribers\PaymentSubscriber;
+use ShopwarePlugins\Connect\Subscribers\ProductStreams;
+use ShopwarePlugins\Connect\Subscribers\Property;
+use ShopwarePlugins\Connect\Subscribers\Search;
+use ShopwarePlugins\Connect\Subscribers\ServiceContainer;
+use ShopwarePlugins\Connect\Subscribers\Supplier;
+use ShopwarePlugins\Connect\Subscribers\TemplateExtension;
+use ShopwarePlugins\Connect\Subscribers\Voucher;
 use Symfony\Component\DependencyInjection\Container;
+use Shopware\Models\Payment\Payment;
 
 class SubscriberRegistration
 {
@@ -36,8 +62,6 @@ class SubscriberRegistration
     private $db;
 
     /**
-     * @TODO: Subscribers should not depend on the Bootstrap class. If you see a possible solution refactor it please.
-     *
      * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
      */
     private $pluginBootstrap;
@@ -123,19 +147,14 @@ class SubscriberRegistration
         }
 
         $subscribers = $this->getDefaultSubscribers();
-
-        // Some subscribers may only be used, if the SDK is verified
         if ($verified) {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForVerifiedKeys());
-            // These subscribers are used if the api key is not valid
+            $subscribers = array_merge($subscribers, $this->getVerifiedSubscribers());
         } else {
-            $subscribers = array_merge($subscribers, $this->getSubscribersForUnverifiedKeys());
+            $subscribers = array_merge($subscribers, $this->getNotVerifiedSubscribers());
         }
 
-        /** @var $subscriber \ShopwarePlugins\Connect\Subscribers\BaseSubscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriber->setBootstrap($this->pluginBootstrap);
-            $this->eventManager->registerSubscriber($subscriber);
+        foreach ($subscribers as $newSubscriber) {
+            $this->eventManager->addSubscriber($newSubscriber);
         }
 
         $this->modelManager->getEventManager()->addEventListener(
@@ -145,106 +164,63 @@ class SubscriberRegistration
     }
 
     /**
-     * Default subscribers can safely be used, even if the api key wasn't verified, yet
-     *
      * @return array
      */
     private function getDefaultSubscribers()
     {
         return [
-            new \ShopwarePlugins\Connect\Subscribers\OrderDocument(),
-            new \ShopwarePlugins\Connect\Subscribers\ControllerPath(),
-            new \ShopwarePlugins\Connect\Subscribers\CustomerGroup(),
-            new \ShopwarePlugins\Connect\Subscribers\CronJob(
-                $this->SDK,
-                $this->connectFactory->getConnectExport()
-            ),
-            new \ShopwarePlugins\Connect\Subscribers\ArticleList(),
-            new \ShopwarePlugins\Connect\Subscribers\Article(
+            new Article(
                 new PDO($this->db->getConnection()),
                 $this->modelManager,
                 $this->connectFactory->getConnectExport(),
                 $this->helper,
-                $this->config
+                $this->config,
+                $this->connectFactory->getSDK()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Category(
-                $this->modelManager
+            new ArticleList($this->container->get('db')),
+            new Category(
+                $this->container->get('dbal_connection'),
+                $this->createProductStreamService()
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Connect(),
-            new \ShopwarePlugins\Connect\Subscribers\Payment(),
-            new \ShopwarePlugins\Connect\Subscribers\ServiceContainer(
-                $this->modelManager,
-                $this->db,
-                $this->container
+            new Connect(
+                $this->config,
+                $this->SDK,
+                $this->container->get('snippets')
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Supplier(),
-            new \ShopwarePlugins\Connect\Subscribers\ProductStreams(
+            new ControllerPath($this->pluginBootstrap->Path()),
+            new CronJob(
+                $this->SDK,
                 $this->connectFactory->getConnectExport(),
-                new Config($this->modelManager),
+                $this->config,
                 $this->helper
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Property(
-                $this->modelManager
+            new CustomerGroup(
+                $this->modelManager,
+                new Logger(Shopware()->Db())
             ),
-            new \ShopwarePlugins\Connect\Subscribers\Search(
-                $this->modelManager
+            $this->getLifecycleSubscriber(),
+            new OrderDocument(),
+            new PaymentSubscriber(
+                $this->helper,
+                $this->modelManager->getRepository(Payment::class)
             ),
+            new ProductStreams(
+                $this->connectFactory->getConnectExport(),
+                $this->config,
+                $this->helper,
+                $this->SDK,
+                $this->container->get('db')
+            ),
+            new Property($this->modelManager),
+            new Search($this->modelManager),
+            new ServiceContainer(
+                $this->modelManager,
+                $this->db,
+                $this->container,
+                $this->config
+            ),
+            new Supplier($this->container->get('dbal_connection'))
         ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getSubscribersForUnverifiedKeys()
-    {
-        return [
-            new \ShopwarePlugins\Connect\Subscribers\DisableConnectInFrontend(),
-            $this->getLifecycleSubscriber()
-        ];
-    }
-
-    /**
-     * These subscribers will only be used, once the user has verified his api key
-     * This will prevent the users from having shopware Connect extensions in their frontend
-     * even if they cannot use shopware Connect due to the missing / wrong api key
-     *
-     * @return array
-     */
-    private function getSubscribersForVerifiedKeys()
-    {
-        $subscribers = [
-            new \ShopwarePlugins\Connect\Subscribers\TemplateExtension(),
-            $this->createCheckoutSubscriber(),
-            new \ShopwarePlugins\Connect\Subscribers\Voucher(),
-            new \ShopwarePlugins\Connect\Subscribers\BasketWidget(),
-            new \ShopwarePlugins\Connect\Subscribers\Dispatches(),
-            new \ShopwarePlugins\Connect\Subscribers\Javascript(),
-            new \ShopwarePlugins\Connect\Subscribers\Less(),
-            $this->getLifecycleSubscriber()
-
-        ];
-
-        return $subscribers;
-    }
-
-    /**
-     * Creates checkout subscriber
-     *
-     * @return Checkout
-     */
-    private function createCheckoutSubscriber()
-    {
-        $checkoutSubscriber = new Checkout(
-            $this->modelManager,
-            $this->eventManager
-        );
-        foreach ($checkoutSubscriber->getListeners() as $listener) {
-            if ($listener->getName() === 'Enlight_Controller_Action_PostDispatch_Frontend_Checkout') {
-                $listener->setPosition(-1);
-            }
-        }
-
-        return $checkoutSubscriber;
     }
 
     /**
@@ -271,7 +247,10 @@ class SubscriberRegistration
         if (!$this->lifecycle) {
             $this->lifecycle = new Lifecycle(
                 $this->modelManager,
-                $this->config->getConfig('autoUpdateProducts', 1)
+                $this->helper,
+                $this->SDK,
+                $this->config,
+                $this->connectFactory->getConnectExport()
             );
         }
 
@@ -301,5 +280,66 @@ class SubscriberRegistration
 
             $this->productUpdates[] = $entity;
         }
+    }
+
+    /**
+     * @return ProductStreamService
+     */
+    private function createProductStreamService()
+    {
+        /** @var ProductStreamAttributeRepository $streamAttrRepository */
+        $streamAttrRepository = $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+
+        return new ProductStreamService(
+            new ProductStreamRepository($this->modelManager, $this->container->get('shopware_product_stream.repository')),
+            $streamAttrRepository,
+            $this->config,
+            $this->container->get('shopware_search.product_search'),
+            $this->container->get('shopware_storefront.context_service')
+        );
+    }
+
+    /**
+     * @return array
+     */
+    private function getVerifiedSubscribers()
+    {
+        return [
+            new BasketWidget(
+                $this->pluginBootstrap->getBasketHelper(),
+                $this->helper
+            ),
+            new Checkout(
+                $this->modelManager,
+                $this->eventManager,
+                $this->connectFactory->getSDK(),
+                $this->connectFactory->getBasketHelper(),
+                $this->connectFactory->getHelper()
+            ),
+            new Dispatches($this->helper),
+            new Javascript(),
+            new TemplateExtension(
+                $this->SDK,
+                $this->helper
+            ),
+            new Voucher(
+                $this->helper,
+                $this->connectFactory->getBasketHelper(),
+                $this->container->get('snippets')
+            ),
+            new Less()
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getNotVerifiedSubscribers()
+    {
+        return [
+            new DisableConnectInFrontend(
+                $this->container->get('db')
+            )
+        ];
     }
 }

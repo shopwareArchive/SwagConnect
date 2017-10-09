@@ -23,6 +23,19 @@ Ext.define('Shopware.apps.Connect.store.import.RemoteProducts', {
             type : 'json',
             root: 'data',
             totalProperty:'total'
+        },
+         listeners : {
+             exception : function(proxy, response, operation) {
+                     var responseData = Ext.decode(response.responseText);
+                     Shopware.Notification.createGrowlMessage(responseData.message,"");
+             }
+        }
+    },
+    listeners : {
+        load : function(store, records, successful, eOpts) {
+            if(!successful) {
+                store.removeAll();
+            }
         }
     }
 });

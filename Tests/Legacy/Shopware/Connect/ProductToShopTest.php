@@ -15,12 +15,16 @@ use Shopware\Models\ProductStream\ProductStream;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductToShop;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Property;
+use Shopware\Models\Category\Category;
+use Shopware\CustomModels\Connect\RemoteCategory;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 
 class ProductToShopTest extends ConnectTestHelper
 {
@@ -63,7 +67,7 @@ class ProductToShopTest extends ConnectTestHelper
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            ConfigFactory::getConfigInstance(),
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -72,11 +76,13 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new DefaultCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $this->modelManager->getRepository(ProductToRemoteCategory::class),
+                $this->modelManager->getRepository(Category::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
     }
 
@@ -112,6 +118,7 @@ class ProductToShopTest extends ConnectTestHelper
     {
         $product = $this->getProduct();
         $product->minPurchaseQuantity = 5;
+        $product->categories = [];
 
         $this->productToShop->insertOrUpdate($product);
 
@@ -132,6 +139,10 @@ class ProductToShopTest extends ConnectTestHelper
         $detail = $connectAttribute->getArticleDetail();
 
         $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
+        $this->assertNull(
+            $detail->getAttribute()->getConnectMappedCategory(),
+            'connect_mapped_category must be null when product does not contain mapped category'
+        );
     }
 
     public function testInsertArticleTranslations()
@@ -325,6 +336,7 @@ class ProductToShopTest extends ConnectTestHelper
             ->findOneBy(['sourceId' => $variants[2]->sourceId]);
 
         $article = $connectAttribute->getArticle();
+        $this->modelManager->refresh($article);
         // check articles details count
         $this->assertEquals(3, count($article->getDetails()));
 
@@ -474,12 +486,12 @@ class ProductToShopTest extends ConnectTestHelper
 
     public function testInsertArticleAndAutomaticallyCreateCategories()
     {
-        $config =  new \ShopwarePlugins\Connect\Components\Config($this->modelManager);
+        $config =  ConfigFactory::getConfigInstance();
         $productToShop = new ProductToShop(
             $this->getHelper(),
             $this->modelManager,
             $this->getImageImport(),
-            new Config($this->modelManager),
+            $config,
             new VariantConfigurator(
                 $this->modelManager,
                 new PdoProductTranslationsGateway(Shopware()->Db())
@@ -488,24 +500,33 @@ class ProductToShopTest extends ConnectTestHelper
             new PdoProductTranslationsGateway(Shopware()->Db()),
             new AutoCategoryResolver(
                 $this->modelManager,
-                $this->modelManager->getRepository('Shopware\Models\Category\Category'),
-                $this->modelManager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $config
+                $this->modelManager->getRepository(Category::class),
+                $this->modelManager->getRepository(RemoteCategory::class),
+                $config,
+                $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,
-            Shopware()->Container()->get('events')
+            Shopware()->Container()->get('events'),
+            Shopware()->Container()->get('CategoryDenormalization')
         );
 
         $product = $this->getProduct();
-        $parentCategory1 = 'MassImport#' . rand(1, 999999999);
+        $parentCategory1 = 'Deutsch';
         $childCategory = 'MassImport#' . rand(1, 999999999);
+        $childCategory2 = 'MassImport#' . rand(1, 999999999);
         $parentCategory2 = 'MassImport#' . rand(1, 999999999);
         // add custom categories
-        $product->categories = array_merge($product->categories, [
+        $product->categories = [
             '/' . strtolower($parentCategory1) => $parentCategory1,
             '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) => $childCategory,
+            '/' . strtolower($parentCategory1) . '/' . strtolower($childCategory) . '/' . strtolower($childCategory2) => $childCategory2,
             '/' . strtolower($parentCategory2) => $parentCategory2,
-        ]);
+        ];
+        foreach ($product->categories as $key => $value) {
+            $this->modelManager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
+              VALUES (?, ?)',
+                [$key, $value]);
+        }
 
         $productToShop->insertOrUpdate($product);
 
@@ -519,12 +540,32 @@ class ProductToShopTest extends ConnectTestHelper
             $childCategoryModel->getParent()->getName()
         );
 
+        $categoryRepository = Shopware()->Models()->getRepository(Category::class);
+        /** @var \Shopware\Models\Category\Category $childCategoryModel */
+        $childCategoryModel2 = $categoryRepository->findOneBy(['name' => $childCategory2]);
+        $this->assertInstanceOf(Category::class, $childCategoryModel2);
+        $this->assertEquals(
+            $childCategoryModel->getName(),
+            $childCategoryModel2->getParent()->getName()
+        );
+        $this->assertEquals(
+            $childCategory2,
+            $childCategoryModel2->getName()
+        );
+
         /** @var Article $article */
         $article = $this->modelManager->getRepository(Article::class)->findOneByName($product->title);
 
         $assignCategories = $article->getCategories();
         $this->assertEquals(1, count($assignCategories));
-        $this->assertEquals($childCategory, $assignCategories[0]->getName());
+        $this->assertEquals($childCategory2, $assignCategories[0]->getName());
+        $this->assertEquals(1, $article->getAttribute()->getConnectMappedCategory());
+
+        foreach ($product->categories as $key => $value) {
+            $this->modelManager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
+              WHERE `category_key` = ? AND `label` = ?',
+                [$key, $value]);
+        }
     }
 
     public function testAutomaticallyCreateUnits()

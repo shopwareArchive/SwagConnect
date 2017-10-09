@@ -77,7 +77,7 @@ class SwQuery implements CategoryQuery
         $builder->select(['categories'])
             ->from('Shopware\Models\Category\Category', 'categories', 'categories.id')
             ->andWhere(':articleId MEMBER OF categories.articles')
-            ->setParameters(['articleId' => $id]);
+            ->setParameters(['articleId' => (int) $id]);
 
         $result = $builder->getQuery()->getResult();
         if (empty($result)) {

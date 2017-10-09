@@ -7,9 +7,10 @@
 
 namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
 
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use Shopware\Models\Category\Category;
 
 class AutoCategoryResolverTest extends ConnectTestHelper
 {
@@ -26,14 +27,15 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         parent::setUp();
 
         $this->manager = Shopware()->Models();
-        $this->config = new \ShopwarePlugins\Connect\Components\Config($this->manager);
+        $this->config = ConfigFactory::getConfigInstance();
         $this->categoryRepo = $this->manager->getRepository('Shopware\Models\Category\Category');
 
         $this->categoryResolver = new AutoCategoryResolver(
             $this->manager,
             $this->categoryRepo,
             $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-            $this->config
+            $this->config,
+            $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }
 
@@ -43,65 +45,66 @@ class AutoCategoryResolverTest extends ConnectTestHelper
         $defaultCategory = $this->categoryRepo->findOneBy([
             'id' => $defaultCategoryId
         ]);
+        $this->assertEquals('Deutsch', $defaultCategory->getName());
 
         $bootsCategory = $this->categoryRepo->findOneBy([
             'name' => 'Boots',
             'parentId' => $defaultCategoryId
         ]);
+
+        $createdCategories = [
+            '/deutsch/boots' => 'Boots',
+            '/deutsch/nike' => 'Nike',
+            '/deutsch/nike/boots' => 'Boots'
+        ];
+        $this->createRemoteCategories($createdCategories);
+
         if (!$bootsCategory) {
-            $this->categoryResolver->convertNodeToEntity([
-                'name' => 'Boots',
-                'categoryId' => '/spanish/boots'
-            ], $defaultCategory);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId());
         }
 
-        $nikeCategory = $this->categoryRepo->findOneBy([
+        $nikeCategoryId = $this->categoryRepo->findOneBy([
             'name' => 'Nike',
             'parentId' => $defaultCategoryId
         ]);
 
-        if (!$nikeCategory) {
-            $nikeCategory = $this->categoryResolver->convertNodeToEntity([
-                'name' => 'Nike',
-                'categoryId' => '/spanish/nike'
-            ], $defaultCategory);
+        if (!$nikeCategoryId) {
+            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId());
         }
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
             'name' => 'Boots',
-            'parentId' => $nikeCategory
+            'parentId' => $nikeCategoryId
         ]);
 
         if (!$nikeBootsCategory) {
-            $this->categoryResolver->convertNodeToEntity([
-                'name' => 'Boots',
-                'categoryId' => '/spanish/nike/boots'
-            ], $nikeCategory);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId);
         }
 
         $categories = [
-            '/spanish/nike/tshirts' => 'Tshirts',
-            '/spanish/nike' => 'Nike',
-            '/spanish/adidas/boots' => 'Boots',
-            '/spanish/adidas' => 'Adidas',
-            '/spanish' => 'Spanish',
+            '/deutsch/nike/tshirts' => 'Tshirts',
+            '/deutsch/nike' => 'Nike',
+            '/deutsch/adidas/boots' => 'Boots',
+            '/deutsch/adidas' => 'Adidas',
+            '/deutsch' => 'Deutsch',
         ];
+
+        $this->createRemoteCategories($categories);
 
         $categoryModels = $this->categoryResolver->resolve($categories);
 
-        //Spanish category must not be created
-        $this->assertNull($this->categoryRepo->findOneByName('Spanish'));
+        $this->deleteRemoteCategories(array_merge($categories, $createdCategories));
+
         $this->assertEquals(
             $defaultCategoryId,
             Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', ['Adidas'])
         );
 
-        $this->assertCount(4, $categoryModels);
-        $this->assertEquals($nikeCategory->getId(), $categoryModels[0]->getId());
-        $this->assertEquals('Tshirts', $categoryModels[1]->getName());
-        $this->assertEquals('Adidas', $categoryModels[2]->getName());
-        $this->assertEquals('Boots', $categoryModels[3]->getName());
+        $this->assertCount(2, $categoryModels);
+        $this->assertEquals('Tshirts', $this->categoryRepo->findOneById($categoryModels[0])->getName());
+        $this->assertEquals('Boots', $this->categoryRepo->findOneById($categoryModels[1])->getName());
 
+        unset($categories['/deutsch']);
         Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("' . implode('","', $categories) . '")');
     }
 
@@ -159,5 +162,30 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             ],
         ];
         $this->assertEquals($expected, $this->categoryResolver->generateTree($categories));
+    }
+
+    /**
+     * @param $categories
+     * @return void
+     */
+    private function createRemoteCategories($categories)
+    {
+        foreach ($categories as $key => $value) {
+            $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
+              VALUES (?, ?)',
+                [$key, $value]);
+        }
+    }
+
+    /**
+     * @param $categories
+     */
+    private function deleteRemoteCategories($categories)
+    {
+        foreach ($categories as $key => $value) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
+              WHERE `category_key` = ? AND `label` = ?',
+                [$key, $value]);
+        }
     }
 }

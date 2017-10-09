@@ -165,10 +165,14 @@ class LocalProductQuery extends BaseProductQuery
             'u.unit',
             'd.purchaseUnit as purchaseUnit',
             'd.referenceUnit as referenceUnit',
+            'd.packUnit as packageUnit',
+            'd.minPurchase as basicUnit',
+            'd.supplierNumber as manufacturerNumber',
             'at.category as category',
             'at.fixedPrice as fixedPrice',
             'd.shippingTime as deliveryWorkDays',
             'a.lastStock',
+            'a.configuratorSetId',
         ];
 
         if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)) {
@@ -259,8 +263,6 @@ class LocalProductQuery extends BaseProductQuery
             }
         }
 
-        //todo@sb: find better way to collect configuration option translations
-        $row = $this->applyConfiguratorOptions($row);
         $row = $this->prepareVendor($row);
 
         if ($row['deliveryWorkDays']) {
@@ -269,34 +271,46 @@ class LocalProductQuery extends BaseProductQuery
             $row['deliveryWorkDays'] = null;
         }
 
-        if ($this->hasVariants($row['localId'])) {
+        if ($row['configuratorSetId'] > 0) {
             $row['groupId'] = $row['localId'];
+            $row = $this->applyConfiguratorOptions($row);
         }
 
-        unset($row['localId']);
-        unset($row['detailId']);
-        unset($row['detailKind']);
+        foreach (['localId', 'detailId', 'detailKind', 'configuratorSetId'] as $fieldName) {
+            unset($row[$fieldName]);
+        }
 
-        if ((array_key_exists('unit', $row['attributes']) && $row['attributes']['unit'])
-            && (array_key_exists('quantity', $row['attributes']) && $row['attributes']['quantity'])
-            && (array_key_exists('ref_quantity', $row['attributes']) && $row['attributes']['ref_quantity'])
-        ) {
+        if (
+            (array_key_exists(Product::ATTRIBUTE_UNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_UNIT]) &&
+            (array_key_exists(Product::ATTRIBUTE_QUANTITY, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_QUANTITY]) &&
+            (array_key_exists(Product::ATTRIBUTE_REFERENCE_QUANTITY, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY])) {
             //Map local unit to connect unit
-            if ($row['attributes']['unit']) {
+            if ($row['attributes'][Product::ATTRIBUTE_UNIT]) {
                 $unitMapper = new UnitMapper($this->configComponent, $this->manager);
-                $row['attributes']['unit'] = $unitMapper->getConnectUnit($row['attributes']['unit']);
+                $row['attributes'][Product::ATTRIBUTE_UNIT] = $unitMapper->getConnectUnit($row['attributes'][Product::ATTRIBUTE_UNIT]);
             }
 
-            $intRefQuantity = (int) $row['attributes']['ref_quantity'];
-            if ($row['attributes']['ref_quantity'] - $intRefQuantity <= 0.0001) {
-                $row['attributes']['ref_quantity'] = $intRefQuantity;
+            $intRefQuantity = (int) $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY];
+            if ($row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] - $intRefQuantity <= 0.0001) {
+                $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] = $intRefQuantity;
             }
         } else {
-            unset($row['attributes']['unit']);
-            $row['attributes']['quantity'] = null;
-            $row['attributes']['ref_quantity'] = null;
+            unset($row['attributes'][Product::ATTRIBUTE_UNIT]);
+            $row['attributes'][Product::ATTRIBUTE_QUANTITY] = null;
+            $row['attributes'][Product::ATTRIBUTE_REFERENCE_QUANTITY] = null;
         }
 
+        if (!(array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT])) {
+            unset($row['attributes'][Product::ATTRIBUTE_PACKAGEUNIT]);
+        }
+
+        if (!(array_key_exists(Product::ATTRIBUTE_MANUFACTURERNUMBER, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_MANUFACTURERNUMBER])) {
+            unset($row['attributes'][Product::ATTRIBUTE_MANUFACTURERNUMBER]);
+        }
+
+        if (!(array_key_exists(Product::ATTRIBUTE_BASICUNIT, $row['attributes']) && $row['attributes'][Product::ATTRIBUTE_BASICUNIT])) {
+            unset($row['attributes'][Product::ATTRIBUTE_BASICUNIT]);
+        }
         $product = new Product($row);
 
         $this->eventManager->notify(
@@ -398,13 +412,25 @@ class LocalProductQuery extends BaseProductQuery
         $mappings = $this->marketplaceGateway->getMappings();
 
         return array_merge(
-            array_filter(array_combine(array_map(function ($mapping) {
-                return $mapping['shopwareAttributeKey'];
-            }, $mappings), array_map(function ($mapping) {
-                return $mapping['attributeKey'];
-            }, $mappings)), function ($mapping) {
-                return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
-            }),
+            array_filter(
+                array_combine(
+                    array_map(
+                        function ($mapping) {
+                            return $mapping['shopwareAttributeKey'];
+                        },
+                        $mappings
+                    ),
+                    array_map(
+                        function ($mapping) {
+                            return $mapping['attributeKey'];
+                        },
+                        $mappings
+                    )
+                ),
+                function ($mapping) {
+                    return strlen($mapping['shopwareAttributeKey']) > 0 && strlen($mapping['attributeKey']) > 0;
+                }
+            ),
             $this->attributeMapping
         );
     }
@@ -412,14 +438,14 @@ class LocalProductQuery extends BaseProductQuery
     /**
      * Check whether the product contains variants
      *
-     * @param int $productId
+     * @param int $articleId
      * @return bool
      */
-    public function hasVariants($productId)
+    public function hasVariants($articleId)
     {
         $result = $this->manager->getConnection()->fetchColumn(
             'SELECT a.configurator_set_id FROM s_articles a WHERE a.id = ?',
-            [(int) $productId]
+            [(int) $articleId]
         );
 
         return $result > 0;

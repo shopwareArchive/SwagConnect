@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Subscribers;
 
+use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\CustomModels\Connect\PaymentRepository;
@@ -15,6 +16,8 @@ use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\Api\Request\RestApiRequest;
 use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
@@ -24,41 +27,55 @@ use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\Components\DependencyInjection\Container;
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Category\Category as CategoryModel;
 use Shopware\Models\Article\Article as ArticleModel;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
+use Shopware\CustomModels\Connect\ProductStreamAttribute;
 
-class ServiceContainer extends BaseSubscriber
+class ServiceContainer implements SubscriberInterface
 {
-    /** @var ModelManager */
+    /**
+     * @var ModelManager
+     */
     private $manager;
 
-    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql */
+    /**
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
     private $db;
 
-    /** @var Container */
+    /**
+     * @var Container
+     */
     private $container;
+
+    /** @var Config */
+    private $config;
 
     /**
      * ServiceContainer constructor.
      * @param ModelManager $manager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param Container $container
+     * @param Config $config
      */
     public function __construct(
         ModelManager $manager,
         Enlight_Components_Db_Adapter_Pdo_Mysql $db,
-        Container $container
+        Container $container,
+        Config $config
     ) {
-        parent::__construct();
         $this->manager = $manager;
         $this->db = $db;
         $this->container = $container;
+        $this->config = $config;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
@@ -68,6 +85,8 @@ class ServiceContainer extends BaseSubscriber
             'Enlight_Bootstrap_InitResource_swagconnect.rest_api_request' => 'onRestApiRequest',
             'Enlight_Bootstrap_InitResource_swagconnect.import_service' => 'onImportService',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
+            'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
+            'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
         ];
     }
 
@@ -77,12 +96,12 @@ class ServiceContainer extends BaseSubscriber
     public function onProductStreamService()
     {
         /** @var ProductStreamAttributeRepository $streamAttrRepository */
-        $streamAttrRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\ProductStreamAttribute');
+        $streamAttrRepository = $this->manager->getRepository(ProductStreamAttribute::class);
 
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            new Config($this->manager),
+            $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
         );
@@ -110,16 +129,20 @@ class ServiceContainer extends BaseSubscriber
         );
     }
 
+    /**
+     * @return FrontendQuery
+     */
     public function onCreateFrontendQuery()
     {
         return new FrontendQuery($this->manager);
     }
 
+    /**
+     * @return RestApiRequest
+     */
     public function onRestApiRequest()
     {
-        return new RestApiRequest(
-            new Config($this->manager)
-        );
+        return new RestApiRequest($this->config);
     }
 
     /**
@@ -127,13 +150,6 @@ class ServiceContainer extends BaseSubscriber
      */
     public function onImportService()
     {
-        $autoCategoryResolver = new AutoCategoryResolver(
-            $this->manager,
-            $this->manager->getRepository(CategoryModel::class),
-            $this->manager->getRepository(RemoteCategory::class),
-            new Config($this->manager)
-        );
-
         return new ImportService(
             $this->manager,
             $this->container->get('multi_edit.product'),
@@ -141,14 +157,16 @@ class ServiceContainer extends BaseSubscriber
             $this->manager->getRepository(ArticleModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class),
-            $autoCategoryResolver,
+            $this->container->get('swagconnect.auto_category_resolver'),
             new CategoryExtractor(
                 $this->manager->getRepository(ConnectAttribute::class),
-                $autoCategoryResolver,
+                $this->container->get('swagconnect.auto_category_resolver'),
                 new PDO($this->db->getConnection()),
                 new RandomStringGenerator(),
                 $this->db
-            )
+            ),
+            $this->container->get('CategoryDenormalization'),
+            $this->container->get('shopware_attribute.data_persister')
         );
     }
 
@@ -159,6 +177,33 @@ class ServiceContainer extends BaseSubscriber
     {
         return new \ShopwarePlugins\Connect\Components\AutoCategoryReverter(
             $this->container->get('swagconnect.import_service')
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver
+     */
+    public function onAutoCategoryResolver()
+    {
+        return new AutoCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(CategoryModel::class),
+            $this->manager->getRepository(RemoteCategory::class),
+            $this->config,
+            $this->manager->getRepository(ProductToRemoteCategory::class)
+        );
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver
+     */
+    public function onDefaultCategoryResolver()
+    {
+        return new DefaultCategoryResolver(
+            $this->manager,
+            $this->manager->getRepository(RemoteCategory::class),
+            $this->manager->getRepository(ProductToRemoteCategory::class),
+            $this->manager->getRepository(CategoryModel::class)
         );
     }
 }

@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Shopware\Components\Plugin\CachedConfigReader;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\Config as ConfigModel;
@@ -42,12 +43,17 @@ class Config
 
     private $connectGateway;
 
+    /** @var CachedConfigReader */
+    private $configReader;
+
     /**
      * @param ModelManager $manager
+     * @param CachedConfigReader $configReader
      */
-    public function __construct(ModelManager $manager)
+    public function __construct(ModelManager $manager, CachedConfigReader $configReader)
     {
         $this->manager = $manager;
+        $this->configReader = $configReader;
     }
 
     /**
@@ -168,7 +174,9 @@ class Config
      */
     private function getPluginConfig($name, $default = null)
     {
-        return Shopware()->Config()->getByNamespace('SwagConnect', $name, $default);
+        $config = $this->configReader->getByPluginName('SwagConnect');
+
+        return array_key_exists($name, $config) ? $config[$name] : $default;
     }
 
     /**

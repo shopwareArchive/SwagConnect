@@ -22,7 +22,7 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
             ->getMock();
 
         $this->configMock = $this->getMockBuilder('\ShopwarePlugins\Connect\Components\Config')
-            ->setConstructorArgs([Shopware()->Models()])
+            ->setConstructorArgs([Shopware()->Models(), Shopware()->Container()->get('shopware.plugin.cached_config_reader')])
             ->setMethods(['getConfig'])
             ->getMock();
 
@@ -89,6 +89,39 @@ class ConnectFactoryTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHelpe
         $this->connectFactory->createSDK();
 
         $this->assertEquals('transaction.stage.connect.shopware.com', getenv('_TRANSACTION_HOST'));
+    }
+
+    public function testCreateSDKAwsDemoStaging()
+    {
+        putenv('_TRANSACTION_HOST');
+        $this->configMock->method('getConfig')->willReturn('sn.demo.connect-devops.com');
+
+        $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
+        $this->connectFactory->createSDK();
+
+        $this->assertEquals('transaction.demo.connect-devops.com', getenv('_TRANSACTION_HOST'));
+    }
+
+    public function testCreateSDKAwsQaStaging()
+    {
+        putenv('_TRANSACTION_HOST');
+        $this->configMock->method('getConfig')->willReturn('sn.staging.connect-devops.com');
+
+        $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
+        $this->connectFactory->createSDK();
+
+        $this->assertEquals('transaction.staging.connect-devops.com', getenv('_TRANSACTION_HOST'));
+    }
+
+    public function testCreateSDKAwsDevStaging()
+    {
+        putenv('_TRANSACTION_HOST');
+        $this->configMock->method('getConfig')->willReturn('sn.dev.connect-devops.com');
+
+        $this->assertEquals(null, getenv('_TRANSACTION_HOST'));
+        $this->connectFactory->createSDK();
+
+        $this->assertEquals('transaction.dev.connect-devops.com', getenv('_TRANSACTION_HOST'));
     }
 
     public function testCreateSDKMarketplaceStaging()

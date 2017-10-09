@@ -8,7 +8,10 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Category\Category;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\CustomModels\Connect\ProductToRemoteCategory;
+use Shopware\CustomModels\Connect\RemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryQuery\RelevanceSorter;
 use ShopwarePlugins\Connect\Components\CategoryQuery\SwQuery;
 use Shopware\Connect\SDK;
@@ -181,7 +184,7 @@ class ConnectFactory
              // Set the debugHost as environment vars for the DependencyResolver
             putenv("_SOCIALNETWORK_HOST={$debugHost}");
 
-            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)/', $debugHost, $matches)) {
+            if (preg_match('/(stage[1-9]?.connect.*)|(connect.local$)|([A-Za-z0-9 _]+.connect-devops.com)/', $debugHost, $matches)) {
                 // Use local or staging url
                 putenv("_TRANSACTION_HOST=transaction.{$matches[0]}");
             }
@@ -193,14 +196,16 @@ class ConnectFactory
         $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
             new AutoCategoryResolver(
                 $manager,
-                $manager->getRepository('Shopware\Models\Category\Category'),
-                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
+                $manager->getRepository(Category::class),
+                $manager->getRepository(RemoteCategory::class),
                 $this->getConfigComponent()
-            ) :
+            )
+            :
             new DefaultCategoryResolver(
                 $manager,
-                $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
-                $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory')
+                $manager->getRepository(RemoteCategory::class),
+                $manager->getRepository(ProductToRemoteCategory::class),
+                $manager->getRepository(Category::class)
             );
 
         return new SDK(
@@ -217,7 +222,8 @@ class ConnectFactory
                 $this->getProductTranslationsGateway(),
                 $categoryResolver,
                 $this->getConnectPDOGateway(),
-                $eventManager
+                $eventManager,
+                $this->getContainer()->get('CategoryDenormalization')
             ),
             new ProductFromShop(
                 $helper,
@@ -415,7 +421,7 @@ class ConnectFactory
     public function getConfigComponent()
     {
         if (!$this->configComponent) {
-            $this->configComponent = new Config($this->getModelManager());
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

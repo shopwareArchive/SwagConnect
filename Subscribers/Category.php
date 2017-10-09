@@ -8,36 +8,42 @@
 namespace ShopwarePlugins\Connect\Subscribers;
 
 use Doctrine\DBAL\Connection;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Models\ProductStream\ProductStream;
+use Enlight\Event\SubscriberInterface;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 
-class Category extends BaseSubscriber
+class Category implements SubscriberInterface
 {
     /** @var Connection $connection */
     private $connection;
 
+    /**
+     * @var array
+     */
     private $parentCollection = [];
 
-    public function __construct(ModelManager $modelManager)
+    /**
+     * @var ProductStreamService
+     */
+    private $productStreamService;
+
+    /**
+     * @param Connection $connection
+     * @param ProductStreamService $productStreamService
+     */
+    public function __construct(Connection $connection, ProductStreamService $productStreamService)
     {
-        parent::__construct();
-        $this->connection = $modelManager->getConnection();
+        $this->connection = $connection;
+        $this->productStreamService = $productStreamService;
     }
 
-    public function getSubscribedEvents()
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Category' => 'extendBackendCategory',
         ];
-    }
-
-    /**
-     * @return ProductStreamService;
-     */
-    public function getProductStreamService()
-    {
-        return $this->Application()->Container()->get('swagconnect.product_stream_service');
     }
 
     /**
@@ -83,20 +89,22 @@ class Category extends BaseSubscriber
      */
     private function activateConnectProducts($streamId)
     {
-        $streamService = $this->getProductStreamService();
-
-        /** @var ProductStream $stream */
         try {
-            $stream = $streamService->findStream($streamId);
+            $stream = $this->productStreamService->findStream($streamId);
         } catch (\Exception $e) {
             return;
         }
 
-        if ($streamService->isConnectStream($stream) && $streamService->isStatic($stream)) {
-            $streamService->activateConnectProductsByStream($stream);
+        if ($this->productStreamService->isConnectStream($stream) && $this->productStreamService->isStatic($stream)) {
+            $this->productStreamService->activateConnectProductsByStream($stream);
         }
     }
 
+    /**
+     * @param array $nodes
+     * @param array $expandedCategories
+     * @return array
+     */
     private function expandCategories(array $nodes, $expandedCategories)
     {
         if (count($expandedCategories) === 0) {
@@ -156,6 +164,11 @@ class Category extends BaseSubscriber
         return $nodes;
     }
 
+    /**
+     * @param string $query
+     * @param int $parentId
+     * @return array
+     */
     public function getCategoriesByQuery($query, $parentId)
     {
         $builder = $this->connection->createQueryBuilder();
@@ -191,6 +204,16 @@ class Category extends BaseSubscriber
         return $nodes;
     }
 
+    /**
+     * @param $id
+     * @param $name
+     * @param $parentId
+     * @param $class
+     * @param $leaf
+     * @param $allowDrag
+     * @param $expanded
+     * @return array
+     */
     public function createTreeNode($id, $name, $parentId, $class, $leaf, $allowDrag, $expanded)
     {
         return [
@@ -207,6 +230,11 @@ class Category extends BaseSubscriber
         ];
     }
 
+    /**
+     * @param array $category
+     * @param $parent
+     * @return null
+     */
     public function getMaxRootCategories($category, $parent)
     {
         if (in_array($category['parent'], $this->parentCollection)) {
@@ -238,6 +266,10 @@ class Category extends BaseSubscriber
         return $this->getMaxRootCategories($parentCategory, $parent);
     }
 
+    /**
+     * @param int $categoryId
+     * @return bool
+     */
     public function isLeaf($categoryId)
     {
         $builder = $this->connection->createQueryBuilder();

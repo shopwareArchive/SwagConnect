@@ -5,7 +5,6 @@
  * file that was distributed with this source code.
  */
 
-use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Connect\Units;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -15,6 +14,7 @@ use ShopwarePlugins\Connect\Components\SnHttpClient;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Gateway\ChangeGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 
 /**
  * @category  Shopware
@@ -618,8 +618,7 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     private function getConfigComponent()
     {
         if ($this->configComponent === null) {
-            $modelsManager = Shopware()->Models();
-            $this->configComponent = new Config($modelsManager);
+            $this->configComponent = ConfigFactory::getConfigInstance();
         }
 
         return $this->configComponent;

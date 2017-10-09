@@ -10,6 +10,7 @@ namespace Shopware\CustomModels\Connect;
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\ModelEntity;
 use Shopware\Models\Category\Category;
+use Shopware\Models\Attribute\Category as CategoryAttribute;
 
 /**
  * Describes Shopware Connect categories
@@ -40,6 +41,16 @@ class RemoteCategory extends ModelEntity
      * @ORM\Column(name="label", type="string", length=255, nullable=false)
      */
     protected $label;
+
+    /**
+     * @deprecated
+     */
+    protected $localCategoryId;
+
+    /**
+     * @deprecated
+     */
+    protected $localCategory;
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
@@ -120,6 +131,13 @@ class RemoteCategory extends ModelEntity
     {
         if (!$this->localCategories->contains($localCategory)) {
             $this->localCategories->add($localCategory);
+            if ($localCategory->getAttribute()) {
+                $localCategory->getAttribute()->setConnectImportedCategory(1);
+            } else {
+                $attribute = new CategoryAttribute();
+                $attribute->setConnectImportedCategory(1);
+                $localCategory->setAttribute($attribute);
+            }
         }
     }
 
@@ -129,5 +147,22 @@ class RemoteCategory extends ModelEntity
     public function removeLocalCategory(Category $localCategory)
     {
         $this->localCategories->remove($localCategory);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function getLocalCategoryId()
+    {
+        return $this->localCategoryId;
+    }
+
+    /**
+     * @param int $id
+     * @deprecated
+     */
+    public function setLocalCategoryId($id)
+    {
+        $this->localCategoryId = $id;
     }
 }

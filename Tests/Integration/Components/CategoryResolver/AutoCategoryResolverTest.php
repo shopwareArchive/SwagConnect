@@ -5,15 +5,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect\Component\CategoryResolver;
+namespace ShopwarePlugins\Connect\Tests\Integration\Components\CategoryResolver;
 
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
-class AutoCategoryResolverTest extends ConnectTestHelper
+class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 {
+    use DatabaseTestCaseTrait;
+
     /** @var \ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver */
     private $categoryResolver;
     private $manager;
@@ -24,8 +26,6 @@ class AutoCategoryResolverTest extends ConnectTestHelper
 
     public function setUp()
     {
-        parent::setUp();
-
         $this->manager = Shopware()->Models();
         $this->config = ConfigFactory::getConfigInstance();
         $this->categoryRepo = $this->manager->getRepository('Shopware\Models\Category\Category');
@@ -87,6 +87,8 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             '/deutsch/adidas/boots' => 'Boots',
             '/deutsch/adidas' => 'Adidas',
             '/deutsch' => 'Deutsch',
+            '/english' => 'English',
+            '/english/test' => 'Tests'
         ];
 
         $this->createRemoteCategories($categories);
@@ -100,9 +102,10 @@ class AutoCategoryResolverTest extends ConnectTestHelper
             Shopware()->Db()->fetchOne('SELECT parent FROM s_categories WHERE description = ?', ['Adidas'])
         );
 
-        $this->assertCount(2, $categoryModels);
+        $this->assertCount(3, $categoryModels);
         $this->assertEquals('Tshirts', $this->categoryRepo->findOneById($categoryModels[0])->getName());
         $this->assertEquals('Boots', $this->categoryRepo->findOneById($categoryModels[1])->getName());
+        $this->assertEquals('Tests', $this->categoryRepo->findOneById($categoryModels[2])->getName());
 
         unset($categories['/deutsch']);
         Shopware()->Db()->exec('DELETE FROM s_categories WHERE description IN ("' . implode('","', $categories) . '")');

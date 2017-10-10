@@ -217,49 +217,6 @@ class ProductToShopTest extends ConnectTestHelper
         }
     }
 
-    public function testInsertVariants()
-    {
-        $variants = $this->getVariants();
-
-        foreach ($variants as $variant) {
-            $this->productToShop->insertOrUpdate($variant);
-        }
-
-        $connectAttribute = $this->modelManager
-            ->getRepository('Shopware\CustomModels\Connect\Attribute')
-            ->findOneBy(['sourceId' => $variants[0]->sourceId]);
-        $article = $connectAttribute->getArticle();
-        // check articles details count
-        $this->assertEquals(4, count($article->getDetails()));
-        // check configurator set
-        $this->assertNotNull($article->getConfiguratorSet());
-        // check configurator group
-        $group = $this->modelManager
-            ->getRepository('Shopware\Models\Article\Configurator\Group')
-            ->findOneBy(['name' => 'Farbe']);
-        $this->assertNotNull($group);
-        // check group options
-        $groupOptionValues = $articleOptionValues = ['Weiss-Blau', 'Weiss-Rot', 'Blau-Rot', 'Schwarz-Rot'];
-        foreach ($group->getOptions() as $option) {
-            foreach ($groupOptionValues as $key => $groupOptionValue) {
-                if (strpos($option->getName(), $groupOptionValue) == 0) {
-                    unset($groupOptionValues[$key]);
-                }
-            }
-        }
-        $this->assertEmpty($groupOptionValues);
-        // check configuration set options
-        $this->assertEquals(4, count($article->getConfiguratorSet()->getOptions()));
-        foreach ($article->getConfiguratorSet()->getOptions() as $option) {
-            foreach ($articleOptionValues as $key => $articleOptionValue) {
-                if (strpos($option->getName(), $articleOptionValue) == 0) {
-                    unset($articleOptionValues[$key]);
-                }
-            }
-        }
-        $this->assertEmpty($articleOptionValues);
-    }
-
     public function testUpdateVariant()
     {
         $variants = $this->getVariants();

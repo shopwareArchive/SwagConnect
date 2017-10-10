@@ -44,7 +44,6 @@ class RemoteProductQueryTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_remote()
     {
-        //$this->applyFixtures();
         $newProduct = $this->getProductNonRand();
         $newProduct->minPurchaseQuantity = 4;
 
@@ -60,7 +59,6 @@ class RemoteProductQueryTest extends \PHPUnit_Framework_TestCase
         $result = $this->remoteProductQuery->get([$newProduct->sourceId], $newProduct->shopId);
         /** @var \Shopware\Connect\Struct\Product $product */
         $product = $result[0];
-
 
         $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
         $this->assertEquals($newProduct->title, $product->title);

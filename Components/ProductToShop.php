@@ -475,10 +475,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $model
+     * @param ProductModel $model
      * @param Product $product
      */
-    private function updateConfiguratorSetTypeFromProduct($model, Product $product)
+    private function updateConfiguratorSetTypeFromProduct(ProductModel $model, Product $product)
     {
         if (!empty($product->variant)) {
             $configSet = $model->getConfiguratorSet();
@@ -487,10 +487,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $model
+     * @param ProductModel $model
      * @param Product $product
      */
-    private function cleanUpConfiguratorSet($model, Product $product)
+    private function cleanUpConfiguratorSet(ProductModel $model, Product $product)
     {
         if (empty($product->variant) && $model->getConfiguratorSet()) {
             $this->manager->getConnection()->executeQuery(
@@ -501,9 +501,9 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $model
+     * @param ProductModel $model
      */
-    private function removeConnectImportedCategories($model)
+    private function removeConnectImportedCategories(ProductModel $model)
     {
         /** @var \Shopware\Models\Category\Category $category */
         foreach ($model->getCategories() as $category) {
@@ -519,11 +519,11 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $detail
-     * @param $model
+     * @param DetailModel $detail
+     * @param ProductModel $model
      * @return AttributeModel
      */
-    private function getOrCreateAttributeModel($detail, $model)
+    private function getOrCreateAttributeModel(DetailModel $detail, ProductModel $model)
     {
         $detailAttribute = $detail->getAttribute();
         if (!$detailAttribute) {
@@ -664,18 +664,18 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $updateFields
-     * @param $model
-     * @param $detailAttribute
+     * @param array $updateFields
+     * @param ProductModel $model
+     * @param AttributeModel $detailAttribute
      * @param Product $product
      */
-    private function setPropertiesForNewProducts($updateFields, $model, $detailAttribute, Product $product)
+    private function setPropertiesForNewProducts(array $updateFields, ProductModel $model, AttributeModel $detailAttribute, Product $product)
     {
         /*
-                 * Make sure, that the following properties are set for
-                 * - new products
-                 * - products that have been configured to receive these updates
-                 */
+         * Make sure, that the following properties are set for
+         * - new products
+         * - products that have been configured to receive these updates
+         */
         if ($updateFields['name']) {
             $model->setName($product->title);
         }
@@ -862,10 +862,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $connectAttribute
+     * @param  ConnectAttribute $connectAttribute
      * @param Product $product
      */
-    private function setConnectAttributesFromProduct($connectAttribute, Product $product)
+    private function setConnectAttributesFromProduct(ConnectAttribute $connectAttribute, Product $product)
     {
         $connectAttribute->setShopId($product->shopId);
         $connectAttribute->setSourceId($product->sourceId);
@@ -880,10 +880,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $detail
+     * @param DetailModel $detail
      * @param Product $product
      */
-    private function updateDetailFromProduct($detail, Product $product)
+    private function updateDetailFromProduct(DetailModel $detail, Product $product)
     {
         $detail->setInStock($product->availability);
         $detail->setEan($product->ean);
@@ -895,11 +895,11 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $detail
+     * @param DetailModel $detail
      * @param Product $product
      * @param $detailAttribute
      */
-    private function detailSetUnit($detail, Product $product, $detailAttribute)
+    private function detailSetUnit(DetailModel $detail, Product $product, $detailAttribute)
     {
         // if connect product has unit
         // find local unit with units mapping
@@ -928,10 +928,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $detail
+     * @param DetailModel $detail
      * @param Product $product
      */
-    private function detailSetAttributes($detail, Product $product)
+    private function detailSetAttributes(DetailModel $detail, Product $product)
     {
         // set dimension
         if (array_key_exists('dimension', $product->attributes) && $product->attributes['dimension']) {
@@ -967,10 +967,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $connectAttribute
+     * @param ConnectAttribute $connectAttribute
      * @param Product $product
      */
-    private function connectAttributeSetLastUpdate($connectAttribute, Product $product)
+    private function connectAttributeSetLastUpdate(ConnectAttribute $connectAttribute, Product $product)
     {
         // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
         // This way a customer will be able to apply the most recent changes any time later
@@ -988,10 +988,10 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $model
-     * @param $categories
+     * @param ProductModel $model
+     * @param array $categories
      */
-    private function categoryDenormalization($model, $categories)
+    private function categoryDenormalization(ProductModel $model, array $categories)
     {
         $this->categoryDenormalization->disableTransactions();
         foreach ($categories as $category) {

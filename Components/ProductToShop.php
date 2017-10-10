@@ -465,11 +465,11 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $detail
-     * @param $mainDetail
+     * @param DetailModel $detail
+     * @param DetailModel $mainDetail
      * @return bool
      */
-    private function checkIfMainVariant($detail, $mainDetail)
+    private function checkIfMainVariant(DetailModel $detail, DetailModel $mainDetail)
     {
         return $detail->getId() === $mainDetail->getId();
     }

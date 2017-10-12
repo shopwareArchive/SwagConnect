@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2baf395e244d74e9d2f3624693517f20",
+    "hash": "486fff1a75c7605ad857c350464b738a",
+    "content-hash": "3160d7f4bb215e30885b6f785858f429",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -47,20 +48,20 @@
             ],
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
-            "time": "2015-07-22T18:31:08+00:00"
+            "time": "2015-07-22 18:31:08"
         },
         {
             "name": "shopware/connect-sdk",
-            "version": "dev-master",
+            "version": "dev-CON-4609",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a"
+                "reference": "4a2e763ee8b12b27cebf77063f5ab8710de32207"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a",
-                "reference": "c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/4a2e763ee8b12b27cebf77063f5ab8710de32207",
+                "reference": "4a2e763ee8b12b27cebf77063f5ab8710de32207",
                 "shasum": ""
             },
             "require-dev": {
@@ -82,10 +83,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/master",
+                "source": "https://github.com/shopware/Connect-SDK/tree/CON-4609",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-09-04T09:09:26+00:00"
+            "time": "2017-10-11 06:40:19"
         }
     ],
     "packages-dev": [
@@ -115,7 +116,7 @@
                 "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-07-28T13:14:21+00:00"
+            "time": "2017-07-28 13:14:21"
         }
     ],
     "aliases": [],

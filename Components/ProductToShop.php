@@ -11,8 +11,11 @@ use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\CategoryDenormalization;
 use Shopware\Connect\ProductToShop as ProductToShopBase;
+use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
 use Shopware\Components\Model\ModelManager;
@@ -1205,5 +1208,98 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($currentMainDetail);
         $this->manager->persist($article);
         $this->manager->flush();
+    }
+
+    /**
+     * Updates the status of an Order
+     *
+     * @param string $localOrderId
+     * @param string $orderStatus
+     * @param string $trackingNumber
+     * @return void
+     */
+    public function updateOrderStatus($localOrderId, $orderStatus, $trackingNumber)
+    {
+        if ($this->config->getConfig('updateOrderStatus') == 1) {
+            $this->updateDeliveryStatus($localOrderId, $orderStatus);
+        }
+
+        if ($trackingNumber) {
+            $this->updateTrackingNumber($localOrderId, $trackingNumber);
+        }
+    }
+
+    /**
+     * @param $localOrderId
+     * @param $orderStatus
+     */
+    private function updateDeliveryStatus($localOrderId, $orderStatus)
+    {
+        $status = false;
+        if ($orderStatus === OrderStatus::STATE_IN_PROCESS) {
+            $status = Status::ORDER_STATE_PARTIALLY_DELIVERED;
+        } elseif ($orderStatus === OrderStatus::STATE_DELIVERED) {
+            $status = Status::ORDER_STATE_COMPLETELY_DELIVERED;
+        }
+
+        if ($status) {
+            $this->manager->getConnection()->executeQuery(
+                'UPDATE s_order 
+                SET status = :orderStatus
+                WHERE ordernumber = :orderNumber',
+                [
+                    ':orderStatus' => $status,
+                    ':orderNumber' => $localOrderId
+                ]
+            );
+        }
+    }
+
+    /**
+     * @param string $localOrderId
+     * @param string $trackingNumber
+     */
+    private function updateTrackingNumber($localOrderId, $trackingNumber)
+    {
+        $currentTrackingCode = $this->manager->getConnection()->fetchColumn(
+            'SELECT trackingcode
+            FROM s_order
+            WHERE ordernumber = :orderNumber',
+            [
+                ':orderNumber' => $localOrderId
+            ]
+        );
+
+        if (!$currentTrackingCode) {
+            $newTracking = $trackingNumber;
+        } else {
+            $currentTrackingCodes = $this->getTrackingNumberAsArray($currentTrackingCode);
+            $newTrackingCodes = $this->getTrackingNumberAsArray($trackingNumber);
+            $newTrackingCodes = array_unique(array_merge($currentTrackingCodes, $newTrackingCodes));
+            $newTracking = implode(',', $newTrackingCodes);
+        }
+
+        $this->manager->getConnection()->executeQuery(
+            'UPDATE s_order 
+            SET trackingcode = :trackingCode
+            WHERE ordernumber = :orderNumber',
+            [
+                ':trackingCode' => $newTracking,
+                ':orderNumber' => $localOrderId
+            ]
+        );
+    }
+
+    /**
+     * @param string $trackingCode
+     * @return string[]
+     */
+    private function getTrackingNumberAsArray($trackingCode)
+    {
+        if (strpos($trackingCode, ',') !== false) {
+            return explode(',', $trackingCode);
+        }
+
+        return [$trackingCode];
     }
 }

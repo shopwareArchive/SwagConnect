@@ -63,7 +63,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
         productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
-        overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}'
+        overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}',
+        updateOrderStatusDescription: '{s name=config/import/update_order_status_description}You can import the order status from orders with Connect-Products. This can override previously set status.{/s}',
+        updateOrderStatusLabel: '{s name=config/import/update_order_status_label}Import Orderstatus:{/s}',
+        updateOrderStatusHelpText: '{s name=config/import/update_order_status_help_text}The order status will be set to \"completly delivered\" if all Connect-Products are delivered. If some but not all Connect-Products are delivered the order status will be set to \"partially delivered\". In this cases the old order status will be overwritten.{/s}',
+        updateOrderStatusTitle: '{s name=config/import/update_order_status_title}Order status{/s}'
+
     },
 
     initComponent: function() {
@@ -200,7 +205,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        var containerBottom = Ext.create('Ext.form.FieldSet', {
+        var containerMiddle = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportImageSettingsTitle,
             layout: 'vbox',
@@ -232,7 +237,35 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        return [ containerTop, containerBottom ];
+        var containerBottom = Ext.create('Ext.form.FieldSet', {
+            flex: 1,
+            title: me.snippets.updateOrderStatusTitle,
+            layout: 'vbox',
+            items: [
+                {
+                    xtype: 'container',
+                    margin: '0 0 20 0',
+                    width: 600,
+                    html: '<p>' + me.snippets.updateOrderStatusDescription + '</p>'
+                },
+                {
+                    xtype      : 'fieldcontainer',
+                    defaultType: 'checkboxfield',
+                    labelWidth: me.defaults.labelWidth,
+                    items: [
+                        {
+                            name: 'updateOrderStatus',
+                            fieldLabel: me.snippets.updateOrderStatusLabel,
+                            helpText: me.snippets.updateOrderStatusHelpText,
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return [ containerTop, containerMiddle, containerBottom ];
     },
 
     /**

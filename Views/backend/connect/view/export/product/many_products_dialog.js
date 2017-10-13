@@ -25,6 +25,11 @@ Ext.define('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
     sourceIds: [],
 
     /**
+     * Contains the amount of products export all will export as batches
+     */
+    count: 0,
+
+    /**
      * Contains all snippets for the component
      * @object
      */
@@ -82,7 +87,8 @@ Ext.define('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
             margin: '30 -10 0 0',
             handler: function () {
                 Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                    sourceIds: me.sourceIds
+                    exportAll: true,
+                    count: me.count
                 }).show();
                 me.destroy();
             }

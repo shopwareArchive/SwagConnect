@@ -585,6 +585,14 @@ class Helper
         Shopware()->Session()->connectReservation = null;
     }
 
+    public function getAllArticleSourceIds($offset, $batchSize)
+    {
+        /** @var AttributeRepository $repo */
+        $repo = $this->manager->getRepository(ConnectAttribute::class);
+
+        return $repo->findAllSourceIds($offset, $batchSize);
+    }
+
     /**
      * Collect sourceIds by given article ids
      *
@@ -802,21 +810,20 @@ class Helper
         return true;
     }
 
-    /**
-     * @return array
-     */
-    public function getAllNonConnectArticleIds()
+    public function getBatchOfArticles($offset, $batchSize)
     {
-        $builder = $this->manager->getConnection()->createQueryBuilder();
-        $builder->select('DISTINCT spci.article_id');
-        $builder->from('s_plugin_connect_items', 'spci');
-        $builder->where('spci.shop_id IS NULL');
+        $query = $this->manager->getConnection()->executeQuery(
+            'SELECT `article_id` FROM `s_plugin_connect_items`  ORDER BY `article_id` LIMIT ?, ?',
+            [$offset, $batchSize],
+            [\PDO::PARAM_INT, \PDO::PARAM_INT]
+        );
 
-        $result = $builder->execute()->fetchAll();
+        return $query->fetchAll(\PDO::FETCH_COLUMN);
+    }
 
-        return array_map(function ($row) {
-            return $row['article_id'];
-        }, $result);
+    public function getLocalArticleCount()
+    {
+        return $this->manager->getRepository(ConnectAttribute::class)->getLocalArticleCount();
     }
 
     /**

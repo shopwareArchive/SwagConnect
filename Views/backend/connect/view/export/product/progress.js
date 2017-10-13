@@ -30,6 +30,16 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     sourceIds: [],
 
     /**
+     * if this is true this will export all products as batches
+     */
+    exportAll: false,
+
+    /**
+     * Contains the amount of products export all will export as batches
+     */
+    count: 0,
+
+    /**
      * Contains all snippets for the component
      * @object
      */
@@ -53,11 +63,12 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
      * Creates the items for the progress window.
      */
     createItems: function() {
-        var me = this;
+        var me = this,
+            totalItems = me.sourceIds.length || me.count;
 
         me.progressField = Ext.create('Ext.ProgressBar', {
             name: 'productExportBar',
-            text: Ext.String.format(me.snippets.process, 0, me.sourceIds.length),
+            text: Ext.String.format(me.snippets.process, 0, totalItems),
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',
@@ -89,12 +100,15 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
                 }
                 me.startButton.setDisabled(true);
                 me.cancelButton.setDisabled(true);
-
-                me.fireEvent('startExport', me.sourceIds, me.batchSize, me);
+                if (me.exportAll) {
+                    me.fireEvent('exportAll', me.count, me.batchSize, me, 0);
+                } else {
+                    me.fireEvent('startExport', me.sourceIds, me.batchSize, me);
+                }
             }
         });
 
-        var totalTime = me.sourceIds.length / me.batchSize * 1.5 / 60;
+        var totalTime = totalItems / me.batchSize * 2.5 / 60;
         totalTime = Ext.Number.toFixed(totalTime, 0);
 
         var notice = Ext.create('Ext.container.Container', {

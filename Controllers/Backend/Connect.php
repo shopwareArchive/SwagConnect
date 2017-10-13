@@ -860,17 +860,63 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     }
 
     /**
+     * get the amount of products that can be exported
+     */
+    public function getArticleCountAction()
+    {
+        try {
+            $count = $this->getHelper()->getLocalArticleCount();
+            $this->View()->assign([
+                'success' => true,
+                'count' => $count
+            ]);
+        } catch (\Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function exportAllProductsAction()
+    {
+        $this->updatePurchasePriceField();
+        $connectExport = $this->getConnectExport();
+        try {
+            $offset = $this->Request()->getPost('offset', []);
+            $batchSize = $this->Request()->getPost('batchSize', []);
+
+            $sourceIds = $this->getHelper()->getAllArticleSourceIds($offset, $batchSize);
+            $errors = $connectExport->export($sourceIds);
+
+            if (!empty($errors)) {
+                $this->View()->assign([
+                    'success' => false,
+                    'messages' => $errors
+                ]);
+
+                return;
+            }
+        } catch (\Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        $this->View()->assign([
+            'success' => true,
+            'sourceIds' => $sourceIds
+        ]);
+    }
+
+    /**
      * Collect all source ids by given article ids
      */
     public function getArticleSourceIdsAction()
     {
         try {
-            $exportAll = (bool) $this->Request()->getPost('exportAll', false);
+            //            $exportAll = (bool) $this->Request()->getPost('exportAll', false);
             $articleIds = $this->Request()->getPost('ids', []);
-
-            if ($exportAll) {
-                $articleIds = $this->getHelper()->getAllNonConnectArticleIds();
-            }
 
             if (!is_array($articleIds)) {
                 $articleIds = [$articleIds];

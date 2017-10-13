@@ -344,7 +344,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onExportAllAction
             },
             'connect-article-export-progress-window': {
-                startExport: me.startArticleExport
+                startExport: me.startArticleExport,
+                exportAll: me.exportAll
             },
             'connect-many-products-dialog': {
                 cronExportAll: me.cronExportAll
@@ -903,6 +904,66 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         });
     },
 
+    exportAll: function(count, batchSize, window, offset) {
+        var me = this;
+        offset = parseInt(offset);
+        batchSize = parseInt(batchSize);
+        count = parseInt(count);
+        // if ((offset+batchSize) > count ){
+        //     return;
+        // }
+
+        Ext.Ajax.request({
+            url: '{url action=exportAllProducts}',
+            method: 'POST',
+            params: {
+                'offset': offset,
+                'batchSize': batchSize
+            },
+            success: function(response, opts) {
+                var operation = Ext.decode(response.responseText);
+
+                if (!operation.success && operation.messages) {
+
+                    if(operation.messages.price && operation.messages.price.length > 0){
+                        var priceMsg = Ext.String.format(
+                            me.messages.priceErrorMessage, operation.messages.price.length, count
+                        );
+                        me.createGrowlMessage(title, priceMsg, true);
+                    }
+
+                    if(operation.messages.default && operation.messages.default.length > 0){
+                        operation.messages.default.forEach( function(message){
+                            me.createGrowlMessage(title, message, true);
+                        });
+                    }
+                }
+
+                window.progressField.updateText(Ext.String.format(window.snippets.process, offset, 0));
+                window.progressField.updateProgress(
+                    offset/count,
+                    Ext.String.format(window.snippets.process, offset, count),
+                    true
+                );
+
+                if (count <= offset) {
+                    window.closeWindow();
+                    me.createGrowlMessage(title, message, false);
+                    list.store.load();
+                    me.onGetExportStatus();
+                } else {
+                    //otherwise we have to call this function recursive with the next offset
+                    me.exportAll(count,batchSize,window,(offset+batchSize));
+                }
+            },
+            failure: function(operation) {
+                me.createGrowlMessage(title, operation.responseText, true);
+                window.inProcess = false;
+                window.cancelButton.setDisabled(false);
+            }
+        });
+    },
+
     /**
      * Callback function that will insert from/for export
      *
@@ -1080,7 +1141,7 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         list.setLoading(true);
 
         Ext.Ajax.request({
-            url: '{url action=getArticleSourceIds}',
+            url: '{url action=getArticleCount}',
             method: 'POST',
             params: {
                 'exportAll': true
@@ -1096,20 +1157,21 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 if (!operation) {
                     return;
                 }
-
                 if (!operation.success) {
                     me.createGrowlMessage(title, operation.message, true);
                 } else {
-                    if (operation.sourceIds.length > 1000) {
+                    if (operation.count > 1000) {
 
                         Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
-                            sourceIds: operation.sourceIds
+                            exportAll: true,
+                            count: operation.count
                         }).show();
                         return;
                     }
 
                     Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                        sourceIds: operation.sourceIds
+                        exportAll: true,
+                        count: operation.count
                     }).show();
                 }
             }

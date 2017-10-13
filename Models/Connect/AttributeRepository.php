@@ -130,25 +130,51 @@ class AttributeRepository extends ModelRepository
     }
 
     /**
+     * @return int[]
+     */
+    public function findAllSourceIds($offset, $batchSize)
+    {
+        $customProductsTableExists = $this->hasCustomProductsTable();
+
+        // main variants should be collected first, because they
+        // should be exported first. Connect uses first variant product with an unknown groupId as main one.
+        $builder = $this->_em->getConnection()->createQueryBuilder();
+        $builder->select('spci.source_id')
+            ->from('s_plugin_connect_items', 'spci')
+            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
+            ->where('sad.kind IN (1,2) AND spci.shop_id IS NULL')
+            ->orderBy('sad.kind', 'ASC')
+            ->addOrderBy('spci.source_id', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults($batchSize);
+
+        if ($customProductsTableExists) {
+            $builder->leftJoin('spci', 's_plugin_custom_products_template_product_relation', 'spcptpr', 'spci.article_id = spcptpr.article_id')
+                ->andWhere('spcptpr.template_id IS NULL');
+        }
+
+        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public function getLocalArticleCount()
+    {
+        $conn = $this->_em->getConnection();
+
+        $sql = 'SELECT COUNT(article_id) FROM s_plugin_connect_items';
+
+        $query = $conn->query($sql);
+
+        return $query->fetchColumn();
+    }
+
+    /**
      * @param array $articleIds
      * @param int $kind
      * @return array
      */
     public function findSourceIds(array $articleIds, $kind)
     {
-        $customProductsTableExists = false;
-        try {
-            $builder = $this->_em->getConnection()->createQueryBuilder();
-            $builder->select('id');
-            $builder->from('s_plugin_custom_products_template');
-            $builder->setMaxResults(1);
-            $builder->execute()->fetch();
-
-            $customProductsTableExists = true;
-        } catch (DBALException $e) {
-            // ignore it
-            // custom products is not installed
-        }
+        $customProductsTableExists = $this->hasCustomProductsTable();
 
         // main variants should be collected first, because they
         // should be exported first. Connect uses first variant product with an unknown groupId as main one.
@@ -166,5 +192,27 @@ class AttributeRepository extends ModelRepository
         }
 
         return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasCustomProductsTable()
+    {
+        $customProductsTableExists = false;
+        try {
+            $builder = $this->_em->getConnection()->createQueryBuilder();
+            $builder->select('id');
+            $builder->from('s_plugin_custom_products_template');
+            $builder->setMaxResults(1);
+            $builder->execute()->fetch();
+
+            $customProductsTableExists = true;
+        } catch (DBALException $e) {
+            // ignore it
+            // custom products is not installed
+        }
+
+        return $customProductsTableExists;
     }
 }

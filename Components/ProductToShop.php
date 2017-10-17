@@ -1273,10 +1273,7 @@ class ProductToShop implements ProductToShopBase
         if (!$currentTrackingCode) {
             $newTracking = $trackingNumber;
         } else {
-            $currentTrackingCodes = $this->getTrackingNumberAsArray($currentTrackingCode);
-            $newTrackingCodes = $this->getTrackingNumberAsArray($trackingNumber);
-            $newTrackingCodes = array_unique(array_merge($currentTrackingCodes, $newTrackingCodes));
-            $newTracking = implode(',', $newTrackingCodes);
+            $newTracking = $this->combineTrackingNumbers($trackingNumber, $currentTrackingCode);
         }
 
         $this->manager->getConnection()->executeQuery(
@@ -1288,6 +1285,21 @@ class ProductToShop implements ProductToShopBase
                 ':orderNumber' => $localOrderId
             ]
         );
+    }
+
+    /**
+     * @param $newTrackingCode
+     * @param $currentTrackingCode
+     * @return string
+     */
+    private function combineTrackingNumbers($newTrackingCode, $currentTrackingCode)
+    {
+        $currentTrackingCodes = $this->getTrackingNumberAsArray($currentTrackingCode);
+        $newTrackingCodes = $this->getTrackingNumberAsArray($newTrackingCode);
+        $newTrackingCodes = array_unique(array_merge($currentTrackingCodes, $newTrackingCodes));
+        $newTracking = implode(',', $newTrackingCodes);
+
+        return $newTracking;
     }
 
     /**

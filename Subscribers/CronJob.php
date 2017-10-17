@@ -17,7 +17,9 @@ use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductSearch;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Shopware\Components\DependencyInjection\Container;
 
 /**
  * Cronjob callback
@@ -53,20 +55,33 @@ class CronJob implements SubscriberInterface
     private $helper;
 
     /**
+     * @var ProductSearch
+     */
+    private $productSearch;
+
+    /**
+     * @var Container
+     */
+    private $container;
+
+    /**
      * @param SDK $sdk
      * @param ConnectExport $connectExport
      * @param Config $configComponent
+     * @param Container $container
      */
     public function __construct(
         SDK $sdk,
         ConnectExport $connectExport,
         Config $configComponent,
-        Helper $helper
+        Helper $helper,
+        Container $container
     ) {
         $this->connectExport = $connectExport;
         $this->sdk = $sdk;
         $this->configComponent = $configComponent;
         $this->helper = $helper;
+        $this->container = $container;
     }
 
     /**
@@ -89,7 +104,7 @@ class CronJob implements SubscriberInterface
         return new ImageImport(
             Shopware()->Models(),
             $this->helper,
-            Shopware()->Container()->get('thumbnail_manager'),
+            $this->container->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );
     }
@@ -151,7 +166,7 @@ class CronJob implements SubscriberInterface
         /** @var ProductStream $stream */
         foreach ($streams as $stream) {
             $streamId = $stream->getId();
-            $productSearchResult = $streamService->getProductFromConditionStream($stream);
+            $productSearchResult = $this->getProductSearch()->getProductFromConditionStream($stream);
             $orderNumbers = array_keys($productSearchResult->getProducts());
 
             //no products found
@@ -228,9 +243,26 @@ class CronJob implements SubscriberInterface
     private function getStreamService()
     {
         if (!$this->streamService) {
-            $this->streamService = Shopware()->Container()->get('swagconnect.product_stream_service');
+            $this->streamService = $this->container->get('swagconnect.product_stream_service');
         }
 
         return $this->streamService;
+    }
+
+    /**
+     * @return ProductSearch
+     */
+    private function getProductSearch()
+    {
+        if (!$this->productSearch) {
+            // HACK
+            // do not use as a dependency!!!
+            // this class uses Shopware product search which depends on shop context
+            // so if it's used as dependency of subscriber, plugin returns error on deactivate
+            // see CON-4922
+            $this->productSearch = $this->container->get('swagconnect.product_search');
+        }
+
+        return $this->productSearch;
     }
 }

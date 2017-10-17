@@ -192,7 +192,8 @@ class SubscriberRegistration
                 $this->SDK,
                 $this->connectFactory->getConnectExport(),
                 $this->config,
-                $this->helper
+                $this->helper,
+                $this->container
             ),
             new CustomerGroup(
                 $this->modelManager,
@@ -293,9 +294,7 @@ class SubscriberRegistration
         return new ProductStreamService(
             new ProductStreamRepository($this->modelManager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
-            $this->config,
-            $this->container->get('shopware_search.product_search'),
-            $this->container->get('shopware_storefront.context_service')
+            $this->config
         );
     }
 

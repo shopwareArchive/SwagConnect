@@ -66,7 +66,6 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
         $this->connection->executeQuery('DELETE FROM s_articles_details');
-
         $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
 
         $mainProducts = $this->repository->findAllSourceIds(0, 4);

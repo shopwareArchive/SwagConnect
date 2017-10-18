@@ -17,7 +17,7 @@ $addedFiles = [];
 exec('git diff --diff-filter=TXAMRU --cached --name-only', $addedFiles, $return);
 
 $csFixerOutput = [];
-exec('./php-cs-fixer fix --dry-run  --diff >&2', $csFixerOutput, $return);
+exec('./php-cs-fixer fix --dry-run --diff >&2', $csFixerOutput, $return);
 doExit($return);
 
 if (count($addedFiles) > 0 && version_compare(phpversion(), '7.0.0', '>')) {

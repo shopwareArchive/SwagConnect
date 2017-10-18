@@ -65,9 +65,9 @@ environments:
         paths:
             - vendor/shopware/plugin-dev-tools/local
         const:
-            DB_USER: "shopware"
-            DB_PASSWORD: "shopware"
-            DB_HOST: "localhost"
+            DB_USER: "app"
+            DB_PASSWORD: "app"
+            DB_HOST: "mysql"
             DB_PORT: "3306"
     travis:
         dynamic:

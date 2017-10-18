@@ -378,4 +378,22 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         $count = $this->getHelper()->getProductCountForCategoryRecovery();
         $this->assertEquals(0, $count);
     }
+
+    public function test_get_all_source_ids()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_items');
+        $manager->getConnection()->executeQuery('DELETE FROM s_articles_details');
+
+        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+
+        $mainProducts = $this->getHelper()->getAllArticleSourceIds(0, 4);
+        $variantIds = $this->getHelper()->getAllArticleSourceIds(4, 3);
+
+        $expectation1 = ['14467', '14468', '14469', '14470'];
+        $expectation2 = ['14469-7091849', '14470-7091851', '14470-7091852'];
+
+        $this->assertEquals($expectation1, $mainProducts);
+        $this->assertEquals($expectation2, $variantIds);
+    }
 }

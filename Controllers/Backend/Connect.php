@@ -916,7 +916,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     public function getArticleSourceIdsAction()
     {
         try {
-            //            $exportAll = (bool) $this->Request()->getPost('exportAll', false);
             $articleIds = $this->Request()->getPost('ids', []);
 
             if (!is_array($articleIds)) {

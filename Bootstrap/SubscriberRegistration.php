@@ -11,6 +11,7 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\Connect\SDK;
+use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Helper;
@@ -193,7 +194,8 @@ class SubscriberRegistration
                 $this->connectFactory->getConnectExport(),
                 $this->config,
                 $this->helper,
-                $this->container
+                $this->container,
+                $this->createProductStreamService()
             ),
             new CustomerGroup(
                 $this->modelManager,

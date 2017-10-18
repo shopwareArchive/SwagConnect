@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
@@ -59,7 +64,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             $this->connectExport,
             $this->createMock(Config::class),
             $this->helper,
-            $this->container
+            $this->container,
+            $this->streamService
         );
     }
 
@@ -77,13 +83,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
 
     public function test_without_exported_dynamic_stream()
     {
-        $this->container
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap([
-                ['swagconnect.product_stream_service', Container::EXCEPTION_ON_INVALID_REFERENCE, $this->streamService],
-            ]));
-
         $this->streamService->expects($this->once())
             ->method('getAllExportedStreams')
             ->with(ProductStreamService::DYNAMIC_STREAM)

@@ -1,4 +1,9 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
@@ -40,8 +45,7 @@ class ProductSearch
         Config $config,
         ProductSearchInterface $productSearchService,
         ContextServiceInterface $contextService
-    )
-    {
+    ) {
         $this->productStreamRepository = $productStreamRepository;
         $this->config = $config;
         $this->productSearchService = $productSearchService;

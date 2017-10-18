@@ -65,23 +65,32 @@ class CronJob implements SubscriberInterface
     private $container;
 
     /**
+     * @var ProductStreamService
+     */
+    private $productStreamService;
+
+    /**
      * @param SDK $sdk
      * @param ConnectExport $connectExport
      * @param Config $configComponent
+     * @param Helper $helper
      * @param Container $container
+     * @param ProductStreamService $productStreamService
      */
     public function __construct(
         SDK $sdk,
         ConnectExport $connectExport,
         Config $configComponent,
         Helper $helper,
-        Container $container
+        Container $container,
+        ProductStreamService $productStreamService
     ) {
         $this->connectExport = $connectExport;
         $this->sdk = $sdk;
         $this->configComponent = $configComponent;
         $this->helper = $helper;
         $this->container = $container;
+        $this->productStreamService = $productStreamService;
     }
 
     /**
@@ -101,6 +110,9 @@ class CronJob implements SubscriberInterface
      */
     public function getImageImport()
     {
+        // do not use thumbnail_manager as a dependency!!!
+        // MediaService::__construct uses Shop entity
+        // this also could break the session in backend when it's used in subscriber
         return new ImageImport(
             Shopware()->Models(),
             $this->helper,
@@ -159,9 +171,7 @@ class CronJob implements SubscriberInterface
      */
     public function exportDynamicStreams(\Shopware_Components_Cron_CronJob $job)
     {
-        /** @var ProductStreamService $streamService */
-        $streamService = $this->getStreamService();
-        $streams = $streamService->getAllExportedStreams(ProductStreamService::DYNAMIC_STREAM);
+        $streams = $this->productStreamService->getAllExportedStreams(ProductStreamService::DYNAMIC_STREAM);
 
         /** @var ProductStream $stream */
         foreach ($streams as $stream) {
@@ -172,16 +182,16 @@ class CronJob implements SubscriberInterface
             //no products found
             if (!$orderNumbers) {
                 //removes all products from this stream
-                $streamService->markProductsToBeRemovedFromStream($streamId);
+                $this->productStreamService->markProductsToBeRemovedFromStream($streamId);
             } else {
                 $articleIds = $this->helper->getArticleIdsByNumber($orderNumbers);
 
-                $streamService->markProductsToBeRemovedFromStream($streamId);
-                $streamService->createStreamRelation($streamId, $articleIds);
+                $this->productStreamService->markProductsToBeRemovedFromStream($streamId);
+                $this->productStreamService->createStreamRelation($streamId, $articleIds);
             }
 
             try {
-                $streamsAssignments = $streamService->prepareStreamsAssignments($streamId, false);
+                $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($streamId, false);
 
                 //article ids must be taken from streamsAssignments
                 $exportArticleIds = $streamsAssignments->getArticleIds();
@@ -198,9 +208,9 @@ class CronJob implements SubscriberInterface
                 $sourceIds = $this->helper->getArticleSourceIds($exportArticleIds);
 
                 $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
-                $streamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
+                $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
             } catch (\RuntimeException $e) {
-                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $e->getMessage());
+                $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $e->getMessage());
                 continue;
             }
 
@@ -215,7 +225,7 @@ class CronJob implements SubscriberInterface
                     $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
                 }
 
-                $streamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $errorMessagesText);
+                $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $errorMessagesText);
             }
         }
     }
@@ -233,20 +243,8 @@ class CronJob implements SubscriberInterface
             $this->sdk->recordDelete($item['sourceId']);
         }
 
-        $this->getStreamService()->removeMarkedStreamRelations();
+        $this->productStreamService->removeMarkedStreamRelations();
         $this->connectExport->updateConnectItemsStatus($sourceIds, Attribute::STATUS_DELETE);
-    }
-
-    /**
-     * @return ProductStreamService $streamService
-     */
-    private function getStreamService()
-    {
-        if (!$this->streamService) {
-            $this->streamService = $this->container->get('swagconnect.product_stream_service');
-        }
-
-        return $this->streamService;
     }
 
     /**

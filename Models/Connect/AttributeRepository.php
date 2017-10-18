@@ -130,7 +130,9 @@ class AttributeRepository extends ModelRepository
     }
 
     /**
-     * @return int[]
+     * @param int $offset
+     * @param int $batchSize
+     * @return array
      */
     public function findAllSourceIds($offset, $batchSize)
     {

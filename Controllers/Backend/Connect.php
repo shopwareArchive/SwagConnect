@@ -880,9 +880,10 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
     public function exportAllProductsAction()
     {
-        $this->updatePurchasePriceField();
-        $connectExport = $this->getConnectExport();
         try {
+            $this->updatePurchasePriceField();
+            $connectExport = $this->getConnectExport();
+
             $offset = $this->Request()->getPost('offset', []);
             $batchSize = $this->Request()->getPost('batchSize', []);
 

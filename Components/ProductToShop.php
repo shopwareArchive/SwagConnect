@@ -1230,8 +1230,8 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $localOrderId
-     * @param $orderStatus
+     * @param string $localOrderId
+     * @param string $orderStatus
      */
     private function updateDeliveryStatus($localOrderId, $orderStatus)
     {
@@ -1288,8 +1288,8 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $newTrackingCode
-     * @param $currentTrackingCode
+     * @param string $newTrackingCode
+     * @param string $currentTrackingCode
      * @return string
      */
     private function combineTrackingNumbers($newTrackingCode, $currentTrackingCode)

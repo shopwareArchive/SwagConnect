@@ -489,7 +489,7 @@ class Update
     {
         if (version_compare($this->version, '1.1.6', '<=')) {
             try {
-                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("recreateConnectCategories", "0", "import")');
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", "0", "import")');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

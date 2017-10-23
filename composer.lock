@@ -55,7 +55,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "c4ffb2327fbc4ab75d65501c7478fd5d15ecf58a"
+                "reference": "9c5bd08e3bd4a9272e2cb533564e7f4ff08504b3"
             },
             "dist": {
                 "type": "zip",
@@ -85,7 +85,7 @@
                 "source": "https://github.com/shopware/Connect-SDK/tree/master",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-09-04T09:09:26+00:00"
+            "time": "2017-09-21T09:09:26+00:00"
         }
     ],
     "packages-dev": [

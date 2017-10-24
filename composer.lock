@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "486fff1a75c7605ad857c350464b738a",
-    "content-hash": "3160d7f4bb215e30885b6f785858f429",
+    "hash": "febf75e31d6e8b5313a1b142185a30bf",
+    "content-hash": "22e5034775f5e48731c4f0d3691080b3",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -52,21 +52,20 @@
         },
         {
             "name": "shopware/connect-sdk",
-            "version": "dev-CON-4609",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "4a2e763ee8b12b27cebf77063f5ab8710de32207"
+                "reference": "5b621e69eedb828cc128bef81fd1acd9435e8ba4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/4a2e763ee8b12b27cebf77063f5ab8710de32207",
-                "reference": "4a2e763ee8b12b27cebf77063f5ab8710de32207",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/5b621e69eedb828cc128bef81fd1acd9435e8ba4",
+                "reference": "5b621e69eedb828cc128bef81fd1acd9435e8ba4",
                 "shasum": ""
             },
             "require-dev": {
                 "behat/behat": "2.4.*@stable",
-                "phake/phake": "@stable",
                 "phpunit/phpunit": ">=4.8.35 <6@stable"
             },
             "type": "library",
@@ -83,10 +82,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/CON-4609",
+                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.5",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-10-11 06:40:19"
+            "time": "2017-10-24 07:42:47"
         }
     ],
     "packages-dev": [

@@ -34,6 +34,7 @@ use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Supplier;
+use Shopware\Models\Tax\Tax;
 
 /**
  * The interface for products imported *from* connect *to* the local shop
@@ -305,13 +306,7 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute->setConnectProductDescription($product->additionalDescription);
         }
 
-        if ($product->vat !== null) {
-            $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
-            $tax = round($product->vat * 100, 2);
-            /** @var \Shopware\Models\Tax\Tax $tax */
-            $tax = $repo->findOneBy(['tax' => $tax]);
-            $model->setTax($tax);
-        }
+        $this->saveVat($product, $model);
 
         if ($product->vendor !== null) {
             $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
@@ -1205,5 +1200,28 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($currentMainDetail);
         $this->manager->persist($article);
         $this->manager->flush();
+    }
+
+    /**
+     * @param Product $product
+     * @param ProductModel $model
+     */
+    private function saveVat(Product $product, $model)
+    {
+        if ($product->vat !== null) {
+            $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+            $taxRate = round($product->vat * 100, 2);
+            /** @var \Shopware\Models\Tax\Tax $tax */
+            $tax = $repo->findOneBy(['tax' => $taxRate]);
+            if (!$tax) {
+                $tax = new Tax();
+                $tax->setTax($taxRate);
+                //this is to get rid of zeroes behind the decimal point
+                $name = strval(round($taxRate, 2)) . '%';
+                $tax->setName($name);
+                $this->manager->persist($tax);
+            }
+            $model->setTax($tax);
+        }
     }
 }

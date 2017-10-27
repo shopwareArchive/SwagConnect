@@ -482,9 +482,13 @@ class ImageImport
             }
             $media = $image->getMedia();
 
-            if (!$media || !$media->getAttribute()) {
+            try {
+                $media->getAttribute();
+            } catch (\Doctrine\ORM\EntityNotFoundException $e) {
+                //is thrown if media was deleted -> simply continue
                 continue;
             }
+
             $attribute = $media->getAttribute();
 
             // If the image was not imported from connect, skip it

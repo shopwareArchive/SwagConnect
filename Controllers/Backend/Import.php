@@ -85,19 +85,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
                 break;
             default:
                 // given id must have following structure:
-                // shopId5~/english/boots/nike
+                // shopId5~stream~AwesomeProducts~/english/boots/nike
                 // shopId is required parameter to fetch all child categories of this parent
-                // $matches[2] gives us only shopId as a int
-                preg_match('/^(shopId(\d+)~)(stream~(.*)~)(.*)$/', $node, $matches);
-                if (empty($matches)) {
+                try {
+                    list($shopId, $stream) = $this->getCategoryExtractor()->extractNode($node);
+                } catch (\InvalidArgumentException $e) {
                     $this->View()->assign([
                         'success' => false,
-                        'message' => 'Node must contain shopId and stream',
+                        'message' => $e->getMessage(),
                     ]);
 
                     return;
                 }
-                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $matches[2], $matches[4]);
+                $categories = $this->getCategoryExtractor()->getRemoteCategoriesTree($parent, false, $hideMapped, $shopId, $stream);
         }
 
         $this->View()->assign([
@@ -268,8 +268,17 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             return;
         }
 
+        try {
+            list($shopId, $stream) = $this->getCategoryExtractor()->extractNode($node);
+        } catch (\InvalidArgumentException $e) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
 
-        list($shopId, $stream) = $this->getCategoryExtractor()->extractNode($node);
+            return;
+        }
+
         if (!$shopId || !$stream) {
             $this->View()->assign([
                 'success' => false,

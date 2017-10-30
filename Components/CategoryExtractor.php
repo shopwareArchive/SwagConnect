@@ -311,14 +311,10 @@ class CategoryExtractor
                 break;
             default:
                 // given id must have following structure:
-                // shopId5~/english/boots/nike
+                // shopId5~stream~AwesomeProducts~/english/boots/nike
                 // shopId is required parameter to fetch all child categories of this parent
-                // $matches[2] gives us only shopId as a int
-                preg_match('/^(shopId(\d+)~)(stream~(.*)~)(.*)$/', $node, $matches);
-                if (empty($matches)) {
-                    throw new \InvalidArgumentException('Node must contain shopId and stream');
-                }
-                $categories = $this->getChildrenCategoriesByQuery($parent, $query, $hideMapped, $matches[2], $matches[4]);
+                list($shopId, $stream) = $this->extractNode($node);
+                $categories = $this->getChildrenCategoriesByQuery($parent, $query, $hideMapped, $shopId, $stream);
         }
 
         return $categories;
@@ -328,7 +324,7 @@ class CategoryExtractor
      * Returns shopId and stream from given node,
      * it must have specific format.
      *
-     * shopId5~/english/boots/nike
+     * shopId5~stream~AwesomeProducts~/english/boots/nike
      *
      * Used in remote category tree to identify which category
      * to which shopId and stream belongs.
@@ -337,6 +333,7 @@ class CategoryExtractor
      * [ shopId, stream]
      *
      * @param string $node
+     * @throws \InvalidArgumentException
      * @return array
      */
     public function extractNode($node)

@@ -295,6 +295,12 @@ class ImportServiceTest extends ConnectTestHelper
             [14471, $fantasyCategoryId]
         );
 
+        // insert invalid articleId in s_plugin_connect_product_to_categories
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [9087041234, $fantasyCategoryId]
+        );
+
         $localCategory = $this->categoryRepository->find(35);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
@@ -324,5 +330,10 @@ class ImportServiceTest extends ConnectTestHelper
             [':categoryID' => $createdLocalCategory->getId()]
         );
         $this->assertEquals($expectedArticleCount, $actualArticleCount);
+
+        // verify that only valid articleIds will be returned. There isn't article with id 9087041234
+        $fantasyArticleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory('/deutsch/bücher/fantasy');
+        self::assertCount(1, $fantasyArticleIds);
+        self::assertEquals(14471, $fantasyArticleIds[0]);
     }
 }

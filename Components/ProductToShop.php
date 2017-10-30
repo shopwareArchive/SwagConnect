@@ -1206,10 +1206,10 @@ class ProductToShop implements ProductToShopBase
      * @param Product $product
      * @param ProductModel $model
      */
-    private function saveVat(Product $product, $model)
+    private function saveVat(Product $product, ProductModel $model)
     {
         if ($product->vat !== null) {
-            $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+            $repo = $this->manager->getRepository(Tax::class);
             $taxRate = round($product->vat * 100, 2);
             /** @var \Shopware\Models\Tax\Tax $tax */
             $tax = $repo->findOneBy(['tax' => $taxRate]);

@@ -257,6 +257,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         $localCategoryId = (int) $this->request->getParam('localCategoryId', 0);
         $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', null);
         $remoteCategoryLabel = $this->request->getParam('remoteCategoryLabel', null);
+        $node = $this->request->getParam('node', null);
 
         if ($localCategoryId == 0 || !$remoteCategoryKey || !$remoteCategoryLabel) {
             $this->View()->assign([
@@ -267,8 +268,19 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             return;
         }
 
+
+        list($shopId, $stream) = $this->getCategoryExtractor()->extractNode($node);
+        if (!$shopId || !$stream) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => 'Node must contain shopId and stream',
+            ]);
+
+            return;
+        }
+
         try {
-            $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel);
+            $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId, $stream);
         } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign([

@@ -88,7 +88,6 @@ class CategoryExtractor
     }
 
     /**
-
      * Collects connect category ids
      *
      * @param Category $parentCategory
@@ -103,7 +102,7 @@ class CategoryExtractor
         }
 
         foreach ($parentCategory->getChildren() as $category) {
-            $categoryIds =  $this->collectCategoryIds($category, $categoryIds);
+            $categoryIds = $this->collectCategoryIds($category, $categoryIds);
         }
 
         return $categoryIds;
@@ -323,6 +322,34 @@ class CategoryExtractor
         }
 
         return $categories;
+    }
+
+    /**
+     * Returns shopId and stream from given node,
+     * it must have specific format.
+     *
+     * shopId5~/english/boots/nike
+     *
+     * Used in remote category tree to identify which category
+     * to which shopId and stream belongs.
+     *
+     * Returned array has following structure
+     * [ shopId, stream]
+     *
+     * @param string $node
+     * @return array
+     */
+    public function extractNode($node)
+    {
+        preg_match('/^(shopId(\d+)~)(stream~(.*)~)(.*)$/', $node, $matches);
+        if (empty($matches)) {
+            throw new \InvalidArgumentException('Node must contain shopId and stream');
+        }
+
+        return [
+            $matches[2],
+            $matches[4]
+        ];
     }
 
     /**

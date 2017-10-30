@@ -30,7 +30,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_find_source_ids_of_products()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $articleIds = $expectedSourceIds = [14467, 14468];
         $this->assertEquals($expectedSourceIds, $this->repository->findSourceIds($articleIds, 1));
@@ -38,7 +38,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_find_source_ids_of_variants()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $articleIds = $mainSourceIds = [14469, 14470];
         $sourceIdsForVariants = [

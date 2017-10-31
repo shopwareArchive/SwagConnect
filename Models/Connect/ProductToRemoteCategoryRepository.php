@@ -135,7 +135,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
         $builder->where('ptrc.articleId = :articleId');
-        $builder->setParameter('articleId', $articleId);
+        $builder->setParameter('articleId', (int) $articleId);
 
         $query = $builder->getQuery();
         $result = $query->getResult($query::HYDRATE_SCALAR);
@@ -158,8 +158,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
         $builder->where('ptrc.connectCategoryId = :ccid');
         $builder->andWhere('ptrc.articleId = :articleId');
-        $builder->setParameter(':ccid', $categoryId);
-        $builder->setParameter(':articleId', $articleId);
+        $builder->setParameter(':ccid', (int) $categoryId);
+        $builder->setParameter(':articleId', (int) $articleId);
         $builder->getQuery()->execute();
     }
 }

@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.6",
+    "currentVersion": "1.1.7",
     "changelog": {
         "de": {
             "1.1.6": "CON-4832 - Fix: Die Mehrfachzuweisung von Kategorien wurde verbessert; CON-4687 - Die alten Plugin Event Subscriber wurden durch die neuen Subscriber ersetzt.",

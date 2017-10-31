@@ -91,6 +91,7 @@ class Update
         $this->addConnectItemsIndex();
         $this->createRemoteToLocalCategoriesTable();
         $this->recreateRemoteCategoriesAndProductAssignments();
+        $this->addProductToCategoryIndex();
 
         return true;
     }
@@ -473,6 +474,25 @@ class Update
         if (version_compare($this->version, '1.1.4', '<=')) {
             try {
                 $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    /**
+     * Create index by articleID in s_plugin_connect_product_to_categories table.
+     */
+    private function addProductToCategoryIndex()
+    {
+        if (version_compare($this->version, '1.1.6', '<=')) {
+            try {
+                $this->db->query('ALTER TABLE s_plugin_connect_product_to_categories ADD INDEX article_id(articleID)');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

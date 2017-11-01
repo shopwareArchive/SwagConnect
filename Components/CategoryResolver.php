@@ -90,23 +90,22 @@ abstract class CategoryResolver
 
         $this->manager->flush();
 
-        $currentConnectCategoryIds = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
-        $this->removeProductsFromNotAssignedRemoteCategories($remoteCategories, $currentConnectCategoryIds, $articleId);
-        $this->addProductToRemoteCategory($remoteCategories, $currentConnectCategoryIds, $articleId);
+        $this->removeProductsFromNotAssignedRemoteCategories($remoteCategories, $articleId);
+        $this->addProductToRemoteCategory($remoteCategories, $articleId);
 
         $this->manager->flush();
     }
 
     /**
      * @param RemoteCategory[] $remoteCategories
-     * @param array $currentConnectCategoryIds
      * @param $articleId
      */
-    private function addProductToRemoteCategory(array $remoteCategories, array $currentConnectCategoryIds, $articleId)
+    private function addProductToRemoteCategory(array $remoteCategories, $articleId)
     {
+        $productToCategories = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
         foreach ($remoteCategories as $remoteCategory) {
-            if (!in_array($remoteCategory->getId(), $currentConnectCategoryIds)) {
+            if (!in_array($remoteCategory->getId(), $productToCategories)) {
                 $productToCategory = new ProductToRemoteCategory();
                 $productToCategory->setArticleId($articleId);
                 $productToCategory->setConnectCategory($remoteCategory);
@@ -117,17 +116,18 @@ abstract class CategoryResolver
 
     /**
      * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
-     * @param array $currentConnectCategoryIds
      * @param int $articleId
      */
-    private function removeProductsFromNotAssignedRemoteCategories(array $assignedCategories, array $currentConnectCategoryIds, $articleId)
+    private function removeProductsFromNotAssignedRemoteCategories(array $assignedCategories, $articleId)
     {
+        $currentProductCategoryIds = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
+
         $assignedCategoryIds = array_map(function (RemoteCategory $assignedCategory) {
             $assignedCategory->getId();
         }, $assignedCategories);
 
         /** @var int $currentProductCategoryId */
-        foreach ($currentConnectCategoryIds as $currentProductCategoryId) {
+        foreach ($currentProductCategoryIds as $currentProductCategoryId) {
             if (!in_array($currentProductCategoryId, $assignedCategoryIds)) {
                 $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId, $articleId);
             }

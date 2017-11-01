@@ -345,4 +345,55 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $configuratorSetId = $this->manager->getConnection()->fetchColumn('SELECT configurator_set_id FROM s_articles WHERE id = ?', [$articleId]);
         $this->assertNull($configuratorSetId);
     }
+
+    public function test_existing_vat()
+    {
+        $expectedTaxId = $this->manager->getConnection()->fetchColumn('
+            SELECT id FROM s_core_tax WHERE tax = 7.00'
+        );
+        $product = $this->getProduct();
+        $product->vat = 0.07;
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $actualTaxId = $this->manager->getConnection()->fetchColumn('
+            SELECT s_articles.taxID 
+            FROM s_articles
+            JOIN s_plugin_connect_items ON s_articles.id = s_plugin_connect_items.article_id
+            WHERE s_plugin_connect_items.source_id = ?',
+            [$product->sourceId]
+        );
+
+        $this->assertEquals($expectedTaxId, $actualTaxId);
+    }
+
+    public function test_not_existing_vat()
+    {
+        $notExisting = $this->manager->getConnection()->fetchColumn('
+            SELECT id FROM s_core_tax WHERE tax = 0.00'
+        );
+        //assert that tax is really not existing
+        $this->assertFalse($notExisting);
+
+        $product = $this->getProduct();
+        $product->vat = 0.00;
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $existing = $this->manager->getConnection()->fetchColumn('
+            SELECT id FROM s_core_tax WHERE tax = 0.00'
+        );
+        //assert that tax is now existing
+        $this->assertNotEmpty($existing);
+
+        $actualTaxId = $this->manager->getConnection()->fetchColumn('
+            SELECT s_articles.taxID 
+            FROM s_articles
+            JOIN s_plugin_connect_items ON s_articles.id = s_plugin_connect_items.article_id
+            WHERE s_plugin_connect_items.source_id = ?',
+            [$product->sourceId]
+        );
+
+        $this->assertEquals($existing, $actualTaxId);
+    }
 }

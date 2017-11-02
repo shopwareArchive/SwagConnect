@@ -59,6 +59,11 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     private $productStreamService;
 
     /**
+     * @var \ShopwarePlugins\Connect\Services\ExportAssignmentService
+     */
+    private $exportAssignmentService;
+
+    /**
      * @return ModelManager
      */
     public function getModelManager()
@@ -76,6 +81,18 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
 
         return $this->sdk;
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Services\ExportAssignmentService
+     */
+    public function getExportAssignmentService()
+    {
+        if ($this->exportAssignmentService === null) {
+            $this->exportAssignmentService = $this->get('swagconnect.export_assignment_service');
+        }
+
+        return $this->exportAssignmentService;
     }
 
     /**
@@ -865,7 +882,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     public function getArticleCountAction()
     {
         try {
-            $count = $this->getHelper()->getLocalArticleCount();
+            $count = $this->getExportAssignmentService()->getCountOfAllExportableArticles();
             $this->View()->assign([
                 'success' => true,
                 'count' => $count
@@ -882,13 +899,11 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     {
         try {
             $this->updatePurchasePriceField();
-            $connectExport = $this->getConnectExport();
 
             $offset = $this->Request()->getPost('offset', []);
             $batchSize = $this->Request()->getPost('batchSize', []);
 
-            $sourceIds = $this->getHelper()->getAllArticleSourceIds($offset, $batchSize);
-            $errors = $connectExport->export($sourceIds);
+            $errors = $this->getExportAssignmentService()->exportBatchOfAllProducts($offset, $batchSize);
 
             if (!empty($errors)) {
                 $this->View()->assign([
@@ -906,7 +921,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
         $this->View()->assign([
             'success' => true,
-            'sourceIds' => $sourceIds
         ]);
     }
 

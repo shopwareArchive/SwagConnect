@@ -585,14 +585,6 @@ class Helper
         Shopware()->Session()->connectReservation = null;
     }
 
-    public function getAllArticleSourceIds($offset, $batchSize)
-    {
-        /** @var AttributeRepository $repo */
-        $repo = $this->manager->getRepository(ConnectAttribute::class);
-
-        return $repo->findAllSourceIds($offset, $batchSize);
-    }
-
     /**
      * Collect sourceIds by given article ids
      *
@@ -808,17 +800,6 @@ class Helper
         }
 
         return true;
-    }
-
-    public function getBatchOfArticles($offset, $batchSize)
-    {
-        $query = $this->manager->getConnection()->executeQuery(
-            'SELECT `article_id` FROM `s_plugin_connect_items`  ORDER BY `article_id` LIMIT ?, ?',
-            [$offset, $batchSize],
-            [\PDO::PARAM_INT, \PDO::PARAM_INT]
-        );
-
-        return $query->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     public function getLocalArticleCount()

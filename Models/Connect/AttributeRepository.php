@@ -143,7 +143,7 @@ class AttributeRepository extends ModelRepository
         $builder = $this->_em->getConnection()->createQueryBuilder();
         $builder->select('spci.source_id')
             ->from('s_plugin_connect_items', 'spci')
-            ->rightJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
+            ->leftJoin('spci', 's_articles_details', 'sad', 'spci.article_detail_id = sad.id')
             ->where('sad.kind IN (1,2) AND spci.shop_id IS NULL')
             ->orderBy('sad.kind', 'ASC')
             ->addOrderBy('spci.source_id', 'ASC')

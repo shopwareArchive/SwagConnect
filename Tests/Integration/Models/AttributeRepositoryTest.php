@@ -68,13 +68,13 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
 
-        $mainProducts = $this->repository->findAllSourceIds(0, 4);
+        $mainProductIds = $this->repository->findAllSourceIds(0, 4);
         $variantIds = $this->repository->findAllSourceIds(4, 3);
 
-        $expectation1 = ['14467', '14468', '14469', '14470'];
-        $expectation2 = ['14469-7091849', '14470-7091851', '14470-7091852'];
+        $expectedProductIds = ['14467', '14468', '14469', '14470'];
+        $expectedVariantIds = ['14469-7091849', '14470-7091851', '14470-7091852'];
 
-        $this->assertEquals($expectation1, $mainProducts);
-        $this->assertEquals($expectation2, $variantIds);
+        $this->assertEquals($expectedProductIds, $mainProductIds);
+        $this->assertEquals($expectedVariantIds, $variantIds);
     }
 }

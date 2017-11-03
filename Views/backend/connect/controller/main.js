@@ -899,7 +899,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                                 startButtonHandler: function (caller) {
                                     me.startArticleExport(operation.sourceIds, batchSize, caller,0)
                                 },
-                                sourceIds: operation.sourceIds
+                                count: operation.sourceIds.length,
+                                totalTime: operation.sourceIds.length / batchSize * 4 / 60
                             }).show();
                         }
                     }
@@ -909,7 +910,10 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     },
 
     exportAll: function(count, batchSize, window, offset) {
-        var me = this;
+        var me = this,
+            message = me.messages.insertOrUpdateProductMessage,
+            title = me.messages.insertOrUpdateProductTitle,
+            list = me.getExportList();
         offset = parseInt(offset);
         batchSize = parseInt(batchSize);
         count = parseInt(count);
@@ -1174,7 +1178,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         startButtonHandler: function (caller) {
                             me.exportAll(operation.count, batchSize, caller,0)
                         },
-                        count: operation.count
+                        count: operation.count,
+                        totalTime: operation.count / batchSize * 4 / 60
                     }).show();
                 }
             }

@@ -91,7 +91,8 @@ Ext.define('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
                     startButtonHandler: function (caller) {
                         caller.fireEvent('exportAll', caller.count, batchSize, caller, 0)
                     },
-                    count: me.count
+                    count: me.count,
+                    totalTime: me.count / batchSize * 4 / 60
                 }).show();
                 me.destroy();
             }

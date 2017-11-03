@@ -20,24 +20,20 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     inProcess: false,
 
     /**
-     * Contains the batch size for each request of the generation.
-     */
-    batchSize: 50,
-
-    /**
-     * Contains array with source ids which have to exported
-     */
-    sourceIds: [],
-
-    /**
      * This function gets called when the start button is pressed
      */
     startButtonHandler: 0,
 
     /**
-     * Contains the amount of products export all will export as batches
+     * Contains the amount of products tha will be exported
      */
     count: 0,
+
+    /**
+     * Contains a estimate of the time the export will take in minutes
+     */
+    totalTime: 0,
+
 
     /**
      * Contains all snippets for the component
@@ -67,12 +63,11 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
      * Creates the items for the progress window.
      */
     createItems: function() {
-        var me = this,
-            totalItems = me.sourceIds.length || me.count;
+        var me = this;
 
         me.progressField = Ext.create('Ext.ProgressBar', {
             name: 'productExportBar',
-            text: Ext.String.format(me.snippets.process, 0, totalItems),
+            text: Ext.String.format(me.snippets.process, 0, me.count),
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',
@@ -106,11 +101,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
             }
         });
 
-        var totalTime = totalItems / me.batchSize * 4 / 60;
-        totalTime = Ext.Number.toFixed(totalTime, 0);
+        me.totalTime = Ext.Number.toFixed(me.totalTime, 0);
 
         var notice = Ext.create('Ext.container.Container', {
-            html: Ext.String.format(me.snippets.notice, totalTime),
+            html: Ext.String.format(me.snippets.notice, me.totalTime),
             style: 'color: #999; font-style: italic; margin: 0 0 15px 0; text-align: center;',
             anchor: '100%'
         });

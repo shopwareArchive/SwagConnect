@@ -54,7 +54,8 @@ Ext.define('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
      * Creates the items for the progress window.
      */
     createItems: function () {
-        var me = this;
+        var me = this,
+        batchSize = 50;
 
         me.cancelButton = Ext.create('Ext.button.Button', {
             text: me.snippets.cancel,
@@ -87,7 +88,9 @@ Ext.define('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
             margin: '30 -10 0 0',
             handler: function () {
                 Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                    exportAll: true,
+                    startButtonHandler: function (caller) {
+                        caller.fireEvent('exportAll', caller.count, batchSize, caller, 0)
+                    },
                     count: me.count
                 }).show();
                 me.destroy();

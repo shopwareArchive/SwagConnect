@@ -1,8 +1,6 @@
 header: |
   "I see now that the circumstances of one's birth are irrelevant. It is what you do with the gift of life that determines who you are."
       - Mewtwo, 1998
-
-
       .--.--.                                         ,----..                                                         ___
      /  /    '.                                      /   /   \                                                      ,--.'|_
     |  :  /`. /          .---.                      |   :     :  ,---.        ,---,      ,---,                      |  | :,'
@@ -17,10 +15,6 @@ header: |
                    \   \ |   |  ,     .-./|   :    : \   \ .'           '---'      '---'        \   \  /  \   \  /   ---`-'
                     '---"     `--`---'     \   \  /   `---`                                      `----'    `----'
                                             `--`-'
-
-
-
-
 paths:
   - DevOps
 
@@ -65,9 +59,9 @@ environments:
         paths:
             - vendor/shopware/plugin-dev-tools/local
         const:
-            DB_USER: "app"
-            DB_PASSWORD: "app"
-            DB_HOST: "mysql"
+            DB_USER: "shopware"
+            DB_PASSWORD: "shopware"
+            DB_HOST: "localhost"
             DB_PORT: "3306"
     travis:
         dynamic:

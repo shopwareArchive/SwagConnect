@@ -871,7 +871,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             list = me.getExportList(),
             records = list.selModel.getSelection(),
             ids = [],
-            title = me.messages.insertOrUpdateProductTitle;
+            title = me.messages.insertOrUpdateProductTitle,
+            batchSize = 50;
 
         if (records.length == 0) {
             return;
@@ -895,6 +896,9 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             me.createGrowlMessage(title, operation.message, true);
                         } else {
                             Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
+                                startButtonHandler: function (caller) {
+                                    me.startArticleExport(operation.sourceIds, batchSize, caller,0)
+                                },
                                 sourceIds: operation.sourceIds
                             }).show();
                         }
@@ -909,9 +913,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
         offset = parseInt(offset);
         batchSize = parseInt(batchSize);
         count = parseInt(count);
-        // if ((offset+batchSize) > count ){
-        //     return;
-        // }
 
         Ext.Ajax.request({
             url: '{url action=exportAllProducts}',
@@ -1136,7 +1137,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     onExportAllAction: function (btn) {
         var me = this,
             list = me.getExportList(),
-            title = me.messages.insertOrUpdateProductTitle;
+            title = me.messages.insertOrUpdateProductTitle,
+            batchSize = 50;
 
         list.setLoading(true);
 
@@ -1163,14 +1165,15 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     if (operation.count > 1000) {
 
                         Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
-                            exportAll: true,
                             count: operation.count
                         }).show();
                         return;
                     }
 
                     Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                        exportAll: true,
+                        startButtonHandler: function (caller) {
+                            me.exportAll(operation.count, batchSize, caller,0)
+                        },
                         count: operation.count
                     }).show();
                 }

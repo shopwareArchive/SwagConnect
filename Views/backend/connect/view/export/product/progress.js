@@ -30,9 +30,9 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     sourceIds: [],
 
     /**
-     * if this is true this will export all products as batches
+     * This function gets called when the start button is pressed
      */
-    exportAll: false,
+    startButtonHandler: 0,
 
     /**
      * Contains the amount of products export all will export as batches
@@ -53,6 +53,10 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
 
     initComponent:function () {
         var me = this;
+
+        if(!Ext.isFunction(me.startButtonHandler)) {
+            throw new Error('startButtonHandler has to be a function');
+        }
 
         me.items = me.createItems();
         me.title = me.snippets.title;
@@ -95,20 +99,14 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
             cls: 'primary',
             handler: function() {
                 me.inProcess = true;
-                if (!Ext.isNumeric(me.batchSize)) {
-                    me.batchSize = 30;
-                }
                 me.startButton.setDisabled(true);
                 me.cancelButton.setDisabled(true);
-                if (me.exportAll) {
-                    me.fireEvent('exportAll', me.count, me.batchSize, me, 0);
-                } else {
-                    me.fireEvent('startExport', me.sourceIds, me.batchSize, me);
-                }
+
+                me.startButtonHandler(me);
             }
         });
 
-        var totalTime = totalItems / me.batchSize * 2.5 / 60;
+        var totalTime = totalItems / me.batchSize * 4 / 60;
         totalTime = Ext.Number.toFixed(totalTime, 0);
 
         var notice = Ext.create('Ext.container.Container', {

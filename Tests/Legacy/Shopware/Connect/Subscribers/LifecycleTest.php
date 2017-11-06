@@ -176,7 +176,6 @@ class LifecycleTest extends ConnectTestHelper
         $this->assertEquals('update', $updateChange['c_operation']);
         $product = unserialize($updateChange['c_payload']);
         $this->assertEquals(200.00, $product->price);
-        $this->assertTrue(false);
     }
 
     private function insertVariants()

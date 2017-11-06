@@ -9,6 +9,7 @@ namespace ShopwarePlugins\Connect\Tests\Integration\Components\CategoryResolver;
 
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\RemoteCategory;
+use ShopwarePlugins\Connect\Components\CategoryResolver;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
@@ -21,6 +22,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
     private $manager;
     private $config;
     private $categoryRepo;
+    /** @var CategoryResolver */
     private $categoryResolver;
 
     public function setUp()
@@ -102,5 +104,26 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         //Assert that new, leaf category is assigned
         $this->assertGreaterThan(0, $productToCategoryId);
+    }
+
+    public function testCreateLocalCategory()
+    {
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
+
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test1", "Test 1")');
+
+        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3);
+
+        $row = $this->manager->getConnection()->fetchAll('SELECT * FROM s_categories WHERE description = "Test 1" AND parent = 3');
+
+        $this->assertNotEmpty($row);
+        $now = new \DateTime('now');
+        $added = new \DateTime($row['added']);
+        $changed = new \DateTime($row['changed']);
+        // assert that timestamps are not older than 5 seconds
+        $this->assertEquals($now->getTimestamp(), $added->getTimestamp(), '', 5);
+        $this->assertEquals($now->getTimestamp(), $changed->getTimestamp(), '', 5);
     }
 }

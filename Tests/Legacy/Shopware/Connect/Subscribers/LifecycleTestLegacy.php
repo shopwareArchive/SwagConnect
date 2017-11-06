@@ -12,10 +12,10 @@ use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
-use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 
-class LifecycleTest extends ConnectTestHelper
+/** Please don't rename it because this test will fail if the classname is LifecycleTest */
+class LifecycleTestLegacy extends ConnectTestHelper
 {
     /**
      * @var \Shopware\Components\Model\ModelManager
@@ -148,27 +148,6 @@ class LifecycleTest extends ConnectTestHelper
         $this->dispatch('backend/Article/saveDetail');
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
-
-        $lifecycle = new Lifecycle(
-            $this->manager,
-            $this->getHelper(),
-            $this->getSDK(),
-            $this->config,
-            new ConnectExport(
-                $this->getHelper(),
-                $this->getSDK(),
-                $this->manager,
-                new ProductsAttributesValidator(),
-                $this->config,
-                new ErrorHandler(),
-                Shopware()->Container()->get('events')
-            )
-        );
-        $eventArgs = new \Enlight_Event_EventArgs();
-        $eventArgs['entity'] = $detail;
-        $eventArgs['entityManager'] = $modelManager;
-        //call has to be made manually because subscriber don't work in test-environment
-        $lifecycle->onPersistDetail($eventArgs);
 
         $changes = $this->db->query('SELECT * FROM sw_connect_change WHERE c_entity_id = ? ORDER BY c_revision', ['llc1408017'])->fetchAll();
         $this->assertCount(2, $changes);

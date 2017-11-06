@@ -7,10 +7,12 @@
 
 namespace Tests\ShopwarePlugins\Connect\Subscribers;
 
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
 use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
+use ShopwarePlugins\Connect\Subscribers\Lifecycle;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 class LifecycleTest extends ConnectTestHelper
@@ -22,6 +24,7 @@ class LifecycleTest extends ConnectTestHelper
 
     private $db;
 
+    /** @var Config */
     private $config;
 
     private $connectExport;
@@ -79,6 +82,7 @@ class LifecycleTest extends ConnectTestHelper
     {
         $articleId = $this->insertVariants();
         $modelManager = $this->manager;
+        $this->config->setConfig('autoUpdateProducts', Config::UPDATE_AUTO);
         $article = $modelManager->getRepository('Shopware\Models\Article\Article')->find($articleId);
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($article);
@@ -91,6 +95,7 @@ class LifecycleTest extends ConnectTestHelper
         $this->connectExport->export([$connectAttribute->getSourceId()]);
 
         $detail = $article->getMainDetail();
+
         $price = $detail->getPrices()->first();
 
         $this->Request()
@@ -141,9 +146,29 @@ class LifecycleTest extends ConnectTestHelper
 
 
         $this->dispatch('backend/Article/saveDetail');
-
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
+
+        $lifecycle = new Lifecycle(
+            $this->manager,
+            $this->getHelper(),
+            $this->getSDK(),
+            $this->config,
+            new ConnectExport(
+                $this->getHelper(),
+                $this->getSDK(),
+                $this->manager,
+                new ProductsAttributesValidator(),
+                $this->config,
+                new ErrorHandler(),
+                Shopware()->Container()->get('events')
+            )
+        );
+        $eventArgs = new \Enlight_Event_EventArgs();
+        $eventArgs['entity'] = $detail;
+        $eventArgs['entityManager'] = $modelManager;
+        //call has to be made manually because subscriber don't work in test-environment
+        $lifecycle->onPersistDetail($eventArgs);
 
         $changes = $this->db->query('SELECT * FROM sw_connect_change WHERE c_entity_id = ? ORDER BY c_revision', ['llc1408017'])->fetchAll();
         $this->assertCount(2, $changes);
@@ -151,6 +176,7 @@ class LifecycleTest extends ConnectTestHelper
         $this->assertEquals('update', $updateChange['c_operation']);
         $product = unserialize($updateChange['c_payload']);
         $this->assertEquals(200.00, $product->price);
+        $this->assertTrue(false);
     }
 
     private function insertVariants()

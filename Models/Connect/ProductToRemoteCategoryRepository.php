@@ -93,12 +93,11 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('a.id');
         $builder->leftJoin('ptrc.connectCategory', 'rc');
-        $builder->leftJoin('ptrc.article', 'a');
-        $builder->leftJoin('a.attribute', 'att');
+        $builder->innerJoin('ptrc.article', 'a');
         $builder->where('rc.categoryKey = :categoryKey');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
         //distinct necessary because of variant articles
-        //each variant has an own entry in a.attribute so same articleId iis returned multiple times
+        //each variant has an own entry in a.attribute so same articleId is returned multiple times
         $builder->distinct();
 
         $query = $builder->getQuery();

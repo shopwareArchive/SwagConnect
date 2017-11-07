@@ -91,6 +91,7 @@ class Update
         $this->addConnectItemsIndex();
         $this->createRemoteToLocalCategoriesTable();
         $this->recreateRemoteCategoriesAndProductAssignments();
+        $this->setDefaultConfigForUpdateOrderStatus();
         $this->addProductToCategoryIndex();
 
         return true;
@@ -474,6 +475,22 @@ class Update
         if (version_compare($this->version, '1.1.4', '<=')) {
             try {
                 $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function setDefaultConfigForUpdateOrderStatus()
+    {
+        if (version_compare($this->version, '1.1.7', '<=')) {
+            try {
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", "0", "import")');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

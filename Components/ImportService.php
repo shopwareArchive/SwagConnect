@@ -226,9 +226,11 @@ class ImportService
      * @param int $localCategoryId
      * @param string $remoteCategoryKey
      * @param string $remoteCategoryLabel
+     * @param int|null $shopId
+     * @param string|null $stream
      * @return void
      */
-    public function importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel)
+    public function importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId = null, $stream = null)
     {
         /** @var \Shopware\Models\Category\Category $localCategory */
         $localCategory = $this->categoryRepository->find((int) $localCategoryId);
@@ -244,7 +246,13 @@ class ImportService
 
         // collect his child categories and
         // generate remote category tree by given remote category
-        $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree($remoteCategoryKey, true);
+        $remoteCategoryChildren = $this->categoryExtractor->getRemoteCategoriesTree(
+            $remoteCategoryKey,
+            true,
+            false,
+            $shopId,
+            $stream
+        );
         $remoteCategoryNodes = [
             [
                 'name' => $remoteCategoryLabel,

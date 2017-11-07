@@ -11,12 +11,14 @@ use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\Struct\Tracking;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Order\Order;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from connect
@@ -151,7 +153,7 @@ class Lifecycle implements SubscriberInterface
             $this->updatePaymentStatus($order);
         }
 
-        if (isset($changeSet['orderStatus'])) {
+        if (isset($changeSet['orderStatus']) || isset($changeSet['trackingCode'])) {
             $this->updateOrderStatus($order);
         }
     }
@@ -434,7 +436,9 @@ class Lifecycle implements SubscriberInterface
 
         $orderStatusMapper = new Utils\OrderStatusMapper();
         $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
-
+        $tracking = new Tracking();
+        $tracking->id = $order->getTrackingCode();
+        $orderStatus->tracking = $tracking;
         try {
             $this->sdk->updateOrderStatus($orderStatus);
         } catch (\Exception $e) {

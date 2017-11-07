@@ -158,7 +158,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
         $builder->where('ptrc.connectCategoryId = :ccid');
         $builder->andWhere('ptrc.articleId = :articleId');
-        $builder->setParameter(':ccid', $categoryId,\PDO::PARAM_INT);
+        $builder->setParameter(':ccid', $categoryId, \PDO::PARAM_INT);
         $builder->setParameter(':articleId', $articleId, \PDO::PARAM_INT);
         $builder->getQuery()->execute();
     }

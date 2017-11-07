@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
 use Shopware\Connect\Gateway\PDO;
+use Shopware\Connect\Struct\OrderStatus;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
@@ -346,6 +347,83 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($configuratorSetId);
     }
 
+    public function test_update_order_status_overrides_status_to_completely_delivered()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
+
+        $orderStatus = $this->manager->getConnection()->fetchColumn('SELECT status from s_order WHERE ordernumber = 42');
+        $this->assertEquals(7, $orderStatus);
+    }
+
+    public function test_update_order_status_overrides_status_to_partially_delivered()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_IN_PROCESS, '');
+
+        $orderStatus = $this->manager->getConnection()->fetchColumn('SELECT status from s_order WHERE ordernumber = 42');
+        $this->assertEquals(6, $orderStatus);
+    }
+
+    public function test_update_order_status_dont_overrides_status_if_status_is_open()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 8)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_OPEN, '');
+
+        $orderStatus = $this->manager->getConnection()->fetchColumn('SELECT status from s_order WHERE ordernumber = 42');
+        $this->assertEquals(8, $orderStatus);
+    }
+
+    public function test_update_order_status_dont_overrides_status_if_config_says_no()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
+
+        $orderStatus = $this->manager->getConnection()->fetchColumn('SELECT status from s_order WHERE ordernumber = 42');
+        $this->assertEquals(0, $orderStatus);
+    }
+
+    public function test_update_order_status_inserts_tracking_number()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, 'test');
+
+        $trackingcode = $this->manager->getConnection()->fetchColumn('SELECT trackingcode from s_order WHERE ordernumber = 42');
+        $this->assertEquals('test', $trackingcode);
+    }
+
+    public function test_update_order_status_appends_tracking_number()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "foo")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, 'foo,test');
+
+        $trackingcode = $this->manager->getConnection()->fetchColumn('SELECT trackingcode from s_order WHERE ordernumber = 42');
+        $this->assertEquals('foo,test', $trackingcode);
+    }
+
+    public function test_update_order_status_dont_change_tracking_number()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "foo")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+
+        $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
+
+        $trackingcode = $this->manager->getConnection()->fetchColumn('SELECT trackingcode from s_order WHERE ordernumber = 42');
+        $this->assertEquals('foo', $trackingcode);
+    }
+      
     public function test_existing_vat()
     {
         $expectedTaxId = $this->manager->getConnection()->fetchColumn('

@@ -5,5 +5,6 @@ parameters:
         - vendor
         - .githooks
     autoload_files:
-        - vendor/autoload.php
         - autoload_bootstrap.php
+        - vendor/autoload.php
+        - Tests/Bootstrap.php

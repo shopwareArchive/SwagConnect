@@ -7,8 +7,6 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
-use ShopwarePlugins\Connect\Components\Config;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Shopware\Components\Model\ModelManager;
 
@@ -17,21 +15,9 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
     use DatabaseTestCaseTrait;
 
     /**
-     * @param string $file
-     */
-    public function importFixtures($file)
-    {
-        /** @var Connection $connection */
-        $connection = Shopware()->Container()->get('dbal_connection');
-        $connection->executeQuery(file_get_contents($file));
-    }
-
-    /**
      * @var ModelManager
      */
     private $manager;
-    /** @var Config */
-    private $config;
 
     /**
      * @before
@@ -42,7 +28,6 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
         // disable auth and acl
         Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
         Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
-        $this->config = ConfigFactory::getConfigInstance();
     }
 
     public function testUpdatePrices()

@@ -16,7 +16,6 @@ use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 

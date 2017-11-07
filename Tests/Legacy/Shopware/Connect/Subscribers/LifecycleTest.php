@@ -15,7 +15,7 @@ use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 
 /** Please don't rename it because this test will fail if the classname is LifecycleTest */
-class LifecycleTestLegacy extends ConnectTestHelper
+class LifecycleTest extends ConnectTestHelper
 {
     /**
      * @var \Shopware\Components\Model\ModelManager

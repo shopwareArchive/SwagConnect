@@ -135,7 +135,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
         $builder->where('ptrc.articleId = :articleId');
-        $builder->setParameter('articleId', (int) $articleId);
+        $builder->setParameter('articleId', $articleId, \PDO::PARAM_INT);
 
         $query = $builder->getQuery();
         $result = $query->getResult($query::HYDRATE_SCALAR);

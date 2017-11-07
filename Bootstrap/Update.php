@@ -490,7 +490,7 @@ class Update
      */
     private function addProductToCategoryIndex()
     {
-        if (version_compare($this->version, '1.1.6', '<=')) {
+        if (version_compare($this->version, '1.1.7', '<=')) {
             try {
                 $this->db->query('ALTER TABLE s_plugin_connect_product_to_categories ADD INDEX article_id(articleID)');
             } catch (\Exception $e) {

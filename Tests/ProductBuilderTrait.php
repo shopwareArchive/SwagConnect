@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests;
 
+use Shopware\Connect\Struct\Change\ToShop\InsertOrUpdate;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Translation;
 
@@ -134,5 +135,63 @@ trait ProductBuilderTrait
         }
 
         return $variants;
+    }
+
+    /**
+     * @param int $number
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @return array
+     */
+    protected function getProducts($number = 10, $withImage = false, $withVariantImages = false)
+    {
+        $products = [];
+        for ($i=0; $i<$number; ++$i) {
+            $products[] = $this->getProduct($withImage, $withVariantImages);
+        }
+
+        return $products;
+    }
+
+    /**
+     * @param string $number
+     * @param bool $withImage
+     * @param bool $withVariantImages
+     * @return array
+     */
+    protected function insertOrUpdateProducts($number, $withImage, $withVariantImages)
+    {
+        $commands = [];
+        foreach ($this->getProducts($number, $withImage, $withVariantImages) as $product) {
+            $commands[$product->sourceId] = new InsertOrUpdate([
+                'product' => $product,
+                'revision' => time(),
+            ]);
+        }
+
+        $this->dispatchRpcCall('products', 'toShop', [
+            $commands
+        ]);
+
+        return array_keys($commands);
+    }
+
+    /**
+     * @param string $service
+     * @param string $command
+     * @param array $args
+     * @return mixed
+     */
+    public static function dispatchRpcCall($service, $command, array $args)
+    {
+        $sdk = Shopware()->Container()->get('ConnectSDK');
+        $refl = new \ReflectionObject($sdk);
+        $property = $refl->getProperty('dependencies');
+        $property->setAccessible(true);
+        $deps = $property->getValue($sdk);
+        $serviceRegistry = $deps->getServiceRegistry();
+        $callable = $serviceRegistry->getService($service, $command);
+
+        return call_user_func_array([$callable['provider'], $callable['command']], $args);
     }
 }

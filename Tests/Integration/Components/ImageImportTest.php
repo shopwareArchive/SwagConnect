@@ -12,13 +12,13 @@ use Shopware\Models\Article\Supplier;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Media\Media;
 use ShopwarePlugins\Connect\Components\ImageImport;
-use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 
 class ImageImportTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
-    use ConnectTestHelperTrait;
+    use ProductBuilderTrait;
 
     private $manager;
     /** @var ImageImport */
@@ -53,7 +53,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     {
         $images = [];
         for ($i=0; $i<3; ++$i) {
-            $images[] = $this->IMAGE_PROVIDER_URL . '?' . $i;
+            $images[] = $this->imageProviderUrl . '?' . $i;
         }
 
         /** @var \Shopware\Models\Article\Article $model */
@@ -70,7 +70,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     {
         $images = [];
         for ($i=0; $i<3; ++$i) {
-            $images[] = $this->IMAGE_PROVIDER_URL . '?' . $i;
+            $images[] = $this->imageProviderUrl . '?' . $i;
         }
 
 
@@ -108,11 +108,11 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     public function testImportDifferentImagesForEachVariant()
     {
         $articleImages = [
-            $this->IMAGE_PROVIDER_URL . '?0'
+            $this->imageProviderUrl . '?0'
         ];
         $variantImages = [];
         for ($i=1; $i<10; ++$i) {
-            $variantImages[] = $this->IMAGE_PROVIDER_URL . '?' . $i;
+            $variantImages[] = $this->imageProviderUrl . '?' . $i;
         }
 
         $expectedVariantImages = $variantImages;
@@ -165,7 +165,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
         $supplier = $this->manager->find('Shopware\Models\Article\Supplier', 1);
         $supplier->setImage('');
 
-        $this->imageImport->importImageForSupplier($this->IMAGE_PROVIDER_URL, $supplier);
+        $this->imageImport->importImageForSupplier($this->imageProviderUrl, $supplier);
 
         $this->assertNotEmpty($supplier->getImage());
     }

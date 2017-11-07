@@ -85,7 +85,7 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
 
-        $changes = $this->manager->getConnection()->query('SELECT * FROM sw_connect_change WHERE c_entity_id = ? ORDER BY c_revision', ['32870-2404537'])->fetchAll();
+        $changes = $this->manager->getConnection()->fetchAll('SELECT * FROM sw_connect_change WHERE c_entity_id = ? ORDER BY c_revision', ['32870-2404537']);
         $this->assertCount(1, $changes);
         $updateChange = $changes[0];
         $this->assertEquals('update', $updateChange['c_operation']);

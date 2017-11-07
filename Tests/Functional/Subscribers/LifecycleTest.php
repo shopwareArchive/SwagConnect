@@ -7,6 +7,8 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
+use ShopwarePlugins\Connect\Components\Config;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Shopware\Components\Model\ModelManager;
 
@@ -15,9 +17,21 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
     use DatabaseTestCaseTrait;
 
     /**
+     * @param string $file
+     */
+    public function importFixtures($file)
+    {
+        /** @var Connection $connection */
+        $connection = Shopware()->Container()->get('dbal_connection');
+        $connection->executeQuery(file_get_contents($file));
+    }
+
+    /**
      * @var ModelManager
      */
     private $manager;
+    /** @var Config */
+    private $config;
 
     /**
      * @before
@@ -28,38 +42,41 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
         // disable auth and acl
         Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
         Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
+        $this->config = ConfigFactory::getConfigInstance();
     }
 
     public function testUpdatePrices()
     {
         $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
 
+        $priceId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?', ['32870', '2404537']);
+
         $this->Request()
             ->setMethod('POST')
-//            ->setPost('prices',
-//                [
-//                    0 => [
-//                        'id' => $price->getId(),
-//                        'from' => 1,
-//                        'to' => 5,
-//                        'price' => 238.00,
-//                        'pseudoPrice' => 0,
-//                        'percent' => 0,
-//                        'cloned' => false,
-//                        'customerGroupKey' => 'EK',
-//                        'customerGroup' => [
-//                            0 => [
-//                                'id' => 1,
-//                                'key' => 'EK',
-//                                'name' => 'Shopkunden',
-//                                'tax' => true,
-//                                'taxInput' => true,
-//                                'mode' => false,
-//                                'discount' => 0,
-//                            ],
-//                        ],
-//                    ],
-//                ])
+            ->setPost('prices',
+                [
+                    0 => [
+                        'id' => $priceId,
+                        'from' => 1,
+                        'to' => 5,
+                        'price' => 238.00,
+                        'pseudoPrice' => 0,
+                        'percent' => 0,
+                        'cloned' => false,
+                        'customerGroupKey' => 'EK',
+                        'customerGroup' => [
+                            0 => [
+                                'id' => 1,
+                                'key' => 'EK',
+                                'name' => 'Shopkunden',
+                                'tax' => true,
+                                'taxInput' => true,
+                                'mode' => false,
+                                'discount' => 0,
+                            ],
+                        ],
+                    ],
+                ])
             ->setPost('controller', 'Article')
             ->setPost('module', 'backend')
             ->setPost('action', 'saveDetail')
@@ -85,7 +102,10 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
         $this->assertEquals(200, $this->Response()->getHttpResponseCode());
         $this->assertTrue($this->View()->success);
 
-        $changes = $this->manager->getConnection()->fetchAll('SELECT * FROM sw_connect_change WHERE c_entity_id = ? ORDER BY c_revision', ['32870-2404537']);
+        $changes = $this->manager->getConnection()->fetchAll(
+            'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
+            ['32870-2404537']
+        );
         $this->assertCount(1, $changes);
         $updateChange = $changes[0];
         $this->assertEquals('update', $updateChange['c_operation']);

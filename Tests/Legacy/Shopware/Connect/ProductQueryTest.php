@@ -7,7 +7,7 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Verificator\Product;
+use Shopware\Connect\SDK;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery;
@@ -47,6 +47,17 @@ class ProductQueryTest extends ConnectTestHelper
                 'priceFieldForPurchasePriceExport',
                 $purchasePriceField,
                 'export'
+            ]);
+
+        Shopware()->Db()->executeQuery(
+            'INSERT IGNORE INTO sw_connect_shop_config (`s_shop`, `s_config`)
+                  VALUES (?, ?)
+                  ON DUPLICATE KEY UPDATE
+                  `s_config` = VALUES(`s_config`)
+              ',
+            [
+                '_price_type',
+                SDK::PRICE_TYPE_BOTH
             ]);
     }
 

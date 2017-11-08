@@ -426,11 +426,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].categoryId,
-            remoteCategoryLabel = data.records[0].text,
-            localCategoryId = overModel.get('id');
-
-        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+        me.importRemoteToLocalCategories(
+            data.records[0].categoryId,
+            data.records[0].text,
+            overModel.get('id'),
+            data.records[0].id
+        );
     },
 
     /**
@@ -443,7 +444,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.unassignRemoteToLocalCategories(localCategoryId);
     },
 
-    importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId) {
+    importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId, node) {
         var me = this;
         var panel = me.getImportPanel();
 
@@ -454,6 +455,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             params: {
                 remoteCategoryKey: remoteCategoryKey,
                 remoteCategoryLabel: remoteCategoryLabel,
+                node: node,
                 localCategoryId: localCategoryId
             },
             success: function(response, opts) {
@@ -539,11 +541,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('categoryId');
-        var remoteCategoryLabel = remoteCategoryTreeSelection[0].get('text');
-        var localCategoryId = localCategoryTreeSelection[0].get('id');
-
-        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+        me.importRemoteToLocalCategories(
+            remoteCategoryTreeSelection[0].get('categoryId'),
+            remoteCategoryTreeSelection[0].get('text'),
+            localCategoryTreeSelection[0].get('id'),
+            remoteCategoryTreeSelection[0].get('id')
+        );
     },
 
     onRecreateRemoteCategoryButtonClick: function() {

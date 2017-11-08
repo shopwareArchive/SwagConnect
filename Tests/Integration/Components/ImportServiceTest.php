@@ -274,12 +274,46 @@ class ImportServiceTest extends ConnectTestHelper
 
     public function testImportRemoteCategory()
     {
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
+
+        $bookCategoryId = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_plugin_connect_categories WHERE category_key = ?', ['/deutsch/bücher']
+        )->fetchColumn();
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [14471, $bookCategoryId]
+        );
+
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
+            ['/deutsch/bücher/fantasy', 'Fantasy']
+        );
+        $fantasyCategoryId = $this->manager->getConnection()->lastInsertId();
+
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [14471, $fantasyCategoryId]
+        );
+
+        // insert invalid articleId in s_plugin_connect_product_to_categories
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [9087041234, $fantasyCategoryId]
+        );
+
         $localCategory = $this->categoryRepository->find(35);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
 
-        $this->importService->importRemoteCategory($localCategory->getId(), $remoteCategory->getCategoryKey(), $remoteCategory->getLabel());
+        $this->importService->importRemoteCategory(
+            $localCategory->getId(),
+            $remoteCategory->getCategoryKey(),
+            $remoteCategory->getLabel(),
+            3,
+            'Awesome products'
+        );
 
+        /** @var Category $createdLocalCategory */
         $createdLocalCategory = $this->categoryRepository->findOneBy([
             'name' => $remoteCategory->getLabel(),
             'parent' => $localCategory->getId()
@@ -287,13 +321,19 @@ class ImportServiceTest extends ConnectTestHelper
 
         $this->assertInstanceOf(Category::class, $createdLocalCategory);
 
-        $expectedArticleCount = count(
-            $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey())
-        );
+        self::assertEmpty($createdLocalCategory->getChildren());
+
+        $articleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey());
+        $expectedArticleCount = count($articleIds);
         $actualArticleCount = (int) $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
             [':categoryID' => $createdLocalCategory->getId()]
         );
         $this->assertEquals($expectedArticleCount, $actualArticleCount);
+
+        // verify that only valid articleIds will be returned. There isn't article with id 9087041234
+        $fantasyArticleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory('/deutsch/bücher/fantasy');
+        self::assertCount(1, $fantasyArticleIds);
+        self::assertEquals(14471, $fantasyArticleIds[0]);
     }
 }

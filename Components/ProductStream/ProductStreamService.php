@@ -7,16 +7,9 @@
 
 namespace ShopwarePlugins\Connect\Components\ProductStream;
 
-use Shopware\Bundle\SearchBundle\ProductSearchInterface;
-use Shopware\Bundle\SearchBundle\ProductSearchResult;
-use Shopware\Bundle\StoreFrontBundle\Struct\ProductContext;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
 use Shopware\Models\ProductStream\ProductStream;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
-use Shopware\Bundle\SearchBundle\Criteria;
-use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
-use Shopware\Bundle\SearchBundle\Condition\CategoryCondition;
-use Shopware\Bundle\SearchBundle\Condition\CustomerGroupCondition;
 use ShopwarePlugins\Connect\Components\Config;
 
 class ProductStreamService
@@ -51,34 +44,18 @@ class ProductStreamService
     private $config;
 
     /**
-     * @var ProductSearchInterface
-     */
-    private $productSearchService;
-
-    /**
-     * @var ContextServiceInterface
-     */
-    private $contextService;
-
-    /**
      * @param ProductStreamRepository $productStreamRepository
      * @param ProductStreamAttributeRepository $streamAttrRepository
      * @param Config $config
-     * @param ProductSearchInterface $productSearchService
-     * @param ContextServiceInterface $contextService
      */
     public function __construct(
         ProductStreamRepository $productStreamRepository,
         ProductStreamAttributeRepository $streamAttrRepository,
-        Config $config,
-        ProductSearchInterface $productSearchService,
-        ContextServiceInterface $contextService
+        Config $config
     ) {
         $this->productStreamRepository = $productStreamRepository;
         $this->streamAttrRepository = $streamAttrRepository;
         $this->config = $config;
-        $this->productSearchService = $productSearchService;
-        $this->contextService = $contextService;
     }
 
     /**
@@ -311,42 +288,6 @@ class ProductStreamService
     public function countProductsInStaticStream($streamId)
     {
         return $this->productStreamRepository->countProductsInStaticStream($streamId);
-    }
-
-    /**
-     * @param ProductStream $stream
-     * @return ProductSearchResult
-     */
-    public function getProductFromConditionStream(ProductStream $stream)
-    {
-        $criteria = new Criteria();
-
-        $conditions = json_decode($stream->getConditions(), true);
-        $conditions = $this->productStreamRepository->unserialize($conditions);
-
-        foreach ($conditions as $condition) {
-            $criteria->addCondition($condition);
-        }
-
-        $sorting = json_decode($stream->getSorting(), true);
-        $sorting = $this->productStreamRepository->unserialize($sorting);
-
-        foreach ($sorting as $sort) {
-            $criteria->addSorting($sort);
-        }
-
-        /** @var ProductContext $context */
-        $context = $this->contextService->createShopContext($this->config->getDefaultShopId());
-
-        $criteria->addBaseCondition(
-            new CustomerGroupCondition([$context->getCurrentCustomerGroup()->getId()])
-        );
-
-        $criteria->addBaseCondition(
-            new CategoryCondition([$context->getShop()->getCategory()->getId()])
-        );
-
-        return $this->productSearchService->search($criteria, $context);
     }
 
     /**

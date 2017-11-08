@@ -40,7 +40,8 @@ Ext.define('Shopware.apps.Connect.model.config.Import', {
         { name: 'overwriteProductLongDescription', type: 'int' },
         { name: 'overwriteProductAdditionalDescription', type: 'int' },
         { name: 'importImagesOnFirstImport', type: 'int' },
-        { name: 'articleImagesLimitImport', type: 'int' }
+        { name: 'articleImagesLimitImport', type: 'int' },
+        { name: 'updateOrderStatus', type: 'int' }
     ],
 
     proxy: {

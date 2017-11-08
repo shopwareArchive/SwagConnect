@@ -584,6 +584,7 @@ class Setup
             'logRequest' => ['1', null, 'general'],
             'showShippingCostsSeparately' => ['0', null, 'general'],
             'articleImagesLimitImport' => [5, null, 'import'],
+            'updateOrderStatus' => ['0', null, 'import'],
         ];
 
         foreach ($configs as $name => $values) {

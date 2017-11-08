@@ -25,6 +25,7 @@ use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductSearch;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
@@ -86,6 +87,7 @@ class ServiceContainer implements SubscriberInterface
     {
         return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
+            'Enlight_Bootstrap_InitResource_swagconnect.product_search' => 'onProductSearch',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
             'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
             'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
@@ -109,6 +111,17 @@ class ServiceContainer implements SubscriberInterface
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
+            $this->config
+        );
+    }
+
+    /**
+     * @return ProductSearch
+     */
+    public function onProductSearch()
+    {
+        return new ProductSearch(
+            $this->container->get('shopware_product_stream.repository'),
             $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')

@@ -42,7 +42,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     snippets: {
         title: 'Export',
         process: '{s name=export/progress/process}[0] of [1] product(s) exported...{/s}',
-        notice: '{s name=export/progress/notice}This process will take about [0] minutes depending on your system resources. <br>Do you want to continue?{/s}'
+        notice: '{s name=export/progress/notice}This process may take several minutes. <br>Do you want to continue?{/s}'
     },
 
     bodyPadding: 10,
@@ -101,10 +101,8 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
             }
         });
 
-        me.totalTime = Ext.Number.toFixed(me.totalTime, 0);
-
         var notice = Ext.create('Ext.container.Container', {
-            html: Ext.String.format(me.snippets.notice, me.totalTime),
+            html: me.snippets.notice,
             style: 'color: #999; font-style: italic; margin: 0 0 15px 0; text-align: center;',
             anchor: '100%'
         });

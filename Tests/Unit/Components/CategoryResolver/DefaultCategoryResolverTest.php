@@ -15,6 +15,7 @@ use Shopware\Models\Category\Repository;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 use ShopwarePlugins\Connect\Tests\Unit\Builders\RemoteCategoryBuilder;
+use Shopware\Components\Model\CategoryDenormalization;
 
 class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 {
@@ -46,6 +47,11 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
     private $categoryRepository;
 
     /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
+    /**
      * @before
      */
     public function prepareMocks()
@@ -54,12 +60,14 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
         $this->manager = $this->createMock(ModelManager::class);
         $this->productToRemoteCategoryRepository = $this->createMock(ProductToRemoteCategoryRepository::class);
         $this->categoryRepository = $this->createMock(Repository::class);
+        $this->categoryDenormalization = $this->createMock(CategoryDenormalization::class);
 
         $this->defaultCategoryResolver = new DefaultCategoryResolver(
             $this->manager,
             $this->remoteCategoryRepository,
             $this->productToRemoteCategoryRepository,
-            $this->categoryRepository
+            $this->categoryRepository,
+            $this->categoryDenormalization
         );
     }
 

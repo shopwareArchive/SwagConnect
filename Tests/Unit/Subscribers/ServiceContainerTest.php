@@ -30,6 +30,7 @@ use Shopware\Models\Payment\Repository as PaymentRepository;
 use Shopware\Models\Payment\Payment;
 use ShopwarePlugins\Connect\Services\MenuService;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Model\CategoryDenormalization;
 
 class ServiceContainerTest extends AbstractConnectUnitTest
 {
@@ -105,6 +106,10 @@ class ServiceContainerTest extends AbstractConnectUnitTest
                 [ProductToRemoteCategory::class, $this->createMock(ProductToRemoteCategoryRepository::class)],
             ]));
 
+        $this->diContainer
+            ->method('get')
+            ->willReturn($this->createMock(CategoryDenormalization::class));
+
         $this->assertInstanceOf(AutoCategoryResolver::class, $this->serviceContainer->onAutoCategoryResolver());
     }
 
@@ -117,6 +122,10 @@ class ServiceContainerTest extends AbstractConnectUnitTest
                 [RemoteCategory::class, $this->createMock(RemoteCategoryRepository::class)],
                 [ProductToRemoteCategory::class, $this->createMock(ProductToRemoteCategoryRepository::class)],
             ]));
+
+        $this->diContainer
+            ->method('get')
+            ->willReturn($this->createMock(CategoryDenormalization::class));
 
         $this->assertInstanceOf(DefaultCategoryResolver::class, $this->serviceContainer->onDefaultCategoryResolver());
     }

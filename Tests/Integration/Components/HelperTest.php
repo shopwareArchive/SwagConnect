@@ -179,6 +179,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase
             $manager->getRepository(Category::class),
             $manager->getRepository(RemoteCategory::class),
             ConfigFactory::getConfigInstance(),
+            Shopware()->Container()->get('CategoryDenormalization'),
             $manager->getRepository(ProductToRemoteCategory::class)
         );
 

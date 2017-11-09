@@ -149,6 +149,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 ConfigFactory::getConfigInstance(),
+                Shopware()->Container()->get('CategoryDenormalization'),
                 $this->em->getRepository(ProductToRemoteCategory::class)
             ),
             $this->configurationGateway,
@@ -684,6 +685,7 @@ class CategoryExtractorTest extends \Tests\ShopwarePlugins\Connect\ConnectTestHe
                 $this->em->getRepository('Shopware\Models\Category\Category'),
                 $this->em->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 ConfigFactory::getConfigInstance(),
+                Shopware()->Container()->get('CategoryDenormalization'),
                 $this->em->getRepository(ProductToRemoteCategory::class)
             ),
             $this->configurationGateway,

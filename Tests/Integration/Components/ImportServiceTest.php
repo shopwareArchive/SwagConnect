@@ -70,6 +70,7 @@ class ImportServiceTest extends ConnectTestHelper
             $this->categoryRepository,
             $this->remoteCategoryRepository,
             ConfigFactory::getConfigInstance(),
+            Shopware()->Container()->get('CategoryDenormalization'),
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
 

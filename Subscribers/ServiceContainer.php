@@ -203,6 +203,7 @@ class ServiceContainer implements SubscriberInterface
             $this->manager->getRepository(CategoryModel::class),
             $this->manager->getRepository(RemoteCategory::class),
             $this->config,
+            $this->container->get('CategoryDenormalization'),
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }
@@ -216,7 +217,8 @@ class ServiceContainer implements SubscriberInterface
             $this->manager,
             $this->manager->getRepository(RemoteCategory::class),
             $this->manager->getRepository(ProductToRemoteCategory::class),
-            $this->manager->getRepository(CategoryModel::class)
+            $this->manager->getRepository(CategoryModel::class),
+            $this->container->get('CategoryDenormalization')
         );
     }
 }

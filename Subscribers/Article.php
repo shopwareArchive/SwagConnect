@@ -235,7 +235,16 @@ class Article implements SubscriberInterface
                     [$article->getId()]
                 )->fetchAll(\PDO::FETCH_COLUMN);
 
-                $this->connectExport->export($sourceIds);
+                $autoUpdateProducts = $this->config->getConfig('autoUpdateProducts');
+                if ($autoUpdateProducts == Config::UPDATE_CRON_JOB) {
+                    $this->modelManager->getConnection()->update(
+                        's_plugin_connect_items',
+                        ['cron_update' => 1],
+                        ['article_id' => $article->getId()]
+                    );
+                } else {
+                    $this->connectExport->export($sourceIds);
+                }
                 break;
             case 'createConfiguratorVariants':
                 // main detail should be updated as well, because shopware won't call lifecycle event

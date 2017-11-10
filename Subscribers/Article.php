@@ -230,10 +230,10 @@ class Article implements SubscriberInterface
                     $this->modelManager->flush();
                 }
 
-                $sourceIds = $this->modelManager->getConnection()->fetchColumn(
+                $sourceIds = $this->modelManager->getConnection()->executeQuery(
                     'SELECT source_id FROM s_plugin_connect_items WHERE article_id = ?',
                     [$article->getId()]
-                );
+                )->fetchAll(\PDO::FETCH_COLUMN);
 
                 $this->connectExport->export($sourceIds);
                 break;

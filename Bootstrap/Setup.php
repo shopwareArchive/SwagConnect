@@ -314,9 +314,10 @@ class Setup
               `category_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
               `label` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
               `local_category_id` int(11) DEFAULT NULL,
+              `shop_id` int(11) NULL,
               PRIMARY KEY (`id`),
               INDEX (`category_key`),
-              UNIQUE KEY `scuk_category_key` (`category_key`)
+              UNIQUE KEY `scuk_connect_category_for_shop_id` (`category_key`,`shop_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_product_to_categories` (
               `id` int(11) NOT NULL AUTO_INCREMENT,

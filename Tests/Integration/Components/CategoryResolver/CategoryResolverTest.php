@@ -43,15 +43,15 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test1", "Test 1")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch", "Deutsch", 1234)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test1", "Test 1", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test2", "Test 2")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test2", "Test 2", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
 
-        $germanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch"')->fetchColumn();
-        $test1Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test1"')->fetchColumn();
-        $test2Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2"')->fetchColumn();
+        $germanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch" AND shop_id = 1234')->fetchColumn();
+        $test1Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test1" AND shop_id = 1234')->fetchColumn();
+        $test2Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2" AND shop_id = 1234')->fetchColumn();
 
         $categories = [
             '/deutsch' => 'Deutsch',
@@ -60,19 +60,19 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
             '/deutsch/test3/test31' => 'Test 3.1'
         ];
 
-        $this->categoryResolver->storeRemoteCategories($categories, 3);
+        $this->categoryResolver->storeRemoteCategories($categories, 3, 1234);
 
-        $actualGermanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch"')->fetchColumn();
-        $actualTest1Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test1"')->fetchColumn();
-        $actualTest2Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2"')->fetchColumn();
+        $actualGermanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch" AND shop_id = 1234')->fetchColumn();
+        $actualTest1Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test1" AND shop_id = 1234')->fetchColumn();
+        $actualTest2Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2" AND shop_id = 1234')->fetchColumn();
 
         //Assert that old remote categories aren't changed
         $this->assertEquals($germanId, $actualGermanId);
         $this->assertEquals($test1Id, $actualTest1Id);
         $this->assertEquals($test2Id, $actualTest2Id);
 
-        $test3Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test3"')->fetchColumn();
-        $test31Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test3/test31"')->fetchColumn();
+        $test3Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test3" AND shop_id = 1234')->fetchColumn();
+        $test31Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test3/test31" AND shop_id = 1234')->fetchColumn();
 
         //Assert that new Categories are created
         $this->assertGreaterThan(0, $test3Id);

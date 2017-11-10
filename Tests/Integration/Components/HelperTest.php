@@ -182,7 +182,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase
             $manager->getRepository(ProductToRemoteCategory::class)
         );
 
-        $categoryKeys = $autoCategoryResolver->resolve($categories);
+        $categoryKeys = $autoCategoryResolver->resolve($categories, 1234);
 
         $this->assertCount(2, $categoryKeys);
         $this->assertGreaterThan(count($categoryKeys), count($categories));
@@ -303,8 +303,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($categories as $categoryKey => $category) {
-            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
-                [$categoryKey, $category]);
+            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
+                [$categoryKey, $category, 1]);
         }
 
         $categoriesJson = json_encode($categories);

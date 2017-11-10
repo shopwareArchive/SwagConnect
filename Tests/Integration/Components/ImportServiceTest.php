@@ -285,8 +285,8 @@ class ImportServiceTest extends ConnectTestHelper
         );
 
         $this->manager->getConnection()->executeQuery(
-            'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
-            ['/deutsch/bücher/fantasy', 'Fantasy']
+            'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) VALUES (?, ?, ?)',
+            ['/deutsch/bücher/fantasy', 'Fantasy', 1234]
         );
         $fantasyCategoryId = $this->manager->getConnection()->lastInsertId();
 

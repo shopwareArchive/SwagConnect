@@ -48,11 +48,11 @@ class CategoryResolverTest extends ConnectTestHelper
 
     public function testCreateLocalCategory()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
-              VALUES (?, ?)',
-            ['/deutsch/test12345', 'Test12345']);
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) 
+              VALUES (?, ?, ?)',
+            ['/deutsch/test12345', 'Test12345', 123456]);
 
-        $this->categoryResolver->createLocalCategory('Test12345', '/deutsch/test12345', 3);
+        $this->categoryResolver->createLocalCategory('Test12345', '/deutsch/test12345', 3, 123456);
 
         $parentId = $this->manager->getConnection()->fetchColumn('SELECT `parent` FROM `s_categories` WHERE `description` = "Test12345"');
         $this->assertEquals('3', $parentId);

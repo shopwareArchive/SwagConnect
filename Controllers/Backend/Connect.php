@@ -911,6 +911,26 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     }
 
     /**
+     * Called when ShopId has to be added to ConnectCategories
+     */
+    public function addShopIdToConnectCategoriesAction()
+    {
+        $batchsize = $this->Request()->getPost('batchsize');
+        $offset = $this->Request()->getPost('offset');
+        try {
+            $this->getHelper()->addShopIdToConnectCategories((int) $offset, (int) $batchsize);
+            $this->View()->assign([
+                'success' => true,
+            ]);
+        } catch (Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'messages' => [ErrorHandler::TYPE_DEFAULT_ERROR => [$e->getMessage()]]
+            ]);
+        }
+    }
+
+    /**
      * Called when a product variants were marked for update in the connect backend module
      */
     public function insertOrUpdateProductAction()

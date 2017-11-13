@@ -766,20 +766,7 @@ class ProductToShop implements ProductToShopBase
         $group = $groupRepo->findOneBy(['name' => $firstProperty->groupName]);
 
         if (!$group) {
-            $group = new PropertyGroup();
-            $group->setName($firstProperty->groupName);
-            $group->setComparable($firstProperty->comparable);
-            $group->setSortMode($firstProperty->sortMode);
-            $group->setPosition($firstProperty->groupPosition);
-
-            $attribute = new \Shopware\Models\Attribute\PropertyGroup();
-            $attribute->setPropertyGroup($group);
-            $attribute->setConnectIsRemote(true);
-            $group->setAttribute($attribute);
-
-            $this->manager->persist($attribute);
-            $this->manager->persist($group);
-            $this->manager->flush();
+            $group = $this->createPropertyGroup($firstProperty);
         }
 
         $propertyValues = $article->getPropertyValues();
@@ -1502,5 +1489,29 @@ class ProductToShop implements ProductToShopBase
             }
             $model->setTax($tax);
         }
+    }
+
+    /**
+     * @param $firstProperty
+     * @return PropertyGroup
+     */
+    private function createPropertyGroup($firstProperty)
+    {
+        $group = new PropertyGroup();
+        $group->setName($firstProperty->groupName);
+        $group->setComparable($firstProperty->comparable);
+        $group->setSortMode($firstProperty->sortMode);
+        $group->setPosition($firstProperty->groupPosition);
+
+        $attribute = new \Shopware\Models\Attribute\PropertyGroup();
+        $attribute->setPropertyGroup($group);
+        $attribute->setConnectIsRemote(true);
+        $group->setAttribute($attribute);
+
+        $this->manager->persist($attribute);
+        $this->manager->persist($group);
+        $this->manager->flush();
+
+        return $group;
     }
 }

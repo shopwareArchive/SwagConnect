@@ -949,7 +949,7 @@ class Helper
             $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
                 [$categoryKey, $category, $shopId]);
             $createdCategoryId = (int) $this->manager->getConnection()->lastInsertId();
-            $this->assignLocalCategories($createdCategoryId);
+            $this->assignLocalCategories($createdCategoryId, $categoryKey);
 
             return $createdCategoryId;
         }

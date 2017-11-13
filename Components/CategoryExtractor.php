@@ -495,7 +495,7 @@ class CategoryExtractor
     }
 
     /**
-     * @param string $categoryKeys
+     * @param array $categoryKeys
      * @param int $shopId
      * @return array
      */

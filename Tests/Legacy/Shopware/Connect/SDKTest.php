@@ -76,6 +76,7 @@ class SDKTest extends ConnectTestHelper
         $this->db->insert('sw_connect_shop_config', ['s_shop' => '_self_', 's_config' => -1]);
         $this->db->insert('sw_connect_shop_config', ['s_shop' => '_last_update_', 's_config' => time()]);
         $this->db->insert('sw_connect_shop_config', ['s_shop' => '_categories_', 's_config' => serialize(['/bücher' => 'Bücher'])]);
+        $this->db->insert('sw_connect_shop_config', ['s_shop' => '_price_type', 's_config' => SDK::PRICE_TYPE_BOTH]);
 
         $offerValidUntil = time() + 1 * 365 * 24 * 60 * 60; // One year
         $purchasePrice = 6.99;

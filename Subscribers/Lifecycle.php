@@ -11,12 +11,14 @@ use Enlight\Event\SubscriberInterface;
 use Shopware\Connect\SDK;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Connect\Struct\Tracking;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\Utils;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use Shopware\Models\Order\Order;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Handles article lifecycle events in order to automatically update/delete products to/from connect
@@ -92,6 +94,8 @@ class Lifecycle implements SubscriberInterface
             'Shopware\Models\Article\Detail::preRemove' => 'onDeleteDetail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdateOrder',
             'Shopware\Models\Shop\Shop::preRemove' => 'onDeleteShop',
+            'Shopware\Models\Category\Category::preRemove' => 'onPreDeleteCategory',
+            'Shopware\Models\Category\Category::postRemove' => 'onPostDeleteCategory'
         ];
     }
 
@@ -149,7 +153,7 @@ class Lifecycle implements SubscriberInterface
             $this->updatePaymentStatus($order);
         }
 
-        if (isset($changeSet['orderStatus'])) {
+        if (isset($changeSet['orderStatus']) || isset($changeSet['trackingCode'])) {
             $this->updateOrderStatus($order);
         }
     }
@@ -164,6 +168,36 @@ class Lifecycle implements SubscriberInterface
     {
         $entity = $eventArgs->get('entity');
         $this->connectExport->setDeleteStatusForVariants($entity);
+    }
+
+    /**
+     * Callback function to delete an product from connect
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onPreDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
+    {
+        if ($this->autoUpdateProducts===Config::UPDATE_MANUAL) {
+            return;
+        }
+        $category = $eventArgs->get('entity');
+        $this->connectExport->markProductsInToBeDeletedCategories($category);
+    }
+
+    /**
+     * Callback function to delete an product from connect
+     * after it is going to be deleted locally
+     *
+     * @param \Enlight_Event_EventArgs $eventArgs
+     */
+    public function onPostDeleteCategory(\Enlight_Event_EventArgs $eventArgs)
+    {
+        // if update is set to auto we have to export all marked products
+        // else cron_job will do it or user does it manually
+        if ($this->autoUpdateProducts===Config::UPDATE_AUTO) {
+            $this->connectExport->handleMarkedProducts();
+        }
     }
 
     /**
@@ -402,7 +436,9 @@ class Lifecycle implements SubscriberInterface
 
         $orderStatusMapper = new Utils\OrderStatusMapper();
         $orderStatus = $orderStatusMapper->getOrderStatusStructFromOrder($order);
-
+        $tracking = new Tracking();
+        $tracking->id = $order->getTrackingCode();
+        $orderStatus->tracking = $tracking;
         try {
             $this->sdk->updateOrderStatus($orderStatus);
         } catch (\Exception $e) {

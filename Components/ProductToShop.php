@@ -11,9 +11,11 @@ use Shopware\Bundle\SearchBundle\Sorting\ReleaseDateSorting;
 use Shopware\Connect\Gateway;
 use Shopware\Components\Model\CategoryDenormalization;
 use Shopware\Connect\ProductToShop as ProductToShopBase;
+use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
-use Shopware\Models\Article\Article;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
 use Shopware\Components\Model\ModelManager;
@@ -35,6 +37,7 @@ use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Supplier;
+use Shopware\Models\Tax\Tax;
 
 /**
  * The interface for products imported *from* connect *to* the local shop
@@ -239,6 +242,8 @@ class ProductToShop implements ProductToShopBase
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
         $this->setPropertiesForNewProducts($updateFields, $model, $detailAttribute, $product);
 
+        $this->saveVat($product, $model);
+
         $this->applyProductProperties($model, $product);
 
         $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
@@ -249,6 +254,9 @@ class ProductToShop implements ProductToShopBase
         $connectAttribute->setCategory($product->categories);
 
         $connectAttribute->setLastUpdateFlag($flag);
+
+        $connectAttribute->setPurchasePriceHash($product->purchasePriceHash);
+        $connectAttribute->setOfferValidUntil($product->offerValidUntil);
 
         $this->updateDetailFromProduct($detail, $product);
 
@@ -266,7 +274,6 @@ class ProductToShop implements ProductToShopBase
         $this->detailSetAttributes($detail, $product);
 
         $this->connectAttributeSetLastUpdate($connectAttribute, $product);
-
 
         if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
@@ -288,13 +295,16 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
+        $this->manager->persist($model);
+        $this->manager->flush();
+
+        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
         $categories = $this->categoryResolver->resolve($product->categories);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }
 
         $this->manager->persist($connectAttribute);
-        $this->manager->persist($model);
         $this->manager->persist($detail);
         //article has to be flushed
         $this->manager->persist($detailAttribute);
@@ -327,7 +337,6 @@ class ProductToShop implements ProductToShopBase
             // import only specific images for variant
             $this->imageImport->importImagesForDetail($product->variantImages, $detail);
         }
-        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
 
         $this->eventManager->notify(
             'Connect_ProductToShop_InsertOrUpdate_After',
@@ -1005,6 +1014,53 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
+     * @param Product $product
+     * @return ProductStream
+     */
+    private function getOrCreateStream(Product $product)
+    {
+        /** @var ProductStreamRepository $repo */
+        $repo = $this->manager->getRepository(ProductStreamAttribute::class);
+        $stream = $repo->findConnectByName($product->stream);
+
+        if (!$stream) {
+            $stream = new ProductStream();
+            $stream->setName($product->stream);
+            $stream->setType(ProductStreamService::STATIC_STREAM);
+            $stream->setSorting(json_encode(
+                [ReleaseDateSorting::class => ['direction' => 'desc']]
+            ));
+
+            //add attributes
+            $attribute = new \Shopware\Models\Attribute\ProductStream();
+            $attribute->setProductStream($stream);
+            $attribute->setConnectIsRemote(true);
+            $stream->setAttribute($attribute);
+
+            $this->manager->persist($attribute);
+            $this->manager->persist($stream);
+            $this->manager->flush();
+        }
+
+        return $stream;
+    }
+
+    /**
+     * @param ProductStream $stream
+     * @param ProductModel $article
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function addProductToStream(ProductStream $stream, ProductModel $article)
+    {
+        $conn = $this->manager->getConnection();
+        $sql = 'INSERT INTO `s_product_streams_selection` (`stream_id`, `article_id`)
+                VALUES (:streamId, :articleId)
+                ON DUPLICATE KEY UPDATE stream_id = :streamId, article_id = :articleId';
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':streamId' => $stream->getId(), ':articleId' => $article->getId()]);
+    }
+
+    /**
      * Set detail purchase price with plain SQL
      * Entity usage throws exception when error handlers are disabled
      *
@@ -1180,53 +1236,6 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param Product $product
-     * @return ProductStream
-     */
-    private function getOrCreateStream(Product $product)
-    {
-        /** @var ProductStreamRepository $repo */
-        $repo = $this->manager->getRepository(ProductStreamAttribute::class);
-        $stream = $repo->findConnectByName($product->stream);
-
-        if (!$stream) {
-            $stream = new ProductStream();
-            $stream->setName($product->stream);
-            $stream->setType(ProductStreamService::STATIC_STREAM);
-            $stream->setSorting(json_encode(
-                [ReleaseDateSorting::class => ['direction' => 'desc']]
-            ));
-
-            //add attributes
-            $attribute = new \Shopware\Models\Attribute\ProductStream();
-            $attribute->setProductStream($stream);
-            $attribute->setConnectIsRemote(true);
-            $stream->setAttribute($attribute);
-
-            $this->manager->persist($attribute);
-            $this->manager->persist($stream);
-            $this->manager->flush();
-        }
-
-        return $stream;
-    }
-
-    /**
-     * @param ProductStream $stream
-     * @param ProductModel $article
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    private function addProductToStream(ProductStream $stream, ProductModel $article)
-    {
-        $conn = $this->manager->getConnection();
-        $sql = 'INSERT INTO `s_product_streams_selection` (`stream_id`, `article_id`)
-                VALUES (:streamId, :articleId)
-                ON DUPLICATE KEY UPDATE stream_id = :streamId, article_id = :articleId';
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([':streamId' => $stream->getId(), ':articleId' => $article->getId()]);
-    }
-
-    /**
      * Delete product or product variant with given shopId and sourceId.
      *
      * Only the combination of both identifies a product uniquely. Do NOT
@@ -1365,5 +1374,133 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($currentMainDetail);
         $this->manager->persist($article);
         $this->manager->flush();
+    }
+
+    /**
+     * Updates the status of an Order
+     *
+     * @param string $localOrderId
+     * @param string $orderStatus
+     * @param string $trackingNumber
+     * @return void
+     */
+    public function updateOrderStatus($localOrderId, $orderStatus, $trackingNumber)
+    {
+        if ($this->config->getConfig('updateOrderStatus') == 1) {
+            $this->updateDeliveryStatus($localOrderId, $orderStatus);
+        }
+
+        if ($trackingNumber) {
+            $this->updateTrackingNumber($localOrderId, $trackingNumber);
+        }
+    }
+
+    /**
+     * @param string $localOrderId
+     * @param string $orderStatus
+     */
+    private function updateDeliveryStatus($localOrderId, $orderStatus)
+    {
+        $status = false;
+        if ($orderStatus === OrderStatus::STATE_IN_PROCESS) {
+            $status = Status::ORDER_STATE_PARTIALLY_DELIVERED;
+        } elseif ($orderStatus === OrderStatus::STATE_DELIVERED) {
+            $status = Status::ORDER_STATE_COMPLETELY_DELIVERED;
+        }
+
+        if ($status) {
+            $this->manager->getConnection()->executeQuery(
+                'UPDATE s_order 
+                SET status = :orderStatus
+                WHERE ordernumber = :orderNumber',
+                [
+                    ':orderStatus' => $status,
+                    ':orderNumber' => $localOrderId
+                ]
+            );
+        }
+    }
+
+    /**
+     * @param string $localOrderId
+     * @param string $trackingNumber
+     */
+    private function updateTrackingNumber($localOrderId, $trackingNumber)
+    {
+        $currentTrackingCode = $this->manager->getConnection()->fetchColumn(
+            'SELECT trackingcode
+            FROM s_order
+            WHERE ordernumber = :orderNumber',
+            [
+                ':orderNumber' => $localOrderId
+            ]
+        );
+
+        if (!$currentTrackingCode) {
+            $newTracking = $trackingNumber;
+        } else {
+            $newTracking = $this->combineTrackingNumbers($trackingNumber, $currentTrackingCode);
+        }
+
+        $this->manager->getConnection()->executeQuery(
+            'UPDATE s_order 
+            SET trackingcode = :trackingCode
+            WHERE ordernumber = :orderNumber',
+            [
+                ':trackingCode' => $newTracking,
+                ':orderNumber' => $localOrderId
+            ]
+        );
+    }
+
+    /**
+     * @param string $newTrackingCode
+     * @param string $currentTrackingCode
+     * @return string
+     */
+    private function combineTrackingNumbers($newTrackingCode, $currentTrackingCode)
+    {
+        $currentTrackingCodes = $this->getTrackingNumberAsArray($currentTrackingCode);
+        $newTrackingCodes = $this->getTrackingNumberAsArray($newTrackingCode);
+        $newTrackingCodes = array_unique(array_merge($currentTrackingCodes, $newTrackingCodes));
+        $newTracking = implode(',', $newTrackingCodes);
+
+        return $newTracking;
+    }
+
+    /**
+     * @param string $trackingCode
+     * @return string[]
+     */
+    private function getTrackingNumberAsArray($trackingCode)
+    {
+        if (strpos($trackingCode, ',') !== false) {
+            return explode(',', $trackingCode);
+        }
+
+        return [$trackingCode];
+    }
+
+    /**
+     * @param Product $product
+     * @param ProductModel $model
+     */
+    private function saveVat(Product $product, ProductModel $model)
+    {
+        if ($product->vat !== null) {
+            $repo = $this->manager->getRepository(Tax::class);
+            $taxRate = round($product->vat * 100, 2);
+            /** @var \Shopware\Models\Tax\Tax $tax */
+            $tax = $repo->findOneBy(['tax' => $taxRate]);
+            if (!$tax) {
+                $tax = new Tax();
+                $tax->setTax($taxRate);
+                //this is to get rid of zeroes behind the decimal point
+                $name = strval(round($taxRate, 2)) . '%';
+                $tax->setName($name);
+                $this->manager->persist($tax);
+            }
+            $model->setTax($tax);
+        }
     }
 }

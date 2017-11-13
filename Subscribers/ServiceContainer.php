@@ -10,6 +10,7 @@ namespace ShopwarePlugins\Connect\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Connect\Gateway\PDO;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\CustomModels\Connect\PaymentRepository;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\CustomModels\Connect\RemoteCategory;
@@ -18,12 +19,19 @@ use ShopwarePlugins\Connect\Components\CategoryExtractor;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\CategoryResolver\DefaultCategoryResolver;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\ConnectExport;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
+use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductSearch;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamRepository;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Shopware\CustomModels\Connect\ProductStreamAttributeRepository;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
+use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Services\ExportAssignmentService;
 use ShopwarePlugins\Connect\Services\MenuService;
 use ShopwarePlugins\Connect\Services\PaymentService;
 use Shopware\Components\DependencyInjection\Container;
@@ -79,6 +87,7 @@ class ServiceContainer implements SubscriberInterface
     {
         return [
             'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
+            'Enlight_Bootstrap_InitResource_swagconnect.product_search' => 'onProductSearch',
             'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
             'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
             'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
@@ -87,6 +96,7 @@ class ServiceContainer implements SubscriberInterface
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
             'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
+            'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService'
         ];
     }
 
@@ -101,6 +111,17 @@ class ServiceContainer implements SubscriberInterface
         return new ProductStreamService(
             new ProductStreamRepository($this->manager, $this->container->get('shopware_product_stream.repository')),
             $streamAttrRepository,
+            $this->config
+        );
+    }
+
+    /**
+     * @return ProductSearch
+     */
+    public function onProductSearch()
+    {
+        return new ProductSearch(
+            $this->container->get('shopware_product_stream.repository'),
             $this->config,
             $this->container->get('shopware_search.product_search'),
             $this->container->get('shopware_storefront.context_service')
@@ -191,6 +212,27 @@ class ServiceContainer implements SubscriberInterface
             $this->manager->getRepository(RemoteCategory::class),
             $this->config,
             $this->manager->getRepository(ProductToRemoteCategory::class)
+        );
+    }
+
+    /**
+     * @return ExportAssignmentService
+     */
+    public function onExportAssignmentService()
+    {
+        $connectFactory = new ConnectFactory();
+
+        return new ExportAssignmentService(
+          $this->manager->getRepository(Attribute::class),
+          new ConnectExport(
+              $connectFactory->getHelper(),
+              $connectFactory->getSDK(),
+              $this->manager,
+              new ProductsAttributesValidator(),
+              ConfigFactory::getConfigInstance(),
+              new ErrorHandler(),
+              $this->container->get('events')
+          )
         );
     }
 

@@ -81,6 +81,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
         $this->assertSame(
             [
                 'Enlight_Bootstrap_InitResource_swagconnect.product_stream_service' => 'onProductStreamService',
+                'Enlight_Bootstrap_InitResource_swagconnect.product_search' => 'onProductSearch',
                 'Enlight_Bootstrap_InitResource_swagconnect.payment_service' => 'onPaymentService',
                 'Enlight_Bootstrap_InitResource_swagconnect.menu_service' => 'onMenuService',
                 'Enlight_Bootstrap_InitResource_swagconnect.frontend_query' => 'onCreateFrontendQuery',
@@ -89,6 +90,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
                 'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
+                'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService'
             ],
             $this->serviceContainer->getSubscribedEvents()
         );

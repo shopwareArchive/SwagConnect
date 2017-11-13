@@ -93,10 +93,12 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('a.id');
         $builder->leftJoin('ptrc.connectCategory', 'rc');
-        $builder->leftJoin('ptrc.article', 'a');
-        $builder->leftJoin('a.attribute', 'att');
+        $builder->innerJoin('ptrc.article', 'a');
         $builder->where('rc.categoryKey = :categoryKey');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
+        //distinct necessary because of variant articles
+        //each variant has an own entry in a.attribute so same articleId is returned multiple times
+        $builder->distinct();
 
         $query = $builder->getQuery();
         $query->setHydrationMode($query::HYDRATE_OBJECT);
@@ -132,7 +134,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('ptrc.connectCategoryId');
         $builder->where('ptrc.articleId = :articleId');
-        $builder->setParameter('articleId', $articleId);
+        $builder->setParameter('articleId', $articleId, \PDO::PARAM_INT);
 
         $query = $builder->getQuery();
         $result = $query->getResult($query::HYDRATE_SCALAR);
@@ -155,8 +157,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->delete('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc');
         $builder->where('ptrc.connectCategoryId = :ccid');
         $builder->andWhere('ptrc.articleId = :articleId');
-        $builder->setParameter(':ccid', $categoryId);
-        $builder->setParameter(':articleId', $articleId);
+        $builder->setParameter(':ccid', $categoryId, \PDO::PARAM_INT);
+        $builder->setParameter(':articleId', $articleId, \PDO::PARAM_INT);
         $builder->getQuery()->execute();
     }
 }

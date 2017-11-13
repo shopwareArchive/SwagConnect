@@ -15,12 +15,13 @@ use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
+use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
 
-class HelperTest extends ConnectTestHelper
+class HelperTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
+    use ConnectTestHelperTrait;
 
     public function testGetDefaultCustomerGroup()
     {
@@ -65,25 +66,6 @@ class HelperTest extends ConnectTestHelper
 
         $connectAttribute = $this->getHelper()->getOrCreateConnectAttributeByModel($model);
         $this->assertNotEmpty($connectAttribute->getId());
-    }
-
-    public function _testGetImagesById()
-    {
-        $images = [];
-        for ($i = 0; $i < 10; ++$i) {
-            $images[] = self::IMAGE_PROVIDER_URL . '?' . rand(0, 9999);
-        }
-
-        /** @var \Shopware\Models\Article\Article $model */
-        $model = Shopware()->Models()->find('Shopware\Models\Article\Article', 2);
-
-        $this->getImageImport()->importImagesForArticle(
-            $images,
-            $model
-        );
-
-        $images = $this->callPrivate($this->getHelper(), 'getImagesById', 2);
-        $this->assertCount(13, count($images));
     }
 
     public function testUpdateUnitInRelatedProducts()

@@ -15,6 +15,7 @@ use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
+use Shopware\Models\Category\Category;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Struct\ExportList;
 use ShopwarePlugins\Connect\Struct\SearchCriteria;
@@ -671,5 +672,66 @@ class ConnectExport
         }
 
         return $marketplaceAttributes;
+    }
+
+    /**
+     * @param Category $category
+     */
+    public function markProductsInToBeDeletedCategories(Category $category)
+    {
+        $categoryId = $category->getId();
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('categories.id')
+            ->from('s_categories', 'categories')
+            ->where('categories.path LIKE :categoryIDs')
+            ->orWhere('categories.id = :categoryID')
+            ->setParameter('categoryIDs', "%|$categoryId|%")
+            ->setParameter('categoryID', $categoryId);
+        $categoriesToBeDeleted = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+
+        if ($categoriesToBeDeleted) {
+            //it's necessary to fetch all articleIDs in the deleted categories
+            //because DQL doesn't allow a join in update
+            $builder->select('articleCategories.articleID')
+                ->from('s_articles_categories', 'articleCategories')
+                ->where('articleCategories.categoryID IN (:categoryIDs)')
+                ->setParameter('categoryIDs', $categoriesToBeDeleted, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            $articlesInDeletedCategories = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+
+            //we can't export Products directly because Categories are still there
+            //we are in preRemove
+            //we just mark them do be updated
+            if ($articlesInDeletedCategories) {
+                $builder->update('s_plugin_connect_items', 'connectItems')
+                    ->set('connectItems.cron_update', 1)
+                    ->where('connectItems.article_id IN (:articleIDs)')
+                    ->andWhere('connectItems.exported = 1')
+                    ->setParameter('articleIDs', $articlesInDeletedCategories, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+
+                $builder->execute();
+            }
+        }
+    }
+
+    /**
+     * exports every article that is marked with cron_update = 1
+     * this is called in postRemoveCategories
+     * to change products if their category was deleted
+     */
+    public function handleMarkedProducts()
+    {
+        $builder = $this->manager->getConnection()->createQueryBuilder();
+        $builder->select('items.article_id')
+            ->from('s_plugin_connect_items', 'items')
+            ->where('items.cron_update = 1');
+        $articlesToBeExported = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+
+        if ($articlesToBeExported) {
+            $this->export($articlesToBeExported);
+
+            $builder->update('s_plugin_connect_items', 'items')
+                ->set('items.cron_update', 0);
+            $builder->execute();
+        }
     }
 }

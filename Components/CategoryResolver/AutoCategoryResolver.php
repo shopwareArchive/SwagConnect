@@ -74,7 +74,7 @@ class AutoCategoryResolver extends CategoryResolver
                 continue;
             }
 
-            $remoteCategories = $this->convertTreeToKeys($node['children'], $mainCategory->getId());
+            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToKeys($node['children'], $mainCategory->getId()));
         }
 
         // Collect all, not only leaf categories. Some customers use them to assign products.

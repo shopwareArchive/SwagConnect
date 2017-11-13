@@ -352,13 +352,14 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
     onUnAssignArticlesFromCategory: function() {
         var me = this;
         var articleIds = [];
+        var categoryId = me.getLocalCategoryTree().getSelectionModel().getSelection()[0].get('id');
         var localProductSelection = me.getLocalProductsGrid().getSelectionModel().getSelection();
 
         for (var i = 0; i < localProductSelection.length; i++) {
             articleIds.push(localProductSelection[i].get('Article_id'));
         }
 
-        me.unAssignArticlesFromCategory(articleIds, true);
+        me.unAssignArticlesFromCategory(articleIds, categoryId, true);
     },
 
     onUnAssignArticleFromCategory: function(record) {
@@ -368,12 +369,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             if (response !== 'yes') {
                 return false;
             }
-
-            me.unAssignArticlesFromCategory([record.get('Article_id')], true);
+            var categoryId = me.getLocalCategoryTree().getSelectionModel().getSelection()[0].get('id');
+            me.unAssignArticlesFromCategory([record.get('Article_id')], categoryId, true);
         });
     },
 
-    unAssignArticlesFromCategory: function(articleIds, reload) {
+    unAssignArticlesFromCategory: function(articleIds, categoryId, reload) {
         var me = this;
         var panel = me.getImportPanel();
 
@@ -387,7 +388,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             url: '{url controller=Import action=unassignRemoteArticlesFromLocalCategory}',
             method: 'POST',
             params: {
-                'articleIds[]': articleIds
+                'articleIds[]': articleIds,
+                'categoryId': categoryId
             },
             success: function(response, opts) {
                 panel.setLoading(false);
@@ -424,11 +426,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = data.records[0].categoryId,
-            remoteCategoryLabel = data.records[0].text,
-            localCategoryId = overModel.get('id');
-
-        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+        me.importRemoteToLocalCategories(
+            data.records[0].categoryId,
+            data.records[0].text,
+            overModel.get('id'),
+            data.records[0].id
+        );
     },
 
     /**
@@ -441,7 +444,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.unassignRemoteToLocalCategories(localCategoryId);
     },
 
-    importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId) {
+    importRemoteToLocalCategories: function(remoteCategoryKey, remoteCategoryLabel, localCategoryId, node) {
         var me = this;
         var panel = me.getImportPanel();
 
@@ -452,6 +455,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             params: {
                 remoteCategoryKey: remoteCategoryKey,
                 remoteCategoryLabel: remoteCategoryLabel,
+                node: node,
                 localCategoryId: localCategoryId
             },
             success: function(response, opts) {
@@ -537,11 +541,12 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             return;
         }
 
-        var remoteCategoryKey = remoteCategoryTreeSelection[0].get('categoryId');
-        var remoteCategoryLabel = remoteCategoryTreeSelection[0].get('text');
-        var localCategoryId = localCategoryTreeSelection[0].get('id');
-
-        me.importRemoteToLocalCategories(remoteCategoryKey, remoteCategoryLabel, localCategoryId);
+        me.importRemoteToLocalCategories(
+            remoteCategoryTreeSelection[0].get('categoryId'),
+            remoteCategoryTreeSelection[0].get('text'),
+            localCategoryTreeSelection[0].get('id'),
+            remoteCategoryTreeSelection[0].get('id')
+        );
     },
 
     onRecreateRemoteCategoryButtonClick: function() {

@@ -7,16 +7,13 @@
 
 namespace Tests\ShopwarePlugins\Connect;
 
-use Shopware\Connect\Struct\Verificator\Product;
 use ShopwarePlugins\Connect\Components\ProductQuery\RemoteProductQuery;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
-use ShopwarePlugins\Connect\Tests\RpcDispatcherTrait;
 
 class RemoteProductQueryTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
-    use RpcDispatcherTrait;
     use ProductBuilderTrait;
 
     /**

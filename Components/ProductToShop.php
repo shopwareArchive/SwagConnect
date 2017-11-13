@@ -1309,7 +1309,7 @@ class ProductToShop implements ProductToShopBase
 
         return [$trackingCode];
     }
-   
+
     /**
      * @param Product $product
      * @param ProductModel $model

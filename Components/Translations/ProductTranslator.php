@@ -223,13 +223,4 @@ class ProductTranslator implements ProductTranslatorInterface
 
         return $this->shopRepository;
     }
-
-    private function getLocaleRepository()
-    {
-        if (!$this->localeRepository) {
-            $this->localeRepository = $this->manager->getRepository('Shopware\Models\Shop\Locale');
-        }
-
-        return $this->localeRepository;
-    }
 }

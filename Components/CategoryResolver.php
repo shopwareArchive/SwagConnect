@@ -100,7 +100,7 @@ abstract class CategoryResolver
      * @param RemoteCategory[] $remoteCategories
      * @param $articleId
      */
-    private function addProductToRemoteCategory($remoteCategories, $articleId)
+    private function addProductToRemoteCategory(array $remoteCategories, $articleId)
     {
         $productToCategories = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
@@ -116,7 +116,7 @@ abstract class CategoryResolver
 
     /**
      * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
-     * @param $articleId
+     * @param int $articleId
      */
     private function removeProductsFromNotAssignedRemoteCategories(array $assignedCategories, $articleId)
     {

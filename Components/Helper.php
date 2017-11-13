@@ -953,8 +953,9 @@ class Helper
 
             return $createdCategoryId;
         }
-        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_categories SET shop_id = ? WHERE category_key = ?',
-            [$shopId, $categoryKey]);
+
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_categories SET shop_id = ? WHERE id = ?',
+            [$shopId, $res['id']]);
 
         return (int) $res['id'];
     }

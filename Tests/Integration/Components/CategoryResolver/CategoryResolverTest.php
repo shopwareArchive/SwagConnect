@@ -111,17 +111,17 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test1", "Test 1")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch", "Deutsch", 1234)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test1", "Test 1", 1234)');
 
-        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3);
+        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3, 1234);
 
         $row = $this->manager->getConnection()->fetchAll('SELECT * FROM s_categories WHERE description = "Test 1" AND parent = 3');
 
         $this->assertNotEmpty($row);
         $now = new \DateTime('now');
-        $added = new \DateTime($row['added']);
-        $changed = new \DateTime($row['changed']);
+        $added = new \DateTime($row[0]['added']);
+        $changed = new \DateTime($row[0]['changed']);
         // assert that timestamps are not older than 5 seconds
         $this->assertEquals($now->getTimestamp(), $added->getTimestamp(), '', 5);
         $this->assertEquals($now->getTimestamp(), $changed->getTimestamp(), '', 5);

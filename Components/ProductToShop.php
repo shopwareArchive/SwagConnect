@@ -1495,7 +1495,7 @@ class ProductToShop implements ProductToShopBase
      * @param Property $property
      * @return PropertyGroup
      */
-    private function createPropertyGroup($property)
+    private function createPropertyGroup(Property $property)
     {
         $group = new PropertyGroup();
         $group->setName($property->groupName);

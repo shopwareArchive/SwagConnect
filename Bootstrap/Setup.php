@@ -323,6 +323,7 @@ class Setup
               `connect_category_id` int(11) NOT NULL,
               `articleID` int(11) NOT NULL,
               PRIMARY KEY (`id`),
+              INDEX article_id (articleID),
               UNIQUE KEY `scuk_connect_category_id` (`connect_category_id`,`articleID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;', '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_streams` (

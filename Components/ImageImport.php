@@ -482,17 +482,21 @@ class ImageImport
             }
             $media = $image->getMedia();
 
-            if (!$media || !$media->getAttribute()) {
+            try {
+                if (!$media || !$media->getAttribute()) {
+                    continue;
+                }
+                $attribute = $media->getAttribute();
+            } catch (\Doctrine\ORM\EntityNotFoundException $e) {
+                //is thrown if media was deleted -> simply continue
                 continue;
             }
-            $attribute = $media->getAttribute();
 
             // If the image was not imported from connect, skip it
             $connectHash = $attribute->getConnectHash();
             if (!$connectHash) {
                 continue;
             }
-
             $localArticleImagesFromConnect[$connectHash] = ['image' => $image, 'media' => $media];
         }
 

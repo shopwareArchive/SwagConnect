@@ -91,6 +91,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
                 'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
+                'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService'
             ],
             $this->serviceContainer->getSubscribedEvents()
         );

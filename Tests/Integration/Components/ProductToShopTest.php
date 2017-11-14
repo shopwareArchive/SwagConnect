@@ -472,7 +472,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $trackingcode = $this->manager->getConnection()->fetchColumn('SELECT trackingcode from s_order WHERE ordernumber = 42');
         $this->assertEquals('foo', $trackingcode);
     }
-      
+
     public function test_existing_vat()
     {
         $expectedTaxId = $this->manager->getConnection()->fetchColumn('

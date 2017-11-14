@@ -250,11 +250,7 @@ class Helper
     {
         $configComponent = ConfigFactory::getConfigInstance();
         $result = $configComponent->getConfig('recreateConnectCategories');
-        if ($result === 0) {
-            return true;
-        }
-
-        return false;
+        return $result === 0;
     }
 
     /**
@@ -265,11 +261,7 @@ class Helper
     {
         $configComponent = ConfigFactory::getConfigInstance();
         $result = $configComponent->getConfig('addShopIdToConnectCategories');
-        if ($result === 0) {
-            return true;
-        }
-
-        return false;
+        return $result === 0;
     }
 
     /**
@@ -903,16 +895,7 @@ class Helper
 
             $shopId = (int) $row['shop_id'];
             foreach ($categories as $categoryKey => $category) {
-                $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
-                    [$categoryKey, $shopId]);
-                if (!($res = $selectedCategory->fetch())) {
-                    $categoryId = $this->createCategoryWithShopId($categoryKey, $shopId, $category);
-                } else {
-                    $categoryId = (int) $res['id'];
-                }
-                $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id) VALUES (?, ?)',
-                    [$row['article_id'], $categoryId]
-                );
+                $this->addShopIdToConnectCategory($categoryKey, $shopId, $category, $row);
             }
         }
 
@@ -921,6 +904,26 @@ class Helper
             $configComponent = ConfigFactory::getConfigInstance();
             $configComponent->setConfig('addShopIdToConnectCategories', 1);
         }
+    }
+
+    /**
+     * @param $categoryKey
+     * @param $shopId
+     * @param $category
+     * @param $row
+     */
+    private function addShopIdToConnectCategory($categoryKey, $shopId, $category, $row)
+    {
+        $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
+            [$categoryKey, $shopId]);
+        if (!($res = $selectedCategory->fetch())) {
+            $categoryId = $this->createCategoryWithShopId($categoryKey, $shopId, $category);
+        } else {
+            $categoryId = (int)$res['id'];
+        }
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id) VALUES (?, ?)',
+            [$row['article_id'], $categoryId]
+        );
     }
 
     /**

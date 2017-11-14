@@ -211,6 +211,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             layout: 'vbox',
             items: [
                 {
+                    xtype: 'container',
+                    margin: '0 0 20 0',
+                    width: 600,
+                    html: '<p>' + me.snippets.importPicturesHelp + '</p>'
+                },
+                {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
@@ -219,7 +225,6 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             xtype: 'checkbox',
                             name: 'importImagesOnFirstImport',
                             fieldLabel: me.snippets.importPicturesLabel,
-                            helpText: me.snippets.importPicturesHelp,
                             inputValue: 1,
                             uncheckedValue: 0,
                             labelWidth: me.defaults.labelWidth,

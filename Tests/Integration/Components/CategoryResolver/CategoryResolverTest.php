@@ -120,8 +120,8 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNotEmpty($row);
         $now = new \DateTime('now');
-        $added = new \DateTime($row['added']);
-        $changed = new \DateTime($row['changed']);
+        $added = new \DateTime($row[0]['added']);
+        $changed = new \DateTime($row[0]['changed']);
         // assert that timestamps are not older than 5 seconds
         $this->assertEquals($now->getTimestamp(), $added->getTimestamp(), '', 5);
         $this->assertEquals($now->getTimestamp(), $changed->getTimestamp(), '', 5);

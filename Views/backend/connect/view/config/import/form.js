@@ -225,6 +225,29 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             labelWidth: me.defaults.labelWidth,
                             listeners:{
                                 change: function(checkbox, newValue, oldValue, opts){
+                                    if (checkbox.getValue() === false) {
+                                        Ext.Ajax.request({
+                                            url: '{url controller=ConnectConfig action=checkCronPlugin}',
+                                            method: 'GET',
+                                            success: function (response, opts) {
+                                                var data = Ext.JSON.decode(response.responseText);
+                                                if (data.cronActivated !== true) {
+                                                    checkbox.setValue(true);
+                                                    Shopware.Notification.createGrowlMessage(
+                                                        '{s name=connect/error}Error{/s}',
+                                                        '{s name=connect/config/error/cron_not_activated}To deactivate this Setting you have to activate the Cron-Plugin{/s}'
+                                                    );
+                                                }
+                                            },
+                                            failure: function (response, opts) {
+                                                checkbox.setValue(true);
+                                                Shopware.Notification.createGrowlMessage(
+                                                    '{s name=connect/error}Error{/s}'
+                                                );
+                                            }
+                                        });
+                                    }
+
                                     me.enableImageImportLimit(checkbox);
                                 },
                                 beforeRender: function(checkbox, opts) {

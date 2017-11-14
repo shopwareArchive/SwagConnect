@@ -362,6 +362,12 @@ class Config
                     $model->setValue($configValue);
                 }
                 $this->manager->persist($model);
+
+                if ($key === 'importImagesOnFirstImport' && $configValue === 0) {
+                    $this->activateConnectImageCronJob(1);
+                } else {
+                    $this->activateConnectImageCronJob(0);
+                }
             }
         }
 
@@ -645,5 +651,14 @@ class Config
         }
 
         return $this->connectGateway;
+    }
+
+    /**
+     * @param int $active
+     */
+    private function activateConnectImageCronJob($active)
+    {
+        $this->manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = ? WHERE `action` = "ShopwareConnectImportImages"',
+            [$active]);
     }
 }

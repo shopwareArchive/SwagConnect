@@ -250,6 +250,7 @@ class Helper
     {
         $configComponent = ConfigFactory::getConfigInstance();
         $result = $configComponent->getConfig('recreateConnectCategories');
+
         return $result === 0;
     }
 
@@ -261,6 +262,7 @@ class Helper
     {
         $configComponent = ConfigFactory::getConfigInstance();
         $result = $configComponent->getConfig('addShopIdToConnectCategories');
+
         return $result === 0;
     }
 
@@ -919,7 +921,7 @@ class Helper
         if (!($res = $selectedCategory->fetch())) {
             $categoryId = $this->createCategoryWithShopId($categoryKey, $shopId, $category);
         } else {
-            $categoryId = (int)$res['id'];
+            $categoryId = (int) $res['id'];
         }
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id) VALUES (?, ?)',
             [$row['article_id'], $categoryId]

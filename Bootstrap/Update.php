@@ -530,7 +530,7 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_categories ADD COLUMN `shop_id` int(11) NULL');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories DROP INDEX scuk_category_key');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories ADD UNIQUE KEY `scuk_connect_category_for_shop_id` (`category_key`,`shop_id`)');
-              } catch (\Exception $e) {
+            } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(
                     true,

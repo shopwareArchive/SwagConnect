@@ -334,8 +334,8 @@ class ImportService
         $connection->beginTransaction();
         try {
             /** @var Product $product */
-            foreach ($remoteItems as $product) {
-                $this->autoCategoryResolver->storeRemoteCategories($product->categories, $product->sourceId, $product->shopId);
+            foreach ($remoteItems as $articleId => $product) {
+                $this->autoCategoryResolver->storeRemoteCategories($product->categories, $articleId, $product->shopId);
             }
             $connection->commit();
         } catch (\Exception $e) {
@@ -391,9 +391,8 @@ class ImportService
             if (is_array($categories) && count($categories) > 0) {
                 $product = new Product();
                 $product->shopId = $item['shop_id'];
-                $product->sourceId = $item['article_id'];
                 $product->categories = $categories;
-                $remoteItems[] = $product;
+                $remoteItems[$item['article_id']] = $product;
             }
         }
 

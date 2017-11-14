@@ -103,7 +103,7 @@ abstract class CategoryResolver
      * @param RemoteCategory[] $remoteCategories
      * @param $articleId
      */
-    private function addProductToRemoteCategory($remoteCategories, $articleId)
+    private function addProductToRemoteCategory(array $remoteCategories, $articleId)
     {
         $productToCategories = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
@@ -119,7 +119,7 @@ abstract class CategoryResolver
 
     /**
      * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
-     * @param $articleId
+     * @param int $articleId
      */
     private function removeProductsFromNotAssignedRemoteCategories(array $assignedCategories, $articleId)
     {
@@ -204,9 +204,11 @@ abstract class CategoryResolver
             [$parentId]);
         $suffix = ($path) ? "$parentId|" : "|$parentId|";
         $path = $path . $suffix;
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`) 
-            VALUES (?, ?, ?, 1)',
-            [$categoryName, $parentId, $path]);
+        $now = new \DateTime('now');
+        $timestamp = $now->format('Y-m-d H:i:s');
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`, `added`, `changed`) 
+            VALUES (?, ?, ?, 1, ?, ?)',
+            [$categoryName, $parentId, $path, $timestamp, $timestamp]);
         $localCategoryId = $this->manager->getConnection()->fetchColumn('SELECT LAST_INSERT_ID()');
 
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 

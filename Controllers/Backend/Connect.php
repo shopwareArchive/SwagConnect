@@ -59,6 +59,11 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     private $productStreamService;
 
     /**
+     * @var \ShopwarePlugins\Connect\Services\ExportAssignmentService
+     */
+    private $exportAssignmentService;
+
+    /**
      * @return ModelManager
      */
     public function getModelManager()
@@ -76,6 +81,18 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         }
 
         return $this->sdk;
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Services\ExportAssignmentService
+     */
+    public function getExportAssignmentService()
+    {
+        if ($this->exportAssignmentService === null) {
+            $this->exportAssignmentService = $this->get('swagconnect.export_assignment_service');
+        }
+
+        return $this->exportAssignmentService;
     }
 
     /**
@@ -860,17 +877,60 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     }
 
     /**
+     * get the amount of products that can be exported
+     */
+    public function getArticleCountAction()
+    {
+        try {
+            $count = $this->getExportAssignmentService()->getCountOfAllExportableArticles();
+            $this->View()->assign([
+                'success' => true,
+                'count' => $count
+            ]);
+        } catch (\Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function exportAllProductsAction()
+    {
+        try {
+            $this->updatePurchasePriceField();
+
+            $offset = $this->Request()->getPost('offset', []);
+            $batchSize = $this->Request()->getPost('batchSize', []);
+
+            $errors = $this->getExportAssignmentService()->exportBatchOfAllProducts($offset, $batchSize);
+
+            if (!empty($errors)) {
+                $this->View()->assign([
+                    'success' => false,
+                    'messages' => $errors
+                ]);
+
+                return;
+            }
+        } catch (\Exception $e) {
+            $this->View()->assign([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        $this->View()->assign([
+            'success' => true,
+        ]);
+    }
+
+    /**
      * Collect all source ids by given article ids
      */
     public function getArticleSourceIdsAction()
     {
         try {
-            $exportAll = (bool) $this->Request()->getPost('exportAll', false);
             $articleIds = $this->Request()->getPost('ids', []);
-
-            if ($exportAll) {
-                $articleIds = $this->getHelper()->getAllNonConnectArticleIds();
-            }
 
             if (!is_array($articleIds)) {
                 $articleIds = [$articleIds];

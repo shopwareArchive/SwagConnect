@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.9",
+    "currentVersion": "1.1.8",
     "changelog": {
         "de": {
             "1.1.7": "CON-4922 - Fix: Plugin stürzt ab bei Deaktivierung; CON-4609 - Versandstatus und Trckingcode werden synchronisiert; CON-4936 - Verbesserung der Kategoriezuweisung",

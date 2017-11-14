@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests\Integration\Models;
 
 use Shopware\CustomModels\Connect\Attribute;
+use Shopware\CustomModels\Connect\AttributeRepository;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Doctrine\DBAL\Connection;
 
@@ -15,6 +16,9 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
 
+    /**
+     * @var AttributeRepository
+     */
     private $repository;
 
     /**
@@ -48,5 +52,29 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         ];
         $this->assertEquals($mainSourceIds, $this->repository->findSourceIds($articleIds, 1));
         $this->assertEquals($sourceIdsForVariants, $this->repository->findSourceIds($articleIds, 2));
+    }
+
+    public function test_get_local_article_count()
+    {
+        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
+        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+        $count = $this->repository->getLocalArticleCount();
+        $this->assertEquals(7, $count);
+    }
+
+    public function test_find_all_source_ids()
+    {
+        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
+        $this->connection->executeQuery('DELETE FROM s_articles_details');
+        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+
+        $mainProductIds = $this->repository->findAllSourceIds(0, 4);
+        $variantIds = $this->repository->findAllSourceIds(4, 3);
+
+        $expectedProductIds = ['14467', '14468', '14469', '14470'];
+        $expectedVariantIds = ['14469-7091849', '14470-7091851', '14470-7091852'];
+
+        $this->assertEquals($expectedProductIds, $mainProductIds);
+        $this->assertEquals($expectedVariantIds, $variantIds);
     }
 }

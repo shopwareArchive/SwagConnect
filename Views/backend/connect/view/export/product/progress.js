@@ -20,14 +20,20 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     inProcess: false,
 
     /**
-     * Contains the batch size for each request of the generation.
+     * This function gets called when the start button is pressed
      */
-    batchSize: 50,
+    startButtonHandler: 0,
 
     /**
-     * Contains array with source ids which have to exported
+     * Contains the amount of products tha will be exported
      */
-    sourceIds: [],
+    count: 0,
+
+    /**
+     * Contains a estimate of the time the export will take in minutes
+     */
+    totalTime: 0,
+
 
     /**
      * Contains all snippets for the component
@@ -36,13 +42,17 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
     snippets: {
         title: 'Export',
         process: '{s name=export/progress/process}[0] of [1] product(s) exported...{/s}',
-        notice: '{s name=export/progress/notice}This process will take about [0] minutes depending on your system resources. <br>Do you want to continue?{/s}'
+        notice: '{s name=export/progress/notice}This process may take several minutes. <br>Do you want to continue?{/s}'
     },
 
     bodyPadding: 10,
 
     initComponent:function () {
         var me = this;
+
+        if(!Ext.isFunction(me.startButtonHandler)) {
+            throw new Error('startButtonHandler has to be a function');
+        }
 
         me.items = me.createItems();
         me.title = me.snippets.title;
@@ -57,7 +67,7 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
 
         me.progressField = Ext.create('Ext.ProgressBar', {
             name: 'productExportBar',
-            text: Ext.String.format(me.snippets.process, 0, me.sourceIds.length),
+            text: Ext.String.format(me.snippets.process, 0, me.count),
             margin: '0 0 15',
             border: 1,
             style: 'border-width: 1px !important;',
@@ -84,21 +94,15 @@ Ext.define('Shopware.apps.Connect.view.export.product.Progress', {
             cls: 'primary',
             handler: function() {
                 me.inProcess = true;
-                if (!Ext.isNumeric(me.batchSize)) {
-                    me.batchSize = 30;
-                }
                 me.startButton.setDisabled(true);
                 me.cancelButton.setDisabled(true);
 
-                me.fireEvent('startExport', me.sourceIds, me.batchSize, me);
+                me.startButtonHandler(me);
             }
         });
 
-        var totalTime = me.sourceIds.length / me.batchSize * 1.5 / 60;
-        totalTime = Ext.Number.toFixed(totalTime, 0);
-
         var notice = Ext.create('Ext.container.Container', {
-            html: Ext.String.format(me.snippets.notice, totalTime),
+            html: me.snippets.notice,
             style: 'color: #999; font-style: italic; margin: 0 0 15px 0; text-align: center;',
             anchor: '100%'
         });

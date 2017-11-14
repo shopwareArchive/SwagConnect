@@ -214,7 +214,7 @@ class ProductToShop implements ProductToShopBase
 
             $detail = $this->generateNewDetail($product, $model);
         } else {
-            /** @var Article $model */
+            /** @var ProductModel $model */
             $model = $detail->getArticle();
             // fix for isMainVariant flag
             // in connect attribute table
@@ -1492,16 +1492,16 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
-     * @param $firstProperty
+     * @param Property $property
      * @return PropertyGroup
      */
-    private function createPropertyGroup($firstProperty)
+    private function createPropertyGroup($property)
     {
         $group = new PropertyGroup();
-        $group->setName($firstProperty->groupName);
-        $group->setComparable($firstProperty->comparable);
-        $group->setSortMode($firstProperty->sortMode);
-        $group->setPosition($firstProperty->groupPosition);
+        $group->setName($property->groupName);
+        $group->setComparable($property->comparable);
+        $group->setSortMode($property->sortMode);
+        $group->setPosition($property->groupPosition);
 
         $attribute = new \Shopware\Models\Attribute\PropertyGroup();
         $attribute->setPropertyGroup($group);

@@ -109,6 +109,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
 
         $this->diContainer
             ->method('get')
+            ->with('CategoryDenormalization')
             ->willReturn($this->createMock(CategoryDenormalization::class));
 
         $this->assertInstanceOf(AutoCategoryResolver::class, $this->serviceContainer->onAutoCategoryResolver());
@@ -126,6 +127,7 @@ class ServiceContainerTest extends AbstractConnectUnitTest
 
         $this->diContainer
             ->method('get')
+            ->with('CategoryDenormalization')
             ->willReturn($this->createMock(CategoryDenormalization::class));
 
         $this->assertInstanceOf(DefaultCategoryResolver::class, $this->serviceContainer->onDefaultCategoryResolver());

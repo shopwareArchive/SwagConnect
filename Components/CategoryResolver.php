@@ -154,13 +154,15 @@ abstract class CategoryResolver
             [$currentProductCategoryId]
         )->fetchAll(\PDO::FETCH_COLUMN);
         if ($localCategoriesIds) {
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` IN (?)',
+                [$articleId, $localCategoriesIds],
+                [\PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+            );
             foreach ($localCategoriesIds as $categoryId) {
-                $this->manager->getConnection()->executeQuery(
-                    'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` = ?',
-                    [$articleId, $categoryId]
-                );
                 $this->categoryDenormalization->removeAssignment($articleId, $categoryId);
             }
+
             $this->deleteEmptyConnectCategories($localCategoriesIds);
         }
     }
@@ -168,7 +170,7 @@ abstract class CategoryResolver
     /**
      * @param int[] $categoryIds
      */
-    public function deleteEmptyConnectCategories($categoryIds)
+    public function deleteEmptyConnectCategories(array $categoryIds)
     {
         foreach ($categoryIds as $categoryId) {
             $articleCount = (int) $this->manager->getConnection()->fetchColumn(
@@ -191,12 +193,7 @@ abstract class CategoryResolver
             [$categoryId]
         );
 
-        $childCount = (int) $this->manager->getConnection()->fetchColumn(
-            'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
-            [$categoryId]
-        );
-
-        if ($connectImported == 1 && $childCount === 0) {
+        if ($connectImported == 1 && $this->countChildCategories($categoryId) === 0) {
             $parent = (int) $this->manager->getConnection()->fetchColumn(
                 'SELECT parent FROM s_categories WHERE `id` = ?',
                 [$categoryId]
@@ -295,5 +292,17 @@ abstract class CategoryResolver
             [$remoteCategoryId, $localCategoryId]);
 
         return $localCategoryId;
+    }
+
+    /**
+     * @param $categoryId
+     * @return int
+     */
+    private function countChildCategories($categoryId)
+    {
+        return (int) $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
+            [$categoryId]
+        );
     }
 }

@@ -669,7 +669,7 @@ class Config
      */
     private function activateConnectCronJob($action, $active)
     {
-        $res = $this->manager->getConnection()->executeUpdate('UPDATE `s_crontab` SET `active` = ? WHERE `action` = ? OR `action` = ?',
+        $this->manager->getConnection()->executeUpdate('UPDATE `s_crontab` SET `active` = ? WHERE `action` = ? OR `action` = ?',
             [$active, $action, "Shopware_CronJob_$action"]);
     }
 }

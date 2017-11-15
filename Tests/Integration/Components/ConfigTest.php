@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
@@ -194,6 +195,90 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNotEmpty($result);
         $this->assertEquals($configValue, $result[$configName]);
+    }
+
+    public function testSetExportConfigsActivatesUpdateProductsCronJob()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 0 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_CRON_JOB,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_CRON_JOB, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(1, $cronActive);
+    }
+
+    public function testSetExportConfigsDeactivatesUpdateProductsCronJobForManualUpdate()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 1 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_MANUAL,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_MANUAL, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(0, $cronActive);
+    }
+
+    public function testSetExportConfigsDeactivatesUpdateProductsCronJobForAutoUpdate()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 1 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_AUTO,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_AUTO, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(0, $cronActive);
     }
 
     public function testCompareExportConfiguration()

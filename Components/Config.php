@@ -363,10 +363,12 @@ class Config
                 }
                 $this->manager->persist($model);
 
-                if ($key === 'importImagesOnFirstImport' && $configValue === 0) {
-                    $this->activateConnectImageCronJob(1);
-                } else {
-                    $this->activateConnectImageCronJob(0);
+                if ($key === 'importImagesOnFirstImport') {
+                    if ($configValue == 0) {
+                        $this->activateConnectCronJob('ShopwareConnectImportImages', 1);
+                    } else {
+                        $this->activateConnectCronJob('ShopwareConnectImportImages', 0);
+                    }
                 }
             }
         }
@@ -421,6 +423,14 @@ class Config
                 }
 
                 $this->manager->persist($model);
+
+                if ($key === 'autoUpdateProducts') {
+                    if ($configValue == self::UPDATE_CRON_JOB) {
+                        $this->activateConnectCronJob('ShopwareConnectUpdateProducts', 1);
+                    } else {
+                        $this->activateConnectCronJob('ShopwareConnectUpdateProducts', 0);
+                    }
+                }
             }
         }
 
@@ -654,11 +664,12 @@ class Config
     }
 
     /**
+     * @param string $action
      * @param int $active
      */
-    private function activateConnectImageCronJob($active)
+    private function activateConnectCronJob($action, $active)
     {
-        $this->manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = ? WHERE `action` = "ShopwareConnectImportImages"',
-            [$active]);
+        $res = $this->manager->getConnection()->executeUpdate('UPDATE `s_crontab` SET `active` = ? WHERE `action` = ? OR `action` = ?',
+            [$active, $action, "Shopware_CronJob_$action"]);
     }
 }

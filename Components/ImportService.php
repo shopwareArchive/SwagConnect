@@ -267,7 +267,7 @@ class ImportService
         $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, false);
 
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory']);
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory'], $shopId);
             foreach ($articleIds as $articleId) {
                 $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
                 $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);

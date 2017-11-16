@@ -80,13 +80,13 @@ class CategoryResolverTest extends AbstractConnectUnitTest
         $this->remoteCategoryRepository
             ->expects($this->at(0))
             ->method('findOneBy')
-            ->with(['categoryKey' => '/deutsch'])
+            ->with(['categoryKey' => '/deutsch', 'shopId' => 12345])
             ->willReturn($germanCategory);
 
         $this->remoteCategoryRepository
             ->expects($this->at(1))
             ->method('findOneBy')
-            ->with(['categoryKey' => '/deutsch/buecher'])
+            ->with(['categoryKey' => '/deutsch/buecher', 'shopId' => 12345])
             ->willReturn($bookCategory);
 
         $this->modelManager->expects($this->exactly(4))->method('persist');
@@ -111,7 +111,8 @@ class CategoryResolverTest extends AbstractConnectUnitTest
                 '/deutsch/buecher' => 'Buecher',
                 '/deutsch/buecher/fantasy' => 'Fantasy'
             ],
-            $articleId
+            $articleId,
+            12345
         );
 
         $fantasyCategory = $persistArgs[2];
@@ -148,6 +149,6 @@ class CategoryResolverTest extends AbstractConnectUnitTest
 
         $this->remoteProductToCategoryRepository->expects($this->once())->method('deleteByConnectCategoryId')->with($productToRemoteCategory->getConnectCategoryId());
 
-        $this->categoryResolver->storeRemoteCategories($categories, $articleId);
+        $this->categoryResolver->storeRemoteCategories($categories, $articleId, 1234);
     }
 }

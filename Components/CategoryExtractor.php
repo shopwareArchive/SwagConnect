@@ -264,9 +264,7 @@ class CategoryExtractor
     {
         $sql = 'SELECT category_key, label
                 FROM `s_plugin_connect_categories` cat
-                INNER JOIN `s_plugin_connect_product_to_categories` prod_to_cat ON cat.id = prod_to_cat.connect_category_id
-                INNER JOIN `s_plugin_connect_items` attributes ON prod_to_cat.articleID = attributes.article_id
-                WHERE attributes.shop_id = ?';
+                WHERE cat.shop_id = ?';
         $rows = $this->db->fetchPairs($sql, [$shopId]);
 
         return $this->convertTree($this->categoryResolver->generateTree($rows), $includeChildren);
@@ -463,7 +461,7 @@ class CategoryExtractor
 
         $categoryKeys = array_unique(array_merge(array_keys($rows), $parents));
 
-        $result = $this->getCategoryNames($categoryKeys);
+        $result = $this->getCategoryNames($categoryKeys, $shopId);
 
         return $this->convertTree($this->categoryResolver->generateTree($result, $parent), false, true, true, $shopId, $stream);
     }
@@ -496,7 +494,12 @@ class CategoryExtractor
         return $parents;
     }
 
-    public function getCategoryNames($categoryKeys)
+    /**
+     * @param array $categoryKeys
+     * @param int $shopId
+     * @return array
+     */
+    public function getCategoryNames($categoryKeys, $shopId)
     {
         if (count($categoryKeys) === 0) {
             return [];
@@ -515,6 +518,8 @@ class CategoryExtractor
             }
             $params[] = $categoryKey;
         }
+        $sql .= ' AND cat.shop_id = ?';
+        $params[] = $shopId;
 
         $rows = $this->db->fetchPairs($sql, $params);
 

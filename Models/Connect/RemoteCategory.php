@@ -31,7 +31,7 @@ class RemoteCategory extends ModelEntity
     /**
      * @var string
      *
-     * @ORM\Column(name="category_key", type="string", length=255, unique=true, nullable=false)
+     * @ORM\Column(name="category_key", type="string", length=255, nullable=false)
      */
     protected $categoryKey;
 
@@ -41,6 +41,13 @@ class RemoteCategory extends ModelEntity
      * @ORM\Column(name="label", type="string", length=255, nullable=false)
      */
     protected $label;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="shop_id", type="integer", nullable=true)
+     */
+    protected $shopId;
 
     /**
      * @deprecated
@@ -164,5 +171,21 @@ class RemoteCategory extends ModelEntity
     public function setLocalCategoryId($id)
     {
         $this->localCategoryId = $id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getShopId()
+    {
+        return $this->shopId;
+    }
+
+    /**
+     * @param int $shopId
+     */
+    public function setShopId($shopId)
+    {
+        $this->shopId = $shopId;
     }
 }

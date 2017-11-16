@@ -10,6 +10,8 @@ namespace ShopwarePlugins\Connect\Bootstrap;
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\SnHttpClient;
 
 /**
  * Uninstaller of the plugin.
@@ -60,11 +62,12 @@ class Uninstall
         $this->menu = $menu;
     }
 
+    /**
+     * @return bool
+     */
     public function run()
     {
-        // Currently this should not be done
-//         $this->removeMyAttributes();
-
+        $this->sendUninstallNotificationToSocialNetwork();
         $this->menu->remove();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
@@ -160,5 +163,32 @@ class Uninstall
             $this->modelManager->remove($element);
             $this->modelManager->flush();
         }
+    }
+
+    /**
+     * @return SnHttpClient
+     */
+    private function getSnHttpClient()
+    {
+        return new SnHttpClient(
+            $this->bootstrap->Application()->Container()->get('http_client'),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            ConfigFactory::getConfigInstance()
+        );
+    }
+
+    /**
+     * @return bool
+     */
+    public function sendUninstallNotificationToSocialNetwork()
+    {
+        $response = $this->getSnHttpClient()->sendRequestToConnect('account/supplier-plugin-uninstalled');
+        $responseBody = json_decode($response->getBody());
+
+        if (!$responseBody->success) {
+            throw new \RuntimeException($responseBody->message);
+        }
+
+        return true;
     }
 }

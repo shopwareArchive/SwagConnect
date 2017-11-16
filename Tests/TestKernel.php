@@ -51,6 +51,42 @@ namespace ShopwarePlugins\Connect\Tests {
             return $response;
         }
 
+        public function transformEnlightResponseToSymfonyResponse($response)
+        {
+            $rawHeaders = $response->getHeaders();
+            $headers = [];
+            foreach ($rawHeaders as $header) {
+                if (!isset($headers[$header['name']]) || !empty($header['replace'])) {
+                    header_remove($header['name']);
+                    $headers[$header['name']] = [$header['value']];
+                } else {
+                    $headers[$header['name']][] = $header['value'];
+                }
+            }
+
+            $symfonyResponse = new SymfonyResponse(
+                $response->getBody(),
+                $response->getHttpResponseCode(),
+                $headers
+            );
+
+            foreach ($response->getCookies() as $cookieContent) {
+                $sfCookie = new Cookie(
+                    $cookieContent['name'],
+                    $cookieContent['value'],
+                    $cookieContent['expire'],
+                    $cookieContent['path'],
+                    $cookieContent['domain'],
+                    (bool) $cookieContent['secure'],
+                    (bool) $cookieContent['httpOnly']
+                );
+
+                $symfonyResponse->headers->setCookie($sfCookie);
+            }
+
+            return $symfonyResponse;
+        }
+
         public function boot($skipDatabase = false)
         {
             $result = parent::boot($skipDatabase);

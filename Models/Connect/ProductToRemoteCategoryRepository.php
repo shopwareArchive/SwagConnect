@@ -86,9 +86,10 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * Collect article ids by given
      * remote category key
      * @param string $remoteCategoryKey
+     * @param int $shopId
      * @return array
      */
-    public function findArticleIdsByRemoteCategory($remoteCategoryKey)
+    public function findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('a.id');
@@ -96,6 +97,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->innerJoin('ptrc.article', 'a');
         $builder->where('rc.categoryKey = :categoryKey');
         $builder->setParameter('categoryKey', $remoteCategoryKey);
+        $builder->andWhere('rc.shopId = :shopId');
+        $builder->setParameter('shopId', $shopId);
         //distinct necessary because of variant articles
         //each variant has an own entry in a.attribute so same articleId is returned multiple times
         $builder->distinct();

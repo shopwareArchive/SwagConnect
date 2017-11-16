@@ -96,8 +96,8 @@ class InjectStreamNameTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->db->executeQuery(
-            'INSERT INTO s_plugin_connect_categories (category_key, label)
-              VALUES (?, ?)', [ self::PANTS_CATEGORY_KEY, self::PANTS_CATEGORY_LABEL]
+            'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id)
+              VALUES (?, ?, ?)', [ self::PANTS_CATEGORY_KEY, self::PANTS_CATEGORY_LABEL, $shopId]
         );
 
         $this->db->executeQuery(
@@ -106,8 +106,8 @@ class InjectStreamNameTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->db->executeQuery(
-            'INSERT INTO s_plugin_connect_categories (category_key, label)
-              VALUES (?, ?)', [ self::COAT_CATEGORY_KEY, self::COAT_CATEGORY_LABEL]
+            'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id)
+              VALUES (?, ?, ?)', [ self::COAT_CATEGORY_KEY, self::COAT_CATEGORY_LABEL, $shopId]
         );
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id)

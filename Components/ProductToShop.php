@@ -456,8 +456,8 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($detail);
         $this->manager->flush();
 
-        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
-        $categories = $this->categoryResolver->resolve($product->categories);
+        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId(), $product->shopId);
+        $categories = $this->categoryResolver->resolve($product->categories, $product->shopId);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }

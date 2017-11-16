@@ -61,7 +61,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->createRemoteCategories($createdCategories);
 
         if (!$bootsCategory) {
-            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId());
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId(), 1234);
         }
 
         $nikeCategoryId = $this->categoryRepo->findOneBy([
@@ -70,7 +70,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         ]);
 
         if (!$nikeCategoryId) {
-            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId());
+            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId(), 1234);
         }
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
@@ -79,7 +79,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         ]);
 
         if (!$nikeBootsCategory) {
-            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId, 1234);
         }
 
         $categories = [
@@ -94,7 +94,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->createRemoteCategories($categories);
 
-        $categoryModels = $this->categoryResolver->resolve($categories);
+        $categoryModels = $this->categoryResolver->resolve($categories, 1234);
 
         $this->deleteRemoteCategories(array_merge($categories, $createdCategories));
 
@@ -175,9 +175,9 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
     private function createRemoteCategories($categories)
     {
         foreach ($categories as $key => $value) {
-            $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
-              VALUES (?, ?)',
-                [$key, $value]);
+            $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) 
+              VALUES (?, ?, ?)',
+                [$key, $value, 1234]);
         }
     }
 
@@ -188,7 +188,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
     {
         foreach ($categories as $key => $value) {
             $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
-              WHERE `category_key` = ? AND `label` = ?',
+              WHERE `category_key` = ? AND `label` = ? AND `shop_id` = 1234',
                 [$key, $value]);
         }
     }

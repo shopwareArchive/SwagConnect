@@ -85,10 +85,10 @@ class DefaultCategoryResolverTest extends AbstractConnectUnitTest
 
         $this->remoteCategoryRepository
             ->method('findBy')
-            ->with(['categoryKey' => [$germanCategory->getCategoryKey(), $bookCategory->getCategoryKey()]])
+            ->with(['categoryKey' => [$germanCategory->getCategoryKey(), $bookCategory->getCategoryKey()], 'shopId' => 1234])
             ->willReturn([$germanCategory, $bookCategory]);
 
-        $result = $this->defaultCategoryResolver->resolve([$germanCategory->getCategoryKey() => null, $bookCategory->getCategoryKey() => null]);
+        $result = $this->defaultCategoryResolver->resolve([$germanCategory->getCategoryKey() => null, $bookCategory->getCategoryKey() => null], 1234);
         $this->assertCount(1, $result);
         $this->assertEquals($localCategory->getId(), $result[0]);
     }

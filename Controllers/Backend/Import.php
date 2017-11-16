@@ -511,6 +511,16 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         ]);
     }
 
+    public function connectCategoriesNeedAdditionalShopIdAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'addShopIdToConnectCategories' => $this->getHelper()->checkIfShopIdHasToBeAddedToConnectCategories(),
+            ]
+        ]);
+    }
+
     public function productCountForCategoryRecoveryAction()
     {
         $this->View()->assign([

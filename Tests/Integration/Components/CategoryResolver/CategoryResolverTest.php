@@ -46,10 +46,10 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test1", "Test 1")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch", "Deutsch", 1234)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test1", "Test 1", 1234)');
 
-        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3);
+        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3, 1234);
 
         $row = $this->manager->getConnection()->fetchAll('SELECT * FROM s_categories WHERE description = "Test 1" AND parent = 3');
 
@@ -67,10 +67,10 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test1", "Test 1")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch", "Deutsch", 1234)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test1", "Test 1", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test2", "Test 2")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test2", "Test 2", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
 
         $germanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch"')->fetchColumn();
@@ -84,7 +84,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
             '/deutsch/test3/test31' => 'Test 3.1'
         ];
 
-        $this->categoryResolver->storeRemoteCategories($categories, 3);
+        $this->categoryResolver->storeRemoteCategories($categories, 3, 1234);
 
         $actualGermanId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch"')->fetchColumn();
         $actualTest1Id = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test1"')->fetchColumn();
@@ -141,8 +141,8 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
             [$localCategoryId, 1]
         );
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch", "Deutsch")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES ("/deutsch/test2", "Test 2")');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch", "Deutsch", 1234)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES ("/deutsch/test2", "Test 2", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
 
         $connectCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2"')->fetchColumn();
@@ -160,7 +160,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
             '/deutsch/test3/test31' => 'Test 3.1'
         ];
 
-        $this->categoryResolver->storeRemoteCategories($categories, 3);
+        $this->categoryResolver->storeRemoteCategories($categories, 3, 1234);
 
         $productToCategoryId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
             [3, $connectCategoryId]

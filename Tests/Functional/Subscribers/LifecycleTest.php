@@ -7,44 +7,44 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Shopware\Components\Model\ModelManager;
+use Doctrine\DBAL\Connection;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Detail;
+use ShopwarePlugins\Connect\Tests\TestClient;
+use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
+use Symfony\Component\HttpFoundation\Response;
 
-class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
+class LifecycleTest extends \PHPUnit_Framework_TestCase
 {
-    use DatabaseTestCaseTrait;
+    use WebTestCaseTrait;
 
     /**
-     * @var ModelManager
+     * @param Response $response
+     * @return array
      */
-    private $manager;
-
-    /**
-     * @before
-     */
-    public function prepare()
+    private function handleJsonResponse(Response $response)
     {
-        $this->manager = Shopware()->Models();
-        // disable auth and acl
-        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
-        Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseData = \json_decode($response->getContent(), true);
+        $this->assertNotEmpty($responseData, 'Response is not valid JSON');
+
+        return $responseData;
     }
 
     public function test_generate_delete_change_for_variants()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('articleId', 32870)
-            ->setPost('id', 2404537);
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
-        $this->dispatch('backend/Article/deleteDetail');
+        $client->request('POST', 'backend/Article/deleteDetail', ['articleId' => 32870, 'id' => 2404537]);
 
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $responseData = $this->handleJsonResponse($client->getResponse());
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $this->assertTrue($responseData['success']);
+
+        $changes = self::getDbalConnection()->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32870-2404537']
         );
@@ -55,25 +55,28 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
 
     public function test_generate_delete_change_only_for_exported()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        $detailExist = $this->manager->getConnection()->fetchColumn(
+        /** @var Connection $connection */
+        $connection = self::getDbalConnection();
+
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
+
+        $detailExist = $connection->fetchColumn(
             'SELECT COUNT(id) FROM s_articles_details WHERE id = ? AND articleID = ?',
             [2404544, 32871]
         );
+
         $this->assertEquals(1, $detailExist, 'Article detail does not exist!');
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('articleId', 32871)
-            ->setPost('id', 2404544);
+        $client->request('POST', 'backend/Article/deleteDetail', ['articleId' => 32870, 'id' => 2404537]);
 
-        $this->dispatch('backend/Article/deleteDetail');
+        $responseData = $this->handleJsonResponse($client->getResponse());
 
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $this->assertTrue($responseData['success']);
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $changes = $connection->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32871-2404544']
         );

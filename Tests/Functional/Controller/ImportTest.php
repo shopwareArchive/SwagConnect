@@ -7,59 +7,90 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Controller;
 
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\TestClient;
+use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
+use Symfony\Component\HttpFoundation\Response;
 
-class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
+class ImportTest extends \PHPUnit_Framework_TestCase
 {
-    use DatabaseTestCaseTrait;
+    use WebTestCaseTrait;
 
-    public function setUp()
+    /**
+     * @param Response $response
+     * @return array
+     */
+    private function handleJsonResponse(Response $response)
     {
-        parent::setUp();
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseData = \json_decode($response->getContent(), true);
+        $this->assertNotNull($responseData, 'Response is not valid JSON');
 
-        // disable auth and acl
-        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
-        Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
-
-        $this->manager = Shopware()->Models();
+        return $responseData;
     }
 
-    public function testGetImportedProductCategoriesTreeAction()
+    public function test_get_imported_product_categories_tree_default()
     {
-        $this->dispatch('backend/Import/getImportedProductCategoriesTree');
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        $returnData = $this->View()->data;
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($returnData), 'Returned data must be array');
+        $client->request('GET', 'backend/Import/getImportedProductCategoriesTree');
+        $responseData = $this->handleJsonResponse($client->getResponse());
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('categoryId', '/deutsch/boots/nike')
-            ->setPost('id', 'shopId6~stream~Awesome Products~/deutsch/boots/nike');
-        $this->dispatch('backend/Import/getImportedProductCategoriesTree');
-
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
-    public function testAssignRemoteToLocalCategoryAction()
+    public function test_get_imported_product_categories_tree_with_params()
     {
-        $this->importFixtures(__DIR__ . '/../_fixtures/categories.sql');
-        $this->dispatch('backend/Import/assignRemoteToLocalCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertFalse($this->View()->success);
+        $client->request(
+            'POST',
+            'backend/Import/getImportedProductCategoriesTree',
+            [
+                'categoryId' => '/deutsch/boots/nike',
+                'id' => 'shopId6~stream~Awesome Products~/deutsch/boots/nike'
+            ]
+        );
+        $responseData = $this->handleJsonResponse($client->getResponse());
+        F;
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('localCategoryId', 140809703)
-            ->setPost('remoteCategoryKey', '/deutsch/television')
-            ->setPost('remoteCategoryLabel', 'Television')
-            ->setPost('node', 'shopId6~stream~Awesome Products~/deutsch/television');
-        $this->dispatch('backend/Import/assignRemoteToLocalCategory');
+        $this->assertTrue($responseData['success']);
+    }
 
-        self::assertTrue($this->View()->success);
+    public function test_assign_remote_to_local_category_action_without_params()
+    {
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
+
+        $client->request('GET', 'backend/Import/assignRemoteToLocalCategory');
+
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertFalse($responseData['success']);
+    }
+
+    public function test_assign_remote_to_local_category_action()
+    {
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
+
+        $this->importFixturesFileOnce(__DIR__ . '/../_fixtures/categories.sql');
+
+        $client->request(
+            'POST',
+            'backend/Import/assignRemoteToLocalCategory',
+            [
+                'localCategoryId' => 140809703,
+                'remoteCategoryKey' => '/deutsch/television',
+                'remoteCategoryLabel' => 'Television',
+                'node' => 'shopId6~stream~Awesome Products~/deutsch/television'
+            ]
+        );
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
     }
 
     /**
@@ -67,14 +98,14 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function get_imported_product_categories_tree_when_parent_is_numeric()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('id', 4);
-        $this->dispatch('backend/Import/getImportedProductCategoriesTree');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $client->request('POST', 'backend/Import/getImportedProductCategoriesTree', ['id' => 4]);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
     /**
@@ -82,14 +113,14 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function get_imported_product_categories_tree_when_parent_is_stream()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('id', '3_stream_Awesome products');
-        $this->dispatch('backend/Import/getImportedProductCategoriesTree');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $client->request('POST', 'backend/Import/getImportedProductCategoriesTree', ['id' => '3_stream_Awesome products']);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
     /**
@@ -97,14 +128,14 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function get_imported_product_categories_tree_when_parent_is_category()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('id', '/bücher');
-        $this->dispatch('backend/Import/getImportedProductCategoriesTree');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $client->request('POST', 'backend/Import/getImportedProductCategoriesTree', ['id' => '/bücher']);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
     /**
@@ -112,14 +143,14 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function load_articles_by_remote_category_with_empty_category()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('shopId', '3');
-        $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $client->request('POST', 'backend/Import/loadArticlesByRemoteCategory', ['shopId' => '3']);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
     /**
@@ -127,15 +158,22 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function load_articles_by_remote_category_with_stream()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('category', '3_stream_Awesome products')
-            ->setPost('shopId', '3');
-        $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertFalse($this->View()->success);
-        self::assertTrue(is_string($this->View()->message), 'Returned message must a string');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
+
+        $client->request(
+            'POST',
+            'backend/Import/loadArticlesByRemoteCategory',
+            [
+                'shopId' => '3',
+                'category' => '3_stream_Awesome products'
+            ]
+        );
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertFalse($responseData['success']);
+        $this->assertTrue(is_string($responseData['message']), 'Returned message must a string');
     }
 
     /**
@@ -143,49 +181,58 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function load_articles_by_remote_category_with_empty_shop_id()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('category', 'Awesome products');
-        $this->dispatch('backend/Import/loadArticlesByRemoteCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
-        self::assertTrue(is_array($this->View()->data), 'Returned data must be array');
+        $client->request('POST', 'backend/Import/loadArticlesByRemoteCategory', ['category' => 'Awesome products']);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertTrue(is_array($responseData['data']), 'Returned data must be array');
     }
 
-    public function testUnassignRemoteToLocalCategoryAction()
+    public function test_unassign_remote_to_local_category()
     {
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('localCategoryId', 6);
-        $this->dispatch('backend/Import/unassignRemoteToLocalCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
+        $client->request('POST', 'backend/Import/unassignRemoteToLocalCategory', ['localCategoryId' => 6]);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
     }
 
-    public function testUnassignRemoteToLocalCategoryActionWithoutCategoryId()
+    public function test_unassign_remote_to_local_category_without_category_id()
     {
-        $this->dispatch('backend/Import/unassignRemoteToLocalCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertFalse($this->View()->success);
-        self::assertEquals('Invalid local or remote category', $this->View()->error);
+        $client->request('POST', 'backend/Import/unassignRemoteToLocalCategory', ['localCategoryId']);
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertFalse($responseData['success']);
+        $this->assertEquals('Invalid local or remote category', $responseData['error']);
     }
 
-    public function testUnassignRemoteArticlesFromLocalCategoryAction()
+    public function test_unassign_remote_articles_from_local_category()
     {
-        $this->dispatch('backend/Import/unassignRemoteArticlesFromLocalCategory');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
+        $client->request('POST', 'backend/Import/unassignRemoteArticlesFromLocalCategory');
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
     }
 
-    public function testRecreateRemoteCategoriesAction()
+    public function test_recreate_remote_categories()
     {
-        $this->dispatch('backend/Import/recreateRemoteCategories');
+        /** @var TestClient $client */
+        $client = $this->createBackendClient();
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
+        $client->request('POST', 'backend/Import/recreateRemoteCategories');
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
     }
 }

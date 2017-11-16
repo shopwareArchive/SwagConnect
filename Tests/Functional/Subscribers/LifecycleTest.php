@@ -8,8 +8,6 @@
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
 use Doctrine\DBAL\Connection;
-use Shopware\Models\Article\Article;
-use Shopware\Models\Article\Detail;
 use ShopwarePlugins\Connect\Tests\TestClient;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +23,7 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
     private function handleJsonResponse(Response $response)
     {
         $this->assertEquals(200, $response->getStatusCode());
-        $responseData = \json_decode($response->getContent(), true);
+        $responseData = json_decode($response->getContent(), true);
         $this->assertNotEmpty($responseData, 'Response is not valid JSON');
 
         return $responseData;

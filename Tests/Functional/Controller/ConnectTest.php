@@ -22,7 +22,7 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
     private function handleJsonResponse(Response $response)
     {
         $this->assertEquals(200, $response->getStatusCode());
-        $responseData = \json_decode($response->getContent(), true);
+        $responseData = json_decode($response->getContent(), true);
         $this->assertNotNull($responseData, 'Response is not valid JSON');
 
         return $responseData;

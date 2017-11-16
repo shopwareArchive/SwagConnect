@@ -8,7 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests;
 
 use Doctrine\DBAL\Connection;
-use Enlight\Event\SubscriberInterface;
+use ShopwarePlugins\Connect\Tests\InitResourceDbSubscriber;
 use Shopware\Kernel;
 
 trait KernelTestCaseTrait
@@ -131,27 +131,7 @@ trait KernelTestCaseTrait
         restore_error_handler();
         restore_exception_handler();
 
-        self::getKernel()->getContainer()->get('events')->addSubscriber(new class() implements SubscriberInterface {
-            /**
-             * {@inheritdoc}
-             */
-            public static function getSubscribedEvents()
-            {
-                return ['Enlight_Bootstrap_InitResource_Db' => 'overwriteDb'];
-            }
-
-            public function overwriteDb()
-            {
-                $container = Shopware()->Container();
-                $options = $container->getParameter('shopware.db');
-                $options = ['dbname' => $options['dbname'], 'username' => null, 'password' => null];
-                $db = \Enlight_Components_Db_Adapter_Pdo_Mysql::createFromDbalConnectionAndConfig($container->get('dbal_connection'), $options);
-
-                \Zend_Db_Table_Abstract::setDefaultAdapter($db);
-
-                return $db;
-            }
-        });
+        self::getKernel()->getContainer()->get('events')->addSubscriber(new InitResourceDbSubscriber());
         self::getKernel()->getContainer()->reset('db');
     }
 

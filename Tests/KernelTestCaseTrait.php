@@ -228,18 +228,7 @@ trait KernelTestCaseTrait
     {
         \Zend_Session::$_unitTestEnabled = true;
 
-        $adapter = new class implements \Zend_Auth_Adapter_Interface {
-            /**
-             * Performs an authentication attempt
-             *
-             * @throws \Zend_Auth_Adapter_Exception If authentication cannot be performed
-             * @return \Zend_Auth_Result
-             */
-            public function authenticate()
-            {
-                return new \Zend_Auth_Result(\Zend_Auth_Result::SUCCESS, ['id' => 1, 'username' => 'demo']);
-            }
-        };
+        $adapter = new ZendAuthenticator();
 
         $auth = \Shopware_Components_Auth::getInstance();
         $auth->setBaseAdapter($adapter);

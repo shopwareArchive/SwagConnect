@@ -90,8 +90,8 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConnectProduct()
     {
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_relationships (articleID, relatedarticle) VALUES (1234, 1)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (1234, 2)');
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO s_articles_relationships (articleID, relatedarticle) VALUES (1234, 1)');
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO s_articles_similar (articleID, relatedarticle) VALUES (1234, 2)');
         $row = [
             'sku' => 'SW10005',
             'sourceId' => '22',

@@ -548,7 +548,7 @@ class Update
             try {
                 $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_article_relations` (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
-                  `article_id` int(11) NOT NULL,
+                  `article_id` int(11) unsigned NOT NULL,
                   `shop_id` int(11) NOT NULL,
                   `related_article_local_id` int(11) NOT NULL,
                   `relationship_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,

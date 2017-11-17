@@ -489,7 +489,7 @@ class ProductToShop implements ProductToShopBase
 
         $this->addArticleTranslations($model, $product);
 
-        if ($isMainVariant) {
+        if ($isMainVariant || $product->groupId === null) {
             $this->applyCrossSelling($model->getId(), $product);
         }
 
@@ -1346,10 +1346,11 @@ class ProductToShop implements ProductToShopBase
      */
     private function applyCrossSelling($articleId, Product $product)
     {
+        $this->deleteRemovedRelations($articleId, $product);
+        $this->storeCrossSellingInformationInverseSide($articleId, $product->sourceId, $product->shopId);
         if ($product->similar || $product->related) {
             $this->storeCrossSellingInformationOwningSide($articleId, $product);
         }
-        $this->storeCrossSellingInformationInverseSide($articleId, $product->sourceId, $product->shopId);
     }
 
     /**
@@ -1358,15 +1359,6 @@ class ProductToShop implements ProductToShopBase
      */
     private function storeCrossSellingInformationOwningSide($articleId, $product)
     {
-        //Delete removed relationships
-        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? related_article_local_id NOT IN ? AND relationship_type = ?',
-            [$articleId, $product->shopId, $product->related, self::RELATION_TYPE_RELATED],
-            [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
-        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? related_article_local_id NOT IN ? AND relationship_type = ?',
-            [$articleId, $product->shopId, $product->similar, self::RELATION_TYPE_SIMILAR],
-            [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
-        //TODO elf: also delete old relations in SW not just in Connect Table
-        //Insert new Relationships
         foreach ($product->related as $relatedId) {
             $this->insertNewRelations($articleId, $product->shopId, $relatedId, self::RELATION_TYPE_RELATED);
         }
@@ -1411,13 +1403,80 @@ class ProductToShop implements ProductToShopBase
      */
     private function storeCrossSellingInformationInverseSide($articleId, $sourceId, $shopId)
     {
-        $relatedArticles = $this->manager->getConnection()->fetchAll('SELECT article_id, relationship_type FROM s_plugin_connect_article_relations WHERE shop_id = ? related_article_local_id = ?',
-            [$sourceId, $shopId]);
+        $relatedArticles = $this->manager->getConnection()->fetchAll('SELECT article_id, relationship_type FROM s_plugin_connect_article_relations WHERE shop_id = ? AND related_article_local_id = ?',
+            [$shopId, $sourceId]);
 
         foreach ($relatedArticles as $relatedArticle) {
             $relationType = $relatedArticle['relationship_type'];
-            $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType(articleID, relatedarticle) VALUES (?, ?)",
+            $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType (articleID, relatedarticle) VALUES (?, ?)",
                 [$relatedArticle['article_id'], $articleId]);
         }
+    }
+
+    /**
+     * @param $articleId
+     * @param $product
+     */
+    private function deleteRemovedRelations($articleId, $product)
+    {
+        if (count($product->related) > 0) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND related_article_local_id NOT IN (?) AND relationship_type = ?',
+                [$articleId, $product->shopId, $product->related, self::RELATION_TYPE_RELATED],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+
+            $oldRelatedIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_relationships AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ? AND ci.source_id NOT IN (?)',
+                [$articleId, $product->shopId, $product->related],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND relationship_type = ?',
+                [$articleId, $product->shopId, self::RELATION_TYPE_RELATED]);
+
+            $oldRelatedIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_relationships AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ?',
+                [$articleId, $product->shopId])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_relationships WHERE id IN (?)',
+            [$oldRelatedIds],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+
+        if (count($product->similar) > 0) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND related_article_local_id NOT IN (?) AND relationship_type = ?',
+                [$articleId, $product->shopId, $product->similar, self::RELATION_TYPE_SIMILAR],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+
+            $oldSimilarIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_similar AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ? AND ci.source_id NOT IN (?)',
+                [$articleId, $product->shopId, $product->similar],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND relationship_type = ?',
+                [$articleId, $product->shopId, self::RELATION_TYPE_SIMILAR]);
+
+            $oldSimilarIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_similar AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ?',
+                [$articleId, $product->shopId])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_similar WHERE id IN (?)',
+            [$oldSimilarIds],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
     }
 }

@@ -8,7 +8,6 @@
 namespace ShopwarePlugins\Connect\Tests;
 
 use Doctrine\DBAL\Connection;
-use ShopwarePlugins\Connect\Tests\InitResourceDbSubscriber;
 use Shopware\Kernel;
 
 trait KernelTestCaseTrait
@@ -235,31 +234,6 @@ trait KernelTestCaseTrait
         $auth->addAdapter($adapter);
 
         self::getKernel()->getContainer()->set('auth', $auth);
-    }
-
-    public function performB2bContactLogin()
-    {
-        $this->performB2bLogin(DebtorFactoryTrait::createContactIdentity());
-    }
-
-    public function performB2bDebtorLogin()
-    {
-        $this->performB2bLogin(DebtorFactoryTrait::createDebtorIdentity());
-    }
-
-    public function performB2bSalesRepresentativeLogin()
-    {
-        $this->performB2bLogin(SalesRepresentativeFactoryTrait::createSalesRepresentativeIdentity());
-    }
-
-    public function performB2bSalesRepresentativeWithClientLogin()
-    {
-        $this->performB2bLogin(SalesRepresentativeFactoryTrait::createSalesRepresentativeIdentityWithClient());
-    }
-
-    public function performB2bSalesRepresentativeDebtorLogin()
-    {
-        $this->performB2bLogin(SalesRepresentativeFactoryTrait::createDebtorSalesRepresentativeIdentity());
     }
 
     /**

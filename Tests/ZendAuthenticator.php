@@ -1,13 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: christian
- * Date: 16.11.17
- * Time: 15:17
+ * (c) shopware AG <info@shopware.com>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace ShopwarePlugins\Connect\Tests;
-
 
 class ZendAuthenticator implements \Zend_Auth_Adapter_Interface
 {

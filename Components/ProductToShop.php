@@ -47,6 +47,9 @@ use Shopware\Models\Tax\Tax;
  */
 class ProductToShop implements ProductToShopBase
 {
+    const RELATION_TYPE_RELATED = 'relationships';
+    const RELATION_TYPE_SIMILAR = 'similar';
+
     /**
      * @var Helper
      */
@@ -485,6 +488,10 @@ class ProductToShop implements ProductToShopBase
         $this->manager->clear();
 
         $this->addArticleTranslations($model, $product);
+
+        if ($isMainVariant) {
+            $this->applyCrossSelling($model->getId(), $product);
+        }
 
         //clear cache for that article
         $this->helper->clearArticleCache($model->getId());
@@ -1330,6 +1337,87 @@ class ProductToShop implements ProductToShopBase
                 $this->manager->persist($tax);
             }
             $model->setTax($tax);
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param Product $product
+     */
+    private function applyCrossSelling($articleId, Product $product)
+    {
+        if ($product->similar || $product->related) {
+            $this->storeCrossSellingInformationOwningSide($articleId, $product);
+        }
+        $this->storeCrossSellingInformationInverseSide($articleId, $product->sourceId, $product->shopId);
+    }
+
+    /**
+     * @param int $articleId
+     * @param Product $product
+     */
+    private function storeCrossSellingInformationOwningSide($articleId, $product)
+    {
+        //Delete removed relationships
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? related_article_local_id NOT IN ? AND relationship_type = ?',
+            [$articleId, $product->shopId, $product->related, self::RELATION_TYPE_RELATED],
+            [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? related_article_local_id NOT IN ? AND relationship_type = ?',
+            [$articleId, $product->shopId, $product->similar, self::RELATION_TYPE_SIMILAR],
+            [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+        //TODO elf: also delete old relations in SW not just in Connect Table
+        //Insert new Relationships
+        foreach ($product->related as $relatedId) {
+            $this->insertNewRelations($articleId, $product->shopId, $relatedId, self::RELATION_TYPE_RELATED);
+        }
+
+        foreach ($product->similar as $similarId) {
+            $this->insertNewRelations($articleId, $product->shopId, $similarId, self::RELATION_TYPE_SIMILAR);
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param int $shopId
+     * @param int $relatedId
+     * @param string $relationType
+     */
+    private function insertNewRelations($articleId, $shopId, $relatedId, $relationType)
+    {
+        $inserted = false;
+        try {
+            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+                [$articleId, $shopId, $relatedId, $relationType]);
+            $inserted = true;
+        } catch (\Doctrine\DBAL\DBALException $e) {
+            // No problems here. Just means that the row already existed.
+        }
+
+        //outside of try catch because we don't want to catch exceptions -> this method should not throw any
+        if ($inserted) {
+            $relatedLocalId = $this->manager->getConnection()->fetchColumn('SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
+                [$shopId, $relatedId]);
+            if ($relatedLocalId) {
+                $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType (articleID, relatedarticle) VALUES (?, ?)",
+                    [$articleId, $relatedLocalId]);
+            }
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param string $sourceId
+     * @param int $shopId
+     */
+    private function storeCrossSellingInformationInverseSide($articleId, $sourceId, $shopId)
+    {
+        $relatedArticles = $this->manager->getConnection()->fetchAll('SELECT article_id, relationship_type FROM s_plugin_connect_article_relations WHERE shop_id = ? related_article_local_id = ?',
+            [$sourceId, $shopId]);
+
+        foreach ($relatedArticles as $relatedArticle) {
+            $relationType = $relatedArticle['relationship_type'];
+            $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType(articleID, relatedarticle) VALUES (?, ?)",
+                [$relatedArticle['article_id'], $articleId]);
         }
     }
 }

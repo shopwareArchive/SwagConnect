@@ -349,6 +349,17 @@ class Setup
                 CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE,
                 CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            ', '
+            CREATE TABLE IF NOT EXISTS `s_plugin_connect_article_relations` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `article_id` int(11) NOT NULL,
+                `shop_id` int(11) NOT NULL,
+                `related_article_local_id` int(11) NOT NULL,
+                `relationship_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `relations` (`article_id`, `shop_id`, `related_article_local_id`, `relationship_type`),
+                CONSTRAINT s_plugin_connect_article_relations_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
+            ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             '];
 
         foreach ($queries as $query) {

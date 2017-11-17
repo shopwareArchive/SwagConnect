@@ -211,6 +211,8 @@ class LocalProductQueryTest extends ConnectTestHelper
 
     public function testGetConnectProduct()
     {
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_relationships (articleID, relatedarticle) VALUES (1234, 1)');
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (1234, 2)');
         $row = [
             'sku' => 'SW10005',
             'sourceId' => '22',
@@ -354,12 +356,16 @@ class LocalProductQueryTest extends ConnectTestHelper
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image9.jpg',
             'http://myshop/media/image/2e/4f/tea_pavilion_variant_image10.jpg',
         ];
+        $expectedProduct->related = [1];
+        $expectedProduct->similar = [2];
 
         $row['vendorName'] = $row['vendor']['name'];
         $row['vendorLink'] = $row['vendor']['url'];
         $row['vendorImage'] = $row['vendor']['logo_url'];
         $row['vendorDescription'] = $row['vendor']['description'];
         $row['vendorMetaTitle'] = $row['vendor']['page_title'];
+        $row['localId'] = '1234';
+        $row['detailKind'] = '1';
         unset($row['vendor']);
         $row['category'] = '';
         $row['weight'] = null;

@@ -76,7 +76,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
                 $this->manager,
                 $this->manager->getRepository(RemoteCategory::class),
                 $this->manager->getRepository(ProductToRemoteCategory::class),
-                $this->manager->getRepository(Category::class)
+                $this->manager->getRepository(Category::class),
+                Shopware()->Container()->get('CategoryDenormalization')
             ),
             new PDO($this->db->getConnection()),
             Shopware()->Container()->get('events'),
@@ -322,6 +323,54 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
             [$articleId]
         );
         $this->assertEquals(0, $articleCount);
+    }
+
+    public function test_delete_product_deletes_empty_category()
+    {
+        $product = $this->getProduct();
+        $this->productToShop->insertOrUpdate($product);
+        $articleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
+            [$product->sourceId, $product->shopId]
+        );
+        $connectItems = $this->manager->getConnection()->fetchAll(
+            'SELECT article_id, article_detail_id, source_id, shop_id FROM s_plugin_connect_items WHERE article_id = ?',
+            [$articleId]
+        );
+        $this->assertCount(1, $connectItems);
+
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+            ['3', '|3|', 'TestCategory']
+        );
+        $localCategoryId = $this->manager->getConnection()->lastInsertId();
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+            [$localCategoryId, 1]
+        );
+        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_categories (articleID, categoryID) VALUES (?, ?)',
+            [$articleId, $localCategoryId]);
+
+        $this->productToShop->delete($product->shopId, $product->sourceId);
+
+        $detailsCount = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles_details WHERE articleID = ?',
+            [$articleId]
+        );
+        $this->assertEquals(0, $detailsCount);
+        $articleCount = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles WHERE id = ?',
+            [$articleId]
+        );
+        $this->assertEquals(0, $articleCount);
+
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+            [$articleId, $localCategoryId]
+        );
+        $this->assertFalse($categoryAssignment);
+
+        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+            [$localCategoryId]
+        );
+        $this->assertFalse($localCategory);
     }
 
     /**

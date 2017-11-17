@@ -15,6 +15,7 @@ use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Category\Category;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -449,7 +450,10 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
+        //article has to be flushed
         $this->manager->persist($model);
+        $this->manager->persist($connectAttribute);
+        $this->manager->persist($detail);
         $this->manager->flush();
 
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId(), $product->shopId);
@@ -458,9 +462,6 @@ class ProductToShop implements ProductToShopBase
             $detailAttribute->setConnectMappedCategory(true);
         }
 
-        $this->manager->persist($connectAttribute);
-        $this->manager->persist($detail);
-        //article has to be flushed
         $this->manager->persist($detailAttribute);
         $this->manager->flush();
 
@@ -827,6 +828,7 @@ class ProductToShop implements ProductToShopBase
         );
 
         $article = $detailModel->getArticle();
+
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
         $this->manager->remove($detailModel);
@@ -861,6 +863,11 @@ class ProductToShop implements ProductToShopBase
             $this->manager->remove($article);
         }
 
+        //save category Ids before flush
+        $oldCategoryIds = array_map(function ($category) {
+            return $category->getId();
+        }, $article->getCategories()->toArray());
+
         // Do not remove flush. It's needed when remove article,
         // because duplication of ordernumber. Even with remove before
         // persist calls mysql throws exception "Duplicate entry"
@@ -868,6 +875,11 @@ class ProductToShop implements ProductToShopBase
         // always clear entity manager, because $article->getDetails() returns
         // more than 1 detail, but all of them were removed except main one.
         $this->manager->clear();
+
+        // call this after flush because article has to be deleted that this works
+        if (count($oldCategoryIds) > 0) {
+            $this->categoryResolver->deleteEmptyConnectCategories($oldCategoryIds);
+        }
     }
 
     /**

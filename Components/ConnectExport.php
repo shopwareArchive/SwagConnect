@@ -700,7 +700,10 @@ class ConnectExport
                     ->where('articleCategories.categoryID = (:categoryID)')
                     ->setParameter('categoryID', $categoryToBeDeleted);
                 $articlesInCategory = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
-                $articlesInDeletedCategories = array_unique(array_merge($articlesInDeletedCategories, $articlesInCategory));
+                foreach ($articlesInCategory as $articleId) {
+                    //trick to get just unique articleIDs -> should be faster than array_unique(array_merge())
+                    $articlesInDeletedCategories[$articleId] = true;
+                }
             }
 
             //we can't export Products directly because Categories are still there
@@ -711,7 +714,7 @@ class ConnectExport
                     ->set('connectItems.cron_update', 1)
                     ->where('connectItems.article_id IN (:articleIDs)')
                     ->andWhere('connectItems.exported = 1')
-                    ->setParameter('articleIDs', $articlesInDeletedCategories, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('articleIDs', array_keys($articlesInDeletedCategories), \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
 
                 $builder->execute();
             }

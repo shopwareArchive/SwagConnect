@@ -54,7 +54,7 @@ class AutoCategoryResolver extends CategoryResolver
     /**
      * {@inheritdoc}
      */
-    public function resolve(array $categories)
+    public function resolve(array $categories, $shopId)
     {
         $tree = $this->generateTree($categories);
 
@@ -74,7 +74,7 @@ class AutoCategoryResolver extends CategoryResolver
                 continue;
             }
 
-            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToKeys($node['children'], $mainCategory->getId()));
+            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToKeys($node['children'], $mainCategory->getId(), $shopId));
         }
 
         // Collect all, not only leaf categories. Some customers use them to assign products.

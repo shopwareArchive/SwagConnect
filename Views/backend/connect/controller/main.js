@@ -202,6 +202,29 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                         }
                     }
                 );
+                var addShopIdToConnectCategories;
+                me.sendAjaxRequest(
+                    '{url controller=Import action=connectCategoriesNeedAdditionalShopId}',
+                    {},
+                    function(response) {
+                        addShopIdToConnectCategories = response.data.addShopIdToConnectCategories;
+                        if (addShopIdToConnectCategories) {
+                            Ext.Msg.show({
+                                    title: me.messages.applyMigrationsTitle,
+                                    msg: me.messages.applyMigrationsMessage,
+                                    buttons: Ext.Msg.YESNO,
+                                    icon: Ext.Msg.QUESTION,
+                                    fn: me.startAdditionOfShopIdToConnectCategories,
+                                    scope: me
+                                }
+                            );
+                        } else {
+                            me.mainWindow = me.getView('main.Window').create({
+                                'action': me.subApplication.action
+                            }).show();
+                        }
+                    }
+                );
                 break;
 
         }
@@ -210,10 +233,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     /**
      * Recovers ConnectCategories in batch way and updates progress bar
      * @param window the progress window
-     * Qparam totalCount Count of products
+     * @param action the action that has to be performend
+     * @param totalCount Count of products
      * @param offset the actual offset
      */
-    recoverConnectCategories: function (window, totalCount, offset) {
+    doMigration: function (window, action, totalCount, offset) {
         offset = parseInt(offset) || 0;
         totalCount = parseInt(totalCount) || 0;
         var batchsize = 50;
@@ -225,39 +249,48 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
 
         window.inProcess = true;
 
-        Ext.Ajax.request({
-            url: '{url action=applyConnectCategoriesRecovery}',
-            method: 'POST',
-            params: {
-                'offset': offset,
-                'batchsize': batchsize
-            },
-            success: function(response, opts) {
-                var doneDetails = articlesProcessed;
+        var url;
+        if (action === 'applyConnectCategoriesRecovery') {
+            url = '{url action=applyConnectCategoriesRecovery}'
+        } else if (action === 'addShopIdToConnectCategories') {
+            url = '{url action=addShopIdToConnectCategories}'
+        }
 
-                window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, totalCount));
-                window.progressField.updateProgress(
-                    articlesProcessed / totalCount,
-                    Ext.String.format(window.snippets.process, doneDetails, totalCount),
-                    true
-                );
+        if (url) {
+            Ext.Ajax.request({
+                url: url,
+                method: 'POST',
+                params: {
+                    'offset': offset,
+                    'batchsize': batchsize
+                },
+                success: function(response, opts) {
+                    var doneDetails = articlesProcessed;
 
-                if (articlesProcessed >= totalCount) {
-                    me.createGrowlMessage(title, message, false);
-                    me.mainWindow = me.getView('main.Window').create({
-                        'action': me.subApplication.action
-                    }).show();
-                    window.closeWindow();
-                } else {
-                    //otherwise we have to call this function recursive with the next offset
-                    me.recoverConnectCategories( window, totalCount, articlesProcessed);
+                    window.progressField.updateText(Ext.String.format(window.snippets.process, doneDetails, totalCount));
+                    window.progressField.updateProgress(
+                        articlesProcessed / totalCount,
+                        Ext.String.format(window.snippets.process, doneDetails, totalCount),
+                        true
+                    );
+
+                    if (articlesProcessed >= totalCount) {
+                        me.createGrowlMessage(title, message, false);
+                        me.mainWindow = me.getView('main.Window').create({
+                            'action': me.subApplication.action
+                        }).show();
+                        window.closeWindow();
+                    } else {
+                        //otherwise we have to call this function recursive with the next offset
+                        me.doMigration( window, action, totalCount, articlesProcessed);
+                    }
+                },
+                failure: function(operation) {
+                    me.createGrowlMessage(title, operation.responseText, true);
+                    window.inProcess = false;
                 }
-            },
-            failure: function(operation) {
-                me.createGrowlMessage(title, operation.responseText, true);
-                window.inProcess = false;
-            }
-        });
+            });
+        }
     },
 
     /**
@@ -278,7 +311,35 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                     totalCount = response.data.totalCount;
                     me.mainWindow = me.getView('main.Progress').create().show();
                     me.mainWindow.progressField.updateText(Ext.String.format(me.mainWindow.snippets.process, 0, totalCount));
-                    me.recoverConnectCategories(me.mainWindow, totalCount);
+                    me.doMigration(me.mainWindow, 'applyConnectCategoriesRecovery', totalCount);
+                }
+            );
+        } else {
+            me.mainWindow = me.getView('main.Window').create({
+                'action': me.subApplication.action
+            }).show();
+        }
+    },
+
+    /**
+     * Callback function from messages box that asks the user wether he wants to start the migration
+     * if 'yes' is clicked it starts the migration
+     * @param buttonId
+     * @param text
+     * @param opt
+     */
+    startAdditionOfShopIdToConnectCategories: function(buttonId, text, opt) {
+        var me = this;
+        var totalCount = 0;
+        if (buttonId === 'yes') {
+            me.sendAjaxRequest(
+                '{url controller=Import action=productCountForCategoryRecovery}',
+                {},
+                function(response) {
+                    totalCount = response.data.totalCount;
+                    me.mainWindow = me.getView('main.Progress').create().show();
+                    me.mainWindow.progressField.updateText(Ext.String.format(me.mainWindow.snippets.process, 0, totalCount));
+                    me.doMigration(me.mainWindow, 'addShopIdToConnectCategories', totalCount);
                 }
             );
         } else {
@@ -344,7 +405,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 click: me.onExportAllAction
             },
             'connect-article-export-progress-window': {
-                startExport: me.startArticleExport
+                startExport: me.startArticleExport,
+                exportAll: me.exportAll
             },
             'connect-many-products-dialog': {
                 cronExportAll: me.cronExportAll
@@ -870,7 +932,8 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
             list = me.getExportList(),
             records = list.selModel.getSelection(),
             ids = [],
-            title = me.messages.insertOrUpdateProductTitle;
+            title = me.messages.insertOrUpdateProductTitle,
+            batchSize = 50;
 
         if (records.length == 0) {
             return;
@@ -894,11 +957,75 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                             me.createGrowlMessage(title, operation.message, true);
                         } else {
                             Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                                sourceIds: operation.sourceIds
+                                startButtonHandler: function (caller) {
+                                    me.startArticleExport(operation.sourceIds, batchSize, caller,0)
+                                },
+                                count: operation.sourceIds.length,
+                                totalTime: operation.sourceIds.length / batchSize * 4 / 60
                             }).show();
                         }
                     }
                 }
+            }
+        });
+    },
+
+    exportAll: function(count, batchSize, window, offset) {
+        var me = this,
+            message = me.messages.insertOrUpdateProductMessage,
+            title = me.messages.insertOrUpdateProductTitle,
+            list = me.getExportList();
+        offset = parseInt(offset);
+        batchSize = parseInt(batchSize);
+        count = parseInt(count);
+
+        Ext.Ajax.request({
+            url: '{url action=exportAllProducts}',
+            method: 'POST',
+            params: {
+                'offset': offset,
+                'batchSize': batchSize
+            },
+            success: function(response, opts) {
+                var operation = Ext.decode(response.responseText);
+
+                if (!operation.success && operation.messages) {
+
+                    if(operation.messages.price && operation.messages.price.length > 0){
+                        var priceMsg = Ext.String.format(
+                            me.messages.priceErrorMessage, operation.messages.price.length, count
+                        );
+                        me.createGrowlMessage(title, priceMsg, true);
+                    }
+
+                    if(operation.messages.default && operation.messages.default.length > 0){
+                        operation.messages.default.forEach( function(message){
+                            me.createGrowlMessage(title, message, true);
+                        });
+                    }
+                }
+
+                window.progressField.updateText(Ext.String.format(window.snippets.process, offset, 0));
+                window.progressField.updateProgress(
+                    offset/count,
+                    Ext.String.format(window.snippets.process, offset, count),
+                    true
+                );
+
+                if (count <= offset) {
+                    window.closeWindow();
+                    me.createGrowlMessage(title, message, false);
+                    list.store.load();
+                    me.onGetExportStatus();
+                } else {
+                    //otherwise we have to call this function recursive with the next offset
+                    me.exportAll(count,batchSize,window,(offset+batchSize));
+                }
+            },
+            failure: function(operation) {
+                me.createGrowlMessage(title, operation.responseText, true);
+                window.inProcess = false;
+                window.cancelButton.setDisabled(false);
             }
         });
     },
@@ -1075,12 +1202,13 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     onExportAllAction: function (btn) {
         var me = this,
             list = me.getExportList(),
-            title = me.messages.insertOrUpdateProductTitle;
+            title = me.messages.insertOrUpdateProductTitle,
+            batchSize = 50;
 
         list.setLoading(true);
 
         Ext.Ajax.request({
-            url: '{url action=getArticleSourceIds}',
+            url: '{url action=getArticleCount}',
             method: 'POST',
             params: {
                 'exportAll': true
@@ -1096,20 +1224,23 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                 if (!operation) {
                     return;
                 }
-
                 if (!operation.success) {
                     me.createGrowlMessage(title, operation.message, true);
                 } else {
-                    if (operation.sourceIds.length > 1000) {
+                    if (operation.count > 1000) {
 
                         Ext.create('Shopware.apps.Connect.view.export.product.manyProductsDialog', {
-                            sourceIds: operation.sourceIds
+                            count: operation.count
                         }).show();
                         return;
                     }
 
                     Ext.create('Shopware.apps.Connect.view.export.product.Progress', {
-                        sourceIds: operation.sourceIds
+                        startButtonHandler: function (caller) {
+                            me.exportAll(operation.count, batchSize, caller,0)
+                        },
+                        count: operation.count,
+                        totalTime: operation.count / batchSize * 4 / 60
                     }).show();
                 }
             }

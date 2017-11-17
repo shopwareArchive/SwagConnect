@@ -468,20 +468,6 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
     }
 
     /**
-     * @return \Shopware\CustomModels\Connect\RemoteCategoryRepository
-     */
-    private function getRemoteCategoryRepository()
-    {
-        if (!$this->remoteCategoryRepository) {
-            $this->remoteCategoryRepository = Shopware()->Models()->getRepository(
-                'Shopware\CustomModels\Connect\RemoteCategory'
-            );
-        }
-
-        return $this->remoteCategoryRepository;
-    }
-
-    /**
      * @return \ShopwarePlugins\Connect\Components\ImportService
      */
     private function getImportService()
@@ -521,6 +507,16 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             'success' => true,
             'data' => [
                 'recreateConnectCategories' => $this->getHelper()->checkIfConnectCategoriesHaveToBeRecreated(),
+            ]
+        ]);
+    }
+
+    public function connectCategoriesNeedAdditionalShopIdAction()
+    {
+        $this->View()->assign([
+            'success' => true,
+            'data' => [
+                'addShopIdToConnectCategories' => $this->getHelper()->checkIfShopIdHasToBeAddedToConnectCategories(),
             ]
         ]);
     }

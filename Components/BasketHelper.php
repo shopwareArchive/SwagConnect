@@ -117,7 +117,7 @@ class BasketHelper
     /**
      * Prepare the basket for connect
      *
-     * @return array
+     * @return void
      */
     public function prepareBasketForConnect()
     {

@@ -136,12 +136,6 @@ class UnitMapper
             /** @var \Shopware\Models\Article\Unit $unit */
             $unit = $units[0];
 
-//            $unit = new Unit();
-//            $unit->setName($deConnectUnits[$connectUnit]);
-//            $unit->setUnit($connectUnit);
-//            $this->manager->persist($unit);
-//            $this->manager->flush();
-
             return $unit->getUnit();
         }
 
@@ -198,7 +192,7 @@ class UnitMapper
     /**
      * Returns connect units
      * @param string $locale
-     * @return array\
+     * @return array
      */
     private function getSdkLocalizedUnits($locale = 'en')
     {

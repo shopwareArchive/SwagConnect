@@ -15,13 +15,15 @@ use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Components\RandomStringGenerator;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Tests\ShopwarePlugins\Connect\ConnectTestHelper;
+use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 use Shopware\Connect\Gateway\PDO;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 
-class ImportServiceTest extends ConnectTestHelper
+class ImportServiceTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
+    use ProductBuilderTrait;
+
     /**
      * @var \ShopwarePlugins\Connect\Components\ImportService
      */
@@ -102,7 +104,7 @@ class ImportServiceTest extends ConnectTestHelper
         // map buecher category to some local category
         $localCategory = $this->categoryRepository->find(6);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
         $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
@@ -152,7 +154,7 @@ class ImportServiceTest extends ConnectTestHelper
         $localCategory = $this->categoryRepository->find(6);
         $localCategory2 = $this->categoryRepository->find(8);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
         $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
@@ -239,7 +241,7 @@ class ImportServiceTest extends ConnectTestHelper
         $this->manager->persist($localCategory);
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
         $remoteCategory->addLocalCategory($localCategory);
         $this->manager->persist($remoteCategory);
         $this->manager->flush();
@@ -276,17 +278,18 @@ class ImportServiceTest extends ConnectTestHelper
     {
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $bookCategoryId = $this->manager->getConnection()->executeQuery(
-            'SELECT id FROM s_plugin_connect_categories WHERE category_key = ?', ['/deutsch/bücher']
-        )->fetchColumn();
+        $bookCategoryId = 1111;
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (1111, "/deutsch/bücher", "Bücher", 1234)');
+
         $this->manager->getConnection()->executeQuery(
             'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
             [14471, $bookCategoryId]
         );
 
         $this->manager->getConnection()->executeQuery(
-            'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
-            ['/deutsch/bücher/fantasy', 'Fantasy']
+            'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) VALUES (?, ?, ?)',
+            ['/deutsch/bücher/fantasy', 'Fantasy', 1234]
         );
         $fantasyCategoryId = $this->manager->getConnection()->lastInsertId();
 
@@ -303,13 +306,13 @@ class ImportServiceTest extends ConnectTestHelper
 
         $localCategory = $this->categoryRepository->find(35);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
-        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher']);
+        $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/deutsch/bücher', 'shopId' => 1234]);
 
         $this->importService->importRemoteCategory(
             $localCategory->getId(),
             $remoteCategory->getCategoryKey(),
             $remoteCategory->getLabel(),
-            3,
+            1234,
             'Awesome products'
         );
 
@@ -323,7 +326,7 @@ class ImportServiceTest extends ConnectTestHelper
 
         self::assertEmpty($createdLocalCategory->getChildren());
 
-        $articleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey());
+        $articleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey(), 1234);
         $expectedArticleCount = count($articleIds);
         $actualArticleCount = (int) $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
@@ -332,7 +335,7 @@ class ImportServiceTest extends ConnectTestHelper
         $this->assertEquals($expectedArticleCount, $actualArticleCount);
 
         // verify that only valid articleIds will be returned. There isn't article with id 9087041234
-        $fantasyArticleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory('/deutsch/bücher/fantasy');
+        $fantasyArticleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory('/deutsch/bücher/fantasy', 1234);
         self::assertCount(1, $fantasyArticleIds);
         self::assertEquals(14471, $fantasyArticleIds[0]);
     }

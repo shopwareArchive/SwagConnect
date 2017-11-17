@@ -54,9 +54,10 @@ abstract class CategoryResolver
      * if they don't exist will be created
      *
      * @param array $categories
+     * @param int $shopId
      * @return \Shopware\Models\Category\Category[]
      */
-    abstract public function resolve(array $categories);
+    abstract public function resolve(array $categories, $shopId);
 
     /**
      * Generates categories tree by given array of categories
@@ -72,16 +73,18 @@ abstract class CategoryResolver
      *
      * @param array $categories
      * @param int $articleId
+     * @param int $shopId
      * @return void
      */
-    public function storeRemoteCategories(array $categories, $articleId)
+    public function storeRemoteCategories(array $categories, $articleId, $shopId)
     {
         $remoteCategories = [];
         foreach ($categories as $categoryKey => $category) {
-            $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $categoryKey]);
+            $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $categoryKey, 'shopId' => $shopId]);
             if (!$remoteCategory) {
                 $remoteCategory = new RemoteCategory();
                 $remoteCategory->setCategoryKey($categoryKey);
+                $remoteCategory->setShopId($shopId);
             }
             $remoteCategory->setLabel($category);
             $this->manager->persist($remoteCategory);
@@ -100,7 +103,7 @@ abstract class CategoryResolver
      * @param RemoteCategory[] $remoteCategories
      * @param $articleId
      */
-    private function addProductToRemoteCategory($remoteCategories, $articleId)
+    private function addProductToRemoteCategory(array $remoteCategories, $articleId)
     {
         $productToCategories = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
         /** @var $remoteCategory \Shopware\CustomModels\Connect\RemoteCategory */
@@ -116,7 +119,7 @@ abstract class CategoryResolver
 
     /**
      * @param \Shopware\CustomModels\Connect\RemoteCategory[] $assignedCategories
-     * @param $articleId
+     * @param int $articleId
      */
     private function removeProductsFromNotAssignedRemoteCategories(array $assignedCategories, $articleId)
     {
@@ -139,14 +142,15 @@ abstract class CategoryResolver
      *
      * @param array $node
      * @param int $parentId
+     * @param int $shopId
      * @param bool $returnOnlyLeafs
      * @param array $categories
      * @return array
      */
-    public function convertTreeToKeys(array $node, $parentId, $returnOnlyLeafs = true, $categories = [])
+    public function convertTreeToKeys(array $node, $parentId, $shopId, $returnOnlyLeafs = true, $categories = [])
     {
         foreach ($node as $category) {
-            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId);
+            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId, $shopId);
 
             if ((!$returnOnlyLeafs) || (empty($category['children']))) {
                 $categories[] = [
@@ -157,7 +161,7 @@ abstract class CategoryResolver
             }
 
             if (!empty($category['children'])) {
-                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $returnOnlyLeafs, $categories);
+                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $shopId, $returnOnlyLeafs, $categories);
             }
         }
 
@@ -168,9 +172,10 @@ abstract class CategoryResolver
      * @param string $categoryName
      * @param string $categoryKey
      * @param int $parentId
+     * @param int $shopId
      * @return int
      */
-    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId)
+    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
     {
         $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_categories`
@@ -178,7 +183,7 @@ abstract class CategoryResolver
             [':parentId' => $parentId, ':description' => $categoryName]);
 
         if (!$id) {
-            return $this->createLocalCategory($categoryName, $categoryKey, $parentId);
+            return $this->createLocalCategory($categoryName, $categoryKey, $parentId, $shopId);
         }
 
         return $id;
@@ -188,9 +193,10 @@ abstract class CategoryResolver
      * @param string $categoryName
      * @param string $categoryKey
      * @param int $parentId
+     * @param int $shopId
      * @return int
      */
-    public function createLocalCategory($categoryName, $categoryKey, $parentId)
+    public function createLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
     {
         $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
             FROM `s_categories`
@@ -198,9 +204,11 @@ abstract class CategoryResolver
             [$parentId]);
         $suffix = ($path) ? "$parentId|" : "|$parentId|";
         $path = $path . $suffix;
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`) 
-            VALUES (?, ?, ?, 1)',
-            [$categoryName, $parentId, $path]);
+        $now = new \DateTime('now');
+        $timestamp = $now->format('Y-m-d H:i:s');
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`, `added`, `changed`) 
+            VALUES (?, ?, ?, 1, ?, ?)',
+            [$categoryName, $parentId, $path, $timestamp, $timestamp]);
         $localCategoryId = $this->manager->getConnection()->fetchColumn('SELECT LAST_INSERT_ID()');
 
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 
@@ -209,8 +217,8 @@ abstract class CategoryResolver
 
         $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_plugin_connect_categories`
-            WHERE `category_key` = ?',
-            [$categoryKey]);
+            WHERE `category_key` = ? AND `shop_id` = ?',
+            [$categoryKey, $shopId]);
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`) 
             VALUES (?, ?)',
             [$remoteCategoryId, $localCategoryId]);

@@ -277,6 +277,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $mainVariant = $this->getProduct(true);
         $mainVariantColor = array_pop($color);
         $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
+        $mainVariant->configuratorSetType = 1;
         $mainVariant->groupId = $groupId;
         $variants[] = $mainVariant;
 

@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Component\HttpFoundation\Response;
 
 trait WebTestCaseTrait
 {
@@ -58,5 +59,18 @@ trait WebTestCaseTrait
         self::getKernel()->getContainer()->get('front')->setResponse('Enlight_Controller_Response_ResponseTestCase');
 
         return $client;
+    }
+
+    /**
+     * @param Response $response
+     * @return array
+     */
+    public function handleJsonResponse(Response $response)
+    {
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertNotNull($responseData, 'Response is not valid JSON');
+
+        return $responseData;
     }
 }

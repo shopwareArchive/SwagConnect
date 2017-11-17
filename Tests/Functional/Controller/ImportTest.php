@@ -9,24 +9,10 @@ namespace ShopwarePlugins\Connect\Tests\Functional\Controller;
 
 use ShopwarePlugins\Connect\Tests\TestClient;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
-use Symfony\Component\HttpFoundation\Response;
 
 class ImportTest extends \PHPUnit_Framework_TestCase
 {
     use WebTestCaseTrait;
-
-    /**
-     * @param Response $response
-     * @return array
-     */
-    private function handleJsonResponse(Response $response)
-    {
-        $this->assertEquals(200, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertNotNull($responseData, 'Response is not valid JSON');
-
-        return $responseData;
-    }
 
     public function test_get_imported_product_categories_tree_default()
     {
@@ -54,7 +40,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ]
         );
         $responseData = $this->handleJsonResponse($client->getResponse());
-        F;
 
         $this->assertTrue($responseData['success']);
     }
@@ -71,7 +56,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($responseData['success']);
     }
 
-    public function test_assign_remote_to_local_category_action()
+    public function test_assign_remote_to_local_category()
     {
         /** @var TestClient $client */
         $client = $this->createBackendClient();
@@ -82,10 +67,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             'POST',
             'backend/Import/assignRemoteToLocalCategory',
             [
-                'localCategoryId' => 140809703,
+                'localCategoryId' => '140809703',
                 'remoteCategoryKey' => '/deutsch/television',
                 'remoteCategoryLabel' => 'Television',
-                'node' => 'shopId6~stream~Awesome Products~/deutsch/television'
+                'node' => 'shopId1234~stream~Awesome Products~/deutsch/television'
             ]
         );
         $responseData = $this->handleJsonResponse($client->getResponse());

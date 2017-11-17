@@ -51,7 +51,7 @@ namespace ShopwarePlugins\Connect\Tests {
             return $response;
         }
 
-        //TODO Remove this function when Shopware 5.2 is no longer supported
+        //TODO Remove this function once Shopware 5.2 is no longer supported
         public function transformEnlightResponseToSymfonyResponse($response)
         {
             $rawHeaders = $response->getHeaders();

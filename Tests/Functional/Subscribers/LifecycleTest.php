@@ -10,35 +10,27 @@ namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Tests\TestClient;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
-use Symfony\Component\HttpFoundation\Response;
 
 class LifecycleTest extends \PHPUnit_Framework_TestCase
 {
     use WebTestCaseTrait;
 
-    /**
-     * @param Response $response
-     * @return array
-     */
-    private function handleJsonResponse(Response $response)
+    public function test_update_prices()
     {
-        $this->assertEquals(200, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertNotEmpty($responseData, 'Response is not valid JSON');
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
 
-        return $responseData;
-    }
+        $connection = self::getDbalConnection();
 
-    public function testUpdatePrices()
-    {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
-        $priceId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?', ['32870', '2404537']);
+        $priceId = $connection->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?',
+            ['32870', '2404537']);
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('prices',
-                [
+        $client->request(
+            'POST', 'backend/Article/saveDetail',
+            [
+                'prices' => [
                     0 => [
                         'id' => $priceId,
                         'from' => 1,
@@ -56,37 +48,39 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
                                 'tax' => true,
                                 'taxInput' => true,
                                 'mode' => false,
-                                'discount' => 0,
-                            ],
-                        ],
-                    ],
-                ])
-            ->setPost('controller', 'Article')
-            ->setPost('module', 'backend')
-            ->setPost('action', 'saveDetail')
-            ->setPost('number', 'sw32870.3')
-            ->setPost('price', 238.00)
-            ->setPost('additionalText', 'L / Schwarz')
-            ->setPost('supplierNumber', '')
-            ->setPost('active', false)
-            ->setPost('inStock', 15)
-            ->setPost('stockMin', 0)
-            ->setPost('weight', 0)
-            ->setPost('kind', 1)
-            ->setPost('position', 0)
-            ->setPost('shippingFree', false)
-            ->setPost('minPurchase', 1)
-            ->setPost('purchasePrice', 38.99)
-            ->setPost('articleId', 32870)
-            ->setPost('standard', false)
-            ->setPost('id', 2404537);
+                                'discount' => 0
+                            ]
+                        ]
+                    ]
+                ],
+                'controller' => 'Article',
+                'module' => 'backend',
+                'action' => 'saveDetail',
+                'number' => 'sw32870.3',
+                'price' => 238.00,
+                'additionalText' => 'L / Schwarz',
+                'supplierNumber' => '',
+                'active' => false,
+                'inStock' => 15,
+                'stockMin' => 0,
+                'weight' => 0,
+                'kind' => 1,
+                'position' => 0,
+                'shippingFree' => false,
+                'minPurchase' => 1,
+                'purchasePrice' => 38.99,
+                'articleId' => 32870,
+                'standard' => false,
+                'id' => 2404537,
 
+            ]
+        );
 
-        $this->dispatch('backend/Article/saveDetail');
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $returnedData = $this->handleJsonResponse($client->getResponse());
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $this->assertTrue($returnedData['success']);
+
+        $changes = $connection->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32870-2404537']
         );

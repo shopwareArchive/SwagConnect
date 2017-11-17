@@ -9,24 +9,10 @@ namespace Functional\Controller;
 
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\TestClient;
-use Symfony\Component\HttpFoundation\Response;
 
 class ConnectTest extends \PHPUnit_Framework_TestCase
 {
     use WebTestCaseTrait;
-
-    /**
-     * @param Response $response
-     * @return array
-     */
-    private function handleJsonResponse(Response $response)
-    {
-        $this->assertEquals(200, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertNotNull($responseData, 'Response is not valid JSON');
-
-        return $responseData;
-    }
 
     public function test_get_article_source_ids()
     {
@@ -45,21 +31,21 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedIds, $responseData['sourceIds']);
     }
 
-    public function test_get_article_source_ids_with_export_all()
+    public function test_get_article_count()
     {
         /** @var TestClient $client */
         $client = self::createBackendClient();
 
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/config_fixes.sql');
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
-        $expectedIds = ['2', '117', '2-123', '2-124', '117-221'];
+        $articleCount = 19;
 
-        $client->request('POST', 'backend/Connect/getArticleSourceIds', ['exportAll' => 'true']);
+        $client->request('POST', 'backend/Connect/getArticleCount');
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertNotEmpty($responseData);
         $this->assertTrue($responseData['success']);
-        $this->assertArraySubset($expectedIds, $responseData['sourceIds']);
+        $this->assertEquals($articleCount, $responseData['count']);
     }
 
     public function test_exporting_a_product_with_variants()

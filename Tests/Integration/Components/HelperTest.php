@@ -179,10 +179,11 @@ class HelperTest extends \PHPUnit_Framework_TestCase
             $manager->getRepository(Category::class),
             $manager->getRepository(RemoteCategory::class),
             ConfigFactory::getConfigInstance(),
+            Shopware()->Container()->get('CategoryDenormalization'),
             $manager->getRepository(ProductToRemoteCategory::class)
         );
 
-        $categoryKeys = $autoCategoryResolver->resolve($categories);
+        $categoryKeys = $autoCategoryResolver->resolve($categories, 1234);
 
         $this->assertCount(2, $categoryKeys);
         $this->assertGreaterThan(count($categoryKeys), count($categories));
@@ -303,8 +304,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($categories as $categoryKey => $category) {
-            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label) VALUES (?, ?)',
-                [$categoryKey, $category]);
+            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
+                [$categoryKey, $category, 1]);
         }
 
         $categoriesJson = json_encode($categories);
@@ -377,5 +378,83 @@ class HelperTest extends \PHPUnit_Framework_TestCase
 
         $count = $this->getHelper()->getProductCountForCategoryRecovery();
         $this->assertEquals(0, $count);
+    }
+
+    public function testAddShopIdToConnectCategoriesWithMultipleSupplier()
+    {
+        $manager = Shopware()->Models();
+        $this->importFixtures(__DIR__ . '/../_fixtures/connect_items_categories_multiple_supplier.sql');
+
+        $this->getHelper()->addShopIdToConnectCategories(0, 50);
+
+        //assert that each category exists for both suppliers
+        $deutschCategoryForShop1111 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Deutsch" AND shop_id = 1111');
+        $this->assertGreaterThan(0, $deutschCategoryForShop1111);
+        $testCategoryForShop1111 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test" AND shop_id = 1111');
+        $this->assertGreaterThan(0, $testCategoryForShop1111);
+        $test1CategoryForShop1111 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test1" AND shop_id = 1111');
+        $this->assertGreaterThan(0, $test1CategoryForShop1111);
+        $test2CategoryForShop1111 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test2" AND shop_id = 1111');
+        $this->assertGreaterThan(0, $test2CategoryForShop1111);
+
+        $deutschCategoryForShop1222 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Deutsch" AND shop_id = 1222');
+        $this->assertGreaterThan(0, $deutschCategoryForShop1222);
+        $testCategoryForShop1222 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test" AND shop_id = 1222');
+        $this->assertGreaterThan(0, $testCategoryForShop1222);
+        $test1CategoryForShop1222 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test1" AND shop_id = 1222');
+        $this->assertGreaterThan(0, $test1CategoryForShop1222);
+        $test2CategoryForShop1222 = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test2" AND shop_id = 1222');
+        $this->assertGreaterThan(0, $test2CategoryForShop1222);
+
+        //assert that old categories got updated
+        $deutschCategory = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Deutsch" AND shop_id = NULL');
+        $this->assertFalse($deutschCategory);
+
+        $testCategory= $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test" AND shop_id = NULL');
+        $this->assertFalse($testCategory);
+
+        $test1Category = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test1" AND shop_id = NULL');
+        $this->assertFalse($test1Category);
+
+        $test2Category = $manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE label = "Test2" AND shop_id = NULL');
+        $this->assertFalse($test2Category);
+
+        //assert that product to categories gets updated
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $deutschCategoryForShop1111 AND articleID = 3");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $deutschCategoryForShop1111 AND articleID = 4");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $testCategoryForShop1111 AND articleID = 3");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $testCategoryForShop1111 AND articleID = 4");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $test1CategoryForShop1111 AND articleID = 3");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $test2CategoryForShop1111 AND articleID = 4");
+        $this->assertGreaterThan(0, $n);
+
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $deutschCategoryForShop1222 AND articleID = 5");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $deutschCategoryForShop1222 AND articleID = 6");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $testCategoryForShop1222 AND articleID = 5");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $testCategoryForShop1222 AND articleID = 6");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $test1CategoryForShop1222 AND articleID = 6");
+        $this->assertGreaterThan(0, $n);
+        $n = $manager->getConnection()->fetchColumn("SELECT id FROM s_plugin_connect_product_to_categories WHERE connect_category_id = $test2CategoryForShop1222 AND articleID = 5");
+        $this->assertGreaterThan(0, $n);
+
+        //assert that product to local categories gets updated
+        $n = $manager->getConnection()->fetchAll("SELECT * FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = $test1CategoryForShop1111 AND local_category_id= 1885");
+        $this->assertInternalType('array', $n);
+        $n = $manager->getConnection()->fetchAll("SELECT * FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = $test1CategoryForShop1222 AND local_category_id= 1885");
+        $this->assertInternalType('array', $n);
+
+        $n = $manager->getConnection()->fetchAll("SELECT * FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = $test2CategoryForShop1111 AND local_category_id= 1886");
+        $this->assertInternalType('array', $n);
+        $n = $manager->getConnection()->fetchAll("SELECT * FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = $test2CategoryForShop1222 AND local_category_id= 1886");
+        $this->assertInternalType('array', $n);
     }
 }

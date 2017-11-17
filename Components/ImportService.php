@@ -10,6 +10,7 @@ namespace ShopwarePlugins\Connect\Components;
 use Doctrine\DBAL\Connection;
 use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 use Shopware\Components\Model\CategoryDenormalization;
+use Shopware\Connect\Struct\Product;
 use ShopwarePlugins\Connect\Components\CategoryResolver\AutoCategoryResolver;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\MultiEdit\Resource\ResourceInterface;
@@ -263,10 +264,10 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), false);
+        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, false);
 
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory']);
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory'], $shopId);
             foreach ($articleIds as $articleId) {
                 $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
                 $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);
@@ -332,18 +333,9 @@ class ImportService
 
         $connection->beginTransaction();
         try {
-            foreach ($remoteItems as $articleId => $categories) {
-                foreach ($categories as $categoryKey => $category) {
-                    $connection->executeQuery(
-                        'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) VALUES (?, ?)',
-                        [$categoryKey, $category]
-                    );
-
-                    $connection->executeQuery(
-                        'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`connect_category_id`, `articleID`) VALUES ((SELECT c.id FROM s_plugin_connect_categories c WHERE c.category_key = ?), ?)',
-                        [$categoryKey, $articleId]
-                    );
-                }
+            /** @var Product $product */
+            foreach ($remoteItems as $articleId => $product) {
+                $this->autoCategoryResolver->storeRemoteCategories($product->categories, $articleId, $product->shopId);
             }
             $connection->commit();
         } catch (\Exception $e) {
@@ -381,12 +373,12 @@ class ImportService
      * and there isn't record in s_plugin_connect_product_to_categories for them.
      * Returned array contains key = articleId and value = array of categories
      *
-     * @return array
+     * @return Product[]
      */
     public function getArticlesWithAutoImportedCategories()
     {
         $statement = $this->manager->getConnection()->prepare(
-            'SELECT b.article_id, b.category
+            'SELECT b.article_id, b.category, b.shop_id
             FROM s_plugin_connect_items b
             LEFT JOIN s_plugin_connect_product_to_categories a ON b.article_id = a.articleID
             WHERE b.shop_id > 0 AND a.connect_category_id IS NULL GROUP BY b.article_id'
@@ -397,8 +389,10 @@ class ImportService
         foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $item) {
             $categories = json_decode($item['category'], true);
             if (is_array($categories) && count($categories) > 0) {
-                $articleId = $item['article_id'];
-                $remoteItems[$articleId] = $categories;
+                $product = new Product();
+                $product->shopId = $item['shop_id'];
+                $product->categories = $categories;
+                $remoteItems[$item['article_id']] = $product;
             }
         }
 

@@ -15,6 +15,7 @@ use Shopware\Components\Model\ModelManager;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
+use Shopware\Components\Model\CategoryDenormalization;
 
 class AutoCategoryResolver extends CategoryResolver
 {
@@ -36,6 +37,7 @@ class AutoCategoryResolver extends CategoryResolver
         CategoryRepository $categoryRepository,
         RemoteCategoryRepository $remoteCategoryRepository,
         Config $config,
+        CategoryDenormalization $categoryDenormalization,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository = null
     ) {
         if (!$productToRemoteCategoryRepository) {
@@ -45,7 +47,8 @@ class AutoCategoryResolver extends CategoryResolver
             $manager,
             $remoteCategoryRepository,
             $productToRemoteCategoryRepository,
-            $categoryRepository
+            $categoryRepository,
+            $categoryDenormalization
         );
 
         $this->config = $config;
@@ -54,7 +57,7 @@ class AutoCategoryResolver extends CategoryResolver
     /**
      * {@inheritdoc}
      */
-    public function resolve(array $categories)
+    public function resolve(array $categories, $shopId)
     {
         $tree = $this->generateTree($categories);
 
@@ -74,7 +77,7 @@ class AutoCategoryResolver extends CategoryResolver
                 continue;
             }
 
-            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToKeys($node['children'], $mainCategory->getId()));
+            $remoteCategories = array_merge($remoteCategories, $this->convertTreeToKeys($node['children'], $mainCategory->getId(), $shopId));
         }
 
         // Collect all, not only leaf categories. Some customers use them to assign products.

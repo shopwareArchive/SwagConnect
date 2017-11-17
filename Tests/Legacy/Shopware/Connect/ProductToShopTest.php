@@ -81,7 +81,8 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager,
                 $this->modelManager->getRepository(RemoteCategory::class),
                 $this->modelManager->getRepository(ProductToRemoteCategory::class),
-                $this->modelManager->getRepository(Category::class)
+                $this->modelManager->getRepository(Category::class),
+                Shopware()->Container()->get('CategoryDenormalization')
             ),
             $this->gateway,
             Shopware()->Container()->get('events'),
@@ -463,6 +464,7 @@ class ProductToShopTest extends ConnectTestHelper
                 $this->modelManager->getRepository(Category::class),
                 $this->modelManager->getRepository(RemoteCategory::class),
                 $config,
+                Shopware()->Container()->get('CategoryDenormalization'),
                 $this->modelManager->getRepository(ProductToRemoteCategory::class)
             ),
             $this->gateway,

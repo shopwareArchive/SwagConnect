@@ -520,33 +520,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                         ]
                                     }),
                                     displayField:'display',
-                                    valueField: 'value',
-                                    listeners: {
-                                        change: function (combo, newValue, oldValue, opts) {
-                                            if (combo.getValue() === 2) {
-                                                Ext.Ajax.request({
-                                                    url: '{url controller=ConnectConfig action=checkCronPlugin}',
-                                                    method: 'GET',
-                                                    success: function (response, opts) {
-                                                        var data = Ext.JSON.decode(response.responseText);
-                                                        if (data.cronActivated !== true) {
-                                                            combo.setValue(oldValue);
-                                                            Shopware.Notification.createGrowlMessage(
-                                                                '{s name=connect/error}Error{/s}',
-                                                                '{s name=connect/config/error/cron_not_activated}To deactivate this Setting you have to activate the Cron-Plugin{/s}'
-                                                            );
-                                                        }
-                                                    },
-                                                    failure: function (response, opts) {
-                                                        combo.setValue(oldValue);
-                                                        Shopware.Notification.createGrowlMessage(
-                                                            '{s name=connect/error}Error{/s}'
-                                                        );
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
+                                    valueField: 'value'
                                 }
                             ]
                         }

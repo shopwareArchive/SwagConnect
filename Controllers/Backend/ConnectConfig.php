@@ -15,7 +15,6 @@ use ShopwarePlugins\Connect\Components\ErrorHandler;
 use Shopware\Connect\Gateway\ChangeGateway;
 use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
-use Shopware\Models\Plugin\Plugin;
 
 /**
  * @category  Shopware
@@ -972,18 +971,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
         $this->View()->assign(
             [
                 'success' => true,
-            ]
-        );
-    }
-
-    public function checkCronPluginAction()
-    {
-        $pluginRepo = $this->getModelManager()->getRepository(Plugin::class);
-        $cronPlugin = $pluginRepo->findOneBy(['name' => 'Cron']);
-
-        $this->View()->assign(
-            [
-                'cronActivated' => (bool) $cronPlugin->getActive()
             ]
         );
     }

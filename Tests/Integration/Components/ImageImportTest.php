@@ -7,7 +7,6 @@
 
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
-use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Logger;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Article\Image;
@@ -174,9 +173,6 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     public function testBatchImport()
     {
         Shopware()->Db()->executeQuery('UPDATE s_plugin_connect_items SET last_update_flag = 0');
-
-        ConfigFactory::getConfigInstance()->setConfig('importImagesOnFirstImport', 0);
-
         $this->insertOrUpdateProducts(1, true, true);
 
         $result = $this->imageImport->getProductsNeedingImageImport();

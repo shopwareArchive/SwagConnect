@@ -62,6 +62,8 @@ class VariantConfigurator
             $configSet = $article->getConfiguratorSet();
         }
 
+        $configSet->setType($product->configuratorSetType);
+
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);
             $option = $this->getOrCreateOptionByName($configSet, $group, $value);

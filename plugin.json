@@ -10,6 +10,7 @@
     "currentVersion": "1.1.8",
     "changelog": {
         "de": {
+            "1.1.8": "CON-4935 - Fix: Kategorien Daten für Sitemap; CON-4829 - Konfigurator wird gesynct; CON-4873 - Alle exportieren Button funktioniert für große Datenmengen; CON-4885 - leere Connect-Kategorien werden automatisch gelöscht; CON-4926 - Performanceoptimierung ToShop-Channel; CON-4954: Fix: gleiche Kategorien von verschiedenen Lieferanten",
             "1.1.7": "CON-4922 - Fix: Plugin stürzt ab bei Deaktivierung; CON-4609 - Versandstatus und Trckingcode werden synchronisiert; CON-4936 - Verbesserung der Kategoriezuweisung",
             "1.1.6": "CON-4832 - Fix: Die Mehrfachzuweisung von Kategorien wurde verbessert; CON-4687 - Die alten Plugin Event Subscriber wurden durch die neuen Subscriber ersetzt.",
             "1.1.5": "CON-4880 - Fix: Aktualisierte Connect-Kategorien werden im Import-Fenster nicht angezeigt; CON-4853 - Performance Verbesserungen im To-Shop-Channel; CON-4871 - Fix: Produkt wurde als Variante exportiert wenn es kein Variantenartikel ist",
@@ -23,6 +24,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.8": "CON-4935 - Fix: Category dates for sitemap; CON-4829 - Configurator-Set gets synced; CON-4873 - Export all works for many products; CON-4885 - empty Connect-Categories get deleted; CON-4926 - Performanceimprovements ToShop-Channel; CON-4954: Fix: same Category from different supplier",
             "1.1.7": "CON-4922 - Fix: Plugin crashes when it gets deactivated; CON-4609 - Shippingstatus and Trackingcode get synced; CON-4936 - Improvements in Category-Assignment",
             "1.1.6": "CON-4832 - Fix: Assignment of multiple categories now works properly; CON-4687 - Refactored the old subscribers to the new Shopware subscribers",
             "1.1.5": "CON-4880 - Fix: Updated Connect-Categories are not visible in Import-Window; CON-4853 - Performance Improvements in To-Shop-Channel; CON-4871 - Fix: Product is exported as a variant even when it's not",

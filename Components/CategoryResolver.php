@@ -14,6 +14,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Models\Category\Category;
+use Shopware\Components\Model\CategoryDenormalization;
 
 abstract class CategoryResolver
 {
@@ -37,16 +38,23 @@ abstract class CategoryResolver
      */
     protected $categoryRepository;
 
+    /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
     public function __construct(
         ModelManager $manager,
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        CategoryDenormalization $categoryDenormalization
     ) {
         $this->manager = $manager;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
         $this->categoryRepository = $categoryRepository;
+        $this->categoryDenormalization = $categoryDenormalization;
     }
 
     /**
@@ -132,8 +140,74 @@ abstract class CategoryResolver
         /** @var int $currentProductCategoryId */
         foreach ($currentProductCategoryIds as $currentProductCategoryId) {
             if (!in_array($currentProductCategoryId, $assignedCategoryIds)) {
+                $this->deleteAssignmentOfLocalCategories($currentProductCategoryId, $articleId);
                 $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId, $articleId);
             }
+        }
+    }
+
+    /**
+     * @param int $currentProductCategoryId
+     * @param int $articleId
+     */
+    private function deleteAssignmentOfLocalCategories($currentProductCategoryId, $articleId)
+    {
+        $localCategoriesIds = $this->manager->getConnection()->executeQuery(
+            'SELECT local_category_id FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = ?',
+            [$currentProductCategoryId]
+        )->fetchAll(\PDO::FETCH_COLUMN);
+        if ($localCategoriesIds) {
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` IN (?)',
+                [$articleId, $localCategoriesIds],
+                [\PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+            );
+            foreach ($localCategoriesIds as $categoryId) {
+                $this->categoryDenormalization->removeAssignment($articleId, $categoryId);
+            }
+
+            $this->deleteEmptyConnectCategories($localCategoriesIds);
+        }
+    }
+
+    /**
+     * @param int[] $categoryIds
+     */
+    public function deleteEmptyConnectCategories(array $categoryIds)
+    {
+        foreach ($categoryIds as $categoryId) {
+            $articleCount = (int) $this->manager->getConnection()->fetchColumn(
+                'SELECT COUNT(id) FROM s_articles_categories WHERE categoryID = ?',
+                [$categoryId]
+            );
+            if ($articleCount === 0) {
+                $this->deleteEmptyCategory($categoryId);
+            }
+        }
+    }
+
+    /**
+     * @param int $categoryId
+     */
+    private function deleteEmptyCategory($categoryId)
+    {
+        $connectImported = $this->manager->getConnection()->fetchColumn(
+            'SELECT connect_imported_category FROM s_categories_attributes WHERE categoryID = ?',
+            [$categoryId]
+        );
+
+        if ($connectImported == 1 && $this->countChildCategories($categoryId) === 0) {
+            $parent = (int) $this->manager->getConnection()->fetchColumn(
+                'SELECT parent FROM s_categories WHERE `id` = ?',
+                [$categoryId]
+            );
+
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_categories` WHERE `id` = ?',
+                [$categoryId]
+            );
+
+            $this->deleteEmptyCategory($parent);
         }
     }
 
@@ -224,5 +298,17 @@ abstract class CategoryResolver
             [$remoteCategoryId, $localCategoryId]);
 
         return $localCategoryId;
+    }
+
+    /**
+     * @param $categoryId
+     * @return int
+     */
+    private function countChildCategories($categoryId)
+    {
+        return (int) $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
+            [$categoryId]
+        );
     }
 }

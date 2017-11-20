@@ -15,6 +15,7 @@ use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Category\Category;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -194,17 +195,7 @@ class ProductToShop implements ProductToShopBase
             return;
         }
 
-        if (!empty($product->sku)) {
-            $number = 'SC-' . $product->shopId . '-' . $product->sku;
-            $duplicatedDetail = $this->helper->getDetailByNumber($number);
-            if ($duplicatedDetail
-                && $this->helper->getConnectAttributeByModel($duplicatedDetail)->getSourceId() != $product->sourceId
-            ) {
-                $this->deleteDetail($duplicatedDetail);
-            }
-        } else {
-            $number = 'SC-' . $product->shopId . '-' . $product->sourceId;
-        }
+        $number = $this->generateSKU($product);
 
         $detail = $this->helper->getArticleDetailModelByProduct($product);
         $detail = $this->eventManager->filter(
@@ -219,68 +210,28 @@ class ProductToShop implements ProductToShopBase
         $isMainVariant = false;
         if ($detail === null) {
             $active = $this->config->getConfig('activateProductsAutomatically', false) ? true : false;
-            if ($product->groupId !== null) {
-                $model = $this->helper->getArticleByRemoteProduct($product);
-                if (!$model instanceof \Shopware\Models\Article\Article) {
-                    $model = $this->helper->createProductModel($product);
-                    $model->setActive($active);
-                    $isMainVariant = true;
-                }
-            } else {
-                $model = $this->helper->getConnectArticleModel($product->sourceId, $product->shopId);
-                if (!$model instanceof \Shopware\Models\Article\Article) {
-                    $model = $this->helper->createProductModel($product);
-                    $model->setActive($active);
-                }
-            }
 
-            $detail = new DetailModel();
-            $detail->setActive($model->getActive());
-            $this->manager->persist($detail);
-            $detail->setArticle($model);
-            $model->getDetails()->add($detail);
-            if (!empty($product->variant)) {
-                $this->variantConfigurator->configureVariantAttributes($product, $detail);
-            }
+            $model = $this->getSWProductModel($product, $active, $isMainVariant);
+
+            $detail = $this->generateNewDetail($product, $model);
         } else {
+            /** @var ProductModel $model */
             $model = $detail->getArticle();
             // fix for isMainVariant flag
             // in connect attribute table
             $mainDetail = $model->getMainDetail();
-            if ($detail->getId() === $mainDetail->getId()) {
-                $isMainVariant = true;
-            }
+            $isMainVariant = $this->checkIfMainVariant($detail, $mainDetail);
 
-            if (empty($product->variant) && $model->getConfiguratorSet()) {
-                $this->manager->getConnection()->executeQuery(
-                    'UPDATE s_articles SET configurator_set_id = NULL WHERE id = ?',
-                    [$model->getId()]
-                );
-            }
+            $this->updateConfiguratorSetTypeFromProduct($model, $product);
+
+            $this->cleanUpConfiguratorSet($model, $product);
         }
 
         $detail->setNumber($number);
 
-        /** @var \Shopware\Models\Category\Category $category */
-        foreach ($model->getCategories() as $category) {
-            $attribute = $category->getAttribute();
-            if (!$attribute) {
-                continue;
-            }
+        $this->removeConnectImportedCategories($model);
 
-            if ($attribute->getConnectImported()) {
-                $model->removeCategory($category);
-            }
-        }
-
-        $detailAttribute = $detail->getAttribute();
-        if (!$detailAttribute) {
-            $detailAttribute = new AttributeModel();
-            $detail->setAttribute($detailAttribute);
-            $model->setAttribute($detailAttribute);
-            $detailAttribute->setArticle($model);
-            $detailAttribute->setArticleDetail($detail);
-        }
+        $detailAttribute = $this->getOrCreateAttributeModel($detail, $model);
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
         // configure main variant and groupId
@@ -290,64 +241,25 @@ class ProductToShop implements ProductToShopBase
         $connectAttribute->setGroupId($product->groupId);
 
         list($updateFields, $flag) = $this->getUpdateFields($model, $detail, $connectAttribute, $product);
-        /*
-         * Make sure, that the following properties are set for
-         * - new products
-         * - products that have been configured to receive these updates
-         */
-        if ($updateFields['name']) {
-            $model->setName($product->title);
-        }
-        if ($updateFields['shortDescription']) {
-            $model->setDescription($product->shortDescription);
-        }
-        if ($updateFields['longDescription']) {
-            $model->setDescriptionLong($product->longDescription);
-        }
-
-        if ($updateFields['additionalDescription']) {
-            $detailAttribute->setConnectProductDescription($product->additionalDescription);
-        }
+        $this->setPropertiesForNewProducts($updateFields, $model, $detailAttribute, $product);
 
         $this->saveVat($product, $model);
 
-        if ($product->vendor !== null) {
-            $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
-            $supplier = $repo->findOneBy(['name' => $product->vendor]);
-            if ($supplier === null) {
-                $supplier = $this->createSupplier($product->vendor);
-            }
-            $model->setSupplier($supplier);
-        }
-
-        //set product properties
         $this->applyProductProperties($model, $product);
 
-        // apply marketplace attributes
         $detailAttribute = $this->applyMarketplaceAttributes($detailAttribute, $product);
 
-        $connectAttribute->setShopId($product->shopId);
-        $connectAttribute->setSourceId($product->sourceId);
-        $connectAttribute->setExportStatus(null);
-        $connectAttribute->setPurchasePrice($product->purchasePrice);
-        $connectAttribute->setFixedPrice($product->fixedPrice);
-        $connectAttribute->setStream($product->stream);
+        $this->setConnectAttributesFromProduct($connectAttribute, $product);
 
         // store product categories to connect attribute
         $connectAttribute->setCategory($product->categories);
 
         $connectAttribute->setLastUpdateFlag($flag);
-        // store purchasePriceHash and offerValidUntil
+
         $connectAttribute->setPurchasePriceHash($product->purchasePriceHash);
         $connectAttribute->setOfferValidUntil($product->offerValidUntil);
 
-        $detail->setInStock($product->availability);
-        $detail->setEan($product->ean);
-        $detail->setShippingTime($product->deliveryWorkDays);
-        $releaseDate = new \DateTime();
-        $releaseDate->setTimestamp($product->deliveryDate);
-        $detail->setReleaseDate($releaseDate);
-        $detail->setMinPurchase($product->minPurchaseQuantity);
+        $this->updateDetailFromProduct($detail, $product);
 
         // some shops have feature "sell not in stock",
         // then end customer should be able to by the product with stock = 0
@@ -358,76 +270,11 @@ class ProductToShop implements ProductToShopBase
             $model->setLastStock(true);
         }
 
-        // if connect product has unit
-        // find local unit with units mapping
-        // and add to detail model
-        if (array_key_exists('unit', $product->attributes) && $product->attributes['unit']) {
-            $detailAttribute->setConnectRemoteUnit($product->attributes['unit']);
-            if ($this->config->getConfig($product->attributes['unit']) == null) {
-                $this->config->setConfig($product->attributes['unit'], '', null, 'units');
-            }
+        $this->detailSetUnit($detail, $product, $detailAttribute);
 
-            /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
-            $unitMapper = new UnitMapper($this->config, $this->manager);
+        $this->detailSetAttributes($detail, $product);
 
-            $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
-
-            /** @var \Shopware\Models\Article\Unit $unit */
-            $unit = $this->helper->getUnit($shopwareUnit);
-            $detail->setUnit($unit);
-            $detail->setPurchaseUnit($product->attributes['quantity']);
-            $detail->setReferenceUnit($product->attributes['ref_quantity']);
-        } else {
-            $detail->setUnit(null);
-            $detail->setPurchaseUnit(null);
-            $detail->setReferenceUnit(null);
-        }
-
-        // set dimension
-        if (array_key_exists('dimension', $product->attributes) && $product->attributes['dimension']) {
-            $dimension = explode('x', $product->attributes['dimension']);
-            $detail->setLen($dimension[0]);
-            $detail->setWidth($dimension[1]);
-            $detail->setHeight($dimension[2]);
-        } else {
-            $detail->setLen(null);
-            $detail->setWidth(null);
-            $detail->setHeight(null);
-        }
-
-        // set weight
-        if (array_key_exists('weight', $product->attributes) && $product->attributes['weight']) {
-            $detail->setWeight($product->attributes['weight']);
-        }
-
-        //set package unit
-        if (array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $product->attributes)) {
-            $detail->setPackUnit($product->attributes[Product::ATTRIBUTE_PACKAGEUNIT]);
-        }
-
-        //set basic unit
-        if (array_key_exists(Product::ATTRIBUTE_BASICUNIT, $product->attributes)) {
-            $detail->setMinPurchase($product->attributes[Product::ATTRIBUTE_BASICUNIT]);
-        }
-
-        //set manufacturer no.
-        if (array_key_exists(Product::ATTRIBUTE_MANUFACTURERNUMBER, $product->attributes)) {
-            $detail->setSupplierNumber($product->attributes[Product::ATTRIBUTE_MANUFACTURERNUMBER]);
-        }
-
-        // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
-        // This way a customer will be able to apply the most recent changes any time later
-        $connectAttribute->setLastUpdate(json_encode([
-            'shortDescription' => $product->shortDescription,
-            'longDescription' => $product->longDescription,
-            'additionalDescription' => $product->additionalDescription,
-            'purchasePrice' => $product->purchasePrice,
-            'image' => $product->images,
-            'variantImages' => $product->variantImages,
-            'price' => $product->price * ($product->vat + 1),
-            'name' => $product->title,
-            'vat' => $product->vat
-        ]));
+        $this->connectAttributeSetLastUpdate($connectAttribute, $product);
 
         if ($model->getMainDetail() === null) {
             $model->setMainDetail($detail);
@@ -449,30 +296,22 @@ class ProductToShop implements ProductToShopBase
             ]
         );
 
+        //article has to be flushed
         $this->manager->persist($model);
+        $this->manager->persist($connectAttribute);
+        $this->manager->persist($detail);
         $this->manager->flush();
 
-        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId());
-        $categories = $this->categoryResolver->resolve($product->categories);
+        $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId(), $product->shopId);
+        $categories = $this->categoryResolver->resolve($product->categories, $product->shopId);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }
 
-        $this->manager->persist($connectAttribute);
-        $this->manager->persist($detail);
-        //article has to be flushed
         $this->manager->persist($detailAttribute);
         $this->manager->flush();
 
-        $this->categoryDenormalization->disableTransactions();
-        foreach ($categories as $category) {
-            $this->categoryDenormalization->addAssignment($model->getId(), $category);
-            $this->manager->getConnection()->executeQuery(
-                'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
-                [$model->getId(),  $category]
-            );
-        }
-        $this->categoryDenormalization->enableTransactions();
+        $this->categoryDenormalization($model, $categories);
 
         $defaultCustomerGroup = $this->helper->getDefaultCustomerGroup();
         // Only set prices, if fixedPrice is active or price updates are configured
@@ -513,6 +352,416 @@ class ProductToShop implements ProductToShopBase
     }
 
     /**
+     * @param Product $product
+     * @return string
+     */
+    private function generateSKU(Product $product)
+    {
+        if (!empty($product->sku)) {
+            $number = 'SC-' . $product->shopId . '-' . $product->sku;
+            $duplicatedDetail = $this->helper->getDetailByNumber($number);
+            if ($duplicatedDetail
+                && $this->helper->getConnectAttributeByModel($duplicatedDetail)->getSourceId() != $product->sourceId
+            ) {
+                $this->deleteDetail($duplicatedDetail);
+            }
+        } else {
+            $number = 'SC-' . $product->shopId . '-' . $product->sourceId;
+        }
+
+        return $number;
+    }
+
+    /**
+     * @param DetailModel $detailModel
+     */
+    private function deleteDetail(DetailModel $detailModel)
+    {
+        $this->eventManager->notify(
+            'Connect_Merchant_Delete_Product_Before',
+            [
+                'subject' => $this,
+                'articleDetail' => $detailModel
+            ]
+        );
+
+        $article = $detailModel->getArticle();
+        // Not sure why, but the Attribute can be NULL
+        $attribute = $this->helper->getConnectAttributeByModel($detailModel);
+        $this->manager->remove($detailModel);
+
+        if ($attribute) {
+            $this->manager->remove($attribute);
+        }
+
+        // if removed variant is main variant
+        // find first variant which is not main and mark it
+        if ($detailModel->getKind() === 1) {
+            /** @var \Shopware\Models\Article\Detail $variant */
+            foreach ($article->getDetails() as $variant) {
+                if ($variant->getId() != $detailModel->getId()) {
+                    $variant->setKind(1);
+                    $article->setMainDetail($variant);
+                    $connectAttribute = $this->helper->getConnectAttributeByModel($variant);
+                    if (!$connectAttribute) {
+                        continue;
+                    }
+                    $connectAttribute->setIsMainVariant(true);
+                    $this->manager->persist($connectAttribute);
+                    $this->manager->persist($article);
+                    $this->manager->persist($variant);
+                    break;
+                }
+            }
+        }
+
+        if (count($details = $article->getDetails()) === 1) {
+            $details->clear();
+            $this->manager->remove($article);
+        }
+      
+        //save category Ids before flush
+        $oldCategoryIds = array_map(function ($category) {
+            return $category->getId();
+        }, $article->getCategories()->toArray());
+
+        // Do not remove flush. It's needed when remove article,
+        // because duplication of ordernumber. Even with remove before
+        // persist calls mysql throws exception "Duplicate entry"
+        $this->manager->flush();
+        // always clear entity manager, because $article->getDetails() returns
+        // more than 1 detail, but all of them were removed except main one.
+        $this->manager->clear();
+
+        // call this after flush because article has to be deleted that this works
+        if (count($oldCategoryIds) > 0) {
+            $this->categoryResolver->deleteEmptyConnectCategories($oldCategoryIds);
+        }
+    }
+
+    /**
+     * @param Product $product
+     * @param $active
+     * @param $isMainVariant
+     * @return null|Article
+     */
+    private function getSWProductModel(Product $product, $active, &$isMainVariant)
+    {
+        if ($product->groupId !== null) {
+            $model = $this->helper->getArticleByRemoteProduct($product);
+            if (!$model instanceof \Shopware\Models\Article\Article) {
+                $model = $this->helper->createProductModel($product);
+                $model->setActive($active);
+                $isMainVariant = true;
+            }
+        } else {
+            $model = $this->helper->getConnectArticleModel($product->sourceId, $product->shopId);
+            if (!$model instanceof \Shopware\Models\Article\Article) {
+                $model = $this->helper->createProductModel($product);
+                $model->setActive($active);
+            }
+        }
+
+        return $model;
+    }
+
+    /**
+     * @param Product $product
+     * @param $model
+     * @return DetailModel
+     */
+    private function generateNewDetail(Product $product, $model)
+    {
+        $detail = new DetailModel();
+        $detail->setActive($model->getActive());
+        $this->manager->persist($detail);
+        $detail->setArticle($model);
+        $model->getDetails()->add($detail);
+        if (!empty($product->variant)) {
+            $this->variantConfigurator->configureVariantAttributes($product, $detail);
+        }
+
+        return $detail;
+    }
+
+    /**
+     * @param DetailModel $detail
+     * @param DetailModel $mainDetail
+     * @return bool
+     */
+    private function checkIfMainVariant(DetailModel $detail, DetailModel $mainDetail)
+    {
+        return $detail->getId() === $mainDetail->getId();
+    }
+
+    /**
+     * @param ProductModel $model
+     * @param Product $product
+     */
+    private function updateConfiguratorSetTypeFromProduct(ProductModel $model, Product $product)
+    {
+        if (!empty($product->variant)) {
+            $configSet = $model->getConfiguratorSet();
+            $configSet->setType($product->configuratorSetType);
+        }
+    }
+
+    /**
+     * @param ProductModel $model
+     * @param Product $product
+     */
+    private function cleanUpConfiguratorSet(ProductModel $model, Product $product)
+    {
+        if (empty($product->variant) && $model->getConfiguratorSet()) {
+            $this->manager->getConnection()->executeQuery(
+                'UPDATE s_articles SET configurator_set_id = NULL WHERE id = ?',
+                [$model->getId()]
+            );
+        }
+    }
+
+    /**
+     * @param ProductModel $model
+     */
+    private function removeConnectImportedCategories(ProductModel $model)
+    {
+        /** @var \Shopware\Models\Category\Category $category */
+        foreach ($model->getCategories() as $category) {
+            $attribute = $category->getAttribute();
+            if (!$attribute) {
+                continue;
+            }
+
+            if ($attribute->getConnectImported()) {
+                $model->removeCategory($category);
+            }
+        }
+    }
+
+    /**
+     * @param DetailModel $detail
+     * @param ProductModel $model
+     * @return AttributeModel
+     */
+    private function getOrCreateAttributeModel(DetailModel $detail, ProductModel $model)
+    {
+        $detailAttribute = $detail->getAttribute();
+        if (!$detailAttribute) {
+            $detailAttribute = new AttributeModel();
+            $detail->setAttribute($detailAttribute);
+            $model->setAttribute($detailAttribute);
+            $detailAttribute->setArticle($model);
+            $detailAttribute->setArticleDetail($detail);
+        }
+
+        return $detailAttribute;
+    }
+
+    /**
+     * Get array of update info for the known fields
+     *
+     * @param $model
+     * @param $detail
+     * @param $attribute
+     * @param $product
+     * @return array
+     */
+    public function getUpdateFields($model, $detail, $attribute, $product)
+    {
+        // This also defines the flags of these fields
+        $fields = $this->helper->getUpdateFlags();
+        $flagsByName = array_flip($fields);
+
+        $flag = 0;
+        $output = [];
+        foreach ($fields as $key => $field) {
+            // Don't handle the imageInitialImport flag
+            if ($field == 'imageInitialImport') {
+                continue;
+            }
+
+            // If this is a new product
+            if (!$model->getId() && $field == 'image' && !$this->config->getConfig('importImagesOnFirstImport',
+                    false)) {
+                $output[$field] = false;
+                $flag |= $flagsByName['imageInitialImport'];
+                continue;
+            }
+
+            $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
+            $output[$field] = $updateAllowed;
+            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $product)) {
+                $flag |= $key;
+            }
+        }
+
+        return [$output, $flag];
+    }
+
+    /**
+     * Helper method to determine if a given $fields may/must be updated.
+     * This method will check for the model->id in order to determine, if it is a new entity. Therefore
+     * this method cannot be used after the model in question was already flushed.
+     *
+     * @param $field
+     * @param $model ProductModel
+     * @param $attribute ConnectAttribute
+     * @throws \RuntimeException
+     * @return bool|null
+     */
+    public function isFieldUpdateAllowed($field, ProductModel $model, ConnectAttribute $attribute)
+    {
+        $allowed = [
+            'ShortDescription',
+            'LongDescription',
+            'AdditionalDescription',
+            'Image',
+            'Price',
+            'Name',
+        ];
+
+        // Always allow updates for new models
+        if (!$model->getId()) {
+            return true;
+        }
+
+        $field = ucfirst($field);
+        $attributeGetter = 'getUpdate' . $field;
+        $configName = 'overwriteProduct' . $field;
+
+        if (!in_array($field, $allowed)) {
+            throw new \RuntimeException("Unknown update field {$field}");
+        }
+
+        $attributeValue = $attribute->$attributeGetter();
+
+
+        // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
+        // Once we have a supplier based configuration, we need to take it into account here
+        if ($attributeValue == null || $attributeValue == 'inherit') {
+            return $this->config->getConfig($configName, true);
+        }
+
+        return $attributeValue == 'overwrite';
+    }
+
+    /**
+     * Determine if a given field has changed
+     *
+     * @param $field
+     * @param ProductModel $model
+     * @param DetailModel $detail
+     * @param Product $product
+     * @return bool
+     */
+    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, Product $product)
+    {
+        switch ($field) {
+            case 'shortDescription':
+                return $model->getDescription() != $product->shortDescription;
+            case 'longDescription':
+                return $model->getDescriptionLong() != $product->longDescription;
+            case 'additionalDescription':
+                return $detail->getAttribute()->getConnectProductDescription() != $product->additionalDescription;
+            case 'name':
+                return $model->getName() != $product->title;
+            case 'image':
+                return count($model->getImages()) != count($product->images);
+            case 'price':
+                $prices = $detail->getPrices();
+                if (empty($prices)) {
+                    return true;
+                }
+                $price = $prices->first();
+                if (!$price) {
+                    return true;
+                }
+
+                return $prices->first()->getPrice() != $product->price;
+        }
+
+        throw new \InvalidArgumentException('Unrecognized field');
+    }
+
+    /**
+     * @param array $updateFields
+     * @param ProductModel $model
+     * @param AttributeModel $detailAttribute
+     * @param Product $product
+     */
+    private function setPropertiesForNewProducts(array $updateFields, ProductModel $model, AttributeModel $detailAttribute, Product $product)
+    {
+        /*
+         * Make sure, that the following properties are set for
+         * - new products
+         * - products that have been configured to receive these updates
+         */
+        if ($updateFields['name']) {
+            $model->setName($product->title);
+        }
+        if ($updateFields['shortDescription']) {
+            $model->setDescription($product->shortDescription);
+        }
+        if ($updateFields['longDescription']) {
+            $model->setDescriptionLong($product->longDescription);
+        }
+
+        if ($updateFields['additionalDescription']) {
+            $detailAttribute->setConnectProductDescription($product->additionalDescription);
+        }
+
+        if ($product->vat !== null) {
+            $repo = $this->manager->getRepository('Shopware\Models\Tax\Tax');
+            $tax = round($product->vat * 100, 2);
+            /** @var \Shopware\Models\Tax\Tax $tax */
+            $tax = $repo->findOneBy(['tax' => $tax]);
+            $model->setTax($tax);
+        }
+
+        if ($product->vendor !== null) {
+            $repo = $this->manager->getRepository('Shopware\Models\Article\Supplier');
+            $supplier = $repo->findOneBy(['name' => $product->vendor]);
+            if ($supplier === null) {
+                $supplier = $this->createSupplier($product->vendor);
+            }
+            $model->setSupplier($supplier);
+        }
+    }
+
+    /**
+     * @param $vendor
+     * @return Supplier
+     */
+    private function createSupplier($vendor)
+    {
+        $supplier = new Supplier();
+
+        if (is_array($vendor)) {
+            $supplier->setName($vendor['name']);
+            $supplier->setDescription($vendor['description']);
+            if (array_key_exists('url', $vendor) && $vendor['url']) {
+                $supplier->setLink($vendor['url']);
+            }
+
+            $supplier->setMetaTitle($vendor['page_title']);
+
+            if (array_key_exists('logo_url', $vendor) && $vendor['logo_url']) {
+                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
+            }
+        } else {
+            $supplier->setName($vendor);
+        }
+
+        //sets supplier attributes
+        $attr = new \Shopware\Models\Attribute\ArticleSupplier();
+        $attr->setConnectIsRemote(true);
+
+        $supplier->setAttribute($attr);
+
+        return $supplier;
+    }
+
+    /**
      * @param ProductModel $article
      * @param Product $product
      */
@@ -528,20 +777,7 @@ class ProductToShop implements ProductToShopBase
         $group = $groupRepo->findOneBy(['name' => $firstProperty->groupName]);
 
         if (!$group) {
-            $group = new PropertyGroup();
-            $group->setName($firstProperty->groupName);
-            $group->setComparable($firstProperty->comparable);
-            $group->setSortMode($firstProperty->sortMode);
-            $group->setPosition($firstProperty->groupPosition);
-
-            $attribute = new \Shopware\Models\Attribute\PropertyGroup();
-            $attribute->setPropertyGroup($group);
-            $attribute->setConnectIsRemote(true);
-            $group->setAttribute($attribute);
-
-            $this->manager->persist($attribute);
-            $this->manager->persist($group);
-            $this->manager->flush();
+            $group = $this->createPropertyGroup($firstProperty);
         }
 
         $propertyValues = $article->getPropertyValues();
@@ -607,6 +843,172 @@ class ProductToShop implements ProductToShopBase
 
         $this->manager->persist($article);
         $this->manager->flush();
+    }
+
+    /**
+     * Read product attributes mapping and set to shopware attribute model
+     *
+     * @param AttributeModel $detailAttribute
+     * @param Product $product
+     * @return AttributeModel
+     */
+    private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
+    {
+        $detailAttribute->setConnectReference($product->sourceId);
+        $detailAttribute->setConnectArticleShipping($product->shipping);
+        //todo@sb: check if connectAttribute matches position of the marketplace attribute
+        array_walk($product->attributes, function ($value, $key) use ($detailAttribute) {
+            $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);
+            if (strlen($shopwareAttribute) > 0) {
+                $setter = 'set' . ucfirst($shopwareAttribute);
+                $detailAttribute->$setter($value);
+            }
+        });
+
+        return $detailAttribute;
+    }
+
+    /**
+     * @param  ConnectAttribute $connectAttribute
+     * @param Product $product
+     */
+    private function setConnectAttributesFromProduct(ConnectAttribute $connectAttribute, Product $product)
+    {
+        $connectAttribute->setShopId($product->shopId);
+        $connectAttribute->setSourceId($product->sourceId);
+        $connectAttribute->setExportStatus(null);
+        $connectAttribute->setPurchasePrice($product->purchasePrice);
+        $connectAttribute->setFixedPrice($product->fixedPrice);
+        $connectAttribute->setStream($product->stream);
+
+        // store purchasePriceHash and offerValidUntil
+        $connectAttribute->setPurchasePriceHash($product->purchasePriceHash);
+        $connectAttribute->setOfferValidUntil($product->offerValidUntil);
+    }
+
+    /**
+     * @param DetailModel $detail
+     * @param Product $product
+     */
+    private function updateDetailFromProduct(DetailModel $detail, Product $product)
+    {
+        $detail->setInStock($product->availability);
+        $detail->setEan($product->ean);
+        $detail->setShippingTime($product->deliveryWorkDays);
+        $releaseDate = new \DateTime();
+        $releaseDate->setTimestamp($product->deliveryDate);
+        $detail->setReleaseDate($releaseDate);
+        $detail->setMinPurchase($product->minPurchaseQuantity);
+    }
+
+    /**
+     * @param DetailModel $detail
+     * @param Product $product
+     * @param $detailAttribute
+     */
+    private function detailSetUnit(DetailModel $detail, Product $product, $detailAttribute)
+    {
+        // if connect product has unit
+        // find local unit with units mapping
+        // and add to detail model
+        if (array_key_exists('unit', $product->attributes) && $product->attributes['unit']) {
+            $detailAttribute->setConnectRemoteUnit($product->attributes['unit']);
+            if ($this->config->getConfig($product->attributes['unit']) == null) {
+                $this->config->setConfig($product->attributes['unit'], '', null, 'units');
+            }
+
+            /** @var \ShopwarePlugins\Connect\Components\Utils\UnitMapper $unitMapper */
+            $unitMapper = new UnitMapper($this->config, $this->manager);
+
+            $shopwareUnit = $unitMapper->getShopwareUnit($product->attributes['unit']);
+
+            /** @var \Shopware\Models\Article\Unit $unit */
+            $unit = $this->helper->getUnit($shopwareUnit);
+            $detail->setUnit($unit);
+            $detail->setPurchaseUnit($product->attributes['quantity']);
+            $detail->setReferenceUnit($product->attributes['ref_quantity']);
+        } else {
+            $detail->setUnit(null);
+            $detail->setPurchaseUnit(null);
+            $detail->setReferenceUnit(null);
+        }
+    }
+
+    /**
+     * @param DetailModel $detail
+     * @param Product $product
+     */
+    private function detailSetAttributes(DetailModel $detail, Product $product)
+    {
+        // set dimension
+        if (array_key_exists('dimension', $product->attributes) && $product->attributes['dimension']) {
+            $dimension = explode('x', $product->attributes['dimension']);
+            $detail->setLen($dimension[0]);
+            $detail->setWidth($dimension[1]);
+            $detail->setHeight($dimension[2]);
+        } else {
+            $detail->setLen(null);
+            $detail->setWidth(null);
+            $detail->setHeight(null);
+        }
+
+        // set weight
+        if (array_key_exists('weight', $product->attributes) && $product->attributes['weight']) {
+            $detail->setWeight($product->attributes['weight']);
+        }
+
+        //set package unit
+        if (array_key_exists(Product::ATTRIBUTE_PACKAGEUNIT, $product->attributes)) {
+            $detail->setPackUnit($product->attributes[Product::ATTRIBUTE_PACKAGEUNIT]);
+        }
+
+        //set basic unit
+        if (array_key_exists(Product::ATTRIBUTE_BASICUNIT, $product->attributes)) {
+            $detail->setMinPurchase($product->attributes[Product::ATTRIBUTE_BASICUNIT]);
+        }
+
+        //set manufacturer no.
+        if (array_key_exists(Product::ATTRIBUTE_MANUFACTURERNUMBER, $product->attributes)) {
+            $detail->setSupplierNumber($product->attributes[Product::ATTRIBUTE_MANUFACTURERNUMBER]);
+        }
+    }
+
+    /**
+     * @param ConnectAttribute $connectAttribute
+     * @param Product $product
+     */
+    private function connectAttributeSetLastUpdate(ConnectAttribute $connectAttribute, Product $product)
+    {
+        // Whenever a product is updated, store a json encoded list of all fields that are updated optionally
+        // This way a customer will be able to apply the most recent changes any time later
+        $connectAttribute->setLastUpdate(json_encode([
+            'shortDescription' => $product->shortDescription,
+            'longDescription' => $product->longDescription,
+            'additionalDescription' => $product->additionalDescription,
+            'purchasePrice' => $product->purchasePrice,
+            'image' => $product->images,
+            'variantImages' => $product->variantImages,
+            'price' => $product->price * ($product->vat + 1),
+            'name' => $product->title,
+            'vat' => $product->vat
+        ]));
+    }
+
+    /**
+     * @param ProductModel $model
+     * @param array $categories
+     */
+    private function categoryDenormalization(ProductModel $model, array $categories)
+    {
+        $this->categoryDenormalization->disableTransactions();
+        foreach ($categories as $category) {
+            $this->categoryDenormalization->addAssignment($model->getId(), $category);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
+                [$model->getId(), $category]
+            );
+        }
+        $this->categoryDenormalization->enableTransactions();
     }
 
     /**
@@ -693,7 +1095,13 @@ class ProductToShop implements ProductToShopBase
             $this->manager->getConnection()->executeQuery(
                 'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
               VALUES (?, 1, "beliebig", ?, ?, ?, ?);',
-                [$customerGroup->getKey(), $article->getId(), $detail->getId(), $product->price, $product->purchasePrice]
+                [
+                    $customerGroup->getKey(),
+                    $article->getId(),
+                    $detail->getId(),
+                    $product->price,
+                    $product->purchasePrice
+                ]
             );
         }
     }
@@ -740,6 +1148,44 @@ class ProductToShop implements ProductToShopBase
         } catch (\Exception $e) {
             $this->manager->getConnection()->rollBack();
             throw new \Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Set detail purchase price with plain SQL
+     * Entity usage throws exception when error handlers are disabled
+     *
+     * @param DetailModel $detail
+     * @param float $purchasePrice
+     * @param Group $defaultGroup
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function setPurchasePrice(DetailModel $detail, $purchasePrice, Group $defaultGroup)
+    {
+        if (method_exists($detail, 'setPurchasePrice')) {
+            $this->manager->getConnection()->executeQuery(
+                'UPDATE `s_articles_details` SET `purchaseprice` = ? WHERE `id` = ?',
+                [$purchasePrice, $detail->getId()]
+            );
+        } else {
+            $id = $this->manager->getConnection()->fetchColumn(
+                'SELECT id FROM `s_articles_prices`
+              WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
+                [$defaultGroup->getKey(), 1, 'beliebig', $detail->getArticleId(), $detail->getId()]
+            );
+
+            if ($id > 0) {
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE `s_articles_prices` SET `baseprice` = ? WHERE `id` = ?',
+                    [$purchasePrice, $id]
+                );
+            } else {
+                $this->manager->getConnection()->executeQuery(
+                    'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `baseprice`)
+              VALUES (?, 1, "beliebig", ?, ?, ?);',
+                    [$defaultGroup->getKey(), $detail->getArticleId(), $detail->getId(), $purchasePrice]
+                );
+            }
         }
     }
 
@@ -811,283 +1257,6 @@ class ProductToShop implements ProductToShopBase
         }
 
         $this->deleteDetail($detail);
-    }
-
-    /**
-     * @param DetailModel $detailModel
-     */
-    private function deleteDetail(DetailModel $detailModel)
-    {
-        $this->eventManager->notify(
-            'Connect_Merchant_Delete_Product_Before',
-            [
-                'subject' => $this,
-                'articleDetail' => $detailModel
-            ]
-        );
-
-        $article = $detailModel->getArticle();
-        // Not sure why, but the Attribute can be NULL
-        $attribute = $this->helper->getConnectAttributeByModel($detailModel);
-        $this->manager->remove($detailModel);
-
-        if ($attribute) {
-            $this->manager->remove($attribute);
-        }
-
-        // if removed variant is main variant
-        // find first variant which is not main and mark it
-        if ($detailModel->getKind() === 1) {
-            /** @var \Shopware\Models\Article\Detail $variant */
-            foreach ($article->getDetails() as $variant) {
-                if ($variant->getId() != $detailModel->getId()) {
-                    $variant->setKind(1);
-                    $article->setMainDetail($variant);
-                    $connectAttribute = $this->helper->getConnectAttributeByModel($variant);
-                    if (!$connectAttribute) {
-                        continue;
-                    }
-                    $connectAttribute->setIsMainVariant(true);
-                    $this->manager->persist($connectAttribute);
-                    $this->manager->persist($article);
-                    $this->manager->persist($variant);
-                    break;
-                }
-            }
-        }
-
-        if (count($details = $article->getDetails()) === 1) {
-            $details->clear();
-            $this->manager->remove($article);
-        }
-
-        // Do not remove flush. It's needed when remove article,
-        // because duplication of ordernumber. Even with remove before
-        // persist calls mysql throws exception "Duplicate entry"
-        $this->manager->flush();
-        // always clear entity manager, because $article->getDetails() returns
-        // more than 1 detail, but all of them were removed except main one.
-        $this->manager->clear();
-    }
-
-    /**
-     * Get array of update info for the known fields
-     *
-     * @param $model
-     * @param $detail
-     * @param $attribute
-     * @param $product
-     * @return array
-     */
-    public function getUpdateFields($model, $detail, $attribute, $product)
-    {
-        // This also defines the flags of these fields
-        $fields = $this->helper->getUpdateFlags();
-        $flagsByName = array_flip($fields);
-
-        $flag = 0;
-        $output = [];
-        foreach ($fields as $key => $field) {
-            // Don't handle the imageInitialImport flag
-            if ($field == 'imageInitialImport') {
-                continue;
-            }
-
-            // If this is a new product
-            if (!$model->getId() && $field == 'image' && !$this->config->getConfig('importImagesOnFirstImport', false)) {
-                $output[$field] = false;
-                $flag |= $flagsByName['imageInitialImport'];
-                continue;
-            }
-
-            $updateAllowed = $this->isFieldUpdateAllowed($field, $model, $attribute);
-            $output[$field] = $updateAllowed;
-            if (!$updateAllowed && $this->hasFieldChanged($field, $model, $detail, $product)) {
-                $flag |= $key;
-            }
-        }
-
-        return [$output, $flag];
-    }
-
-    /**
-     * Determine if a given field has changed
-     *
-     * @param $field
-     * @param ProductModel $model
-     * @param DetailModel $detail
-     * @param Product $product
-     * @return bool
-     */
-    public function hasFieldChanged($field, ProductModel $model, DetailModel $detail, Product $product)
-    {
-        switch ($field) {
-            case 'shortDescription':
-                return $model->getDescription() != $product->shortDescription;
-            case 'longDescription':
-                return $model->getDescriptionLong() != $product->longDescription;
-            case 'additionalDescription':
-                return $detail->getAttribute()->getConnectProductDescription() != $product->additionalDescription;
-            case 'name':
-                return $model->getName() != $product->title;
-            case 'image':
-                return count($model->getImages()) != count($product->images);
-            case 'price':
-                $prices = $detail->getPrices();
-                if (empty($prices)) {
-                    return true;
-                }
-                $price = $prices->first();
-                if (!$price) {
-                    return true;
-                }
-
-                return $prices->first()->getPrice() != $product->price;
-        }
-
-        throw new \InvalidArgumentException('Unrecognized field');
-    }
-
-    /**
-     * Helper method to determine if a given $fields may/must be updated.
-     * This method will check for the model->id in order to determine, if it is a new entity. Therefore
-     * this method cannot be used after the model in question was already flushed.
-     *
-     * @param $field
-     * @param $model ProductModel
-     * @param $attribute ConnectAttribute
-     * @throws \RuntimeException
-     * @return bool|null
-     */
-    public function isFieldUpdateAllowed($field, ProductModel $model, ConnectAttribute $attribute)
-    {
-        $allowed = [
-            'ShortDescription',
-            'LongDescription',
-            'AdditionalDescription',
-            'Image',
-            'Price',
-            'Name',
-        ];
-
-        // Always allow updates for new models
-        if (!$model->getId()) {
-            return true;
-        }
-
-        $field = ucfirst($field);
-        $attributeGetter = 'getUpdate' . $field;
-        $configName = 'overwriteProduct' . $field;
-
-        if (!in_array($field, $allowed)) {
-            throw new \RuntimeException("Unknown update field {$field}");
-        }
-
-        $attributeValue = $attribute->$attributeGetter();
-
-
-
-        // If the value is 'null' or 'inherit', the behaviour will be inherited from the global configuration
-        // Once we have a supplier based configuration, we need to take it into account here
-        if ($attributeValue == null || $attributeValue == 'inherit') {
-            return $this->config->getConfig($configName, true);
-        }
-
-        return $attributeValue == 'overwrite';
-    }
-
-    /**
-     * Read product attributes mapping and set to shopware attribute model
-     *
-     * @param AttributeModel $detailAttribute
-     * @param Product $product
-     * @return AttributeModel
-     */
-    private function applyMarketplaceAttributes(AttributeModel $detailAttribute, Product $product)
-    {
-        $detailAttribute->setConnectReference($product->sourceId);
-        $detailAttribute->setConnectArticleShipping($product->shipping);
-        //todo@sb: check if connectAttribute matches position of the marketplace attribute
-        array_walk($product->attributes, function ($value, $key) use ($detailAttribute) {
-            $shopwareAttribute = $this->marketplaceGateway->findShopwareMappingFor($key);
-            if (strlen($shopwareAttribute) > 0) {
-                $setter = 'set' . ucfirst($shopwareAttribute);
-                $detailAttribute->$setter($value);
-            }
-        });
-
-        return $detailAttribute;
-    }
-
-    /**
-     * @param $vendor
-     * @return Supplier
-     */
-    private function createSupplier($vendor)
-    {
-        $supplier = new Supplier();
-
-        if (is_array($vendor)) {
-            $supplier->setName($vendor['name']);
-            $supplier->setDescription($vendor['description']);
-            if (array_key_exists('url', $vendor) && $vendor['url']) {
-                $supplier->setLink($vendor['url']);
-            }
-
-            $supplier->setMetaTitle($vendor['page_title']);
-
-            if (array_key_exists('logo_url', $vendor) && $vendor['logo_url']) {
-                $this->imageImport->importImageForSupplier($vendor['logo_url'], $supplier);
-            }
-        } else {
-            $supplier->setName($vendor);
-        }
-
-        //sets supplier attributes
-        $attr = new \Shopware\Models\Attribute\ArticleSupplier();
-        $attr->setConnectIsRemote(true);
-
-        $supplier->setAttribute($attr);
-
-        return $supplier;
-    }
-
-    /**
-     * Set detail purchase price with plain SQL
-     * Entity usage throws exception when error handlers are disabled
-     *
-     * @param DetailModel $detail
-     * @param float $purchasePrice
-     * @param Group $defaultGroup
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    private function setPurchasePrice(DetailModel $detail, $purchasePrice, Group $defaultGroup)
-    {
-        if (method_exists($detail, 'setPurchasePrice')) {
-            $this->manager->getConnection()->executeQuery(
-                    'UPDATE `s_articles_details` SET `purchaseprice` = ? WHERE `id` = ?',
-                    [$purchasePrice, $detail->getId()]
-                );
-        } else {
-            $id = $this->manager->getConnection()->fetchColumn(
-                'SELECT id FROM `s_articles_prices`
-              WHERE `pricegroup` = ? AND `from` = ? AND `to` = ? AND `articleID` = ? AND `articledetailsID` = ?',
-                [$defaultGroup->getKey(), 1, 'beliebig', $detail->getArticleId(), $detail->getId()]
-            );
-
-            if ($id > 0) {
-                $this->manager->getConnection()->executeQuery(
-                    'UPDATE `s_articles_prices` SET `baseprice` = ? WHERE `id` = ?',
-                    [$purchasePrice, $id]
-                );
-            } else {
-                $this->manager->getConnection()->executeQuery(
-                    'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `baseprice`)
-              VALUES (?, 1, "beliebig", ?, ?, ?);',
-                    [$defaultGroup->getKey(), $detail->getArticleId(), $detail->getId(), $purchasePrice]
-                );
-            }
-        }
     }
 
     public function update($shopId, $sourceId, ProductUpdate $product)
@@ -1331,5 +1500,29 @@ class ProductToShop implements ProductToShopBase
             }
             $model->setTax($tax);
         }
+    }
+
+    /**
+     * @param Property $property
+     * @return PropertyGroup
+     */
+    private function createPropertyGroup(Property $property)
+    {
+        $group = new PropertyGroup();
+        $group->setName($property->groupName);
+        $group->setComparable($property->comparable);
+        $group->setSortMode($property->sortMode);
+        $group->setPosition($property->groupPosition);
+
+        $attribute = new \Shopware\Models\Attribute\PropertyGroup();
+        $attribute->setPropertyGroup($group);
+        $attribute->setConnectIsRemote(true);
+        $group->setAttribute($attribute);
+
+        $this->manager->persist($attribute);
+        $this->manager->persist($group);
+        $this->manager->flush();
+
+        return $group;
     }
 }

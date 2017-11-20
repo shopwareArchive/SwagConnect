@@ -198,14 +198,16 @@ class ConnectFactory
                 $manager,
                 $manager->getRepository(Category::class),
                 $manager->getRepository(RemoteCategory::class),
-                $this->getConfigComponent()
+                $this->getConfigComponent(),
+                $this->getContainer()->get('CategoryDenormalization')
             )
             :
             new DefaultCategoryResolver(
                 $manager,
                 $manager->getRepository(RemoteCategory::class),
                 $manager->getRepository(ProductToRemoteCategory::class),
-                $manager->getRepository(Category::class)
+                $manager->getRepository(Category::class),
+                $this->getContainer()->get('CategoryDenormalization')
             );
 
         return new SDK(

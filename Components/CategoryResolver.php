@@ -14,6 +14,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\CustomModels\Connect\ProductToRemoteCategoryRepository;
 use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Models\Category\Category;
+use Shopware\Components\Model\CategoryDenormalization;
 
 abstract class CategoryResolver
 {
@@ -37,16 +38,23 @@ abstract class CategoryResolver
      */
     protected $categoryRepository;
 
+    /**
+     * @var CategoryDenormalization
+     */
+    private $categoryDenormalization;
+
     public function __construct(
         ModelManager $manager,
         RemoteCategoryRepository $remoteCategoryRepository,
         ProductToRemoteCategoryRepository $productToRemoteCategoryRepository,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        CategoryDenormalization $categoryDenormalization
     ) {
         $this->manager = $manager;
         $this->remoteCategoryRepository = $remoteCategoryRepository;
         $this->productToRemoteCategoryRepository = $productToRemoteCategoryRepository;
         $this->categoryRepository = $categoryRepository;
+        $this->categoryDenormalization = $categoryDenormalization;
     }
 
     /**
@@ -54,9 +62,10 @@ abstract class CategoryResolver
      * if they don't exist will be created
      *
      * @param array $categories
+     * @param int $shopId
      * @return \Shopware\Models\Category\Category[]
      */
-    abstract public function resolve(array $categories);
+    abstract public function resolve(array $categories, $shopId);
 
     /**
      * Generates categories tree by given array of categories
@@ -72,16 +81,18 @@ abstract class CategoryResolver
      *
      * @param array $categories
      * @param int $articleId
+     * @param int $shopId
      * @return void
      */
-    public function storeRemoteCategories(array $categories, $articleId)
+    public function storeRemoteCategories(array $categories, $articleId, $shopId)
     {
         $remoteCategories = [];
         foreach ($categories as $categoryKey => $category) {
-            $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $categoryKey]);
+            $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => $categoryKey, 'shopId' => $shopId]);
             if (!$remoteCategory) {
                 $remoteCategory = new RemoteCategory();
                 $remoteCategory->setCategoryKey($categoryKey);
+                $remoteCategory->setShopId($shopId);
             }
             $remoteCategory->setLabel($category);
             $this->manager->persist($remoteCategory);
@@ -129,8 +140,74 @@ abstract class CategoryResolver
         /** @var int $currentProductCategoryId */
         foreach ($currentProductCategoryIds as $currentProductCategoryId) {
             if (!in_array($currentProductCategoryId, $assignedCategoryIds)) {
+                $this->deleteAssignmentOfLocalCategories($currentProductCategoryId, $articleId);
                 $this->productToRemoteCategoryRepository->deleteByConnectCategoryId($currentProductCategoryId, $articleId);
             }
+        }
+    }
+
+    /**
+     * @param int $currentProductCategoryId
+     * @param int $articleId
+     */
+    private function deleteAssignmentOfLocalCategories($currentProductCategoryId, $articleId)
+    {
+        $localCategoriesIds = $this->manager->getConnection()->executeQuery(
+            'SELECT local_category_id FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = ?',
+            [$currentProductCategoryId]
+        )->fetchAll(\PDO::FETCH_COLUMN);
+        if ($localCategoriesIds) {
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` IN (?)',
+                [$articleId, $localCategoriesIds],
+                [\PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+            );
+            foreach ($localCategoriesIds as $categoryId) {
+                $this->categoryDenormalization->removeAssignment($articleId, $categoryId);
+            }
+
+            $this->deleteEmptyConnectCategories($localCategoriesIds);
+        }
+    }
+
+    /**
+     * @param int[] $categoryIds
+     */
+    public function deleteEmptyConnectCategories(array $categoryIds)
+    {
+        foreach ($categoryIds as $categoryId) {
+            $articleCount = (int) $this->manager->getConnection()->fetchColumn(
+                'SELECT COUNT(id) FROM s_articles_categories WHERE categoryID = ?',
+                [$categoryId]
+            );
+            if ($articleCount === 0) {
+                $this->deleteEmptyCategory($categoryId);
+            }
+        }
+    }
+
+    /**
+     * @param int $categoryId
+     */
+    private function deleteEmptyCategory($categoryId)
+    {
+        $connectImported = $this->manager->getConnection()->fetchColumn(
+            'SELECT connect_imported_category FROM s_categories_attributes WHERE categoryID = ?',
+            [$categoryId]
+        );
+
+        if ($connectImported == 1 && $this->countChildCategories($categoryId) === 0) {
+            $parent = (int) $this->manager->getConnection()->fetchColumn(
+                'SELECT parent FROM s_categories WHERE `id` = ?',
+                [$categoryId]
+            );
+
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_categories` WHERE `id` = ?',
+                [$categoryId]
+            );
+
+            $this->deleteEmptyCategory($parent);
         }
     }
 
@@ -139,14 +216,15 @@ abstract class CategoryResolver
      *
      * @param array $node
      * @param int $parentId
+     * @param int $shopId
      * @param bool $returnOnlyLeafs
      * @param array $categories
      * @return array
      */
-    public function convertTreeToKeys(array $node, $parentId, $returnOnlyLeafs = true, $categories = [])
+    public function convertTreeToKeys(array $node, $parentId, $shopId, $returnOnlyLeafs = true, $categories = [])
     {
         foreach ($node as $category) {
-            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId);
+            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId, $shopId);
 
             if ((!$returnOnlyLeafs) || (empty($category['children']))) {
                 $categories[] = [
@@ -157,7 +235,7 @@ abstract class CategoryResolver
             }
 
             if (!empty($category['children'])) {
-                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $returnOnlyLeafs, $categories);
+                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $shopId, $returnOnlyLeafs, $categories);
             }
         }
 
@@ -168,9 +246,10 @@ abstract class CategoryResolver
      * @param string $categoryName
      * @param string $categoryKey
      * @param int $parentId
+     * @param int $shopId
      * @return int
      */
-    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId)
+    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
     {
         $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_categories`
@@ -178,7 +257,7 @@ abstract class CategoryResolver
             [':parentId' => $parentId, ':description' => $categoryName]);
 
         if (!$id) {
-            return $this->createLocalCategory($categoryName, $categoryKey, $parentId);
+            return $this->createLocalCategory($categoryName, $categoryKey, $parentId, $shopId);
         }
 
         return $id;
@@ -188,9 +267,10 @@ abstract class CategoryResolver
      * @param string $categoryName
      * @param string $categoryKey
      * @param int $parentId
+     * @param int $shopId
      * @return int
      */
-    public function createLocalCategory($categoryName, $categoryKey, $parentId)
+    public function createLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
     {
         $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
             FROM `s_categories`
@@ -211,12 +291,24 @@ abstract class CategoryResolver
 
         $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` 
             FROM `s_plugin_connect_categories`
-            WHERE `category_key` = ?',
-            [$categoryKey]);
+            WHERE `category_key` = ? AND `shop_id` = ?',
+            [$categoryKey, $shopId]);
         $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`) 
             VALUES (?, ?)',
             [$remoteCategoryId, $localCategoryId]);
 
         return $localCategoryId;
+    }
+
+    /**
+     * @param $categoryId
+     * @return int
+     */
+    private function countChildCategories($categoryId)
+    {
+        return (int) $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
+            [$categoryId]
+        );
     }
 }

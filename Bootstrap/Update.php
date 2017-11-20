@@ -92,6 +92,7 @@ class Update
         $this->createRemoteToLocalCategoriesTable();
         $this->recreateRemoteCategoriesAndProductAssignments();
         $this->setDefaultConfigForUpdateOrderStatus();
+        $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
 
         return true;
@@ -501,8 +502,8 @@ class Update
             }
         }
     }
-
-    /**
+  
+  /**
      * Create index by articleID in s_plugin_connect_product_to_categories table.
      */
     private function addProductToCategoryIndex()
@@ -518,6 +519,25 @@ class Update
                     $e->getMessage()
                 );
             }
+        }
+    }
+
+    private function addShopIdToConnectCategories()
+    {
+        if (version_compare($this->version, '1.1.7', '<=')) {
+            try {
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("addShopIdToConnectCategories", "0")');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories ADD COLUMN `shop_id` int(11) NULL');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories DROP INDEX scuk_category_key');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories ADD UNIQUE KEY `scuk_connect_category_for_shop_id` (`category_key`,`shop_id`)');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            } 
         }
     }
 }

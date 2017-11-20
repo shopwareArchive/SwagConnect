@@ -211,12 +211,6 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             layout: 'vbox',
             items: [
                 {
-                    xtype: 'container',
-                    margin: '0 0 20 0',
-                    width: 600,
-                    html: '<p>' + me.snippets.importPicturesHelp + '</p>'
-                },
-                {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
@@ -225,34 +219,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             xtype: 'checkbox',
                             name: 'importImagesOnFirstImport',
                             fieldLabel: me.snippets.importPicturesLabel,
+                            helpText: me.snippets.importPicturesHelp,
                             inputValue: 1,
                             uncheckedValue: 0,
                             labelWidth: me.defaults.labelWidth,
                             listeners:{
                                 change: function(checkbox, newValue, oldValue, opts){
-                                    if (checkbox.getValue() === false) {
-                                        Ext.Ajax.request({
-                                            url: '{url controller=ConnectConfig action=checkCronPlugin}',
-                                            method: 'GET',
-                                            success: function (response, opts) {
-                                                var data = Ext.JSON.decode(response.responseText);
-                                                if (data.cronActivated !== true) {
-                                                    checkbox.setValue(true);
-                                                    Shopware.Notification.createGrowlMessage(
-                                                        '{s name=connect/error}Error{/s}',
-                                                        '{s name=connect/config/error/cron_not_activated}To deactivate this Setting you have to activate the Cron-Plugin{/s}'
-                                                    );
-                                                }
-                                            },
-                                            failure: function (response, opts) {
-                                                checkbox.setValue(true);
-                                                Shopware.Notification.createGrowlMessage(
-                                                    '{s name=connect/error}Error{/s}'
-                                                );
-                                            }
-                                        });
-                                    }
-
                                     me.enableImageImportLimit(checkbox);
                                 },
                                 beforeRender: function(checkbox, opts) {

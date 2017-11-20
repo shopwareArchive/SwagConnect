@@ -39,6 +39,7 @@ Ext.define('Shopware.apps.Connect', {
         'import.TabPanel',
         'import.unit.Panel',
         'import.tree.RemoteCategoryDragAndDrop',
+        'import.Progress',
 
         'log.Panel',
         'log.List',

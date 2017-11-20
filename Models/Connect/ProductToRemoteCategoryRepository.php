@@ -87,9 +87,11 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * remote category key
      * @param string $remoteCategoryKey
      * @param int $shopId
+     * @param int $offset
+     * @param int $limit
      * @return array
      */
-    public function findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId)
+    public function findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId, $offset, $limit)
     {
         $builder = $this->createQueryBuilder('ptrc');
         $builder->select('a.id');
@@ -99,17 +101,19 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->setParameter('categoryKey', $remoteCategoryKey);
         $builder->andWhere('rc.shopId = :shopId');
         $builder->setParameter('shopId', $shopId);
+        $builder->orderBy('a.id', 'ASC');
+        $builder->setFirstResult($offset);
+        $builder->setMaxResults($limit);
+
         //distinct necessary because of variant articles
         //each variant has an own entry in a.attribute so same articleId is returned multiple times
         $builder->distinct();
 
         $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        $result = $query->getArrayResult();
+        $query->setHydrationMode($query::HYDRATE_SCALAR);
+        $result = $query->getResult();
 
-        return array_map(function ($resultItem) {
-            return $resultItem['id'];
-        }, $result);
+        return array_column($result, 'id');
     }
 
     /**
@@ -153,6 +157,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
     /**
      * @param int $categoryId
      * @param int $articleId
+     * @return int
      */
     public function deleteByConnectCategoryId($categoryId, $articleId)
     {
@@ -163,5 +168,30 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->setParameter(':ccid', $categoryId, \PDO::PARAM_INT);
         $builder->setParameter(':articleId', $articleId, \PDO::PARAM_INT);
         $builder->getQuery()->execute();
+    }
+
+    /**
+     * @param string $remoteCategoryKey
+     * @param int $shopId
+     * @return int
+     */
+    public function getArticleCountByRemoteCategory($remoteCategoryKey, $shopId)
+    {
+        $builder = $this->createQueryBuilder('ptrc');
+        $builder->select('COUNT(a.id)');
+        $builder->leftJoin('ptrc.connectCategory', 'rc');
+        $builder->innerJoin('ptrc.article', 'a');
+        $builder->where('rc.categoryKey = :categoryKey');
+        $builder->setParameter('categoryKey', $remoteCategoryKey);
+        $builder->andWhere('rc.shopId = :shopId');
+        $builder->setParameter('shopId', $shopId);
+
+        //distinct necessary because of variant articles
+        //each variant has an own entry in a.attribute so same articleId is returned multiple times
+        $builder->distinct();
+
+        $query = $builder->getQuery();
+
+        return $query->getSingleScalarResult();
     }
 }

@@ -134,11 +134,33 @@ class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Ac
         echo $result->getContent();
     }
 
+    public function deactivateConnectProducts()
+    {
+        $this->Response()->setHeader('Content-Type', 'application/json; charset=utf-8');
+
+        $request = file_get_contents('php://input');
+
+        $apiRequest = $this->getRestApiRequest();
+        $result = $apiRequest->verifyRequest($request);
+
+        if ($result->isOk()) {
+            Shopware()->Db()->exec(
+                'UPDATE s_articles
+                INNER JOIN s_plugin_connect_items
+                  ON s_plugin_connect_items.article_id = s_articles.id
+                  AND shop_id IS NOT NULL
+                SET s_articles.active = false'
+            );
+        }
+
+        echo $result->getContent();
+    }
+
     /**
      * {@inheritdoc}
      */
     public function getWhitelistedCSRFActions()
     {
-        return ['index', 'removePlugin'];
+        return ['index', 'removePlugin', 'deactivateConnectProducts'];
     }
 }

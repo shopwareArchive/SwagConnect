@@ -177,18 +177,12 @@ class Uninstall
         );
     }
 
-    /**
-     * @return bool
-     */
     public function sendUninstallNotificationToSocialNetwork()
     {
-        $response = $this->getSnHttpClient()->sendRequestToConnect('account/supplier-plugin-uninstalled');
-        $responseBody = json_decode($response->getBody());
-
-        if (!$responseBody->success) {
-            throw new \RuntimeException($responseBody->message);
+        try {
+            $this->getSnHttpClient()->sendRequestToConnect('account/supplier-plugin-uninstalled');
+        } catch (\Exception $e) {
+            Shopware()->PluginLogger()->warning("The plugin was uninstalled but sending the status to Connect failed with this exception: " . $e->getMessage());
         }
-
-        return true;
     }
 }

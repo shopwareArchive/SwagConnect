@@ -529,7 +529,7 @@ class Helper
      */
     public function getUpdateFlags()
     {
-        return [2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport', 128 => 'additionalDescription'];
+        return [2 => 'shortDescription', 4 => 'longDescription', 8 => 'name', 16 => 'image', 32 => 'price', 64 => 'imageInitialImport', 128 => 'additionalDescription', 256 => 'mainImage'];
     }
 
     /**

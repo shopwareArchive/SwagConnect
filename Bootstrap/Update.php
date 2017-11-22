@@ -94,6 +94,7 @@ class Update
         $this->setDefaultConfigForUpdateOrderStatus();
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
+        $this->addOverwriteMainImage();
 
         return true;
     }
@@ -538,6 +539,23 @@ class Update
                     $e->getMessage()
                 );
             } 
+        }
+    }
+
+    private function addOverwriteMainImage()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("overwriteProductMainImage", "1", "import")');
+                $this->db->query('ALTER TABLE `s_plugin_connect_items` ADD COLUMN `update_main_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
         }
     }
 }

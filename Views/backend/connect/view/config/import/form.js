@@ -57,6 +57,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductName: '{s name=config/import/overwrite_product_name}Product name{/s}',
         overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
+        overwriteProductMainImage: '{s name=config/import/overwrite_product_main_image}Main image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         overwriteProductAdditionalDescription: '{s name=config/import/overwrite_product_additional_description}Connect description{/s}',
@@ -182,6 +183,11 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                         }, {
                             boxLabel  : me.snippets.overwriteProductImages,
                             name      : 'overwriteProductImage',
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }, {
+                            boxLabel  : me.snippets.overwriteProductMainImage,
+                            name      : 'overwriteProductMainImage',
                             inputValue: 1,
                             uncheckedValue: 0
                         }, {

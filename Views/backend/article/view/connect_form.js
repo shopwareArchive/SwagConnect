@@ -92,7 +92,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         return [
             me.getOverwriteCombo('{s name=connect/updatePrice}Update prices{/s}', 'updatePrice'),
             me.getOverwriteCombo('{s name=connect/updateImage}Update images{/s}', 'updateImage'),
-            me.getOverwriteCombo('{s name=connect/updateName}Update name{/s}', 'updateName')
+            me.getOverwriteCombo('{s name=connect/updateMainImage}Update main image{/s}', 'updateMainImage')
         ];
     },
 
@@ -100,6 +100,7 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
         var me = this;
 
         return [
+            me.getOverwriteCombo('{s name=connect/updateName}Update name{/s}', 'updateName'),
             me.getOverwriteCombo('{s name=connect/updateLongDescription}Update long description{/s}', 'updateLongDescription'),
             me.getOverwriteCombo('{s name=connect/updateShortDescription}Update short description{/s}', 'updateShortDescription')
         ];
@@ -129,6 +130,9 @@ Ext.define('Shopware.apps.Article.view.ConnectForm', {
                 name: 'description'
             }],
             data: [{
+                value: 'inherit',
+                description: '{s name=connect/inherit}like global configuration{/s}'
+            }, {
                 value: 'overwrite',
                 description: '{s name=connect/automatically}Automatic{/s}'
             }, {

@@ -14,6 +14,8 @@ use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
 use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Logger;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\SnHttpClient;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -116,6 +118,16 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         $this->doUninstall();
 
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function disable()
+    {
+        $this->sendUninstallNotificationToSocialNetwork();
+
+        return ['success' => true];
     }
 
     /**
@@ -320,5 +332,26 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         }
 
         $this->subscriberRegistration->registerSubscribers();
+    }
+
+    /**
+     * @return SnHttpClient
+     */
+    public function getSnHttpClient()
+    {
+        return new SnHttpClient(
+            $this->Application()->Container()->get('http_client'),
+            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
+            ConfigFactory::getConfigInstance()
+        );
+    }
+
+    public function sendUninstallNotificationToSocialNetwork()
+    {
+        try {
+            $this->getSnHttpClient()->sendRequestToConnect('account/supplier-plugin-uninstalled');
+        } catch (\Exception $e) {
+            Shopware()->PluginLogger()->warning("The plugin was uninstalled but sending the status to Connect failed with this exception: " . $e->getMessage());
+        }
     }
 }

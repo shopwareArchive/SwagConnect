@@ -134,7 +134,7 @@ class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Ac
         echo $result->getContent();
     }
 
-    public function deactivateConnectProducts()
+    public function deactivateConnectProductsAction()
     {
         $this->Response()->setHeader('Content-Type', 'application/json; charset=utf-8');
 

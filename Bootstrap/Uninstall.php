@@ -10,8 +10,6 @@ namespace ShopwarePlugins\Connect\Bootstrap;
 use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
-use ShopwarePlugins\Connect\Components\ConfigFactory;
-use ShopwarePlugins\Connect\Components\SnHttpClient;
 
 /**
  * Uninstaller of the plugin.
@@ -67,7 +65,6 @@ class Uninstall
      */
     public function run()
     {
-        $this->sendUninstallNotificationToSocialNetwork();
         $this->menu->remove();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();
@@ -162,27 +159,6 @@ class Uninstall
         if ($element) {
             $this->modelManager->remove($element);
             $this->modelManager->flush();
-        }
-    }
-
-    /**
-     * @return SnHttpClient
-     */
-    private function getSnHttpClient()
-    {
-        return new SnHttpClient(
-            $this->bootstrap->Application()->Container()->get('http_client'),
-            new \Shopware\Connect\Gateway\PDO(Shopware()->Db()->getConnection()),
-            ConfigFactory::getConfigInstance()
-        );
-    }
-
-    public function sendUninstallNotificationToSocialNetwork()
-    {
-        try {
-            $this->getSnHttpClient()->sendRequestToConnect('account/supplier-plugin-uninstalled');
-        } catch (\Exception $e) {
-            Shopware()->PluginLogger()->warning("The plugin was uninstalled but sending the status to Connect failed with this exception: " . $e->getMessage());
         }
     }
 }

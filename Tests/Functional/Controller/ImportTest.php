@@ -56,7 +56,7 @@ class ImportTest extends \Enlight_Components_Test_Plugin_TestCase
             ->setPost('localCategoryId', 140809703)
             ->setPost('remoteCategoryKey', '/deutsch/television')
             ->setPost('remoteCategoryLabel', 'Television')
-            ->setPost('node', 'shopId6~stream~Awesome Products~/deutsch/television');
+            ->setPost('node', 'shopId1234~stream~Awesome Products~/deutsch/television');
         $this->dispatch('backend/Import/assignRemoteToLocalCategory');
 
         self::assertTrue($this->View()->success);

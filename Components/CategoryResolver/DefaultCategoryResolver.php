@@ -14,11 +14,11 @@ class DefaultCategoryResolver extends CategoryResolver
     /**
      * {@inheritdoc}
      */
-    public function resolve(array $categories)
+    public function resolve(array $categories, $shopId)
     {
         $localCategories = [];
         /** @var \Shopware\CustomModels\Connect\RemoteCategory[] $remoteCategoriesModels */
-        $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(['categoryKey' => array_keys($categories)]);
+        $remoteCategoriesModels = $this->remoteCategoryRepository->findBy(['categoryKey' => array_keys($categories), 'shopId' => $shopId]);
 
         foreach ($remoteCategoriesModels as $remoteCategory) {
             if ($remoteCategory->hasLocalCategories()) {

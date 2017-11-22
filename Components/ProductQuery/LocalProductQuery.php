@@ -136,6 +136,7 @@ class LocalProductQuery extends BaseProductQuery
         $builder->join('a.tax', 't');
         $builder->leftJoin('d.attribute', 'attribute');
         $builder->leftJoin('d.unit', 'u');
+        $builder->leftJoin('a.configuratorSet', 'configSet');
         $builder->where('at.shopId IS NULL');
         $selectColumns = [
             'a.id as localId',
@@ -173,6 +174,7 @@ class LocalProductQuery extends BaseProductQuery
             'd.shippingTime as deliveryWorkDays',
             'a.lastStock',
             'a.configuratorSetId',
+            'configSet.type as configuratorSetType'
         ];
 
         if ($this->configComponent->getConfig(self::SHORT_DESCRIPTION_FIELD, false)) {

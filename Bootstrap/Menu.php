@@ -23,11 +23,6 @@ class Menu
     const CONNECT_CLASS = 'shopware-connect';
 
     /**
-     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
-     */
-    private $bootstrap;
-
-    /**
      * @var \ShopwarePlugins\Connect\Components\Config
      */
     private $configComponent;
@@ -42,16 +37,20 @@ class Menu
      */
     private $shopware526installed;
 
+    /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    private $menuRepository;
+
     public function __construct(
-        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         Config $configComponent,
         ModelManager $modelManager,
         $shopware526installed
     ) {
-        $this->bootstrap = $bootstrap;
         $this->configComponent = $configComponent;
         $this->modelManager = $modelManager;
         $this->shopware526installed = $shopware526installed;
+        $this->menuRepository = Shopware()->Models()->getRepository(\Shopware\Models\Menu\Menu::class);
     }
 
     /**
@@ -72,7 +71,7 @@ class Menu
      */
     public function getMainMenuItem()
     {
-        return $this->bootstrap->Menu()->findOneBy([
+        return $this->menuRepository->findOneBy([
             'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
@@ -87,7 +86,7 @@ class Menu
         // check if shopware Connect menu item exists
         if (!$connectItem || $this->shopware526installed) {
             if ($this->shopware526installed) {
-                $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+                $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
                 if (null !== $connectInstallItem) {
                     $connectInstallItem->setActive(0);
                     $this->modelManager->persist($connectInstallItem);
@@ -95,7 +94,7 @@ class Menu
                 }
             } else {
                 //move help menu item after Connect
-                $helpItem = $this->bootstrap->Menu()->findOneBy(['label' => '']);
+                $helpItem = $this->menuRepository->findOneBy(['label' => '']);
                 $helpItem->setPosition(1);
                 $this->modelManager->persist($helpItem);
                 $this->modelManager->flush();
@@ -107,9 +106,9 @@ class Menu
                 $this->modelManager->flush();
             }
 
-            $parent = $this->bootstrap->Menu()->findOneBy(['class' => self::CONNECT_CLASS]);
+            $parent = $this->menuRepository->findOneBy(['class' => self::CONNECT_CLASS]);
             if (null === $parent) {
-                $parent = $this->bootstrap->createMenuItem([
+                $parent = $this->createMenuItem([
                     'label' => self::CONNECT_LABEL,
                     'class' => 'connect-icon',
                     'active' => 1,
@@ -126,12 +125,12 @@ class Menu
 
             if ($this->configComponent->getConfig('apiKey', '') == ''
                 && !$this->configComponent->getConfig('shopwareId')) {
-                $registerItem = $this->bootstrap->Menu()->findOneBy([
+                $registerItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Register'
                 ]);
                 if (!$registerItem) {
-                    $this->bootstrap->createMenuItem([
+                    $this->createMenuItem([
                         'label' => 'Register',
                         'controller' => 'Connect',
                         'action' => 'Register',
@@ -144,12 +143,12 @@ class Menu
                 // check if menu item already exists
                 // this is possible when start update,
                 // because setup function is called
-                $importItem = $this->bootstrap->Menu()->findOneBy([
+                $importItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Import'
                 ]);
                 if (!$importItem) {
-                    $this->bootstrap->createMenuItem([
+                    $this->createMenuItem([
                         'label' => 'Import',
                         'controller' => 'Connect',
                         'action' => 'Import',
@@ -159,12 +158,12 @@ class Menu
                     ]);
                 }
 
-                $exportItem = $this->bootstrap->Menu()->findOneBy([
+                $exportItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Export'
                 ]);
                 if (!$exportItem) {
-                    $this->bootstrap->createMenuItem([
+                    $this->createMenuItem([
                         'label' => 'Export',
                         'controller' => 'Connect',
                         'action' => 'Export',
@@ -174,12 +173,12 @@ class Menu
                     ]);
                 }
 
-                $settingsItem = $this->bootstrap->Menu()->findOneBy([
+                $settingsItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'Settings'
                 ]);
                 if (!$settingsItem) {
-                    $this->bootstrap->createMenuItem([
+                    $this->createMenuItem([
                         'label' => 'Settings',
                         'controller' => 'Connect',
                         'action' => 'Settings',
@@ -189,12 +188,12 @@ class Menu
                     ]);
                 }
 
-                $openConnectItem = $this->bootstrap->Menu()->findOneBy([
+                $openConnectItem = $this->menuRepository->findOneBy([
                     'controller' => 'Connect',
                     'action' => 'OpenConnect'
                 ]);
                 if (!$openConnectItem) {
-                    $this->bootstrap->createMenuItem([
+                    $this->createMenuItem([
                         'label' => 'OpenConnect',
                         'controller' => 'Connect',
                         'action' => 'OpenConnect',
@@ -218,13 +217,13 @@ class Menu
         }
 
         //if it is sem demo marketplace it will not find the correct menu item
-        $connectMainMenu = $this->bootstrap->Menu()->findOneBy([
+        $connectMainMenu = $this->menuRepository->findOneBy([
             'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
 
         if (!$connectMainMenu) {
-            $connectMainMenu = $this->bootstrap->createMenuItem([
+            $connectMainMenu = $this->createMenuItem([
                 'label' => self::CONNECT_LABEL,
                 'class' => self::CONNECT_CLASS,
                 'active' => 1,
@@ -235,12 +234,20 @@ class Menu
             $connectMainMenu->setLabel(self::CONNECT_LABEL);
         }
 
-        $connectInstallItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+        $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
         if (null !== $connectInstallItem) {
             $connectInstallItem->setActive(1);
             $connectInstallItem->setParent($connectMainMenu);
         } else {
-            $connectInstallItem = $this->bootstrap->createMenuItem([
+            $connectInstallItem = $this->createMenuItem([
+                'label' => 'Einstieg',
+                'controller' => 'PluginManager',
+                'class' => 'sprite-mousepointer-click',
+                'action' => 'ShopwareConnect',
+                'active' => 1,
+                'parent' => $connectMainMenu
+            ]);
+            $connectInstallItem = $this->createMenuItem([
                 'label' => 'Einstieg',
                 'controller' => 'PluginManager',
                 'class' => 'sprite-mousepointer-click',
@@ -250,5 +257,25 @@ class Menu
             ]);
             $connectInstallItem->setPlugin(null);
         }
+    }
+
+    /**
+     * @param array $values
+     * @return \Shopware\Models\Menu\Menu
+     */
+    private function createMenuItem($values)
+    {
+        $menu = new \Shopware\Models\Menu\Menu();
+        $menu->setLabel($values['label']);
+        $menu->setController($values['controller']);
+        $menu->setClass($values['class']);
+        $menu->setAction($values['action']);
+        $menu->setActive($values['active']);
+        $menu->setParent($values['parent']);
+
+        $this->modelManager->persist($menu);
+        $this->modelManager->flush();
+
+        return $menu;
     }
 }

@@ -14,6 +14,8 @@ use Shopware\Components\Model\ModelManager;
 use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
 use ShopwarePlugins\Connect\Components\Config;
 use Shopware\Models\Order\Status;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
+use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
 
 /**
@@ -25,11 +27,6 @@ use ShopwarePlugins\Connect\Components\Utils\ConnectOrderUtil;
  */
 class Setup
 {
-    /**
-     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
-     */
-    protected $bootstrap;
-
     /**
      * @var Pdo
      */
@@ -44,32 +41,27 @@ class Setup
 
     /**
      * Setup constructor.
-     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
      * @param Menu
      */
     public function __construct(
-        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
         Menu $menu
 
     ) {
-        $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
         $this->menu = $menu;
     }
 
-    public function run($fullSetup)
+    public function run($fullSetup, $pluginPath)
     {
-        $this->createMyEvents();
         $this->createMyTables();
-        $this->createConfig();
         $this->createMyAttributes();
         $this->populateConfigTable();
-        $this->importSnippets();
+        $this->importSnippets($pluginPath);
         $this->generateConnectPaymentAttribute();
         $this->populateDispatchAttributes();
         $this->populateConnectPaymentAttribute();
@@ -80,19 +72,6 @@ class Setup
             $this->populatePaymentStates();
             $this->populateOrderStates();
         }
-    }
-
-    private function createConfig()
-    {
-        $form = $this->bootstrap->Form();
-
-        $form->setElement('text',
-            'connectDebugHost',
-            [
-                'label' => 'Shopware Connect Host',
-                'required' => false,
-                'value'    => Config::MARKETPLACE_URL
-            ]);
     }
 
     /**
@@ -124,70 +103,6 @@ class Setup
               `value` = VALUES(`value`)
               ;";
         $this->db->exec($sql);
-    }
-
-    /**
-     * Registers the shopware Connect events. As we register all events on the fly, only the early
-     * Enlight_Controller_Front_StartDispatch-Event is needed.
-     */
-    public function createMyEvents()
-    {
-        $this->bootstrap->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_ConnectSDK',
-            'onInitResourceSDK'
-        );
-
-        $this->bootstrap->subscribeEvent(
-            'Enlight_Controller_Front_DispatchLoopStartup',
-            'onStartDispatch'
-        );
-
-        $this->bootstrap->subscribeEvent(
-            'Shopware_Console_Add_Command',
-            'onConsoleAddCommand'
-        );
-
-        $connectImportImages = $this->db->fetchOne(
-            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            ['action' => '%ShopwareConnectImportImages']
-        );
-
-        if (!$connectImportImages) {
-            $this->bootstrap->createCronJob(
-                'SwagConnect Import images',
-                'ShopwareConnectImportImages',
-                60 * 30,
-                false
-            );
-        }
-
-        $connectUpdateProducts = $this->db->fetchOne(
-            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            ['action' => '%ShopwareConnectUpdateProducts']
-        );
-
-        if (!$connectUpdateProducts) {
-            $this->bootstrap->createCronJob(
-                'SwagConnect Update Products',
-                'ShopwareConnectUpdateProducts',
-                60 * 2,
-                false
-            );
-        }
-
-        $connectExportDynamicStreams = $this->db->fetchOne(
-            'SELECT id FROM s_crontab WHERE `action` LIKE :action',
-            ['action' => '%ConnectExportDynamicStreams']
-        );
-
-        if (!$connectExportDynamicStreams) {
-            $this->bootstrap->createCronJob(
-                'SwagConnect Export Dynamic Streams',
-                'Shopware_CronJob_ConnectExportDynamicStreams',
-                12 * 3600, //12hours
-                true
-            );
-        }
     }
 
     /**
@@ -358,7 +273,7 @@ class Setup
 
     public function getCrudService()
     {
-        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+        return Shopware()->Container()->get('shopware_attribute.crud_service');
     }
 
     /**
@@ -558,10 +473,8 @@ class Setup
      */
     public function populateConfigTable()
     {
-        $this->registerCustomModels();
-
-        $this->bootstrap->registerMyLibrary();
-        $configComponent = $this->bootstrap->getConfigComponents();
+        /** @var Config $configComponent */
+        $configComponent = ConfigFactory::getConfigInstance();
         // when add/remove item in $configs array
         // open ConnectConfigTest.php and change tearDown function
         // for some reason shopware runs test during plugin installation
@@ -608,10 +521,11 @@ class Setup
 
     /**
      * Import frontend snippets
+     * @param $pluginPath string
      */
-    public function importSnippets()
+    public function importSnippets($pluginPath)
     {
-        $sql = file_get_contents($this->bootstrap->Path() . 'Snippets/frontend.sql');
+        $sql = file_get_contents($pluginPath . 'Snippets/frontend.sql');
         $this->db->exec($sql);
     }
 
@@ -694,17 +608,6 @@ class Setup
 
         throw new \RuntimeException('Could not find a free group name for the Shopware Connect customer group.Probably you need to delete an existing customer group created by Shopware Connect (SC, SWC, SWCONN, SC-1). Make sure, you really don\'t need it any more!'
         );
-    }
-
-    public function registerCustomModels()
-    {
-        Shopware()->Loader()->registerNamespace(
-            'Shopware\CustomModels',
-            $this->bootstrap->Path() . 'Models/'
-        );
-        Shopware()->ModelAnnotations()->addPaths([
-            $this->bootstrap->Path() . 'Models/'
-        ]);
     }
 
     /**

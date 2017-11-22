@@ -6,7 +6,7 @@
  */
 
 require __DIR__ . '/../../../../../../autoload.php';
-require __DIR__ . '/Bootstrap.php';
+require __DIR__ . '/SwagConnect.php';
 
 $loader = new Enlight_Loader();
 

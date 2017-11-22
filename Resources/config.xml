@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../engine/Shopware/Components/Plugin/schema/config.xsd">
+    <elements>
+        <element required="false" type="text" scope="locale">
+            <name>connectDebugHost</name>
+            <label lang="de">Shopware Connect Host</label>
+            <label lang="en">Shopware Connect Host</label>
+            <value>sn.connect.shopware.com</value>
+            <description lang="de">Die URL zu deinem Connect-Marktplatz.</description>
+            <description lang="en">The URL to your Connect Marketplace.</description>
+        </element>
+    </elements>
+</config>

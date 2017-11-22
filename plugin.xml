@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../engine/Shopware/Components/Plugin/schema/plugin.xsd">
+    <label lang="de">Connect</label>
+    <label lang="en">Connect</label>
+
+    <version>1.1.8</version>
+
+    <copyright>(c) by Shopware AG</copyright>
+    <license>proprietary</license>
+    <link>http://store.shopware.com</link>
+    <author>shopware AG</author>
+    <compatibility minVersion="5.2.0" />
+
+    <changelog version="1.1.8">
+        <changes lang="de">CON-4935 - Fix: Kategorien Daten für Sitemap; CON-4829 - Konfigurator wird gesynct; CON-4873 - Alle exportieren Button funktioniert für große Datenmengen; CON-4885 - leere Connect-Kategorien werden automatisch gelöscht; CON-4926 - Performanceoptimierung ToShop-Channel; CON-4954: Fix: gleiche Kategorien von verschiedenen Lieferanten</changes>
+        <changes lang="en">CON-4935 - Fix: Category dates for sitemap; CON-4829 - Configurator-Set gets synced; CON-4873 - Export all works for many products; CON-4885 - empty Connect-Categories get deleted; CON-4926 - Performanceimprovements ToShop-Channel; CON-4954: Fix: same Category from different supplier</changes>
+    </changelog>
+    <changelog version="1.1.7">
+        <changes lang="de">CON-4922 - Fix: Plugin stürzt ab bei Deaktivierung; CON-4609 - Versandstatus und Trckingcode werden synchronisiert; CON-4936 - Verbesserung der Kategoriezuweisung</changes>
+        <changes lang="en">CON-4922 - Fix: Plugin crashes when it gets deactivated; CON-4609 - Shippingstatus and Trackingcode get synced; CON-4936 - Improvements in Category-Assignment</changes>
+    </changelog>
+    <changelog version="1.1.6">
+        <changes lang="de">CON-4832 - Fix: Die Mehrfachzuweisung von Kategorien wurde verbessert; CON-4687 - Die alten Plugin Event Subscriber wurden durch die neuen Subscriber ersetzt.</changes>
+        <changes lang="en">CON-4832 - Fix: Assignment of multiple categories now works properly; CON-4687 - Refactored the old subscribers to the new Shopware subscribers</changes>
+    </changelog>
+    <changelog version="1.1.5">
+        <changes lang="de">CON-4880 - Fix: Aktualisierte Connect-Kategorien werden im Import-Fenster nicht angezeigt; CON-4853 - Performance Verbesserungen im To-Shop-Channel; CON-4871 - Fix: Produkt wurde als Variante exportiert wenn es kein Variantenartikel ist</changes>
+        <changes lang="en">CON-4880 - Fix: Updated Connect-Categories are not visible in Import-Window; CON-4853 - Performance Improvements in To-Shop-Channel; CON-4871 - Fix: Product is exported as a variant even when it's not</changes>
+    </changelog>
+    <changelog version="1.1.4">
+        <changes lang="de">CON-4807 - Connect Kategorien können nun mehreren Shopware Kategorien zugewiesen werden; CON-4814 - Fix: Leere Seite bei Accounts mit sehr vielen Product Streams; CON-4815 - Fix: Optimierung der Kategoriezuweisung</changes>
+        <changes lang="en">CON-4807 - Connect categories can now be assigned to multiple shopware categories; CON-4814 - Fix: Empty response for product streams if the account has very many of these; CON-4815 - Fix: Optimized the category assignment</changes>
+    </changelog>
+    <changelog version="1.1.3">
+        <changes lang="de">CON-4660 - Fix: Kommentare in der Bestellübersicht nicht sichtbar;</changes>
+        <changes lang="en">CON-4660 - Fix: Comments in order overview are not visible;</changes>
+    </changelog>
+    <changelog version="1.1.2">
+        <changes lang="de">CON-4751 - Index auf source_id in s_plugin_connect_items hinzugefügt; CON-4758 - Performance bei Connect-Import verbessert; CON-4773 - Refaktorierung, danke an &lt;a href=\"https://github.com/aragon999\"&gt;aragon999&lt;/a&gt;;</changes>
+        <changes lang="en">CON-4751 - Added index on source_id in s_plugin_connect_items; CON-4758 - Improve performance for products from connect; CON-4773 - Refactoring, thanks to &lt;a href=\"https://github.com/aragon999\"&gt;aragon999&lt;/a&gt;;</changes>
+    </changelog>
+    <changelog version="1.1.1">
+        <changes lang="de">CON-4761 - Kategoriebaum lässt sich komplett ausklappen; CON-4762 - Kategoriezuweisung wurde gefixed; CON-4731 - Dopplete revisions gefixed;</changes>
+        <changes lang="en">CON-4761 - Category tree can now be expanded completely; CON-4762 - Category assignment was fixed; CON-4731 - Duplicate revisions fixed;</changes>
+    </changelog>
+    <changelog version="1.1.0">
+        <changes lang="de">CON-4663 - Shopware 5.3 Kompatiblität;</changes>
+        <changes lang="en">CON-4663 - Shopware 5.3 compatibility;</changes>
+    </changelog>
+    <changelog version="1.0.20">
+        <changes lang="de">CON-4735 - Fix duplicate entry for s_articles_categories; CON-4611 - Änderungen an inaktiven Produkten werden nicht mehr getracked; CON-4698 - Fix neu generierte Varianten;</changes>
+        <changes lang="en">CON-4735 - Fix duplicate entry for s_articles_categories; CON-4611 - Prevent change generation of inactive products; CON-4698 - Fix regenerated Variants;</changes>
+    </changelog>
+    <changelog version="1.0.19">
+        <changes lang="de">CON-4675 - CronJobs sind nun ausführbar über `bin/console sw:cron:run`;</changes>
+        <changes lang="en">CON-4675 - CronJobs can be execute via `bin/console sw:cron:run`;</changes>
+    </changelog>
+    <changelog version="1.0.18">
+        <changes lang="de">CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;</changes>
+        <changes lang="en">CON-4531 - Wrong value for automatically activated products; CON-4645 - Added events to use customAttributes for orders;</changes>
+    </changelog>
+</plugin>

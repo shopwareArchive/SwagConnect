@@ -21,10 +21,6 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql as Pdo;
  */
 class Uninstall
 {
-    /**
-     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
-     */
-    protected $bootstrap;
 
     /**
      * @var Pdo
@@ -42,19 +38,16 @@ class Uninstall
     private $menu;
 
     /**
-     * Setup constructor.
-     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
+     * Uninstall constructor.
      * @param ModelManager $modelManager
      * @param Pdo $db
      * @param Menu $menu
      */
     public function __construct(
-        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
         Menu $menu
     ) {
-        $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
         $this->menu = $menu;
@@ -77,7 +70,7 @@ class Uninstall
      */
     public function getCrudService()
     {
-        return $this->bootstrap->Application()->Container()->get('shopware_attribute.crud_service');
+        return Shopware()->Container()->get('shopware_attribute.crud_service');
     }
 
     /**

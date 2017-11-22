@@ -5,7 +5,12 @@
  * file that was distributed with this source code.
  */
 
+namespace SwagConnect;
+
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Components\Plugin\Context\InstallContext;
+use Shopware\Components\Plugin\Context\UninstallContext;
+use Shopware\Components\Plugin\Context\UpdateContext;
 use ShopwarePlugins\Connect\Bootstrap\SubscriberRegistration;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
@@ -21,7 +26,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  * @category  Shopware
  * @package   Shopware\Plugins\SwagConnect
  */
-final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Components_Plugin_Bootstrap
+final class SwagConnect extends \Shopware\Components\Plugin
 {
     /**
      * @var SubscriberRegistration
@@ -36,7 +41,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Returns the current version of the plugin.
      *
-     * @throws Exception
+     * @throws \Exception
      * @return string|void
      */
     public function getVersion()
@@ -67,7 +72,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         return [
             'version' => $this->getVersion(),
             'label' => $this->getLabel(),
-            'description' => file_get_contents($this->Path() . 'info.txt'),
+            'description' => file_get_contents($this->getPath() . 'info.txt'),
             'link' => 'http://www.shopware.de/',
         ];
     }
@@ -75,21 +80,22 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Install plugin method
      *
+     * @param $context InstallContext
      * @throws \RuntimeException
-     * @return bool
+     * @return array
      */
-    public function install()
+    public function install(InstallContext $context)
     {
-        $this->doSetup();
+        $this->doSetup($context);
 
         return ['success' => true, 'invalidateCache' => ['backend', 'config']];
     }
 
     /**
-     * @param $version string
+     * @param $context UpdateContext
      * @return array
      */
-    public function update($version)
+    public function update(UpdateContext $context)
     {
         // sometimes plugin is not installed before
         // but could be updated. by this way setup process
@@ -100,20 +106,20 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
             $fullSetup = true;
         }
 
-        $this->doSetup($fullSetup);
-        $this->doUpdate($version);
+        $this->doSetup($context, $fullSetup);
+        $this->doUpdate($context->getUpdateVersion());
 
         return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme']];
     }
 
     /**
      * Uninstall plugin method
-     *
+     * @param $context UninstallContext
      * @return bool
      */
-    public function uninstall()
+    public function uninstall(UninstallContext $context)
     {
-        $this->doUninstall();
+        $this->doUninstall($context);
 
         return true;
     }
@@ -123,25 +129,23 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      *
      * This can be used by the update as well as by the install method
      *
+     * @param InstallContext $context
      * @param bool $fullSetup
      * @throws RuntimeException
      */
-    public function doSetup($fullSetup = true)
+    public function doSetup($context, $fullSetup = true)
     {
-        $this->registerMyLibrary();
         $modelManager = Shopware()->Models();
         $setup = new Setup(
-            $this,
             $modelManager,
             Shopware()->Db(),
             new \ShopwarePlugins\Connect\Bootstrap\Menu(
-                $this,
                 $this->getConfigComponents(),
                 $modelManager,
-                $this->assertMinimumVersion('5.2.6')
+                $context->assertMinimumVersion('5.2.6')
             )
         );
-        $setup->run($fullSetup);
+        $setup->run($fullSetup, $this->getPath());
     }
 
     /**
@@ -152,10 +156,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function doUpdate($version)
     {
-        $this->registerMyLibrary();
-
         $update = new Update(
-            $this,
             Shopware()->Models(),
             Shopware()->Db(),
             new Logger(Shopware()->Db()),
@@ -167,24 +168,32 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
     /**
      * Uninstall the plugin
+     * @param $context UninstallContext
+     * @return bool
      */
-    public function doUninstall()
+    public function doUninstall($context)
     {
-        $this->registerMyLibrary();
         $modelManager = Shopware()->Models();
         $uninstall = new Uninstall(
-            $this,
             $modelManager,
             Shopware()->Db(),
             new \ShopwarePlugins\Connect\Bootstrap\Menu(
-                $this,
                 $this->getConfigComponents(),
                 $modelManager,
-                $this->assertMinimumVersion('5.2.6')
+                $context->assertMinimumVersion('5.2.6')
             )
         );
 
         return $uninstall->run();
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return [
+            'Enlight_Bootstrap_InitResource_ConnectSDK' => 'onInitResourceSDK',
+            'Enlight_Controller_Front_DispatchLoopStartup' => 'onStartDispatch',
+            'Shopware_Console_Add_Command' => 'onConsoleAddCommand'
+        ];
     }
 
     /**
@@ -194,9 +203,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
-        $this->get('template')->addTemplateDir($this->Path() . 'Views/', 'connect');
-        $this->get('snippets')->addConfigDir($this->Path() . 'Snippets/');
-        $this->registerMyLibrary();
+        $this->container->get('template')->addTemplateDir($this->getPath() . 'Views/', 'connect');
+        $this->container->get('snippets')->addConfigDir($this->getPath() . 'Snippets/');
         $this->registerSubscribers();
     }
 
@@ -205,7 +213,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onConsoleAddCommand()
     {
-        $this->registerMyLibrary();
         $this->registerSubscribers();
 
         return new ArrayCollection([
@@ -215,22 +222,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
     public function onInitResourceSDK()
     {
-        $this->registerMyLibrary();
-
         return $this->getConnectFactory()->createSDK();
-    }
-
-    /**
-     * Register additional namespaces for the libraries
-     */
-    public function registerMyLibrary()
-    {
-        $this->Application()->Loader()->registerNamespace(
-            'ShopwarePlugins\\Connect',
-            $this->Path()
-        );
-
-        $this->registerCustomModels();
     }
 
     /**
@@ -240,8 +232,6 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function getConnectFactory()
     {
-        $this->registerMyLibrary();
-
         if (!$this->connectFactory) {
             $this->connectFactory = new ConnectFactory($this->getVersion());
         }
@@ -250,7 +240,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     }
 
     /**
-     * @return Shopware\Connect\SDK
+     * @return \Shopware\Connect\SDK
      */
     public function getSDK()
     {
@@ -295,7 +285,7 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
         $query = $builder->getQuery();
         $plugin = $query->getOneOrNullResult();
-        /** @var $plugin Shopware\Models\Plugin\Plugin */
+        /** @var $plugin \Shopware\Models\Plugin\Plugin */
         if (!$plugin) {
             return false;
         }

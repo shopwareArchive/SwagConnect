@@ -25,11 +25,6 @@ use ShopwarePlugins\Connect\Components\Logger;
 class Update
 {
     /**
-     * @var \Shopware_Plugins_Backend_SwagConnect_Bootstrap
-     */
-    protected $bootstrap;
-
-    /**
      * @var Pdo
      */
     protected $db;
@@ -50,25 +45,28 @@ class Update
     private $logger;
 
     /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    private $menuRepository;
+
+    /**
      * Setup constructor.
-     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap
      * @param ModelManager $modelManager
      * @param Pdo $db
      * @param $version
      * @param Logger|null $logger
      */
     public function __construct(
-        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $bootstrap,
         ModelManager $modelManager,
         Pdo $db,
         Logger $logger,
         $version
     ) {
-        $this->bootstrap = $bootstrap;
         $this->modelManager = $modelManager;
         $this->db = $db;
         $this->logger = $logger;
         $this->version = $version;
+        $this->menuRepository = Shopware()->Models()->getRepository(\Shopware\Models\Menu\Menu::class);
     }
 
     public function run()
@@ -132,7 +130,7 @@ class Update
     private function removeRedirectMenu()
     {
         if (version_compare($this->version, '1.0.4', '<=')) {
-            $connectItem = $this->bootstrap->Menu()->findOneBy(['label' => 'Open Connect', 'action' => '']);
+            $connectItem = $this->menuRepository->findOneBy(['label' => 'Open Connect', 'action' => '']);
             if ($connectItem) {
                 $this->modelManager->remove($connectItem);
                 $this->modelManager->flush();
@@ -395,7 +393,7 @@ class Update
     private function removeDuplicatedMenuItems()
     {
         if (version_compare($this->version, '1.0.16', '<=')) {
-            $mainMenuItems = $this->bootstrap->Menu()->findBy([
+            $mainMenuItems = $this->menuRepository->findBy([
                 'class' => Menu::CONNECT_CLASS,
                 'parent' => null,
             ], ['id' => 'ASC']);

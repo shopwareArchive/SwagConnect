@@ -3,6 +3,12 @@
   "require-dev": {
     "shopware/plugin-dev-tools": "dev-master"
   },
+  "autoload": {
+     "psr-4": {
+       "ShopwarePlugins\\Connect\\": "./",
+       "Shopware\\CustomModels\\": "Models/"
+     }
+  },
   "require": {
     "firebase/php-jwt": "^3.0",
     "shopware/connect-sdk": "dev-master#v2.0.6"

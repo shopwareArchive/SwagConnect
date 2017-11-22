@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cronjobs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../engine/Shopware/Components/Plugin/schema/cronjob.xsd">
+
+    <cronjob>
+        <name>SwagConnect Import images</name>
+        <action>ShopwareConnectImportImages</action>
+        <active>false</active>
+        <interval>1800</interval> /30 min
+        <disableOnError>true</disableOnError>
+    </cronjob>
+    <cronjob>
+        <name>SwagConnect Update Products</name>
+        <action>ShopwareConnectUpdateProducts</action>
+        <active>false</active>
+        <interval>120</interval> /2 min
+        <disableOnError>true</disableOnError>
+    </cronjob>
+    <cronjob>
+        <name>SwagConnect Export Dynamic Streams</name>
+        <action>Shopware_CronJob_ConnectExportDynamicStreams</action>
+        <active>true</active>
+        <interval>43200</interval> /12 h
+        <disableOnError>true</disableOnError>
+    </cronjob>
+</cronjobs>

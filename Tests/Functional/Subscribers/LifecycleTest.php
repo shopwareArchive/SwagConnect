@@ -94,7 +94,7 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
     public function test_generate_delete_change_for_variants()
     {
         /** @var TestClient $client */
-        $client = $this->createBackendClient();
+        $client = self::createBackendClient();
 
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
@@ -116,7 +116,7 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
     public function test_generate_delete_change_only_for_exported()
     {
         /** @var TestClient $client */
-        $client = $this->createBackendClient();
+        $client = self::createBackendClient();
 
         /** @var Connection $connection */
         $connection = self::getDbalConnection();

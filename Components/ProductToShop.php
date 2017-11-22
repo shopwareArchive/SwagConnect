@@ -419,7 +419,7 @@ class ProductToShop implements ProductToShopBase
             $details->clear();
             $this->manager->remove($article);
         }
-      
+
         //save category Ids before flush
         $oldCategoryIds = array_map(function ($category) {
             return $category->getId();

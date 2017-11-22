@@ -16,7 +16,7 @@ class ArticleTest extends \PHPUnit_Framework_TestCase
     public function testExtendBackendArticlePropertyGroup()
     {
         /** @var TestClient $client */
-        $client = $this->createBackendClient();
+        $client = self::createBackendClient();
 
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/articleWithPriceGroup.sql');
 

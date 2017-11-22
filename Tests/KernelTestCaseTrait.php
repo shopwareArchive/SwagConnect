@@ -45,9 +45,7 @@ trait KernelTestCaseTrait
     /**
      * @var array
      */
-//    private $commonTestFixtures = [
-//        __DIR__ . '/../../common_user_test_fixtures.sql',
-//    ];
+    private $commonTestFixtures = [];
 
     /**
      * @param bool $set

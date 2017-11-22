@@ -56,10 +56,18 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/config_fixes.sql');
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
 
-        $client->request('POST', 'backend/Connect/insertOrUpdateProduct', ['sourceIds' => ['2','2-123','2-124']]);
+        $sourceIds = ['2','2-123','2-124'];
+
+        $client->request('POST', 'backend/Connect/insertOrUpdateProduct', ['sourceIds' => $sourceIds]);
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertTrue($responseData['success']);
+
+        $exportedItems = self::getDbalConnection()->fetchAll(
+            "SELECT export_status FROM s_plugin_connect_items WHERE source_id in (?, ?, ?) AND export_status = 'update' ",
+            $sourceIds
+        );
+        $this->assertCount(3, $exportedItems);
     }
 
     public function test_error_handling_on_export()
@@ -67,13 +75,21 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         /** @var TestClient $client */
         $client = self::createBackendClient();
 
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/config_fixes.sql');
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
+
+        $connection = self::getDbalConnection();
+
+        $connection->executeQuery('DELETE FROM s_articles_prices WHERE articledetailsID = 123');
 
         $client->request('POST', 'backend/Connect/insertOrUpdateProduct', ['sourceIds' => ['2','2-123']]);
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertFalse($responseData['success']);
-        $this->assertCount(2, $responseData['messages']['price']);
+        $this->assertCount(1, $responseData['messages']['price']);
+
+        $exportedItems = $connection->fetchAll("SELECT export_status FROM s_plugin_connect_items WHERE source_id = '2' AND export_status = 'update' ");
+        $this->assertCount(1, $exportedItems);
     }
 
     public function test_mark_product_to_be_deleted()
@@ -180,11 +196,19 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/sw_product_stream.sql');
 
-        $streamId = self::getDbalConnection()->fetchColumn('SELECT id FROM s_product_streams WHERE name = ?', ['AwStream']);
+        $connection = self::getDbalConnection();
+        $itemsInStream = 19;
+
+        $streamId = $connection->fetchColumn('SELECT id FROM s_product_streams WHERE name = ?', ['AwStream']);
 
         $client->request('POST', 'backend/Connect/exportStream', ['offset' => 0, 'limit' => 50, 'streamIds' => [$streamId]]);
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertTrue($responseData['success']);
+
+        $exportedItems = self::getDbalConnection()->fetchAll(
+            "SELECT export_status FROM s_plugin_connect_items WHERE export_status = 'update' "
+        );
+        $this->assertCount($itemsInStream, $exportedItems);
     }
 }

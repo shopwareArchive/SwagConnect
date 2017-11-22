@@ -178,28 +178,3 @@ namespace ShopwarePlugins\Connect\Tests {
         }
     }
 }
-
-namespace {
-    class Measurement
-    {
-        private static $lastPingTime;
-
-        /**
-         * @param string $message
-         */
-        public static function ping($message)
-        {
-            if (self::$lastPingTime) {
-                $now = time();
-                $dif = $now - self::$lastPingTime;
-                echo $message . ": $dif\n";
-                self::$lastPingTime = $now;
-
-                return;
-            }
-
-            self::$lastPingTime = time();
-            echo "Starting with: $message\n";
-        }
-    }
-}

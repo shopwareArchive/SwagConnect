@@ -122,7 +122,6 @@ class ImageImport
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
             foreach ($connectAttributes as $connectAttribute) {
                 $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-                // update mainImage can be set to true because this just runs on initial import
                 $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $article);
                 $this->importImagesForDetail($lastUpdate['variantImages'], $connectAttribute->getArticleDetail());
                 $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);

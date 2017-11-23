@@ -252,7 +252,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         self::getDbalConnection()->executeQuery('UPDATE s_plugin_connect_items SET shop_id = 2');
 
         $client->request('POST', 'backend/Import/recreateRemoteCategories');
-        print_r($client->getResponse()->getContent());
         $responseData = $this->handleJsonResponse($client->getResponse());
         $this->assertTrue($responseData['success']);
 

@@ -7,6 +7,7 @@
 
 namespace Functional\Controller;
 
+use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\TestClient;
 
@@ -64,8 +65,9 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($responseData['success']);
 
         $exportedItems = self::getDbalConnection()->fetchAll(
-            "SELECT export_status FROM s_plugin_connect_items WHERE source_id in (?, ?, ?) AND export_status = 'update' ",
-            $sourceIds
+            "SELECT export_status FROM s_plugin_connect_items WHERE source_id IN (?) AND export_status = 'update' ",
+            [$sourceIds],
+            [Connection::PARAM_INT_ARRAY]
         );
         $this->assertCount(3, $exportedItems);
     }
@@ -79,17 +81,23 @@ class ConnectTest extends \PHPUnit_Framework_TestCase
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
 
         $connection = self::getDbalConnection();
-
+        $connection->executeQuery("UPDATE s_plugin_connect_items SET export_status = 'synced'");
+        //break one of the products to be exported to check for errors
         $connection->executeQuery('DELETE FROM s_articles_prices WHERE articledetailsID = 123');
 
-        $client->request('POST', 'backend/Connect/insertOrUpdateProduct', ['sourceIds' => ['2','2-123']]);
+        $sourceIds = ['2','2-123'];
+
+        $client->request('POST', 'backend/Connect/insertOrUpdateProduct', ['sourceIds' => $sourceIds]);
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertFalse($responseData['success']);
         $this->assertCount(1, $responseData['messages']['price']);
 
-        $exportedItems = $connection->fetchAll("SELECT export_status FROM s_plugin_connect_items WHERE source_id = '2' AND export_status = 'update' ");
-        $this->assertCount(1, $exportedItems);
+        $firstItem = $connection->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = ? ', [$sourceIds[0]]);
+        $this->assertEquals('update', $firstItem);
+
+        $secondItem = $connection->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = ? ', [$sourceIds[1]]);
+        $this->assertEquals('error-price', $secondItem);
     }
 
     public function test_mark_product_to_be_deleted()

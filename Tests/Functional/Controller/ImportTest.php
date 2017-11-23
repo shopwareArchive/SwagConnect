@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Controller;
 
+use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Tests\TestClient;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 
@@ -68,7 +69,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $localCategoryId = '140809703';
         $remoteCategoryKey = '/deutsch/television';
 
-        $remoteCategoryId = $connection->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE category_key = ?', [$remoteCategoryKey]);
+        $remoteCategoryId = $connection->fetchColumn('SELECT id FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = 1234', [$remoteCategoryKey]);
 
         $client->request(
             'POST',
@@ -219,13 +220,23 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         /** @var TestClient $client */
         $client = self::createBackendClient();
 
-        $client->request('POST', 'backend/Import/unassignRemoteArticlesFromLocalCategory');
+        $this->importFixturesFileOnce(__DIR__ . '/../_fixtures/categories.sql');
+
+        $categoryID = 140809703;
+        $productId = '2';
+
+        $connection = self::getDbalConnection();
+
+        $client->request('POST', 'backend/Import/unassignRemoteArticlesFromLocalCategory', ['articleIds' => [$productId], 'categoryId' => $categoryID]);
         $responseData = $this->handleJsonResponse($client->getResponse());
 
         $this->assertTrue($responseData['success']);
 
-        $categoryAssignments = self::getDbalConnection()->fetchAll('SELECT * FROM s_plugin_connect_categories_to_local_categories');
-        $this->assertEmpty($categoryAssignments);
+        $categoryAssignment = $connection->fetchAll('SELECT * FROM s_articles_categories WHERE articleID = ? AND categoryID = ?', [$productId, $categoryID]);
+        $this->assertEmpty($categoryAssignment);
+
+        $isProductConnectMapped = $connection->fetchColumn('SELECT connect_mapped_category FROM s_articles_attributes WHERE articleID = ?', [$productId]);
+        $this->assertNull($isProductConnectMapped);
     }
 
     public function test_recreate_remote_categories()
@@ -233,14 +244,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         /** @var TestClient $client */
         $client = self::createBackendClient();
 
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/connect_items.sql');
+
+        $articleIDs = [2, 117];
+
+        self::getDbalConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories WHERE articleID IN (?)', [$articleIDs], [Connection::PARAM_INT_ARRAY]);
+        self::getDbalConnection()->executeQuery('UPDATE s_plugin_connect_items SET shop_id = 2');
+
         $client->request('POST', 'backend/Import/recreateRemoteCategories');
+        print_r($client->getResponse()->getContent());
         $responseData = $this->handleJsonResponse($client->getResponse());
         $this->assertTrue($responseData['success']);
 
-        $assignedProducts = self::getDbalConnection()->fetchAll(
-            'SELECT cp_to_cc.id FROM s_plugin_connect_product_to_categories cp_to_cc LEFT JOIN s_plugin_connect_categories cc ON cp_to_cc.connect_category_id = cc.id WHERE cc.local_category_id IS NOT NULL '
-        );
+        $assignedProducts = self::getDbalConnection()->fetchAll('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID IN (?)', [$articleIDs], [Connection::PARAM_INT_ARRAY]);
 
-        $this->assertEmpty($assignedProducts);
+        $this->assertNotEmpty($assignedProducts);
     }
 }

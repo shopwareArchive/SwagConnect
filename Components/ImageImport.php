@@ -621,6 +621,6 @@ class ImageImport
             WHERE s_articles_img.articleID = ? AND s_articles_img.main = 1 AND s_articles_img.parent_id IS NULL AND s_media_attributes.connect_hash = ?',
             [$articleId, $imageUrl]);
 
-        return (bool) $result;
+        return !(bool) $result;
     }
 }

@@ -190,4 +190,34 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEmpty($this->imageImport->getProductsNeedingImageImport());
     }
+
+    public function testImportMainImage()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $this->imageImport->importMainImage('no_main_img', 14467);
+
+        $result = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
+            [14467]);
+
+        $this->assertEquals(1235, $result);
+    }
+
+    public function testHasMainImageChnagedReturnsTrue()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $result = $this->imageImport->hasMainImageChanged('no_main_img', 14467);
+
+        $this->assertEquals(true, $result);
+    }
+
+    public function testHasMainImageChnagedReturnsFalse()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $result = $this->imageImport->hasMainImageChanged('main_img', 14467);
+
+        $this->assertEquals(false, $result);
+    }
 }

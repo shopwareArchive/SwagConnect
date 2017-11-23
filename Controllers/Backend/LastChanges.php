@@ -102,7 +102,7 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
                 break;
             case 'mainImage':
                 $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-                if ($lastUpdate['image'][0]) {
+                if (isset($lastUpdate['image'][0])) {
                     $this->getImageImport()->importMainImage(
                         $lastUpdate['image'][0], $article->getId()
                     );

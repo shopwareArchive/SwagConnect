@@ -253,7 +253,7 @@ class LocalProductQuery extends BaseProductQuery
             $mediaFiles[$sku] = array_slice($mediaFiles[$sku], 0, self::IMAGE_LIMIT);
             foreach ($mediaFiles[$sku] as $media) {
                 //main image has to be first image
-                if ($this->isMediaMainImage($row['localId'], $media->getId) && $row['images'][0]) {
+                if ($this->isMediaMainImage($row['localId'], $media->getId()) && isset($row['images'][0])) {
                     $temp = $row['images'][0];
                     $row['images'][0] = $media->getFile();
                     $row['images'][] = $temp;

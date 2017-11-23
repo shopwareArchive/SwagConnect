@@ -333,7 +333,7 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             // import only global images for article
             $this->imageImport->importImagesForArticle(array_diff($product->images, $product->variantImages), $model);
-            if ($updateFields['mainImage'] && $product->images[0]) {
+            if ($updateFields['mainImage'] && isset($product->images[0])) {
                 $this->imageImport->importMainImage($product->images[0], $model->getId());
             }
             // Reload the article detail model in order to not to work an the already flushed model

@@ -503,7 +503,7 @@ class Update
             }
         }
     }
-  
+
   /**
      * Create index by articleID in s_plugin_connect_product_to_categories table.
      */
@@ -538,7 +538,7 @@ class Update
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
                     $e->getMessage()
                 );
-            } 
+            }
         }
     }
 

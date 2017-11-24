@@ -72,6 +72,7 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
             $this->categoryRepository,
             $this->remoteCategoryRepository,
             ConfigFactory::getConfigInstance(),
+            Shopware()->Container()->get('CategoryDenormalization'),
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
 

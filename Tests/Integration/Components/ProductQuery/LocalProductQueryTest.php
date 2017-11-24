@@ -58,6 +58,49 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    private function applyFixtures()
+    {
+        $this->importFixtures('Tests/Integration/Components/ProductQuery/Fixtures/ProductQueryFixtures.sql');
+
+        if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
+            $purchasePriceField = 'detailPurchasePrice';
+        } else {
+            $purchasePriceField = 'basePrice';
+        }
+
+        Shopware()->Db()->executeQuery(
+            "DELETE FROM s_plugin_connect_config WHERE `name` = 'priceFieldForPurchasePriceExport'"
+        );
+        Shopware()->Db()->executeQuery(
+            'INSERT IGNORE INTO s_plugin_connect_config (`name`, `value`, `groupName`)
+                  VALUES (?, ?, ?)
+                  ON DUPLICATE KEY UPDATE
+                  `value` = VALUES(`value`)
+              ',
+            [
+                'priceFieldForPurchasePriceExport',
+                $purchasePriceField,
+                'export'
+            ]);
+    }
+
+    public function test_get()
+    {
+        $this->applyFixtures();
+        $result = $this->localProductQuery->get([3]);
+        $this->assertCount(1, $result);
+        /** @var \Shopware\Connect\Struct\Product $product */
+        $product = $result[0];
+
+        $this->assertInstanceOf('\Shopware\Connect\Struct\Product', $product);
+        $this->assertEquals('Münsterländer Aperitif 16%', $product->title);
+        $this->assertEquals(12.56, round($product->price, 2));
+        $this->assertEquals(1, $product->minPurchaseQuantity);
+        $this->assertEquals('l', $product->attributes[Product::ATTRIBUTE_UNIT]);
+        $this->assertEquals('0.7000', $product->attributes[Product::ATTRIBUTE_QUANTITY]);
+        $this->assertEquals('1.000', $product->attributes[Product::ATTRIBUTE_REFERENCE_QUANTITY]);
+    }
+
     /**
      * When configurator_set_id column is empty in s_articles is NULL,
      * product must be exported as a article without variants even
@@ -162,5 +205,17 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
             'id' => '',
             'fullPath' => true
         ]);
+    }
+
+    public function testGetUrlForProduct()
+    {
+        $expectedUrl = $this->getProductBaseUrl() . '1091';
+        $this->assertEquals($expectedUrl, $this->localProductQuery->getUrlForProduct(1091));
+    }
+
+    public function testGetUrlForProductWithShopId()
+    {
+        $expectedUrl = $this->getProductBaseUrl() . '1091/shId/3';
+        $this->assertEquals($expectedUrl, $this->localProductQuery->getUrlForProduct(1091, 3));
     }
 }

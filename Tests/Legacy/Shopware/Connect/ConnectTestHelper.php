@@ -277,6 +277,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $mainVariant = $this->getProduct(true);
         $mainVariantColor = array_pop($color);
         $mainVariant->variant['Farbe'] = $mainVariantColor['de'];
+        $mainVariant->configuratorSetType = 1;
         $mainVariant->groupId = $groupId;
         $variants[] = $mainVariant;
 
@@ -404,7 +405,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
                 $manager,
                 $manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
                 $manager->getRepository('Shopware\CustomModels\Connect\ProductToRemoteCategory'),
-                $manager->getRepository('Shopware\Models\Category\Category')
+                $manager->getRepository('Shopware\Models\Category\Category'),
+                Shopware()->Container()->get('CategoryDenormalization')
             ),
             new PDO(Shopware()->Db()->getConnection()),
             Shopware()->Container()->get('events'),

@@ -143,14 +143,23 @@ class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Ac
         $apiRequest = $this->getRestApiRequest();
         $result = $apiRequest->verifyRequest($request);
 
+        $requestObject = json_decode($request);
+        $supplierShopId = $requestObject->data->shopId;
+
         if ($result->isOk()) {
-            Shopware()->Db()->exec(
-                'UPDATE s_articles
-                INNER JOIN s_plugin_connect_items
-                  ON s_plugin_connect_items.article_id = s_articles.id
-                  AND shop_id IS NOT NULL
-                SET s_articles.active = false'
-            );
+            try {
+                $sql = Shopware()->Db()->prepare(
+                    'UPDATE s_articles
+                    INNER JOIN s_plugin_connect_items
+                      ON s_plugin_connect_items.article_id = s_articles.id
+                      AND shop_id = ' . $supplierShopId . '
+                    SET s_articles.active = false'
+                );
+
+                Shopware()->Db()->exec($sql);
+            } catch (Exception $exception) {
+                Shopware()->PluginLogger()->error($exception);
+            }
         }
 
         echo $result->getContent();

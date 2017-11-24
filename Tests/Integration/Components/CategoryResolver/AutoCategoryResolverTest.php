@@ -35,6 +35,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
             $this->categoryRepo,
             $this->manager->getRepository('Shopware\CustomModels\Connect\RemoteCategory'),
             $this->config,
+            Shopware()->Container()->get('CategoryDenormalization'),
             $this->manager->getRepository(ProductToRemoteCategory::class)
         );
     }

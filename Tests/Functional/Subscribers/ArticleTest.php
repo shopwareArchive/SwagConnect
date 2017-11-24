@@ -7,39 +7,31 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscriber;
 
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 
-class ArticleTest extends \Enlight_Components_Test_Plugin_TestCase
+class ArticleTest extends \PHPUnit_Framework_TestCase
 {
-    use DatabaseTestCaseTrait;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        // disable auth and acl
-        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
-        Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
-
-        $this->manager = Shopware()->Models();
-    }
+    use WebTestCaseTrait;
 
     public function testExtendBackendArticlePropertyGroup()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/articleWithPriceGroup.sql');
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('articleId', '32870');
-        $this->dispatch('backend/Article/setPropertyList');
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/articleWithPriceGroup.sql');
 
-        self::assertEquals(200, $this->Response()->getHttpResponseCode());
-        self::assertTrue($this->View()->success);
+        $client->request('POST', 'backend/Article/deleteDetail', ['articleId' => 32870]);
 
-        $statuses = $this->manager->getConnection()->executeQuery(
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+
+        $statuses = self::getDbalConnection()->fetchColumn(
             'SELECT export_status FROM s_plugin_connect_items WHERE article_id = ?',
             [32870]
-        )->fetchAll(\PDO::FETCH_COLUMN);
+        );
+
+        $this->assertNotEmpty($statuses);
 
         foreach ($statuses as $status) {
             //doesn't matter that theres an error

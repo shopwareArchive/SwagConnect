@@ -252,7 +252,7 @@ abstract class BaseProductQuery
     private function prepareCrossSellingProducts(array $row)
     {
         // do this just for mainvariant because crossSelling can just be defined for Products not for Variants
-        if ($row['detailKind'] == 1) {
+        if (isset($row['detailKind']) && $row['detailKind'] == 1) {
             $relatedArticleIds = $this->manager->getConnection()->executeQuery(
                 'SELECT relatedarticle FROM s_articles_relationships WHERE articleID = ?',
                 [$row['localId']])->fetchAll(\PDO::FETCH_COLUMN);

@@ -134,7 +134,7 @@ abstract class CategoryResolver
         $currentProductCategoryIds = $this->productToRemoteCategoryRepository->getRemoteCategoryIds($articleId);
 
         $assignedCategoryIds = array_map(function (RemoteCategory $assignedCategory) {
-            $assignedCategory->getId();
+            return $assignedCategory->getId();
         }, $assignedCategories);
 
         /** @var int $currentProductCategoryId */
@@ -195,7 +195,6 @@ abstract class CategoryResolver
             'SELECT connect_imported_category FROM s_categories_attributes WHERE categoryID = ?',
             [$categoryId]
         );
-
         if ($connectImported == 1 && $this->countChildCategories($categoryId) === 0) {
             $parent = (int) $this->manager->getConnection()->fetchColumn(
                 'SELECT parent FROM s_categories WHERE `id` = ?',

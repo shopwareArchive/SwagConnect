@@ -229,8 +229,6 @@ class ProductToShop implements ProductToShopBase
 
         $detail->setNumber($number);
 
-        $this->removeConnectImportedCategories($model);
-
         $detailAttribute = $this->getOrCreateAttributeModel($detail, $model);
 
         $connectAttribute = $this->helper->getConnectAttributeByModel($detail) ?: new ConnectAttribute;
@@ -419,7 +417,7 @@ class ProductToShop implements ProductToShopBase
             $details->clear();
             $this->manager->remove($article);
         }
-      
+
         //save category Ids before flush
         $oldCategoryIds = array_map(function ($category) {
             return $category->getId();
@@ -517,24 +515,6 @@ class ProductToShop implements ProductToShopBase
                 'UPDATE s_articles SET configurator_set_id = NULL WHERE id = ?',
                 [$model->getId()]
             );
-        }
-    }
-
-    /**
-     * @param ProductModel $model
-     */
-    private function removeConnectImportedCategories(ProductModel $model)
-    {
-        /** @var \Shopware\Models\Category\Category $category */
-        foreach ($model->getCategories() as $category) {
-            $attribute = $category->getAttribute();
-            if (!$attribute) {
-                continue;
-            }
-
-            if ($attribute->getConnectImported()) {
-                $model->removeCategory($category);
-            }
         }
     }
 
@@ -1006,6 +986,15 @@ class ProductToShop implements ProductToShopBase
             $this->manager->getConnection()->executeQuery(
                 'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
                 [$model->getId(), $category]
+            );
+            $parentId =$this->manager->getConnection()->fetchColumn(
+                'SELECT parent FROM `s_categories` WHERE id = ?',
+                [$category]
+            );
+            $this->categoryDenormalization->removeAssignment($model->getId(), $parentId);
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` = ?',
+                [$model->getId(), $parentId]
             );
         }
         $this->categoryDenormalization->enableTransactions();

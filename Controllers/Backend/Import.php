@@ -345,7 +345,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign([
                 'success' => false,
-                'error' => 'Articles could not be assigned to local Category!S',
+                'error' => 'Articles could not be assigned to local Categorys!',
             ]);
 
             return;

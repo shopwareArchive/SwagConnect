@@ -264,10 +264,10 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, false);
+        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, $stream, false);
 
         foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($category['remoteCategory'], $shopId);
+            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategoryAndStream($category['remoteCategory'], $shopId, $stream);
             foreach ($articleIds as $articleId) {
                 $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
                 $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);

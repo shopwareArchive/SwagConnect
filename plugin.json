@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.8",
+    "currentVersion": "1.1.9",
     "changelog": {
         "de": {
             "1.1.8": "CON-4935 - Fix: Kategorien Daten für Sitemap; CON-4829 - Konfigurator wird gesynct; CON-4873 - Alle exportieren Button funktioniert für große Datenmengen; CON-4885 - leere Connect-Kategorien werden automatisch gelöscht; CON-4926 - Performanceoptimierung ToShop-Channel; CON-4954: Fix: gleiche Kategorien von verschiedenen Lieferanten",

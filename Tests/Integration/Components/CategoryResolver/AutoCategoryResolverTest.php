@@ -61,7 +61,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->createRemoteCategories($createdCategories);
 
         if (!$bootsCategory) {
-            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId(), 1234);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/boots', $defaultCategory->getId(), 1234, 'test');
         }
 
         $nikeCategoryId = $this->categoryRepo->findOneBy([
@@ -70,7 +70,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         ]);
 
         if (!$nikeCategoryId) {
-            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId(), 1234);
+            $nikeCategoryId = $this->categoryResolver->createLocalCategory('Nike', '/deutsch/nike', $defaultCategory->getId(), 1234, 'test');
         }
 
         $nikeBootsCategory = $this->categoryRepo->findOneBy([
@@ -79,7 +79,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
         ]);
 
         if (!$nikeBootsCategory) {
-            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId, 1234);
+            $this->categoryResolver->createLocalCategory('Boots', '/deutsch/nike/boots', $nikeCategoryId, 1234, 'test');
         }
 
         $categories = [
@@ -94,7 +94,7 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->createRemoteCategories($categories);
 
-        $categoryModels = $this->categoryResolver->resolve($categories, 1234);
+        $categoryModels = $this->categoryResolver->resolve($categories, 1234, 'test');
 
         $this->deleteRemoteCategories(array_merge($categories, $createdCategories));
 

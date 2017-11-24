@@ -57,7 +57,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
     public function test_get_local_article_count()
     {
         $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
         $count = $this->repository->getLocalArticleCount();
         $this->assertEquals(7, $count);
     }
@@ -66,7 +66,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
         $this->connection->executeQuery('DELETE FROM s_articles_details');
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_connect_items.sql');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $mainProductIds = $this->repository->findAllSourceIds(0, 4);
         $variantIds = $this->repository->findAllSourceIds(4, 3);

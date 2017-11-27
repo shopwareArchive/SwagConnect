@@ -47,7 +47,7 @@ class VariantConfigurator
      */
     public function configureVariantAttributes(Product $product, Detail $detail)
     {
-        if (count($product->variant) === 0) {
+        if (count($product->variant) === 0 || $product->configuratorSetType === null) {
             return;
         }
 

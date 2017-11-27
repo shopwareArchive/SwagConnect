@@ -681,6 +681,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($existing, $actualTaxId);
     }
+
     public function test_update_product_dont_delete_category_with_count_1()
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_item_with_two_categories.sql');
@@ -733,5 +734,29 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
             [3333]
         );
         $this->assertNotFalse($localCategory);
+    }
+
+    public function test_update_product_with_different_streams()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/one_item_category_with_wrong_stream.sql');
+        $product = $this->getProduct();
+        $product->stream = 'Awesome products';
+        $product->shopId = 1234;
+        $product->sourceId = '1234-1';
+        $product->categories = [
+            '/deutsch' => 'Deutsch',
+            '/deutsch/bücher' => 'Bücher',
+            '/deutsch/bücher/fantasy' => 'Fantasy',
+            '/deutsch/bücher/romane' => 'Romane',
+        ];
+        $this->productToShop->insertOrUpdate($product);
+
+        //category in right stream
+        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 1234 AND categoryID = 2222');
+        $this->assertNotFalse($id);
+
+        //category in wrong stream
+        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 1234 AND categoryID = 3333');
+        $this->assertFalse($id);
     }
 }

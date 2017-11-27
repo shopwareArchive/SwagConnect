@@ -36,6 +36,7 @@ Ext.define('Shopware.apps.Connect.model.config.Import', {
         { name: 'overwriteProductName', type: 'int' },
         { name: 'overwriteProductPrice', type: 'int' },
         { name: 'overwriteProductImage', type: 'int' },
+        { name: 'overwriteProductMainImage', type: 'int' },
         { name: 'overwriteProductShortDescription', type: 'int' },
         { name: 'overwriteProductLongDescription', type: 'int' },
         { name: 'overwriteProductAdditionalDescription', type: 'int' },

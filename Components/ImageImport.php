@@ -577,4 +577,49 @@ class ImageImport
 
         return $sizesArray;
     }
+
+    /**
+     * @param $imageUrl string
+     * @param $articleId int
+     */
+    public function importMainImage($imageUrl, $articleId)
+    {
+        $oldMainImageId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
+            [$articleId]);
+
+        $newMainImageId = $this->manager->getConnection()->fetchColumn('
+            SELECT s_articles_img.id 
+            FROM s_articles_img 
+            INNER JOIN s_media ON s_articles_img.media_id = s_media.id
+            INNER JOIN s_media_attributes ON s_media.id = s_media_attributes.mediaID
+            WHERE s_articles_img.articleID = ? AND s_articles_img.parent_id IS NULL AND s_media_attributes.connect_hash = ?',
+            [$articleId, $imageUrl]);
+
+        if ($newMainImageId && $newMainImageId !== $oldMainImageId) {
+            $this->manager->getConnection()->executeQuery('
+            UPDATE s_articles_img SET main = ? WHERE id = ?',
+            [0, $oldMainImageId]);
+            $this->manager->getConnection()->executeQuery('
+            UPDATE s_articles_img SET main = ? WHERE id = ?',
+             [1, $newMainImageId]);
+        }
+    }
+
+    /**
+     * @param $imageUrl string
+     * @param $articleId int
+     * @return bool
+     */
+    public function hasMainImageChanged($imageUrl, $articleId)
+    {
+        $result = $this->manager->getConnection()->fetchColumn('
+            SELECT s_articles_img.id 
+            FROM s_articles_img 
+            INNER JOIN s_media ON s_articles_img.media_id = s_media.id
+            INNER JOIN s_media_attributes ON s_media.id = s_media_attributes.mediaID
+            WHERE s_articles_img.articleID = ? AND s_articles_img.main = 1 AND s_articles_img.parent_id IS NULL AND s_media_attributes.connect_hash = ?',
+            [$articleId, $imageUrl]);
+
+        return !(bool) $result;
+    }
 }

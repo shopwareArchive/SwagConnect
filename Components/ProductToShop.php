@@ -331,6 +331,9 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             // import only global images for article
             $this->imageImport->importImagesForArticle(array_diff($product->images, $product->variantImages), $model);
+            if ($updateFields['mainImage'] && isset($product->images[0])) {
+                $this->imageImport->importMainImage($product->images[0], $model->getId());
+            }
             // Reload the article detail model in order to not to work an the already flushed model
             $detail = $this->helper->getArticleDetailModelByProduct($product);
             // import only specific images for variant
@@ -598,6 +601,7 @@ class ProductToShop implements ProductToShopBase
             'Image',
             'Price',
             'Name',
+            'MainImage',
         ];
 
         // Always allow updates for new models
@@ -647,6 +651,12 @@ class ProductToShop implements ProductToShopBase
                 return $model->getName() != $product->title;
             case 'image':
                 return count($model->getImages()) != count($product->images);
+            case 'mainImage':
+                if ($product->images[0]) {
+                    return $this->imageImport->hasMainImageChanged($product->images[0], $model->getId());
+                }
+
+                return false;
             case 'price':
                 $prices = $detail->getPrices();
                 if (empty($prices)) {

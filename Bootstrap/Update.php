@@ -95,6 +95,7 @@ class Update
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
         $this->addArticleRelationsTable();
+        $this->addOverwriteMainImage();
 
         return true;
     }
@@ -557,6 +558,23 @@ class Update
                   CONSTRAINT s_plugin_connect_article_relations_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
                   ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
                 );
+              } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+  
+    private function addOverwriteMainImage()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("overwriteProductMainImage", "1", "import")');
+                $this->db->query('ALTER TABLE `s_plugin_connect_items` ADD COLUMN `update_main_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL');
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(

@@ -681,7 +681,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($existing, $actualTaxId);
     }
-    
+
     public function test_update_product_dont_delete_category_with_count_1()
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_item_with_two_categories.sql');

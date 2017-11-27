@@ -271,7 +271,7 @@ class Setup
              `article_detail_id` int(11) unsigned DEFAULT NULL,
              `shop_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
              `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-             `export_status` text COLLATE utf8_unicode_ci,
+             `export_status` varchar(255) COLLATE utf8_unicode_ci,
              `export_message` text COLLATE utf8_unicode_ci,
              `exported` TINYINT(1) DEFAULT 0,
              `category` text COLLATE utf8_unicode_ci,
@@ -297,7 +297,9 @@ class Setup
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`),
              INDEX source_id (source_id, shop_id),
-             INDEX group_id (group_id, shop_id)
+             INDEX group_id (group_id, shop_id),
+             INDEX IDX_revision (revision),
+             INDEX IDX_status (export_status)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", '
             CREATE TABLE IF NOT EXISTS `sw_connect_shipping_rules` (
              `sr_id` int(11) NOT NULL AUTO_INCREMENT,

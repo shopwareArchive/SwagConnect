@@ -5,53 +5,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\ShopwarePlugins\Connect;
+namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
+use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
-use ShopwarePlugins\Connect\Components\ProductQuery\BaseProductQuery;
+use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 
-class ConfigTest extends ConnectTestHelper
+class ConfigTest extends \PHPUnit_Framework_TestCase
 {
-    public function setUp()
-    {
-        parent::setUp();
-
-        $longDescription = BaseProductQuery::LONG_DESCRIPTION_FIELD;
-        Shopware()->Db()->exec('DELETE FROM s_plugin_connect_config');
-        Shopware()->Db()->executeQuery(
-            "INSERT INTO `s_plugin_connect_config`
-            (`name`, `value`, `groupName`) VALUES
-            ('priceGroupForPriceExport', 'EK', 'export'),
-            ('priceGroupForPurchasePriceExport', 'EK', 'export'),
-            ('priceFieldForPriceExport', 'price', 'export'),
-            ('priceFieldForPurchasePriceExport', 'basePrice', 'export'),
-            ('exportPriceMode', '[\"price\", \"purchasePrice\"]', 'export'),
-            ('detailProductNoIndex', '1', 'general'),
-            ('detailShopInfo', '1', 'general'),
-            ('checkoutShopInfo', '1', 'general'),
-            ('$longDescription', '1', 'export'),
-            ('importImagesOnFirstImport', '0', 'import'),
-            ('autoUpdateProducts', '1', 'export'),
-            ('overwriteProductName', '1', 'import'),
-            ('overwriteProductPrice', '1', 'import'),
-            ('overwriteProductImage', '1', 'import'),
-            ('overwriteProductShortDescription', '1', 'import'),
-            ('overwriteProductLongDescription', '1', 'import'),
-            ('overwriteProductAdditionalDescription', '1', 'import'),
-            ('logRequest', '1', 'general'),
-            ('showShippingCostsSeparately', '0', 'general'),
-            ('articleImagesLimitImport', '10', 'import');
-            "
-        );
-    }
-
-    public function tearDown()
-    {
-        Shopware()->Db()->exec("
-          DELETE FROM s_plugin_connect_config WHERE groupName = 'marketplace'
-        ");
-    }
+    use DatabaseTestCaseTrait;
 
     public function testGetConfig()
     {
@@ -119,20 +82,85 @@ class ConfigTest extends ConnectTestHelper
 
     public function testSetImportConfigs()
     {
-        $configName = 'testConfig' . rand(1, 9999);
-        $configValue = 0;
+        $manager = Shopware()->Models();
         $data = [
             [
-                $configName => $configValue
+                'testConfig' => 0,
+                'testConfig1' => 1
             ]
         ];
 
         $this->getConfigComponent()->setImportConfigs($data);
-        $sql = 'SELECT name, value FROM s_plugin_connect_config WHERE shopId IS NULL AND groupName = ? AND name = ?';
-        $result = Shopware()->Db()->fetchPairs($sql, ['import', $configName]);
 
-        $this->assertNotEmpty($result);
-        $this->assertEquals($configValue, $result[$configName]);
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "import" AND `name` = "testConfig"');
+
+        $this->assertEquals(0, $configValue);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "import" AND `name` = "testConfig1"');
+
+        $this->assertEquals(1, $configValue);
+    }
+
+    public function testSetImportConfigsActivatesImageCronJob()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 0 WHERE `action` = "ShopwareConnectImportImages"');
+
+        $data = [
+            [
+                'importImagesOnFirstImport' => 0,
+            ]
+        ];
+
+        $this->getConfigComponent()->setImportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "import" AND `name` = "importImagesOnFirstImport"');
+
+        $this->assertEquals(0, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectImportImages"');
+
+        $this->assertEquals(1, $cronActive);
+    }
+
+    public function testSetImportConfigsDeactivatesImageCronJob()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 1 WHERE `action` = "ShopwareConnectImportImages"');
+
+        $data = [
+            [
+                'importImagesOnFirstImport' => 1,
+            ]
+        ];
+
+        $this->getConfigComponent()->setImportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "import" AND `name` = "importImagesOnFirstImport"');
+
+        $this->assertEquals(1, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE action = "ShopwareConnectImportImages"');
+
+        $this->assertEquals(0, $cronActive);
     }
 
     public function testGetExportConfig()
@@ -167,6 +195,90 @@ class ConfigTest extends ConnectTestHelper
 
         $this->assertNotEmpty($result);
         $this->assertEquals($configValue, $result[$configName]);
+    }
+
+    public function testSetExportConfigsActivatesUpdateProductsCronJob()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 0 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_CRON_JOB,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_CRON_JOB, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(1, $cronActive);
+    }
+
+    public function testSetExportConfigsDeactivatesUpdateProductsCronJobForManualUpdate()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 1 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_MANUAL,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_MANUAL, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(0, $cronActive);
+    }
+
+    public function testSetExportConfigsDeactivatesUpdateProductsCronJobForAutoUpdate()
+    {
+        $manager = Shopware()->Models();
+        $manager->getConnection()->executeQuery('UPDATE `s_crontab` SET `active` = 1 WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $data = [
+            [
+                'autoUpdateProducts' => Config::UPDATE_AUTO,
+            ]
+        ];
+
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $configValue = $manager->getConnection()->fetchColumn('
+          SELECT `value` 
+          FROM `s_plugin_connect_config`
+          WHERE `shopId` IS NULL AND `groupName` = "export" AND `name` = "autoUpdateProducts"');
+
+        $this->assertEquals(Config::UPDATE_AUTO, $configValue);
+
+        $cronActive = $manager->getConnection()->fetchColumn('
+          SELECT active
+          FROM s_crontab
+          WHERE `action` = "ShopwareConnectUpdateProducts"');
+
+        $this->assertEquals(0, $cronActive);
     }
 
     public function testCompareExportConfiguration()
@@ -251,12 +363,6 @@ class ConfigTest extends ConnectTestHelper
         foreach ($result as $name => $value) {
             $this->assertEquals($value, $unitsMapping[$name]);
         }
-    }
-
-    public static function tearDownAfterClass()
-    {
-        $sql = 'DELETE FROM s_plugin_connect_config WHERE name LIKE  "testConfig%"';
-        Shopware()->Db()->exec($sql);
     }
 
     private function getConfigComponent()

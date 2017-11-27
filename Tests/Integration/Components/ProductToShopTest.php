@@ -797,5 +797,58 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
             [$insertedArticleId, 11]);
         $this->assertNotFalse($id);
+
+    public function test_update_product_dont_delete_category_with_count_1()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_item_with_two_categories.sql');
+
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+            [1234, 3333]
+        );
+        $this->assertNotFalse($categoryAssignment);
+
+        $product = $this->getProduct();
+        $product->shopId = 1234;
+        $product->sourceId = '1234-1';
+        $product->categories = [
+            '/deutsch' => 'Deutsch',
+            '/deutsch/test1' => 'Test 1'
+        ];
+
+        $this->productToShop->insertOrUpdate($product);
+
+        $articleCount = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(id) FROM s_articles WHERE id = ?',
+            [1234]
+        );
+        $this->assertEquals(1, $articleCount);
+
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+            [1234, 4444]
+        );
+        $this->assertFalse($categoryAssignment);
+
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+            [1234, 2222]
+        );
+        $this->assertFalse($categoryAssignment);
+
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+            [1234, 3333]
+        );
+        $this->assertNotFalse($categoryAssignment);
+
+        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+            [4444]
+        );
+        $this->assertFalse($localCategory);
+        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+            [2222]
+        );
+        $this->assertNotFalse($localCategory);
+        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+            [3333]
+        );
+        $this->assertNotFalse($localCategory);
     }
 }

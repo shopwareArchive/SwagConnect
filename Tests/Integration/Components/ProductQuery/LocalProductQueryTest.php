@@ -131,6 +131,67 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->localProductQuery->hasVariants(2));
     }
 
+    public function testGetConnectProduct()
+    {
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO s_articles_relationships (articleID, relatedarticle) VALUES (1234, 1)');
+        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO s_articles_similar (articleID, relatedarticle) VALUES (1234, 2)');
+        $row = [
+            'sku' => 'SW10005',
+            'sourceId' => '22',
+            'ean' => null,
+            'title' => 'Glas -Teetasse 0,25l',
+            'shortDescription' => 'Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius.',
+            'vendor' =>  [
+                'name' => 'Teapavilion',
+                'description' => 'Teapavilion description',
+                'logo_url' => 'tea_pavilion.jpg',
+                'url' => 'http://teapavilion.com',
+                'page_title' => 'Teapavilion title',
+            ],
+            'vat' => '0.190000',
+            'availability' => 3445,
+            'price' => 10.924369747899,
+            'purchasePrice' => 0,
+            'longDescription' => '<p>Reficio congratulor simplex Ile familia mire hae Prosequor in pro St quae Muto,, St Texo aer Cornu ferox lex inconsiderate propitius, animus ops nos haero vietus Subdo qui Gemo ipse somniculosus. Non Apertio ops, per Repere torpeo penintentiarius Synagoga res mala caelestis praestigiator. Ineo via consectatio Gemitus sui domus ludio is vulgariter, hic ut legens nox Falx nos cui vaco insudo tero, tollo valde emo. deprecativus fio redigo probabiliter pacificus sem Nequequam, suppliciter dis Te summisse Consuesco cur Desolo sis insolesco expeditus pes Curo aut Crocotula Trimodus. Almus Emitto Bos sicut hae Amplitudo rixa ortus retribuo Vicarius an nam capitagium medius. Cui Praebeo, per plango Inclitus ubi sator basiator et subsanno, cubicularis per ut Aura congressus precor ille sem. aro quid ius Praedatio vitupero Tractare nos premo procurator. Ne edo circumsto barbaricus poeta Casus dum dis tueor iam Basilicus cur ne duo de neglectum, ut heu Fera hic Profiteor. Ius Perpetuus stilla co.</p>',
+            'fixedPrice' => null,
+            'deliveryWorkDays' => null,
+            'shipping' => null,
+            'translations' => [],
+            'attributes' => [
+                'unit' => null,
+                'quantity' => null,
+                'ref_quantity' => null,
+            ],
+        ];
+
+        $expectedProduct = new Product($row);
+        $expectedProduct->vendor['logo_url'] = 'http:/media/image/8e/42/46/tea_pavilion.jpg';
+        $expectedProduct->url = $this->getProductBaseUrl() . '22';
+        $expectedProduct->attributes = [
+            'quantity' => null,
+            'ref_quantity' => null,
+        ];
+
+        $expectedProduct->related = [1];
+        $expectedProduct->similar = [2];
+
+        $row['vendorName'] = $row['vendor']['name'];
+        $row['vendorLink'] = $row['vendor']['url'];
+        $row['vendorImage'] = $row['vendor']['logo_url'];
+        $row['vendorDescription'] = $row['vendor']['description'];
+        $row['vendorMetaTitle'] = $row['vendor']['page_title'];
+        $row['detailKind'] = '1';
+        unset($row['vendor']);
+        $row['category'] = '';
+        $row['weight'] = null;
+        $row['unit'] = null;
+        $row['localId'] = '1234';
+        $row['detailId'] = '1234';
+        $row['configuratorSetId'] = null;
+
+        $this->assertEquals($expectedProduct, $this->localProductQuery->getConnectProduct($row));
+    }
+
     private function getProductBaseUrl()
     {
         if (!Shopware()->Front()->Router()) {

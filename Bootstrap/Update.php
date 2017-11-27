@@ -94,6 +94,7 @@ class Update
         $this->setDefaultConfigForUpdateOrderStatus();
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
+        $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
 
         return true;
@@ -542,6 +543,32 @@ class Update
         }
     }
 
+    private function addArticleRelationsTable()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_article_relations` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `article_id` int(11) unsigned NOT NULL,
+                  `shop_id` int(11) NOT NULL,
+                  `related_article_local_id` int(11) NOT NULL,
+                  `relationship_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+                  PRIMARY KEY (`id`),
+                  UNIQUE KEY `relations` (`article_id`, `shop_id`, `related_article_local_id`, `relationship_type`),
+                  CONSTRAINT s_plugin_connect_article_relations_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
+                  ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
+                );
+              } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+  
     private function addOverwriteMainImage()
     {
         if (version_compare($this->version, '1.1.8', '<=')) {

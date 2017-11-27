@@ -150,7 +150,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (LAST_INSERT_ID(), 3)');
 
         $connectCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2"')->fetchColumn();
-
+      
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id) VALUES (?, ?)',
             [$connectCategoryId, $localCategoryId]);
 

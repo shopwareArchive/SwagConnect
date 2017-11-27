@@ -797,6 +797,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
             [$insertedArticleId, 11]);
         $this->assertNotFalse($id);
+    }
 
     public function test_update_product_dont_delete_category_with_count_1()
     {

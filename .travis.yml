@@ -25,7 +25,9 @@ before_script:
     - ln -sf vendor/shopware/plugin-dev-tools/psh56.phar psh56
     - ./psh56 travis:init
 
-script: ./psh56 travis:unit-coveralls
+script:
+    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./psh56 travis:unit; fi'
+    - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./psh56 travis:unit-coveralls; fi'
 
 notifications:
     email: false

@@ -62,7 +62,7 @@ class VariantConfigurator
         } else {
             $configSet = $article->getConfiguratorSet();
         }
-        if ($product->configuratorSetType !== null) {   
+        if ($product->configuratorSetType !== null) {
             $configSet->setType($product->configuratorSetType);
         }
 

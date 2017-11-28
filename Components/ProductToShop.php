@@ -224,7 +224,7 @@ class ProductToShop implements ProductToShopBase
             // in connect attribute table
             $mainDetail = $model->getMainDetail();
             $isMainVariant = $this->checkIfMainVariant($detail, $mainDetail);
-
+            $this->variantConfigurator->configureVariantAttributes($product, $detail);
             $this->updateConfiguratorSetTypeFromProduct($model, $product);
 
             $this->cleanUpConfiguratorSet($model, $product);
@@ -485,9 +485,7 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($detail);
         $detail->setArticle($model);
         $model->getDetails()->add($detail);
-        if (!empty($product->variant)) {
-            $this->variantConfigurator->configureVariantAttributes($product, $detail);
-        }
+        $this->variantConfigurator->configureVariantAttributes($product, $detail);
 
         return $detail;
     }
@@ -508,8 +506,7 @@ class ProductToShop implements ProductToShopBase
      */
     private function updateConfiguratorSetTypeFromProduct(ProductModel $model, Product $product)
     {
-        if (!empty($product->variant)) {
-            $configSet = $model->getConfiguratorSet();
+        if (!empty($product->variant) && $configSet = $model->getConfiguratorSet()) {
             $configSet->setType($product->configuratorSetType);
         }
     }
@@ -1648,7 +1645,7 @@ class ProductToShop implements ProductToShopBase
             [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
     }
 
-    /**  
+    /**
      * @param Property $property
      * @return PropertyGroup
      */

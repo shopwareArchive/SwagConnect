@@ -160,6 +160,13 @@ class Attribute extends ModelEntity
      */
      protected $updateName;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="update_main_image", type="string", nullable=true)
+     */
+    protected $updateMainImage;
+
 
     /**
      * @var string
@@ -566,6 +573,22 @@ class Attribute extends ModelEntity
     public function getUpdateShortDescription()
     {
         return $this->updateShortDescription;
+    }
+
+    /**
+     * @param string $updateMainImage
+     */
+    public function setUpdateMainImage($updateMainImage)
+    {
+        $this->updateMainImage = $updateMainImage;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdateMainImage()
+    {
+        return $this->updateMainImage;
     }
 
     /**

@@ -26,8 +26,8 @@ before_script:
     - ./psh56 travis:init
 
 script:
-    - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then ./psh56 travis:unit; fi'
-    - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./psh56 travis:unit-coveralls; fi'
+    - 'if [ "$TRAVIS_BRANCH" != "master" ]; then ./psh56 travis:unit; fi'
+    - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./psh56 travis:unit-coveralls; fi'
 
 notifications:
     email: false

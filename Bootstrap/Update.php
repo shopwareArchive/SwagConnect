@@ -94,6 +94,7 @@ class Update
         $this->setDefaultConfigForUpdateOrderStatus();
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
+        $this->changeExportStatusToVarchar();
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
 
@@ -543,6 +544,24 @@ class Update
         }
     }
 
+    private function changeExportStatusToVarchar()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('ALTER TABLE s_plugin_connect_items MODIFY export_status varchar(255)');
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX IDX_revision (revision)');
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX IDX_status (export_status)');
+            } catch (\Exception $e) {
+                // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+  
     private function addArticleRelationsTable()
     {
         if (version_compare($this->version, '1.1.8', '<=')) {

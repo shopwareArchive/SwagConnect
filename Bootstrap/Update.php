@@ -95,6 +95,7 @@ class Update
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
         $this->addStreamColumnToConnectToLocalCategories();
+        $this->changeExportStatusToVarchar();
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
 
@@ -557,6 +558,24 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE');
             } catch (\Exception $e) {
               // ignore it if exists
+              $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function changeExportStatusToVarchar()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('ALTER TABLE s_plugin_connect_items MODIFY export_status varchar(255)');
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX IDX_revision (revision)');
+                $this->db->query('ALTER TABLE s_plugin_connect_items ADD INDEX IDX_status (export_status)');
+            } catch (\Exception $e) {
+                // ignore it if exists
                 $this->logger->write(
                     true,
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),

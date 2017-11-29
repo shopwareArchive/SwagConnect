@@ -70,7 +70,7 @@ class Attribute extends ModelEntity
     /**
      * @var string
      *
-     * @ORM\Column(name="export_status", type="text", nullable=true)
+     * @ORM\Column(name="export_status", type="string", nullable=true)
      */
      protected $exportStatus;
 

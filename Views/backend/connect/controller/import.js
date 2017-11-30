@@ -28,7 +28,9 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             recreateRemoteCategoriesTitle: '{s name=import/tree/update_remote_categories}Re-create categories{/s}',
             recreateRemoteCategoriesConfirmMessage: '{s name=import/message/recreate_remote_categories}Are you sure you want to re-create remote categories? This will deactivate all auto created remote categories and unassign their products.{/s}',
             deactivatedCategoriesSuccess: '{s name=deactivated_categories/success/message}[0] categories deactivated{/s}'
-        }
+        },
+        categoryProgress: '[0] of [1] categories assigned',
+        articleProgress: '[0] of [1] articles assigned'
     },
 
     /**
@@ -462,7 +464,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.createGrowlMessage('{s name=connect/success}Success{/s}', '{s name=changed_products/success/notification/message}Successfully applied changes{/s}');
+                    me.assignArticlesToCategories(data.categories, data.shopId);
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
@@ -479,6 +481,76 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
             },
             failure: function(response, opts) {
                 panel.setLoading(false);
+                me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
+            }
+        });
+    },
+
+    assignArticlesToCategories: function(categories, shopId) {
+        var me = this;
+        var shopId = shopId;
+        var categoriesCount = categories.length;
+
+        me.progressWindow = Ext.create('Shopware.apps.Connect.view.import.Progress', {
+            categoriesCount: categoriesCount
+        }).show();
+
+        categories.forEach(function (item, index) {
+            Ext.Ajax.request({
+                url: '{url controller=Import action=getArticleCountForRemoteCategory}',
+                method: 'GET',
+                params: {
+                    remoteCategoryKey: item.remoteCategory,
+                    shopId: shopId
+                },
+                success: function(response, opts) {
+                    var data = Ext.JSON.decode(response.responseText);
+                    if (data.success == true) {
+                        var window = me.progressWindow;
+                        window.progressFieldArticles.updateText(Ext.String.format(window.snippets.processArticles, 0, data.count));
+                        me.assignArticlesBatch(window, item, shopId, data.count, 0, 200);
+                    } else {
+                        me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                    }
+                },
+                failure: function(response, opts) {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
+                }
+            });
+            var window = me.progressWindow;
+            window.progressFieldCategories.updateText(Ext.String.format(window.snippets.processCategories, index + 1, categoriesCount));
+            window.progressFieldCategories.updateProgress((index + 1)/categoriesCount);
+        });
+
+        me.progressWindow.closeWindow();
+    },
+
+    assignArticlesBatch: function(window, category, shopId, articleCount, offset, batchsize) {
+        Ext.Ajax.request({
+            url: '{url controller=Import action=assignArticlesToRemoteCategory}',
+            method: 'POST',
+            params: {
+                remoteCategoryKey: category.remoteCategory,
+                shopId: shopId,
+                localCategoryId: category.categoryKey,
+                localParentId: category.parentId,
+                offset: offset,
+                limit: batchsize
+            },
+            success: function(response, opts) {
+                var data = Ext.JSON.decode(response.responseText);
+                if (data.success == true) {
+                    offset = offset + batchsize;
+                    window.progressFieldArticles.updateText(Ext.String.format(window.snippets.processArticles, offset, articleCount));
+                    window.progressFieldArticles.updateProgress(offset/articleCount);
+                    if (offset < articleCount) {
+                        me.assignArticlesBatch(window, category, shopId, articleCount, offset, batchsize);
+                    }
+                } else {
+                    me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
+                }
+            },
+            failure: function(response, opts) {
                 me.createGrowlMessage('{s name=connect/error}Error{/s}', 'error');
             }
         });

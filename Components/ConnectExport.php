@@ -691,8 +691,7 @@ class ConnectExport
 
         if ($categoriesToBeDeleted) {
             $articlesInDeletedCategories = [];
-            foreach ($categoriesToBeDeleted as $categoryToBeDeleted)
-            {
+            foreach ($categoriesToBeDeleted as $categoryToBeDeleted) {
                 //it's necessary to fetch all articleIDs in the deleted categories
                 //because DQL doesn't allow a join in update
                 $builder->select('articleCategories.articleID')

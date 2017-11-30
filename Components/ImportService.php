@@ -229,9 +229,9 @@ class ImportService
      * @param string $remoteCategoryLabel
      * @param int|null $shopId
      * @param string|null $stream
-     * @return void
+     * @return array
      */
-    public function importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId = null, $stream = null)
+    public function importRemoteCategoryCreateLocalCategories($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId = null, $stream = null)
     {
         /** @var \Shopware\Models\Category\Category $localCategory */
         $localCategory = $this->categoryRepository->find((int) $localCategoryId);
@@ -264,37 +264,7 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        $categories = $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, $stream, false);
-
-        foreach ($categories as $category) {
-            $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategoryAndStream($category['remoteCategory'], $shopId, $stream);
-            foreach ($articleIds as $articleId) {
-                $this->categoryDenormalization->addAssignment($articleId, $category['categoryKey']);
-                $this->categoryDenormalization->removeAssignment($articleId, $category['parentId']);
-                $this->manager->getConnection()->executeQuery(
-                    'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
-                    [$articleId,  $category['categoryKey']]
-                );
-                $this->manager->getConnection()->executeQuery(
-                    'DELETE FROM `s_articles_categories` WHERE `articleID` = :articleID AND `categoryID` = :categoryID',
-                    [
-                        ':articleID' => $articleId,
-                        ':categoryID' => $category['parentId']
-                    ]
-                );
-                $detailId = $this->manager->getConnection()->fetchColumn(
-                    'SELECT id FROM `s_articles_details` WHERE `articleID` = :articleID',
-                    ['articleID' => $articleId]
-                );
-                $this->manager->getConnection()->executeQuery(
-                    'INSERT  INTO `s_articles_attributes` (`articleID`, `articledetailsID`, `connect_mapped_category`) 
-                        VALUES (?, ?, 1)
-                        ON DUPLICATE KEY UPDATE `connect_mapped_category` = 1
-                    ',
-                    [$articleId,  $detailId]
-                );
-            }
-        }
+        return $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, false);
     }
 
     /**
@@ -597,5 +567,54 @@ class ImportService
         $categoriesStatement->execute();
         $categoryLogStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories_ro WHERE articleID IN (' . implode(', ', $articleIds) . ')');
         $categoryLogStatement->execute();
+    }
+
+    /**
+     * @param int $shopId
+     * @param string $remoteCategoryKey
+     * @param int $localCategoryId
+     * @param int $localParentId
+     * @param int $offset
+     * @param int $limit
+     */
+    public function importRemoteCategoryAssignArticles($shopId, $remoteCategoryKey, $localCategoryId, $localParentId, $offset, $limit)
+    {
+        $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId, $offset, $limit);
+        foreach ($articleIds as $articleId) {
+            $this->categoryDenormalization->addAssignment($articleId, $localCategoryId);
+            $this->categoryDenormalization->removeAssignment($articleId, $localParentId);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+                [$articleId, $localCategoryId]
+            );
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = :articleID AND `categoryID` = :categoryID',
+                [
+                    ':articleID' => $articleId,
+                    ':categoryID' => $localParentId
+                ]
+            );
+            $detailId = $this->manager->getConnection()->fetchColumn(
+                'SELECT main_detail_id FROM `s_articles` WHERE `id` = :articleID',
+                ['articleID' => $articleId]
+            );
+            $this->manager->getConnection()->executeQuery(
+                'INSERT  INTO `s_articles_attributes` (`articleID`, `articledetailsID`, `connect_mapped_category`) 
+                    VALUES (?, ?, 1)
+                    ON DUPLICATE KEY UPDATE `connect_mapped_category` = 1
+                ',
+                [$articleId, $detailId]
+            );
+        }
+    }
+
+    /**
+     * @param int $shopId
+     * @param string $remoteCategoryKey
+     * @return int
+     */
+    public function importRemoteCategoryGetArticleCountForCategory($shopId, $remoteCategoryKey)
+    {
+        return $this->productToRemoteCategoryRepository->getArticleCountByRemoteCategory($remoteCategoryKey, $shopId);
     }
 }

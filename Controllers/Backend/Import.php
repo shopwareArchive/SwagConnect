@@ -289,7 +289,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         try {
-            $this->getImportService()->importRemoteCategory($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId, $stream);
+            $categories = $this->getImportService()->importRemoteCategoryCreateLocalCategories($localCategoryId, $remoteCategoryKey, $remoteCategoryLabel, $shopId, $stream);
         } catch (\RuntimeException $e) {
             $this->getLogger()->write(true, $e->getMessage(), $e);
             $this->View()->assign([
@@ -301,7 +301,58 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
         }
 
         $this->View()->assign([
-            'success' => true
+            'success' => true,
+            'categories' => $categories,
+            'shopId' => $shopId
+        ]);
+    }
+
+    public function getArticleCountForRemoteCategoryAction()
+    {
+        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', "");
+        $shopId = (int) $this->request->getParam('shopId', 0);
+
+        try {
+            $articleCount = $this->getImportService()->importRemoteCategoryGetArticleCountForCategory($shopId, $remoteCategoryKey);
+        } catch (\RuntimeException $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign([
+                'success' => false,
+                'error' => 'Articles could not be counted!',
+            ]);
+
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+            'count' => (int) $articleCount
+        ]);
+    }
+
+    public function assignArticlesToRemoteCategoryAction()
+    {
+        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', "");
+        $localCategoryId = (int) $this->request->getParam('localCategoryId', 0);
+        $localParentId = (int) $this->request->getParam('localParentId', 0);
+        $offset = (int) $this->request->getParam('offset', 0);
+        $limit = (int) $this->request->getParam('limit', 0);
+        $shopId = (int) $this->request->getParam('shopId', 0);
+
+        try {
+            $this->getImportService()->importRemoteCategoryAssignArticles($shopId, $remoteCategoryKey, $localCategoryId, $localParentId, $offset, $limit);
+        } catch (\RuntimeException $e) {
+            $this->getLogger()->write(true, $e->getMessage(), $e);
+            $this->View()->assign([
+                'success' => false,
+                'error' => 'Articles could not be assigned to local Categorys!',
+            ]);
+
+            return;
+        }
+
+        $this->View()->assign([
+            'success' => true,
         ]);
     }
 

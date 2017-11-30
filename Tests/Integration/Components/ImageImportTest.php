@@ -74,7 +74,6 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
             $images[] = $this->imageProviderUrl . '?' . $i;
         }
 
-
         /** @var \Shopware\Models\Article\Article $model */
         $model = $this->manager->find('Shopware\Models\Article\Article', 2);
         $media = $model->getImages()[0]->getMedia();

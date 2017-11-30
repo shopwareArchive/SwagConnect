@@ -274,13 +274,13 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($articleIds, $assignedArticleIds);
     }
 
-    public function testImportRemoteCategory()
+    public function testImportRemoteCategoryCreateLocalCategories()
     {
         $this->importFixtures(__DIR__ . '/_fixtures/one_article_with_connect_categories.sql');
 
         $localCategory = $this->categoryRepository->find(35);
 
-        $this->importService->importRemoteCategory(
+        $this->importService->importRemoteCategoryCreateLocalCategories(
             $localCategory->getId(),
             '/deutsch/bücher',
             'Bücher',
@@ -303,21 +303,40 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, count($createdLocalCategory->getChildren()));
 
-        // assert that 0 articles are in the parent category
+        $articleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategory($remoteCategory->getCategoryKey(), 1234, 0, 50);
+
+        $this->importService->importRemoteCategoryAssignArticles(1234, $remoteCategory->getCategoryKey(), $createdLocalCategory->getId(), $localCategory->getId(), 0, 50);
+
+        $expectedArticleCount = count($articleIds);
         $actualArticleCount = (int) $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
             [':categoryID' => $createdLocalCategory->getId()]
         );
-        $this->assertEquals(0, $actualArticleCount);
-
-        // assert that articles are in the leaf-category
-        $articleIds = $this->productToRemoteCategoriesRepository->findArticleIdsByRemoteCategoryAndStream('/deutsch/bücher', 1234, 'Awesome products');
-        $expectedArticleCount = count($articleIds);
-        $this->assertGreaterThan(0, $expectedArticleCount);
-        $actualArticleCount = (int) $this->manager->getConnection()->fetchColumn(
-            'SELECT COUNT(*) FROM `s_articles_categories` WHERE `categoryID` = :categoryID',
-            [':categoryID' => $createdLocalSubCategory->getId()]
-        );
         $this->assertEquals($expectedArticleCount, $actualArticleCount);
+    }
+
+    public function testImportRemoteCategoryGetArticleCountForCategory()
+    {
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
+
+        $bookCategoryId = 1111;
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (1111, "/deutsch/bücher", "Bücher", 1234)');
+
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [14471, $bookCategoryId]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [14470, $bookCategoryId]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
+            [14469, $bookCategoryId]
+        );
+
+        $result = $this->importService->importRemoteCategoryGetArticleCountForCategory(1234, '/deutsch/bücher');
+        $this->assertEquals(3, $result);
     }
 }

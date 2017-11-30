@@ -264,7 +264,7 @@ class ImportService
         ];
 
         // create same category structure as Shopware Connect structure
-        return $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, false);
+        return $this->autoCategoryResolver->convertTreeToKeys($remoteCategoryNodes, $localCategory->getId(), $shopId, $stream, false);
     }
 
     /**
@@ -572,14 +572,15 @@ class ImportService
     /**
      * @param int $shopId
      * @param string $remoteCategoryKey
+     * @param string $stream
      * @param int $localCategoryId
      * @param int $localParentId
      * @param int $offset
      * @param int $limit
      */
-    public function importRemoteCategoryAssignArticles($shopId, $remoteCategoryKey, $localCategoryId, $localParentId, $offset, $limit)
+    public function importRemoteCategoryAssignArticles($shopId, $remoteCategoryKey, $stream, $localCategoryId, $localParentId, $offset, $limit)
     {
-        $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId, $offset, $limit);
+        $articleIds = $this->productToRemoteCategoryRepository->findArticleIdsByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream, $offset, $limit);
         foreach ($articleIds as $articleId) {
             $this->categoryDenormalization->addAssignment($articleId, $localCategoryId);
             $this->categoryDenormalization->removeAssignment($articleId, $localParentId);
@@ -611,10 +612,11 @@ class ImportService
     /**
      * @param int $shopId
      * @param string $remoteCategoryKey
+     * @param string $stream
      * @return int
      */
-    public function importRemoteCategoryGetArticleCountForCategory($shopId, $remoteCategoryKey)
+    public function importRemoteCategoryGetArticleCountForCategory($shopId, $remoteCategoryKey, $stream)
     {
-        return $this->productToRemoteCategoryRepository->getArticleCountByRemoteCategory($remoteCategoryKey, $shopId);
+        return $this->productToRemoteCategoryRepository->getArticleCountByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream);
     }
 }

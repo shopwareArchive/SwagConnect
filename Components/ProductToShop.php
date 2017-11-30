@@ -14,8 +14,6 @@ use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Category\Category;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -36,9 +34,9 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
-use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Tax\Tax;
+use Shopware\Models\Article\Configurator\Set;
 
 /**
  * The interface for products imported *from* connect *to* the local shop
@@ -224,7 +222,7 @@ class ProductToShop implements ProductToShopBase
             // in connect attribute table
             $mainDetail = $model->getMainDetail();
             $isMainVariant = $this->checkIfMainVariant($detail, $mainDetail);
-
+            $this->variantConfigurator->configureVariantAttributes($product, $detail);
             $this->updateConfiguratorSetTypeFromProduct($model, $product);
 
             $this->cleanUpConfiguratorSet($model, $product);
@@ -485,9 +483,7 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($detail);
         $detail->setArticle($model);
         $model->getDetails()->add($detail);
-        if (!empty($product->variant)) {
-            $this->variantConfigurator->configureVariantAttributes($product, $detail);
-        }
+        $this->variantConfigurator->configureVariantAttributes($product, $detail);
 
         return $detail;
     }
@@ -508,8 +504,8 @@ class ProductToShop implements ProductToShopBase
      */
     private function updateConfiguratorSetTypeFromProduct(ProductModel $model, Product $product)
     {
-        if (!empty($product->variant)) {
-            $configSet = $model->getConfiguratorSet();
+        $configSet = $model->getConfiguratorSet();
+        if (!empty($product->variant) && $configSet instanceof Set) {
             $configSet->setType($product->configuratorSetType);
         }
     }
@@ -1648,7 +1644,7 @@ class ProductToShop implements ProductToShopBase
             [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
     }
 
-    /**  
+    /**
      * @param Property $property
      * @return PropertyGroup
      */

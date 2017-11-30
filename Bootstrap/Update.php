@@ -577,7 +577,7 @@ class Update
                   CONSTRAINT s_plugin_connect_article_relations_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
                   ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
                 );
-              } catch (\Exception $e) {
+            } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(
                     true,
@@ -587,7 +587,7 @@ class Update
             }
         }
     }
-  
+
     private function addOverwriteMainImage()
     {
         if (version_compare($this->version, '1.1.8', '<=')) {

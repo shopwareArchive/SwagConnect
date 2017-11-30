@@ -276,7 +276,7 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testImportRemoteCategory()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/one_item.sql');
+        $this->importFixtures(__DIR__ . '/_fixtures/one_article_with_connect_categories.sql');
 
         $localCategory = $this->categoryRepository->find(35);
 

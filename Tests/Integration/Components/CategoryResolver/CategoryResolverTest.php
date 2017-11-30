@@ -49,7 +49,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (2222, "/deutsch", "Deutsch", 1234)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (3333, "/deutsch/test1", "Test 1", 1234)');
 
-        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3, 1234, 'test');
+        $this->categoryResolver->createLocalCategory('Test 1', '/deutsch/test1', 3, 1234, 'test Stream');
 
         $row = $this->manager->getConnection()->fetchAll('SELECT * FROM s_categories WHERE description = "Test 1" AND parent = 3');
 
@@ -62,7 +62,7 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($now->getTimestamp(), $changed->getTimestamp(), '', 5);
 
         $result = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories_to_local_categories WHERE stream = ? AND remote_category_id = ? AND local_category_id = ?',
-            ['test', 3333, $row[0]['id']]);
+            ['test Stream', 3333, $row[0]['id']]);
         $this->assertNotFalse($result);
     }
 

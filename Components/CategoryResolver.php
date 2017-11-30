@@ -266,8 +266,8 @@ abstract class CategoryResolver
         $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT ctlc.remote_category_id
              FROM s_plugin_connect_categories_to_local_categories AS ctlc
              JOIN s_plugin_connect_categories AS cc ON cc.id = ctlc.remote_category_id
-             WHERE ctlc.stream = ? AND cc.category_key = ? AND cc.shop_id = ?',
-            [$stream, $categoryKey, $shopId]);
+             WHERE cc.category_key = ? AND cc.shop_id = ? AND ctlc.stream = ?',
+            [$categoryKey, $shopId, $stream]);
 
         //create entry in connect_categories_to_local_categories for the given stream -> for "merging" when assigning an other stream to the same category
         if (!$remoteCategoryId) {

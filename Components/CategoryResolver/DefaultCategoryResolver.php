@@ -26,9 +26,9 @@ class DefaultCategoryResolver extends CategoryResolver
         return $this->manager->getConnection()->executeQuery('
             SELECT local_category_id
             FROM s_plugin_connect_categories_to_local_categories
-            WHERE (stream = ? OR stream IS NULL) AND remote_category_id IN (?)',
-            [$stream, $remoteCategoriesIds],
-            [\PDO::PARAM_STR, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])->fetchAll(\PDO::FETCH_COLUMN);
+            WHERE remote_category_id IN (?) AND (stream = ? OR stream IS NULL) ',
+            [$remoteCategoriesIds, $stream],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR])->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**

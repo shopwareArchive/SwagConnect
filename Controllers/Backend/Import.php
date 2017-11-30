@@ -309,7 +309,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function getArticleCountForRemoteCategoryAction()
     {
-        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', "");
+        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', '');
         $shopId = (int) $this->request->getParam('shopId', 0);
 
         try {
@@ -332,7 +332,7 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
 
     public function assignArticlesToRemoteCategoryAction()
     {
-        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', "");
+        $remoteCategoryKey = $this->request->getParam('remoteCategoryKey', '');
         $localCategoryId = (int) $this->request->getParam('localCategoryId', 0);
         $localParentId = (int) $this->request->getParam('localParentId', 0);
         $offset = (int) $this->request->getParam('offset', 0);

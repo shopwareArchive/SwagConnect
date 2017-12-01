@@ -464,7 +464,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 panel.setLoading(false);
                 var data = Ext.JSON.decode(response.responseText);
                 if (data.success == true) {
-                    me.assignArticlesToCategories(data.categories, data.shopId);
+                    me.assignArticlesToCategories(data.categories, data.shopId, data.stream);
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                 }
@@ -486,7 +486,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         });
     },
 
-    assignArticlesToCategories: function(categories, shopId) {
+    assignArticlesToCategories: function(categories, shopId, stream) {
         var me = this;
         var shopId = shopId;
         var categoriesCount = categories.length;
@@ -501,14 +501,15 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 method: 'GET',
                 params: {
                     remoteCategoryKey: item.remoteCategory,
-                    shopId: shopId
+                    shopId: shopId,
+                    stream: stream
                 },
                 success: function(response, opts) {
                     var data = Ext.JSON.decode(response.responseText);
                     if (data.success == true) {
                         var window = me.progressWindow;
                         window.progressFieldArticles.updateText(Ext.String.format(window.snippets.processArticles, 0, data.count));
-                        me.assignArticlesBatch(window, item, shopId, data.count, 0, 200);
+                        me.assignArticlesBatch(window, item, shopId, stream, data.count, 0, 200);
                     } else {
                         me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');
                     }
@@ -525,7 +526,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
         me.progressWindow.closeWindow();
     },
 
-    assignArticlesBatch: function(window, category, shopId, articleCount, offset, batchsize) {
+    assignArticlesBatch: function(window, category, shopId, stream, articleCount, offset, batchsize) {
         Ext.Ajax.request({
             url: '{url controller=Import action=assignArticlesToRemoteCategory}',
             method: 'POST',
@@ -535,7 +536,8 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                 localCategoryId: category.categoryKey,
                 localParentId: category.parentId,
                 offset: offset,
-                limit: batchsize
+                limit: batchsize,
+                stream: stream
             },
             success: function(response, opts) {
                 var data = Ext.JSON.decode(response.responseText);
@@ -544,7 +546,7 @@ Ext.define('Shopware.apps.Connect.controller.Import', {
                     window.progressFieldArticles.updateText(Ext.String.format(window.snippets.processArticles, offset, articleCount));
                     window.progressFieldArticles.updateProgress(offset/articleCount);
                     if (offset < articleCount) {
-                        me.assignArticlesBatch(window, category, shopId, articleCount, offset, batchsize);
+                        me.assignArticlesBatch(window, category, shopId, stream, articleCount, offset, batchsize);
                     }
                 } else {
                     me.createGrowlMessage('{s name=connect/error}Error{/s}', '{s name=changed_products/failure/message}Changes are not applied{/s}');

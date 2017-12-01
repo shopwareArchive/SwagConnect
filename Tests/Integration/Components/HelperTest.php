@@ -183,7 +183,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
             $manager->getRepository(ProductToRemoteCategory::class)
         );
 
-        $categoryKeys = $autoCategoryResolver->resolve($categories, 1234);
+        $autoCategoryResolver->storeRemoteCategories($categories, $article->getId(), 1234);
+        $categoryKeys = $autoCategoryResolver->resolve($categories, 1234, 'test');
 
         $this->assertCount(2, $categoryKeys);
         $this->assertGreaterThan(count($categoryKeys), count($categories));

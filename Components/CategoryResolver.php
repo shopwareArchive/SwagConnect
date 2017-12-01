@@ -63,9 +63,10 @@ abstract class CategoryResolver
      *
      * @param array $categories
      * @param int $shopId
+     * @param string $stream
      * @return \Shopware\Models\Category\Category[]
      */
-    abstract public function resolve(array $categories, $shopId);
+    abstract public function resolve(array $categories, $shopId, $stream);
 
     /**
      * Generates categories tree by given array of categories
@@ -216,14 +217,15 @@ abstract class CategoryResolver
      * @param array $node
      * @param int $parentId
      * @param int $shopId
+     * @param string $stream
      * @param bool $returnOnlyLeafs
      * @param array $categories
      * @return array
      */
-    public function convertTreeToKeys(array $node, $parentId, $shopId, $returnOnlyLeafs = true, $categories = [])
+    public function convertTreeToKeys(array $node, $parentId, $shopId, $stream, $returnOnlyLeafs = true, $categories = [])
     {
         foreach ($node as $category) {
-            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId, $shopId);
+            $categoryId = $this->checkAndCreateLocalCategory($category['name'], $category['categoryId'], $parentId, $shopId, $stream);
 
             if ((!$returnOnlyLeafs) || (empty($category['children']))) {
                 $categories[] = [
@@ -234,7 +236,7 @@ abstract class CategoryResolver
             }
 
             if (!empty($category['children'])) {
-                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $shopId, $returnOnlyLeafs, $categories);
+                $categories = $this->convertTreeToKeys($category['children'], $categoryId, $shopId, $stream, $returnOnlyLeafs, $categories);
             }
         }
 
@@ -246,17 +248,36 @@ abstract class CategoryResolver
      * @param string $categoryKey
      * @param int $parentId
      * @param int $shopId
+     * @param string stream
      * @return int
      */
-    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
+    private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream)
     {
-        $id = $this->manager->getConnection()->fetchColumn('SELECT `id` 
+        $id = $this->manager->getConnection()->fetchColumn('SELECT `s_categories`.`id` 
             FROM `s_categories`
-            WHERE `parent` = :parentId AND `description` = :description',
+            JOIN `s_categories_attributes` ON s_categories.id = s_categories_attributes.categoryID
+            WHERE s_categories.`parent` = :parentId AND s_categories.`description` = :description AND s_categories_attributes.connect_imported_category = 1',
             [':parentId' => $parentId, ':description' => $categoryName]);
 
         if (!$id) {
-            return $this->createLocalCategory($categoryName, $categoryKey, $parentId, $shopId);
+            return $this->createLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream);
+        }
+
+        $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT ctlc.remote_category_id
+             FROM s_plugin_connect_categories_to_local_categories AS ctlc
+             JOIN s_plugin_connect_categories AS cc ON cc.id = ctlc.remote_category_id
+             WHERE cc.category_key = ? AND cc.shop_id = ? AND ctlc.stream = ?',
+            [$categoryKey, $shopId, $stream]);
+
+        //create entry in connect_categories_to_local_categories for the given stream -> for "merging" when assigning an other stream to the same category
+        if (!$remoteCategoryId) {
+            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id, stream)
+                VALUES (
+                    (SELECT id FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?),
+                    ?,
+                    ?
+                )',
+                [$categoryKey, $shopId, $id, $stream]);
         }
 
         return $id;
@@ -267,9 +288,10 @@ abstract class CategoryResolver
      * @param string $categoryKey
      * @param int $parentId
      * @param int $shopId
+     * @param string $stream
      * @return int
      */
-    public function createLocalCategory($categoryName, $categoryKey, $parentId, $shopId)
+    public function createLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream)
     {
         $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
             FROM `s_categories`
@@ -292,9 +314,9 @@ abstract class CategoryResolver
             FROM `s_plugin_connect_categories`
             WHERE `category_key` = ? AND `shop_id` = ?',
             [$categoryKey, $shopId]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`) 
-            VALUES (?, ?)',
-            [$remoteCategoryId, $localCategoryId]);
+        $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`, `stream`) 
+            VALUES (?, ?, ?)',
+            [$remoteCategoryId, $localCategoryId, $stream]);
 
         return $localCategoryId;
     }

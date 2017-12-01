@@ -346,9 +346,12 @@ class Setup
                 CONSTRAINT s_plugin_connect_streams_selection_fk_article_id FOREIGN KEY (article_id) REFERENCES s_articles (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;", '
             CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories_to_local_categories` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
                 `remote_category_id` int(11) NOT NULL,
                 `local_category_id` int(11) unsigned NOT NULL,
-                PRIMARY KEY (`remote_category_id`, `local_category_id`),
+                `stream` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `scuk_connect_category_to_local_category` (`remote_category_id`, `local_category_id`, `stream`),
                 CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE,
                 CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

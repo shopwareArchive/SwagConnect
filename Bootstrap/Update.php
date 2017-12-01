@@ -94,6 +94,7 @@ class Update
         $this->setDefaultConfigForUpdateOrderStatus();
         $this->addShopIdToConnectCategories();
         $this->addProductToCategoryIndex();
+        $this->addStreamColumnToConnectToLocalCategories();
         $this->changeExportStatusToVarchar();
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
@@ -536,6 +537,28 @@ class Update
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function addStreamColumnToConnectToLocalCategories()
+    {
+        if (version_compare($this->version, '1.1.8', '<=')) {
+            try {
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories DROP FOREIGN KEY s_plugin_connect_remote_categories_fk_remote_category_id');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories DROP FOREIGN KEY s_plugin_connect_remote_categories_fk_local_category_id');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories DROP PRIMARY KEY');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD COLUMN `stream` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE');
+                $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE');
+            } catch (\Exception $e) {
+              // ignore it if exists
+              $this->logger->write(
                     true,
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
                     $e->getMessage()

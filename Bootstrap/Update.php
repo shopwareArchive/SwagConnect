@@ -561,7 +561,7 @@ class Update
             }
         }
     }
-  
+
     private function addArticleRelationsTable()
     {
         if (version_compare($this->version, '1.1.8', '<=')) {

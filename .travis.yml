@@ -27,8 +27,8 @@ before_script:
     - ./psh56 travis:init
 
 script:
-    - 'if [ $SHOPWARE_VERSION != "5.3" ] || [ "$TRAVIS_PHP_VERSION" != "7.0" ]; then ./psh56 travis:unit; fi'
-    - 'if [ $SHOPWARE_VERSION = "5.3" ] && [ "$TRAVIS_PHP_VERSION" = "7.0" ]; then ./psh56 travis:unit-coveralls-phpdbg; fi'
+    - 'if [ "$TRAVIS_BRANCH" != "master" ] || [ $SHOPWARE_VERSION != "5.3" ] || [ "$TRAVIS_PHP_VERSION" != "7.0" ]; then ./psh56 travis:unit; fi'
+    - 'if [ "$TRAVIS_BRANCH" = "master" ] && [ $SHOPWARE_VERSION = "5.3" ] && [ "$TRAVIS_PHP_VERSION" = "7.0" ]; then ./psh56 travis:unit-coveralls-phpdbg; fi'
 
 notifications:
     email: false

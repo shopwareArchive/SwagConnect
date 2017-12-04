@@ -16,26 +16,48 @@ class DefaultCategoryResolver extends CategoryResolver
      */
     public function resolve(array $categories, $shopId, $stream)
     {
-        $remoteCategoriesIds = $this->manager->getConnection()->executeQuery('
-            SELECT id
-            FROM s_plugin_connect_categories
-            WHERE shop_id = ? AND category_key IN (?)',
-            [$shopId, array_keys($categories)],
-            [\PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY])->fetchAll(\PDO::FETCH_COLUMN);
+        $tree = $this->generateTree($categories);
 
-        return $this->manager->getConnection()->executeQuery('
-            SELECT local_category_id
-            FROM s_plugin_connect_categories_to_local_categories
-            WHERE remote_category_id IN (?) AND (stream = ? OR stream IS NULL) ',
-            [$remoteCategoriesIds, $stream],
-            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR])->fetchAll(\PDO::FETCH_COLUMN);
+        return array_keys($this->traverseTree($tree, $shopId, $stream));
     }
 
     /**
-     * {@inheritdoc}
+     * @param array $children
+     * @param int $shopId
+     * @param string $stream
+     * @return array
      */
-    public function generateTree(array $categories, $idPrefix = '')
+    private function traverseTree(array $children, $shopId, $stream)
     {
-        return [];
+        $childCategories = [];
+        $mappedCategories = [];
+        foreach ($children as $category) {
+            $localCategories = $this->manager->getConnection()->executeQuery('
+              SELECT pclc.local_category_id
+              FROM s_plugin_connect_categories_to_local_categories AS pclc
+              INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = pclc.remote_category_id
+              WHERE pcc.category_key = ? AND pcc.shop_id = ? AND (pclc.stream = ? OR pclc.stream IS NULL) ',
+              [$category['categoryId'], $shopId, $stream]
+            )->fetchAll(\PDO::FETCH_COLUMN);
+
+            if ($localCategories) {
+                foreach ($localCategories as $localCategory) {
+                    $mappedCategories[$localCategory] = true;
+                    if (!empty($category['children'])) {
+                        foreach ($this->convertTreeToKeys($category['children'], $localCategory, $shopId, $stream) as $local) {
+                            $mappedCategories[$local['categoryKey']] = true;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($category['children'])) {
+                //use + not array_merge because we want to preserve the numeric keys
+                $childCategories = $childCategories + $this->traverseTree($category['children'], $shopId, $stream);
+            }
+        }
+
+        //use + not array_merge because we want to preserve the numeric keys
+        return $mappedCategories + $childCategories;
     }
 }

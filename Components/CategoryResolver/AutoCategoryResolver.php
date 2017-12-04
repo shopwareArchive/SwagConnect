@@ -87,38 +87,4 @@ class AutoCategoryResolver extends CategoryResolver
             return $category['categoryKey'];
         }, $remoteCategories);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function generateTree(array $categories, $idPrefix = '')
-    {
-        $tree = [];
-
-        if (strlen($idPrefix) > 0) {
-            // find child categories by given prefix
-            $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix) {
-                return strpos($key, $idPrefix) === 0 && strrpos($key, '/') === strlen($idPrefix);
-            });
-            $filteredCategories = array_intersect_key($categories, array_flip($childCategories));
-        } else {
-            // filter only main categories
-            $matchedKeys = array_filter(array_keys($categories), function ($key) {
-                return strrpos($key, '/') === 0;
-            });
-            $filteredCategories = array_intersect_key($categories, array_flip($matchedKeys));
-        }
-
-        foreach ($filteredCategories as $key => $categoryName) {
-            $children = $this->generateTree($categories, $key);
-            $tree[$key] = [
-                'name' => $categoryName,
-                'children' => $children,
-                'categoryId' => $key,
-                'leaf' => empty($children),
-            ];
-        }
-
-        return $tree;
-    }
 }

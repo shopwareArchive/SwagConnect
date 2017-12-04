@@ -18,7 +18,7 @@ class DefaultCategoryResolver extends CategoryResolver
     {
         $tree = $this->generateTree($categories);
 
-        return array_keys($this->traverseTree($tree, $shopId, $stream));
+        return array_keys($this->findAssignedLocalCategories($tree, $shopId, $stream));
     }
 
     /**
@@ -27,7 +27,7 @@ class DefaultCategoryResolver extends CategoryResolver
      * @param string $stream
      * @return array
      */
-    private function traverseTree(array $children, $shopId, $stream)
+    private function findAssignedLocalCategories(array $children, $shopId, $stream)
     {
         $childCategories = [];
         $mappedCategories = [];
@@ -40,7 +40,7 @@ class DefaultCategoryResolver extends CategoryResolver
               [$category['categoryId'], $shopId, $stream]
             )->fetchAll(\PDO::FETCH_COLUMN);
 
-            if ($localCategories) {
+            if (is_array($localCategories)) {
                 foreach ($localCategories as $localCategory) {
                     $mappedCategories[$localCategory] = true;
                     if (!empty($category['children'])) {
@@ -53,7 +53,7 @@ class DefaultCategoryResolver extends CategoryResolver
 
             if (!empty($category['children'])) {
                 //use + not array_merge because we want to preserve the numeric keys
-                $childCategories = $childCategories + $this->traverseTree($category['children'], $shopId, $stream);
+                $childCategories = $childCategories + $this->findAssignedLocalCategories($category['children'], $shopId, $stream);
             }
         }
 

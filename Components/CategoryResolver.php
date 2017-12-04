@@ -80,17 +80,9 @@ abstract class CategoryResolver
         $tree = [];
 
         if (strlen($idPrefix) > 0) {
-            // find child categories by given prefix
-            $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix) {
-                return strpos($key, $idPrefix) === 0 && strrpos($key, '/') === strlen($idPrefix);
-            });
-            $filteredCategories = array_intersect_key($categories, array_flip($childCategories));
+            $filteredCategories = $this->findChildCategories($categories, $idPrefix);
         } else {
-            // filter only main categories
-            $matchedKeys = array_filter(array_keys($categories), function ($key) {
-                return strrpos($key, '/') === 0;
-            });
-            $filteredCategories = array_intersect_key($categories, array_flip($matchedKeys));
+            $filteredCategories = $this->filterMainCategories($categories);
         }
 
         foreach ($filteredCategories as $key => $categoryName) {
@@ -360,5 +352,34 @@ abstract class CategoryResolver
             'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
             [$categoryId]
         );
+    }
+
+    /**
+     * @param array $categories
+     * @param $idPrefix
+     * @return array
+     */
+    private function findChildCategories(array $categories, $idPrefix)
+    {
+        $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix) {
+            return strpos($key, $idPrefix) === 0 && strrpos($key, '/') === strlen($idPrefix);
+        });
+        $filteredCategories = array_intersect_key($categories, array_flip($childCategories));
+
+        return $filteredCategories;
+    }
+
+    /**
+     * @param array $categories
+     * @return array
+     */
+    private function filterMainCategories(array $categories)
+    {
+        $matchedKeys = array_filter(array_keys($categories), function ($key) {
+            return strrpos($key, '/') === 0;
+        });
+        $filteredCategories = array_intersect_key($categories, array_flip($matchedKeys));
+
+        return $filteredCategories;
     }
 }

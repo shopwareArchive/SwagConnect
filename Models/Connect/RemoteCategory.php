@@ -58,6 +58,12 @@ class RemoteCategory extends ModelEntity
     protected $localCategory;
 
     /**
+     * @deprecated
+     * hack because doctrine crashes because old cache
+     */
+    protected $localCategories;
+
+    /**
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Connect\RemoteToLocalCategory", mappedBy="remoteCategory")

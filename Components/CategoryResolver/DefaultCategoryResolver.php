@@ -32,7 +32,7 @@ class DefaultCategoryResolver extends CategoryResolver
         $childCategories = [];
         $mappedCategories = [];
         foreach ($children as $category) {
-            $localCategories = $this->manager->getConnection()->executeQuery('
+            $localCategories = (array) $this->manager->getConnection()->executeQuery('
               SELECT pclc.local_category_id
               FROM s_plugin_connect_categories_to_local_categories AS pclc
               INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = pclc.remote_category_id
@@ -40,13 +40,11 @@ class DefaultCategoryResolver extends CategoryResolver
               [$category['categoryId'], $shopId, $stream]
             )->fetchAll(\PDO::FETCH_COLUMN);
 
-            if (is_array($localCategories)) {
-                foreach ($localCategories as $localCategory) {
-                    $mappedCategories[$localCategory] = true;
-                    if (!empty($category['children'])) {
-                        foreach ($this->convertTreeToKeys($category['children'], $localCategory, $shopId, $stream) as $local) {
-                            $mappedCategories[$local['categoryKey']] = true;
-                        }
+            foreach ($localCategories as $localCategory) {
+                $mappedCategories[$localCategory] = true;
+                if (count($category['children']) > 0) {
+                    foreach ($this->convertTreeToKeys($category['children'], $localCategory, $shopId, $stream) as $local) {
+                        $mappedCategories[$local['categoryKey']] = true;
                     }
                 }
             }

@@ -16,6 +16,7 @@ use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Components\Model\CategoryDenormalization;
 
+//ToDo Refactor this one
 abstract class CategoryResolver
 {
     /**

@@ -20,6 +20,7 @@ use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Attribute\CustomerGroup as CustomerGroupAttribute;
+use ShopwarePlugins\Connect\Services\RemoteShopService;
 
 /**
  * Class Article
@@ -108,6 +109,8 @@ class Article implements SubscriberInterface
 
     /**
      * @param \Enlight_Event_EventArgs $args
+     * @return bool
+     * @throws \Exception
      */
     public function checkSupplierPluginAvailability(\Enlight_Event_EventArgs $args)
     {
@@ -118,52 +121,39 @@ class Article implements SubscriberInterface
             $shopProductId = $this->helper->getShopProductId($articleDetailId);
             $shopId = $shopProductId->shopId;
 
-            $this->pingRemoteShop($shopId);
+            return $this->pingRemoteShop($shopId);
         };
     }
 
     /**
      * @param $shopId
+     * @return bool
+     * @throws \Exception
      */
-    private function pingRemoteShop($shopId)
+    public function pingRemoteShop($shopId)
     {
-        try {
-            $this->sdk->pingShop($shopId);
-        } catch (\Exception $e) {
-            if (!strpos($e->getMessage(), "Uncaught Shopware\Connect\SecurityException: No Authorization to call service 'ping'.")) {
-                $infoMessage = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
-                    'connect/basket/addArticleFailedInfoMessage',
-                    'The marketplace product could not be added to the basket because it is not available.'
-                );
+        /**
+         * @var RemoteShopService $remoteShopService
+         * @todo: refactor when using 5.2 plugin base.
+         */
+        $remoteShopService = Shopware()->Container()->get('swagconnect.remote_shop_service');
 
-                Shopware()->Template()->assign(
-                    'basketInfoMessage',
-                    $infoMessage
-                );
-
-                $this->deactivateRemoteProducts($shopId);
-            }
+        if (!$remoteShopService->isPingRemoteShopSuccessful($shopId)) {
+            $this->createBasketInfoMessagesOnFailingRemoteShopPing();
+            return false;
         }
     }
 
-    /**
-     * @param $shopId
-     */
-    private function deactivateRemoteProducts($shopId)
+    private function createBasketInfoMessagesOnFailingRemoteShopPing()
     {
-        try {
-            $sql = Shopware()->Db()->prepare(
-                'UPDATE s_articles
-                    INNER JOIN s_plugin_connect_items
-                      ON s_plugin_connect_items.article_id = s_articles.id
-                      AND shop_id = ' . $shopId . '
-                    SET s_articles.active = false'
-            );
-            $sql->execute();
+        $infoMessage = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+            'connect/basket/addArticleFailedInfoMessage',
+            'The marketplace product could not be added to the basket because it is not available.'
+        );
 
-        } catch (\Exception $exception) {
-            Shopware()->PluginLogger()->error($exception);
-        }
+        Shopware()->Template()
+            ->assign('basketInfoMessage', $infoMessage)
+            ->assign('sBasketInfo', $infoMessage);
     }
 
     /**

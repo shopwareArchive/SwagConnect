@@ -40,6 +40,8 @@ use Shopware\Models\Article\Article as ArticleModel;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Shopware\CustomModels\Connect\ProductStreamAttribute;
+use ShopwarePlugins\Connect\Services\RemoteShopService;
+use Shopware\Connect\SDK;
 
 class ServiceContainer implements SubscriberInterface
 {
@@ -62,6 +64,11 @@ class ServiceContainer implements SubscriberInterface
     private $config;
 
     /**
+     * @var SDK
+     */
+    private $sdk;
+
+    /**
      * ServiceContainer constructor.
      * @param ModelManager $manager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
@@ -72,12 +79,14 @@ class ServiceContainer implements SubscriberInterface
         ModelManager $manager,
         Enlight_Components_Db_Adapter_Pdo_Mysql $db,
         Container $container,
-        Config $config
+        Config $config,
+        SDK $sdk
     ) {
         $this->manager = $manager;
         $this->db = $db;
         $this->container = $container;
         $this->config = $config;
+        $this->sdk = $sdk;
     }
 
     /**
@@ -96,7 +105,8 @@ class ServiceContainer implements SubscriberInterface
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
             'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
             'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
-            'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService'
+            'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService',
+            'Enlight_Bootstrap_InitResource_swagconnect.remote_shop_service' => 'onRemoteShopService'
         ];
     }
 
@@ -248,6 +258,16 @@ class ServiceContainer implements SubscriberInterface
             $this->manager->getRepository(ProductToRemoteCategory::class),
             $this->manager->getRepository(CategoryModel::class),
             $this->container->get('CategoryDenormalization')
+        );
+    }
+
+    /**
+     * @return RemoteShopService
+     */
+    public function onRemoteShopService()
+    {
+        return new RemoteShopService(
+            $this->sdk
         );
     }
 }

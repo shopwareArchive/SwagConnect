@@ -29,33 +29,69 @@ class DefaultCategoryResolver extends CategoryResolver
      */
     private function findAssignedLocalCategories(array $children, $shopId, $stream)
     {
-        $childCategories = [];
         $mappedCategories = [];
         foreach ($children as $category) {
-            $localCategories = (array) $this->manager->getConnection()->executeQuery('
+            $localCategories = $this->getDirectlyAssignedCategories($category['categoryId'], $shopId, $stream);
+            //use + not array_merge because we want to preserve the numeric keys
+            $mappedCategories = $mappedCategories + $this->buildLocalSubtrees($shopId, $stream, $localCategories, $category['children']);
+            $mappedCategories = $mappedCategories + $this->findAssignedLocalCategoriesForChildCategories($shopId, $stream, $category['children']);
+        }
+
+        return $mappedCategories;
+    }
+
+    /**
+     * @param int $remoteCategoryId
+     * @param int $shopId
+     * @param string $stream
+     * @return array
+     */
+    private function getDirectlyAssignedCategories($remoteCategoryId, $shopId, $stream)
+    {
+        return (array) $this->manager->getConnection()->executeQuery('
               SELECT pclc.local_category_id
               FROM s_plugin_connect_categories_to_local_categories AS pclc
               INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = pclc.remote_category_id
               WHERE pcc.category_key = ? AND pcc.shop_id = ? AND (pclc.stream = ? OR pclc.stream IS NULL) ',
-              [$category['categoryId'], $shopId, $stream]
-            )->fetchAll(\PDO::FETCH_COLUMN);
+            [$remoteCategoryId, $shopId, $stream]
+        )->fetchAll(\PDO::FETCH_COLUMN);
+    }
 
-            foreach ($localCategories as $localCategory) {
-                $mappedCategories[$localCategory] = true;
-                if (count($category['children']) > 0) {
-                    foreach ($this->convertTreeToKeys($category['children'], $localCategory, $shopId, $stream) as $local) {
-                        $mappedCategories[$local['categoryKey']] = true;
-                    }
+    /**
+     * @param int $shopId
+     * @param string $stream
+     * @param array $localCategories
+     * @param array $children
+     * @return array
+     */
+    private function buildLocalSubtrees($shopId, $stream, array $localCategories, array $children)
+    {
+        $mappedCategories = [];
+        foreach ($localCategories as $localCategory) {
+            $mappedCategories[$localCategory] = true;
+            if (count($children) > 0) {
+                foreach ($this->convertTreeToKeys($children, $localCategory, $shopId, $stream) as $local) {
+                    $mappedCategories[$local['categoryKey']] = true;
                 }
-            }
-
-            if (!empty($category['children'])) {
-                //use + not array_merge because we want to preserve the numeric keys
-                $childCategories = $childCategories + $this->findAssignedLocalCategories($category['children'], $shopId, $stream);
             }
         }
 
-        //use + not array_merge because we want to preserve the numeric keys
-        return $mappedCategories + $childCategories;
+        return $mappedCategories;
+    }
+
+    /**
+     * @param int $shopId
+     * @param string $stream
+     * @param array $children
+     * @return array
+     */
+    private function findAssignedLocalCategoriesForChildCategories($shopId, $stream, $children)
+    {
+        $childCategories = [];
+        if (count($children) > 0) {
+            $childCategories = $this->findAssignedLocalCategories($children, $shopId, $stream);
+        }
+
+        return $childCategories;
     }
 }

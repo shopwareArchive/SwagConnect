@@ -48,13 +48,19 @@ class DefaultCategoryResolver extends CategoryResolver
      */
     private function getDirectlyAssignedCategories($remoteCategoryId, $shopId, $stream)
     {
-        return (array) $this->manager->getConnection()->executeQuery('
+        $localCategories = $this->manager->getConnection()->executeQuery('
               SELECT pclc.local_category_id
               FROM s_plugin_connect_categories_to_local_categories AS pclc
               INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = pclc.remote_category_id
               WHERE pcc.category_key = ? AND pcc.shop_id = ? AND (pclc.stream = ? OR pclc.stream IS NULL) ',
             [$remoteCategoryId, $shopId, $stream]
         )->fetchAll(\PDO::FETCH_COLUMN);
+
+        if ($localCategories === false) {
+            return [];
+        } else {
+            return $localCategories;
+        }
     }
 
     /**

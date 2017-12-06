@@ -104,9 +104,6 @@ class Menu
      */
     public function synchronize()
     {
-//        if(!$this->shopware526installed) {
-//            return;
-//        }
 
         try {
             $connectMainMenu = $this->getMainMenuItem();
@@ -117,8 +114,6 @@ class Menu
 
         $this->activateConnectMenuItem($connectMainMenu);
         $this->deactivateInstallConnectMenuItem();
-
-//        $parent = $this->fetchParent();
 
         if ($this->isUnregistered()) {
             $this->createRegisterMenuItem($connectMainMenu);
@@ -288,32 +283,6 @@ class Menu
         ]);
     }
 
-    /**
-     * @return \Shopware\Models\Menu\Menu
-     */
-    private function fetchParent()
-    {
-        try {
-            $parent = $this->fetchOneBy(['class' => self::CONNECT_CLASS]);
-        } catch (\RuntimeException $e) {
-            $parent = $this->createMenuItem([
-                'label' => self::CONNECT_LABEL,
-                'class' => 'connect-icon',
-                'active' => 1,
-            ]);
-
-            if ($this->shopware526installed) {
-                $parent->setClass(self::CONNECT_CLASS);
-                //if "Connect" menu does not exist
-                //it must not have pluginID, because on plugin uninstall
-                //it will be removed
-                $parent->setPlugin(null);
-            }
-        }
-
-        return $parent;
-    }
-
     private function deactivateInstallConnectMenuItem()
     {
         try {
@@ -323,7 +292,6 @@ class Menu
             $this->modelManager->persist($connectInstallItem);
             $this->modelManager->flush();
         } catch (\RuntimeException $e) {
-
         }
     }
 

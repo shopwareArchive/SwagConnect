@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="Tests/Bootstrap.php" colors="true">
+<phpunit backupGlobals="false" backupStaticAttributes="false" bootstrap="./Tests/Bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="SwagConnect legacy">
             <directory>Tests/Legacy/</directory>

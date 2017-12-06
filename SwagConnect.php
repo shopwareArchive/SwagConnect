@@ -8,6 +8,7 @@
 namespace SwagConnect;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
@@ -26,7 +27,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  * @category  Shopware
  * @package   Shopware\Plugins\SwagConnect
  */
-class SwagConnect extends \Shopware\Components\Plugin
+class SwagConnect extends Plugin
 {
     /**
      * @var SubscriberRegistration
@@ -205,7 +206,6 @@ class SwagConnect extends \Shopware\Components\Plugin
     {
         $this->container->get('template')->addTemplateDir($this->getPath() . '/Views/', 'connect');
         $this->container->get('snippets')->addConfigDir($this->getPath() . '/Snippets/');
-//        $this->container->get('dbal_connection')->exec("UPDATE s_core_menu SET active = 0 WHERE name ='Import'");
         $this->registerSubscribers();
     }
 
@@ -216,9 +216,11 @@ class SwagConnect extends \Shopware\Components\Plugin
     {
         $this->registerSubscribers();
 
-        return new ArrayCollection([
-            new ApiEndpointCommand()
-        ]);
+        return new ArrayCollection(
+            [
+                new ApiEndpointCommand()
+            ]
+        );
     }
 
     public function onInitResourceSDK()

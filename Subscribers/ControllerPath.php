@@ -49,7 +49,7 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathBackend(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Backend/Connect.php';
+        return $this->pluginPath . '/Controllers/Backend/Connect.php';
     }
 
     /**
@@ -61,7 +61,7 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetLastChangesControllerPath(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Backend/LastChanges.php';
+        return $this->pluginPath . '/Controllers/Backend/LastChanges.php';
     }
 
     /**
@@ -83,7 +83,7 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathFrontend(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Frontend/Connect.php';
+        return $this->pluginPath . '/Controllers/Frontend/Connect.php';
     }
 
     /**
@@ -94,7 +94,7 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathFrontendConnectControllerGateway(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Frontend/ConnectProductGateway.php';
+        return $this->pluginPath . '/Controllers/Frontend/ConnectProductGateway.php';
     }
 
     /**
@@ -106,7 +106,7 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathConnectConfig(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Backend/ConnectConfig.php';
+        return $this->pluginPath . '/Controllers/Backend/ConnectConfig.php';
     }
 
     /**
@@ -118,6 +118,6 @@ class ControllerPath implements SubscriberInterface
      */
     public function onGetControllerPathImport(\Enlight_Event_EventArgs $args)
     {
-        return $this->pluginPath . 'Controllers/Backend/Import.php';
+        return $this->pluginPath . '/Controllers/Backend/Import.php';
     }
 }

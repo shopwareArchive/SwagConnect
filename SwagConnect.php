@@ -26,7 +26,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  * @category  Shopware
  * @package   Shopware\Plugins\SwagConnect
  */
-final class SwagConnect extends \Shopware\Components\Plugin
+class SwagConnect extends \Shopware\Components\Plugin
 {
     /**
      * @var SubscriberRegistration
@@ -201,10 +201,11 @@ final class SwagConnect extends \Shopware\Components\Plugin
      *
      * @param Enlight_Event_EventArgs $args
      */
-    public function onStartDispatch(Enlight_Event_EventArgs $args)
+    public function onStartDispatch(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('template')->addTemplateDir($this->getPath() . 'Views/', 'connect');
-        $this->container->get('snippets')->addConfigDir($this->getPath() . 'Snippets/');
+        $this->container->get('template')->addTemplateDir($this->getPath() . '/Views/', 'connect');
+        $this->container->get('snippets')->addConfigDir($this->getPath() . '/Snippets/');
+//        $this->container->get('dbal_connection')->exec("UPDATE s_core_menu SET active = 0 WHERE name ='Import'");
         $this->registerSubscribers();
     }
 
@@ -298,14 +299,14 @@ final class SwagConnect extends \Shopware\Components\Plugin
         if (!$this->subscriberRegistration instanceof SubscriberRegistration) {
             $this->subscriberRegistration = new SubscriberRegistration(
                 $this->getConfigComponents(),
-                $this->get('models'),
-                $this->get('db'),
+                $this->container->get('models'),
+                $this->container->get('db'),
                 $this,
-                $this->get('events'),
+                $this->container->get('events'),
                 $this->getSDK(),
                 $this->getConnectFactory(),
                 $this->getHelper(),
-                $this->get('service_container')
+                $this->container->get('service_container')
             );
         }
 

@@ -67,195 +67,103 @@ class Menu
     }
 
     /**
-     * @return \Shopware\Models\Menu\Menu | null
+     * @return \Shopware\Models\Menu\Menu
      */
     public function getMainMenuItem()
     {
-        return $this->menuRepository->findOneBy([
+        $menuItem = $this->menuRepository->findOneBy([
             'class' => self::CONNECT_CLASS,
             'parent' => null,
         ]);
+
+        if(!$menuItem) {
+            throw new \RuntimeException('Could not find entry');
+        }
+
+        return $menuItem;
+    }
+
+    /**
+     * @param array $selector
+     * @return mixed
+     * @throws \RuntimeException
+     */
+    private function fetchOneBy(array $selector)
+    {
+        $menuItem = $this->menuRepository->findOneBy($selector);
+
+        if(!$menuItem) {
+            throw new \RuntimeException('Could not find entry');
+        }
+
+        return $menuItem;
     }
 
     /**
      * Creates Shopware Connect menu
      */
-    public function create()
+    public function synchronize()
     {
-        $connectItem = $this->getMainMenuItem();
-        // check if shopware Connect menu item exists
-        if (!$connectItem || $this->shopware526installed) {
-            if ($this->shopware526installed) {
-                $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
-                if (null !== $connectInstallItem) {
-                    $connectInstallItem->setActive(0);
-                    $this->modelManager->persist($connectInstallItem);
-                    $this->modelManager->flush();
-                }
-            } else {
-                //move help menu item after Connect
-                $helpItem = $this->menuRepository->findOneBy(['label' => '']);
-                $helpItem->setPosition(1);
-                $this->modelManager->persist($helpItem);
-                $this->modelManager->flush();
-            }
+//        if(!$this->shopware526installed) {
+//            return;
+//        }
 
-            if ($connectItem) {
-                $connectItem->setActive(1);
-                $this->modelManager->persist($connectItem);
-                $this->modelManager->flush();
-            }
+        try {
+            $connectMainMenu = $this->getMainMenuItem();
+        } catch (\RuntimeException $e) {
+            $connectMainMenu = $this->createConnectMainMenu();
+        }
 
-            $parent = $this->menuRepository->findOneBy(['class' => self::CONNECT_CLASS]);
-            if (null === $parent) {
-                $parent = $this->createMenuItem([
-                    'label' => self::CONNECT_LABEL,
-                    'class' => 'connect-icon',
-                    'active' => 1,
-                ]);
 
-                if ($this->shopware526installed) {
-                    $parent->setClass(self::CONNECT_CLASS);
-                    //if "Connect" menu does not exist
-                    //it must not have pluginID, because on plugin uninstall
-                    //it will be removed
-                    $parent->setPlugin(null);
-                }
-            }
+        $this->activateConnectMenuItem($connectMainMenu);
+        $this->deactivateInstallConnectMenuItem();
 
-            if ($this->configComponent->getConfig('apiKey', '') == ''
-                && !$this->configComponent->getConfig('shopwareId')) {
-                $registerItem = $this->menuRepository->findOneBy([
-                    'controller' => 'Connect',
-                    'action' => 'Register'
-                ]);
-                if (!$registerItem) {
-                    $this->createMenuItem([
-                        'label' => 'Register',
-                        'controller' => 'Connect',
-                        'action' => 'Register',
-                        'class' => 'sprite-mousepointer-click',
-                        'active' => 1,
-                        'parent' => $parent
-                    ]);
-                }
-            } else {
-                // check if menu item already exists
-                // this is possible when start update,
-                // because setup function is called
-                $importItem = $this->menuRepository->findOneBy([
-                    'controller' => 'Connect',
-                    'action' => 'Import'
-                ]);
-                if (!$importItem) {
-                    $this->createMenuItem([
-                        'label' => 'Import',
-                        'controller' => 'Connect',
-                        'action' => 'Import',
-                        'class' => 'sc-icon-import',
-                        'active' => 1,
-                        'parent' => $parent
-                    ]);
-                }
+//        $parent = $this->fetchParent();
 
-                $exportItem = $this->menuRepository->findOneBy([
-                    'controller' => 'Connect',
-                    'action' => 'Export'
-                ]);
-                if (!$exportItem) {
-                    $this->createMenuItem([
-                        'label' => 'Export',
-                        'controller' => 'Connect',
-                        'action' => 'Export',
-                        'class' => 'sc-icon-export',
-                        'active' => 1,
-                        'parent' => $parent
-                    ]);
-                }
-
-                $settingsItem = $this->menuRepository->findOneBy([
-                    'controller' => 'Connect',
-                    'action' => 'Settings'
-                ]);
-                if (!$settingsItem) {
-                    $this->createMenuItem([
-                        'label' => 'Settings',
-                        'controller' => 'Connect',
-                        'action' => 'Settings',
-                        'class' => 'sprite-gear',
-                        'active' => 1,
-                        'parent' => $parent
-                    ]);
-                }
-
-                $openConnectItem = $this->menuRepository->findOneBy([
-                    'controller' => 'Connect',
-                    'action' => 'OpenConnect'
-                ]);
-                if (!$openConnectItem) {
-                    $this->createMenuItem([
-                        'label' => 'OpenConnect',
-                        'controller' => 'Connect',
-                        'action' => 'OpenConnect',
-                        'onclick' => 'window.open("connect/autoLogin")',
-                        'class' => 'connect-icon',
-                        'active' => 1,
-                        'parent' => $parent
-                    ]);
-                }
-            }
+        if ($this->isUnregistered()) {
+            $this->createRegisterMenuItem($connectMainMenu);
+            $this->removeMainRegisteredMenu();
+        } else {
+            $this->createMainRegisteredMenu($connectMainMenu);
+            $this->removeRegisterMenu();
         }
     }
 
-    /**
-     * Re-Activate the connect install menu item, if version is >= 5.2.6
-     */
     public function remove()
     {
+
+        $this->removeRegisterMenu();
+        $this->removeMainRegisteredMenu();
+
         if (!$this->shopware526installed) {
             return;
         }
+        $this->resetInstallConnectMenu();
+    }
 
-        //if it is sem demo marketplace it will not find the correct menu item
-        $connectMainMenu = $this->menuRepository->findOneBy([
-            'class' => self::CONNECT_CLASS,
-            'parent' => null,
-        ]);
+    private function removeMainRegisteredMenu()
+    {
+        $this->removeMenuItem(['label' => 'Import', 'action' => 'Import']);
+        $this->removeMenuItem(['label' => 'Export', 'action' => 'Export']);
+        $this->removeMenuItem(['label' => 'Settings', 'action' => 'Settings']);
+        $this->removeMenuItem(['label' => 'OpenConnect', 'action' => 'OpenConnect']);
+    }
 
-        if (!$connectMainMenu) {
-            $connectMainMenu = $this->createMenuItem([
-                'label' => self::CONNECT_LABEL,
-                'class' => self::CONNECT_CLASS,
-                'active' => 1,
-            ]);
-            $connectMainMenu->setPlugin(null);
-        } else {
-            //resets the label if it's changed (diff marketplace)
-            $connectMainMenu->setLabel(self::CONNECT_LABEL);
-        }
+    private function removeRegisterMenu()
+    {
+        $this->removeMenuItem(['label' => 'Register', 'controller' => 'Connect', 'action' => 'Register',]);
+    }
 
-        $connectInstallItem = $this->menuRepository->findOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
-        if (null !== $connectInstallItem) {
-            $connectInstallItem->setActive(1);
-            $connectInstallItem->setParent($connectMainMenu);
-        } else {
-            $connectInstallItem = $this->createMenuItem([
-                'label' => 'Einstieg',
-                'controller' => 'PluginManager',
-                'class' => 'sprite-mousepointer-click',
-                'action' => 'ShopwareConnect',
-                'active' => 1,
-                'parent' => $connectMainMenu
-            ]);
-            $connectInstallItem = $this->createMenuItem([
-                'label' => 'Einstieg',
-                'controller' => 'PluginManager',
-                'class' => 'sprite-mousepointer-click',
-                'action' => 'ShopwareConnect',
-                'active' => 1,
-                'parent' => $connectMainMenu
-            ]);
-            $connectInstallItem->setPlugin(null);
+    /**
+     * @param array $selector
+     */
+    private function removeMenuItem($selector)
+    {
+        try {
+            $menuItem = $this->fetchOneBy($selector);
+            $this->modelManager->remove($menuItem);
+        } catch (\RuntimeException $e) {
+            return;
         }
     }
 
@@ -277,5 +185,203 @@ class Menu
         $this->modelManager->flush();
 
         return $menu;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isUnregistered()
+    {
+        return $this->configComponent->getConfig('apiKey', '') == ''
+            && !$this->configComponent->getConfig('shopwareId');
+    }
+
+    /**
+     * @param \Shopware\Models\Menu\Menu $parent
+     */
+    private function createRegisterMenuItem(\Shopware\Models\Menu\Menu $parent)
+    {
+        $registerItem = $this->menuRepository->findOneBy([
+            'controller' => 'Connect',
+            'action' => 'Register'
+        ]);
+        if (!$registerItem) {
+            $this->createMenuItem([
+                'label' => 'Register',
+                'controller' => 'Connect',
+                'action' => 'Register',
+                'class' => 'sprite-mousepointer-click',
+                'active' => 1,
+                'parent' => $parent
+            ]);
+        }
+    }
+
+    private function resetInstallConnectMenu()
+    {
+        try {
+            //if it is sem demo marketplace it will not find the connectMainMenu
+            $connectMainMenu = $this->getMainMenuItem();
+        } catch (\RuntimeException $e) {
+            $connectMainMenu = $this->createConnectMainMenu();
+        }
+
+        //resets the label if it's changed (diff marketplace)
+        $connectMainMenu->setLabel(self::CONNECT_LABEL);
+
+        try {
+            $connectInstallItem = $this->fetchOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+            $connectInstallItem->setParent($connectMainMenu);
+            $this->activateConnectMenuItem($connectInstallItem);
+        } catch (\RuntimeException $e) {
+            $this->createInstallConnectMenu($connectMainMenu);
+        }
+    }
+
+    /**
+     * @param \Shopware\Models\Menu\Menu $parent
+     */
+    private function createMainRegisteredMenu(\Shopware\Models\Menu\Menu $parent)
+    {
+        // check if menu item already exists
+        // this is possible when start update,
+        // because setup function is called
+        if($this->isMenuAlreadyCreated()) {
+            return;
+        }
+
+        $this->createMenuItem([
+            'label' => 'Import',
+            'controller' => 'Connect',
+            'action' => 'Import',
+            'class' => 'sc-icon-import',
+            'active' => 1,
+            'parent' => $parent
+        ]);
+
+        $this->createMenuItem([
+            'label' => 'Export',
+            'controller' => 'Connect',
+            'action' => 'Export',
+            'class' => 'sc-icon-export',
+            'active' => 1,
+            'parent' => $parent
+        ]);
+
+        $this->createMenuItem([
+            'label' => 'Settings',
+            'controller' => 'Connect',
+            'action' => 'Settings',
+            'class' => 'sprite-gear',
+            'active' => 1,
+            'parent' => $parent
+        ]);
+
+        $this->createMenuItem([
+            'label' => 'OpenConnect',
+            'controller' => 'Connect',
+            'action' => 'OpenConnect',
+            'onclick' => 'window.open("connect/autoLogin")',
+            'class' => 'connect-icon',
+            'active' => 1,
+            'parent' => $parent
+        ]);
+    }
+
+    /**
+     * @return \Shopware\Models\Menu\Menu
+     */
+    private function fetchParent()
+    {
+        try {
+            $parent = $this->fetchOneBy(['class' => self::CONNECT_CLASS]);
+        } catch (\RuntimeException $e) {
+            $parent = $this->createMenuItem([
+                'label' => self::CONNECT_LABEL,
+                'class' => 'connect-icon',
+                'active' => 1,
+            ]);
+
+            if ($this->shopware526installed) {
+                $parent->setClass(self::CONNECT_CLASS);
+                //if "Connect" menu does not exist
+                //it must not have pluginID, because on plugin uninstall
+                //it will be removed
+                $parent->setPlugin(null);
+            }
+        }
+
+        return $parent;
+    }
+
+    private function deactivateInstallConnectMenuItem()
+    {
+        try {
+            $connectInstallItem = $this->fetchOneBy(['label' => 'Einstieg', 'action' => 'ShopwareConnect']);
+
+            $connectInstallItem->setActive(0);
+            $this->modelManager->persist($connectInstallItem);
+            $this->modelManager->flush();
+        } catch (\RuntimeException $e) {
+
+        }
+    }
+
+    private function isMenuAlreadyCreated()
+    {
+        try {
+            $importItem = $this->fetchOneBy([
+                'controller' => 'Connect',
+                'action' => 'Import'
+            ]);
+
+            return true;
+        } catch (\RuntimeException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param \Shopware\Models\Menu\Menu $connectItem
+     */
+    private function activateConnectMenuItem(\Shopware\Models\Menu\Menu $connectItem)
+    {
+        $connectItem->setActive(1);
+        $this->modelManager->persist($connectItem);
+        $this->modelManager->flush();
+    }
+
+    /**
+     * @param \Shopware\Models\Menu\Menu $connectMainMenu
+     */
+    private function createInstallConnectMenu(\Shopware\Models\Menu\Menu $connectMainMenu)
+    {
+        $connectInstallItem = $this->createMenuItem([
+            'label' => 'Einstieg',
+            'controller' => 'PluginManager',
+            'class' => 'sprite-mousepointer-click',
+            'action' => 'ShopwareConnect',
+            'active' => 1,
+            'parent' => $connectMainMenu
+        ]);
+        $connectInstallItem->setPlugin(null);
+        $this->modelManager->persist($connectInstallItem);
+        $this->modelManager->flush();
+    }
+
+    /**
+     * @return \Shopware\Models\Menu\Menu
+     */
+    private function createConnectMainMenu()
+    {
+        $connectMainMenu = $this->createMenuItem([
+            'label' => self::CONNECT_LABEL,
+            'class' => self::CONNECT_CLASS,
+            'active' => 1,
+        ]);
+        $connectMainMenu->setPlugin(null);
+        $this->modelManager->persist($connectMainMenu);
+        $this->modelManager->flush();
+        return $connectMainMenu;
     }
 }

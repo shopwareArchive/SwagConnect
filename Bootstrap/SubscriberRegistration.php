@@ -108,7 +108,7 @@ class SubscriberRegistration
      * @param Config $config
      * @param ModelManager $modelManager
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
-     * @param \Shopware_Plugins_Backend_SwagConnect_Bootstrap $pluginBootstrap
+     * @param \SwagConnect\SwagConnect $pluginBootstrap
      * @param \Enlight_Event_EventManager $eventManager
      * @param SDK $SDK
      * @param ConnectFactory $connectFactory
@@ -119,7 +119,7 @@ class SubscriberRegistration
         Config $config,
         ModelManager $modelManager,
         Enlight_Components_Db_Adapter_Pdo_Mysql $db,
-        \Shopware_Plugins_Backend_SwagConnect_Bootstrap $pluginBootstrap,
+        \SwagConnect\SwagConnect $pluginBootstrap,
         \Enlight_Event_EventManager $eventManager,
         SDK $SDK,
         ConnectFactory $connectFactory,
@@ -188,7 +188,7 @@ class SubscriberRegistration
                 $this->SDK,
                 $this->container->get('snippets')
             ),
-            new ControllerPath($this->pluginBootstrap->Path()),
+            new ControllerPath($this->pluginBootstrap->getPath()),
             new CronJob(
                 $this->SDK,
                 $this->connectFactory->getConnectExport(),

@@ -630,7 +630,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $message
+                'message' => 'extern: ' . $message
             ]);
 
             return;
@@ -645,7 +645,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
             $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
-            $this->removeConnectMenuEntry();
             $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
@@ -653,11 +652,14 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'intern: ' . $e->getMessage()
             ]);
 
             return;
         }
+
+        $menu = new \ShopwarePlugins\Connect\Bootstrap\Menu($this->getConfigComponent(),$this->getModelManager(),true);
+        $menu->synchronize();
 
         $this->View()->assign([
             'success' => true
@@ -702,7 +704,7 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
         if (!$responseObject->success) {
             $this->View()->assign([
                 'success' => false,
-                'message' => $responseObject->reason
+                'message' => 'extern: '. $responseObject->reason
             ]);
 
             return;
@@ -717,7 +719,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
             $sdk->verifySdk();
             $this->getConfigComponent()->setConfig('apiKeyVerified', true);
             $this->getConfigComponent()->setConfig('shopwareId', $shopwareId, null, 'general');
-            $this->removeConnectMenuEntry();
             $marketplaceSettings = $sdk->getMarketplaceSettings();
             $this->getMarketplaceApplier()->apply(new MarketplaceSettings($marketplaceSettings));
         } catch (\Exception $e) {
@@ -725,11 +726,14 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
 
             $this->View()->assign([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'intern: '. $e->getMessage()
             ]);
 
             return;
         }
+
+        $menu = new \ShopwarePlugins\Connect\Bootstrap\Menu($this->getConfigComponent(),$this->getModelManager(),true);
+        $menu->synchronize();
 
         $this->View()->assign([
             'success' => true
@@ -750,76 +754,77 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
      */
     private function removeConnectMenuEntry($loggedIn = true)
     {
-        /** @var Enlight_Components_Db_Adapter_Pdo_Mysql $db */
-        $db = Shopware()->Db();
-
-        $result = $db->fetchAssoc("SELECT id, parent, pluginID FROM s_core_menu WHERE controller = 'connect' AND name = 'Register' ORDER BY id DESC LIMIT 1");
-        if (empty($result)) {
-            return;
-        }
-        $row = current($result);
-
-        $db->exec('DELETE FROM s_core_menu WHERE id = ' . $row['id']);
-
-        $insertSql = "INSERT INTO s_core_menu (
-            parent,
-            name,
-            class,
-            pluginID,
-            controller,
-            action,
-            onclick,
-            active
-          ) VALUES (
-            '#parent#',
-            '#name#',
-            '#class#',
-            #pluginID#,
-            '#controller#',
-            '#action#',
-            '#onclick#',
-            1
-          )";
-
-        $db->exec(strtr($insertSql, [
-            '#parent#' => $row['parent'],
-            '#name#' => 'Import',
-            '#class#' => 'sc-icon-import',
-            '#pluginID#' => $row['pluginID'],
-            '#controller#' => 'Connect',
-            '#onclick#' => '',
-            '#action#' => 'Import'
-        ]));
-
-        $db->exec(strtr($insertSql, [
-            '#parent#' => $row['parent'],
-            '#name#' => 'Export',
-            '#class#' => 'sc-icon-export',
-            '#pluginID#' => $row['pluginID'],
-            '#controller#' => 'Connect',
-            '#onclick#' => '',
-            '#action#' => 'Export'
-        ]));
-
-        $db->exec(strtr($insertSql, [
-            '#parent#' => $row['parent'],
-            '#name#' => 'Settings',
-            '#class#' => 'sprite-gear',
-            '#pluginID#' => $row['pluginID'],
-            '#controller#' => 'Connect',
-            '#onclick#' => '',
-            '#action#' => 'Settings'
-        ]));
-
-        $db->exec(strtr($insertSql, [
-            '#parent#' => $row['parent'],
-            '#name#' => 'OpenConnect',
-            '#class#' => 'connect-icon',
-            '#pluginID#' => $row['pluginID'],
-            '#controller#' => 'Connect',
-            '#onclick#' => 'window.open("connect/autoLogin")',
-            '#action#' => 'OpenConnect'
-        ]));
+//        /** @var Enlight_Components_Db_Adapter_Pdo_Mysql $db */
+//        $db = Shopware()->Db();
+//
+//        $result = $db->fetchAssoc("SELECT id, parent, pluginID FROM s_core_menu WHERE controller = 'connect' AND name = 'Register' ORDER BY id DESC LIMIT 1");
+//        if (empty($result)) {
+//            return;
+//        }
+//        $row = current($result);
+//
+//        $db->exec('DELETE FROM s_core_menu WHERE id = ' . $row['id']);
+//        print_r('deleted');
+//
+//        $insertSql = "INSERT INTO s_core_menu (
+//            parent,
+//            name,
+//            class,
+//            pluginID,
+//            controller,
+//            action,
+//            onclick,
+//            active
+//          ) VALUES (
+//            '#parent#',
+//            '#name#',
+//            '#class#',
+//            #pluginID#,
+//            '#controller#',
+//            '#action#',
+//            '#onclick#',
+//            1
+//          )";
+//
+//        $db->exec(strtr($insertSql, [
+//            '#parent#' => $row['parent'],
+//            '#name#' => 'Import',
+//            '#class#' => 'sc-icon-import',
+//            '#pluginID#' => $row['pluginID'],
+//            '#controller#' => 'Connect',
+//            '#onclick#' => '',
+//            '#action#' => 'Import'
+//        ]));
+//
+//        $db->exec(strtr($insertSql, [
+//            '#parent#' => $row['parent'],
+//            '#name#' => 'Export',
+//            '#class#' => 'sc-icon-export',
+//            '#pluginID#' => $row['pluginID'],
+//            '#controller#' => 'Connect',
+//            '#onclick#' => '',
+//            '#action#' => 'Export'
+//        ]));
+//
+//        $db->exec(strtr($insertSql, [
+//            '#parent#' => $row['parent'],
+//            '#name#' => 'Settings',
+//            '#class#' => 'sprite-gear',
+//            '#pluginID#' => $row['pluginID'],
+//            '#controller#' => 'Connect',
+//            '#onclick#' => '',
+//            '#action#' => 'Settings'
+//        ]));
+//
+//        $db->exec(strtr($insertSql, [
+//            '#parent#' => $row['parent'],
+//            '#name#' => 'OpenConnect',
+//            '#class#' => 'connect-icon',
+//            '#pluginID#' => $row['pluginID'],
+//            '#controller#' => 'Connect',
+//            '#onclick#' => 'window.open("connect/autoLogin")',
+//            '#action#' => 'OpenConnect'
+//        ]));
     }
 
     /**

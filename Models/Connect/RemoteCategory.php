@@ -9,8 +9,6 @@ namespace Shopware\CustomModels\Connect;
 
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\ModelEntity;
-use Shopware\Models\Category\Category;
-use Shopware\Models\Attribute\Category as CategoryAttribute;
 
 /**
  * Describes Shopware Connect categories
@@ -60,19 +58,21 @@ class RemoteCategory extends ModelEntity
     protected $localCategory;
 
     /**
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     *
-     * @ORM\ManyToMany(targetEntity="Shopware\Models\Category\Category")
-     * @ORM\JoinTable(name="s_plugin_connect_categories_to_local_categories",
-     *      joinColumns={@ORM\JoinColumn(name="remote_category_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="local_category_id", referencedColumnName="id")}
-     *      )
+     * @deprecated
+     * hack because doctrine crashes because old cache
      */
     protected $localCategories;
 
+    /**
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="Shopware\CustomModels\Connect\RemoteToLocalCategory", mappedBy="remoteCategory")
+     */
+    protected $remoteToLocalCategories;
+
     public function __construct()
     {
-        $this->localCategories = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->remoteToLocalCategories = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -116,44 +116,19 @@ class RemoteCategory extends ModelEntity
     }
 
     /**
-     * @return bool
+     * @return \Doctrine\Common\Collections\ArrayCollection
      */
-    public function hasLocalCategories()
+    public function getRemoteToLocalCategories()
     {
-        return !$this->localCategories->isEmpty();
+        return $this->remoteToLocalCategories;
     }
 
     /**
-     * @return array
+     * @param \Doctrine\Common\Collections\ArrayCollection $remoteToLocalCategories
      */
-    public function getLocalCategories()
+    public function setRemoteToLocalCategories($remoteToLocalCategories)
     {
-        return $this->localCategories->toArray();
-    }
-
-    /**
-     * @param \Shopware\Models\Category\Category $localCategory
-     */
-    public function addLocalCategory(Category $localCategory)
-    {
-        if (!$this->localCategories->contains($localCategory)) {
-            $this->localCategories->add($localCategory);
-            if ($localCategory->getAttribute()) {
-                $localCategory->getAttribute()->setConnectImportedCategory(1);
-            } else {
-                $attribute = new CategoryAttribute();
-                $attribute->setConnectImportedCategory(1);
-                $localCategory->setAttribute($attribute);
-            }
-        }
-    }
-
-    /**
-     * @param \Shopware\Models\Category\Category $localCategory
-     */
-    public function removeLocalCategory(Category $localCategory)
-    {
-        $this->localCategories->remove($localCategory);
+        $this->remoteToLocalCategories = $remoteToLocalCategories;
     }
 
     /**

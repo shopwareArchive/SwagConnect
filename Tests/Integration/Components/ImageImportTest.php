@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Logger;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Article\Image;
@@ -74,7 +75,6 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
         for ($i=0; $i<3; ++$i) {
             $images[] = $this->imageProviderUrl . '?' . $i;
         }
-
 
         /** @var \Shopware\Models\Article\Article $model */
         $model = $this->manager->find('Shopware\Models\Article\Article', 2);
@@ -175,6 +175,9 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     public function testBatchImport()
     {
         Shopware()->Db()->executeQuery('UPDATE s_plugin_connect_items SET last_update_flag = 0');
+
+        ConfigFactory::getConfigInstance()->setConfig('importImagesOnFirstImport', 0);
+
         $this->insertOrUpdateProducts(1, true, true);
 
         $result = $this->imageImport->getProductsNeedingImageImport();
@@ -191,5 +194,35 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $article->getMainDetail()->getImages()->count());
 
         $this->assertEmpty($this->imageImport->getProductsNeedingImageImport());
+    }
+
+    public function testImportMainImage()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $this->imageImport->importMainImage('no_main_img', 14467);
+
+        $result = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
+            [14467]);
+
+        $this->assertEquals(1235, $result);
+    }
+
+    public function testHasMainImageChnagedReturnsTrue()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $result = $this->imageImport->hasMainImageChanged('no_main_img', 14467);
+
+        $this->assertEquals(true, $result);
+    }
+
+    public function testHasMainImageChnagedReturnsFalse()
+    {
+        $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
+
+        $result = $this->imageImport->hasMainImageChanged('main_img', 14467);
+
+        $this->assertEquals(false, $result);
     }
 }

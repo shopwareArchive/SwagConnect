@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.Article.model.Connect', {
         { name: 'sourceId', type: 'string', useNull: true },
         { name: 'updatePrice', type: 'string', useNull: true  },
         { name: 'updateImage', type: 'string', useNull: true  },
+        { name: 'updateMainImage', type: 'string', useNull: true  },
         { name: 'updateLongDescription', type: 'string', useNull: true  },
         { name: 'updateShortDescription', type: 'string', useNull: true  },
         { name: 'updateName', type: 'string', useNull: true  }

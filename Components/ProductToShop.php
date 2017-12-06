@@ -14,8 +14,6 @@ use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Category\Category;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -36,9 +34,9 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
 use ShopwarePlugins\Connect\Components\Utils\UnitMapper;
 use Shopware\CustomModels\Connect\Attribute as ConnectAttribute;
-use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Tax\Tax;
+use Shopware\Models\Article\Configurator\Set;
 
 /**
  * The interface for products imported *from* connect *to* the local shop
@@ -48,6 +46,9 @@ use Shopware\Models\Tax\Tax;
  */
 class ProductToShop implements ProductToShopBase
 {
+    const RELATION_TYPE_RELATED = 'relationships';
+    const RELATION_TYPE_SIMILAR = 'similar';
+
     /**
      * @var Helper
      */
@@ -221,15 +222,13 @@ class ProductToShop implements ProductToShopBase
             // in connect attribute table
             $mainDetail = $model->getMainDetail();
             $isMainVariant = $this->checkIfMainVariant($detail, $mainDetail);
-
+            $this->variantConfigurator->configureVariantAttributes($product, $detail);
             $this->updateConfiguratorSetTypeFromProduct($model, $product);
 
             $this->cleanUpConfiguratorSet($model, $product);
         }
 
         $detail->setNumber($number);
-
-        $this->removeConnectImportedCategories($model);
 
         $detailAttribute = $this->getOrCreateAttributeModel($detail, $model);
 
@@ -303,7 +302,7 @@ class ProductToShop implements ProductToShopBase
         $this->manager->flush();
 
         $this->categoryResolver->storeRemoteCategories($product->categories, $model->getId(), $product->shopId);
-        $categories = $this->categoryResolver->resolve($product->categories, $product->shopId);
+        $categories = $this->categoryResolver->resolve($product->categories, $product->shopId, $product->stream);
         if (count($categories) > 0) {
             $detailAttribute->setConnectMappedCategory(true);
         }
@@ -325,6 +324,10 @@ class ProductToShop implements ProductToShopBase
 
         $this->addArticleTranslations($model, $product);
 
+        if ($isMainVariant || $product->groupId === null) {
+            $this->applyCrossSelling($model->getId(), $product);
+        }
+
         //clear cache for that article
         $this->helper->clearArticleCache($model->getId());
 
@@ -333,6 +336,9 @@ class ProductToShop implements ProductToShopBase
             $model = $this->helper->getArticleModelByProduct($product);
             // import only global images for article
             $this->imageImport->importImagesForArticle(array_diff($product->images, $product->variantImages), $model);
+            if ($updateFields['mainImage'] && isset($product->images[0])) {
+                $this->imageImport->importMainImage($product->images[0], $model->getId());
+            }
             // Reload the article detail model in order to not to work an the already flushed model
             $detail = $this->helper->getArticleDetailModelByProduct($product);
             // import only specific images for variant
@@ -419,7 +425,7 @@ class ProductToShop implements ProductToShopBase
             $details->clear();
             $this->manager->remove($article);
         }
-      
+
         //save category Ids before flush
         $oldCategoryIds = array_map(function ($category) {
             return $category->getId();
@@ -477,9 +483,7 @@ class ProductToShop implements ProductToShopBase
         $this->manager->persist($detail);
         $detail->setArticle($model);
         $model->getDetails()->add($detail);
-        if (!empty($product->variant)) {
-            $this->variantConfigurator->configureVariantAttributes($product, $detail);
-        }
+        $this->variantConfigurator->configureVariantAttributes($product, $detail);
 
         return $detail;
     }
@@ -500,8 +504,8 @@ class ProductToShop implements ProductToShopBase
      */
     private function updateConfiguratorSetTypeFromProduct(ProductModel $model, Product $product)
     {
-        if (!empty($product->variant)) {
-            $configSet = $model->getConfiguratorSet();
+        $configSet = $model->getConfiguratorSet();
+        if (!empty($product->variant) && $configSet instanceof Set) {
             $configSet->setType($product->configuratorSetType);
         }
     }
@@ -517,24 +521,6 @@ class ProductToShop implements ProductToShopBase
                 'UPDATE s_articles SET configurator_set_id = NULL WHERE id = ?',
                 [$model->getId()]
             );
-        }
-    }
-
-    /**
-     * @param ProductModel $model
-     */
-    private function removeConnectImportedCategories(ProductModel $model)
-    {
-        /** @var \Shopware\Models\Category\Category $category */
-        foreach ($model->getCategories() as $category) {
-            $attribute = $category->getAttribute();
-            if (!$attribute) {
-                continue;
-            }
-
-            if ($attribute->getConnectImported()) {
-                $model->removeCategory($category);
-            }
         }
     }
 
@@ -618,6 +604,7 @@ class ProductToShop implements ProductToShopBase
             'Image',
             'Price',
             'Name',
+            'MainImage',
         ];
 
         // Always allow updates for new models
@@ -667,6 +654,12 @@ class ProductToShop implements ProductToShopBase
                 return $model->getName() != $product->title;
             case 'image':
                 return count($model->getImages()) != count($product->images);
+            case 'mainImage':
+                if ($product->images[0]) {
+                    return $this->imageImport->hasMainImageChanged($product->images[0], $model->getId());
+                }
+
+                return false;
             case 'price':
                 $prices = $detail->getPrices();
                 if (empty($prices)) {
@@ -1006,6 +999,15 @@ class ProductToShop implements ProductToShopBase
             $this->manager->getConnection()->executeQuery(
                 'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?,?)',
                 [$model->getId(), $category]
+            );
+            $parentId =$this->manager->getConnection()->fetchColumn(
+                'SELECT parent FROM `s_categories` WHERE id = ?',
+                [$category]
+            );
+            $this->categoryDenormalization->removeAssignment($model->getId(), $parentId);
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_articles_categories` WHERE `articleID` = ? AND `categoryID` = ?',
+                [$model->getId(), $parentId]
             );
         }
         $this->categoryDenormalization->enableTransactions();
@@ -1500,6 +1502,146 @@ class ProductToShop implements ProductToShopBase
             }
             $model->setTax($tax);
         }
+    }
+
+    /**
+     * @param int $articleId
+     * @param Product $product
+     */
+    private function applyCrossSelling($articleId, Product $product)
+    {
+        $this->deleteRemovedRelations($articleId, $product);
+        $this->storeCrossSellingInformationInverseSide($articleId, $product->sourceId, $product->shopId);
+        if ($product->similar || $product->related) {
+            $this->storeCrossSellingInformationOwningSide($articleId, $product);
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param Product $product
+     */
+    private function storeCrossSellingInformationOwningSide($articleId, $product)
+    {
+        foreach ($product->related as $relatedId) {
+            $this->insertNewRelations($articleId, $product->shopId, $relatedId, self::RELATION_TYPE_RELATED);
+        }
+
+        foreach ($product->similar as $similarId) {
+            $this->insertNewRelations($articleId, $product->shopId, $similarId, self::RELATION_TYPE_SIMILAR);
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param int $shopId
+     * @param int $relatedId
+     * @param string $relationType
+     */
+    private function insertNewRelations($articleId, $shopId, $relatedId, $relationType)
+    {
+        $inserted = false;
+        try {
+            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+                [$articleId, $shopId, $relatedId, $relationType]);
+            $inserted = true;
+        } catch (\Doctrine\DBAL\DBALException $e) {
+            // No problems here. Just means that the row already existed.
+        }
+
+        //outside of try catch because we don't want to catch exceptions -> this method should not throw any
+        if ($inserted) {
+            $relatedLocalId = $this->manager->getConnection()->fetchColumn('SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
+                [$shopId, $relatedId]);
+            if ($relatedLocalId) {
+                $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType (articleID, relatedarticle) VALUES (?, ?)",
+                    [$articleId, $relatedLocalId]);
+            }
+        }
+    }
+
+    /**
+     * @param int $articleId
+     * @param string $sourceId
+     * @param int $shopId
+     */
+    private function storeCrossSellingInformationInverseSide($articleId, $sourceId, $shopId)
+    {
+        $relatedArticles = $this->manager->getConnection()->fetchAll('SELECT article_id, relationship_type FROM s_plugin_connect_article_relations WHERE shop_id = ? AND related_article_local_id = ?',
+            [$shopId, $sourceId]);
+
+        foreach ($relatedArticles as $relatedArticle) {
+            $relationType = $relatedArticle['relationship_type'];
+            $this->manager->getConnection()->executeQuery("INSERT IGNORE INTO s_articles_$relationType (articleID, relatedarticle) VALUES (?, ?)",
+                [$relatedArticle['article_id'], $articleId]);
+        }
+    }
+
+    /**
+     * @param $articleId
+     * @param $product
+     */
+    private function deleteRemovedRelations($articleId, $product)
+    {
+        if (count($product->related) > 0) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND related_article_local_id NOT IN (?) AND relationship_type = ?',
+                [$articleId, $product->shopId, $product->related, self::RELATION_TYPE_RELATED],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+
+            $oldRelatedIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_relationships AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ? AND ci.source_id NOT IN (?)',
+                [$articleId, $product->shopId, $product->related],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND relationship_type = ?',
+                [$articleId, $product->shopId, self::RELATION_TYPE_RELATED]);
+
+            $oldRelatedIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_relationships AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ?',
+                [$articleId, $product->shopId])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_relationships WHERE id IN (?)',
+            [$oldRelatedIds],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+
+        if (count($product->similar) > 0) {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND related_article_local_id NOT IN (?) AND relationship_type = ?',
+                [$articleId, $product->shopId, $product->similar, self::RELATION_TYPE_SIMILAR],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY, \PDO::PARAM_STR]);
+
+            $oldSimilarIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_similar AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ? AND ci.source_id NOT IN (?)',
+                [$articleId, $product->shopId, $product->similar],
+                [\PDO::PARAM_INT, \PDO::PARAM_INT, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        } else {
+            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_article_relations WHERE article_id = ? AND shop_id = ? AND relationship_type = ?',
+                [$articleId, $product->shopId, self::RELATION_TYPE_SIMILAR]);
+
+            $oldSimilarIds = $this->manager->getConnection()->executeQuery(
+                'SELECT ar.id 
+                FROM s_articles_similar AS ar
+                INNER JOIN s_plugin_connect_items AS ci ON ar.relatedarticle = ci.article_id
+                WHERE ar.articleID = ? AND ci.shop_id = ?',
+                [$articleId, $product->shopId])
+                ->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_similar WHERE id IN (?)',
+            [$oldSimilarIds],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
     }
 
     /**

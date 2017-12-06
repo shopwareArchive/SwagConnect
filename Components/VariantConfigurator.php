@@ -57,15 +57,18 @@ class VariantConfigurator
             $configSet = new Set();
             $configSet->setName('Set-' . $article->getName());
             $configSet->setArticles([$article]);
+            $configSet->setType(0);
             $article->setConfiguratorSet($configSet);
         } else {
             $configSet = $article->getConfiguratorSet();
         }
-
-        $configSet->setType($product->configuratorSetType);
+        if ($product->configuratorSetType !== null) {
+            $configSet->setType($product->configuratorSetType);
+        }
 
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);
+
             $option = $this->getOrCreateOptionByName($configSet, $group, $value);
 
             $configSet = $this->addGroupToConfiguratorSet($configSet, $group);
@@ -73,9 +76,11 @@ class VariantConfigurator
 
             $this->manager->persist($option);
             $this->manager->persist($group);
-            $this->manager->persist($configSet);
-            $detailOptions[] = $option;
+            if (!$detailOptions->contains($option)) {
+                $detailOptions->add($option);
+            }
         }
+        $this->manager->persist($configSet);
 
         $detail->setConfiguratorOptions($detailOptions);
         $this->manager->persist($detail);

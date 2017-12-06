@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b50cf353a7b0bb4d0336d047f6129c61",
-    "content-hash": "ffd8327544cc4e38d61e3a5f8d21c63d",
+    "content-hash": "1fcd17063ddb897f58b22341e721b177",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -48,7 +47,7 @@
             ],
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
-            "time": "2015-07-22 18:31:08"
+            "time": "2015-07-22T18:31:08+00:00"
         },
         {
             "name": "shopware/connect-sdk",
@@ -56,12 +55,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "21a33a64f0fbe62b3b58fcd83d8804b2387c89b0"
+                "reference": "7087db5905c8fb565a7841bd9962def1fff5d222"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/21a33a64f0fbe62b3b58fcd83d8804b2387c89b0",
-                "reference": "21a33a64f0fbe62b3b58fcd83d8804b2387c89b0",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/7087db5905c8fb565a7841bd9962def1fff5d222",
+                "reference": "7087db5905c8fb565a7841bd9962def1fff5d222",
                 "shasum": ""
             },
             "require-dev": {
@@ -82,10 +81,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.6",
+                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.7",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-11-13 14:44:46"
+            "time": "2017-11-24T08:54:03+00:00"
         }
     ],
     "packages-dev": [
@@ -95,12 +94,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopwareLabs/plugin-dev-tools.git",
-                "reference": "1913b26a6c17ffe3b6cba2ab0957a28537217059"
+                "reference": "a3aae835f6183c209c316123a728b3bbb7209ceb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/1913b26a6c17ffe3b6cba2ab0957a28537217059",
-                "reference": "1913b26a6c17ffe3b6cba2ab0957a28537217059",
+                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/a3aae835f6183c209c316123a728b3bbb7209ceb",
+                "reference": "a3aae835f6183c209c316123a728b3bbb7209ceb",
                 "shasum": ""
             },
             "type": "application",
@@ -115,7 +114,7 @@
                 "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-07-28 13:14:21"
+            "time": "2017-12-04T12:05:50+00:00"
         }
     ],
     "aliases": [],

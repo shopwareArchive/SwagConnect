@@ -110,7 +110,7 @@ class SwagConnect extends Plugin
         $this->doSetup($context, $fullSetup);
         $this->doUpdate($context->getUpdateVersion());
 
-        return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme']];
+        return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme', 'proxy']];
     }
 
     /**

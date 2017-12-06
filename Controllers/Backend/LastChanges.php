@@ -100,6 +100,14 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
                     $detail
                 );
                 break;
+            case 'mainImage':
+                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                if (isset($lastUpdate['image'][0])) {
+                    $this->getImageImport()->importMainImage(
+                        $lastUpdate['image'][0], $article->getId()
+                    );
+                }
+                break;
             case 'price':
                 $netPrice = $value / (1 + ($article->getTax()->getTax()/100));
                 $customerGroup = $this->getHelper()->getDefaultCustomerGroup();

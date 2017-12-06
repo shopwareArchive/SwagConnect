@@ -195,10 +195,6 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
                                     scope: me
                                 }
                             );
-                        } else {
-                            me.mainWindow = me.getView('main.Window').create({
-                                'action': me.subApplication.action
-                            }).show();
                         }
                     }
                 );

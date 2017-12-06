@@ -513,21 +513,40 @@ class ProductFromShop implements ProductFromShopBase
         $statusUpdate = Attribute::STATUS_UPDATE;
         $statusDelete = Attribute::STATUS_DELETE;
         try {
-            $this->manager->getConnection()->executeQuery(
-                "UPDATE s_plugin_connect_items
-                SET export_status = '$statusSynced'
-                WHERE revision <= ?
-                AND ( export_status = '$statusInsert' OR export_status = '$statusUpdate' )",
-                [$since]
-            );
+            if ($since) {
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE s_plugin_connect_items
+                    SET export_status = ?
+                    WHERE revision <= ?
+                    AND ( export_status = ? OR export_status = ? )',
+                    [$statusSynced, $since, $statusInsert, $statusUpdate]
+                );
 
-            $this->manager->getConnection()->executeQuery(
-                "UPDATE s_plugin_connect_items
-                SET export_status = ?
-                WHERE revision <= ?
-                AND export_status = '$statusDelete'",
-                [null, $since]
-            );
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE s_plugin_connect_items
+                    SET export_status = ?
+                    WHERE revision <= ?
+                    AND export_status = ?',
+                    [null, $since, $statusDelete]
+                );
+            } else {
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE s_plugin_connect_items
+                    SET export_status = ?
+                    WHERE revision IS NULL
+                    AND ( export_status = ? OR export_status = ? )',
+                    [$statusSynced, $statusInsert, $statusUpdate]
+                );
+
+                $this->manager->getConnection()->executeQuery(
+                    'UPDATE s_plugin_connect_items
+                    SET export_status = ?
+                    WHERE revision IS NULL
+                    AND export_status = ?',
+                    [null, $statusDelete]
+                );
+            }
+
 
             /** @var \Shopware\Connect\Struct\Change $change */
             foreach ($changes as $change) {

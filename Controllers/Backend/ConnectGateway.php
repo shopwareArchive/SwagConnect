@@ -139,6 +139,6 @@ class Shopware_Controllers_Backend_ConnectGateway extends \Enlight_Controller_Ac
      */
     public function getWhitelistedCSRFActions()
     {
-        return ['index', 'removePlugin', 'deactivateConnectProducts'];
+        return ['index', 'removePlugin'];
     }
 }

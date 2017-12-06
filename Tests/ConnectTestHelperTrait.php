@@ -44,6 +44,7 @@ trait ConnectTestHelperTrait
      */
     public function getHelper()
     {
-        return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
+        return $this->getConnectFactory()->getHelper();
+//        return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
     }
 }

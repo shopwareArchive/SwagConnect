@@ -18,6 +18,7 @@ use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
+use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceGateway;
@@ -79,7 +80,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     public function getHelper()
     {
-        return Shopware()->Plugins()->Backend()->SwagConnect()->getHelper();
+        return $this->getConnectFactory()->getHelper();
     }
 
     /**

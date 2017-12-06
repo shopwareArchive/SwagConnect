@@ -12,6 +12,7 @@ use Shopware\Models\Article\Supplier;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Media\Media;
 use ShopwarePlugins\Connect\Components\ImageImport;
+use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 
@@ -19,6 +20,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 {
     use DatabaseTestCaseTrait;
     use ProductBuilderTrait;
+    use ConnectTestHelperTrait;
 
     private $manager;
     /** @var ImageImport */
@@ -29,7 +31,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
         $this->manager = Shopware()->Models();
         $this->imageImport = new ImageImport(
             Shopware()->Models(),
-            Shopware()->Plugins()->Backend()->SwagConnect()->getHelper(),
+            $this->getHelper(),
             Shopware()->Container()->get('thumbnail_manager'),
             new Logger(Shopware()->Db())
         );

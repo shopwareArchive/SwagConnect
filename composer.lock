@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "1fcd17063ddb897f58b22341e721b177",
+    "content-hash": "23b001dff1088a6f7bb21edb8a6e0ffe",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -55,12 +55,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "7087db5905c8fb565a7841bd9962def1fff5d222"
+                "reference": "b85a72a12eb121d3385fe2c6711bf8a55f18395d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/7087db5905c8fb565a7841bd9962def1fff5d222",
-                "reference": "7087db5905c8fb565a7841bd9962def1fff5d222",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/b85a72a12eb121d3385fe2c6711bf8a55f18395d",
+                "reference": "b85a72a12eb121d3385fe2c6711bf8a55f18395d",
                 "shasum": ""
             },
             "require-dev": {
@@ -81,10 +81,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.7",
+                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.8",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2017-11-24T08:54:03+00:00"
+            "time": "2017-12-11 09:52:20"
         }
     ],
     "packages-dev": [
@@ -114,7 +114,7 @@
                 "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-12-04T12:05:50+00:00"
+            "time": "2017-12-04 12:05:50"
         }
     ],
     "aliases": [],

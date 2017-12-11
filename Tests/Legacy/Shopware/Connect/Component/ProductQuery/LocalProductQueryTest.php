@@ -360,6 +360,8 @@ class LocalProductQueryTest extends ConnectTestHelper
         $row['vendorImage'] = $row['vendor']['logo_url'];
         $row['vendorDescription'] = $row['vendor']['description'];
         $row['vendorMetaTitle'] = $row['vendor']['page_title'];
+        $row['localId'] = '1234';
+        $row['detailKind'] = '1';
         unset($row['vendor']);
         $row['category'] = '';
         $row['weight'] = null;

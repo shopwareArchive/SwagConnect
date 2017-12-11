@@ -252,7 +252,14 @@ class LocalProductQuery extends BaseProductQuery
         if (array_key_exists($sku, $mediaFiles) && $mediaFiles[$sku]) {
             $mediaFiles[$sku] = array_slice($mediaFiles[$sku], 0, self::IMAGE_LIMIT);
             foreach ($mediaFiles[$sku] as $media) {
-                $row['images'][] = $media->getFile();
+                //main image has to be first image
+                if ($this->isMediaMainImage($row['localId'], $media->getId()) && isset($row['images'][0])) {
+                    $temp = $row['images'][0];
+                    $row['images'][0] = $media->getFile();
+                    $row['images'][] = $temp;
+                } else {
+                    $row['images'][] = $media->getFile();
+                }
             }
         }
 
@@ -610,5 +617,18 @@ class LocalProductQuery extends BaseProductQuery
         }
 
         return $row;
+    }
+
+    /**
+     * @param int $articleId
+     * @param int $mediaId
+     * @return bool
+     */
+    private function isMediaMainImage($articleId, $mediaId)
+    {
+        $isMain = $this->manager->getConnection()->fetchColumn('SELECT main FROM s_articles_img WHERE articleID = ? and media_id = ?',
+            [$articleId, $mediaId]);
+
+        return $isMain == 1;
     }
 }

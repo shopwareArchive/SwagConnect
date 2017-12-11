@@ -57,6 +57,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductName: '{s name=config/import/overwrite_product_name}Product name{/s}',
         overwriteProductPrice: '{s name=config/import/overwrite_product_price}Price{/s}',
         overwriteProductImages: '{s name=config/import/overwrite_product_images}Image{/s}',
+        overwriteProductMainImage: '{s name=config/import/overwrite_product_main_image}Main image{/s}',
         overwriteProductShortDescription: '{s name=config/import/overwrite_product_short_description}Short description{/s}',
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         overwriteProductAdditionalDescription: '{s name=config/import/overwrite_product_additional_description}Connect description{/s}',
@@ -185,6 +186,11 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             inputValue: 1,
                             uncheckedValue: 0
                         }, {
+                            boxLabel  : me.snippets.overwriteProductMainImage,
+                            name      : 'overwriteProductMainImage',
+                            inputValue: 1,
+                            uncheckedValue: 0
+                        }, {
                             boxLabel  : me.snippets.overwriteProductShortDescription,
                             name      : 'overwriteProductShortDescription',
                             inputValue: 1,
@@ -211,6 +217,12 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             layout: 'vbox',
             items: [
                 {
+                    xtype: 'container',
+                    margin: '0 0 20 0',
+                    width: 600,
+                    html: '<p>' + me.snippets.importPicturesHelp + '</p>'
+                },
+                {
                     xtype      : 'fieldcontainer',
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
@@ -219,12 +231,34 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                             xtype: 'checkbox',
                             name: 'importImagesOnFirstImport',
                             fieldLabel: me.snippets.importPicturesLabel,
-                            helpText: me.snippets.importPicturesHelp,
                             inputValue: 1,
                             uncheckedValue: 0,
                             labelWidth: me.defaults.labelWidth,
                             listeners:{
                                 change: function(checkbox, newValue, oldValue, opts){
+                                    if (checkbox.getValue() === false) {
+                                        Ext.Ajax.request({
+                                            url: '{url controller=ConnectConfig action=checkCronPlugin}',
+                                            method: 'GET',
+                                            success: function (response, opts) {
+                                                var data = Ext.JSON.decode(response.responseText);
+                                                if (data.cronActivated !== true) {
+                                                    checkbox.setValue(true);
+                                                    Shopware.Notification.createGrowlMessage(
+                                                        '{s name=connect/error}Error{/s}',
+                                                        '{s name=connect/config/error/cron_not_activated}To deactivate this Setting you have to activate the Cron-Plugin{/s}'
+                                                    );
+                                                }
+                                            },
+                                            failure: function (response, opts) {
+                                                checkbox.setValue(true);
+                                                Shopware.Notification.createGrowlMessage(
+                                                    '{s name=connect/error}Error{/s}'
+                                                );
+                                            }
+                                        });
+                                    }
+
                                     me.enableImageImportLimit(checkbox);
                                 },
                                 beforeRender: function(checkbox, opts) {

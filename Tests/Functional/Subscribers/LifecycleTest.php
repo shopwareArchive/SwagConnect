@@ -7,39 +7,30 @@
 
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
-use Shopware\Components\Model\ModelManager;
+use Doctrine\DBAL\Connection;
+use ShopwarePlugins\Connect\Tests\TestClient;
+use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 
-class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
+class LifecycleTest extends \PHPUnit_Framework_TestCase
 {
-    use DatabaseTestCaseTrait;
+    use WebTestCaseTrait;
 
-    /**
-     * @var ModelManager
-     */
-    private $manager;
-
-    /**
-     * @before
-     */
-    public function prepare()
+    public function test_update_prices()
     {
-        $this->manager = Shopware()->Models();
-        // disable auth and acl
-        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
-        Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
-    }
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
 
-    public function testUpdatePrices()
-    {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        $connection = self::getDbalConnection();
 
-        $priceId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?', ['32870', '2404537']);
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('prices',
-                [
+        $priceId = $connection->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?',
+            ['32870', '2404537']);
+
+        $client->request(
+            'POST', 'backend/Article/saveDetail',
+            [
+                'prices' => [
                     0 => [
                         'id' => $priceId,
                         'from' => 1,
@@ -57,37 +48,39 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
                                 'tax' => true,
                                 'taxInput' => true,
                                 'mode' => false,
-                                'discount' => 0,
-                            ],
-                        ],
-                    ],
-                ])
-            ->setPost('controller', 'Article')
-            ->setPost('module', 'backend')
-            ->setPost('action', 'saveDetail')
-            ->setPost('number', 'sw32870.3')
-            ->setPost('price', 238.00)
-            ->setPost('additionalText', 'L / Schwarz')
-            ->setPost('supplierNumber', '')
-            ->setPost('active', false)
-            ->setPost('inStock', 15)
-            ->setPost('stockMin', 0)
-            ->setPost('weight', 0)
-            ->setPost('kind', 1)
-            ->setPost('position', 0)
-            ->setPost('shippingFree', false)
-            ->setPost('minPurchase', 1)
-            ->setPost('purchasePrice', 38.99)
-            ->setPost('articleId', 32870)
-            ->setPost('standard', false)
-            ->setPost('id', 2404537);
+                                'discount' => 0
+                            ]
+                        ]
+                    ]
+                ],
+                'controller' => 'Article',
+                'module' => 'backend',
+                'action' => 'saveDetail',
+                'number' => 'sw32870.3',
+                'price' => 238.00,
+                'additionalText' => 'L / Schwarz',
+                'supplierNumber' => '',
+                'active' => false,
+                'inStock' => 15,
+                'stockMin' => 0,
+                'weight' => 0,
+                'kind' => 1,
+                'position' => 0,
+                'shippingFree' => false,
+                'minPurchase' => 1,
+                'purchasePrice' => 38.99,
+                'articleId' => 32870,
+                'standard' => false,
+                'id' => 2404537,
 
+            ]
+        );
 
-        $this->dispatch('backend/Article/saveDetail');
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $returnedData = $this->handleJsonResponse($client->getResponse());
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $this->assertTrue($returnedData['success']);
+
+        $changes = $connection->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32870-2404537']
         );
@@ -100,19 +93,18 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
 
     public function test_generate_delete_change_for_variants()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('articleId', 32870)
-            ->setPost('id', 2404537);
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
-        $this->dispatch('backend/Article/deleteDetail');
+        $client->request('POST', 'backend/Article/deleteDetail', ['articleId' => 32870, 'id' => 2404537]);
 
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $responseData = $this->handleJsonResponse($client->getResponse());
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $this->assertTrue($responseData['success']);
+
+        $changes = self::getDbalConnection()->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32870-2404537']
         );
@@ -123,25 +115,28 @@ class LifecycleTest extends \Enlight_Components_Test_Plugin_TestCase
 
     public function test_generate_delete_change_only_for_exported()
     {
-        $this->importFixtures(__DIR__ . '/_fixtures/simple_variants.sql');
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
 
-        $detailExist = $this->manager->getConnection()->fetchColumn(
+        /** @var Connection $connection */
+        $connection = self::getDbalConnection();
+
+        $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
+
+        $detailExist = $connection->fetchColumn(
             'SELECT COUNT(id) FROM s_articles_details WHERE id = ? AND articleID = ?',
             [2404544, 32871]
         );
+
         $this->assertEquals(1, $detailExist, 'Article detail does not exist!');
 
-        $this->Request()
-            ->setMethod('POST')
-            ->setPost('articleId', 32871)
-            ->setPost('id', 2404544);
+        $client->request('POST', 'backend/Article/deleteDetail', ['articleId' => 32870, 'id' => 2404537]);
 
-        $this->dispatch('backend/Article/deleteDetail');
+        $responseData = $this->handleJsonResponse($client->getResponse());
 
-        $this->assertEquals(200, $this->Response()->getHttpResponseCode());
-        $this->assertTrue($this->View()->success);
+        $this->assertTrue($responseData['success']);
 
-        $changes = $this->manager->getConnection()->fetchAll(
+        $changes = $connection->fetchAll(
             'SELECT c_entity_id, c_operation, c_revision, c_payload FROM sw_connect_change WHERE c_entity_id = ?',
             ['32871-2404544']
         );

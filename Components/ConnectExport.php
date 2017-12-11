@@ -690,13 +690,20 @@ class ConnectExport
         $categoriesToBeDeleted = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
         if ($categoriesToBeDeleted) {
-            //it's necessary to fetch all articleIDs in the deleted categories
-            //because DQL doesn't allow a join in update
-            $builder->select('articleCategories.articleID')
-                ->from('s_articles_categories', 'articleCategories')
-                ->where('articleCategories.categoryID IN (:categoryIDs)')
-                ->setParameter('categoryIDs', $categoriesToBeDeleted, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
-            $articlesInDeletedCategories = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+            $articlesInDeletedCategories = [];
+            foreach ($categoriesToBeDeleted as $categoryToBeDeleted) {
+                //it's necessary to fetch all articleIDs in the deleted categories
+                //because DQL doesn't allow a join in update
+                $builder->select('articleCategories.articleID')
+                    ->from('s_articles_categories', 'articleCategories')
+                    ->where('articleCategories.categoryID = (:categoryID)')
+                    ->setParameter('categoryID', $categoryToBeDeleted);
+                $articlesInCategory = $builder->execute()->fetchAll(\PDO::FETCH_COLUMN);
+                foreach ($articlesInCategory as $articleId) {
+                    //trick to get just unique articleIDs -> should be faster than array_unique(array_merge())
+                    $articlesInDeletedCategories[$articleId] = true;
+                }
+            }
 
             //we can't export Products directly because Categories are still there
             //we are in preRemove
@@ -706,7 +713,7 @@ class ConnectExport
                     ->set('connectItems.cron_update', 1)
                     ->where('connectItems.article_id IN (:articleIDs)')
                     ->andWhere('connectItems.exported = 1')
-                    ->setParameter('articleIDs', $articlesInDeletedCategories, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('articleIDs', array_keys($articlesInDeletedCategories), \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
 
                 $builder->execute();
             }

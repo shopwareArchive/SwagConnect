@@ -33,7 +33,7 @@ abstract class AbstractConnectUnitTest extends \PHPUnit_Framework_TestCase
     public function killShopwareFunctionBefore()
     {
         self::$appState = Shopware();
-        Shopware(new EmptyShopwareApplication());
+        Shopware(new EmptyShopwareUnitTestApplication());
     }
 
     /**
@@ -45,7 +45,7 @@ abstract class AbstractConnectUnitTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class EmptyShopwareApplication
+class EmptyShopwareUnitTestApplication
 {
     public function __call($name, $arguments)
     {

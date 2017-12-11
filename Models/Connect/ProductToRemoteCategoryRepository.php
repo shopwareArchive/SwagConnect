@@ -87,29 +87,24 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      * remote category key
      * @param string $remoteCategoryKey
      * @param int $shopId
+     * @param string $stream
+     * @param int $offset
+     * @param int $limit
      * @return array
      */
-    public function findArticleIdsByRemoteCategory($remoteCategoryKey, $shopId)
+    public function findArticleIdsByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream, $offset, $limit)
     {
-        $builder = $this->createQueryBuilder('ptrc');
-        $builder->select('a.id');
-        $builder->leftJoin('ptrc.connectCategory', 'rc');
-        $builder->innerJoin('ptrc.article', 'a');
-        $builder->where('rc.categoryKey = :categoryKey');
-        $builder->setParameter('categoryKey', $remoteCategoryKey);
-        $builder->andWhere('rc.shopId = :shopId');
-        $builder->setParameter('shopId', $shopId);
-        //distinct necessary because of variant articles
-        //each variant has an own entry in a.attribute so same articleId is returned multiple times
-        $builder->distinct();
-
-        $query = $builder->getQuery();
-        $query->setHydrationMode($query::HYDRATE_OBJECT);
-        $result = $query->getArrayResult();
-
-        return array_map(function ($resultItem) {
-            return $resultItem['id'];
-        }, $result);
+        return $this->getEntityManager()->getConnection()->executeQuery('
+        SELECT DISTINCT pci.article_id
+            FROM s_plugin_connect_items AS pci
+            INNER JOIN s_plugin_connect_product_to_categories AS ptrc ON ptrc.articleID = pci.article_id
+            INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = ptrc.connect_category_id
+            WHERE pcc.category_key = ? AND pcc.shop_id = ? AND pci.stream = ?
+            ORDER BY pci.article_id DESC
+            LIMIT ?
+            OFFSET ?',
+            [$remoteCategoryKey, $shopId, $stream, $limit, $offset],
+            [\PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_INT])->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -153,6 +148,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
     /**
      * @param int $categoryId
      * @param int $articleId
+     * @return int
      */
     public function deleteByConnectCategoryId($categoryId, $articleId)
     {
@@ -163,5 +159,22 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         $builder->setParameter(':ccid', $categoryId, \PDO::PARAM_INT);
         $builder->setParameter(':articleId', $articleId, \PDO::PARAM_INT);
         $builder->getQuery()->execute();
+    }
+
+    /**
+     * @param string $remoteCategoryKey
+     * @param int $shopId
+     * @param string $stream
+     * @return int
+     */
+    public function getArticleCountByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream)
+    {
+        return $this->getEntityManager()->getConnection()->fetchColumn('
+        SELECT COUNT(DISTINCT pci.article_id)
+            FROM s_plugin_connect_items AS pci
+            INNER JOIN s_plugin_connect_product_to_categories AS ptrc ON ptrc.articleID = pci.article_id
+            INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = ptrc.connect_category_id
+            WHERE pcc.category_key = ? AND pcc.shop_id = ? AND pci.stream = ?',
+            [$remoteCategoryKey, $shopId, $stream]);
     }
 }

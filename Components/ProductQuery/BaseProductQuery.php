@@ -216,6 +216,8 @@ abstract class BaseProductQuery
         // Fix availability
         $row['availability'] = (int) $row['availability'];
 
+        $row = $this->prepareCrossSellingProducts($row);
+
         return $row;
     }
 
@@ -239,5 +241,35 @@ abstract class BaseProductQuery
     public function getAttributeMapping()
     {
         return $this->attributeMapping;
+    }
+
+    /**
+     * adds the related and similar products
+     * this is not possible in productQuery because we need to fetch all Ids of the inverse side in join table
+     * @param array $row
+     * @return array
+     */
+    private function prepareCrossSellingProducts(array $row)
+    {
+        // do this just for mainvariant because crossSelling can just be defined for Products not for Variants
+        if (isset($row['detailKind']) && $row['detailKind'] == 1) {
+            $relatedArticleIds = $this->manager->getConnection()->executeQuery(
+                'SELECT relatedarticle FROM s_articles_relationships WHERE articleID = ?',
+                [$row['localId']])->fetchAll(\PDO::FETCH_COLUMN);
+
+            if ($relatedArticleIds) {
+                $row['related'] = $relatedArticleIds;
+            }
+
+            $similarArticleIds = $this->manager->getConnection()->executeQuery(
+                'SELECT relatedarticle FROM s_articles_similar WHERE articleID = ?',
+                [$row['localId']])->fetchAll(\PDO::FETCH_COLUMN);
+
+            if ($similarArticleIds) {
+                $row['similar'] = $similarArticleIds;
+            }
+        }
+
+        return $row;
     }
 }

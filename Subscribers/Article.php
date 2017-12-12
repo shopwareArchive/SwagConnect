@@ -109,7 +109,7 @@ class Article implements SubscriberInterface
 
     /**
      * @param \Enlight_Event_EventArgs $args
-     * @return bool
+     * @return bool|void
      * @throws \Exception
      */
     public function checkSupplierPluginAvailability(\Enlight_Event_EventArgs $args)
@@ -117,31 +117,27 @@ class Article implements SubscriberInterface
         $articleDetail = $this->helper->getDetailByNumber($args->getId());
         $articleDetailId = $articleDetail->getId();
 
-        if ($this->helper->isRemoteArticleDetail($articleDetailId)) {
-            $shopProductId = $this->helper->getShopProductId($articleDetailId);
-            $shopId = $shopProductId->shopId;
-
-            return $this->pingRemoteShop($shopId);
+        if (!$this->helper->isRemoteArticleDetail($articleDetailId)) {
+            return;
         };
-    }
 
-    /**
-     * @param $shopId
-     * @return bool
-     * @throws \Exception
-     */
-    public function pingRemoteShop($shopId)
-    {
+        $shopProductId = $this->helper->getShopProductId($articleDetailId);
+        $shopId = $shopProductId->shopId;
+
         /**
          * @var RemoteShopService $remoteShopService
          * @todo: refactor when using 5.2 plugin base.
          */
         $remoteShopService = Shopware()->Container()->get('swagconnect.remote_shop_service');
 
-        if (!$remoteShopService->isPingRemoteShopSuccessful($shopId)) {
-            $this->createBasketInfoMessagesOnFailingRemoteShopPing();
-            return false;
+        if ($remoteShopService->isPingRemoteShopSuccessful($shopId)) {
+            return;
         }
+
+        $this->createBasketInfoMessagesOnFailingRemoteShopPing();
+
+        // Prevent adding article to basket
+        return false;
     }
 
     private function createBasketInfoMessagesOnFailingRemoteShopPing()

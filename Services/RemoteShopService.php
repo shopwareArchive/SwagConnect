@@ -39,22 +39,21 @@ class RemoteShopService
     public function isPingRemoteShopSuccessful($shopId)
     {
         try {
-            return $this->tryPingRemoteShop($shopId);
+            $this->tryPingRemoteShop($shopId);
         } catch (\RuntimeException $exception) {
             return $this->handlePingRemoteShopError($shopId, $exception);
         }
+        return true;
     }
 
     /**
      * @param $shopId
-     * @return bool
+     * @throws RuntimeException
      */
     private function tryPingRemoteShop($shopId)
     {
         if ($this->sdk->pingShop($shopId) !== 'pong') {
             throw new RuntimeException("Ping was not returning excepted result 'pong'.");
-        } else {
-            return true;
         }
     }
 

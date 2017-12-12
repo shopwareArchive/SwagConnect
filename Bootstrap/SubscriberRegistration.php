@@ -220,7 +220,8 @@ class SubscriberRegistration
                 $this->modelManager,
                 $this->db,
                 $this->container,
-                $this->config
+                $this->config,
+                $this->SDK
             ),
             new Supplier($this->container->get('dbal_connection'))
         ];

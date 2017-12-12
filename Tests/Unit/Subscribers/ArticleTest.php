@@ -191,7 +191,8 @@ class ArticleTest extends AbstractConnectUnitTest
                 'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
                 'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
                 'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
-                'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
+                'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle',
+                'Shopware_Modules_Basket_AddArticle_Start' => 'checkSupplierPluginAvailability'
             ],
             Article::getSubscribedEvents()
         );

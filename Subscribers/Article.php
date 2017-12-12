@@ -20,6 +20,7 @@ use Shopware\Models\Article\Article as ArticleModel;
 use ShopwarePlugins\Connect\Components\Helper;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Attribute\CustomerGroup as CustomerGroupAttribute;
+use ShopwarePlugins\Connect\Services\RemoteShopService;
 
 /**
  * Class Article
@@ -101,8 +102,54 @@ class Article implements SubscriberInterface
             'Enlight_Controller_Action_PostDispatch_Backend_Article' => 'extendBackendArticle',
             'Enlight_Controller_Action_PreDispatch_Backend_Article' => 'preBackendArticle',
             'Enlight_Controller_Action_PostDispatch_Frontend_Detail' => 'modifyConnectArticle',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle'
+            'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'extendFrontendArticle',
+            'Shopware_Modules_Basket_AddArticle_Start' => 'checkSupplierPluginAvailability'
         ];
+    }
+
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     * @return bool|void
+     * @throws \Exception
+     */
+    public function checkSupplierPluginAvailability(\Enlight_Event_EventArgs $args)
+    {
+        $articleDetail = $this->helper->getDetailByNumber($args->getId());
+        $articleDetailId = $articleDetail->getId();
+
+        if (!$this->helper->isRemoteArticleDetail($articleDetailId)) {
+            return;
+        };
+
+        $shopProductId = $this->helper->getShopProductId($articleDetailId);
+        $shopId = $shopProductId->shopId;
+
+        /**
+         * @var RemoteShopService $remoteShopService
+         * @todo: refactor when using 5.2 plugin base.
+         */
+        $remoteShopService = Shopware()->Container()->get('swagconnect.remote_shop_service');
+
+        if ($remoteShopService->isPingRemoteShopSuccessful($shopId)) {
+            return;
+        }
+
+        $this->createBasketInfoMessagesOnFailingRemoteShopPing();
+
+        // Prevent adding article to basket
+        return false;
+    }
+
+    private function createBasketInfoMessagesOnFailingRemoteShopPing()
+    {
+        $infoMessage = Shopware()->Snippets()->getNamespace('backend/connect/view/main')->get(
+            'connect/basket/addArticleFailedInfoMessage',
+            'The marketplace product could not be added to the basket because it is not available.'
+        );
+
+        Shopware()->Template()
+            ->assign('basketInfoMessage', $infoMessage)
+            ->assign('sBasketInfo', $infoMessage);
     }
 
     /**

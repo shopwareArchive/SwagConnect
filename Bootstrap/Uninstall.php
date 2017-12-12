@@ -60,11 +60,11 @@ class Uninstall
         $this->menu = $menu;
     }
 
+    /**
+     * @return bool
+     */
     public function run()
     {
-        // Currently this should not be done
-//         $this->removeMyAttributes();
-
         $this->menu->remove();
         $this->deactivateConnectProducts();
         $this->removeEngineElement();

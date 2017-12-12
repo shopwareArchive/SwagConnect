@@ -18,6 +18,7 @@ use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\FrontendQuery\FrontendQuery;
 use ShopwarePlugins\Connect\Components\ImportService;
 use ShopwarePlugins\Connect\Services\PaymentService;
+use ShopwarePlugins\Connect\Services\RemoteShopService;
 use ShopwarePlugins\Connect\Subscribers\ServiceContainer;
 use ShopwarePlugins\Connect\Tests\AbstractConnectUnitTest;
 use Shopware\Components\Model\ModelManager;
@@ -31,9 +32,13 @@ use Shopware\Models\Payment\Payment;
 use ShopwarePlugins\Connect\Services\MenuService;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Model\CategoryDenormalization;
+use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 
 class ServiceContainerTest extends AbstractConnectUnitTest
 {
+
+    use ConnectTestHelperTrait;
+
     /**
      * @var ServiceContainer
      */
@@ -73,7 +78,8 @@ class ServiceContainerTest extends AbstractConnectUnitTest
             $this->modelManager,
             $this->db,
             $this->diContainer,
-            $this->config
+            $this->config,
+            $this->getSDK()
         );
     }
 
@@ -91,7 +97,8 @@ class ServiceContainerTest extends AbstractConnectUnitTest
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_reverter' => 'onAutoCategoryReverter',
                 'Enlight_Bootstrap_InitResource_swagconnect.auto_category_resolver' => 'onAutoCategoryResolver',
                 'Enlight_Bootstrap_InitResource_swagconnect.default_category_resolver' => 'onDefaultCategoryResolver',
-                'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService'
+                'Enlight_Bootstrap_InitResource_swagconnect.export_assignment_service' => 'onExportAssignmentService',
+                'Enlight_Bootstrap_InitResource_swagconnect.remote_shop_service' => 'onRemoteShopService'
             ],
             $this->serviceContainer->getSubscribedEvents()
         );
@@ -174,5 +181,10 @@ class ServiceContainerTest extends AbstractConnectUnitTest
             ->willReturn($this->createMock(InstallerService::class));
 
         $this->assertInstanceOf(MenuService::class, $this->serviceContainer->onMenuService());
+    }
+
+    public function testOnRemoteShopService()
+    {
+        $this->assertInstanceOf(RemoteShopService::class, $this->serviceContainer->onRemoteShopService());
     }
 }

@@ -23,6 +23,9 @@ class ServiceContainerTest extends \PHPUnit_Framework_TestCase
      */
     private $serviceContainer;
 
+    /**
+     * @var Config
+     */
     private $config;
 
     public function setUp()
@@ -32,7 +35,8 @@ class ServiceContainerTest extends \PHPUnit_Framework_TestCase
             Shopware()->Models(),
             Shopware()->Db(),
             Shopware()->Container(),
-            $this->config
+            $this->config,
+            $this->getSDK()
         );
     }
 

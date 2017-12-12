@@ -21,3 +21,9 @@ INSERT INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_cate
 INSERT INTO s_categories (id, parent, path, description) VALUES (3333, 1111 ,"|3|1111|", "Romane");
 INSERT INTO s_categories_attributes (categoryID, connect_imported_category) VALUES (3333, 1);
 INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id, stream) VALUES (3333, 3333, "Test stream");
+
+INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (4444, "/deutsch/schuhe", "Schuhe", 1234);
+INSERT INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (1234, 4444);
+INSERT INTO s_categories (id, parent, path, description) VALUES (4444, 3 ,"|3|", "Schuhe");
+INSERT INTO s_categories_attributes (categoryID, connect_imported_category) VALUES (4444, 1);
+INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id, stream) VALUES (4444, 4444, "Test stream");

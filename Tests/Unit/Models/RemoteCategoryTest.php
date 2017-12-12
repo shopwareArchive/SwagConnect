@@ -9,7 +9,6 @@ namespace ShopwarePlugins\Connect\Tests\Unit\Components;
 
 use Shopware\CustomModels\Connect\RemoteCategory;
 use Shopware\CustomModels\Connect\RemoteToLocalCategory;
-use Shopware\Models\Category\Category;
 
 class RemoteCategoryTest extends \PHPUnit_Framework_TestCase
 {

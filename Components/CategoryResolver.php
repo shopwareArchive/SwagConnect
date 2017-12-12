@@ -16,6 +16,7 @@ use Shopware\Models\Category\Repository as CategoryRepository;
 use Shopware\Models\Category\Category;
 use Shopware\Components\Model\CategoryDenormalization;
 
+//ToDo Refactor this one
 abstract class CategoryResolver
 {
     /**
@@ -75,7 +76,28 @@ abstract class CategoryResolver
      * @param string $idPrefix
      * @return array
      */
-    abstract public function generateTree(array $categories, $idPrefix = '');
+    public function generateTree(array $categories, $idPrefix = '')
+    {
+        $tree = [];
+
+        if (strlen($idPrefix) > 0) {
+            $filteredCategories = $this->findChildCategories($categories, $idPrefix);
+        } else {
+            $filteredCategories = $this->filterMainCategories($categories);
+        }
+
+        foreach ($filteredCategories as $key => $categoryName) {
+            $children = $this->generateTree($categories, $key);
+            $tree[$key] = [
+                'name' => $categoryName,
+                'children' => $children,
+                'categoryId' => $key,
+                'leaf' => empty($children),
+            ];
+        }
+
+        return $tree;
+    }
 
     /**
      * Stores raw Shopware Connect categories
@@ -331,5 +353,34 @@ abstract class CategoryResolver
             'SELECT COUNT(id) FROM s_categories WHERE parent = ?',
             [$categoryId]
         );
+    }
+
+    /**
+     * @param array $categories
+     * @param $idPrefix
+     * @return array
+     */
+    private function findChildCategories(array $categories, $idPrefix)
+    {
+        $childCategories = array_filter(array_keys($categories), function ($key) use ($idPrefix) {
+            return strpos($key, $idPrefix) === 0 && strrpos($key, '/') === strlen($idPrefix);
+        });
+        $filteredCategories = array_intersect_key($categories, array_flip($childCategories));
+
+        return $filteredCategories;
+    }
+
+    /**
+     * @param array $categories
+     * @return array
+     */
+    private function filterMainCategories(array $categories)
+    {
+        $matchedKeys = array_filter(array_keys($categories), function ($key) {
+            return strrpos($key, '/') === 0;
+        });
+        $filteredCategories = array_intersect_key($categories, array_flip($matchedKeys));
+
+        return $filteredCategories;
     }
 }

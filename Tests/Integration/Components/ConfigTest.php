@@ -12,7 +12,6 @@ use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Marketplace\MarketplaceSettings;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Doctrine\DBAL\Connection;
-use ShopwarePlugins\Connect\Tests\KernelTestCaseTrait;
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {

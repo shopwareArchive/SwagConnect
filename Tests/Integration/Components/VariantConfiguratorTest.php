@@ -14,7 +14,6 @@ use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\KernelTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 
@@ -53,6 +52,7 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
     private function getHelper()
     {
         $connectFactory = new ConnectFactory();
+
         return $connectFactory->getHelper();
     }
 

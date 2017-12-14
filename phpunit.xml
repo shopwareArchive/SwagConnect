@@ -14,13 +14,13 @@
         </testsuite>
 
 
-        <!--<testsuite name="SwagConnect regression">-->
-            <!--<directory>Tests/Regression/</directory>-->
-        <!--</testsuite>-->
+        <testsuite name="SwagConnect regression">
+            <directory>Tests/Regression/</directory>
+        </testsuite>
 
-        <!--<testsuite name="SwagConnect functional">-->
-            <!--<directory>Tests/Functional/</directory>-->
-        <!--</testsuite>-->
+        <testsuite name="SwagConnect functional">
+            <directory>Tests/Functional/</directory>
+        </testsuite>
     </testsuites>
 
     <filter>

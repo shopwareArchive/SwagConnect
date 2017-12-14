@@ -27,6 +27,13 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
         $priceId = $connection->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?',
             ['32870', '2404537']);
 
+        $changes = $connection->fetchAll(
+            'SELECT * FROM s_plugin_connect_items WHERE c_entity_id = ?',
+            ['32870-2404537']
+        );
+
+        print_r($changes);
+
         $client->request(
             'POST', 'backend/Article/saveDetail',
             [

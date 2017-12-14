@@ -23,7 +23,6 @@ use ShopwarePlugins\Connect\Components\VariantConfigurator;
 use Shopware\CustomModels\Connect\RemoteCategory;
 use Shopware\CustomModels\Connect\ProductToRemoteCategory;
 use Shopware\Components\Model\ModelManager;
-use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\KernelTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 use Shopware\Models\Category\Category;
@@ -40,7 +39,6 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function prepare()
     {
         $this->setAutoReboot(true);
-
     }
 
     /**
@@ -60,8 +58,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return ProductToShop
      * @throws \Exception
+     * @return ProductToShop
      */
     private function getProductToShop()
     {
@@ -568,7 +566,6 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
      */
     public function test_migrate_variant_to_article()
     {
-
         $productToShop = $this->getProductToShop();
         $variants = $this->getVariants();
         $modelManager = $this->getManager();

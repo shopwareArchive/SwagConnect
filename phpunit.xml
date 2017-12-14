@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <phpunit backupGlobals="false" backupStaticAttributes="false" bootstrap="./Tests/Bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="SwagConnect legacy">
-            <directory>Tests/Legacy/</directory>
-        </testsuite>
+        <!--<testsuite name="SwagConnect legacy">-->
+            <!--<directory>Tests/Legacy/</directory>-->
+        <!--</testsuite>-->
 
         <testsuite name="SwagConnect unit">
             <directory>Tests/Unit/</directory>
@@ -14,13 +14,13 @@
         </testsuite>
 
 
-        <testsuite name="SwagConnect regression">
-            <directory>Tests/Regression/</directory>
-        </testsuite>
+        <!--<testsuite name="SwagConnect regression">-->
+            <!--<directory>Tests/Regression/</directory>-->
+        <!--</testsuite>-->
 
-        <testsuite name="SwagConnect functional">
-            <directory>Tests/Functional/</directory>
-        </testsuite>
+        <!--<testsuite name="SwagConnect functional">-->
+            <!--<directory>Tests/Functional/</directory>-->
+        <!--</testsuite>-->
     </testsuites>
 
     <filter>

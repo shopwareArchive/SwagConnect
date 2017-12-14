@@ -89,6 +89,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
     public function test_export_errors()
     {
         Shopware()->Db()->executeUpdate('UPDATE s_filter SET sortmode = 1');
+        $this->importFixtures(__DIR__ . '/../../Functional/Controller/_fixtures/config_fixes.sql');
 
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(4);
         $detail = $model->getMainDetail();
@@ -113,6 +114,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         /** @var \Shopware\Models\Article\Article $model */
         $model = $this->manager->getRepository('Shopware\Models\Article\Article')->find(3);
         $detail = $model->getMainDetail();
+        $this->importFixtures(__DIR__ . '/../../Functional/Controller/_fixtures/config_fixes.sql');
 
         //fixes wrong sort mode in demo data
         $propertyGroup = $model->getPropertyGroup();

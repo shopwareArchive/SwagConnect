@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
+use Doctrine\DBAL\Connection;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\Logger;
 use Shopware\Models\Article\Supplier;
@@ -40,6 +41,14 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 
     public function testGetProductsNeedingImageImport()
     {
+        /** @var Connection $connection */
+        $connection = Shopware()->Container()->get('dbal_connection');
+
+        $this->importFixtures(__DIR__ . '/../../Functional/Controller/_fixtures/connect_items.sql');
+        //sets the imageInitialImport Flag true
+        $bitFlag = bindec('01000000');
+        $connection->executeQuery('UPDATE s_plugin_connect_items SET shop_id=1, last_update_flag=?', [$bitFlag]);
+
         $result = $this->imageImport->getProductsNeedingImageImport();
 
         $this->assertNotEmpty($result);

@@ -61,6 +61,7 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
     private function applyFixtures()
     {
         $this->importFixtures('Tests/Integration/Components/ProductQuery/Fixtures/ProductQueryFixtures.sql');
+        $this->importFixtures(__DIR__ . '/../../../Functional/Controller/_fixtures/config_fixes.sql');
 
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
             $purchasePriceField = 'detailPurchasePrice';

@@ -11,6 +11,8 @@ use Symfony\Component\HttpKernel\Client;
 
 class TestClient extends Client
 {
+
+
     /**
      * {@inheritdoc}
      */

@@ -205,8 +205,7 @@ class SwagConnect extends Plugin
     public function onStartDispatch(\Enlight_Event_EventArgs $args)
     {
         $this->container->get('template')->addTemplateDir($this->getPath() . '/Views/', 'connect');
-        $this->container->get('snippets')->addConfigDir($this->getPath() . '/Snippets/');
-        $this->registerSubscribers();
+        $this->container->get('snippets')->addConfigDir($this->getPath() . '/Snippets/');        $this->registerSubscribers();
     }
 
     /**

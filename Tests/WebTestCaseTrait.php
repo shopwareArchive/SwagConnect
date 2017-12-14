@@ -28,10 +28,8 @@ trait WebTestCaseTrait
      */
     public static function createClient()
     {
-        self::getKernel()
-            ->getContainer()
-            ->get('dbal_connection')
-            ->exec('UPDATE s_core_auth SET apiKey=123 WHERE id=1');
+        $connection = self::getKernel()->getContainer()->get('dbal_connection');
+        $connection->exec('UPDATE s_core_auth SET apiKey=123 WHERE id=1');
 
         return new TestClient(self::getKernel(), ['HTTP_HOST' => parse_url('http://127.0.0.1', PHP_URL_HOST)]);
     }

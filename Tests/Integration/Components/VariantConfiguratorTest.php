@@ -15,11 +15,12 @@ use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway\PdoPro
 use ShopwarePlugins\Connect\Components\Helper;
 use ShopwarePlugins\Connect\Components\VariantConfigurator;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
+use ShopwarePlugins\Connect\Tests\KernelTestCaseTrait;
 use ShopwarePlugins\Connect\Tests\ProductBuilderTrait;
 
 class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
 {
-    use DatabaseTestCaseTrait;
+    use KernelTestCaseTrait;
 
     use ProductBuilderTrait;
 
@@ -34,47 +35,60 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
     private $db;
 
     /**
-     * @var VariantConfigurator
-     */
-    private $variantConfigurator;
-    /**
      * @var Helper
      */
     private $helper;
 
-    /**
-     * @before
-     */
-    public function prepare()
+    private function getVariantConfigurator()
     {
-        $this->manager = Shopware()->Models();
-        $this->db = Shopware()->Db();
-        $connectFactory = new ConnectFactory();
-        $this->helper = $connectFactory->getHelper();
-
-        $this->variantConfigurator = new VariantConfigurator(
-            $this->manager,
-            new PdoProductTranslationsGateway($this->db)
+        return new VariantConfigurator(
+            $this->getManager(),
+            new PdoProductTranslationsGateway($this->getDb())
         );
+    }
+
+    /**
+     * @return Helper
+     */
+    private function getHelper()
+    {
+        $connectFactory = new ConnectFactory();
+        return $connectFactory->getHelper();
+    }
+
+    /**
+     * @return \Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
+    private function getDb()
+    {
+        return Shopware()->Db();
+    }
+
+    /**
+     * @return ModelManager
+     */
+    private function getManager()
+    {
+        return Shopware()->Models();
     }
 
     public function test_configure_new_variant()
     {
         //delete the configurator group to test that its gets correctly recreated
-        $this->db->exec("DELETE FROM s_article_configurator_groups WHERE name = 'Farbe'");
+        $this->getDb()->exec("DELETE FROM s_article_configurator_groups WHERE name = 'Farbe'");
 
         $variants = $this->getVariants();
         $mainVariant = $variants[0];
 
-        $model = $this->helper->createProductModel($mainVariant);
+        $model = $this->getHelper()->createProductModel($mainVariant);
 
         $detail = new Detail();
         $detail->setActive($model->getActive());
-        $this->manager->persist($detail);
+        $this->getManager()->persist($detail);
         $detail->setArticle($model);
         $model->getDetails()->add($detail);
 
-        $this->variantConfigurator->configureVariantAttributes($mainVariant, $detail);
+        $this->getVariantConfigurator()->configureVariantAttributes($mainVariant, $detail);
 
         $configuratorSet = $model->getConfiguratorSet();
 
@@ -98,6 +112,7 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
     public function test_configure_serveral_variant_products()
     {
         $variants = $this->getVariants();
+        $variantConfigurator = $this->getVariantConfigurator();
 
         $colorOptions = array_map(
             function (Product $product) {
@@ -105,17 +120,17 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
             },
             $variants);
 
-        $mainVariant = $this->helper->createProductModel($variants[0]);
+        $mainVariant = $this->getHelper()->createProductModel($variants[0]);
         $productIds[] = $mainVariant->getId();
 
         $detail = new Detail();
         $detail->setActive($mainVariant->getActive());
-        $this->manager->persist($detail);
+        $this->getManager()->persist($detail);
         $detail->setArticle($mainVariant);
         $mainVariant->getDetails()->add($detail);
 
         foreach ($variants as $variant) {
-            $this->variantConfigurator->configureVariantAttributes($variant, $detail);
+            $variantConfigurator->configureVariantAttributes($variant, $detail);
         }
 
         $configuratorSet = $mainVariant->getConfiguratorSet();

@@ -12,6 +12,7 @@ use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
+use ShopwarePlugins\Connect\Struct\SearchCriteria;
 use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 use ShopwarePlugins\Connect\Tests\DatabaseTestCaseTrait;
 use Shopware\Models\Category\Category;
@@ -84,5 +85,22 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
 
         $count = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM `s_plugin_connect_items` WHERE `cron_update` = 1')->fetchColumn();
         $this->assertEquals(0, (int) $count);
+    }
+
+    public function testGetExportList()
+    {
+        $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_items`');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
+
+        $criteria = new SearchCriteria();
+        $criteria->limit = 20;
+        $criteria->offset = 0;
+
+        $result = $this->connectExport->getExportList($criteria);
+
+        $this->assertCount(5, $result->articles);
+        $this->assertEquals(14467, $result->articles[0]['id']);
+        $this->assertEquals(14471, $result->articles[4]['id']);
+        $this->assertEquals(5, $result->count);
     }
 }

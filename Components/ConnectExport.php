@@ -568,12 +568,14 @@ class ConnectExport
             $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
         }
 
-        $total = $builder->execute()->rowCount();
-
         $builder->setFirstResult($criteria->offset);
         $builder->setMaxResults($criteria->limit);
 
         $data = $builder->execute()->fetchAll();
+
+        $total = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(DISTINCT article_id) FROM s_plugin_connect_items WHERE shop_id IS NULL'
+        );
 
         return new ExportList([
             'articles' => $data,

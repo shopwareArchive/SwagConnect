@@ -499,8 +499,8 @@ class ConnectExport
             'i.cron_update as cronUpdate'
         ])
             ->from('s_plugin_connect_items', 'i')
-            ->innerJoin('i', 's_articles', 'a', 'a.id = i.article_id')
-            ->innerJoin('a', 's_articles_details', 'd', 'a.main_detail_id = d.id')
+            ->leftJoin('i', 's_articles', 'a', 'a.id = i.article_id')
+            ->leftJoin('a', 's_articles_details', 'd', 'a.main_detail_id = d.id')
             ->leftJoin('d', 's_articles_prices', 'p', 'd.id = p.articledetailsID')
             ->leftJoin('a', 's_core_tax', 't', 'a.taxID = t.id')
             ->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id')
@@ -568,12 +568,14 @@ class ConnectExport
             $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
         }
 
-        $total = $builder->execute()->rowCount();
-
         $builder->setFirstResult($criteria->offset);
         $builder->setMaxResults($criteria->limit);
 
         $data = $builder->execute()->fetchAll();
+
+        $total = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(DISTINCT article_id) FROM s_plugin_connect_items WHERE shop_id IS NULL'
+        );
 
         return new ExportList([
             'articles' => $data,

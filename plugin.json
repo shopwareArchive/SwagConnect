@@ -10,7 +10,7 @@
     "currentVersion": "1.1.9",
     "changelog": {
         "de": {
-            "1.1.10": "CON-4908 - Benachrichtigung whenn Lieferant sein Plugin deaktiviert; CON-4973 - Unterkategorien von bereits zugewiesenen Kategorien werden erzeugt; CON-4878 - Fix: Timeout im Export-Fenster bei mehr als 1M Produkten;"
+            "1.1.10": "CON-4908 - Benachrichtigung whenn Lieferant sein Plugin deaktiviert; CON-4973 - Unterkategorien von bereits zugewiesenen Kategorien werden erzeugt; CON-4878 - Fix: Timeout im Export-Fenster bei mehr als 1M Produkten;",
             "1.1.9": "CON-4964 - Fix: Timeout bei der Zuweisung großer Kategories; CON-4756 - Cross-Selling Produkte werden gesynct; CON-4896 - Usabilityverbesserungen bei Cronjobs, CON-4965 - Zuweisung von Kategorien beachten den Stream; CON-4967 - Vorschaubild wird synchronisiert; CON-4971 - Performanceverbesserungen im From Shop;",
             "1.1.8": "CON-4935 - Fix: Kategorien Daten für Sitemap; CON-4829 - Konfigurator wird gesynct; CON-4873 - Alle exportieren Button funktioniert für große Datenmengen; CON-4885 - leere Connect-Kategorien werden automatisch gelöscht; CON-4926 - Performanceoptimierung ToShop-Channel; CON-4954: Fix: gleiche Kategorien von verschiedenen Lieferanten",
             "1.1.7": "CON-4922 - Fix: Plugin stürzt ab bei Deaktivierung; CON-4609 - Versandstatus und Trckingcode werden synchronisiert; CON-4936 - Verbesserung der Kategoriezuweisung",
@@ -26,7 +26,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {            
-            "1.1.10": "CON-4908 - Notification if Supplier deactivates Plugin; CON-4973 - Subcategories of assigned Categories are created; CON-4878 - Fix: Timeout in Export-Window with more than 1M products;"
+            "1.1.10": "CON-4908 - Notification if Supplier deactivates Plugin; CON-4973 - Subcategories of assigned Categories are created; CON-4878 - Fix: Timeout in Export-Window with more than 1M products;",
             "1.1.9": "CON-4964 - Fix: Timeout when assigning big Categories; CON-4756 - Cross-Selling products get synced; CON-4896 - Usabilityimprovements for Cronjobs, CON-4965 - Catagory Assignment is aware of Streams; CON-4967 - Main image gets synced; CON-4971 - Performanceimprovements in From Shop;",
             "1.1.8": "CON-4935 - Fix: Category dates for sitemap; CON-4829 - Configurator-Set gets synced; CON-4873 - Export all works for many products; CON-4885 - empty Connect-Categories get deleted; CON-4926 - Performanceimprovements ToShop-Channel; CON-4954: Fix: same Category from different supplier",
             "1.1.7": "CON-4922 - Fix: Plugin crashes when it gets deactivated; CON-4609 - Shippingstatus and Trackingcode get synced; CON-4936 - Improvements in Category-Assignment",

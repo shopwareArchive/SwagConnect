@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.9",
+    "currentVersion": "1.1.10",
     "changelog": {
         "de": {
             "1.1.10": "CON-4908 - Benachrichtigung whenn Lieferant sein Plugin deaktiviert; CON-4973 - Unterkategorien von bereits zugewiesenen Kategorien werden erzeugt; CON-4878 - Fix: Timeout im Export-Fenster bei mehr als 1M Produkten;",

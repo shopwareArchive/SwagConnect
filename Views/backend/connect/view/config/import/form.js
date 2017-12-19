@@ -44,12 +44,17 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
      */
     defaults: {
         labelWidth: 170,
+        importSettingsLabelWidth: 190,
         anchor: '100%'
     },
 
     snippets: {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
+        importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
+        createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
+        activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
+        createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
         importPicturesHelp: '{s name=config/import/pictures_help}The import of images can slow down the import. If you want to import many products, you should not activate and import the pictures on the CronJob.{/s}',
         overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Overwrite the following properties during import{/s}',
@@ -151,8 +156,14 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             width: 250,
             store: numStore
         });
+        var elements = [];
+        if (window.defaultMarketplace == false && typeof(window.defaultMarketplace) !== 'undefined') {
+            // extended import settings are available
+            // only for SEM shops
+            elements.push(me.getImportSettingsFieldset());
+        }
 
-        var containerTop = Ext.create('Ext.form.FieldSet', {
+        var productContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportSettingsTitle,
             layout: 'vbox',
@@ -211,7 +222,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        var containerMiddle = Ext.create('Ext.form.FieldSet', {
+        var imageContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportImageSettingsTitle,
             layout: 'vbox',
@@ -271,7 +282,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        var containerBottom = Ext.create('Ext.form.FieldSet', {
+        var orderContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.updateOrderStatusTitle,
             layout: 'vbox',
@@ -299,7 +310,61 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        return [ containerTop, containerMiddle, containerBottom ];
+        elements.push(productContainer);
+        elements.push(imageContainer);
+        elements.push(orderContainer);
+        return elements;
+    },
+
+    /**
+     * Returns Import settings field set
+     *
+     * @return Ext.form.FieldSet
+     */
+    getImportSettingsFieldset: function () {
+        var me = this;
+
+        var leftElements = Ext.create('Ext.container.Container', {
+                columnWidth: 0.5,
+                padding: '0 20 0 0',
+                layout: 'anchor',
+                border: false,
+                items: [
+                    {
+                        xtype: 'checkbox',
+                        name: 'createCategoriesAutomatically',
+                        fieldLabel: me.snippets.createCategoriesAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }, {
+                        xtype: 'checkbox',
+                        name: 'activateProductsAutomatically',
+                        fieldLabel: me.snippets.activateProductsAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }, {
+                        xtype: 'checkbox',
+                        name: 'createUnitsAutomatically',
+                        fieldLabel: me.snippets.createUnitsAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }
+                ]
+            });
+
+
+        return Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: me.snippets.importSettingsHeader,
+            defaultType: 'checkbox',
+            defaults: me.defaults,
+            items: [
+                leftElements
+            ]
+        });
     },
 
     /**

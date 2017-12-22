@@ -310,9 +310,8 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        elements.push(productContainer);
-        elements.push(imageContainer);
-        elements.push(orderContainer);
+        elements.push(productContainer, imageContainer, orderContainer);
+
         return elements;
     },
 

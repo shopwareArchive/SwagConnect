@@ -115,11 +115,14 @@ class Article implements SubscriberInterface
     public function checkSupplierPluginAvailability(\Enlight_Event_EventArgs $args)
     {
         $articleDetail = $this->helper->getDetailByNumber($args->getId());
+        if (!$articleDetail instanceof Detail) {
+            return;
+        }
         $articleDetailId = $articleDetail->getId();
 
         if (!$this->helper->isRemoteArticleDetail($articleDetailId)) {
             return;
-        };
+        }
 
         $shopProductId = $this->helper->getShopProductId($articleDetailId);
         $shopId = $shopProductId->shopId;

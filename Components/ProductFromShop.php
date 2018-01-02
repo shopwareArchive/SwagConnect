@@ -25,6 +25,7 @@ use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Shipping;
 use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Shopware\Connect\Struct\Message;
 
 /**
  * The interface for products exported *to* connect *from* the local shop
@@ -407,14 +408,31 @@ class ProductFromShop implements ProductFromShopBase
     public function calculateShippingCosts(Order $order)
     {
         if (!$order->deliveryAddress) {
-            return new Shipping(['isShippable' => false]);
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'Delivery address could not be empty'
+                    ])
+                ]
+            ]);
         }
 
         $countryIso3 = $order->deliveryAddress->country;
         $country = $this->manager->getRepository('Shopware\Models\Country\Country')->findOneBy(['iso3' => $countryIso3]);
 
         if (!$country) {
-            return new Shipping(['isShippable' => false]);
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'Order could not be shipped to %country',
+                        'values' => [
+                            'country' => $countryIso3,
+                        ]
+                    ])
+                ]
+            ]);
         }
 
         if (count($order->orderItems) == 0) {
@@ -426,7 +444,14 @@ class ProductFromShop implements ProductFromShopBase
         /* @var \Shopware\Models\Shop\Shop $shop */
         $shop = $this->manager->getRepository('Shopware\Models\Shop\Shop')->getActiveDefault();
         if (!$shop) {
-            return new Shipping(['isShippable' => false]);
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'Default shop could not be found'
+                    ])
+                ]
+            ]);
         }
         $shop->registerResources(Shopware()->Container()->get('bootstrap'));
 
@@ -443,7 +468,14 @@ class ProductFromShop implements ProductFromShopBase
         // todo: if products are not shippable with default shipping
         // todo: do we need to check with other shipping methods
         if (!$shipping) {
-            return new Shipping(['isShippable' => false]);
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'Default shipping could not be found'
+                    ])
+                ]
+            ]);
         }
 
         $session->offsetSet('sDispatch', $shipping->getId());
@@ -470,7 +502,14 @@ class ProductFromShop implements ProductFromShopBase
 
         $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(['id' => $country->getId()]);
         if (!is_array($result)) {
-            return new Shipping(['isShippable' => false]);
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'Checkout is not possible at the moment possible reasons are: inactive product, removed product, etc.'
+                    ])
+                ]
+            ]);
         }
 
         $sql = 'DELETE FROM s_order_basket WHERE sessionID=?';

@@ -109,8 +109,8 @@ class Article implements SubscriberInterface
 
     /**
      * @param \Enlight_Event_EventArgs $args
-     * @return bool|void
      * @throws \Exception
+     * @return bool|void
      */
     public function checkSupplierPluginAvailability(\Enlight_Event_EventArgs $args)
     {
@@ -123,13 +123,13 @@ class Article implements SubscriberInterface
 
         if (!$this->helper->isRemoteArticleDetail($articleDetailId)) {
             return;
-        };
+        }
 
         $shopProductId = $this->helper->getShopProductId($articleDetailId);
         $shopId = $shopProductId->shopId;
 
         /**
-         * @var RemoteShopService $remoteShopService
+         * @var RemoteShopService
          * @todo: refactor when using 5.2 plugin base.
          */
         $remoteShopService = Shopware()->Container()->get('swagconnect.remote_shop_service');

@@ -43,6 +43,7 @@ class RemoteShopService
         } catch (\RuntimeException $exception) {
             return $this->handlePingRemoteShopError($shopId, $exception);
         }
+
         return true;
     }
 
@@ -66,8 +67,10 @@ class RemoteShopService
     {
         if ($this->isExceptionFatal($exception)) {
             $this->sendAddToBaskedFailedNotificationToSocialNetwork($shopId);
+
             return false;
         }
+
         return true;
     }
 
@@ -88,12 +91,13 @@ class RemoteShopService
             "Uncaught Shopware\Connect\SecurityException: No Authorization to call service 'ping'.") !== false) {
             return false;
         }
+
         return true;
     }
 
     /**
-     * @return SnHttpClient
      * @throws \Exception
+     * @return SnHttpClient
      * @todo: refactor when using 5.2 plugin base.
      */
     private function getSnHttpClient()

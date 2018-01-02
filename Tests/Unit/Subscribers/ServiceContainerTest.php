@@ -36,7 +36,6 @@ use ShopwarePlugins\Connect\Tests\ConnectTestHelperTrait;
 
 class ServiceContainerTest extends AbstractConnectUnitTest
 {
-
     use ConnectTestHelperTrait;
 
     /**

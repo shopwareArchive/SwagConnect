@@ -33,8 +33,8 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('priceFieldForPurchasePriceExport', 'basePrice', 'export'),
             ('exportPriceMode', '[\"price\", \"purchasePrice\"]', 'export'),
             ('detailProductNoIndex', '1', 'general'),
-            ('detailShopInfo', '1', 'general'),
-            ('checkoutShopInfo', '1', 'general'),
+            ('detailShopInfo', '1', 'import'),
+            ('checkoutShopInfo', '1', 'import'),
             ('$longDescription', '1', 'export'),
             ('importImagesOnFirstImport', '0', 'import'),
             ('autoUpdateProducts', '1', 'export'),
@@ -45,7 +45,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('overwriteProductLongDescription', '1', 'import'),
             ('overwriteProductAdditionalDescription', '1', 'import'),
             ('logRequest', '1', 'general'),
-            ('showShippingCostsSeparately', '0', 'general'),
+            ('showShippingCostsSeparately', '0', 'import'),
             ('articleImagesLimitImport', '10', 'import');
             "
         );

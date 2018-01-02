@@ -58,9 +58,9 @@ class DefaultCategoryResolver extends CategoryResolver
 
         if ($localCategories === false) {
             return [];
-        } else {
-            return $localCategories;
         }
+
+        return $localCategories;
     }
 
     /**

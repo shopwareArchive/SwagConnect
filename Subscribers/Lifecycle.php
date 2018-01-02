@@ -117,7 +117,7 @@ class Lifecycle implements SubscriberInterface
             return;
         }
 
-        if (!$this->hasPriceType()) {
+        if (!SDK::isPriceTypeValid($this->sdk->getPriceType())) {
             return;
         }
 
@@ -268,7 +268,7 @@ class Lifecycle implements SubscriberInterface
             }
         }
 
-        if (!$this->hasPriceType()) {
+        if (!SDK::isPriceTypeValid($this->sdk->getPriceType())) {
             return;
         }
 
@@ -319,7 +319,7 @@ class Lifecycle implements SubscriberInterface
             return;
         }
 
-        if (!$this->hasPriceType()) {
+        if (!SDK::isPriceTypeValid($this->sdk->getPriceType())) {
             return;
         }
 
@@ -474,20 +474,5 @@ class Lifecycle implements SubscriberInterface
         } catch (\Exception $e) {
             // if sn is not available, proceed without exception
         }
-    }
-
-    /**
-     * @return bool
-     */
-    private function hasPriceType()
-    {
-        if ($this->sdk->getPriceType() === SDK::PRICE_TYPE_PURCHASE
-            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_RETAIL
-            || $this->sdk->getPriceType() === SDK::PRICE_TYPE_BOTH
-        ) {
-            return true;
-        }
-
-        return false;
     }
 }

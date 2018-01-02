@@ -631,7 +631,7 @@ class Update
 
     private function changeGroupNameImportSettings()
     {
-        if (version_compare($this->version, '1.1.12', '<=')) {
+        if (version_compare($this->version, '1.1.11', '<=')) {
             try {
                 $this->db->query('UPDATE `s_plugin_connect_config` SET `groupName` = "import" WHERE `groupName` = "general" AND `name` IN ("createCategoriesAutomatically", "activateProductsAutomatically", "createUnitsAutomatically",
                                             "detailShopInfo", "checkoutShopInfo", "showShippingCostsSeparately")');

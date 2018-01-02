@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.11",
+    "currentVersion": "1.1.12",
     "changelog": {
         "de": {
             "1.1.11": "CON-5001: Fix: Security check hinzugeügt, falls keine Artikel-Id übergeben wird, wenn ein Produkt dem Warenkorb hinzugefügt wurde",

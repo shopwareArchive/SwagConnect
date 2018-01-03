@@ -412,7 +412,7 @@ class ProductFromShop implements ProductFromShopBase
                 'isShippable' => false,
                 'messages' => [
                     new Message([
-                        'message' => 'Delivery address could not be empty'
+                        'message' => 'delivery_address_empty'
                     ])
                 ]
             ]);
@@ -426,7 +426,7 @@ class ProductFromShop implements ProductFromShopBase
                 'isShippable' => false,
                 'messages' => [
                     new Message([
-                        'message' => 'Order could not be shipped to %country',
+                        'message' => 'order_not_shippable_to_country',
                         'values' => [
                             'country' => $countryIso3,
                         ]
@@ -448,7 +448,7 @@ class ProductFromShop implements ProductFromShopBase
                 'isShippable' => false,
                 'messages' => [
                     new Message([
-                        'message' => 'Default shop could not be found'
+                        'message' => 'default_shop_not_found'
                     ])
                 ]
             ]);
@@ -472,7 +472,7 @@ class ProductFromShop implements ProductFromShopBase
                 'isShippable' => false,
                 'messages' => [
                     new Message([
-                        'message' => 'Default shipping could not be found'
+                        'message' => 'default_shipping_not_found'
                     ])
                 ]
             ]);
@@ -506,7 +506,7 @@ class ProductFromShop implements ProductFromShopBase
                 'isShippable' => false,
                 'messages' => [
                     new Message([
-                        'message' => 'Checkout is not possible at the moment possible reasons are: inactive product, removed product, etc.'
+                        'message' => 'checkout_not_possible'
                     ])
                 ]
             ]);

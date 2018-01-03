@@ -4,6 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
+    "hash": "b14ef629d2f378d38d3dc6257db65f62",
     "content-hash": "e6d7ec5b494620faa9eaa05092337d04",
     "packages": [
         {
@@ -47,7 +48,7 @@
             ],
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
-            "time": "2015-07-22T18:31:08+00:00"
+            "time": "2015-07-22 18:31:08"
         },
         {
             "name": "shopware/connect-sdk",
@@ -94,12 +95,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopwareLabs/plugin-dev-tools.git",
-                "reference": "a3aae835f6183c209c316123a728b3bbb7209ceb"
+                "reference": "78fef1ba3a52fa97c3f00940236c9e8455e012f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/a3aae835f6183c209c316123a728b3bbb7209ceb",
-                "reference": "a3aae835f6183c209c316123a728b3bbb7209ceb",
+                "url": "https://api.github.com/repos/shopwareLabs/plugin-dev-tools/zipball/78fef1ba3a52fa97c3f00940236c9e8455e012f1",
+                "reference": "78fef1ba3a52fa97c3f00940236c9e8455e012f1",
                 "shasum": ""
             },
             "type": "application",
@@ -114,7 +115,7 @@
                 "source": "https://github.com/shopwareLabs/plugin-dev-tools/tree/master",
                 "issues": "https://github.com/shopwareLabs/plugin-dev-tools/issues"
             },
-            "time": "2017-12-04 12:05:50"
+            "time": "2017-12-20 07:47:21"
         }
     ],
     "aliases": [],

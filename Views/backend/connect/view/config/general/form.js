@@ -328,8 +328,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         return Ext.create('Ext.form.FieldSet', {
             layout: 'anchor',
             title: me.snippets.advancedHeader,
-            collapsible: true,
-            collapsed: true,
             defaults: {
                 labelWidth: 170,
                 anchor: '100%'

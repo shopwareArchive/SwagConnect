@@ -62,7 +62,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         overwriteProductAdditionalDescription: '{s name=config/import/overwrite_product_additional_description}Connect description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
-        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
+        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product master data{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
         overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}',
         updateOrderStatusDescription: '{s name=config/import/update_order_status_description}You can import the order status from orders with Connect-Products. This can override previously set status.{/s}',
@@ -152,6 +152,9 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             store: numStore
         });
 
+        var leftProductElements = me.createLeftProductElements(),
+            rightProductElements = me.createRightProductElements();
+
         var containerTop = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportSettingsTitle,
@@ -168,45 +171,8 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                     fieldLabel : me.snippets.overwritePropertiesLabel,
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
-                    items: [
-                        {
-                            boxLabel  : me.snippets.overwriteProductName,
-                            name      : 'overwriteProductName',
-                            inputValue: 1,
-                            helpText: me.snippets.overwritePropertiesHelp,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductPrice,
-                            name      : 'overwriteProductPrice',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductImages,
-                            name      : 'overwriteProductImage',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductMainImage,
-                            name      : 'overwriteProductMainImage',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductShortDescription,
-                            name      : 'overwriteProductShortDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductLongDescription,
-                            name      : 'overwriteProductLongDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductAdditionalDescription,
-                            name      : 'overwriteProductAdditionalDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }
-                    ]
+                    layout: 'hbox',
+                    items: [leftProductElements, rightProductElements]
                 }
             ]
         });
@@ -300,6 +266,77 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         });
 
         return [ containerTop, containerMiddle, containerBottom ];
+    },
+
+    createLeftProductElements: function() {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            margin: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            width: me.defaults.labelWidth,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductName,
+                    name: 'overwriteProductName',
+                    inputValue: 1,
+                    helpText: me.snippets.overwritePropertiesHelp,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductPrice,
+                    name: 'overwriteProductPrice',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductImages,
+                    name: 'overwriteProductImage',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductMainImage,
+                    name: 'overwriteProductMainImage',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }
+            ]
+        });
+    },
+
+    createRightProductElements: function() {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            margin: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            width: me.defaults.labelWidth,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductShortDescription,
+                    name      : 'overwriteProductShortDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductLongDescription,
+                    name      : 'overwriteProductLongDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel:  me.snippets.overwriteProductAdditionalDescription,
+                    name      : 'overwriteProductAdditionalDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }
+            ]
+        });
     },
 
     /**

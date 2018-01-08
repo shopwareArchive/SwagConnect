@@ -26,7 +26,7 @@
             "1.0.19": "CON-4675 - CronJobs sind nun ausführbar über `bin/console sw:cron:run`;",
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
-        "en": {            
+        "en": {
             "1.1.11": "CON-5001: Fix: Security check added if no article id is passed when a product has been added to the cart",
             "1.1.10": "CON-4908 - Notification if Supplier deactivates Plugin; CON-4973 - Subcategories of assigned Categories are created; CON-4878 - Fix: Timeout in Export-Window with more than 1M products;",
             "1.1.9": "CON-4964 - Fix: Timeout when assigning big Categories; CON-4756 - Cross-Selling products get synced; CON-4896 - Usabilityimprovements for Cronjobs, CON-4965 - Catagory Assignment is aware of Streams; CON-4967 - Main image gets synced; CON-4971 - Performanceimprovements in From Shop;",

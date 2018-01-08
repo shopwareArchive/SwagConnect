@@ -54,23 +54,17 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         basicSettings: '{s name=config/main/basic_settings}Grundeinstellungen{/s}',
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
-        detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
         noIndexLabel: Ext.String.format('{s name=config/noindex_label}Setze »noindex« meta-tag für [0]-Produkte{/s}', marketplaceName),
-        basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
         shippingCostsLabel: '{s name=config/plus_shipping_costs}Shipping costs page{/s}',
         exportDomainLabel: '{s name=config/alternative_export_url}Alternative export URL{/s}',
-        basicHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
         unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}', marketplaceName),
-        separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}',
         resetBtn: '{s name=config/reset_btn}reset{/s}',
         priceResetLabel: '{s name=config/price_reset_label}Reset exported prices{/s}',
         priceResetMessage: '{s name=config/price_reset_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
         exchangeSettingResetLabel: '{s name=config/exchange_settings_label}Reset exchange settings{/s}',
-        exchangeSettingResetMessage: '{s name=config/exchange_settings_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}',
-        showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
-        showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
+        exchangeSettingResetMessage: '{s name=config/exchange_settings_message}Your exported products will be deleted in Connect and your sent offers will be invalid. Do you want to continue?{/s}'
     },
 
     initComponent: function () {
@@ -102,7 +96,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         var me = this,
             elements = [];
 
-        elements.push(me.getBasicConfigFieldset());
         elements.push(me.getAdvancedConfigFieldset());
 
         return elements;
@@ -129,30 +122,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 cls: 'primary'
             })
         ];
-    },
-
-    /**
-     * Creates basic configuration field set
-     * @return Ext.form.FieldSet
-     */
-    getBasicConfigFieldset: function () {
-        var me = this,
-            items = [],
-            leftElements = me.createLeftElements(),
-            rightElements = me.createRightElements();
-
-        items.push(leftElements);
-        items.push(rightElements);
-
-        return Ext.create('Ext.form.FieldSet', {
-            layout: 'column',
-            title: me.snippets.basicHeader,
-            defaults: {
-                labelWidth: 170,
-                anchor: '100%'
-            },
-            items: items
-        });
     },
 
     getApiKeyItems: function () {
@@ -333,65 +302,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 anchor: '100%'
             },
             items: items
-        });
-    },
-
-    /**
-     * Creates the field set items which are displayed in the left column
-     * @return Ext.container.Container
-     */
-    createLeftElements: function () {
-        var me = this;
-
-        return Ext.create('Ext.container.Container', {
-            columnWidth: 0.5,
-            padding: '0 20 0 0',
-            layout: 'anchor',
-            border: false,
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'detailShopInfo',
-                    fieldLabel: me.snippets.detailPageHintLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: me.snippets.showDropshippingHintDetailsHelptext
-                }, {
-                    xtype: 'checkbox',
-                    name: 'showShippingCostsSeparately',
-                    fieldLabel: me.snippets.separateShippingLabel,
-                    labelWidth: me.defaults.labelWidth,
-                    inputValue: 1,
-                    hidden : true,
-                    uncheckedValue: 0
-                }
-            ]
-        });
-    },
-
-    /**
-     * Creates the field set items which are displayed in the right column
-     * @return Ext.container.Container
-     */
-    createRightElements: function () {
-        var me = this;
-
-        return Ext.create('Ext.container.Container', {
-            columnWidth: 0.5,
-            layout: 'anchor',
-            border: false,
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'checkoutShopInfo',
-                    fieldLabel: me.snippets.basketHintLabel,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.labelWidth,
-                    helpText: me.snippets.showDropshippingHintBasketHelptext
-                }
-            ]
         });
     },
 

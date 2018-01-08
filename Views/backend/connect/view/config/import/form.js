@@ -73,8 +73,13 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         updateOrderStatusDescription: '{s name=config/import/update_order_status_description}You can import the order status from orders with Connect-Products. This can override previously set status.{/s}',
         updateOrderStatusLabel: '{s name=config/import/update_order_status_label}Import Orderstatus:{/s}',
         updateOrderStatusHelpText: '{s name=config/import/update_order_status_help_text}The order status will be set to \"completly delivered\" if all Connect-Products are delivered. If some but not all Connect-Products are delivered the order status will be set to \"partially delivered\". In this cases the old order status will be overwritten.{/s}',
-        updateOrderStatusTitle: '{s name=config/import/update_order_status_title}Order status{/s}'
-
+        updateOrderStatusTitle: '{s name=config/import/update_order_status_title}Order status{/s}',
+        dropShippingHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
+        detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
+        separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
+        basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
+        showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
+        showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
 
     initComponent: function() {
@@ -276,7 +281,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        elements.push(productContainer, imageContainer, orderContainer);
+        elements.push(productContainer, imageContainer, orderContainer, me.getDropShippingConfigFieldset());
 
         return elements;
     },
@@ -427,6 +432,88 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         var me = this;
 
         me.imageLimitImportField.setDisabled(checkbox.getValue());
+    },
+
+    /**
+     * Creates dropshipping configuration field set
+     * @return Ext.form.FieldSet
+     */
+    getDropShippingConfigFieldset: function () {
+        var me = this,
+            items = [],
+            leftElements = me.createLeftDropShippingElements(),
+            rightElements = me.createRightDropShippingElements();
+
+        items.push(leftElements, rightElements);
+
+        return Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: me.snippets.dropShippingHeader,
+            defaults: {
+                labelWidth: 170,
+                anchor: '100%'
+            },
+            items: items
+        });
+    },
+
+    /**
+     * Creates the field set items which are displayed in the left column of the drop shipping container
+     * @return Ext.container.Container
+     */
+    createLeftDropShippingElements: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            padding: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'detailShopInfo',
+                    fieldLabel: me.snippets.detailPageHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintDetailsHelptext
+                }, {
+                    xtype: 'checkbox',
+                    name: 'showShippingCostsSeparately',
+                    fieldLabel: me.snippets.separateShippingLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    inputValue: 1,
+                    hidden : true,
+                    uncheckedValue: 0
+                }
+            ]
+        });
+    },
+
+    /**
+     * Creates the field set items which are displayed in the right column of the drop shipping container
+     * @return Ext.container.Container
+     */
+    createRightDropShippingElements: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'checkoutShopInfo',
+                    fieldLabel: me.snippets.basketHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintBasketHelptext
+                }
+            ]
+        });
     }
 });
 //{/block}

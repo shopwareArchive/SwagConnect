@@ -633,7 +633,8 @@ class Update
     {
         if (version_compare($this->version, '1.1.11', '<=')) {
             try {
-                $this->db->query('UPDATE `s_plugin_connect_config` SET `groupName` = "import" WHERE `groupName` = "general" AND `name` IN ("createCategoriesAutomatically", "activateProductsAutomatically", "createUnitsAutomatically")');
+                $this->db->query('UPDATE `s_plugin_connect_config` SET `groupName` = "import" WHERE `groupName` = "general" AND `name` IN ("createCategoriesAutomatically", "activateProductsAutomatically", "createUnitsAutomatically",
+                                            "detailShopInfo", "checkoutShopInfo", "showShippingCostsSeparately")');
             } catch (\Exception $e) {
                 $this->logger->write(
                     true,

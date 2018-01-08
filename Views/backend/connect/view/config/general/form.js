@@ -44,7 +44,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
      */
     defaults: {
         labelWidth: 170,
-        importSettingsLabelWidth: 190,
         anchor: '100%'
     },
 
@@ -63,10 +62,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
         basicHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
         unitsHeader: '{s name=navigation/units}Einheiten{/s}',
         unitsFieldsetDescription: Ext.String.format('{s name=config/units/description}Hier ordnen Sie die Einheiten aus Ihrem Shop den Standard-Einheiten in [0] zu.{/s}', marketplaceName),
-        importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
-        createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
-        activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
-        createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         advancedHeader: '{s name=config/advanced}Advanced{/s}',
         resetBtn: '{s name=config/reset_btn}reset{/s}',
@@ -106,12 +101,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
     createElements: function () {
         var me = this,
             elements = [];
-
-        if (window.defaultMarketplace == false && typeof(window.defaultMarketplace) !== 'undefined') {
-            // extended import settings are available
-            // only for SEM shops
-            elements.push(me.getImportSettingsFieldset());
-        }
 
         elements.push(me.getBasicConfigFieldset());
         elements.push(me.getAdvancedConfigFieldset());
@@ -163,46 +152,6 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
                 anchor: '100%'
             },
             items: items
-        });
-    },
-
-    /**
-     * Returns Import settings field set
-     *
-     * @return Ext.form.FieldSet
-     */
-    getImportSettingsFieldset: function () {
-        var me = this;
-
-        return Ext.create('Ext.form.FieldSet', {
-            columnWidth: 1,
-            title: me.snippets.importSettingsHeader,
-            defaultType: 'checkbox',
-            layout: 'anchor',
-            items: [
-                {
-                    xtype: 'checkbox',
-                    name: 'createCategoriesAutomatically',
-                    fieldLabel: me.snippets.createCategoriesAutomatically,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.importSettingsLabelWidth
-                }, {
-                    xtype: 'checkbox',
-                    name: 'activateProductsAutomatically',
-                    fieldLabel: me.snippets.activateProductsAutomatically,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.importSettingsLabelWidth
-                }, {
-                    xtype: 'checkbox',
-                    name: 'createUnitsAutomatically',
-                    fieldLabel: me.snippets.createUnitsAutomatically,
-                    inputValue: 1,
-                    uncheckedValue: 0,
-                    labelWidth: me.defaults.importSettingsLabelWidth
-                }
-            ]
         });
     },
 

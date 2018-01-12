@@ -13,6 +13,7 @@ use Shopware\Connect\ProductFromShop as ProductFromShopBase;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\Product;
 use Shopware\Connect\Struct\Address;
+use Shopware\Models\Dispatch\Dispatch;
 use Shopware\Models\Order as OrderModel;
 use Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel;
 use Shopware\Models\Customer as CustomerModel;
@@ -460,26 +461,6 @@ class ProductFromShop implements ProductFromShopBase
         $sessionId = uniqid('connect_remote');
         $session->offsetSet('sSESSION_ID', $sessionId);
 
-        /** @var \Shopware\Models\Dispatch\Dispatch $shipping */
-        $shipping = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch')->findOneBy([
-            'type' => 0 // standard shipping
-        ]);
-
-        // todo: if products are not shippable with default shipping
-        // todo: do we need to check with other shipping methods
-        if (!$shipping) {
-            return new Shipping([
-                'isShippable' => false,
-                'messages' => [
-                    new Message([
-                        'message' => 'default_shipping_not_found'
-                    ])
-                ]
-            ]);
-        }
-
-        $session->offsetSet('sDispatch', $shipping->getId());
-
         $repository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
         $products = [];
         /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
@@ -499,6 +480,39 @@ class ProductFromShop implements ProductFromShopBase
         foreach ($products as $product) {
             Shopware()->Modules()->Basket()->sAddArticle($product['ordernumber'], $product['quantity']);
         }
+
+        $shippingMethods = Shopware()->Modules()->Admin()->sGetPremiumDispatches($country->getId());
+        if (empty($shippingMethods)) {
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'order_not_shippable_to_country',
+                        'values' => [
+                            'country' => $countryIso3,
+                        ]
+                    ])
+                ]
+            ]);
+        }
+
+        $shippingMethod = reset($shippingMethods);
+
+        /** @var Dispatch $shipping */
+        $shipping = $this->manager->getRepository(Dispatch::class)->find($shippingMethod['id']);
+
+        if (!$shipping) {
+            return new Shipping([
+                'isShippable' => false,
+                'messages' => [
+                    new Message([
+                        'message' => 'default_shipping_not_found'
+                    ])
+                ]
+            ]);
+        }
+
+        $session->offsetSet('sDispatch', $shipping->getId());
 
         $result = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts(['id' => $country->getId()]);
         if (!is_array($result)) {

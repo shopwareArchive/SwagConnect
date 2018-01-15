@@ -5,7 +5,7 @@
   },
   "require": {
     "firebase/php-jwt": "^3.0",
-    "shopware/connect-sdk": "dev-master#v2.0.10"
+    "shopware/connect-sdk": "dev-CON-4632-2"
   },
   "repositories": [
     {

@@ -477,7 +477,7 @@ class BasketHelper
         /** @var \Shopware\Connect\Struct\Shipping $shipping */
         foreach ($this->checkResult->shippingCosts as $shipping) {
             $shopConfiguration = $this->connectGateway->getShopConfiguration($shipping->shopId);
-            if ($shopConfiguration->shippingCostType == 'remote') {
+            if ($shopConfiguration->merchantShippingCostType == 'remote') {
                 $shippingCostsNet += $shipping->shippingCosts;
                 $shippingCostsWithTax += $shipping->grossShippingCosts;
             }

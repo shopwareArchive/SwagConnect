@@ -42,7 +42,13 @@ Ext.define('Shopware.apps.Connect.model.config.Import', {
         { name: 'overwriteProductAdditionalDescription', type: 'int' },
         { name: 'importImagesOnFirstImport', type: 'int' },
         { name: 'articleImagesLimitImport', type: 'int' },
-        { name: 'updateOrderStatus', type: 'int' }
+        { name: 'updateOrderStatus', type: 'int' },
+        { name: 'createCategoriesAutomatically', type: 'string' },
+        { name: 'activateProductsAutomatically', type: 'string' },
+        { name: 'createUnitsAutomatically', type: 'string' },
+        { name: 'detailShopInfo', type: 'string' },
+        { name: 'showShippingCostsSeparately', type: 'string' },
+        { name: 'checkoutShopInfo', type: 'string' }
     ],
 
     proxy: {

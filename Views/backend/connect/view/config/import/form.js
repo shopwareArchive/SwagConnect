@@ -44,12 +44,17 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
      */
     defaults: {
         labelWidth: 170,
+        importSettingsLabelWidth: 190,
         anchor: '100%'
     },
 
     snippets: {
         save: '{s name=config/save}Save{/s}',
         cancel: '{s name=config/cancel}Cancel{/s}',
+        importSettingsHeader: '{s name=config/import_settings_header}Import Einstellungen{/s}',
+        createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
+        activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
+        createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
         importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
         importPicturesHelp: '{s name=config/import/pictures_help}The import of images can slow down the import. If you want to import many products, you should not activate and import the pictures on the CronJob.{/s}',
         overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Overwrite the following properties during import{/s}',
@@ -62,14 +67,19 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         overwriteProductLongDescription: '{s name=config/import/overwrite_product_long_description}Long description{/s}',
         overwriteProductAdditionalDescription: '{s name=config/import/overwrite_product_additional_description}Connect description{/s}',
         articleImagesLimitImportLabel: '{s name=config/import/pictures_limit_label}Number of products per image import pass{/s}',
-        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product{/s}',
+        productImportSettingsTitle: '{s name=config/import/product_import_settings_title}Product master data{/s}',
         productImportImageSettingsTitle: '{s name=config/import/image_settings_title}Product images{/s}',
         overwritePropertiesHelptext: '{s name=config/import/overwrite_properties_helptext}Gebe an, welche Felder überschrieben werden sollen, wenn dein Lieferant sie ändert. Diese Einstellung kannst du auch pro Artikel treffen. Gehe dafür direkt in den Artikel und dann auf den Tab Connect.{/s}',
         updateOrderStatusDescription: '{s name=config/import/update_order_status_description}You can import the order status from orders with Connect-Products. This can override previously set status.{/s}',
         updateOrderStatusLabel: '{s name=config/import/update_order_status_label}Import Orderstatus:{/s}',
         updateOrderStatusHelpText: '{s name=config/import/update_order_status_help_text}The order status will be set to \"completly delivered\" if all Connect-Products are delivered. If some but not all Connect-Products are delivered the order status will be set to \"partially delivered\". In this cases the old order status will be overwritten.{/s}',
-        updateOrderStatusTitle: '{s name=config/import/update_order_status_title}Order status{/s}'
-
+        updateOrderStatusTitle: '{s name=config/import/update_order_status_title}Order status{/s}',
+        dropShippingHeader: '{s name=config/main/dropshipping}Dropshipping{/s}',
+        detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
+        separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
+        basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
+        showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
+        showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
 
     initComponent: function() {
@@ -151,8 +161,17 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             width: 250,
             store: numStore
         });
+        var elements = [];
+        if (window.defaultMarketplace == false && typeof(window.defaultMarketplace) !== 'undefined') {
+            // extended import settings are available
+            // only for SEM shops
+            elements.push(me.getImportSettingsFieldset());
+        }
 
-        var containerTop = Ext.create('Ext.form.FieldSet', {
+        var leftProductElements = me.createLeftProductElements(),
+            rightProductElements = me.createRightProductElements();
+
+        var productContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportSettingsTitle,
             layout: 'vbox',
@@ -168,50 +187,13 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                     fieldLabel : me.snippets.overwritePropertiesLabel,
                     defaultType: 'checkboxfield',
                     labelWidth: me.defaults.labelWidth,
-                    items: [
-                        {
-                            boxLabel  : me.snippets.overwriteProductName,
-                            name      : 'overwriteProductName',
-                            inputValue: 1,
-                            helpText: me.snippets.overwritePropertiesHelp,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductPrice,
-                            name      : 'overwriteProductPrice',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductImages,
-                            name      : 'overwriteProductImage',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductMainImage,
-                            name      : 'overwriteProductMainImage',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductShortDescription,
-                            name      : 'overwriteProductShortDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductLongDescription,
-                            name      : 'overwriteProductLongDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }, {
-                            boxLabel  : me.snippets.overwriteProductAdditionalDescription,
-                            name      : 'overwriteProductAdditionalDescription',
-                            inputValue: 1,
-                            uncheckedValue: 0
-                        }
-                    ]
+                    layout: 'hbox',
+                    items: [leftProductElements, rightProductElements]
                 }
             ]
         });
 
-        var containerMiddle = Ext.create('Ext.form.FieldSet', {
+        var imageContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.productImportImageSettingsTitle,
             layout: 'vbox',
@@ -271,7 +253,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        var containerBottom = Ext.create('Ext.form.FieldSet', {
+        var orderContainer = Ext.create('Ext.form.FieldSet', {
             flex: 1,
             title: me.snippets.updateOrderStatusTitle,
             layout: 'vbox',
@@ -299,7 +281,131 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
             ]
         });
 
-        return [ containerTop, containerMiddle, containerBottom ];
+        elements.push(productContainer, imageContainer, orderContainer, me.getDropShippingConfigFieldset());
+
+        return elements;
+    },
+
+    /**
+     * Returns Import settings field set
+     *
+     * @return Ext.form.FieldSet
+     */
+    getImportSettingsFieldset: function () {
+        var me = this;
+
+        var leftElements = Ext.create('Ext.container.Container', {
+                columnWidth: 0.5,
+                padding: '0 20 0 0',
+                layout: 'anchor',
+                border: false,
+                items: [
+                    {
+                        xtype: 'checkbox',
+                        name: 'createCategoriesAutomatically',
+                        fieldLabel: me.snippets.createCategoriesAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }, {
+                        xtype: 'checkbox',
+                        name: 'activateProductsAutomatically',
+                        fieldLabel: me.snippets.activateProductsAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }, {
+                        xtype: 'checkbox',
+                        name: 'createUnitsAutomatically',
+                        fieldLabel: me.snippets.createUnitsAutomatically,
+                        inputValue: 1,
+                        uncheckedValue: 0,
+                        labelWidth: me.defaults.importSettingsLabelWidth
+                    }
+                ]
+            });
+
+
+        return Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: me.snippets.importSettingsHeader,
+            defaultType: 'checkbox',
+            defaults: me.defaults,
+            items: [
+                leftElements
+            ]
+        });
+    },
+
+    createLeftProductElements: function() {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            margin: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            width: me.defaults.labelWidth,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductName,
+                    name: 'overwriteProductName',
+                    inputValue: 1,
+                    helpText: me.snippets.overwritePropertiesHelp,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductPrice,
+                    name: 'overwriteProductPrice',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductImages,
+                    name: 'overwriteProductImage',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductMainImage,
+                    name: 'overwriteProductMainImage',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }
+            ]
+        });
+    },
+
+    createRightProductElements: function() {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            margin: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            width: me.defaults.labelWidth,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductShortDescription,
+                    name      : 'overwriteProductShortDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel: me.snippets.overwriteProductLongDescription,
+                    name      : 'overwriteProductLongDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }, {
+                    xtype: 'checkbox',
+                    boxLabel:  me.snippets.overwriteProductAdditionalDescription,
+                    name      : 'overwriteProductAdditionalDescription',
+                    inputValue: 1,
+                    uncheckedValue: 0
+                }
+            ]
+        });
     },
 
     /**
@@ -326,6 +432,88 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         var me = this;
 
         me.imageLimitImportField.setDisabled(checkbox.getValue());
+    },
+
+    /**
+     * Creates dropshipping configuration field set
+     * @return Ext.form.FieldSet
+     */
+    getDropShippingConfigFieldset: function () {
+        var me = this,
+            items = [],
+            leftElements = me.createLeftDropShippingElements(),
+            rightElements = me.createRightDropShippingElements();
+
+        items.push(leftElements, rightElements);
+
+        return Ext.create('Ext.form.FieldSet', {
+            layout: 'column',
+            title: me.snippets.dropShippingHeader,
+            defaults: {
+                labelWidth: 170,
+                anchor: '100%'
+            },
+            items: items
+        });
+    },
+
+    /**
+     * Creates the field set items which are displayed in the left column of the drop shipping container
+     * @return Ext.container.Container
+     */
+    createLeftDropShippingElements: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            padding: '0 20 0 0',
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'detailShopInfo',
+                    fieldLabel: me.snippets.detailPageHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintDetailsHelptext
+                }, {
+                    xtype: 'checkbox',
+                    name: 'showShippingCostsSeparately',
+                    fieldLabel: me.snippets.separateShippingLabel,
+                    labelWidth: me.defaults.labelWidth,
+                    inputValue: 1,
+                    hidden : false,
+                    uncheckedValue: 0
+                }
+            ]
+        });
+    },
+
+    /**
+     * Creates the field set items which are displayed in the right column of the drop shipping container
+     * @return Ext.container.Container
+     */
+    createRightDropShippingElements: function () {
+        var me = this;
+
+        return Ext.create('Ext.container.Container', {
+            columnWidth: 0.5,
+            layout: 'anchor',
+            border: false,
+            items: [
+                {
+                    xtype: 'checkbox',
+                    name: 'checkoutShopInfo',
+                    fieldLabel: me.snippets.basketHintLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.showDropshippingHintBasketHelptext
+                }
+            ]
+        });
     }
 });
 //{/block}

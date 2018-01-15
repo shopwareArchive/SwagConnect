@@ -98,6 +98,7 @@ class Update
         $this->changeExportStatusToVarchar();
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
+        $this->changeGroupNameImportSettings();
 
         return true;
     }
@@ -619,6 +620,22 @@ class Update
                 $this->db->query('ALTER TABLE `s_plugin_connect_items` ADD COLUMN `update_main_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL');
             } catch (\Exception $e) {
                 // ignore it if exists
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function changeGroupNameImportSettings()
+    {
+        if (version_compare($this->version, '1.1.11', '<=')) {
+            try {
+                $this->db->query('UPDATE `s_plugin_connect_config` SET `groupName` = "import" WHERE `groupName` = "general" AND `name` IN ("createCategoriesAutomatically", "activateProductsAutomatically", "createUnitsAutomatically",
+                                            "detailShopInfo", "checkoutShopInfo", "showShippingCostsSeparately")');
+            } catch (\Exception $e) {
                 $this->logger->write(
                     true,
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),

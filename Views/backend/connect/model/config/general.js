@@ -39,14 +39,8 @@ Ext.define('Shopware.apps.Connect.model.config.General', {
         { name: 'shopwareId', type: 'string' },
         { name: 'connectDebugHost', type: 'string' },
         { name: 'logRequest', type: 'string' },
-        { name: 'detailShopInfo', type: 'string' },
         { name: 'detailProductNoIndex', type: 'string' },
-        { name: 'checkoutShopInfo', type: 'string' },
-        { name: 'exportDomain', type: 'string' },
-        { name: 'createCategoriesAutomatically', type: 'string' },
-        { name: 'activateProductsAutomatically', type: 'string' },
-        { name: 'createUnitsAutomatically', type: 'string' },
-        { name: 'showShippingCostsSeparately', type: 'string' }
+        { name: 'exportDomain', type: 'string' }
     ],
 
     proxy: {

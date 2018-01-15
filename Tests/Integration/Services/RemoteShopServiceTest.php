@@ -48,7 +48,7 @@ class RemoteShopServiceTest extends PHPUnit_Framework_TestCase
     public function test_isExceptionFatal_returns_true()
     {
         $fatalExceptionFromSDK = new RuntimeException(
-            "Some fatal exception from SDK"
+            'Some fatal exception from SDK'
         );
 
         $result = $this->remoteShopService->isExceptionFatal($fatalExceptionFromSDK);

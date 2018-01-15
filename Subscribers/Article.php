@@ -123,7 +123,7 @@ class Article implements SubscriberInterface
 
         if (!$this->helper->isRemoteArticleDetail($articleDetailId)) {
             return;
-        };
+        }
 
         $shopProductId = $this->helper->getShopProductId($articleDetailId);
         $shopId = $shopProductId->shopId;
@@ -269,7 +269,7 @@ class Article implements SubscriberInterface
                     return;
                 }
 
-                if (!$this->hasPriceType()) {
+                if (!SDK::isPriceTypeValid($this->sdk->getPriceType())) {
                     return;
                 }
 
@@ -463,7 +463,7 @@ class Article implements SubscriberInterface
             return;
         }
 
-        if (!$this->hasPriceType()) {
+        if (!SDK::isPriceTypeValid($this->sdk->getPriceType())) {
             return;
         }
 
@@ -656,20 +656,5 @@ class Article implements SubscriberInterface
             'SELECT shop_id FROM s_plugin_connect_items WHERE article_id = ? AND shop_id IS NOT NULL',
             [$articleId]
         );
-    }
-
-    /**
-     * @return bool
-     */
-    private function hasPriceType()
-    {
-        if ($this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_PURCHASE
-            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_RETAIL
-            || $this->sdk->getPriceType() === \Shopware\Connect\SDK::PRICE_TYPE_BOTH
-        ) {
-            return true;
-        }
-
-        return false;
     }
 }

@@ -96,8 +96,8 @@ class RemoteShopService
     }
 
     /**
-     * @return SnHttpClient
      * @throws \Exception
+     * @return SnHttpClient
      * @todo: refactor when using 5.2 plugin base.
      */
     private function getSnHttpClient()

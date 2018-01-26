@@ -36,8 +36,6 @@ class ProductTranslator implements ProductTranslatorInterface
 
     private $shopRepository;
 
-    private $localeRepository;
-
     public function __construct(
         Config $config,
         ProductTranslationsGateway $productTranslationsGateway,
@@ -74,13 +72,13 @@ class ProductTranslator implements ProductTranslatorInterface
                 continue;
             }
 
-            $localeCode = explode('_', $locale->getLocale());
-
-            if (count($localeCode) === 0) {
+            try {
+                $countryCode = $this->getCountryCode($locale->getLocale());
+            } catch (\RuntimeException $e) {
                 continue;
             }
 
-            $result[$localeCode[0]] = new Translation(
+            $result[$countryCode] = new Translation(
                 [
                     'title' => isset($translation['title']) ? $translation['title'] : '',
                     'shortDescription' => isset($translation['shortDescription']) ? $translation['shortDescription'] : '',
@@ -120,16 +118,17 @@ class ProductTranslator implements ProductTranslatorInterface
                 continue;
             }
 
-            $localeCode = explode('_', $locale->getLocale());
-            if (count($localeCode) === 0) {
+            try {
+                $countryCode = $this->getCountryCode($locale->getLocale());
+            } catch (\RuntimeException $e) {
                 continue;
             }
 
             $groupTranslation = isset($groupTranslations[$shopId]) ? $groupTranslations[$shopId] : '';
-            if (!array_key_exists($localeCode[0], $translations)) {
+            if (!array_key_exists($countryCode, $translations)) {
                 continue;
             }
-            $translationStruct = $translations[$localeCode[0]];
+            $translationStruct = $translations[$countryCode];
             if (!$translationStruct instanceof Translation) {
                 continue;
             }
@@ -161,13 +160,14 @@ class ProductTranslator implements ProductTranslatorInterface
                 continue;
             }
 
-            $localeCode = explode('_', $locale->getLocale());
-            if (count($localeCode) === 0) {
+            try {
+                $countryCode = $this->getCountryCode($locale->getLocale());
+            } catch (\RuntimeException $e) {
                 continue;
             }
 
             $optionTranslation = isset($optionTranslations[$shopId]) ? $optionTranslations[$shopId] : '';
-            $translationStruct = $translations[$localeCode[0]];
+            $translationStruct = $translations[$countryCode];
             if (!$translationStruct instanceof Translation) {
                 continue;
             }
@@ -222,5 +222,23 @@ class ProductTranslator implements ProductTranslatorInterface
         }
 
         return $this->shopRepository;
+    }
+
+    /**
+     * Extract country code from given locale.
+     * It must be in following format: de_DE, en_GB
+     *
+     * @param string $locale
+     * @throws \RuntimeException
+     * @return string
+     */
+    private function getCountryCode($locale)
+    {
+        $localeCode = explode('_', $locale);
+        if (count($localeCode) !== 2) {
+            throw new \RuntimeException('Invalid locale. It must be in format en_GB');
+        }
+
+        return strtolower($localeCode[1]);
     }
 }

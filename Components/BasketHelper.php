@@ -223,6 +223,7 @@ class BasketHelper
             $this->onlyConnectProducts = true;
 
             $this->removeNonProductsFromBasket();
+            $this->basket = $this->removeDefaultShipping($this->basket);
 
             $connectContent = $this->getConnectContent();
 
@@ -236,6 +237,39 @@ class BasketHelper
         }
 
         return false;
+    }
+
+    /**
+     * Remove shipping costs from given basket
+     *
+     * @param array $basket
+     * @return array
+     */
+    private function removeDefaultShipping(array $basket)
+    {
+        $basket['AmountNumeric'] -= $basket['sShippingcosts'];
+        $basket['AmountNetNumeric'] -= $basket['sShippingcostsNet'];
+
+        $basketHasTax = $this->hasTax();
+        if (!empty($this->basket['sAmountWithTax'])) {
+            if ($basketHasTax) {
+                $this->basket['sAmountWithTax'] -= $basket['sShippingcosts'];
+            } else {
+                $this->basket['sAmountWithTax'] -= $basket['sShippingcostsNet'];
+            }
+        }
+
+        if ($basketHasTax) {
+            $basket['sAmount'] -= $basket['sShippingcosts'];
+        } else {
+            $basket['sAmount'] -= $basket['sShippingcostsNet'];
+        }
+
+        $basket['sShippingcosts'] = 0;
+        $basket['sShippingcostsNet'] = 0;
+        $basket['sShippingcostsWithTax'] = 0;
+
+        return $basket;
     }
 
     /**
@@ -443,7 +477,7 @@ class BasketHelper
         /** @var \Shopware\Connect\Struct\Shipping $shipping */
         foreach ($this->checkResult->shippingCosts as $shipping) {
             $shopConfiguration = $this->connectGateway->getShopConfiguration($shipping->shopId);
-            if ($shopConfiguration->shippingCostType == 'remote') {
+            if ($shopConfiguration->importedProductsShippingCostType == 'remote') {
                 $shippingCostsNet += $shipping->shippingCosts;
                 $shippingCostsWithTax += $shipping->grossShippingCosts;
             }
@@ -466,8 +500,6 @@ class BasketHelper
         $this->basket['sShippingcostsNet'] += $shippingCostsNet;
         $this->basket['sShippingcostsWithTax'] += $shippingCostsWithTax;
 
-        // Update total amount
-        $this->basket['AmountNumeric'] += $shippingCostsNet;
         $this->basket['AmountNetNumeric'] += $shippingCostsNet;
 
         if (!empty($this->basket['sAmountWithTax'])) {
@@ -587,7 +619,6 @@ class BasketHelper
                 }
             }
         }
-
 
         return [
             'connectContent' => $this->getConnectContent(),

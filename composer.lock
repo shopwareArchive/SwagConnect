@@ -56,12 +56,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "898350be7d8f4cd95b1691f5a0adaea57f0ff4d4"
+                "reference": "1bc0bbd71476a62fed15fc7db40e4d94fab4cbf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/898350be7d8f4cd95b1691f5a0adaea57f0ff4d4",
-                "reference": "898350be7d8f4cd95b1691f5a0adaea57f0ff4d4",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/1bc0bbd71476a62fed15fc7db40e4d94fab4cbf9",
+                "reference": "1bc0bbd71476a62fed15fc7db40e4d94fab4cbf9",
                 "shasum": ""
             },
             "require-dev": {
@@ -82,10 +82,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.9",
+                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.11",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2018-01-02 13:01:09"
+            "time": "2018-01-18 07:00:51"
         }
     ],
     "packages-dev": [

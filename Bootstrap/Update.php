@@ -99,6 +99,7 @@ class Update
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
         $this->changeGroupNameImportSettings();
+        $this->addTriggerConfig();
 
         return true;
     }
@@ -635,6 +636,21 @@ class Update
             try {
                 $this->db->query('UPDATE `s_plugin_connect_config` SET `groupName` = "import" WHERE `groupName` = "general" AND `name` IN ("createCategoriesAutomatically", "activateProductsAutomatically", "createUnitsAutomatically",
                                             "detailShopInfo", "checkoutShopInfo", "showShippingCostsSeparately")');
+            } catch (\Exception $e) {
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function addTriggerConfig()
+    {
+        if (version_compare($this->version, '1.1.12', '<=')) {
+            try {
+                $this->db->query('INSERT INTO `s_plugin_connect_config` (`groupName`, `name`, `value`) VALUES ("export", "useTriggers", "0")');
             } catch (\Exception $e) {
                 $this->logger->write(
                     true,

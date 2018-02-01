@@ -211,7 +211,7 @@ class TriggerServiceTest extends \PHPUnit_Framework_TestCase
         $connection = Shopware()->Container()->get('dbal_connection');
         $this->assertArticleIsNotMarkedForUpdate($connection);
 
-        $connection->executeQuery('INSERT INTO s_articles_translations (articleID, languageID, `name`, keywords, description, description_long, description_clear, shippingtime, attr1, attr2, attr3, attr4, attr5) VALUES (1234, 2, "testTranslation is Awesome", "", "", "", "", "", "", "", "", "", "");');
+        $connection->executeQuery('INSERT INTO s_articles_translations (articleID, languageID, `name`, keywords, description, description_long, description_clear, attr1, attr2, attr3, attr4, attr5) VALUES (1234, 2, "testTranslation is Awesome", "", "", "", "", "", "", "", "", "");');
 
         $this->assertArticleIsMarkedForUpdate($connection);
     }

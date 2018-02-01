@@ -21,4 +21,4 @@ INSERT INTO s_articles_categories (articleID, categoryID) VALUES (1234, 2222);
 
 INSERT INTO s_articles_prices (articleID, articledetailsID, price, pricegroup, `from`, `to`) VALUES (1234, 7091846, 7.9, 1, 1, "beliebig");
 
-INSERT INTO s_articles_translations (articleID, languageID, `name`, keywords, description, description_long, description_clear, shippingtime, attr1, attr2, attr3, attr4, attr5) VALUES (1234, 1, "testTranslation", "", "", "", "", "", "", "", "", "", "");
+INSERT INTO s_articles_translations (articleID, languageID, `name`, keywords, description, description_long, description_clear, attr1, attr2, attr3, attr4, attr5) VALUES (1234, 1, "testTranslation", "", "", "", "", "", "", "", "", "");

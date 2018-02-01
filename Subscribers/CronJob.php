@@ -147,7 +147,7 @@ class CronJob implements SubscriberInterface
     public function updateProducts(\Shopware_Components_Cron_CronJob $job)
     {
         $sourceIds = Shopware()->Db()->fetchCol(
-            'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 LIMIT 100'
+            'SELECT source_id FROM s_plugin_connect_items WHERE shop_id IS NULL AND cron_update = 1 AND exported = 1 LIMIT 100'
         );
 
         if (empty($sourceIds)) {

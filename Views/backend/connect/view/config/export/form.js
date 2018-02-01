@@ -467,6 +467,16 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     createProductContainer: function () {
         var me = this;
 
+        var useTriggersCheckbox = Ext.create('Ext.form.field.Checkbox', {
+            xtype: 'checkbox',
+            fieldLabel: me.snippets.activateDBTriggers,
+            helpText:  me.snippets.hintActivateDBTriggers,
+            name: 'useTriggers',
+            inputValue: 1,
+            uncheckedValue: 0,
+            labelWidth: me.defaults.labelWidth
+        });
+
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.productSettingsLegend,
@@ -546,12 +556,12 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                                         );
                                                     }
                                                 });
-                                                Ext.getCmp('cbUseTriggers').setReadOnly(false);
-                                                Ext.getCmp('cbUseTriggers').removeCls("x-item-disabled");
+                                                useTriggersCheckbox.setReadOnly(false);
+                                                useTriggersCheckbox.removeCls("x-item-disabled");
                                             } else {
-                                                Ext.getCmp('cbUseTriggers').setValue(0);
-                                                Ext.getCmp('cbUseTriggers').setReadOnly(true);
-                                                Ext.getCmp('cbUseTriggers').addCls("x-item-disabled");
+                                                useTriggersCheckbox.setValue(0);
+                                                useTriggersCheckbox.setReadOnly(true);
+                                                useTriggersCheckbox.addCls("x-item-disabled");
                                             }
                                         }
                                     }
@@ -565,16 +575,7 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                     layout: 'anchor',
                     border: false,
                     items: [
-                        {
-                            xtype: 'checkbox',
-                            fieldLabel: me.snippets.activateDBTriggers,
-                            helpText:  me.snippets.hintActivateDBTriggers,
-                            id: 'cbUseTriggers',
-                            name: 'useTriggers',
-                            inputValue: 1,
-                            uncheckedValue: 0,
-                            labelWidth: me.defaults.labelWidth
-                        }
+                        useTriggersCheckbox
                     ]
                 })
             ]

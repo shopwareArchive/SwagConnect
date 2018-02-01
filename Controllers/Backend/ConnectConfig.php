@@ -58,11 +58,6 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     private $snHttpClient;
 
     /**
-     * @var \ShopwarePlugins\Connect\Components\TriggerService
-     */
-    private $triggerService;
-
-    /**
      * The getGeneralAction function is an ExtJs event listener method of the
      * connect module. The function is used to load store
      * required in the general config form.

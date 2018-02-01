@@ -33,6 +33,7 @@ class TriggerService
         $this->createTaxTrigger();
         $this->createCategoriesTrigger();
     }
+
     public function deactivateTriggers()
     {
         $this->connection->executeQuery('
@@ -60,7 +61,6 @@ class TriggerService
             DROP TRIGGER IF EXISTS connect_categories_trigger;  
         ');
     }
-
 
     private function createArticleTrigger()
     {

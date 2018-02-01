@@ -236,7 +236,7 @@ class Helper
         LEFT JOIN `s_articles_details` ad
         ON ad.id = bi.article_detail_id
 
-        WHERE ad.id IS NULL
+        WHERE ad.id IS NULL AND bi.cron_update = 0
         ';
 
         $this->manager->getConnection()->exec($sql);

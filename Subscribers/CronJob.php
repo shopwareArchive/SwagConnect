@@ -154,7 +154,7 @@ class CronJob implements SubscriberInterface
             return true;
         }
 
-        $this->connectExport->export($sourceIds);
+        $this->connectExport->processChanged($sourceIds);
 
         $quotedSourceIds = Shopware()->Db()->quote($sourceIds);
         Shopware()->Db()->query("

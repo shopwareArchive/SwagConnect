@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\CustomModels\Connect\Attribute;
 use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ErrorHandler;
@@ -102,5 +103,22 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(14467, $result->articles[0]['id']);
         $this->assertEquals(14471, $result->articles[4]['id']);
         $this->assertEquals(5, $result->count);
+    }
+
+    public function testProcessChanges()
+    {
+        $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_items`');
+        $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
+
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 7091852');
+
+        $this->connectExport->processChanged(['14470-7091852', '14470-7091851']);
+
+        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "14470-7091852"');
+        $this->assertEquals(Attribute::STATUS_DELETE, $status);
+
+        // No matter that it is error -> it says that ConnectExport->export() is called for this sourceId
+        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "14470-7091851"');
+        $this->assertEquals(Attribute::STATUS_ERROR, $status);
     }
 }

@@ -100,7 +100,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->any())->method('find')->willReturn($shop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -208,7 +208,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -233,7 +233,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -259,7 +259,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         // translate should be the same after group translation
         // when exportLanguages contains only default shop language
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -310,7 +310,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -332,7 +332,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -382,7 +382,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => [],
+            'gb' => [],
             'nl' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product NL',
@@ -397,7 +397,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => [],
+            'gb' => [],
             'nl' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product NL',
@@ -443,7 +443,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -465,7 +465,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -518,7 +518,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -543,7 +543,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -569,7 +569,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         // translate should be the same after group translation
         // when exportLanguages contains only default shop language
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -629,7 +629,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -651,7 +651,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => new Translation(
+            'gb' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product EN',
                     'shortDescription' => 'shopware Connect Local Product short description EN',
@@ -701,7 +701,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         $this->shopRepository->expects($this->at(1))->method('find')->with(3)->willReturn($nlShop);
 
         $expected = [
-            'en' => [],
+            'gb' => [],
             'nl' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product NL',
@@ -716,7 +716,7 @@ class ProductTranslatorTest extends ConnectTestHelper
         ];
 
         $translations = [
-            'en' => [],
+            'gb' => [],
             'nl' => new Translation(
                 [
                     'title' => 'shopware Connect Local Product NL',

@@ -269,7 +269,6 @@ class ConnectExport
         $this->export($updatedIds);
 
         foreach ($deleted as $sourceId) {
-            var_dump($sourceId);
             $this->recordDelete($sourceId);
         }
 

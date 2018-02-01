@@ -275,6 +275,9 @@ class TriggerServiceTest extends \PHPUnit_Framework_TestCase
 
     private function assertArticleIsMarkedForUpdate()
     {
+        $triggers = $this->connection->fetchAll('SHOW TRIGGERS');
+        $this->assertTrue(count($triggers) > 0);
+
         $cronUpdate = $this->connection->fetchColumn('SELECT cron_update FROM s_plugin_connect_items WHERE article_id = 1234');
         $this->assertEquals(1, $cronUpdate);
     }

@@ -135,6 +135,11 @@ Ext.define('Shopware.apps.Connect.controller.Main', {
     init: function () {
         var me = this;
 
+        Ext.Ajax.request({
+            url: '{url action=refreshConnectItems}',
+            method: 'POST'
+        });
+
         if (!window.marketplaceName) {
             me.sendAjaxRequest(
                 '{url controller=Connect action=initParams}',

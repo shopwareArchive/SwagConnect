@@ -162,8 +162,6 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
      */
     public function indexAction()
     {
-        $this->getHelper()->updateConnectProducts();
-
         parent::loadAction();
     }
 

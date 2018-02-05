@@ -99,6 +99,7 @@ class Update
         $this->addArticleRelationsTable();
         $this->addOverwriteMainImage();
         $this->changeGroupNameImportSettings();
+        $this->addArticleDetailsForeignKey();
         $this->addTriggerConfig();
 
         return true;
@@ -559,7 +560,7 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE');
             } catch (\Exception $e) {
-                // ignore it if exists
+              // ignore it if exists
               $this->logger->write(
                     true,
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
@@ -646,7 +647,25 @@ class Update
         }
     }
 
-    private function addTriggerConfig()
+    private function addArticleDetailsForeignKey()
+    {
+        if (version_compare($this->version, '1.1.12', '<=')) {
+            try {
+                $this->db->query('
+                ALTER TABLE s_plugin_connect_items
+                ADD FOREIGN KEY (`article_detail_id`) REFERENCES s_articles_details (id) ON DELETE SET NULL
+                ');
+            } catch (\Exception $e) {
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+	private function addTriggerConfig()
     {
         if (version_compare($this->version, '1.1.12', '<=')) {
             try {

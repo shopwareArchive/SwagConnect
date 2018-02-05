@@ -297,6 +297,7 @@ class Setup
              PRIMARY KEY (`id`),
              UNIQUE KEY `article_detail_id` (`article_detail_id`),
              KEY `article_id` (`article_id`),
+             CONSTRAINT s_plugin_connect_items_relations_fk_article_detail_id FOREIGN KEY (`article_detail_id`) REFERENCES s_articles_details (id) ON DELETE SET NULL,
              INDEX source_id (source_id, shop_id),
              INDEX group_id (group_id, shop_id),
              INDEX IDX_revision (revision),

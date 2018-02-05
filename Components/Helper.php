@@ -231,12 +231,8 @@ class Helper
 
         // Delete removed articles from s_plugin_connect_items
         $sql = '
-        DELETE bi FROM `s_plugin_connect_items`  bi
-
-        LEFT JOIN `s_articles_details` ad
-        ON ad.id = bi.article_detail_id
-
-        WHERE ad.id IS NULL AND NOT bi.cron_update <=> 1
+        DELETE FROM `s_plugin_connect_items` 
+        WHERE article_detail_id IS NULL AND NOT cron_update <=> 1
         ';
 
         $this->manager->getConnection()->exec($sql);

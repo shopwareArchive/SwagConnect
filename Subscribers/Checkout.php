@@ -580,13 +580,27 @@ class Checkout implements SubscriberInterface
 
         foreach ($checkResult->shippingCosts as $shipping) {
             if ($shipping->isShippable === false) {
-                $connectMessages[] = new Message([
-                    'message' => $namespace->get(
+                if (empty($shipping->messages)) {
+                    $connectMessages[] = new Message([
+                        'message' => $namespace->get(
                             'frontend_checkout_cart_connect_not_shippable',
                             'Ihre Bestellung kann nicht geliefert werden',
                             true
                         )
-                ]);
+                    ]);
+
+                    continue;
+                }
+
+                foreach ($shipping->messages as $message) {
+                    $connectMessages[] = new Message([
+                        'message' => $namespace->get(
+                            $message->message,
+                            $message->message
+                        ),
+                        'values' => $message->values
+                    ]);
+                }
             }
         }
 

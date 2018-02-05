@@ -44,8 +44,23 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 ('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message', 'Products of your order are out of stock in your order, delete this products in your order', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
 
 ('frontend/checkout/error_messages', 1, 1, 'connect_product_lower_stock_message', 'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/checkout/error_messages', 1, 2, 'connect_product_lower_stock_message', 'Availability of product "%product" changed to %availability', '2017-04-11 15:36:48', '2017-04-11 15:36:48')
+('frontend/checkout/error_messages', 1, 2, 'connect_product_lower_stock_message', 'Availability of product "%product" changed to %availability', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
 
+
+('frontend/checkout/connect', 1, 1, 'delivery_address_empty', 'Die Lieferadresse kann nicht leer sein', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'delivery_address_empty', 'Delivery address could not be empty', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+
+('frontend/checkout/connect', 1, 1, 'order_not_shippable_to_country', 'Die Bestellung kann nicht nach %country geliefert werden', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'order_not_shippable_to_country', 'Order could not be shipped to %country', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+
+('frontend/checkout/connect', 1, 1, 'default_shop_not_found', 'Standardshop konnte nicht gefunden werden', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'default_shop_not_found', 'Default shop could not be found', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+
+('frontend/checkout/connect', 1, 1, 'default_shipping_not_found', 'Standardversand konnte nicht gefunden werden', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'default_shipping_not_found', 'Default shipping could not be found', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+
+('frontend/checkout/connect', 1, 1, 'checkout_not_possible', 'Der Checkout ist zur Zeit nicht möglich, mögliche Gründe sind: Produkt ist inaktiv, entfernt oder ähnliches', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/connect', 1, 2, 'checkout_not_possible', 'Checkout is not possible at the moment possible reasons are: inactive product, removed product, etc.', '2017-04-11 15:36:48', '2017-04-11 15:36:48')
 
 ON DUPLICATE KEY UPDATE
   `namespace` = VALUES(`namespace`),

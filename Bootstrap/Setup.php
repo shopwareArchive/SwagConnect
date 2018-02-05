@@ -593,6 +593,7 @@ class Setup
             'detailShopInfo' => ['1', null, 'import'],
             'checkoutShopInfo' => ['1', null, 'import'],
             'longDescriptionField' => ['1', null, 'export'],
+            'useTriggers' => ['0', null, 'export'],
             'importImagesOnFirstImport' => ['1', null, 'import'],
             'autoUpdateProducts' => ['1', null, 'export'],
             'overwriteProductName' => ['1', null, 'import'],

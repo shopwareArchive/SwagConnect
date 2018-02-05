@@ -197,6 +197,39 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($configValue, $result[$configName]);
     }
 
+    public function testToggleTriggerConfig()
+    {
+        $manager = Shopware()->Models();
+
+        $data = [
+            [
+                'useTriggers' => 0
+            ]
+        ];
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $data = [
+            [
+                'useTriggers' => 1
+            ]
+        ];
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $triggers = $manager->getConnection()->fetchAll('SHOW TRIGGERS');
+
+        $this->assertTrue(count($triggers) > 0);
+
+        $data = [
+            [
+                'useTriggers' => 0
+            ]
+        ];
+        $this->getConfigComponent()->setExportConfigs($data);
+
+        $triggers = $manager->getConnection()->fetchAll('SHOW TRIGGERS');
+        $this->assertEquals([], $triggers);
+    }
+
     public function testSetExportConfigsActivatesUpdateProductsCronJob()
     {
         $manager = Shopware()->Models();

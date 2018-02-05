@@ -251,6 +251,33 @@ class ConnectExport
         return $this->errorHandler->getMessages();
     }
 
+    public function processChanged(array $ids)
+    {
+        $deleted = $this->manager->getConnection()->executeQuery('
+            SELECT ci.source_id
+            FROM s_plugin_connect_items AS ci
+            LEFT JOIN s_articles_details AS ad ON ad.id = ci.article_detail_id
+            WHERE ad.id IS NULL AND ci.source_id IN (?)',
+            [$ids],
+            [\Doctrine\DBAL\Connection::PARAM_STR_ARRAY])->fetchAll(\PDO::FETCH_COLUMN);
+
+        $updatedIds = array_diff($ids, $deleted);
+        if ($updatedIds === null)
+        {
+            $updatedIds = [];
+        }
+        $this->export($updatedIds);
+
+        foreach ($deleted as $sourceId) {
+            $this->recordDelete($sourceId);
+        }
+
+        $this->manager->getConnection()->executeQuery('
+            UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id IN (?)',
+            [Attribute::STATUS_DELETE, $deleted],
+            [\PDO::PARAM_STR, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+            );
+    }
     /**
      * Update connect attribute data
      *

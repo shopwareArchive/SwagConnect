@@ -77,7 +77,9 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
         no: '{s name=connect/no}Nein{/s}',
         edit: '{s name=connect/edit}Edit{/s}',
         excludeInactiveProducts: '{s name=config/export/exclude_inactive_products}Exclude inactive products from export{/s}',
-        purchasePriceHint: '{s name=export/price/purchase_price_hint}You have the option to export your purchase prices to connect and edit it there. They are only visible for you.{/s}'
+        purchasePriceHint: '{s name=export/price/purchase_price_hint}You have the option to export your purchase prices to connect and edit it there. They are only visible for you.{/s}',
+        activateDBTriggers: '{s name=config/export/activateDBTriggers}Activate Database Triggers{/s}',
+        hintActivateDBTriggers: '{s name=config/export/hintActivateDBTriggers}Activate this setting for Compatibility with other Plugins, like Import/Export. This only works if the above setting is to set to "Cronjob"{/s}'
     },
 
     initComponent: function () {
@@ -465,6 +467,16 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
     createProductContainer: function () {
         var me = this;
 
+        var useTriggersCheckbox = Ext.create('Ext.form.field.Checkbox', {
+            xtype: 'checkbox',
+            fieldLabel: me.snippets.activateDBTriggers,
+            helpText:  me.snippets.hintActivateDBTriggers,
+            name: 'useTriggers',
+            inputValue: 1,
+            uncheckedValue: 0,
+            labelWidth: me.defaults.labelWidth
+        });
+
         return Ext.create('Ext.form.FieldSet', {
             columnWidth: 1,
             title: me.snippets.productSettingsLegend,
@@ -544,12 +556,26 @@ Ext.define('Shopware.apps.Connect.view.config.export.Form', {
                                                         );
                                                     }
                                                 });
+                                                useTriggersCheckbox.setReadOnly(false);
+                                                useTriggersCheckbox.removeCls("x-item-disabled");
+                                            } else {
+                                                useTriggersCheckbox.setValue(0);
+                                                useTriggersCheckbox.setReadOnly(true);
+                                                useTriggersCheckbox.addCls("x-item-disabled");
                                             }
                                         }
                                     }
                                 }
                             ]
                         }
+                    ]
+                }),
+                Ext.create('Ext.container.Container', {
+                    columnWidth: 0.5,
+                    layout: 'anchor',
+                    border: false,
+                    items: [
+                        useTriggersCheckbox
                     ]
                 })
             ]

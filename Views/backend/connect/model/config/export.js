@@ -42,6 +42,7 @@ Ext.define('Shopware.apps.Connect.model.config.Export', {
         { name: 'priceFieldForPriceExport', type: 'string' },
         { name: 'priceGroupForPurchasePriceExport', type: 'string' },
         { name: 'priceFieldForPurchasePriceExport', type: 'string' },
+        { name: 'useTriggers', type: 'string' },
         { name: 'exportLanguages', type: 'array', defaultValue : new Array() },
         { name: 'exportPriceMode',
             type: 'array',

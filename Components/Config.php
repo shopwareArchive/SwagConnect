@@ -47,6 +47,10 @@ class Config
     private $configReader;
 
     /**
+     * @var TriggerService
+     */
+    private $triggerService;
+    /**
      * @param ModelManager $manager
      * @param CachedConfigReader $configReader
      */
@@ -431,10 +435,38 @@ class Config
                         $this->activateConnectCronJob('ShopwareConnectUpdateProducts', 0);
                     }
                 }
+                if ($key === 'useTriggers' && $this->hasTriggerConfigChanged($configValue)) {
+                    $this->processTriggerChange($configValue);
+                }
             }
         }
 
         $this->manager->flush();
+    }
+
+    /**
+     * @param string $configValue
+     */
+    private function processTriggerChange($configValue)
+    {
+        $triggerService = $this->getTriggerService();
+        if ($configValue == '1') {
+            $triggerService->activateTriggers();
+        } else {
+            $triggerService->deactivateTriggers();
+        }
+    }
+
+    /**
+     * @return \ShopwarePlugins\Connect\Components\TriggerService
+     */
+    private function getTriggerService()
+    {
+        if (!$this->triggerService) {
+            $this->triggerService = new \ShopwarePlugins\Connect\Components\TriggerService(Shopware()->Models()->getConnection());
+        }
+
+        return $this->triggerService;
     }
 
     /**
@@ -494,6 +526,22 @@ class Config
         } elseif ($currentConfig['priceFieldForPurchasePriceExport'] != $config['priceFieldForPurchasePriceExport']) {
             return true;
         } elseif ($currentConfig['exportPriceMode'] != $config['exportPriceMode']) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Compare given Trigger configuration
+     * and current Trigger configuration
+     * @param string $configValue
+     * @return bool
+     */
+    private function hasTriggerConfigChanged($configValue)
+    {
+        $currentConfig = $this->getExportConfig();
+        if (isset($currentConfig['useTriggers']) && $currentConfig['useTriggers'] != $configValue) {
             return true;
         }
 

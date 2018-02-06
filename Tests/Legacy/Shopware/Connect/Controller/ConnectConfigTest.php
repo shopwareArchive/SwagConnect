@@ -36,6 +36,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('detailShopInfo', '1', 'import'),
             ('checkoutShopInfo', '1', 'import'),
             ('$longDescription', '1', 'export'),
+            ('useTriggers', '0', 'export'),
             ('importImagesOnFirstImport', '0', 'import'),
             ('autoUpdateProducts', '1', 'export'),
             ('overwriteProductName', '1', 'import'),

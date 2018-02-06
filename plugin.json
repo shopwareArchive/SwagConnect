@@ -10,6 +10,7 @@
     "currentVersion": "1.1.12",
     "changelog": {
         "de": {
+            "1.1.12": "CON-4632 - Fix: Live-Shipping Abfrage; CON-5097 - Lock-wait Timeouts im Backend behoben; CON-5093 - Möglichkeit Dantenbank-Trigger zu benutzen für bessere Kompatibilität mit anderen Plugins; CON-5041 - exportierte Länder und Sprach-Codes wurden aktualisiert;",
             "1.1.11": "CON-5001 - Fix: Security check hinzugeügt, falls keine Artikel-Id übergeben wird, wenn ein Produkt dem Warenkorb hinzugefügt wurde; CON-4517 - alle Importeinstellung sind jetzt im Import-Tab; CON-4518 - Änderung in Artikelstammdaten-einstellungen; CON-4522 - DropShipping-Einstellung sind jetzt im Import-Tab;",
             "1.1.10": "CON-4908 - Benachrichtigung wenn Lieferant sein Plugin deaktiviert; CON-4973 - Unterkategorien von bereits zugewiesenen Kategorien werden erzeugt; CON-4878 - Fix: Timeout im Export-Fenster bei mehr als 1M Produkten;",
             "1.1.9": "CON-4964 - Fix: Timeout bei der Zuweisung großer Kategories; CON-4756 - Cross-Selling Produkte werden gesynct; CON-4896 - Usabilityverbesserungen bei Cronjobs, CON-4965 - Zuweisung von Kategorien beachten den Stream; CON-4967 - Vorschaubild wird synchronisiert; CON-4971 - Performanceverbesserungen im From Shop;",
@@ -27,6 +28,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.12": "CON-4632 - Fix: Live-Shipping request; CON-5097 - Fix: Lock-wait Timeouts in Backend; CON-5093 - Added Possibility to use Database Triggers, to improve compatibility with other Plugins; CON-5041 - exported Country and Language Codes updated;",
             "1.1.11": "CON-5001 - Fix: Security check added if no article id is passed when a product has been added to the cart; CON-4517 - all Import-settings are now in Import-tab; CON-4518 - Changes in product master data; CON-4522 - DropShipping-settings are now in Import-tab;",
             "1.1.10": "CON-4908 - Notification if Supplier deactivates Plugin; CON-4973 - Subcategories of assigned Categories are created; CON-4878 - Fix: Timeout in Export-Window with more than 1M products;",
             "1.1.9": "CON-4964 - Fix: Timeout when assigning big Categories; CON-4756 - Cross-Selling products get synced; CON-4896 - Usabilityimprovements for Cronjobs, CON-4965 - Catagory Assignment is aware of Streams; CON-4967 - Main image gets synced; CON-4971 - Performanceimprovements in From Shop;",

@@ -104,7 +104,7 @@ class Connect implements SubscriberInterface
             file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
         )[0];
 
-        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>' && $this->userHasPermissions())) {
+        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>') && $this->userHasPermissions()) {
             $view->falseVersionTitle = $snippets->get('info/new_version_header');
             $view->falseVersionMessage = $snippets->get('info/new_version_text');
             $view->extendsTemplate('backend/index/view/connect_menu.js');

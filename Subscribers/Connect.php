@@ -104,7 +104,7 @@ class Connect implements SubscriberInterface
             file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
         )[0];
 
-        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>')) {
+        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>' && $this->userHasPermissions())) {
             $view->falseVersionTitle = $snippets->get('info/new_version_header');
             $view->falseVersionMessage = $snippets->get('info/new_version_text');
             $view->extendsTemplate('backend/index/view/connect_menu.js');
@@ -153,5 +153,16 @@ class Connect implements SubscriberInterface
         $view->purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
 
         $view->extendsTemplate('backend/connect/menu_entry.tpl');
+    }
+
+    private function userHasPermissions()
+    {
+        // looks like this ignores the privilege
+        // but localy all privileges for pluginmanager were ignored e.g. i can open the pluginmanager if i don't have read rights
+        return Shopware()->Plugins()->Backend()->Auth()->isAllowed([
+            'privilege' => 'update',
+            'resource' => 'pluginmanager',
+            'role' => null
+        ]);
     }
 }

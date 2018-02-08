@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Tests\Functional\Subscribers;
 
 use Doctrine\DBAL\Connection;
+use ShopwarePlugins\Connect\Components\ConfigFactory;
 use ShopwarePlugins\Connect\Tests\TestClient;
 use ShopwarePlugins\Connect\Tests\WebTestCaseTrait;
 
@@ -142,5 +143,36 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEmpty($changes);
+    }
+
+    public function testRemoveExportedLanguageOnShopDelete()
+    {
+
+        /** @var TestClient $client */
+        $client = self::createBackendClient();
+
+        /** @var Connection $connection */
+        $connection = self::getDbalConnection();
+
+        $this->importFixturesFileOnce(__DIR__ . '/../_fixtures/shops.sql');
+        $configComponent = ConfigFactory::getConfigInstance();
+        $translationShops = array_map(function ($row) {
+            return $row['id'];
+        }, $connection
+            ->executeQuery('SELECT `id` FROM `s_core_shops` WHERE `name` = ? OR `name` = ?', ['Greek', 'Czech'])
+            ->fetchAll()
+        );
+        $this->assertCount(2, $translationShops);
+
+        $configComponent->setConfig('exportLanguages', $translationShops);
+
+        $this->assertSame($translationShops, $configComponent->getConfig('exportLanguages'));
+
+        $client->request('POST', 'backend/Config/deleteValues?_repositoryClass=shop', ['id' => $translationShops[0]]);
+
+        $responseData = $this->handleJsonResponse($client->getResponse());
+
+        $this->assertTrue($responseData['success']);
+        $this->assertSame([$translationShops[1]], $configComponent->getConfig('exportLanguages'));
     }
 }

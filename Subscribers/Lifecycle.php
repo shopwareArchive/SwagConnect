@@ -351,14 +351,16 @@ class Lifecycle implements SubscriberInterface
         /** @var \Shopware\Models\Shop\Shop $shop */
         $shop = $eventArgs->get('entity');
         $shopId = $shop->getId();
+
         $exportLanguages = $this->config->getConfig('exportLanguages');
         $exportLanguages = $exportLanguages ?: [];
 
-        if (!in_array($shopId, $exportLanguages)) {
+        $shopIndex = array_search($shopId, $exportLanguages);
+        if (false === $shopIndex) {
             return;
         }
 
-        $exportLanguages = array_splice($exportLanguages, array_search($shopId, $exportLanguages), 1);
+        array_splice($exportLanguages, $shopIndex, 1);
         $this->config->setConfig('exportLanguages', $exportLanguages, null, 'export');
     }
 

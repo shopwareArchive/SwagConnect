@@ -22,6 +22,8 @@ use Shopware\Connect\Struct\Product;
  */
 class BasketHelper
 {
+    const REMOTE_SHIPPING = 'remote';
+
     /**
      * The basket array decorated by this class
      * @var array
@@ -223,9 +225,11 @@ class BasketHelper
             $this->onlyConnectProducts = true;
 
             $this->removeNonProductsFromBasket();
-            $this->basket = $this->removeDefaultShipping($this->basket);
 
             $connectContent = $this->getConnectContent();
+            if (false === $this->customerHasToPayLocalShipping($connectContent)) {
+                $this->basket = $this->removeDefaultShipping($this->basket);
+            }
 
             // Make the first connect shop the default basket-content
             reset($connectContent);
@@ -237,6 +241,33 @@ class BasketHelper
         }
 
         return false;
+    }
+
+    /**
+     * Verifies that some of suppliers as shippingCosts type
+     * different from "remote". Then endcustomer must pay
+     * merchant shipping costs
+     *
+     * @param array $connectContent
+     * @return bool
+     */
+    private function customerHasToPayLocalShipping(array $connectContent)
+    {
+        $useLocalShipping = false;
+
+        foreach (array_keys($connectContent) as $shopId) {
+            $shopConfiguration = $this->connectGateway->getShopConfiguration($shopId);
+            if ($shopConfiguration === null) {
+                continue;
+            }
+
+            if ($shopConfiguration->importedProductsShippingCostType != self::REMOTE_SHIPPING) {
+                $useLocalShipping = true;
+                break;
+            }
+        }
+
+        return $useLocalShipping;
     }
 
     /**
@@ -477,7 +508,7 @@ class BasketHelper
         /** @var \Shopware\Connect\Struct\Shipping $shipping */
         foreach ($this->checkResult->shippingCosts as $shipping) {
             $shopConfiguration = $this->connectGateway->getShopConfiguration($shipping->shopId);
-            if ($shopConfiguration->importedProductsShippingCostType == 'remote') {
+            if ($shopConfiguration->importedProductsShippingCostType == self::REMOTE_SHIPPING) {
                 $shippingCostsNet += $shipping->shippingCosts;
                 $shippingCostsWithTax += $shipping->grossShippingCosts;
             }

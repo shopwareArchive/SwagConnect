@@ -227,7 +227,7 @@ class BasketHelper
             $this->removeNonProductsFromBasket();
 
             $connectContent = $this->getConnectContent();
-            if (false === $this->customerHasToPayLocalShipping($connectContent)) {
+            if ($this->customerHasToPayLocalShipping($connectContent) === false) {
                 $this->basket = $this->removeDefaultShipping($this->basket);
             }
 

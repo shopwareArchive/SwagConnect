@@ -209,14 +209,13 @@ class Checkout implements SubscriberInterface
 
             foreach ($this->basketHelper->getConnectProducts() as $shopId => $products) {
                 $products = $this->helper->prepareConnectUnit($products);
-                $allProducts = array_merge($allProducts, $products);
-                // add order items in connect order
-                $order->orderItems = array_map(function (Product $product) {
-                    return new OrderItem([
+                foreach ($products as $product) {
+                    $allProducts[] = $product;
+                    $order->orderItems[] = new OrderItem([
                         'product' => $product,
                         'count' => $this->basketHelper->getQuantityForProduct($product),
                     ]);
-                }, $products);
+                }
             }
 
             $this->eventManager->notify(

@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.13",
+    "currentVersion": "1.1.14",
     "changelog": {
         "de": {
+            "1.1.14": "CON-5125 - Kompatibilität zu Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: eigene Berechnung für Versandkosten wird korrekt angezeigt; CON-5114 - Fix: Versandkosten für mehrere Lieferanten werden korrekt im Warenkorb angezeigt; CON-5096 - Fix: Connect Update Dialog wird nur Nutzern mit Rechten angezeigt;",
             "1.1.12": "CON-4632 - Fix: Live-Shipping Abfrage; CON-5097 - Lock-wait Timeouts im Backend behoben; CON-5093 - Möglichkeit Dantenbank-Trigger zu benutzen für bessere Kompatibilität mit anderen Plugins; CON-5041 - exportierte Länder und Sprach-Codes wurden aktualisiert;",
             "1.1.11": "CON-5001 - Fix: Security check hinzugeügt, falls keine Artikel-Id übergeben wird, wenn ein Produkt dem Warenkorb hinzugefügt wurde; CON-4517 - alle Importeinstellung sind jetzt im Import-Tab; CON-4518 - Änderung in Artikelstammdaten-einstellungen; CON-4522 - DropShipping-Einstellung sind jetzt im Import-Tab;",
@@ -29,6 +30,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.14": "CON-5125 - Compatibilitiy for Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: Own calculation for shipping costs gets correctly shown; CON-5114 - Fix: Shipping costs for multiple suppliers in basket is showed correctly; CON-5096 - Fix: Connect update dialog only visible for users with permissions;",
             "1.1.12": "CON-4632 - Fix: Live-Shipping request; CON-5097 - Fix: Lock-wait Timeouts in Backend; CON-5093 - Added Possibility to use Database Triggers, to improve compatibility with other Plugins; CON-5041 - exported Country and Language Codes updated;",
             "1.1.11": "CON-5001 - Fix: Security check added if no article id is passed when a product has been added to the cart; CON-4517 - all Import-settings are now in Import-tab; CON-4518 - Changes in product master data; CON-4522 - DropShipping-settings are now in Import-tab;",
@@ -50,7 +52,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.3.7",
+        "maximumVersion": "5.4.0",
         "blacklist": []
     }
 }

@@ -480,7 +480,11 @@ class ProductToShop implements ProductToShopBase
     {
         $detail = new DetailModel();
         $detail->setActive($model->getActive());
-        $detail->setLastStock($product->lastStock);
+        try {
+            $detail->setLastStock($product->lastStock);
+        } catch (\Throwable $e) {
+            //added and needed for SW 5.4
+        }
         $this->manager->persist($detail);
         $detail->setArticle($model);
         $model->getDetails()->add($detail);

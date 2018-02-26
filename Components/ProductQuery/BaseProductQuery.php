@@ -255,7 +255,8 @@ abstract class BaseProductQuery
         if (isset($row['detailKind']) && $row['detailKind'] == 1) {
             $relatedArticleIds = $this->manager->getConnection()->executeQuery(
                 'SELECT relatedarticle FROM s_articles_relationships WHERE articleID = ?',
-                [$row['localId']])->fetchAll(\PDO::FETCH_COLUMN);
+                [$row['localId']]
+            )->fetchAll(\PDO::FETCH_COLUMN);
 
             if ($relatedArticleIds) {
                 $row['related'] = $relatedArticleIds;
@@ -263,7 +264,8 @@ abstract class BaseProductQuery
 
             $similarArticleIds = $this->manager->getConnection()->executeQuery(
                 'SELECT relatedarticle FROM s_articles_similar WHERE articleID = ?',
-                [$row['localId']])->fetchAll(\PDO::FETCH_COLUMN);
+                [$row['localId']]
+            )->fetchAll(\PDO::FETCH_COLUMN);
 
             if ($similarArticleIds) {
                 $row['similar'] = $similarArticleIds;

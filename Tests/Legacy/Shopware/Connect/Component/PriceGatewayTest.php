@@ -50,7 +50,8 @@ class PriceGatewayTest extends ConnectTestHelper
             Shopware()->Db()->executeQuery(
                 'INSERT INTO `s_articles_prices`(
               `pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`
-              ) VALUES ("EK", 1, "beliebig", ?, ?, 50)', [$record['articleId'], $record['detailId']]
+              ) VALUES ("EK", 1, "beliebig", ?, ?, 50)',
+                [$record['articleId'], $record['detailId']]
             );
         }
 

@@ -210,12 +210,13 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
      */
     public function addGroupTranslation($translation, $groupId, $shopId)
     {
-        $this->db->query('
-                INSERT IGNORE INTO `s_core_translations`
+        $this->db->query(
+            'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', ['configuratorgroup', serialize(['name' => $translation]), $groupId, $shopId]
+                ',
+            ['configuratorgroup', serialize(['name' => $translation]), $groupId, $shopId]
         );
     }
 
@@ -224,12 +225,13 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
      */
     public function addOptionTranslation($translation, $optionId, $shopId)
     {
-        $this->db->query('
-                INSERT IGNORE INTO `s_core_translations`
+        $this->db->query(
+            'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', ['configuratoroption', serialize(['name' => $translation]), $optionId, $shopId]
+                ',
+            ['configuratoroption', serialize(['name' => $translation]), $optionId, $shopId]
         );
     }
 
@@ -250,12 +252,13 @@ class PdoProductTranslationsGateway implements ProductTranslationsGateway
             $objectData[self::CONNECT_DESCRIPTION] = $translation->additionalDescription;
         }
 
-        $this->db->query('
-                INSERT IGNORE INTO `s_core_translations`
+        $this->db->query(
+            'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
-                ', ['article', serialize($objectData), $articleId, $shopId]
+                ',
+            ['article', serialize($objectData), $articleId, $shopId]
         );
     }
 }

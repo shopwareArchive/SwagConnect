@@ -99,7 +99,8 @@ class SDKTest extends ConnectTestHelper
                         'purchasePrice' => $purchasePrice,
                         'purchasePriceHash' => hash_hmac(
                             'sha256',
-                            sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+                            sprintf('%.3F %d', $purchasePrice, $offerValidUntil),
+                            '54642546-0001-48ee-b4d0-4f54af66d822'
                         ),
                         'offerValidUntil' => $offerValidUntil,
                         'availability' => 100,

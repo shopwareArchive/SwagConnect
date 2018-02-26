@@ -496,15 +496,19 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertCount(1, $connectItems);
 
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $localCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$localCategoryId, 1]
         );
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_categories (articleID, categoryID) VALUES (?, ?)',
-            [$articleId, $localCategoryId]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_articles_categories (articleID, categoryID) VALUES (?, ?)',
+            [$articleId, $localCategoryId]
+        );
 
         $this->productToShop->delete($product->shopId, $product->sourceId);
 
@@ -519,12 +523,14 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(0, $articleCount);
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [$articleId, $localCategoryId]
         );
         $this->assertFalse($categoryAssignment);
 
-        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $localCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$localCategoryId]
         );
         $this->assertFalse($localCategory);
@@ -549,8 +555,10 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
             'SELECT article_id FROM s_plugin_connect_items WHERE source_id = ? AND shop_id = ?',
             [$variants[0]->sourceId, $variants[0]->shopId]
         );
-        $configuratorSetId = $this->manager->getConnection()->fetchColumn('SELECT configurator_set_id FROM s_articles WHERE id = ?',
-            [$articleId]);
+        $configuratorSetId = $this->manager->getConnection()->fetchColumn(
+            'SELECT configurator_set_id FROM s_articles WHERE id = ?',
+            [$articleId]
+        );
         $this->assertNull($configuratorSetId);
     }
 
@@ -633,7 +641,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
     public function test_existing_vat()
     {
-        $expectedTaxId = $this->manager->getConnection()->fetchColumn('
+        $expectedTaxId = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT id FROM s_core_tax WHERE tax = 7.00'
         );
         $product = $this->getProduct();
@@ -641,7 +650,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->productToShop->insertOrUpdate($product);
 
-        $actualTaxId = $this->manager->getConnection()->fetchColumn('
+        $actualTaxId = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT s_articles.taxID 
             FROM s_articles
             JOIN s_plugin_connect_items ON s_articles.id = s_plugin_connect_items.article_id
@@ -654,7 +664,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
     public function test_not_existing_vat()
     {
-        $notExisting = $this->manager->getConnection()->fetchColumn('
+        $notExisting = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT id FROM s_core_tax WHERE tax = 0.00'
         );
         //assert that tax is really not existing
@@ -665,13 +676,15 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->productToShop->insertOrUpdate($product);
 
-        $existing = $this->manager->getConnection()->fetchColumn('
+        $existing = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT id FROM s_core_tax WHERE tax = 0.00'
         );
         //assert that tax is now existing
         $this->assertNotEmpty($existing);
 
-        $actualTaxId = $this->manager->getConnection()->fetchColumn('
+        $actualTaxId = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT s_articles.taxID 
             FROM s_articles
             JOIN s_plugin_connect_items ON s_articles.id = s_plugin_connect_items.article_id
@@ -695,37 +708,55 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->productToShop->insertOrUpdate($product);
 
-        $insertedArticleId = $this->manager->getConnection()->fetchColumn('SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
-            [$product->shopId, $product->sourceId]);
+        $insertedArticleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
+            [$product->shopId, $product->sourceId]
+        );
         $this->assertNotFalse($insertedArticleId);
 
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 1234, ProductToShop::RELATION_TYPE_SIMILAR]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 1234, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
         $this->assertNotFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 4321, ProductToShop::RELATION_TYPE_RELATED]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 4321, ProductToShop::RELATION_TYPE_RELATED]
+        );
         $this->assertNotFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 9876, ProductToShop::RELATION_TYPE_RELATED]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 9876, ProductToShop::RELATION_TYPE_RELATED]
+        );
         $this->assertNotFalse($id);
 
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 4444]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 4444]
+        );
         $this->assertNotFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 5555]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 5555]
+        );
         $this->assertNotFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 7777]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 7777]
+        );
         $this->assertFalse($id);
     }
 
     public function test_storesCrossSellingInfosOnInverseSide()
     {
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
-            [12, 42, 1111, ProductToShop::RELATION_TYPE_RELATED]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
-            [12, 42, 1111, ProductToShop::RELATION_TYPE_SIMILAR]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+            [12, 42, 1111, ProductToShop::RELATION_TYPE_RELATED]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+            [12, 42, 1111, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
 
         $product = $this->getProduct();
         $product->shopId = 42;
@@ -733,15 +764,21 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->productToShop->insertOrUpdate($product);
 
-        $insertedArticleId = $this->manager->getConnection()->fetchColumn('SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
-            [$product->shopId, $product->sourceId]);
+        $insertedArticleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
+            [$product->shopId, $product->sourceId]
+        );
         $this->assertNotFalse($insertedArticleId);
 
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
-            [12, $insertedArticleId]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
+            [12, $insertedArticleId]
+        );
         $this->assertNotFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
-            [12, $insertedArticleId]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
+            [12, $insertedArticleId]
+        );
         $this->assertNotFalse($id);
     }
 
@@ -751,19 +788,31 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, source_id) VALUES (11, 42, 2222)');
         $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, source_id) VALUES (12, 42, 3333)');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
-            [10, 42, 3333, ProductToShop::RELATION_TYPE_RELATED]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
-            [10, 42, 3333, ProductToShop::RELATION_TYPE_SIMILAR]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
-            [10, 42, 2222, ProductToShop::RELATION_TYPE_SIMILAR]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+            [10, 42, 3333, ProductToShop::RELATION_TYPE_RELATED]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+            [10, 42, 3333, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_article_relations (article_id, shop_id, related_article_local_id, relationship_type) VALUES (?, ?, ?, ?)',
+            [10, 42, 2222, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_relationships (articleID, relatedarticle) VALUES (?, ?)',
-            [10, 12]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (?, ?)',
-            [10, 12]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (?, ?)',
-            [10, 11]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_articles_relationships (articleID, relatedarticle) VALUES (?, ?)',
+            [10, 12]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (?, ?)',
+            [10, 12]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_articles_similar (articleID, relatedarticle) VALUES (?, ?)',
+            [10, 11]
+        );
 
 
         $product = $this->getProduct();
@@ -774,28 +823,42 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $this->productToShop->insertOrUpdate($product);
 
-        $insertedArticleId = $this->manager->getConnection()->fetchColumn('SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
-            [$product->shopId, $product->sourceId]);
+        $insertedArticleId = $this->manager->getConnection()->fetchColumn(
+            'SELECT article_id FROM s_plugin_connect_items WHERE shop_id = ? AND source_id = ?',
+            [$product->shopId, $product->sourceId]
+        );
         $this->assertNotFalse($insertedArticleId);
 
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 3333, ProductToShop::RELATION_TYPE_SIMILAR]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 3333, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
         $this->assertFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 3333, ProductToShop::RELATION_TYPE_RELATED]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 3333, ProductToShop::RELATION_TYPE_RELATED]
+        );
         $this->assertFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
-            [$product->shopId, $insertedArticleId, 2222, ProductToShop::RELATION_TYPE_SIMILAR]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_article_relations WHERE shop_id = ? AND article_id = ? AND related_article_local_id = ? AND relationship_type = ?',
+            [$product->shopId, $insertedArticleId, 2222, ProductToShop::RELATION_TYPE_SIMILAR]
+        );
         $this->assertNotFalse($id);
 
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 12]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 12]
+        );
         $this->assertFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 12]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_relationships WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 12]
+        );
         $this->assertFalse($id);
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
-            [$insertedArticleId, 11]);
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_similar WHERE articleID = ? AND relatedarticle = ?',
+            [$insertedArticleId, 11]
+        );
         $this->assertNotFalse($id);
     }
 
@@ -803,7 +866,8 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_item_with_two_categories.sql');
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [1234, 3333]
         );
         $this->assertNotFalse($categoryAssignment);
@@ -824,30 +888,36 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(1, $articleCount);
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [1234, 4444]
         );
         $this->assertFalse($categoryAssignment);
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [1234, 2222]
         );
         $this->assertFalse($categoryAssignment);
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [1234, 3333]
         );
         $this->assertNotFalse($categoryAssignment);
 
-        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $localCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [4444]
         );
         $this->assertFalse($localCategory);
-        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $localCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [2222]
         );
         $this->assertNotFalse($localCategory);
-        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $localCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [3333]
         );
         $this->assertNotFalse($localCategory);

@@ -4,7 +4,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 use ShopwarePlugins\Connect\Components\ImageImport;
 use Shopware\Models\Article\Price;
 
@@ -104,7 +103,8 @@ class Shopware_Controllers_Backend_LastChanges extends \Shopware_Controllers_Bac
                 $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
                 if (isset($lastUpdate['image'][0])) {
                     $this->getImageImport()->importMainImage(
-                        $lastUpdate['image'][0], $article->getId()
+                        $lastUpdate['image'][0],
+                        $article->getId()
                     );
                 }
                 break;

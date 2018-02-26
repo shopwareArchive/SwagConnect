@@ -51,7 +51,8 @@ class DisableConnectInFrontendTest extends \PHPUnit_Framework_TestCase
         /** @var Connection $connection */
         $connection = Shopware()->Container()->get('dbal_connection');
         $connection->executeQuery(
-            'INSERT INTO s_plugin_connect_items (article_id, purchase_price_hash, offer_valid_until, stream, shop_id) VALUES (?, "hash", 123, 1, 1)', [ self::SPACHTELMASSE_ARTICLE_ID]
+            'INSERT INTO s_plugin_connect_items (article_id, purchase_price_hash, offer_valid_until, stream, shop_id) VALUES (?, "hash", 123, 1, 1)',
+            [ self::SPACHTELMASSE_ARTICLE_ID]
         );
 
         $subscriber = new DisableConnectInFrontend(Shopware()->Container()->get('db'));

@@ -275,31 +275,37 @@ abstract class CategoryResolver
      */
     private function checkAndCreateLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream)
     {
-        $id = $this->manager->getConnection()->fetchColumn('SELECT `s_categories`.`id` 
+        $id = $this->manager->getConnection()->fetchColumn(
+            'SELECT `s_categories`.`id` 
             FROM `s_categories`
             JOIN `s_categories_attributes` ON s_categories.id = s_categories_attributes.categoryID
             WHERE s_categories.`parent` = :parentId AND s_categories.`description` = :description AND s_categories_attributes.connect_imported_category = 1',
-            [':parentId' => $parentId, ':description' => $categoryName]);
+            [':parentId' => $parentId, ':description' => $categoryName]
+        );
 
         if (!$id) {
             return $this->createLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream);
         }
 
-        $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT ctlc.remote_category_id
+        $remoteCategoryId = $this->manager->getConnection()->fetchColumn(
+            'SELECT ctlc.remote_category_id
              FROM s_plugin_connect_categories_to_local_categories AS ctlc
              JOIN s_plugin_connect_categories AS cc ON cc.id = ctlc.remote_category_id
              WHERE cc.category_key = ? AND cc.shop_id = ? AND ctlc.stream = ?',
-            [$categoryKey, $shopId, $stream]);
+            [$categoryKey, $shopId, $stream]
+        );
 
         //create entry in connect_categories_to_local_categories for the given stream -> for "merging" when assigning an other stream to the same category
         if (!$remoteCategoryId) {
-            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id, stream)
+            $this->manager->getConnection()->executeQuery(
+                'INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id, stream)
                 VALUES (
                     (SELECT id FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?),
                     ?,
                     ?
                 )',
-                [$categoryKey, $shopId, $id, $stream]);
+                [$categoryKey, $shopId, $id, $stream]
+            );
         }
 
         return $id;
@@ -315,30 +321,40 @@ abstract class CategoryResolver
      */
     public function createLocalCategory($categoryName, $categoryKey, $parentId, $shopId, $stream)
     {
-        $path = $this->manager->getConnection()->fetchColumn('SELECT `path` 
+        $path = $this->manager->getConnection()->fetchColumn(
+            'SELECT `path` 
             FROM `s_categories`
             WHERE `id` = ?',
-            [$parentId]);
+            [$parentId]
+        );
         $suffix = ($path) ? "$parentId|" : "|$parentId|";
         $path = $path . $suffix;
         $now = new \DateTime('now');
         $timestamp = $now->format('Y-m-d H:i:s');
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`, `added`, `changed`) 
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO `s_categories` (`description`, `parent`, `path`, `active`, `added`, `changed`) 
             VALUES (?, ?, ?, 1, ?, ?)',
-            [$categoryName, $parentId, $path, $timestamp, $timestamp]);
+            [$categoryName, $parentId, $path, $timestamp, $timestamp]
+        );
         $localCategoryId = $this->manager->getConnection()->fetchColumn('SELECT LAST_INSERT_ID()');
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) 
             VALUES (?, 1)',
-            [$localCategoryId]);
+            [$localCategoryId]
+        );
 
-        $remoteCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` 
+        $remoteCategoryId = $this->manager->getConnection()->fetchColumn(
+            'SELECT `id` 
             FROM `s_plugin_connect_categories`
             WHERE `category_key` = ? AND `shop_id` = ?',
-            [$categoryKey, $shopId]);
-        $this->manager->getConnection()->executeQuery('INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`, `stream`) 
+            [$categoryKey, $shopId]
+        );
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO `s_plugin_connect_categories_to_local_categories` (`remote_category_id`, `local_category_id`, `stream`) 
             VALUES (?, ?, ?)',
-            [$remoteCategoryId, $localCategoryId, $stream]);
+            [$remoteCategoryId, $localCategoryId, $stream]
+        );
 
         return $localCategoryId;
     }

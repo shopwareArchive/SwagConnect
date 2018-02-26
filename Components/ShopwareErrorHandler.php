@@ -30,7 +30,10 @@ class ShopwareErrorHandler extends ErrorHandler
      */
     public function handleError(Error $error)
     {
-        $this->logger->write(true, null, sprintf(
+        $this->logger->write(
+            true,
+            null,
+            sprintf(
                 "%s \n\n %s",
                 $error->message,
                 $error->debugText

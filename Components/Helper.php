@@ -819,34 +819,42 @@ class Helper
      */
     public function recreateConnectCategories($offset, $batchsize)
     {
-        $result = $this->manager->getConnection()->executeQuery('SELECT `article_id`, `category`, `shop_id` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
+        $result = $this->manager->getConnection()->executeQuery(
+            'SELECT `article_id`, `category`, `shop_id` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
             [$batchsize, $offset],
             [\PDO::PARAM_INT, \PDO::PARAM_INT]
         );
 
         while ($row = $result->fetch()) {
             $categories = json_decode($row['category'], true);
-            $countAssignedCategories = $this->manager->getConnection()->executeQuery('SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
+            $countAssignedCategories = $this->manager->getConnection()->executeQuery(
+                'SELECT COUNT(`connect_category_id`) AS categories_count FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
                 [$row['article_id']]
             )->fetchColumn();
 
             if (count($categories) != $countAssignedCategories) {
                 $shopId = $row['shop_id'];
                 foreach ($categories as $categoryKey => $category) {
-                    $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
-                        [$categoryKey, $shopId]);
+                    $selectedCategory = $this->manager->getConnection()->executeQuery(
+                        'SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
+                        [$categoryKey, $shopId]
+                    );
                     if (!($res = $selectedCategory->fetch())) {
-                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
-                            [$categoryKey, $category, $shopId]);
+                        $this->manager->getConnection()->executeQuery(
+                            'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
+                            [$categoryKey, $category, $shopId]
+                        );
                         $categoryId = (int) $this->manager->getConnection()->lastInsertId();
                     } else {
                         $categoryId = (int) $res['id'];
                     }
-                    $selectedProductToCategory = $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
+                    $selectedProductToCategory = $this->manager->getConnection()->executeQuery(
+                        'SELECT COUNT(*) FROM s_plugin_connect_product_to_categories WHERE connect_category_id = ? AND articleID = ?',
                         [$categoryId, (int) $row['article_id']]
                     )->fetchColumn();
                     if ((int) $selectedProductToCategory === 0) {
-                        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
+                        $this->manager->getConnection()->executeQuery(
+                            'INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (?, ?)',
                             [$categoryId, (int) $row['article_id']]
                             );
                     }
@@ -880,14 +888,16 @@ class Helper
      */
     public function addShopIdToConnectCategories($offset, $batchsize)
     {
-        $result = $this->manager->getConnection()->executeQuery('SELECT `article_id`, `category`, `shop_id` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
+        $result = $this->manager->getConnection()->executeQuery(
+            'SELECT `article_id`, `category`, `shop_id` FROM `s_plugin_connect_items` WHERE shop_id IS NOT NULL GROUP BY `article_id` ORDER BY `id` LIMIT ? OFFSET ?',
             [$batchsize, $offset],
             [\PDO::PARAM_INT, \PDO::PARAM_INT]
         );
 
         while ($row = $result->fetch()) {
             $categories = json_decode($row['category'], true);
-            $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM s_plugin_connect_product_to_categories WHERE articleID = ?',
                 [$row['article_id']]
             );
 
@@ -912,14 +922,17 @@ class Helper
      */
     private function addShopIdToConnectCategory($categoryKey, $shopId, $category, $row)
     {
-        $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
-            [$categoryKey, $shopId]);
+        $selectedCategory = $this->manager->getConnection()->executeQuery(
+            'SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id = ?',
+            [$categoryKey, $shopId]
+        );
         if (!($res = $selectedCategory->fetch())) {
             $categoryId = $this->createCategoryWithShopId($categoryKey, $shopId, $category);
         } else {
             $categoryId = (int) $res['id'];
         }
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id) VALUES (?, ?)',
             [$row['article_id'], $categoryId]
         );
     }
@@ -932,19 +945,25 @@ class Helper
      */
     private function createCategoryWithShopId($categoryKey, $shopId, $category)
     {
-        $selectedCategory = $this->manager->getConnection()->executeQuery('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id IS NULL',
-            [$categoryKey]);
+        $selectedCategory = $this->manager->getConnection()->executeQuery(
+            'SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND shop_id IS NULL',
+            [$categoryKey]
+        );
         if (!($res = $selectedCategory->fetch())) {
-            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
-                [$categoryKey, $category, $shopId]);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
+                [$categoryKey, $category, $shopId]
+            );
             $createdCategoryId = (int) $this->manager->getConnection()->lastInsertId();
             $this->assignLocalCategories($createdCategoryId, $categoryKey);
 
             return $createdCategoryId;
         }
 
-        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_categories SET shop_id = ? WHERE id = ?',
-            [$shopId, $res['id']]);
+        $this->manager->getConnection()->executeQuery(
+            'UPDATE s_plugin_connect_categories SET shop_id = ? WHERE id = ?',
+            [$shopId, $res['id']]
+        );
 
         return (int) $res['id'];
     }
@@ -955,14 +974,20 @@ class Helper
      */
     private function assignLocalCategories($createdCategoryId, $categoryKey)
     {
-        $originalCategoryId = $this->manager->getConnection()->fetchColumn('SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND id <> ?',
-            [$categoryKey, $createdCategoryId]);
-        $localCategories = $this->manager->getConnection()->executeQuery('SELECT `local_category_id` FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = ?',
-            [$originalCategoryId])->fetchAll(\PDO::FETCH_COLUMN);
+        $originalCategoryId = $this->manager->getConnection()->fetchColumn(
+            'SELECT `id` FROM s_plugin_connect_categories WHERE category_key = ? AND id <> ?',
+            [$categoryKey, $createdCategoryId]
+        );
+        $localCategories = $this->manager->getConnection()->executeQuery(
+            'SELECT `local_category_id` FROM s_plugin_connect_categories_to_local_categories WHERE remote_category_id = ?',
+            [$originalCategoryId]
+        )->fetchAll(\PDO::FETCH_COLUMN);
 
         foreach ($localCategories as $localCategoryId) {
-            $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id) VALUES (?, ?)',
-                [$createdCategoryId, $localCategoryId]);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id) VALUES (?, ?)',
+                [$createdCategoryId, $localCategoryId]
+            );
         }
     }
 }

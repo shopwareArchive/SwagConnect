@@ -157,8 +157,8 @@ class CronJob implements SubscriberInterface
         $this->connectExport->processChanged($sourceIds);
 
         $quotedSourceIds = Shopware()->Db()->quote($sourceIds);
-        Shopware()->Db()->query("
-            UPDATE s_plugin_connect_items
+        Shopware()->Db()->query(
+            "UPDATE s_plugin_connect_items
             SET cron_update = false
             WHERE source_id IN ($quotedSourceIds)"
         )->execute();

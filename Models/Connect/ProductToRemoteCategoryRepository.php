@@ -41,10 +41,12 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             ->leftJoin('Shopware\CustomModels\Connect\ProductToRemoteCategory', 'ptrc', Join::WITH, 'ptrc.articleId = pci.articleId')
             ->leftJoin('pci.article', 'a')
             ->leftJoin('a.mainDetail', 'md')
-            ->leftJoin('Shopware\Models\Article\Price',
+            ->leftJoin(
+                'Shopware\Models\Article\Price',
                 'p',
                 Join::WITH,
-                "p.articleDetailsId = md.id AND p.customerGroupKey = 'EK' AND p.from = 1")
+                "p.articleDetailsId = md.id AND p.customerGroupKey = 'EK' AND p.from = 1"
+            )
             ->leftJoin('a.supplier', 's')
             ->leftJoin('a.tax', 't')
             ->leftJoin('a.attribute', 'att')
@@ -94,8 +96,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      */
     public function findArticleIdsByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream, $offset, $limit)
     {
-        return $this->getEntityManager()->getConnection()->executeQuery('
-        SELECT DISTINCT pci.article_id
+        return $this->getEntityManager()->getConnection()->executeQuery(
+            'SELECT DISTINCT pci.article_id
             FROM s_plugin_connect_items AS pci
             INNER JOIN s_plugin_connect_product_to_categories AS ptrc ON ptrc.articleID = pci.article_id
             INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = ptrc.connect_category_id
@@ -104,7 +106,8 @@ class ProductToRemoteCategoryRepository extends ModelRepository
             LIMIT ?
             OFFSET ?',
             [$remoteCategoryKey, $shopId, $stream, $limit, $offset],
-            [\PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_INT])->fetchAll(\PDO::FETCH_COLUMN);
+            [\PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_INT]
+        )->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -169,12 +172,13 @@ class ProductToRemoteCategoryRepository extends ModelRepository
      */
     public function getArticleCountByRemoteCategoryAndStream($remoteCategoryKey, $shopId, $stream)
     {
-        return $this->getEntityManager()->getConnection()->fetchColumn('
-        SELECT COUNT(DISTINCT pci.article_id)
+        return $this->getEntityManager()->getConnection()->fetchColumn(
+            'SELECT COUNT(DISTINCT pci.article_id)
             FROM s_plugin_connect_items AS pci
             INNER JOIN s_plugin_connect_product_to_categories AS ptrc ON ptrc.articleID = pci.article_id
             INNER JOIN s_plugin_connect_categories AS pcc ON pcc.id = ptrc.connect_category_id
             WHERE pcc.category_key = ? AND pcc.shop_id = ? AND pci.stream = ?',
-            [$remoteCategoryKey, $shopId, $stream]);
+            [$remoteCategoryKey, $shopId, $stream]
+        );
     }
 }

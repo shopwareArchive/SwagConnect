@@ -61,8 +61,10 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($now->getTimestamp(), $added->getTimestamp(), '', 5);
         $this->assertEquals($now->getTimestamp(), $changed->getTimestamp(), '', 5);
 
-        $result = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_categories_to_local_categories WHERE stream = ? AND remote_category_id = ? AND local_category_id = ?',
-            ['test Stream', 3333, $row[0]['id']]);
+        $result = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_categories_to_local_categories WHERE stream = ? AND remote_category_id = ? AND local_category_id = ?',
+            ['test Stream', 3333, $row[0]['id']]
+        );
         $this->assertNotFalse($result);
     }
 
@@ -106,27 +108,35 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, $test3Id);
         $this->assertGreaterThan(0, $test31Id);
 
-        $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
-            [3, $test1Id])->fetchColumn();
+        $productToCategoryId = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
+            [3, $test1Id]
+        )->fetchColumn();
 
         //Assert that old category is still assigned
         $this->assertGreaterThan(0, $productToCategoryId);
 
-        $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
-            [3, $test2Id])->fetchColumn();
+        $productToCategoryId = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
+            [3, $test2Id]
+        )->fetchColumn();
 
         //Assert that removed category is not assigned
         $this->assertEquals(false, $productToCategoryId);
 
-        $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
-            [3, $test3Id])->fetchColumn();
+        $productToCategoryId = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
+            [3, $test3Id]
+        )->fetchColumn();
 
         //Assert that new, not-leaf category is assigned
         //This is necessary that ext.js find all products in not-leaf categories in import window
         $this->assertGreaterThan(0, $productToCategoryId);
 
-        $productToCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
-            [3, $test31Id])->fetchColumn();
+        $productToCategoryId = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
+            [3, $test31Id]
+        )->fetchColumn();
 
         //Assert that new, leaf category is assigned
         $this->assertGreaterThan(0, $productToCategoryId);
@@ -137,11 +147,13 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_categories');
         $this->manager->getConnection()->executeQuery('DELETE FROM s_plugin_connect_product_to_categories');
 
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $localCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$localCategoryId, 1]
         );
 
@@ -151,11 +163,15 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         $connectCategoryId = $this->manager->getConnection()->executeQuery('SELECT id FROM s_plugin_connect_categories WHERE category_key = "/deutsch/test2"')->fetchColumn();
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id) VALUES (?, ?)',
-            [$connectCategoryId, $localCategoryId]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories_to_local_categories (remote_category_id, local_category_id) VALUES (?, ?)',
+            [$connectCategoryId, $localCategoryId]
+        );
 
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_articles_categories (articleID, categoryID) VALUES (?, ?)',
-            [3, $localCategoryId]);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_articles_categories (articleID, categoryID) VALUES (?, ?)',
+            [3, $localCategoryId]
+        );
 
         $categories = [
             '/deutsch' => 'Deutsch',
@@ -166,18 +182,21 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->categoryResolver->storeRemoteCategories($categories, 3, 1234);
 
-        $productToCategoryId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
+        $productToCategoryId = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_plugin_connect_product_to_categories WHERE articleID = ? AND connect_category_id = ?',
             [3, $connectCategoryId]
         );
         //Assert that removed category is not assigned
         $this->assertFalse($productToCategoryId);
 
-        $categoryAssignment = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
+        $categoryAssignment = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
             [3, $localCategoryId]
         );
         $this->assertFalse($categoryAssignment);
 
-        $localCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $localCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$localCategoryId]
         );
         $this->assertFalse($localCategory);
@@ -185,30 +204,36 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testDeleteEmptyConnectCategoriesDeletesMultiple()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $firstCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$firstCategoryId, 1]
         );
 
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $secondCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$secondCategoryId, 1]
         );
 
         $this->categoryResolver->deleteEmptyConnectCategories([$firstCategoryId, $secondCategoryId]);
 
-        $firstCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $firstCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$firstCategoryId]
         );
         $this->assertFalse($firstCategory);
 
-        $secondCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $secondCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$secondCategoryId]
         );
         $this->assertFalse($secondCategory);
@@ -216,29 +241,35 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testDeleteEmptyConnectCategoriesDeletesParent()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $firstCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$firstCategoryId, 1]
         );
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             [$firstCategoryId, "|3|$firstCategoryId|", 'TestCategory']
         );
         $secondCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$secondCategoryId, 1]
         );
 
         $this->categoryResolver->deleteEmptyConnectCategories([$secondCategoryId]);
 
-        $firstCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $firstCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$firstCategoryId]
         );
         $this->assertFalse($firstCategory);
 
-        $secondCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $secondCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$secondCategoryId]
         );
         $this->assertFalse($secondCategory);
@@ -246,14 +277,16 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testDeleteEmptyConnectCategoriesDontDeletesNotConnectCategory()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $notConnectCategoryId = $this->manager->getConnection()->lastInsertId();
 
         $this->categoryResolver->deleteEmptyConnectCategories([$notConnectCategoryId]);
 
-        $notConnectCategory = $this->manager->getConnection()->fetchColumn('SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
+        $notConnectCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
             [$notConnectCategoryId]
         );
         $this->assertEquals(1, $notConnectCategory);
@@ -261,20 +294,24 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testDeleteEmptyConnectCategoriesDontDeletesNotEmptyCategory()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $notEmptyCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$notEmptyCategoryId, 1]
         );
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_articles_categories` (`articleID`, `categoryID`) VALUES (?, ?)',
             [1, $notEmptyCategoryId]
         );
 
         $this->categoryResolver->deleteEmptyConnectCategories([$notEmptyCategoryId]);
 
-        $notEmptyCategory = $this->manager->getConnection()->fetchColumn('SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
+        $notEmptyCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
             [$notEmptyCategoryId]
         );
         $this->assertEquals(1, $notEmptyCategory);
@@ -282,40 +319,48 @@ class CategoryResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testDeleteEmptyConnectCategoriesDontDeletesParentWithSiblings()
     {
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             ['3', '|3|', 'TestCategory']
         );
         $firstCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$firstCategoryId, 1]
         );
 
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             [$firstCategoryId, "|3|$firstCategoryId|", 'TestCategory']
         );
         $secondCategoryId = $this->manager->getConnection()->lastInsertId();
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories_attributes` (`categoryID`, `connect_imported_category`) VALUES (?, ?)',
             [$secondCategoryId, 1]
         );
 
-        $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
+        $this->manager->getConnection()->executeQuery(
+            'INSERT IGNORE INTO `s_categories` (`parent`, `path`, `description`) VALUES (?, ?, ?)',
             [$firstCategoryId, "|3|$firstCategoryId|", 'TestCategory']
         );
         $thirdCategoryId = $this->manager->getConnection()->lastInsertId();
 
         $this->categoryResolver->deleteEmptyConnectCategories([$secondCategoryId]);
 
-        $secondCategory = $this->manager->getConnection()->fetchColumn('SELECT * FROM `s_categories` WHERE id = ?',
+        $secondCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT * FROM `s_categories` WHERE id = ?',
             [$secondCategoryId]
         );
         $this->assertFalse($secondCategory);
 
-        $firstCategory = $this->manager->getConnection()->fetchColumn('SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
+        $firstCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
             [$firstCategoryId]
         );
         $this->assertEquals(1, $firstCategory);
 
-        $thirdCategory = $this->manager->getConnection()->fetchColumn('SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
+        $thirdCategory = $this->manager->getConnection()->fetchColumn(
+            'SELECT COUNT(*) FROM `s_categories` WHERE id = ?',
             [$thirdCategoryId]
         );
         $this->assertEquals(1, $thirdCategory);

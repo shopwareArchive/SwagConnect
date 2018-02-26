@@ -25,11 +25,14 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
 
         $this->importFixturesFileOnce(__DIR__ . '/_fixtures/simple_variants.sql');
 
-        $priceId = $connection->fetchColumn('SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?',
-            ['32870', '2404537']);
+        $priceId = $connection->fetchColumn(
+            'SELECT id FROM s_articles_prices WHERE articleID = ? AND articledetailsID = ?',
+            ['32870', '2404537']
+        );
 
         $client->request(
-            'POST', 'backend/Article/saveDetail',
+            'POST',
+            'backend/Article/saveDetail',
             [
                 'prices' => [
                     0 => [
@@ -156,9 +159,11 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
 
         $this->importFixturesFileOnce(__DIR__ . '/../_fixtures/shops.sql');
         $configComponent = ConfigFactory::getConfigInstance();
-        $translationShops = array_map(function ($row) {
-            return $row['id'];
-        }, $connection
+        $translationShops = array_map(
+            function ($row) {
+                return $row['id'];
+            },
+            $connection
             ->executeQuery('SELECT `id` FROM `s_core_shops` WHERE `name` = ? OR `name` = ?', ['Greek', 'Czech'])
             ->fetchAll()
         );

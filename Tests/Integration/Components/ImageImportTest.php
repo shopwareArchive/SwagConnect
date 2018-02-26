@@ -200,8 +200,10 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 
         $this->imageImport->importMainImage('no_main_img', 14467);
 
-        $result = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
-            [14467]);
+        $result = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
+            [14467]
+        );
 
         $this->assertEquals(1235, $result);
     }

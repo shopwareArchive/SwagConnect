@@ -91,7 +91,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
     public function callPrivate($class, $method, $args)
     {
         $method = new \ReflectionMethod(
-            $class, $method
+            $class,
+            $method
         );
 
         $method->setAccessible(true);
@@ -180,7 +181,8 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'purchasePrice' => $purchasePrice,
             'purchasePriceHash' => hash_hmac(
                 'sha256',
-                sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+                sprintf('%.3F %d', $purchasePrice, $offerValidUntil),
+                '54642546-0001-48ee-b4d0-4f54af66d822'
             ),
             'offerValidUntil' => $offerValidUntil,
             'availability' => 100,
@@ -378,7 +380,9 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         Shopware()->Db()->executeQuery(
             'INSERT INTO `s_articles_prices`(`pricegroup`, `from`, `to`, `articleID`, `articledetailsID`, `price`, `baseprice`)
           VALUES (?, 1, "beliebig", ?, ?, ?, ?)
-          ', [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]);
+          ',
+            [$customerGroup->getKey(), $article->getId(), $mainDetail->getId(), 8.99, 3.99]
+        );
 
         return $article;
     }

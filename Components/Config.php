@@ -50,6 +50,7 @@ class Config
      * @var TriggerService
      */
     private $triggerService;
+
     /**
      * @param ModelManager $manager
      * @param CachedConfigReader $configReader
@@ -717,7 +718,9 @@ class Config
      */
     private function activateConnectCronJob($action, $active)
     {
-        $this->manager->getConnection()->executeUpdate('UPDATE `s_crontab` SET `active` = ? WHERE `action` = ? OR `action` = ?',
-            [$active, $action, "Shopware_CronJob_$action"]);
+        $this->manager->getConnection()->executeUpdate(
+            'UPDATE `s_crontab` SET `active` = ? WHERE `action` = ? OR `action` = ?',
+            [$active, $action, "Shopware_CronJob_$action"]
+        );
     }
 }

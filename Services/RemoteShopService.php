@@ -87,8 +87,10 @@ class RemoteShopService
      */
     public function isExceptionFatal($exception)
     {
-        if (strpos($exception->getMessage(),
-            "Uncaught Shopware\Connect\SecurityException: No Authorization to call service 'ping'.") !== false) {
+        if (strpos(
+            $exception->getMessage(),
+            "Uncaught Shopware\Connect\SecurityException: No Authorization to call service 'ping'."
+        ) !== false) {
             return false;
         }
 

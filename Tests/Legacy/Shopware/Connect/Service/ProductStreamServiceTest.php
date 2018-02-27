@@ -80,20 +80,26 @@ class ProductStreamServiceTest extends ConnectTestHelper
 
         $articleAIds = [33, 34, 35, 36];
         foreach ($articleAIds as $articleAId) {
-            $this->db->insert('s_product_streams_selection',
-                ['stream_id' => $this->streamAId, 'article_id' => $articleAId]);
+            $this->db->insert(
+                's_product_streams_selection',
+                ['stream_id' => $this->streamAId, 'article_id' => $articleAId]
+            );
         }
 
         $articleBIds = [35, 36, 37];
         foreach ($articleBIds as $articleBId) {
-            $this->db->insert('s_product_streams_selection',
-                ['stream_id' => $this->streamBId, 'article_id' => $articleBId]);
+            $this->db->insert(
+                's_product_streams_selection',
+                ['stream_id' => $this->streamBId, 'article_id' => $articleBId]
+            );
         }
 
         $articleCIds = [36];
         foreach ($articleCIds as $articleCId) {
-            $this->db->insert('s_product_streams_selection',
-                ['stream_id' => $this->streamCId, 'article_id' => $articleCId]);
+            $this->db->insert(
+                's_product_streams_selection',
+                ['stream_id' => $this->streamCId, 'article_id' => $articleCId]
+            );
         }
     }
 

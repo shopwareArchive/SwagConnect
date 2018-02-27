@@ -524,8 +524,10 @@ class ImportService
     {
         $categories = [];
         $categories[] = $categoryId;
-        $childCategories = $this->manager->getConnection()->executeQuery('SELECT id FROM s_categories WHERE path LIKE ?',
-            ["%|$categoryId|%"]);
+        $childCategories = $this->manager->getConnection()->executeQuery(
+            'SELECT id FROM s_categories WHERE path LIKE ?',
+            ["%|$categoryId|%"]
+        );
 
         while ($childCategory = $childCategories->fetchColumn()) {
             $categories[] = (int) $childCategory;

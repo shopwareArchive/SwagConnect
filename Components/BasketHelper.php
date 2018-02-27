@@ -107,8 +107,8 @@ class BasketHelper
         SDK $sdk,
         Helper $helper,
         PDO $connectGateway,
-        $showCheckoutShopInfo)
-    {
+        $showCheckoutShopInfo
+    ) {
         $this->database = $database;
         $this->sdk = $sdk;
         $this->helper = $helper;
@@ -399,8 +399,9 @@ class BasketHelper
             } elseif ($item['modus'] == 2) {
                 // Ticket 4842 - dynamic tax-rates
                 $resultVoucherTaxMode = Shopware()->Db()->fetchOne(
-                    'SELECT taxconfig FROM s_emarketing_vouchers WHERE ordercode=?
-                ', [$item['ordernumber']]);
+                    'SELECT taxconfig FROM s_emarketing_vouchers WHERE ordercode=?',
+                    [$item['ordernumber']]
+                );
                 // Old behaviour
                 if (empty($resultVoucherTaxMode) || $resultVoucherTaxMode == 'default') {
                     $tax = Shopware()->Config()->get('sVOUCHERTAX');
@@ -412,9 +413,10 @@ class BasketHelper
                     $tax = '0';
                 } elseif (intval($resultVoucherTaxMode)) {
                     // Fix defined tax
-                    $tax = Shopware()->Db()->fetchOne('
-					SELECT tax FROM s_core_tax WHERE id = ?
-					', [$resultVoucherTaxMode]);
+                    $tax = Shopware()->Db()->fetchOne(
+                        'SELECT tax FROM s_core_tax WHERE id = ?',
+                        [$resultVoucherTaxMode]
+                    );
                 }
                 $item['tax_rate'] = $tax;
             } else {
@@ -675,13 +677,15 @@ class BasketHelper
         $newVariables = $this->getDefaultTemplateVariables();
 
         // We need the manipulated content as the order is created from the session
-         $basket['content'] = $basket['contentOrg'];
+        $basket['content'] = $basket['contentOrg'];
         unset($basket['contentOrg']);
 
 
         // Replace the original session array with the new one
         $variables->exchangeArray(array_merge(
-            $variables->getArrayCopy(), $newVariables, ['sBasket' => $basket]
+            $variables->getArrayCopy(),
+            $newVariables,
+            ['sBasket' => $basket]
         ));
 
         return $variables;

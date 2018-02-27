@@ -316,7 +316,8 @@ class ConnectExportTest extends ConnectTestHelper
                     $detail->getNumber(),
                     '/bücher',
                     1
-                ]);
+                ]
+            );
         }
 
         return $article->getId();

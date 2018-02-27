@@ -217,7 +217,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         ];
         $categoriesJson = json_encode($categories);
 
-        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
             [3, 1, $categoriesJson]
         );
 
@@ -245,10 +246,12 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         ];
         $categoriesJson = json_encode($categories);
 
-        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
             [3, 1, $categoriesJson]
         );
-        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
             [4, 1, $categoriesJson]
         );
 
@@ -274,7 +277,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         $categoriesJson = json_encode($categories);
 
         for ($i = 1; $i < 110; ++$i) {
-            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+            $manager->getConnection()->executeQuery(
+                'INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
                 [$i, 1, $categoriesJson]
             );
         }
@@ -305,13 +309,16 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($categories as $categoryKey => $category) {
-            $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
-                [$categoryKey, $category, 1]);
+            $manager->getConnection()->executeQuery(
+                'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id) VALUES (?, ?, ?)',
+                [$categoryKey, $category, 1]
+            );
         }
 
         $categoriesJson = json_encode($categories);
 
-        $manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
+        $manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_items (article_id, shop_id, category) VALUES (?, ?, ?)',
             [3, 1, $categoriesJson]
         );
 

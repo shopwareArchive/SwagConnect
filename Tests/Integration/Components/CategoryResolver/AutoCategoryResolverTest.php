@@ -175,9 +175,11 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
     private function createRemoteCategories($categories)
     {
         foreach ($categories as $key => $value) {
-            $this->manager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) 
-              VALUES (?, ?, ?)',
-                [$key, $value, 1234]);
+            $this->manager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`, `shop_id`) 
+                VALUES (?, ?, ?)',
+                [$key, $value, 1234]
+            );
         }
     }
 
@@ -187,9 +189,11 @@ class AutoCategoryResolverTest extends \PHPUnit_Framework_TestCase
     private function deleteRemoteCategories($categories)
     {
         foreach ($categories as $key => $value) {
-            $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
-              WHERE `category_key` = ? AND `label` = ? AND `shop_id` = 1234',
-                [$key, $value]);
+            $this->manager->getConnection()->executeQuery(
+                'DELETE FROM `s_plugin_connect_categories`
+                WHERE `category_key` = ? AND `label` = ? AND `shop_id` = 1234',
+                [$key, $value]
+            );
         }
     }
 }

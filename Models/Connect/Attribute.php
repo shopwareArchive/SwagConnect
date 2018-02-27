@@ -32,7 +32,7 @@ class Attribute extends ModelEntity
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(name="id", type="integer", nullable=false)
      */
-     protected $id;
+    protected $id;
 
 
     /**
@@ -40,7 +40,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="article_id", type="integer", nullable=true)
      */
-     protected $articleId;
+    protected $articleId;
 
 
     /**
@@ -48,7 +48,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="article_detail_id", type="integer", nullable=true)
      */
-     protected $articleDetailId;
+    protected $articleDetailId;
 
 
     /**
@@ -56,7 +56,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="shop_id", type="string", nullable=true)
      */
-     protected $shopId;
+    protected $shopId;
 
 
     /**
@@ -64,7 +64,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="source_id", type="string", nullable=true)
      */
-     protected $sourceId;
+    protected $sourceId;
 
 
     /**
@@ -72,7 +72,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="export_status", type="string", nullable=true)
      */
-     protected $exportStatus;
+    protected $exportStatus;
 
 
     /**
@@ -80,7 +80,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="export_message", type="text", nullable=true)
      */
-     protected $exportMessage;
+    protected $exportMessage;
 
     /**
      * @var bool
@@ -95,7 +95,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="category", type="text", nullable=true)
      */
-     protected $category;
+    protected $category;
 
 
     /**
@@ -103,7 +103,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="purchase_price", type="float", nullable=true)
      */
-     protected $purchasePrice;
+    protected $purchasePrice;
 
 
     /**
@@ -111,7 +111,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="fixed_price", type="integer", nullable=true)
      */
-     protected $fixedPrice;
+    protected $fixedPrice;
 
 
     /**
@@ -119,7 +119,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="update_price", type="string", nullable=true)
      */
-     protected $updatePrice;
+    protected $updatePrice;
 
 
     /**
@@ -127,7 +127,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="update_image", type="string", nullable=true)
      */
-     protected $updateImage;
+    protected $updateImage;
 
 
     /**
@@ -135,7 +135,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="update_long_description", type="string", nullable=true)
      */
-     protected $updateLongDescription;
+    protected $updateLongDescription;
 
 
     /**
@@ -143,7 +143,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="update_short_description", type="string", nullable=true)
      */
-     protected $updateShortDescription;
+    protected $updateShortDescription;
 
 
     /**
@@ -151,14 +151,14 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="update_additional_description", type="string", nullable=true)
      */
-     protected $updateAdditionalDescription;
+    protected $updateAdditionalDescription;
 
     /**
      * @var string
      *
      * @ORM\Column(name="update_name", type="string", nullable=true)
      */
-     protected $updateName;
+    protected $updateName;
 
     /**
      * @var string
@@ -173,7 +173,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="last_update", type="text", nullable=true)
      */
-     protected $lastUpdate;
+    protected $lastUpdate;
 
 
     /**
@@ -181,7 +181,7 @@ class Attribute extends ModelEntity
      *
      * @ORM\Column(name="last_update_flag", type="integer", nullable=true)
      */
-     protected $lastUpdateFlag;
+    protected $lastUpdateFlag;
 
 
     /**

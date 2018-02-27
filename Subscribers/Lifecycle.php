@@ -128,7 +128,8 @@ class Lifecycle implements SubscriberInterface
         // this will generate wrong Connect changes
         if ($changeSet['propertyGroup']) {
             $filterGroupId = $db->fetchOne(
-                'SELECT filtergroupID FROM s_articles WHERE id = ?', [$entity->getId()]
+                'SELECT filtergroupID FROM s_articles WHERE id = ?',
+                [$entity->getId()]
             );
 
             $db->executeUpdate(
@@ -379,7 +380,8 @@ class Lifecycle implements SubscriberInterface
 
         if ($this->isAutoUpdateEnabled($force)) {
             $this->connectExport->export(
-                [$attribute->getSourceId()], null
+                [$attribute->getSourceId()],
+                null
             );
         } elseif ($this->autoUpdateProducts == Config::UPDATE_CRON_JOB) {
             $this->manager->getConnection()->update(

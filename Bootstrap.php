@@ -4,7 +4,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 use Doctrine\Common\Collections\ArrayCollection;
 use ShopwarePlugins\Connect\Bootstrap\SubscriberRegistration;
 use ShopwarePlugins\Connect\Bootstrap\Uninstall;
@@ -194,10 +193,14 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      */
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
-        $this->get('template')->addTemplateDir($this->Path() . 'Views/', 'connect');
         $this->get('snippets')->addConfigDir($this->Path() . 'Snippets/');
         $this->registerMyLibrary();
         $this->registerSubscribers();
+    }
+
+    public function registerTemplateDir()
+    {
+        $this->get('template')->addTemplateDir($this->Path() . 'Views/', 'connect');
     }
 
     /**

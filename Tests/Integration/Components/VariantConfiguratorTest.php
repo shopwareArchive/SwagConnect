@@ -103,7 +103,8 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
             function (Product $product) {
                 return $product->variant['Farbe'];
             },
-            $variants);
+            $variants
+        );
 
         $mainVariant = $this->helper->createProductModel($variants[0]);
         $productIds[] = $mainVariant->getId();

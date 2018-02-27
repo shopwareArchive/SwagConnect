@@ -86,13 +86,15 @@ class Setup
     {
         $form = $this->bootstrap->Form();
 
-        $form->setElement('text',
+        $form->setElement(
+            'text',
             'connectDebugHost',
             [
                 'label' => 'Shopware Connect Host',
                 'required' => false,
                 'value'    => Config::MARKETPLACE_URL
-            ]);
+            ]
+        );
     }
 
     /**
@@ -135,6 +137,11 @@ class Setup
         $this->bootstrap->subscribeEvent(
             'Enlight_Bootstrap_InitResource_ConnectSDK',
             'onInitResourceSDK'
+        );
+
+        $this->bootstrap->subscribeEvent(
+          'Enlight_Controller_Action_PreDispatch',
+          'registerTemplateDir'
         );
 
         $this->bootstrap->subscribeEvent(
@@ -712,7 +719,8 @@ class Setup
             }
         }
 
-        throw new \RuntimeException('Could not find a free group name for the Shopware Connect customer group.Probably you need to delete an existing customer group created by Shopware Connect (SC, SWC, SWCONN, SC-1). Make sure, you really don\'t need it any more!'
+        throw new \RuntimeException(
+            'Could not find a free group name for the Shopware Connect customer group.Probably you need to delete an existing customer group created by Shopware Connect (SC, SWC, SWCONN, SC-1). Make sure, you really don\'t need it any more!'
         );
     }
 
@@ -733,10 +741,10 @@ class Setup
      */
     public function populateDispatchAttributes()
     {
-        $this->db->exec('
-            INSERT IGNORE INTO `s_premium_dispatch_attributes` (`dispatchID`)
-            SELECT `id` FROM `s_premium_dispatch`
-        ');
+        $this->db->exec(
+            'INSERT IGNORE INTO `s_premium_dispatch_attributes` (`dispatchID`)
+            SELECT `id` FROM `s_premium_dispatch`'
+        );
     }
 
     /**
@@ -766,10 +774,10 @@ class Setup
 
     public function populateConnectPaymentAttribute()
     {
-        $this->db->exec('
-            INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)
-            SELECT `id` FROM `s_core_paymentmeans`
-        ');
+        $this->db->exec(
+            'INSERT IGNORE INTO `s_core_paymentmeans_attributes` (`paymentmeanID`)
+            SELECT `id` FROM `s_core_paymentmeans`'
+        );
     }
 
     public function populatePaymentStates()
@@ -805,10 +813,10 @@ class Setup
         $currentId = $this->getMaxStateId();
 
         foreach ($states as $name => $description) {
-            $isExists = $this->db->query('
-                SELECT `id` FROM `s_core_states`
-                WHERE `name` = ? AND `group` = ?
-                ', [$name, $group]
+            $isExists = $this->db->query(
+                'SELECT `id` FROM `s_core_states`
+                WHERE `name` = ? AND `group` = ?',
+                [$name, $group]
             )->fetch();
 
             if ($isExists) {
@@ -816,11 +824,11 @@ class Setup
             }
 
             ++$currentId;
-            $this->db->query('
-                INSERT INTO `s_core_states`
+            $this->db->query(
+                'INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
-                VALUES (?, ?, ?, ?, ?, ?)
-                ', [$currentId, $name, $description, $currentId, $group, 0]
+                VALUES (?, ?, ?, ?, ?, ?)',
+                [$currentId, $name, $description, $currentId, $group, 0]
             );
         }
     }

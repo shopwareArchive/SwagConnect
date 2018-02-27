@@ -106,8 +106,10 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         $localCategory = $this->categoryRepository->find(6);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
-            [$localCategory->getId(), $remoteCategory->getId(), 'test']);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
+            [$localCategory->getId(), $remoteCategory->getId(), 'test']
+        );
 
         // assign local category to products
         $articleIds = [];
@@ -156,8 +158,10 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         $localCategory2 = $this->categoryRepository->find(8);
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
-            [$localCategory->getId(), $remoteCategory->getId(), 'test']);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
+            [$localCategory->getId(), $remoteCategory->getId(), 'test']
+        );
 
         // assign local category to products
         $articleIds = [];
@@ -191,8 +195,10 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(
             1,
-            $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_articles_categories WHERE articleID = ?',
-                [$articleWithCategory])->fetchColumn()
+            $this->manager->getConnection()->executeQuery(
+                'SELECT COUNT(*) FROM s_articles_categories WHERE articleID = ?',
+                [$articleWithCategory]
+            )->fetchColumn()
         );
 
         $this->assertEquals(
@@ -202,15 +208,19 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         //minimum category count in s_articles_categories_ro because one category is directly assigned
         $categoryCount = 1;
         //get the parent category count from the path
-        $path = $this->manager->getConnection()->executeQuery('SELECT path FROM s_categories WHERE id = ?',
-            [$localCategory2->getId()])->fetchColumn();
+        $path = $this->manager->getConnection()->executeQuery(
+            'SELECT path FROM s_categories WHERE id = ?',
+            [$localCategory2->getId()]
+        )->fetchColumn();
         //remove leading  pipe in path
         $path = substr($path, 1);
         $categoryCount += substr_count($path, '|');
         $this->assertEquals(
             $categoryCount,
-            $this->manager->getConnection()->executeQuery('SELECT COUNT(*) FROM s_articles_categories_ro WHERE articleID = ?',
-                [$articleWithCategory])->fetchColumn()
+            $this->manager->getConnection()->executeQuery(
+                'SELECT COUNT(*) FROM s_articles_categories_ro WHERE articleID = ?',
+                [$articleWithCategory]
+            )->fetchColumn()
         );
 
         $this->manager->clear();
@@ -243,8 +253,10 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
 
         /** @var \Shopware\CustomModels\Connect\RemoteCategory $remoteCategory */
         $remoteCategory = $this->remoteCategoryRepository->findOneBy(['categoryKey' => '/bücher']);
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
-            [$localCategory->getId(), $remoteCategory->getId(), 'test']);
+        $this->manager->getConnection()->executeQuery(
+            'INSERT INTO s_plugin_connect_categories_to_local_categories (local_category_id, remote_category_id, stream) VALUES (?, ?, ?)',
+            [$localCategory->getId(), $remoteCategory->getId(), 'test']
+        );
 
         // assign local category to products
         $articleIds = [];
@@ -346,7 +358,8 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
 
         $bookCategoryId = 1111;
         $this->manager->getConnection()->executeQuery(
-            'INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (1111, "/deutsch/bücher", "Bücher", 1234)');
+            'INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (1111, "/deutsch/bücher", "Bücher", 1234)'
+        );
 
         $this->manager->getConnection()->executeQuery(
             'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',

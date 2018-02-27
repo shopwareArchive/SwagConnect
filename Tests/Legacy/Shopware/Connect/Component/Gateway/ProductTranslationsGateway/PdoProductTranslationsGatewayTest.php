@@ -354,8 +354,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
 
     public function testAddGroupTranslation()
     {
-        $sql = '
-                INSERT IGNORE INTO `s_core_translations`
+        $sql = 'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
@@ -371,8 +370,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
 
     public function testAddOptionTranslation()
     {
-        $sql = '
-                INSERT IGNORE INTO `s_core_translations`
+        $sql = 'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);
@@ -400,8 +398,7 @@ class PdoProductTranslationsGatewayTest extends ConnectTestHelper
             'txtshortdescription' => $translation->shortDescription,
             PdoProductTranslationsGateway::CONNECT_DESCRIPTION => $translation->additionalDescription,
         ];
-        $sql = '
-                INSERT IGNORE INTO `s_core_translations`
+        $sql = 'INSERT IGNORE INTO `s_core_translations`
                 (`objecttype`, `objectdata`, `objectkey`, `objectlanguage`)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `objectdata`=VALUES(objectdata);

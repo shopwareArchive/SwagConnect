@@ -372,9 +372,10 @@ class ImageImport
             ->orderBy('images.main', 'ASC')
             ->addOrderBy('images.position', 'ASC');
 
-        return array_map(function ($image) {
-            return $image['path'];
-        },
+        return array_map(
+            function ($image) {
+                return $image['path'];
+            },
             $builder->getQuery()->getArrayResult()
         );
     }
@@ -584,24 +585,32 @@ class ImageImport
      */
     public function importMainImage($imageUrl, $articleId)
     {
-        $oldMainImageId = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
-            [$articleId]);
+        $oldMainImageId = $this->manager->getConnection()->fetchColumn(
+            'SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
+            [$articleId]
+        );
 
-        $newMainImageId = $this->manager->getConnection()->fetchColumn('
+        $newMainImageId = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT s_articles_img.id 
             FROM s_articles_img 
             INNER JOIN s_media ON s_articles_img.media_id = s_media.id
             INNER JOIN s_media_attributes ON s_media.id = s_media_attributes.mediaID
             WHERE s_articles_img.articleID = ? AND s_articles_img.parent_id IS NULL AND s_media_attributes.connect_hash = ?',
-            [$articleId, $imageUrl]);
+            [$articleId, $imageUrl]
+        );
 
         if ($newMainImageId && $newMainImageId !== $oldMainImageId) {
-            $this->manager->getConnection()->executeQuery('
+            $this->manager->getConnection()->executeQuery(
+                '
             UPDATE s_articles_img SET main = ? WHERE id = ?',
-            [0, $oldMainImageId]);
-            $this->manager->getConnection()->executeQuery('
+            [0, $oldMainImageId]
+            );
+            $this->manager->getConnection()->executeQuery(
+                '
             UPDATE s_articles_img SET main = ? WHERE id = ?',
-             [1, $newMainImageId]);
+             [1, $newMainImageId]
+            );
         }
     }
 
@@ -612,13 +621,15 @@ class ImageImport
      */
     public function hasMainImageChanged($imageUrl, $articleId)
     {
-        $result = $this->manager->getConnection()->fetchColumn('
+        $result = $this->manager->getConnection()->fetchColumn(
+            '
             SELECT s_articles_img.id 
             FROM s_articles_img 
             INNER JOIN s_media ON s_articles_img.media_id = s_media.id
             INNER JOIN s_media_attributes ON s_media.id = s_media_attributes.mediaID
             WHERE s_articles_img.articleID = ? AND s_articles_img.main = 1 AND s_articles_img.parent_id IS NULL AND s_media_attributes.connect_hash = ?',
-            [$articleId, $imageUrl]);
+            [$articleId, $imageUrl]
+        );
 
         return !(bool) $result;
     }

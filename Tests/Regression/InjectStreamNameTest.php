@@ -92,26 +92,31 @@ class InjectStreamNameTest extends \PHPUnit_Framework_TestCase
 
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_items (article_id, purchase_price_hash, offer_valid_until, stream, shop_id)
-              VALUES (?, "hash", 123, ?, ?)', [ $articleId, $streamName, $shopId]
+              VALUES (?, "hash", 123, ?, ?)',
+            [ $articleId, $streamName, $shopId]
         );
 
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id)
-              VALUES (?, ?, ?)', [ self::PANTS_CATEGORY_KEY, self::PANTS_CATEGORY_LABEL, $shopId]
+              VALUES (?, ?, ?)',
+            [ self::PANTS_CATEGORY_KEY, self::PANTS_CATEGORY_LABEL, $shopId]
         );
 
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id)
-              VALUES (?, ?)', [ $articleId, $this->db->lastInsertId('s_plugin_connect_categories')]
+              VALUES (?, ?)',
+            [ $articleId, $this->db->lastInsertId('s_plugin_connect_categories')]
         );
 
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_categories (category_key, label, shop_id)
-              VALUES (?, ?, ?)', [ self::COAT_CATEGORY_KEY, self::COAT_CATEGORY_LABEL, $shopId]
+              VALUES (?, ?, ?)',
+            [ self::COAT_CATEGORY_KEY, self::COAT_CATEGORY_LABEL, $shopId]
         );
         $this->db->executeQuery(
             'INSERT INTO s_plugin_connect_product_to_categories (articleID, connect_category_id)
-              VALUES (?, ?)', [ $articleId, $this->db->lastInsertId('s_plugin_connect_categories')]
+              VALUES (?, ?)',
+            [ $articleId, $this->db->lastInsertId('s_plugin_connect_categories')]
         );
 
         $this->categoryResolver->expects($this->once())

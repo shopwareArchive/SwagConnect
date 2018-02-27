@@ -626,8 +626,10 @@ class LocalProductQuery extends BaseProductQuery
      */
     private function isMediaMainImage($articleId, $mediaId)
     {
-        $isMain = $this->manager->getConnection()->fetchColumn('SELECT main FROM s_articles_img WHERE articleID = ? and media_id = ?',
-            [$articleId, $mediaId]);
+        $isMain = $this->manager->getConnection()->fetchColumn(
+            'SELECT main FROM s_articles_img WHERE articleID = ? and media_id = ?',
+            [$articleId, $mediaId]
+        );
 
         return $isMain == 1;
     }

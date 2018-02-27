@@ -50,7 +50,8 @@ class ProductStreamAttributeRepository extends ModelRepository
                 $qb->expr()->orX(
                     $qb->expr()->eq('pcs.export_status', ':exportedStatus'),
                     $qb->expr()->eq('pcs.export_status', ':syncedStatus')
-                ))
+                )
+            )
             ->setParameter('exportedStatus', ProductStreamService::STATUS_EXPORT)
             ->setParameter('syncedStatus', ProductStreamService::STATUS_SYNCED);
 

@@ -4,7 +4,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 use Shopware\Connect\Units;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\Validator\ProductAttributesValidator\ProductsAttributesValidator;
@@ -822,13 +821,15 @@ class Shopware_Controllers_Backend_ConnectConfig extends Shopware_Controllers_Ba
     {
         $marketplaceGateway = $this->getFactory()->getMarketplaceGateway();
 
-        $mappings = array_map(function ($attribute) use ($marketplaceGateway) {
-            return [
+        $mappings = array_map(
+            function ($attribute) use ($marketplaceGateway) {
+                return [
                     'shopwareAttributeKey' => $attribute->getName(),
                     'shopwareAttributeLabel' => $attribute->getLabel(),
                     'attributeKey' => $marketplaceGateway->findMarketplaceMappingFor($attribute->getName()),
                 ];
-        }, array_values(
+            },
+            array_values(
                 array_filter(
                     Shopware()->Models()->getRepository('Shopware\Models\Article\Element')->findAll(),
                     function ($attribute) {

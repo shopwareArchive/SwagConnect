@@ -4,7 +4,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 
 /**
@@ -132,13 +131,15 @@ class Shopware_Controllers_Backend_Import extends Shopware_Controllers_Backend_E
             return;
         }
 
-        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory($category,
+        $query = $this->getProductToRemoteCategoryRepository()->findArticlesByRemoteCategory(
+            $category,
             $shopId,
             $stream,
             $limit,
             $offset,
             $hideMapped,
-            $searchQuery);
+            $searchQuery
+        );
 
         $query->setHydrationMode($query::HYDRATE_OBJECT);
 

@@ -109,8 +109,8 @@ class Update
      */
     public function reVerifySDK()
     {
-        $this->db->query('
-            UPDATE sw_connect_shop_config
+        $this->db->query(
+            'UPDATE sw_connect_shop_config
             SET s_config = ?
             WHERE s_shop = "_last_update_"
             LIMIT 1; ',
@@ -121,13 +121,13 @@ class Update
     private function createExportedFlag()
     {
         if (version_compare($this->version, '1.0.1', '<=')) {
-            $this->db->query('
-                ALTER TABLE `s_plugin_connect_items`
-                ADD COLUMN `exported` TINYINT(1) DEFAULT 0
-            ');
+            $this->db->query(
+                'ALTER TABLE `s_plugin_connect_items`
+                ADD COLUMN `exported` TINYINT(1) DEFAULT 0'
+            );
 
-            $this->db->query('
-                UPDATE `s_plugin_connect_items`
+            $this->db->query(
+                'UPDATE `s_plugin_connect_items`
                 SET `exported` = 1
                 WHERE (`export_status` = ? OR `export_status` = ? OR `export_status` = ?) AND `shop_id` IS NULL',
                 [Attribute::STATUS_INSERT, Attribute::STATUS_UPDATE, Attribute::STATUS_SYNCED]
@@ -281,10 +281,10 @@ class Update
             $name = ConnectOrderUtil::ORDER_STATUS_ERROR;
             $group = Status::GROUP_STATE;
 
-            $isExists = $this->db->query('
-                SELECT `id` FROM `s_core_states`
-                WHERE `name` = ? AND `group` = ?
-                ', [$name, $group]
+            $isExists = $this->db->query(
+                'SELECT `id` FROM `s_core_states`
+                WHERE `name` = ? AND `group` = ?',
+                [$name, $group]
             )->fetch();
 
             if ($isExists) {
@@ -292,11 +292,11 @@ class Update
             }
 
             ++$currentId;
-            $this->db->query('
-                INSERT INTO `s_core_states`
+            $this->db->query(
+                'INSERT INTO `s_core_states`
                 (`id`, `name`, `description`, `position`, `group`, `mail`)
-                VALUES (?, ?, ?, ?, ?, ?)
-                ', [$currentId, $name, 'SC error', $currentId, $group, 0]
+                VALUES (?, ?, ?, ?, ?, ?)',
+                [$currentId, $name, 'SC error', $currentId, $group, 0]
             );
         }
     }
@@ -329,15 +329,15 @@ class Update
                 'shortDescriptionField' => $rows['longDescriptionField'],
             ];
 
-            $this->db->query('
-                UPDATE `s_plugin_connect_config`
+            $this->db->query(
+                'UPDATE `s_plugin_connect_config`
                 SET `value` = ?
                 WHERE `name` = ?',
                 [$newValues['longDescriptionField'], 'longDescriptionField']
             );
 
-            $this->db->query('
-                UPDATE `s_plugin_connect_config`
+            $this->db->query(
+                'UPDATE `s_plugin_connect_config`
                 SET `value` = ?
                 WHERE `name` = ?',
                 [$newValues['shortDescriptionField'], 'shortDescriptionField']
@@ -446,7 +446,8 @@ class Update
     {
         if (version_compare($this->version, '1.1.3', '<=')) {
             try {
-                $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories_to_local_categories` (
+                $this->db->query(
+                    'CREATE TABLE IF NOT EXISTS `s_plugin_connect_categories_to_local_categories` (
                   `remote_category_id` int(11) NOT NULL,
                   `local_category_id` int(11) unsigned NOT NULL,
                   PRIMARY KEY (`remote_category_id`, `local_category_id`),
@@ -509,9 +510,9 @@ class Update
         }
     }
 
-  /**
-     * Create index by articleID in s_plugin_connect_product_to_categories table.
-     */
+    /**
+      * Create index by articleID in s_plugin_connect_product_to_categories table.
+      */
     private function addProductToCategoryIndex()
     {
         if (version_compare($this->version, '1.1.7', '<=')) {
@@ -559,8 +560,8 @@ class Update
                 $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_remote_category_id FOREIGN KEY (remote_category_id) REFERENCES s_plugin_connect_categories (id) ON DELETE CASCADE');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories_to_local_categories ADD CONSTRAINT s_plugin_connect_remote_categories_fk_local_category_id FOREIGN KEY (local_category_id) REFERENCES s_categories (id) ON DELETE CASCADE');
             } catch (\Exception $e) {
-              // ignore it if exists
-              $this->logger->write(
+                // ignore it if exists
+                $this->logger->write(
                     true,
                     sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
                     $e->getMessage()
@@ -591,7 +592,8 @@ class Update
     {
         if (version_compare($this->version, '1.1.8', '<=')) {
             try {
-                $this->db->query('CREATE TABLE IF NOT EXISTS `s_plugin_connect_article_relations` (
+                $this->db->query(
+                    'CREATE TABLE IF NOT EXISTS `s_plugin_connect_article_relations` (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
                   `article_id` int(11) unsigned NOT NULL,
                   `shop_id` int(11) NOT NULL,

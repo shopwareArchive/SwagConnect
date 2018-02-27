@@ -81,7 +81,8 @@ class LocalProductQueryTest extends \PHPUnit_Framework_TestCase
                 'priceFieldForPurchasePriceExport',
                 $purchasePriceField,
                 'export'
-            ]);
+            ]
+        );
     }
 
     public function test_get()

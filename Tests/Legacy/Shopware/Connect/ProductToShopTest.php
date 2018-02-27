@@ -368,7 +368,8 @@ class ProductToShopTest extends ConnectTestHelper
             'purchasePrice' => $purchasePrice,
             'purchasePriceHash' => hash_hmac(
                 'sha256',
-                sprintf('%.3F %d', $purchasePrice, $offerValidUntil), '54642546-0001-48ee-b4d0-4f54af66d822'
+                sprintf('%.3F %d', $purchasePrice, $offerValidUntil),
+                '54642546-0001-48ee-b4d0-4f54af66d822'
             ),
             'offerValidUntil' => $offerValidUntil,
             'availability' => 80,
@@ -485,9 +486,11 @@ class ProductToShopTest extends ConnectTestHelper
             '/' . strtolower($parentCategory2) => $parentCategory2,
         ];
         foreach ($product->categories as $key => $value) {
-            $this->modelManager->getConnection()->executeQuery('INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
+            $this->modelManager->getConnection()->executeQuery(
+                'INSERT IGNORE INTO `s_plugin_connect_categories` (`category_key`, `label`) 
               VALUES (?, ?)',
-                [$key, $value]);
+                [$key, $value]
+            );
         }
 
         $productToShop->insertOrUpdate($product);
@@ -524,9 +527,11 @@ class ProductToShopTest extends ConnectTestHelper
         $this->assertEquals(1, $article->getAttribute()->getConnectMappedCategory());
 
         foreach ($product->categories as $key => $value) {
-            $this->modelManager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_categories`
+            $this->modelManager->getConnection()->executeQuery(
+                'DELETE FROM `s_plugin_connect_categories`
               WHERE `category_key` = ? AND `label` = ?',
-                [$key, $value]);
+                [$key, $value]
+            );
         }
     }
 

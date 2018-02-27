@@ -76,13 +76,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
      * Install plugin method
      *
      * @throws \RuntimeException
-     * @return bool
+     * @return array
      */
     public function install()
     {
         $this->doSetup();
 
-        return ['success' => true, 'invalidateCache' => ['backend', 'config']];
+        return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme', 'proxy']];
     }
 
     /**
@@ -109,13 +109,13 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
     /**
      * Uninstall plugin method
      *
-     * @return bool
+     * @return array
      */
     public function uninstall()
     {
         $this->doUninstall();
 
-        return true;
+        return ['success' => true, 'invalidateCache' => ['backend', 'config', 'template', 'theme', 'proxy']];
     }
 
     /**

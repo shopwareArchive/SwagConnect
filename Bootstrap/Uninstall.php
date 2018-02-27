@@ -81,59 +81,6 @@ class Uninstall
     }
 
     /**
-     * Remove the attributes when uninstalling the plugin
-     */
-    public function removeMyAttributes()
-    {
-        $crudService = $this->getCrudService();
-
-        try {
-            $crudService->delete(
-                's_order_attributes',
-                'connect_shop_id'
-            );
-            $crudService->delete(
-                's_order_attributes',
-                'connect_order_id'
-            );
-
-            $crudService->delete(
-                's_categories_attributes',
-                'connect_import_mapping'
-            );
-
-            $crudService->delete(
-                's_categories_attributes',
-                'connect_export_mapping'
-            );
-
-            $crudService->delete(
-                's_categories_attributes',
-                'connect_imported'
-            );
-
-            $crudService->delete(
-                's_premium_dispatch_attributes',
-                'connect_allowed'
-            );
-
-            $crudService->delete(
-                's_media_attributes',
-                'connect_hash'
-            );
-
-            $this->modelManager->generateAttributeModels([
-                's_premium_dispatch_attributes',
-                's_categories_attributes',
-                's_order_details_attributes',
-                's_order_basket_attributes',
-                's_media_attributes'
-            ]);
-        } catch (\Exception $e) {
-        }
-    }
-
-    /**
      * Disabled all products imported from shopware Connect
      */
     public function deactivateConnectProducts()

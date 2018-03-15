@@ -48,7 +48,9 @@ class SDKTest extends ConnectTestHelper
     public function testExportProductWithoutPurchasePrice()
     {
         $article = $this->getLocalArticle();
+        $article->setActive(true);
         $prices = $article->getMainDetail()->getPrices();
+        $article->getMainDetail()->setActive(true);
         if (method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice')) {
             $article->getMainDetail()->setPurchasePrice(null);
             $this->manager->persist($article->getMainDetail());
@@ -57,6 +59,7 @@ class SDKTest extends ConnectTestHelper
             $this->manager->Models()->persist($prices[0]);
         }
 
+        $this->manager->persist($article);
         $this->manager->flush();
 
         $this->getConnectExport()->export([$article->getId()]);

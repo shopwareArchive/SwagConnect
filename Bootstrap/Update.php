@@ -482,7 +482,9 @@ class Update
     {
         if (version_compare($this->version, '1.1.4', '<=')) {
             try {
-                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
+                if (!$this->existsConfig('recreateConnectCategories')) {
+                    $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("recreateConnectCategories", "0")');
+                }
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(
@@ -498,7 +500,9 @@ class Update
     {
         if (version_compare($this->version, '1.1.7', '<=')) {
             try {
-                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", "0", "import")');
+                if (!$this->existsConfig('updateOrderStatus')) {
+                    $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", "0", "import")');
+                }
             } catch (\Exception $e) {
                 // ignore it if exists
                 $this->logger->write(
@@ -533,7 +537,9 @@ class Update
     {
         if (version_compare($this->version, '1.1.7', '<=')) {
             try {
-                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("addShopIdToConnectCategories", "0")');
+                if (!$this->existsConfig('addShopIdToConnectCategories')) {
+                    $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`) VALUES ("addShopIdToConnectCategories", "0")');
+                }
                 $this->db->query('ALTER TABLE s_plugin_connect_categories ADD COLUMN `shop_id` int(11) NULL');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories DROP INDEX scuk_category_key');
                 $this->db->query('ALTER TABLE s_plugin_connect_categories ADD UNIQUE KEY `scuk_connect_category_for_shop_id` (`category_key`,`shop_id`)');
@@ -619,7 +625,9 @@ class Update
     {
         if (version_compare($this->version, '1.1.8', '<=')) {
             try {
-                $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("overwriteProductMainImage", "1", "import")');
+                if (!$this->existsConfig('overwriteProductMainImage')) {
+                    $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("overwriteProductMainImage", "1", "import")');
+                }
                 $this->db->query('ALTER TABLE `s_plugin_connect_items` ADD COLUMN `update_main_image` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL');
             } catch (\Exception $e) {
                 // ignore it if exists
@@ -664,5 +672,16 @@ class Update
                 );
             }
         }
+    }
+
+    /**
+     * @param string $configName
+     * @return bool
+     */
+    private function existsConfig($configName) {
+        $stmt = $this->db->prepare('SELECT * FROM s_plugin_connect_config WHERE `name` = ?');
+        $stmt->execute([$configName]);
+
+        return $stmt->fetch() !== false;
     }
 }

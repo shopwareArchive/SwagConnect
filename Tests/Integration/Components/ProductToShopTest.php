@@ -565,7 +565,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_overrides_status_to_completely_delivered()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 1 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
 
@@ -576,7 +576,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_overrides_status_to_partially_delivered()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 1 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_IN_PROCESS, '');
 
@@ -587,7 +587,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_dont_overrides_status_if_status_is_open()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 8)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 1 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_OPEN, '');
 
@@ -598,7 +598,10 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_dont_overrides_status_if_config_says_no()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status) VALUES (42, 0)');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 0 WHERE `name` = "updateOrderStatus"');
+
+        $config = ConfigFactory::getConfigInstance();
+        $config->setConfig('updateOrderStatus', 0);
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
 
@@ -609,7 +612,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_inserts_tracking_number()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 1, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 1 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, 'test');
 
@@ -620,7 +623,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_appends_tracking_number()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "foo")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 0 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, 'foo,test');
 
@@ -631,7 +634,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
     public function test_update_order_status_dont_change_tracking_number()
     {
         $this->manager->getConnection()->executeQuery('INSERT INTO s_order (ordernumber, status, trackingcode) VALUES (42, 0, "foo")');
-        $this->manager->getConnection()->executeQuery('INSERT INTO s_plugin_connect_config (`name`, `value`, `groupName`) VALUES ("updateOrderStatus", 0, "import")');
+        $this->manager->getConnection()->executeQuery('UPDATE s_plugin_connect_config SET `value` = 0 WHERE `name` = "updateOrderStatus"');
 
         $this->productToShop->updateOrderStatus(42, OrderStatus::STATE_DELIVERED, '');
 

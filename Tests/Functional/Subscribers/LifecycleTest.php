@@ -64,7 +64,7 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
                 'price' => 238.00,
                 'additionalText' => 'L / Schwarz',
                 'supplierNumber' => '',
-                'active' => false,
+                'active' => true,
                 'inStock' => 15,
                 'stockMin' => 0,
                 'weight' => 0,
@@ -76,7 +76,6 @@ class LifecycleTest extends \PHPUnit_Framework_TestCase
                 'articleId' => 32870,
                 'standard' => false,
                 'id' => 2404537,
-
             ]
         );
 

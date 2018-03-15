@@ -31,6 +31,7 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('priceGroupForPurchasePriceExport', 'EK', 'export'),
             ('priceFieldForPriceExport', 'price', 'export'),
             ('priceFieldForPurchasePriceExport', 'basePrice', 'export'),
+            ('excludeInactiveProducts', '1','export'),
             ('exportPriceMode', '[\"price\", \"purchasePrice\"]', 'export'),
             ('detailProductNoIndex', '1', 'general'),
             ('detailShopInfo', '1', 'import'),
@@ -42,12 +43,14 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('overwriteProductName', '1', 'import'),
             ('overwriteProductPrice', '1', 'import'),
             ('overwriteProductImage', '1', 'import'),
+            ('overwriteProductMainImage', '1','import'),
             ('overwriteProductShortDescription', '1', 'import'),
             ('overwriteProductLongDescription', '1', 'import'),
             ('overwriteProductAdditionalDescription', '1', 'import'),
             ('logRequest', '1', 'general'),
             ('showShippingCostsSeparately', '0', 'import'),
-            ('articleImagesLimitImport', '10', 'import');
+            ('articleImagesLimitImport', '10', 'import'),
+            ('updateOrderStatus', '0', 'import');
             "
         );
     }

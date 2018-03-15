@@ -10,7 +10,7 @@
     "currentVersion": "1.1.15",
     "changelog": {
         "de": {
-            "1.1.15": "CON-5085 - Connect Plugin ist jetzt mit Smarty Security kompatibel",
+            "1.1.15": "CON-5085 - Connect Plugin ist jetzt mit Smarty Security kompatibel; CON-5155 - Gefilterte Streams werden mit ersten Cron-Durchlauf exportiert; CON-5154 - Doppelte Config-Werte werden verhindert;",
             "1.1.14": "CON-5125 - Kompatibilität zu Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: eigene Berechnung für Versandkosten wird korrekt angezeigt; CON-5114 - Fix: Versandkosten für mehrere Lieferanten werden korrekt im Warenkorb angezeigt; CON-5096 - Fix: Connect Update Dialog wird nur Nutzern mit Rechten angezeigt;",
             "1.1.12": "CON-4632 - Fix: Live-Shipping Abfrage; CON-5097 - Lock-wait Timeouts im Backend behoben; CON-5093 - Möglichkeit Dantenbank-Trigger zu benutzen für bessere Kompatibilität mit anderen Plugins; CON-5041 - exportierte Länder und Sprach-Codes wurden aktualisiert;",
@@ -31,7 +31,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
-            "1.1.15": "CON-5085 - Connect Plugin is now compatible with Smarty Security",
+            "1.1.15": "CON-5085 - Connect Plugin is now compatible with Smarty Security; CON-5155 - Filtered Streams are exporten with first Cronjob; CON-5154: prevent duplicated config values;",
             "1.1.14": "CON-5125 - Compatibilitiy for Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: Own calculation for shipping costs gets correctly shown; CON-5114 - Fix: Shipping costs for multiple suppliers in basket is showed correctly; CON-5096 - Fix: Connect update dialog only visible for users with permissions;",
             "1.1.12": "CON-4632 - Fix: Live-Shipping request; CON-5097 - Fix: Lock-wait Timeouts in Backend; CON-5093 - Added Possibility to use Database Triggers, to improve compatibility with other Plugins; CON-5041 - exported Country and Language Codes updated;",

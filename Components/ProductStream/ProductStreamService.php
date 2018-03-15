@@ -28,6 +28,7 @@ class ProductStreamService
         self::STATUS_EXPORT,
         self::STATUS_SYNCED,
         self::STATUS_ERROR,
+        self::STATUS_PENDING,
     ];
 
     /**

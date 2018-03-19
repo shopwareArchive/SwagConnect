@@ -482,7 +482,12 @@ class ProductToShop implements ProductToShopBase
         $detail->setActive($model->getActive());
         // added for 5.4 compatibility
         if (method_exists($detail, 'setLastStock')) {
-            $detail->setLastStock($product->lastStock);
+            $shopConfiguration = $this->connectGateway->getShopConfiguration($product->shopId);
+            if ($shopConfiguration && $shopConfiguration->sellNotInStock) {
+                $detail->setLastStock(1);
+            } else {
+                $detail->setLastStock(0);
+            }
         }
         $this->manager->persist($detail);
         $detail->setArticle($model);

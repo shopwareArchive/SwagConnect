@@ -484,9 +484,9 @@ class ProductToShop implements ProductToShopBase
         if (method_exists($detail, 'setLastStock')) {
             $shopConfiguration = $this->connectGateway->getShopConfiguration($product->shopId);
             if ($shopConfiguration && $shopConfiguration->sellNotInStock) {
-                $detail->setLastStock(1);
+                $detail->setLastStock(false);
             } else {
-                $detail->setLastStock(0);
+                $detail->setLastStock(true);
             }
         }
         $this->manager->persist($detail);

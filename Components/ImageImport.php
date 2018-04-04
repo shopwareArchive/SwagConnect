@@ -121,13 +121,21 @@ class ImageImport
 
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
             foreach ($connectAttributes as $connectAttribute) {
-                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-                $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $article);
-                $this->importImagesForDetail($lastUpdate['variantImages'], $connectAttribute->getArticleDetail());
-                $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+                $this->manager->getConnection()->beginTransaction();
+                try {
+                    $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                    $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $article);
+                    $this->importImagesForDetail($lastUpdate['variantImages'], $connectAttribute->getArticleDetail());
+                    $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+                    $this->manager->flush();
+                    $this->manager->getConnection()->commit();
+                } catch (\PDOException $e) {
+                    // possible lock with ImageImport from ToShop channel
+                    // is thrown before flipping of last update flag
+                    // so we should process the article again in next cron run
+                    $this->manager->getConnection()->rollback();
+                }
             }
-
-            $this->manager->flush();
         }
     }
 
@@ -160,8 +168,8 @@ class ImageImport
             if (count($image->getMappings()) > 0) {
                 continue;
             }
-            $this->manager->remove($image);
             $this->manager->remove($data['media']);
+            $this->manager->remove($image);
         }
         $this->manager->flush();
 

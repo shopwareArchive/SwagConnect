@@ -50,7 +50,8 @@ class MenuService
         $plugin = $this->installerService->getPluginByName('SwagConnect');
 
         /** @var Menu $menuItem */
-        $menuItem = $this->manager->getRepository(Menu::class)->findOneBy(['label' => 'Connect']);
+        $menuItem = $this->manager->getRepository(Menu::class)
+            ->findOneBy(['class' => 'shopware-connect']);
 
         $this->connection->delete('s_core_menu', ['controller' => 'Connect', 'pluginID' => $plugin->getId()]);
         $this->connection->insert('s_core_menu', [

@@ -40,11 +40,11 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_net_price', 'net price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/connect/shipping_costs', 1, 2, 'connect_dispatch_gross_price', 'gross price', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 
-('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message', 'Produkte in Ihrer Bestellung sind aktuell nicht lieferbar, bitte entfernen Sie die Produkte um fortzufahren.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message', 'Products of your order are out of stock in your order, delete this products in your order', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message', 'Das Product "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar, bitte entfernen Sie das Produkt um fortzufahren.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message', 'Product "%ptitle" in your order is currently out of stock. delete the product in your order to continue', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
 
-('frontend/checkout/error_messages', 1, 1, 'connect_product_lower_stock_message', 'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/checkout/error_messages', 1, 2, 'connect_product_lower_stock_message', 'Availability of product "%product" changed to %availability', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
+('frontend/checkout/error_messages', 1, 1, 'connect_product_lower_stock_message', 'Der Lagerbestand von Produkt "%ptitle" hat sich auf %availability geändert', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
+('frontend/checkout/error_messages', 1, 2, 'connect_product_lower_stock_message', 'Availability of product "%ptitle" changed to %availability', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
 
 
 ('frontend/checkout/connect', 1, 1, 'delivery_address_empty', 'Die Lieferadresse kann nicht leer sein', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),

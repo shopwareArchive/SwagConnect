@@ -636,18 +636,22 @@ class BasketHelper
     public function getConnectTemplateVariables(array $connectMessages)
     {
         $snippets = Shopware()->Snippets()->getNamespace('frontend/checkout/error_messages');
+
         /** @var Message $message */
         foreach ($connectMessages as $message) {
             if ($message->message == 'Availability of product %product changed to %availability.') {
+
+                $this->guessProductTitle($message);
+
                 if ($message->values['availability'] == 0) {
                     $message->message = $snippets->get(
                         'connect_product_out_of_stock_message',
-                        'Produkte in Ihrer Bestellung sind aktuell nicht lieferbar, bitte entfernen Sie die Produkte um fortzufahren.'
+                        'Das Product "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar, bitte entfernen Sie das Produkt um fortzufahren.'
                     );
                 } else {
                     $message->message = $snippets->get(
                         'connect_product_lower_stock_message',
-                        'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert'
+                        'Der Lagerbestand von Produkt "%ptitle" hat sich auf %availability geändert.'
                     );
                 }
             }
@@ -662,6 +666,24 @@ class BasketHelper
             'connectShopInfo' => $this->showCheckoutShopInfo,
             'addBaseShop' => $this->onlyConnectProducts ? 0 : 1,
         ];
+    }
+
+    private function guessProductTitle(Message $message)
+    {
+        if (isset($message->values['shopId'])) {
+            $product = $this->getConnectProducts()[$message->values['shopId']][$message->values['product']];
+            $message->values['ptitle'] = $product->title;
+            return;
+        }
+
+        //sdk version < v2.0.12
+        foreach ($this->getConnectProducts() as $supplierArray) {
+            foreach ($supplierArray as $key => $product) {
+                if ($key == $message->values['product'] && $product->availability == 0 )
+                    $message->values['ptitle'] = $product->title;
+                return;
+            }
+        }
     }
 
     /**

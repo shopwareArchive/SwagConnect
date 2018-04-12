@@ -580,12 +580,18 @@ class Checkout implements SubscriberInterface
         foreach ($checkResult->shippingCosts as $shipping) {
             if ($shipping->isShippable === false) {
                 if (empty($shipping->messages)) {
+
+                    $shop = $this->sdk->getShop($shipping->shopId);
+
                     $connectMessages[] = new Message([
                         'message' => $namespace->get(
                             'frontend_checkout_cart_connect_not_shippable',
-                            'Ihre Bestellung kann nicht geliefert werden',
-                            true
-                        )
+                            'Ihre Bestellung kann nicht geliefert werden. Der Händler %supplierName liefert nicht in Dein Land.',
+                            false
+                        ),
+                        'values' => [
+                            'supplierName' => $shop->name
+                        ]
                     ]);
 
                     continue;

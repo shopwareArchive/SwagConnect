@@ -1,13 +1,13 @@
 
 INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`, `value`, `created`, `updated`) VALUES
 ('frontend/checkout/connect', 1, 1, 'frontend_checkout_cart_connect_phone', 'Um diese Produkte zu bestellen, müssen Sie ihre Telefonnummer hinterlegen. Klicken Sie hier, um diese Änderung jetzt durchzuführen.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/checkout/connect', 1, 1, 'frontend_checkout_cart_connect_not_shippable', 'Ihre Bestellung kann nicht geliefert werden', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
+('frontend/checkout/connect', 1, 1, 'frontend_checkout_cart_connect_not_shippable', 'Ihre Bestellung kann nicht geliefert werden. Der Händler %supplierName liefert nicht in Dein Land.', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
 ('frontend/checkout/connect', 1, 1, 'frontend_checkout_cart_connect_payment_not_allowed', 'Die ausgewählte Zahlungsmethode steht für Marktplatzprodukte nicht zur Verfügung. Bitte ändern Sie diese.', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
 ('frontend/search/connect', 1, 1, 'SearchHeading', 'Zu "{$searchQuery|escape}" wurden in diesem Shop keine Produkte gefunden,<br> eventuell sind die Produkte unserer Partnershops für Sie interessant.', '2014-04-25 11:00:00', '2014-04-25 11:00:00'),
 ('frontend/search/connect', 1, 1, 'SearchHeadingEmpty', 'Leider wurden zu "{$searchQuery|escape}" keine Artikel gefunden', '2014-04-25 11:00:00', '2014-04-25 11:00:00'),
 ('frontend/checkout/connect', 1, 2, 'price_of_product__product_changed_to__price_', 'Price of product %product changed to %price.', '2014-01-11 18:30:18', '2014-01-11 18:30:18'),
 ('frontend/checkout/connect', 1, 2, 'frontend_checkout_cart_connect_phone', 'You need to leave your phone number in order to purchase these products. Click here in order to change your phone number now.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
-('frontend/checkout/connect', 1, 2, 'frontend_checkout_cart_connect_not_shippable', 'Your order can not be delivered', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
+('frontend/checkout/connect', 1, 2, 'frontend_checkout_cart_connect_not_shippable', 'Your order can not be delivered. %supplierName does not deliver into your country.', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
 ('frontend/checkout/connect', 1, 2, 'frontend_checkout_cart_connect_payment_not_allowed', 'Selected payment method is not allowed with connect products. Please change it.', '2014-04-22 17:29:48', '2014-04-22 17:29:48'),
 ('frontend/search/connect', 1, 2, 'SearchHeading', 'No results have been found for "{$searchQuery|escape}",<br> but maybe these products in our partner shops are interesting for you.', '2014-04-25 11:00:00', '2014-04-25 11:00:00'),
 ('frontend/search/connect', 1, 2, 'SearchHeadingEmpty', 'No results have been found for "{$searchQuery|escape}"', '2014-04-25 11:00:00', '2014-04-25 11:00:00'),
@@ -66,5 +66,6 @@ ON DUPLICATE KEY UPDATE
   `namespace` = VALUES(`namespace`),
   `shopID` = VALUES(`shopID`),
   `name` = VALUES(`name`),
-  `localeID` = VALUES(`localeID`)
+  `localeID` = VALUES(`localeID`),
+  `value` = VALUES(`value`)
 ;

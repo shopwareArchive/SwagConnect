@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.15",
+    "currentVersion": "1.1.16",
     "changelog": {
         "de": {
+            "1.1.16": "CON-5195 - Im Checkout wird jetzt angezeigt, warum eine Bestellung nicht geliefert werden kann.",
             "1.1.15": "CON-5085 - Connect Plugin ist jetzt mit Smarty Security kompatibel; CON-5155 - Gefilterte Streams werden mit ersten Cron-Durchlauf exportiert; CON-5154 - Doppelte Config-Werte werden verhindert;",
             "1.1.14": "CON-5125 - Kompatibilität zu Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: eigene Berechnung für Versandkosten wird korrekt angezeigt; CON-5114 - Fix: Versandkosten für mehrere Lieferanten werden korrekt im Warenkorb angezeigt; CON-5096 - Fix: Connect Update Dialog wird nur Nutzern mit Rechten angezeigt;",
@@ -31,6 +32,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.16": "CON-5195 - The user get now notified why a order can't be shipped during checkout.",
             "1.1.15": "CON-5085 - Connect Plugin is now compatible with Smarty Security; CON-5155 - Filtered Streams are exporten with first Cronjob; CON-5154: prevent duplicated config values;",
             "1.1.14": "CON-5125 - Compatibilitiy for Shopware 5.4",
             "1.1.13": "CON-5110 - Fix: Own calculation for shipping costs gets correctly shown; CON-5114 - Fix: Shipping costs for multiple suppliers in basket is showed correctly; CON-5096 - Fix: Connect update dialog only visible for users with permissions;",

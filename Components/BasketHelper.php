@@ -678,10 +678,11 @@ class BasketHelper
 
         //sdk version < v2.0.12
         foreach ($this->getConnectProducts() as $supplierArray) {
-            foreach ($supplierArray as $key => $product) {
-                if ($key == $message->values['product'] && $product->availability == 0 )
+            foreach ($supplierArray as $product) {
+                if ($product->sourceId == $message->values['product'] && $product->availability == 0) {
                     $message->values['ptitle'] = $product->title;
-                return;
+                    return;
+                }
             }
         }
     }

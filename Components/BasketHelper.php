@@ -641,16 +641,16 @@ class BasketHelper
         foreach ($connectMessages as $message) {
             if ($message->message == 'Availability of product %product changed to %availability.') {
 
-                $this->guessProductTitle($message);
+                $this->determineProductTitle($message);
 
                 if ($message->values['availability'] == 0) {
                     $message->message = $snippets->get(
-                        'connect_product_out_of_stock_message',
+                        'connect_product_out_of_stock_message_detailed',
                         'Das Product "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar, bitte entfernen Sie das Produkt um fortzufahren.'
                     );
                 } else {
                     $message->message = $snippets->get(
-                        'connect_product_lower_stock_message',
+                        'connect_product_lower_stock_message_detailed',
                         'Der Lagerbestand von Produkt "%ptitle" hat sich auf %availability geändert.'
                     );
                 }
@@ -668,7 +668,7 @@ class BasketHelper
         ];
     }
 
-    private function guessProductTitle(Message $message)
+    private function determineProductTitle(Message $message)
     {
         if (isset($message->values['shopId'])) {
             $product = $this->getConnectProducts()[$message->values['shopId']][$message->values['product']];

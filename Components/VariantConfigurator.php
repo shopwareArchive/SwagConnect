@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Components;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use ShopwarePlugins\Connect\Components\Gateway\ProductTranslationsGateway;
 use ShopwarePlugins\Connect\Components\Translations\LocaleMapper;
 use Shopware\Components\Model\ModelManager;
@@ -80,6 +81,8 @@ class VariantConfigurator
                 $detailOptions->add($option);
             }
         }
+        $this->deleteUnusedOptions($product, $detailOptions, $configSet);
+
         $this->manager->persist($configSet);
 
         $detail->setConfiguratorOptions($detailOptions);
@@ -96,6 +99,51 @@ class VariantConfigurator
             $this->addGroupTranslation($group, $product);
             $this->addOptionTranslation($option, $product);
         }
+    }
+
+
+    /**
+     * @param Product $product
+     * @param $detailOptions
+     * @param Set $configSet
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function deleteUnusedOptions(Product $product, $detailOptions, Set $configSet)
+    {
+        /** @var Option $detailOption */
+        foreach ($detailOptions as $detailOption) {
+            if (!in_array($detailOption->getName(), $product->variant)) {
+
+                $detailOptions->removeElement($detailOption);
+
+                $configSet->getOptions()->removeElement($detailOption);
+
+                file_put_contents(__DIR__.'/testlog.log', sprintf('Deleted %s => %b', $detailOption->getName(), $this->isOptionUsed($detailOption)) . PHP_EOL, FILE_APPEND);
+                if (!($this->isOptionUsed($detailOption))) {
+                    $this->manager->remove($detailOption);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @param $detailOption
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function isOptionUsed(Option $detailOption)
+    {
+        $connection = $this->manager->getConnection();
+        $query = $connection->prepare(
+            'SELECT set_id FROM s_article_configurator_set_option_relations WHERE option_id = :optionId UNION 
+              SELECT article_id FROM s_article_configurator_option_relations WHERE option_id = :optionId
+              LIMIT 1'
+        );
+        $query->bindValue('optionId', $detailOption->getId());
+        $result = $query->fetchColumn();
+
+        return $result !== false;
     }
 
     /**

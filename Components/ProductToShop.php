@@ -14,6 +14,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Article\Configurator\Option;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -392,6 +393,18 @@ class ProductToShop implements ProductToShopBase
         );
 
         $article = $detailModel->getArticle();
+
+        $configSet = $article->getConfiguratorSet();
+        $options = $detailModel->getConfiguratorOptions();
+        $optionCollection = $configSet->getOptions();
+        /** @var Option $option */
+        foreach ($options as $option) {
+            file_put_contents(__DIR__.'/testlog.log', sprintf('Delete %s', $option->getName()) . PHP_EOL, FILE_APPEND);
+            $optionCollection->removeElement($option);
+        }
+        $configSet->setOptions($options);
+        $this->manager->persist($configSet);
+
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
         $this->manager->remove($detailModel);

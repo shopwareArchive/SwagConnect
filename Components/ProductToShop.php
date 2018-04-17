@@ -457,7 +457,7 @@ class ProductToShop implements ProductToShopBase
     {
         $configSet = $article->getConfiguratorSet();
         $options = $detailModel->getConfiguratorOptions();
-        if($options && $options) {
+        if($options && $configSet) {
             $optionCollection = $configSet->getOptions();
             /** @var Option $option */
             foreach ($options as $option) {

@@ -87,12 +87,10 @@ class VariantConfigurator
         $detail->setConfiguratorOptions($detailOptions);
         $this->manager->persist($detail);
         $this->manager->persist($article);
-        $this->manager->persist($article);
 
         $this->deleteUnusedOptions($product, $detailOptions, $configSet);
 
         $this->manager->flush();
-
 
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);

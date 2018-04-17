@@ -394,15 +394,7 @@ class ProductToShop implements ProductToShopBase
 
         $article = $detailModel->getArticle();
 
-        $configSet = $article->getConfiguratorSet();
-        $options = $detailModel->getConfiguratorOptions();
-        $optionCollection = $configSet->getOptions();
-        /** @var Option $option */
-        foreach ($options as $option) {
-            $optionCollection->removeElement($option);
-        }
-        $configSet->setOptions($options);
-        $this->manager->persist($configSet);
+        $this->removeOptions($detailModel, $article);
 
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
@@ -454,6 +446,25 @@ class ProductToShop implements ProductToShopBase
         // call this after flush because article has to be deleted that this works
         if (count($oldCategoryIds) > 0) {
             $this->categoryResolver->deleteEmptyConnectCategories($oldCategoryIds);
+        }
+    }
+
+    /**
+     * @param DetailModel $detailModel
+     * @param $article
+     */
+    private function removeOptions(DetailModel $detailModel, $article)
+    {
+        $configSet = $article->getConfiguratorSet();
+        $options = $detailModel->getConfiguratorOptions();
+        if($options) {
+            $optionCollection = $configSet->getOptions();
+            /** @var Option $option */
+            foreach ($options as $option) {
+                $optionCollection->removeElement($option);
+            }
+            $configSet->setOptions($options);
+            $this->manager->persist($configSet);
         }
     }
 

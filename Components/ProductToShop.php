@@ -399,7 +399,6 @@ class ProductToShop implements ProductToShopBase
         $optionCollection = $configSet->getOptions();
         /** @var Option $option */
         foreach ($options as $option) {
-            file_put_contents(__DIR__.'/testlog.log', sprintf('Delete %s', $option->getName()) . PHP_EOL, FILE_APPEND);
             $optionCollection->removeElement($option);
         }
         $configSet->setOptions($options);

@@ -81,15 +81,18 @@ class VariantConfigurator
                 $detailOptions->add($option);
             }
         }
-        $this->deleteUnusedOptions($product, $detailOptions, $configSet);
 
         $this->manager->persist($configSet);
 
         $detail->setConfiguratorOptions($detailOptions);
         $this->manager->persist($detail);
         $this->manager->persist($article);
+        $this->manager->persist($article);
+
+        $this->deleteUnusedOptions($product, $detailOptions, $configSet);
 
         $this->manager->flush();
+
 
         foreach ($product->variant as $key => $value) {
             $group = $this->getGroupByName($configSet, $key);
@@ -118,7 +121,8 @@ class VariantConfigurator
 
                 $configSet->getOptions()->removeElement($detailOption);
 
-                file_put_contents(__DIR__.'/testlog.log', sprintf('Deleted %s => %b', $detailOption->getName(), $this->isOptionUsed($detailOption)) . PHP_EOL, FILE_APPEND);
+                $this->manager->flush();
+
                 if (!($this->isOptionUsed($detailOption))) {
                     $this->manager->remove($detailOption);
                 }
@@ -136,11 +140,12 @@ class VariantConfigurator
     {
         $connection = $this->manager->getConnection();
         $query = $connection->prepare(
-            'SELECT set_id FROM s_article_configurator_set_option_relations WHERE option_id = :optionId UNION 
-              SELECT article_id FROM s_article_configurator_option_relations WHERE option_id = :optionId
+            'SELECT option_id FROM s_article_configurator_set_option_relations WHERE option_id = :optionId UNION 
+              SELECT option_id FROM s_article_configurator_option_relations WHERE option_id = :optionId
               LIMIT 1'
         );
         $query->bindValue('optionId', $detailOption->getId());
+        $query->execute();
         $result = $query->fetchColumn();
 
         return $result !== false;

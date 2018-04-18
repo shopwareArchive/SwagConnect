@@ -458,11 +458,6 @@ class ProductToShop implements ProductToShopBase
         $configSet = $article->getConfiguratorSet();
         $options = $detailModel->getConfiguratorOptions();
         if($options && $configSet) {
-            $optionCollection = $configSet->getOptions();
-            /** @var Option $option */
-            foreach ($options as $option) {
-                $optionCollection->removeElement($option);
-            }
             $configSet->setOptions($options);
             $this->manager->persist($configSet);
         }

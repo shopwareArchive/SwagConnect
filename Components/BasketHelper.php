@@ -646,7 +646,7 @@ class BasketHelper
                 if ($message->values['availability'] == 0) {
                     $message->message = $snippets->get(
                         'connect_product_out_of_stock_message_detailed',
-                        'Das Product "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar, bitte entfernen Sie das Produkt um fortzufahren.'
+                        'Das Produkt "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar. Bitte entfernen Sie das Produkt um fortzufahren.'
                     );
                 } else {
                     $message->message = $snippets->get(

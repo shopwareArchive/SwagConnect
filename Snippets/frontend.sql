@@ -44,7 +44,7 @@ INSERT IGNORE INTO `s_core_snippets` (`namespace`, `shopID`, `localeID`, `name`,
 
 ('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message', 'Produkte in Ihrer Bestellung sind aktuell nicht lieferbar, bitte entfernen Sie die Produkte um fortzufahren.', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),
 ('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message', 'Products of your order are out of stock in your order, delete this products in your order', '2017-04-11 15:36:48', '2017-04-11 15:36:48'),
-('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message_detailed', 'Das Product "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar, bitte entfernen Sie das Produkt um fortzufahren.', '2018-04-13 10:30:00', '2018-04-13 10:30:00'),
+('frontend/checkout/error_messages', 1, 1, 'connect_product_out_of_stock_message_detailed', 'Das Produkt "%ptitle" in Ihrer Bestellung ist aktuell nicht lieferbar. Bitte entfernen Sie das Produkt um fortzufahren.', '2018-04-13 10:30:00', '2018-04-13 10:30:00'),
 ('frontend/checkout/error_messages', 1, 2, 'connect_product_out_of_stock_message_detailed', 'Product "%ptitle" in your order is currently out of stock. delete the product in your order to continue', '2018-04-13 10:30:00', '2018-04-13 10:30:00'),
 
 ('frontend/checkout/error_messages', 1, 1, 'connect_product_lower_stock_message', 'Der Lagerbestand von Produkt "%product" hat sich auf %availability geändert', '2014-01-11 18:32:48', '2014-01-11 18:32:48'),

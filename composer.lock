@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "51af523ac45f9a5905397f13d3de4e12",
+    "content-hash": "dc71c48fa28f8f9473e2565666c37772",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -51,16 +51,16 @@
         },
         {
             "name": "shopware/connect-sdk",
-            "version": "dev-CON-5195",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/Connect-SDK.git",
-                "reference": "34488a7245f8c7c0f167a883b8153c87cd30ae69"
+                "reference": "2ab362b53257ce6b7f2ad584677da91e19b080e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/34488a7245f8c7c0f167a883b8153c87cd30ae69",
-                "reference": "34488a7245f8c7c0f167a883b8153c87cd30ae69",
+                "url": "https://api.github.com/repos/shopware/Connect-SDK/zipball/2ab362b53257ce6b7f2ad584677da91e19b080e3",
+                "reference": "2ab362b53257ce6b7f2ad584677da91e19b080e3",
                 "shasum": ""
             },
             "require-dev": {
@@ -81,10 +81,10 @@
             ],
             "description": "PHP SDK to integrate your shop with Shopware Connect",
             "support": {
-                "source": "https://github.com/shopware/Connect-SDK/tree/CON-5195",
+                "source": "https://github.com/shopware/Connect-SDK/tree/v2.0.13",
                 "issues": "https://github.com/shopware/Connect-SDK/issues"
             },
-            "time": "2018-04-12T14:24:20+00:00"
+            "time": "2018-04-24T13:45:55+00:00"
         }
     ],
     "packages-dev": [

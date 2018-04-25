@@ -49,7 +49,8 @@ Ext.define('Shopware.apps.Connect.view.config.general.Form', {
 
     snippets: {
         apiKeyHeader: '{s name=config/main/api_key}API-Key{/s}',
-        apiKeyDescription: Ext.String.format('{s name=config/api-key-description}Du findest deinen API-Key in [0] unter Einstellungen und Synchronisation.<br><br>{/s}', marketplaceName),
+        apiKeyDescription: Ext.String.format('{s name=config/api-key-description}Du findest deinen API-Key in [0] unter Einstellungen und Synchronisation. <br> ' +
+            'Durch das Prüfen der Verbindung übermitteln sie ihre Shop URL an Connect<br><br>{/s}', marketplaceName),
         apiKeyCheck: '{s name=config/api_key_check}Validate{/s}',
         basicSettings: '{s name=config/main/basic_settings}Grundeinstellungen{/s}',
         save: '{s name=config/save}Save{/s}',

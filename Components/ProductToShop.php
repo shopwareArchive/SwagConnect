@@ -14,6 +14,7 @@ use Shopware\Connect\ProductToShop as ProductToShopBase;
 use Shopware\Connect\Struct\OrderStatus;
 use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Article\Configurator\Option;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Article\Detail as DetailModel;
 use Shopware\Models\Attribute\Article as AttributeModel;
@@ -392,6 +393,9 @@ class ProductToShop implements ProductToShopBase
         );
 
         $article = $detailModel->getArticle();
+
+        $this->removeOptions($detailModel, $article);
+
         // Not sure why, but the Attribute can be NULL
         $attribute = $this->helper->getConnectAttributeByModel($detailModel);
         $this->manager->remove($detailModel);
@@ -442,6 +446,20 @@ class ProductToShop implements ProductToShopBase
         // call this after flush because article has to be deleted that this works
         if (count($oldCategoryIds) > 0) {
             $this->categoryResolver->deleteEmptyConnectCategories($oldCategoryIds);
+        }
+    }
+
+    /**
+     * @param DetailModel $detailModel
+     * @param $article
+     */
+    private function removeOptions(DetailModel $detailModel, $article)
+    {
+        $configSet = $article->getConfiguratorSet();
+        $options = $detailModel->getConfiguratorOptions();
+        if($options && $configSet) {
+            $configSet->setOptions($options);
+            $this->manager->persist($configSet);
         }
     }
 

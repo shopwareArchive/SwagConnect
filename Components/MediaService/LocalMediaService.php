@@ -9,7 +9,7 @@ namespace ShopwarePlugins\Connect\Components\MediaService;
 
 use Shopware\Bundle\StoreFrontBundle\Struct;
 use Shopware\Bundle\StoreFrontBundle\Gateway;
-use Shopware\Bundle\StoreFrontBundle\Service\Core\MediaService as CoreMediaService;
+use Shopware\Bundle\StoreFrontBundle\Service\MediaServiceInterface as CoreMediaService;
 use ShopwarePlugins\Connect\Components\MediaService;
 
 class LocalMediaService implements MediaService

@@ -97,7 +97,7 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
 
     public function test_configure_serveral_variant_products()
     {
-        $variants = $this->getVariants();
+        $variants = $this->getVariantsNonRand();
 
         $colorOptions = array_map(
             function (Product $product) {
@@ -132,7 +132,7 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
 
         $options = $configuratorSet->getOptions();
 
-        $this->assertEquals(4, $options->count());
+        $this->assertEquals(1, $options->count());
 
         foreach ($options as $option) {
             $this->assertContains($option->getName(), $colorOptions);

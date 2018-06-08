@@ -37,7 +37,8 @@ class ImageImportCommand extends ShopwareCommand
             ->addArgument(
                 'limit',
                 InputArgument::OPTIONAL,
-                'Amount of Images to import at once'
+                'Amount of Images to import at once',
+                10
             );
     }
 
@@ -48,7 +49,7 @@ class ImageImportCommand extends ShopwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $symfonyStyle = new SymfonyStyle($input, $output);
-        $limit = $input->getArgument('limit') | 10;
+        $limit = $input->getArgument('limit');
 
         $this->getImageImport()->import($limit);
 

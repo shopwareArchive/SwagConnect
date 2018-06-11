@@ -10,6 +10,7 @@ use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
+use ShopwarePlugins\Connect\Commands\ImageImportCommand;
 use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
 use ShopwarePlugins\Connect\Components\Logger;
@@ -212,7 +213,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
         $this->registerSubscribers();
 
         return new ArrayCollection([
-            new ApiEndpointCommand()
+            new ApiEndpointCommand(),
+            new ImageImportCommand($this->getHelper())
         ]);
     }
 

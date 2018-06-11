@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.16",
+    "currentVersion": "1.1.17",
     "changelog": {
         "de": {
+            "1.1.17": "CON-5273 - Bildimport kann via Konsolen-Command ausgeführt werden;",
             "1.1.16": "CON-5196 - Fix: Probleme beim Bildimport via Cronjob; CON-5195 - Hinzugefügt: Hinweis im Checkout welcher Lieferant nicht liefern kann; CON-5221 - Fix: Shop-Url wird durch \"Verbindung prüfen\" akzualisiert; CON-5228 - Fix: MediaServiceInterface wird benutzt;",
             "1.1.15": "CON-5085 - Connect Plugin ist jetzt mit Smarty Security kompatibel; CON-5155 - Gefilterte Streams werden mit ersten Cron-Durchlauf exportiert; CON-5154 - Doppelte Config-Werte werden verhindert;",
             "1.1.14": "CON-5125 - Kompatibilität zu Shopware 5.4",
@@ -32,6 +33,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.17": "CON-5273 - ImageImport can be started with Console-Command;",
             "1.1.16": "CON-5196 - Fix: Problems with imageImport with Cronjob; CON-5195 - Added: Notification during Checkout which Supplier can not ship Items; CON-5221 - Fix: Shop-Url gets updated with \"Check Connection\" button; CON-5228 - Fix: use MediaServiceInterface;",
             "1.1.15": "CON-5085 - Connect Plugin is now compatible with Smarty Security; CON-5155 - Filtered Streams are exporten with first Cronjob; CON-5154: prevent duplicated config values;",
             "1.1.14": "CON-5125 - Compatibilitiy for Shopware 5.4",
@@ -56,7 +58,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.4.2",
+        "maximumVersion": "5.4.4",
         "blacklist": []
     }
 }

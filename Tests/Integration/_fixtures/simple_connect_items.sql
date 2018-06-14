@@ -2,7 +2,7 @@ INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, pu
 VALUES (3, 3, 3, "hash", 123, "Awesome products", NULL);
 
 INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, purchase_price_hash, offer_valid_until, stream, shop_id)
-VALUES (4, 4, 3, "hash", 123, "Awesome products", NULL);
+VALUES (4, 4, 4, "hash", 123, "Awesome products", NULL);
 
 INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, purchase_price_hash, offer_valid_until, stream, shop_id)
 VALUES (89, 153, 89, "hash", 123, "Awesome products", NULL);

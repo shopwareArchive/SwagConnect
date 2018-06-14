@@ -112,9 +112,9 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
 
         $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 125');
 
-        $this->connectExport->processChanged(['2-125', '2-124']);
+        $this->connectExport->processChanged(['2-123', '2-124']);
 
-        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "2-125"');
+        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "2-123"');
         $this->assertEquals(Attribute::STATUS_DELETE, $status);
 
         // No matter that it is error -> it says that ConnectExport->export() is called for this sourceId

@@ -41,11 +41,11 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $articleIds = $mainSourceIds = [89, 2];
+        $articleIds = $mainSourceIds = [2, 89];
         $sourceIdsForVariants = [
-            '89-154',
             '2-124',
-            '2-125',
+            '2-123',
+            '89-154',
         ];
         $this->assertEquals($mainSourceIds, $this->repository->findSourceIds($articleIds, 1));
         $this->assertEquals($sourceIdsForVariants, $this->repository->findSourceIds($articleIds, 2));
@@ -65,8 +65,8 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $mainProductIds = $this->repository->findAllSourceIds(0, 5);
         $variantIds = $this->repository->findAllSourceIds(5, 3);
 
-        $expectedProductIds = ['3', '4', '89', '2', '6'];
-        $expectedVariantIds = ['89-154', '2-124', '2-125'];
+        $expectedProductIds = ['2', '3', '4', '6', '89'];
+        $expectedVariantIds = ['2-124', '2-123', '89-154'];
 
         $this->assertEquals($expectedProductIds, $mainProductIds);
         $this->assertEquals($expectedVariantIds, $variantIds);

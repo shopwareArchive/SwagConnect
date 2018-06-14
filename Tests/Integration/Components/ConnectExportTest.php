@@ -100,8 +100,8 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $result = $this->connectExport->getExportList($criteria);
 
         $this->assertCount(5, $result->articles);
-        $this->assertEquals(14467, $result->articles[0]['id']);
-        $this->assertEquals(14471, $result->articles[4]['id']);
+        $this->assertEquals(3, $result->articles[0]['id']);
+        $this->assertEquals(6, $result->articles[4]['id']);
         $this->assertEquals(5, $result->count);
     }
 
@@ -110,15 +110,15 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_items`');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 7091852');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 125');
 
-        $this->connectExport->processChanged(['14470-7091852', '14470-7091851']);
+        $this->connectExport->processChanged(['2-125', '2-124']);
 
-        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "14470-7091852"');
+        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "2-125"');
         $this->assertEquals(Attribute::STATUS_DELETE, $status);
 
         // No matter that it is error -> it says that ConnectExport->export() is called for this sourceId
-        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "14470-7091851"');
+        $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "2-124"');
         $this->assertEquals(Attribute::STATUS_ERROR, $status);
     }
 }

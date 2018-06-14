@@ -38,7 +38,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $articleIds = $expectedSourceIds = [14467, 14468];
+        $articleIds = $expectedSourceIds = [3, 4];
         $this->assertEquals($expectedSourceIds, $this->repository->findSourceIds($articleIds, 1));
     }
 
@@ -48,11 +48,11 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $articleIds = $mainSourceIds = [14469, 14470];
+        $articleIds = $mainSourceIds = [89, 2];
         $sourceIdsForVariants = [
-            '14469-7091849',
-            '14470-7091851',
-            '14470-7091852',
+            '89-154',
+            '2-124',
+            '2-125',
         ];
         $this->assertEquals($mainSourceIds, $this->repository->findSourceIds($articleIds, 1));
         $this->assertEquals($sourceIdsForVariants, $this->repository->findSourceIds($articleIds, 2));
@@ -76,8 +76,8 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $mainProductIds = $this->repository->findAllSourceIds(0, 5);
         $variantIds = $this->repository->findAllSourceIds(5, 3);
 
-        $expectedProductIds = ['14467', '14468', '14469', '14470', '14471'];
-        $expectedVariantIds = ['14469-7091849', '14470-7091851', '14470-7091852'];
+        $expectedProductIds = ['3', '4', '89', '2', '6'];
+        $expectedVariantIds = ['89-154', '2-124', '2-125'];
 
         $this->assertEquals($expectedProductIds, $mainProductIds);
         $this->assertEquals($expectedVariantIds, $variantIds);

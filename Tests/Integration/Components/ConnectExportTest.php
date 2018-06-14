@@ -101,7 +101,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(5, $result->articles);
         $this->assertEquals(2, $result->articles[0]['id']);
-        $this->assertEquals(6, $result->articles[4]['id']);
+        $this->assertEquals(89, $result->articles[4]['id']);
         $this->assertEquals(5, $result->count);
     }
 

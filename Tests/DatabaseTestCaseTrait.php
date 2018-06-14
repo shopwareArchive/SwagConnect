@@ -36,10 +36,6 @@ trait DatabaseTestCaseTrait
     {
         /** @var Connection $connection */
         $connection = Shopware()->Container()->get('dbal_connection');
-        /** @var \PDO $pdo */
-        $pdo = $connection->getWrappedConnection();
-        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, 0);
-
         $connection->executeQuery(file_get_contents($file));
     }
 }

@@ -24,6 +24,9 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->repository = Shopware()->Models()->getRepository(Attribute::class);
+        $connection = Shopware()->Container()->get('dbal_connection');
+        $connection->executeQuery('DELETE FROM s_plugin_connect_items');
+
     }
 
     public function test_find_source_ids_of_products()

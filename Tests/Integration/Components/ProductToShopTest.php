@@ -877,7 +877,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $product = $this->getProduct();
         $product->shopId = 1234;
-        $product->sourceId = '3';
+        $product->sourceId = 3;
         $product->categories = [
             '/deutsch' => 'Deutsch',
             '/deutsch/test1' => 'Test 1'
@@ -932,7 +932,7 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $product = $this->getProduct();
         $product->stream = 'Awesome products';
         $product->shopId = 1234;
-        $product->sourceId = '1234-1';
+        $product->sourceId = 3;
         $product->categories = [
             '/deutsch' => 'Deutsch',
             '/deutsch/bücher' => 'Bücher',
@@ -942,15 +942,15 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
         $this->productToShop->insertOrUpdate($product);
 
         //category in right stream
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 1234 AND categoryID = 2222');
+        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 3 AND categoryID = 2222');
         $this->assertNotFalse($id);
 
         //category in wrong stream but child of assigned categories
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 1234 AND categoryID = 3333');
+        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 3 AND categoryID = 3333');
         $this->assertNotFalse($id);
 
         //category in wrong stream
-        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 1234 AND categoryID = 4444');
+        $id = $this->manager->getConnection()->fetchColumn('SELECT id FROM s_articles_categories WHERE articleID = 3 AND categoryID = 4444');
         $this->assertFalse($id);
     }
 }

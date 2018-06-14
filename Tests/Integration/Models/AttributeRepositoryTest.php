@@ -43,8 +43,8 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $articleIds = $mainSourceIds = [2, 89];
         $sourceIdsForVariants = [
-            '2-124',
             '2-123',
+            '2-124',
             '89-154',
         ];
         $this->assertEquals($mainSourceIds, $this->repository->findSourceIds($articleIds, 1));
@@ -66,7 +66,7 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
         $variantIds = $this->repository->findAllSourceIds(5, 3);
 
         $expectedProductIds = ['2', '3', '4', '6', '89'];
-        $expectedVariantIds = ['2-124', '2-123', '89-154'];
+        $expectedVariantIds = ['2-123', '2-124', '89-154'];
 
         $this->assertEquals($expectedProductIds, $mainProductIds);
         $this->assertEquals($expectedVariantIds, $variantIds);

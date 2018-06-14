@@ -110,7 +110,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $this->manager->getConnection()->executeQuery('DELETE FROM `s_plugin_connect_items`');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
-        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 125');
+        $this->manager->getConnection()->executeQuery('DELETE FROM s_articles_details WHERE id = 123');
 
         $this->connectExport->processChanged(['2-123', '2-124']);
 

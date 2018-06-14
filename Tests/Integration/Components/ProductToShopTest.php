@@ -871,13 +871,13 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $categoryAssignment = $this->manager->getConnection()->fetchColumn(
             'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
-            [1234, 3333]
+            [3, 3333]
         );
         $this->assertNotFalse($categoryAssignment);
 
         $product = $this->getProduct();
         $product->shopId = 1234;
-        $product->sourceId = '1234-1';
+        $product->sourceId = '3';
         $product->categories = [
             '/deutsch' => 'Deutsch',
             '/deutsch/test1' => 'Test 1'
@@ -887,25 +887,25 @@ class ProductToShopTest extends \PHPUnit_Framework_TestCase
 
         $articleCount = $this->manager->getConnection()->fetchColumn(
             'SELECT COUNT(id) FROM s_articles WHERE id = ?',
-            [1234]
+            [3]
         );
         $this->assertEquals(1, $articleCount);
 
         $categoryAssignment = $this->manager->getConnection()->fetchColumn(
             'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
-            [1234, 4444]
+            [3, 4444]
         );
         $this->assertFalse($categoryAssignment);
 
         $categoryAssignment = $this->manager->getConnection()->fetchColumn(
             'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
-            [1234, 2222]
+            [3, 2222]
         );
         $this->assertFalse($categoryAssignment);
 
         $categoryAssignment = $this->manager->getConnection()->fetchColumn(
             'SELECT * FROM `s_articles_categories` WHERE articleID = ? AND categoryID = ?',
-            [1234, 3333]
+            [3, 3333]
         );
         $this->assertNotFalse($categoryAssignment);
 

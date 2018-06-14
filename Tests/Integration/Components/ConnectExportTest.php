@@ -100,7 +100,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $result = $this->connectExport->getExportList($criteria);
 
         $this->assertCount(5, $result->articles);
-        $this->assertEquals(3, $result->articles[0]['id']);
+        $this->assertEquals(2, $result->articles[0]['id']);
         $this->assertEquals(6, $result->articles[4]['id']);
         $this->assertEquals(5, $result->count);
     }
@@ -119,6 +119,6 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
 
         // No matter that it is error -> it says that ConnectExport->export() is called for this sourceId
         $status = $this->manager->getConnection()->fetchColumn('SELECT export_status FROM s_plugin_connect_items WHERE source_id = "2-124"');
-        $this->assertEquals(Attribute::STATUS_ERROR, $status);
+        $this->assertEquals(Attribute::STATUS_ERROR_PRICE, $status);
     }
 }

@@ -34,8 +34,6 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_find_source_ids_of_products()
     {
-        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
-        $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $articleIds = $expectedSourceIds = [3, 4];
@@ -44,8 +42,6 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_find_source_ids_of_variants()
     {
-        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
-        $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $articleIds = $mainSourceIds = [89, 2];
@@ -60,8 +56,6 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_local_article_count()
     {
-        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
-        $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
         $count = $this->repository->getLocalArticleCount();
         $this->assertEquals(8, $count);
@@ -69,8 +63,6 @@ class AttributeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function test_find_all_source_ids()
     {
-        $this->connection->executeQuery('DELETE FROM s_plugin_connect_items');
-        $this->connection->executeQuery('DELETE FROM s_articles_details');
         $this->importFixtures(__DIR__ . '/../_fixtures/simple_connect_items.sql');
 
         $mainProductIds = $this->repository->findAllSourceIds(0, 5);

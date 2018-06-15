@@ -1,6 +1,6 @@
-DELETE FROM s_categories;
-DELETE FROM s_articles_categories;
-DELETE FROM s_plugin_connect_categories;
+-- DELETE FROM s_categories;
+-- DELETE FROM s_articles_categories;
+-- DELETE FROM s_plugin_connect_categories;
 
 INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, purchase_price_hash, offer_valid_until, stream, shop_id)
 VALUES (3, 3, 3, "hash", 123, "Awesome products", 1234);
@@ -15,9 +15,9 @@ VALUES (4444, 2222, "Deutsch", 1, 1, 1, NOW(), NOW(), 1, 1, 0, 0);
 INSERT INTO s_articles_categories (articleID, categoryID) VALUES (3, 3333);
 INSERT INTO s_articles_categories (articleID, categoryID) VALUES (3, 4444);
 
-INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (2222, "/deutsch", "Deutsch", 3);
-INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (3333, "/deutsch/test1", "Test 1", 3);
-INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (4444, "/deutsch/test2", "Test 2", 3);
+INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (2222, "/deutsch", "Deutsch", 1234);
+INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (3333, "/deutsch/test1", "Test 1", 1234);
+INSERT INTO s_plugin_connect_categories (id, category_key, label, shop_id) VALUES (4444, "/deutsch/test2", "Test 2", 1234);
 
 INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (2222, 3);
 INSERT INTO s_plugin_connect_product_to_categories (connect_category_id, articleID) VALUES (3333, 3);

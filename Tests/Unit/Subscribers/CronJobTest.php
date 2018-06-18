@@ -112,7 +112,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
                 2,
                 [],
                 new Criteria(),
-                $this->container->get('shopware_storefront.context_service')->getShopContext())
+                Shopware()->Container()->get('shopware_storefront.context_service')->getShopContext())
             );
 
         $this->helper->expects($this->once())

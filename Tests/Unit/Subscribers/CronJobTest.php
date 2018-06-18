@@ -9,6 +9,8 @@ namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
 use Shopware\Bundle\SearchBundle\Criteria;
 use Shopware\Bundle\SearchBundle\ProductSearchResult;
+use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
+use Shopware\Tests\Functional\Bundle\StoreFrontBundle\TestContext;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
@@ -109,7 +111,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
                 ],
                 2,
                 [],
-                new Criteria())
+                new Criteria(),
+                new ShopContext("", null, null, null, null , [], []))
             );
 
         $this->helper->expects($this->once())

@@ -115,6 +115,10 @@ class VariantConfiguratorTest extends \PHPUnit_Framework_TestCase
 
         $detail = new Detail();
         $detail->setActive($mainVariant->getActive());
+        if (property_exists($detail, 'lastStock')) {
+            $detail->setLastStock(0);
+        }
+        
         $this->manager->persist($detail);
         $detail->setArticle($mainVariant);
         $mainVariant->getDetails()->add($detail);

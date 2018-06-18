@@ -69,15 +69,6 @@ class TriggerServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertArticleIsMarkedForUpdate();
     }
 
-    public function testActivateArticleDetailsDeleteTriggers()
-    {
-        $this->assertArticleIsNotMarkedForUpdate();
-
-        $this->connection->executeQuery('DELETE FROM s_articles_details WHERE articleID = 3');
-
-        $this->assertArticleIsMarkedForUpdate();
-    }
-
     public function testActivateArticleAttributesUpdateTriggers()
     {
         $this->assertArticleIsNotMarkedForUpdate();

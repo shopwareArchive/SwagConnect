@@ -13,7 +13,6 @@ env:
   - SHOPWARE_VERSION: 5.2
   - SHOPWARE_VERSION: 5.3
   - SHOPWARE_VERSION: 5.4
-  - SHOPWARE_VERSION: 5.5
 
 before_script:
     - git clone https://github.com/shopware/shopware.git /tmp/shopware

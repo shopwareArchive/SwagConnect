@@ -58,7 +58,6 @@ namespace ShopwarePlugins\Connect\Tests {
             $headers = [];
             foreach ($rawHeaders as $header) {
                 if (!isset($headers[$header['name']]) || !empty($header['replace'])) {
-                    header_remove($header['name']);
                     $headers[$header['name']] = [$header['value']];
                 } else {
                     $headers[$header['name']][] = $header['value'];

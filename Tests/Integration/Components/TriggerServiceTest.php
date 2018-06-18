@@ -69,15 +69,6 @@ class TriggerServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertArticleIsMarkedForUpdate();
     }
 
-    public function testActivateArticleDetailsInsertTriggers()
-    {
-        $this->assertArticleIsNotMarkedForUpdate();
-
-        $this->connection->executeQuery('INSERT INTO s_articles_details (id, `articleID`, `ordernumber`, `kind`, `position`) VALUES (3, 3, "sw1004-2", 2, 3);');
-
-        $this->assertArticleIsMarkedForUpdate();
-    }
-
     public function testActivateArticleDetailsDeleteTriggers()
     {
         $this->assertArticleIsNotMarkedForUpdate();

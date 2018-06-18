@@ -4,7 +4,8 @@ INSERT IGNORE INTO s_articles_supplier (id, `name`, img, link) VALUES (111, "tes
 
 UPDATE s_articles SET taxID = 111, supplierID = 111 WHERE id = 3;
 
-INSERT IGNORE INTO s_plugin_connect_items (article_id, article_detail_id, source_id, purchase_price_hash, offer_valid_until, stream, shop_id, cron_update)
+DELETE FROM s_plugin_connect_items WHERE article_id = 3;
+INSERT INTO s_plugin_connect_items (article_id, article_detail_id, source_id, purchase_price_hash, offer_valid_until, stream, shop_id, cron_update)
 VALUES (3, 3, "1234-1", "hash", 123, "Awesome products", 1234, NULL);
 
 INSERT IGNORE INTO s_articles_attributes (articleID, articledetailsID) VALUES (3, 3);

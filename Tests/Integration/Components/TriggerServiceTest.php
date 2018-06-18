@@ -270,7 +270,7 @@ class TriggerServiceTest extends \PHPUnit_Framework_TestCase
     private function assertArticleIsNotMarkedForUpdate()
     {
         $cronUpdate = $this->connection->fetchColumn('SELECT cron_update FROM s_plugin_connect_items WHERE article_id = 3');
-        $this->assertFalse($cronUpdate);
+        $this->assertNull($cronUpdate);
     }
 
     private function assertArticleIsMarkedForUpdate()

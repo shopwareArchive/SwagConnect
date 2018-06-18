@@ -2,10 +2,6 @@ DELETE FROM s_core_tax WHERE id = 111;
 
 DELETE FROM s_articles_supplier WHERE id = 111;
 
-DELETE FROM s_articles WHERE id = 3;
-
-DELETE FROM s_articles_details WHERE articleID = 3;
-
 DELETE FROM s_plugin_connect_items WHERE article_id = 3;
 
 DELETE FROM s_articles_attributes WHERE articleID = 3;

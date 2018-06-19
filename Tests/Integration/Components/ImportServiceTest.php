@@ -363,15 +363,15 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->manager->getConnection()->executeQuery(
             'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
-            [14468, $bookCategoryId]
+            [4, $bookCategoryId]
         );
         $this->manager->getConnection()->executeQuery(
             'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
-            [14470, $bookCategoryId]
+            [2, $bookCategoryId]
         );
         $this->manager->getConnection()->executeQuery(
             'INSERT IGNORE INTO `s_plugin_connect_product_to_categories` (`articleID`, `connect_category_id`) VALUES (?, ?)',
-            [14469, $bookCategoryId]
+            [89, $bookCategoryId]
         );
 
         $result = $this->importService->importRemoteCategoryGetArticleCountForCategory(1234, '/deutsch/bücher', 'Awesome products');

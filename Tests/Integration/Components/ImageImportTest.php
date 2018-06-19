@@ -198,11 +198,11 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
 
-        $this->imageImport->importMainImage('no_main_img', 14467);
+        $this->imageImport->importMainImage('no_main_img', 3);
 
         $result = $this->manager->getConnection()->fetchColumn(
             'SELECT id FROM s_articles_img WHERE articleID = ? AND main = 1 AND parent_id IS NULL',
-            [14467]
+            [3]
         );
 
         $this->assertEquals(1235, $result);
@@ -212,7 +212,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
 
-        $result = $this->imageImport->hasMainImageChanged('no_main_img', 14467);
+        $result = $this->imageImport->hasMainImageChanged('no_main_img', 3);
 
         $this->assertEquals(true, $result);
     }
@@ -221,7 +221,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
     {
         $this->importFixtures(__DIR__ . '/_fixtures/connect_media.sql');
 
-        $result = $this->imageImport->hasMainImageChanged('main_img', 14467);
+        $result = $this->imageImport->hasMainImageChanged('main_img', 3);
 
         $this->assertEquals(false, $result);
     }

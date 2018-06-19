@@ -347,6 +347,10 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             'inStock' => 30,
             'article' => $article
         ]);
+        if (property_exists($mainDetail, 'lastStock')) {
+            $mainDetail->setLastStock(0);
+        }
+
         $article->setMainDetail($mainDetail);
         $detailAtrribute = new \Shopware\Models\Attribute\Article();
         $detailAtrribute->fromArray([

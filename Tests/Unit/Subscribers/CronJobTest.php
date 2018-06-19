@@ -7,7 +7,10 @@
 
 namespace ShopwarePlugins\Connect\Tests\Unit\Subscribers;
 
+use Shopware\Bundle\SearchBundle\Criteria;
 use Shopware\Bundle\SearchBundle\ProductSearchResult;
+use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
+use Shopware\Tests\Functional\Bundle\StoreFrontBundle\TestContext;
 use ShopwarePlugins\Connect\Components\Config;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
@@ -101,10 +104,16 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->productSearch->expects($this->once())
             ->method('getProductFromConditionStream')
             ->with($stream)
-            ->willReturn(new ProductSearchResult([
-                'SW100001' => new ListProduct(14, 26, 'SW100001'),
-                'SW100003' => new ListProduct(15, 35, 'SW100002'),
-            ], 2, []));
+            ->willReturn(new ProductSearchResult(
+                [
+                    'SW100001' => new ListProduct(14, 26, 'SW100001'),
+                    'SW100003' => new ListProduct(15, 35, 'SW100002'),
+                ],
+                2,
+                [],
+                new Criteria(),
+                Shopware()->Container()->get('shopware_storefront.context_service')->getShopContext())
+            );
 
         $this->helper->expects($this->once())
             ->method('getArticleIdsByNumber')

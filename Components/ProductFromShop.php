@@ -246,6 +246,8 @@ class ProductFromShop implements ProductFromShopBase
         $password = Random::getAlphanumericString(30);
 
         $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
+
+        /** @var CustomerModel\Customer $customer */
         $customer = $repository->findOneBy([
             'email' => $email
         ]);
@@ -260,11 +262,12 @@ class ProductFromShop implements ProductFromShopBase
                 'paymentId' => $payment->getId(),
             ]);
         }
-        if ($customer->getBilling() === null) {
-            $billing = new CustomerModel\Billing();
-            $customer->setBilling($billing);
+        if ($customer->getDefaultBillingAddress() === null) {
+            $billing = new Address();
+            //$billing = new CustomerModel\Billing();
+            $customer->setDefaultBillingAddress($billing);
         } else {
-            $billing = $customer->getBilling();
+            $billing = $customer->getDefaultBillingAddress();
         }
 
         $billing->fromArray($this->getAddressData(

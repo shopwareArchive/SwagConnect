@@ -7,7 +7,7 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.17",
+    "currentVersion": "1.1.18",
     "changelog": {
         "de": {
             "1.1.17": "CON-5273 - Bildimport kann via Konsolen-Command ausgeführt werden;",
@@ -58,7 +58,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.4.4",
+        "maximumVersion": "5.5.0",
         "blacklist": []
     }
 }

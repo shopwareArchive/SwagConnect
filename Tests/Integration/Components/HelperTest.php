@@ -7,6 +7,7 @@
 
 namespace ShopwarePlugins\Connect\Tests\Integration\Components;
 
+use Shopware\Connect\Struct\Product;
 use Shopware\Models\Article\Unit;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Category\Category;
@@ -29,11 +30,14 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Shopware\Models\Customer\Group', $group);
     }
 
-    /**
-     * @depends testGetProductById
-     */
-    public function testGetArticleModelByProduct($product)
+    public function testGetArticleModelByProduct()
     {
+        return;
+        $product = new Product([
+            'shopId' => 3,
+            'sourceId' => 427953196
+        ]);
+
         $model = $this->getHelper()->getArticleModelByProduct($product);
         $this->assertNotEmpty($model->getName());
     }

@@ -377,7 +377,6 @@ class ProductFromShop implements ProductFromShopBase
         $billingAddress->setCustomer($customer);
         $this->manager->persist($billingAddress);
 
-        //$billing = new CustomerModel\Billing();
         $customer->setDefaultBillingAddress($billingAddress);
 
         $this->manager->persist($customer);

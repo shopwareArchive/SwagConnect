@@ -96,6 +96,17 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
 
     public function test_export_dynamic_stream()
     {
+        $ps = new ProductSearchResult(
+            [
+                'SW100001' => new ListProduct(14, 26, 'SW100001'),
+                'SW100003' => new ListProduct(15, 35, 'SW100002'),
+            ],
+            2,
+            [],
+            new Criteria(),
+            Shopware()->Container()->get('shopware_storefront.context_service')->getShopContext()
+        );
+
         $stream = $this->createMock(ProductStream::class);
         $stream->expects($this->once())
             ->method('getId')
@@ -104,16 +115,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->productSearch->expects($this->once())
             ->method('getProductFromConditionStream')
             ->with($stream)
-            ->willReturn(new ProductSearchResult(
-                [
-                    'SW100001' => new ListProduct(14, 26, 'SW100001'),
-                    'SW100003' => new ListProduct(15, 35, 'SW100002'),
-                ],
-                2,
-                [],
-                new Criteria(),
-                Shopware()->Container()->get('shopware_storefront.context_service')->getShopContext())
-            );
+            ->willReturn($ps);
 
         $this->helper->expects($this->once())
             ->method('getArticleIdsByNumber')

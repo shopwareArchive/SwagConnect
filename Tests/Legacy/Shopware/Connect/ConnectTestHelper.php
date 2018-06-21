@@ -517,9 +517,4 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
             ]
         ];
     }
-
-    private function createRandomAddress()
-    {
-
-    }
 }

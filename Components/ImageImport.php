@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Shopware\Components\Model\ModelManager;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Image;
@@ -71,11 +72,11 @@ class ImageImport
     }
 
     /**
-     * Get ids of products that needs an image import
+     * Get ids of details that needs an image import
      * @param null $limit
      * @return array        Ids of products needing an image import
      */
-    public function getProductsNeedingImageImport($limit=null)
+    public function getDetailIdsNeedingImageImport($limit=null)
     {
         $updateFlags = $this->helper->getUpdateFlags();
         $updateFlagsByName = array_flip($updateFlags);
@@ -84,11 +85,10 @@ class ImageImport
 
         $builder = $this->manager->createQueryBuilder();
         $builder->from('Shopware\CustomModels\Connect\Attribute', 'at');
-        $builder->innerJoin('at.articleDetail', 'detail');
-        $builder->select('at.articleId');
+        $builder->select('at.articleDetailId');
         $builder->andWhere('at.shopId IS NOT NULL')
-            ->andWHere('at.lastUpdateFlag IS NOT NULL')
-            ->andWHere('BIT_AND(at.lastUpdateFlag, :initialImportFlag) > 0')
+            ->andWhere('at.lastUpdateFlag IS NOT NULL')
+            ->andWhere('BIT_AND(at.lastUpdateFlag, :initialImportFlag) > 0')
             ->setParameter('initialImportFlag', $initialImportFlag);
 
         if ($limit) {
@@ -107,34 +107,31 @@ class ImageImport
      */
     public function import($limit = null)
     {
-        $articleRepository = $this->manager->getRepository('Shopware\Models\Article\Article');
+        $detailRepository = $this->manager->getRepository('Shopware\Models\Article\Detail');
 
         $flags = $this->helper->getUpdateFlags();
         $flagsByName = array_flip($flags);
 
-        $ids = $this->getProductsNeedingImageImport($limit);
+        $ids = $this->getDetailIdsNeedingImageImport($limit);
 
         foreach ($ids as $id) {
-            /** @var \Shopware\Models\Article\Article $article */
-            $article = $articleRepository->find($id);
-            $connectAttributes = $this->helper->getConnectAttributesByArticle($article);
+            /** @var \Shopware\Models\Article\Detail $detail */
+            $detail = $detailRepository->find($id);
+            $connectAttribute = $this->helper->getConnectAttributeByModel($detail);
 
-            /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
-            foreach ($connectAttributes as $connectAttribute) {
-                $this->manager->getConnection()->beginTransaction();
-                try {
-                    $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
-                    $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $article);
-                    $this->importImagesForDetail($lastUpdate['variantImages'], $connectAttribute->getArticleDetail());
-                    $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
-                    $this->manager->flush();
-                    $this->manager->getConnection()->commit();
-                } catch (\PDOException $e) {
-                    // possible lock with ImageImport from ToShop channel
-                    // is thrown before flipping of last update flag
-                    // so we should process the article again in next cron run
-                    $this->manager->getConnection()->rollback();
-                }
+            $this->manager->getConnection()->beginTransaction();
+            try {
+                $lastUpdate = json_decode($connectAttribute->getLastUpdate(), true);
+                $this->importArticleImagesWhenMainDetail($detail, $lastUpdate);
+                $this->importImagesForDetail($lastUpdate['variantImages'], $detail);
+                $connectAttribute->flipLastUpdateFlag($flagsByName['imageInitialImport']);
+                $this->manager->flush();
+                $this->manager->getConnection()->commit();
+            } catch (\PDOException $e) {
+                // possible lock with ImageImport from ToShop channel
+                // is thrown before flipping of last update flag
+                // so we should process the detail again in next cron run
+                $this->manager->getConnection()->rollback();
             }
         }
     }
@@ -640,5 +637,16 @@ class ImageImport
         );
 
         return !(bool) $result;
+    }
+
+    /**
+     * @param Detail $detail
+     * @param array $lastUpdate
+     */
+    private function importArticleImagesWhenMainDetail($detail, array $lastUpdate)
+    {
+        if ($detail->getKind() == 1) {
+            $this->importImagesForArticle(array_diff($lastUpdate['image'], $lastUpdate['variantImages']), $detail->getArticle());
+        }
     }
 }

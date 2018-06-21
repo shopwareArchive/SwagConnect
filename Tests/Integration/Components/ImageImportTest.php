@@ -38,7 +38,7 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 
     public function testGetProductsNeedingImageImport()
     {
-        $result = $this->imageImport->getProductsNeedingImageImport();
+        $result = $this->imageImport->getDetailIdsNeedingImageImport();
 
         $this->assertNotEmpty($result);
     }
@@ -178,20 +178,20 @@ class ImageImportTest extends \PHPUnit_Framework_TestCase
 
         $this->insertOrUpdateProducts(1, true, true);
 
-        $result = $this->imageImport->getProductsNeedingImageImport();
-        $articleId = reset($result);
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->manager->find('Shopware\Models\Article\Article', $articleId);
+        $result = $this->imageImport->getDetailIdsNeedingImageImport();
+        $detailId = reset($result);
+        /** @var \Shopware\Models\Article\Detail $detail */
+        $detail = $this->manager->find('Shopware\Models\Article\Detail', $detailId);
 
-        $this->assertEmpty($article->getImages());
+        $this->assertEmpty($detail->getImages());
         $this->imageImport->import(1);
 
-        /** @var \Shopware\Models\Article\Article $article */
-        $article = $this->manager->find('Shopware\Models\Article\Article', $articleId);
-        $this->assertEquals(2, $article->getImages()->count());
-        $this->assertEquals(1, $article->getMainDetail()->getImages()->count());
+        /** @var \Shopware\Models\Article\Detail $detail */
+        $detail = $this->manager->find('Shopware\Models\Article\Detail', $detailId);
+        $this->assertEquals(2, $detail->getArticle()->getImages()->count());
+        $this->assertEquals(1, $detail->getImages()->count());
 
-        $this->assertEmpty($this->imageImport->getProductsNeedingImageImport());
+        $this->assertEmpty($this->imageImport->getDetailIdsNeedingImageImport());
     }
 
     public function testImportMainImage()

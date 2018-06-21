@@ -30,18 +30,6 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Shopware\Models\Customer\Group', $group);
     }
 
-    public function testGetArticleModelByProduct()
-    {
-        return;
-        $product = new Product([
-            'shopId' => 3,
-            'sourceId' => 427953196
-        ]);
-
-        $model = $this->getHelper()->getArticleModelByProduct($product);
-        $this->assertNotEmpty($model->getName());
-    }
-
     public function testHasBasketConnectProductsIsFalse()
     {
         $result = $this->getHelper()->hasBasketConnectProducts(333);

@@ -61,7 +61,7 @@ class ProductFromShopTest extends ConnectTestHelper
         parent::setUp();
 
         $this->user = $this->getRandomUser();
-        $this->user['billingaddress']['country'] = $this->user['billingaddress']['countryID'];
+        $this->user['billingaddress']['country'] = $this->user['billingaddress']['country_id'];
         Shopware()->Events()->addListener('Shopware_Modules_Admin_GetUserData_FilterResult', [$this, 'onGetUserData']);
         $this->productFromShop = new ProductFromShop(
             $this->getHelper(),

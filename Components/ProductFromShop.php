@@ -8,24 +8,31 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Enlight_Event_EventManager;
+
 use Shopware\Connect\Gateway;
 use Shopware\Connect\ProductFromShop as ProductFromShopBase;
 use Shopware\Connect\Struct\Order;
 use Shopware\Connect\Struct\Product;
-use Shopware\Connect\Struct\Address;
-use Shopware\Models\Dispatch\Dispatch;
-use Shopware\Models\Order as OrderModel;
-use Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel;
-use Shopware\Models\Customer as CustomerModel;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Components\Random;
+use Shopware\Connect\Struct\Address as ConnectAddress;
 use Shopware\Connect\Struct\Change\FromShop\Availability;
 use Shopware\Connect\Struct\Change\FromShop\Insert;
 use Shopware\Connect\Struct\Change\FromShop\Update;
 use Shopware\Connect\Struct\PaymentStatus;
 use Shopware\Connect\Struct\Shipping;
-use Shopware\CustomModels\Connect\Attribute;
+
+use Shopware\Models\Shop\Shop;
+use Shopware\Models\Order\Order as ShopwareOrder;
+use Shopware\Models\Customer\Address as ShopwareAddress;
+use Shopware\Models\Dispatch\Dispatch;
+use Shopware\Models\Order as OrderModel;
+use Shopware\Models\Attribute\OrderDetail as OrderDetailAttributeModel;
+use Shopware\Models\Customer as CustomerModel;
+
+use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Random;
+
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
+use Shopware\CustomModels\Connect\Attribute;
 use Shopware\Connect\Struct\Message;
 
 /**
@@ -155,6 +162,20 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
+     * returns PaymentInformation for invoice
+     * @return null|object|\Shopware\Models\Payment\Payment
+     */
+    private function getInvoicePayment()
+    {
+        $repository = $this->manager->getRepository('Shopware\Models\Payment\Payment');
+        return $repository->findOneBy([
+            'name' => 'invoice',
+        ]);
+    }
+
+
+
+    /**
      * Actually creates the remote order in shopware.
      *
      * @param Order $order
@@ -164,48 +185,118 @@ class ProductFromShop implements ProductFromShopBase
     {
         $this->manager->clear();
 
-        $detailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
-        $status = $this->manager->find('Shopware\Models\Order\Status', 0);
         $shop = $this->manager->find('Shopware\Models\Shop\Shop', 1);
-        $number = 'SC-' . $order->orderShop . '-' . $order->localOrderId;
+        $shopwareOrder = $this->createAndReturnMinimalOrderInShopware($order, $shop);
 
-        $repository = $this->manager->getRepository('Shopware\Models\Payment\Payment');
-        $payment = $repository->findOneBy([
-            'name' => 'invoice',
+        $this->fillShopwareOrderWithItems($shopwareOrder, $order);
+
+        $customer = $this->prepareCustomerFromConnectOrder($order, $shop);
+
+        $shopwareOrder->setCustomer($customer);
+
+        $billing = new OrderModel\Billing();
+        $billing->setCustomer($customer);
+        $billing->fromArray($this->getAddressData(
+                $order->billingAddress
+        ));
+        $shopwareOrder->setBilling($billing);
+
+        $shipping = new OrderModel\Shipping();
+        $shipping->setCustomer($customer);
+        $shipping->fromArray($this->getAddressData(
+            $order->deliveryAddress
+        ));
+        $shopwareOrder->setShipping($shipping);
+
+        $shopwareOrder->calculateInvoiceAmount();
+
+        $dispatchRepository = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch');
+        $dispatch = $dispatchRepository->findOneBy([
+            'name' => $order->shipping->service
         ]);
+        if ($dispatch) {
+            $shopwareOrder->setDispatch($dispatch);
+        }
+
+        $this->eventManager->notify(
+            'Connect_Supplier_Buy_Before',
+            [
+                'subject' => $this,
+                'order' => $order
+            ]
+        );
+
+        $this->manager->flush();
+
+        return $shopwareOrder->getNumber();
+    }
+
+    /**
+     * @param Order $connectOrder
+     * @param Shop $shop
+     * @return ShopwareOrder
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    private function createAndReturnMinimalOrderInShopware(Order $connectOrder, Shop $shop)
+    {
+        $orderNumber = sprintf('SC-%s-%s',
+            $connectOrder->orderShop,
+            $connectOrder->localOrderId
+        );
+        $status = $this->manager->find('Shopware\Models\Order\Status', 0);
 
         // todo: Create the OrderModel without previous plain SQL
         //$model = new OrderModel\Order();
         $sql = 'INSERT INTO `s_order` (`ordernumber`, `cleared`) VALUES (?, 17);';
-        Shopware()->Db()->query($sql, [$number]);
+        Shopware()->Db()->query($sql, [$orderNumber]);
         $modelId = Shopware()->Db()->lastInsertId();
-        /** @var $model \Shopware\Models\Order\Order */
-        $model = $this->manager->find('Shopware\Models\Order\Order', $modelId);
+
+        /** @var $shopwareOrder \Shopware\Models\Order\Order */
+        $shopwareOrder = $this->manager->find('Shopware\Models\Order\Order', $modelId);
 
         $attribute = new \Shopware\Models\Attribute\Order;
-        $attribute->setConnectOrderId($order->localOrderId);
-        $attribute->setConnectShopId($order->orderShop);
-        $model->setAttribute($attribute);
+        $attribute->setConnectOrderId($connectOrder->localOrderId);
+        $attribute->setConnectShopId($connectOrder->orderShop);
+        $shopwareOrder->setAttribute($attribute);
 
-        $model->fromArray([
-            'number' => $number,
-            'invoiceShipping' => $order->grossShippingCosts,
-            'invoiceShippingNet' => $order->shippingCosts,
+        $shopwareOrder->fromArray([
+            'number' => $orderNumber,
+            'invoiceShipping' => $connectOrder->shipping->grossShippingCosts,
+            'invoiceShippingNet' => $connectOrder->shipping->shippingCosts,
             'currencyFactor' => 1,
             'orderStatus' => $status,
             'shop' => $shop,
             'languageSubShop' => $shop,
-            'payment' => $payment,
+            'payment' => $this->getInvoicePayment(),
             'currency' => 'EUR',
             'orderTime' => 'now'
         ]);
-        $items = [];
+
+        return $shopwareOrder;
+    }
+
+    /**
+     * iterates through order items and converts them to positions in shopware order
+     * @param ShopwareOrder $shopwareOrder
+     * @param Order $connectOrder
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
+    private function fillShopwareOrderWithItems(ShopwareOrder $shopwareOrder, Order $connectOrder)
+    {
+        $openDetailStatus = $this->manager->find('Shopware\Models\Order\DetailStatus', 0);
         $connectAttributeRepository = $this->manager->getRepository('Shopware\CustomModels\Connect\Attribute');
 
+        $items = [];
         /** @var \Shopware\Connect\Struct\OrderItem $orderItem */
-        foreach ($order->products as $orderItem) {
+        foreach ($connectOrder->orderItems as $orderItem) {
             $product = $orderItem->product;
             /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+            //use null as shop id to fetch exported articles
             $connectAttribute = $connectAttributeRepository->findOneBy([
                 'sourceId' => $product->sourceId,
                 'shopId' => null,
@@ -228,28 +319,39 @@ class ProductFromShop implements ProductFromShopBase
             $item->fromArray([
                 'articleId' => $productModel->getId(),
                 'quantity' => $orderItem->count,
-                'orderId' => $model->getId(),
-                'number' => $model->getNumber(),
+                'orderId' => $shopwareOrder->getId(),
+                'number' => $shopwareOrder->getNumber(),
                 'articleNumber' => $detail->getNumber(),
                 'articleName' => $product->title,
                 'price' => $this->calculatePrice($product),
                 'taxRate' => $product->vat * 100,
-                'status' => $detailStatus,
+                'status' => $openDetailStatus,
                 'attribute' => new OrderDetailAttributeModel()
             ]);
             $items[] = $item;
         }
-        $model->setDetails($items);
+        $shopwareOrder->setDetails($items);
+    }
 
-        $email = $order->billingAddress->email;
+    /**
+     * Reads customer information from connectOrder and creates a new customer if it does not exists
+     * @param Order $connectOrder
+     * @param Shop $shop
+     * @return CustomerModel\Customer
+     */
+    private function prepareCustomerFromConnectOrder(Order $connectOrder, Shop $shop)
+    {
+        $email = $connectOrder->billingAddress->email;
 
-        $password = Random::getAlphanumericString(30);
+        $customerRepository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
 
-        $repository = $this->manager->getRepository('Shopware\Models\Customer\Customer');
-        $customer = $repository->findOneBy([
+        /** @var CustomerModel\Customer $customer */
+        $customer = $customerRepository->findOneBy([
             'email' => $email
         ]);
+
         if ($customer === null) {
+            $password = Random::getAlphanumericString(30);
             $customer = new CustomerModel\Customer();
             $customer->fromArray([
                 'active' => true,
@@ -257,58 +359,29 @@ class ProductFromShop implements ProductFromShopBase
                 'password' => $password,
                 'accountMode' => 1,
                 'shop' => $shop,
-                'paymentId' => $payment->getId(),
+                'paymentId' => $this->getInvoicePayment()->getId(),
             ]);
-        }
-        if ($customer->getBilling() === null) {
-            $billing = new CustomerModel\Billing();
-            $customer->setBilling($billing);
-        } else {
-            $billing = $customer->getBilling();
+            //we need to save the customer right now to receive a id
+            $this->manager->persist($customer);
+            $this->manager->flush($customer);
         }
 
-        $billing->fromArray($this->getAddressData(
-            $order->billingAddress
+        $billingAddress = $customer->getDefaultBillingAddress();
+        if ($billingAddress === null) {
+            $billingAddress = new ShopwareAddress();
+        }
+
+        $billingAddress->fromArray($this->getAddressData(
+            $connectOrder->billingAddress
         ));
+        $billingAddress->setCustomer($customer);
+        $this->manager->persist($billingAddress);
+
+        $customer->setDefaultBillingAddress($billingAddress);
+
         $this->manager->persist($customer);
 
-        $model->setCustomer($customer);
-
-        $billing = new OrderModel\Billing();
-        $billing->setCustomer($customer);
-        $billing->fromArray($this->getAddressData(
-                $order->billingAddress
-        ));
-        $model->setBilling($billing);
-
-        $shipping = new OrderModel\Shipping();
-        $shipping->setCustomer($customer);
-        $shipping->fromArray($this->getAddressData(
-            $order->deliveryAddress
-        ));
-        $model->setShipping($shipping);
-
-        $model->calculateInvoiceAmount();
-
-        $dispatchRepository = $this->manager->getRepository('Shopware\Models\Dispatch\Dispatch');
-        $dispatch = $dispatchRepository->findOneBy([
-            'name' => $order->shipping->service
-        ]);
-        if ($dispatch) {
-            $model->setDispatch($dispatch);
-        }
-
-        $this->eventManager->notify(
-            'Connect_Supplier_Buy_Before',
-            [
-                'subject' => $this,
-                'order' => $order
-            ]
-        );
-
-        $this->manager->flush();
-
-        return $model->getNumber();
+        return $customer;
     }
 
     /**
@@ -324,10 +397,10 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
-     * @param Address $address
+     * @param ConnectAddress $address
      * @return array
      */
-    private function getAddressData(Address $address)
+    private function getAddressData(ConnectAddress $address)
     {
         $repository = 'Shopware\Models\Country\Country';
         $repository = $this->manager->getRepository($repository);
@@ -699,9 +772,9 @@ class ProductFromShop implements ProductFromShopBase
     }
 
     /**
-     * @param Address $address
+     * @param ConnectAddress $address
      */
-    private function validateBilling(Address $address)
+    private function validateBilling(ConnectAddress $address)
     {
         if (!$address->email) {
             throw new \RuntimeException('Billing address should contain email');

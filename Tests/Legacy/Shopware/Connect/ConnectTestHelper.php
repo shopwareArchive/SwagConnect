@@ -40,7 +40,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     private $connectFactory;
 
-    const IMAGE_PROVIDER_URL = 'http://www.shopware.de/ShopwareCommunityCenter/img/logo.png';
+    const IMAGE_PROVIDER_URL = 'https://de.shopware.com/press/company/Shopware_Jamaica.jpg';
 
     public function setUp()
     {
@@ -453,18 +453,24 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         $user = Shopware()->Db()->fetchRow('SELECT * FROM s_user WHERE id = 1 LIMIT 1');
 
         $billing = Shopware()->Db()->fetchRow(
-            'SELECT * FROM s_user_billingaddress WHERE userID = :id',
+            'SELECT * FROM s_user_addresses WHERE user_id = :id',
             [':id' => $user['id']]
         );
+
         $billing['stateID'] = isset($billing['stateId']) ? $billing['stateID'] : '1';
         $shipping = Shopware()->Db()->fetchRow(
-            'SELECT * FROM s_user_shippingaddress WHERE userID = :id',
+            'SELECT * FROM s_user_addresses WHERE user_id = :id',
             [':id' => $user['id']]
         );
+        if ($shipping === false) {
+            $shipping = $this->createRandomAddress();
+        }
+
         $shipping['stateID'] = isset($shipping['stateId']) ? $shipping['stateID'] : '1';
+
         $country = Shopware()->Db()->fetchRow(
             'SELECT * FROM s_core_countries WHERE id = :id',
-            [':id' => $billing['countryID']]
+            [':id' => $billing['country_id']]
         );
         $state = Shopware()->Db()->fetchRow(
             'SELECT * FROM s_core_countries_states WHERE id = :id',
@@ -472,7 +478,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
         );
         $countryShipping = Shopware()->Db()->fetchRow(
             'SELECT * FROM s_core_countries WHERE id = :id',
-            [':id' => $shipping['countryID']]
+            [':id' => $shipping['country_id']]
         );
         $payment = Shopware()->Db()->fetchRow(
             'SELECT * FROM s_core_paymentmeans WHERE id = :id',

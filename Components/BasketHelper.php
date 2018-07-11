@@ -237,9 +237,12 @@ class BasketHelper
             {
                 $this->removeNonProductsFromBasket();
             }
-            // Make the first connect shop the default basket-content
-            $this->basket['content'] = $connectContent[$shopId];
-            unset($this->connectContent[$shopId]);
+
+            if (count($this->basket['content']) == 0) {
+                // Make the first connect shop the default basket-content
+                $this->basket['content'] = $connectContent[$shopId];
+                unset($this->connectContent[$shopId]);
+            }
 
             return $shopId;
         }

@@ -614,6 +614,7 @@ class Setup
             'showShippingCostsSeparately' => ['0', null, 'import'],
             'articleImagesLimitImport' => [5, null, 'import'],
             'updateOrderStatus' => ['0', null, 'import'],
+            'removeBasketAdditions' => ['1', null, 'import'],
         ];
 
         foreach ($configs as $name => $values) {

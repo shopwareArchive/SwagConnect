@@ -50,7 +50,8 @@ class ConnectConfigTest extends \Enlight_Components_Test_Controller_TestCase
             ('logRequest', '1', 'general'),
             ('showShippingCostsSeparately', '0', 'import'),
             ('articleImagesLimitImport', '10', 'import'),
-            ('updateOrderStatus', '0', 'import');
+            ('updateOrderStatus', '0', 'import'),
+            ('removeBasketAdditions', '1','import');
             "
         );
     }

@@ -48,6 +48,7 @@ Ext.define('Shopware.apps.Connect.model.config.Import', {
         { name: 'createUnitsAutomatically', type: 'string' },
         { name: 'detailShopInfo', type: 'string' },
         { name: 'showShippingCostsSeparately', type: 'string' },
+        { name: 'removeBasketAdditions', type: 'string' },
         { name: 'checkoutShopInfo', type: 'string' }
     ],
 

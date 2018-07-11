@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.18",
+    "currentVersion": "1.1.19",
     "changelog": {
         "de": {
+            "1.1.19": "CON-5307 - Warenkorb-Verhalten für Zusätze konfigurierbar",
             "1.1.18": "CON-5301 - Bildimport Command nutzt Limit",
             "1.1.17": "CON-5273 - Bildimport kann via Konsolen-Command ausgeführt werden;",
             "1.1.16": "CON-5196 - Fix: Probleme beim Bildimport via Cronjob; CON-5195 - Hinzugefügt: Hinweis im Checkout welcher Lieferant nicht liefern kann; CON-5221 - Fix: Shop-Url wird durch \"Verbindung prüfen\" akzualisiert; CON-5228 - Fix: MediaServiceInterface wird benutzt;",
@@ -34,6 +35,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.19": "CON-5307 - basket behaviour for Additions is now configurable",
             "1.1.18": "CON-5301 - add Limit to ImageImport-Command",
             "1.1.17": "CON-5273 - ImageImport can be started with Console-Command;",
             "1.1.16": "CON-5196 - Fix: Problems with imageImport with Cronjob; CON-5195 - Added: Notification during Checkout which Supplier can not ship Items; CON-5221 - Fix: Shop-Url gets updated with \"Check Connection\" button; CON-5228 - Fix: use MediaServiceInterface;",

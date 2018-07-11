@@ -78,6 +78,8 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         detailPageHintLabel: '{s name=config/detail_page_dropshipping_hint}Zeige Dropshipping-Hinweis auf Artikel-Detailseite{/s}',
         separateShippingLabel: '{s name=config/separate_shipping_label}Versandkosten als separate Position im Warenkorb ausgeben{/s}',
         basketHintLabel: '{s name=config/basket_dropshipping_hint_label}Zeige Dropshipping-Hinweis im Warenkorb{/s}',
+        removeVouchersLabel: '{s name=config/basket_remove_voucher_label}Remove local basket additions without local products in basket{/s}',
+        removeVouchersHelptext: '{s name=config/basket_remove_voucher_helptext}If this setting is enabled local basket additions, like vouchers, surcharges, etc. will be removed from the basket if the customer does not order any product from your own shop.{/s}',
         showDropshippingHintBasketHelptext: '{s name=config/show_dropshipping_hint_basket_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}',
         showDropshippingHintDetailsHelptext: '{s name=config/show_dropshipping_hint_details_helptext}Ein Dropshipping-Hinweis und der Lieferantenname werden angezeigt{/s}'
     },
@@ -511,6 +513,15 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
                     uncheckedValue: 0,
                     labelWidth: me.defaults.labelWidth,
                     helpText: me.snippets.showDropshippingHintBasketHelptext
+                },
+                {
+                    xtype: 'checkbox',
+                    name: 'removeBasketAdditions',
+                    fieldLabel: me.snippets.removeVouchersLabel,
+                    inputValue: 1,
+                    uncheckedValue: 0,
+                    labelWidth: me.defaults.labelWidth,
+                    helpText: me.snippets.removeVouchersHelptext
                 }
             ]
         });

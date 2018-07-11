@@ -224,19 +224,23 @@ class BasketHelper
         if (empty($content)) {
             $this->onlyConnectProducts = true;
 
-            $this->removeNonProductsFromBasket();
-
             $connectContent = $this->getConnectContent();
             if ($this->customerHasToPayLocalShipping($connectContent) === false) {
                 $this->basket = $this->removeDefaultShipping($this->basket);
             }
 
-            // Make the first connect shop the default basket-content
             reset($connectContent);
             $shopId = current(array_keys($connectContent));
-            $this->basket['content'] = $connectContent[$shopId];
-            unset($this->connectContent[$shopId]);
 
+            $config = $this->getConfig();
+            if ($config->getConfig('removeBasketAdditions'))
+            {
+                $this->removeNonProductsFromBasket();
+                // Make the first connect shop the default basket-content
+                $this->basket['content'] = $connectContent[$shopId];
+                unset($this->connectContent[$shopId]);
+            }
+            
             return $shopId;
         }
 
@@ -917,5 +921,10 @@ class BasketHelper
     public function setCheckResult(CheckResult $checkResult)
     {
         $this->checkResult = $checkResult;
+    }
+
+    private function getConfig()
+    {
+        return ConfigFactory::getConfigInstance();
     }
 }

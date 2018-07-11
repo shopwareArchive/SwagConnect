@@ -100,6 +100,7 @@ class Update
         $this->addOverwriteMainImage();
         $this->changeGroupNameImportSettings();
         $this->addArticleDetailsForeignKey();
+        $this->addConfigForBasketRemovals();
 
         return true;
     }
@@ -664,6 +665,23 @@ class Update
                 ALTER TABLE s_plugin_connect_items
                 ADD FOREIGN KEY (`article_detail_id`) REFERENCES s_articles_details (id) ON DELETE SET NULL
                 ');
+            } catch (\Exception $e) {
+                $this->logger->write(
+                    true,
+                    sprintf('An error occurred during update to version %s stacktrace: %s', $this->version, $e->getTraceAsString()),
+                    $e->getMessage()
+                );
+            }
+        }
+    }
+
+    private function addConfigForBasketRemovals()
+    {
+        if (version_compare($this->version, '1.1.18', '<=')) {
+            try {
+                if (!$this->existsConfig('removeBasketAdditions')) {
+                    $this->db->query('INSERT INTO `s_plugin_connect_config` (`name`, `value`, `groupName`) VALUES ("removeBasketAdditions", "1", "import")');
+                }
             } catch (\Exception $e) {
                 $this->logger->write(
                     true,

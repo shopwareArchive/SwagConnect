@@ -236,11 +236,11 @@ class BasketHelper
             if ($config->getConfig('removeBasketAdditions'))
             {
                 $this->removeNonProductsFromBasket();
-                // Make the first connect shop the default basket-content
-                $this->basket['content'] = $connectContent[$shopId];
-                unset($this->connectContent[$shopId]);
             }
-            
+            // Make the first connect shop the default basket-content
+            $this->basket['content'] = $connectContent[$shopId];
+            unset($this->connectContent[$shopId]);
+
             return $shopId;
         }
 

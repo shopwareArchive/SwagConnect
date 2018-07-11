@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.20",
+    "currentVersion": "1.1.21",
     "changelog": {
         "de": {
+            "1.1.21": "CON-5310 - Usability Fix Warenkorb Zusätze",
             "1.1.20": "CON-5308 - Fix Bug im Warenkorb",
             "1.1.19": "CON-5307 - Warenkorb-Verhalten für Zusätze konfigurierbar",
             "1.1.18": "CON-5301 - Bildimport Command nutzt Limit",
@@ -36,6 +37,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.21": "CON-5310 - Usability Fix basket additions",
             "1.1.20": "CON-5308 - Fix Bug in Basket",
             "1.1.19": "CON-5307 - basket behaviour for Additions is now configurable",
             "1.1.18": "CON-5301 - add Limit to ImageImport-Command",

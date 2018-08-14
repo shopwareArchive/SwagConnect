@@ -262,21 +262,40 @@ class ConnectExport
             [\Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
         )->fetchAll(\PDO::FETCH_COLUMN);
 
+        $inactive = $this->manager->getConnection()->executeQuery(
+            'SELECT ci.source_id
+             FROM s_plugin_connect_items AS ci
+             JOIN s_articles as a ON ci.article_id = a.id
+             WHERE a.active = 0 AND ci.source_id IN (?)',
+            [$ids],
+            [\Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+        )->fetchAll(\PDO::FETCH_COLUMN);
+        $deleted = array_merge($deleted, $inactive);
+
         $updatedIds = array_diff($ids, $deleted);
         if ($updatedIds === null) {
             $updatedIds = [];
         }
         $this->export($updatedIds);
 
-        foreach ($deleted as $sourceId) {
+        $this->markProductsDeleted($deleted);
+        $this->markProductsDeleted($inactive);
+    }
+
+    /**
+     * @param array $ids
+     */
+    private function markProductsDeleted($ids)
+    {
+        foreach ($ids as $sourceId) {
             $this->recordDelete($sourceId);
         }
 
         $this->manager->getConnection()->executeQuery(
             'UPDATE s_plugin_connect_items SET export_status = ? WHERE source_id IN (?)',
-            [Attribute::STATUS_DELETE, $deleted],
+            [Attribute::STATUS_DELETE, $ids],
             [\PDO::PARAM_STR, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
-            );
+        );
     }
 
     /**

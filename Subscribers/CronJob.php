@@ -217,7 +217,12 @@ class CronJob implements SubscriberInterface
 
         $sourceIds = $this->helper->getArticleSourceIds($exportArticleIds);
 
-        $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
+        foreach (array_chunk($sourceIds, 100, true) as $ids) {
+            $errorMessages = $this->connectExport->export($ids, $streamsAssignments);
+            if ($errorMessages) {
+                break;
+            }
+        }
 
         if ($errorMessages) {
             $errorMessagesText = '';

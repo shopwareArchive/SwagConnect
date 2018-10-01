@@ -86,6 +86,26 @@ class ProductStreamService
 
     /**
      * @param $streamId
+     * @param bool $appendCurrent
+     * @return ProductStreamsAssignments
+     */
+    public function getAssignmentsForStream($streamId)
+    {
+        $stream = $this->findStream($streamId);
+        $articleIds = $this->getArticlesIds($stream);
+        $assignment = [];
+
+        foreach ($articleIds as $articleId) {
+            $assignment[$articleId][$stream->getId()] = $stream->getName();
+        }
+
+        return new ProductStreamsAssignments(
+            ['assignments' => $assignment]
+        );
+    }
+
+    /**
+     * @param $streamId
      * @throws \Exception
      * @return ProductStreamsAssignments
      */

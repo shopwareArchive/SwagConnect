@@ -148,7 +148,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             ['assignments' => $assignment]
         );
         $this->streamService->expects($this->once())
-            ->method('prepareStreamsAssignments')
+            ->method('getAssignmentsForStream')
             ->with(5)
             ->willReturn($streamAssignments);
 

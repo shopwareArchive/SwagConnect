@@ -193,7 +193,7 @@ class CronJob implements SubscriberInterface
             }
 
             try {
-                $streamsAssignments->merge($this->productStreamService->prepareStreamsAssignments($streamId));
+                $streamsAssignments->merge($this->productStreamService->getAssignmentsForStream($streamId));
             } catch (\RuntimeException $e) {
                 $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $e->getMessage());
                 continue;

@@ -14,7 +14,7 @@ class ProductStreamsAssignments extends Struct
     /**
      * @var array
      */
-    public $assignments;
+    public $assignments = [];
 
     /**
      * @param $articleId
@@ -51,5 +51,11 @@ class ProductStreamsAssignments extends Struct
         }
 
         return $articleIds;
+    }
+
+    public function merge(ProductStreamsAssignments $assignments) {
+        $this->assignments = $this->assignments + $assignments->assignments;
+
+        return $this;
     }
 }

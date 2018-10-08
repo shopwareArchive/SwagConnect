@@ -18,6 +18,7 @@ use ShopwarePlugins\Connect\Components\ImageImport;
 use ShopwarePlugins\Connect\Components\Logger;
 use ShopwarePlugins\Connect\Components\ConnectExport;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductSearch;
+use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamsAssignments;
 use ShopwarePlugins\Connect\Components\ProductStream\ProductStreamService;
 use Shopware\Components\DependencyInjection\Container;
 
@@ -172,6 +173,7 @@ class CronJob implements SubscriberInterface
     public function exportDynamicStreams(\Shopware_Components_Cron_CronJob $job)
     {
         $streams = $this->productStreamService->getAllExportedStreams(ProductStreamService::DYNAMIC_STREAM);
+        $streamsAssignments = new ProductStreamsAssignments();
 
         /** @var ProductStream $stream */
         foreach ($streams as $stream) {
@@ -191,42 +193,55 @@ class CronJob implements SubscriberInterface
             }
 
             try {
-                $streamsAssignments = $this->productStreamService->prepareStreamsAssignments($streamId, false);
-
-                //article ids must be taken from streamsAssignments
-                $exportArticleIds = $streamsAssignments->getArticleIds();
-
-                $removeArticleIds = $streamsAssignments->getArticleIdsWithoutStreams();
-
-                if (!empty($removeArticleIds)) {
-                    $this->removeArticlesFromStream($removeArticleIds);
-
-                    //filter the $exportArticleIds
-                    $exportArticleIds = array_diff($exportArticleIds, $removeArticleIds);
-                }
-
-                $sourceIds = $this->helper->getArticleSourceIds($exportArticleIds);
-
-                $errorMessages = $this->connectExport->export($sourceIds, $streamsAssignments);
-                $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_EXPORT);
+                $streamsAssignments->merge($this->productStreamService->getAssignmentsForStream($streamId));
             } catch (\RuntimeException $e) {
                 $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $e->getMessage());
                 continue;
             }
+        }
+        if (count($streamsAssignments->assignments) === 0) {
+            return;
+        }
 
+        //article ids must be taken from streamsAssignments
+        $exportArticleIds = $streamsAssignments->getArticleIds();
+
+        $removeArticleIds = $streamsAssignments->getArticleIdsWithoutStreams();
+
+        if (!empty($removeArticleIds)) {
+            $this->removeArticlesFromStream($removeArticleIds);
+
+            //filter the $exportArticleIds
+            $exportArticleIds = array_diff($exportArticleIds, $removeArticleIds);
+        }
+
+        $sourceIds = $this->helper->getArticleSourceIds($exportArticleIds);
+
+        foreach (array_chunk($sourceIds, 100, true) as $ids) {
+            $errorMessages = $this->connectExport->export($ids, $streamsAssignments);
             if ($errorMessages) {
-                $errorMessagesText = '';
-                $displayedErrorTypes = [
-                    ErrorHandler::TYPE_DEFAULT_ERROR,
-                    ErrorHandler::TYPE_PRICE_ERROR
-                ];
-
-                foreach ($displayedErrorTypes as $displayedErrorType) {
-                    $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
-                }
-
-                $this->productStreamService->changeStatus($streamId, ProductStreamService::STATUS_ERROR, $errorMessagesText);
+                break;
             }
+        }
+
+        if ($errorMessages) {
+            $errorMessagesText = '';
+            $displayedErrorTypes = [
+                ErrorHandler::TYPE_DEFAULT_ERROR,
+                ErrorHandler::TYPE_PRICE_ERROR
+            ];
+
+            foreach ($displayedErrorTypes as $displayedErrorType) {
+                $errorMessagesText .= implode('\n', $errorMessages[$displayedErrorType]);
+            }
+
+            foreach ($streams as $stream) {
+                $this->productStreamService->changeStatus($stream->getId(), ProductStreamService::STATUS_ERROR, $errorMessagesText);
+            }
+        }
+
+        foreach ($streams as $stream) {
+            $this->productStreamService->changeStatus($stream->getId(), ProductStreamService::STATUS_EXPORT);
         }
     }
 

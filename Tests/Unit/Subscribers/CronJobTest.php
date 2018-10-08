@@ -106,7 +106,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         );
 
         $stream = $this->createMock(ProductStream::class);
-        $stream->expects($this->once())
+        $stream->expects($this->exactly(2))
             ->method('getId')
             ->willReturn(5);
 
@@ -148,8 +148,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             ['assignments' => $assignment]
         );
         $this->streamService->expects($this->once())
-            ->method('prepareStreamsAssignments')
-            ->with(5, false)
+            ->method('getAssignmentsForStream')
+            ->with(5)
             ->willReturn($streamAssignments);
 
         $this->connectExport->expects($this->once())

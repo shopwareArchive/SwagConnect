@@ -85,6 +85,14 @@ class ProductSearch
             new CategoryCondition([$context->getShop()->getCategory()->getId()])
         );
 
-        return $this->productSearchService->search($criteria, $context);
+        $result = $this->productSearchService->search($criteria, $context);
+
+        // elastic will fetch just 10 products by default -> so we fetch it again with correct limit
+        if ($result->getTotalCount() > count($result->getProducts())) {
+            $criteria->limit($result->getTotalCount());
+            $result = $this->productSearchService->search($criteria, $context);
+        }
+
+        return $result;
     }
 }

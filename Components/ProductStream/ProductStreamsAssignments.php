@@ -54,6 +54,11 @@ class ProductStreamsAssignments extends Struct
     }
 
     public function merge(ProductStreamsAssignments $assignments) {
+        foreach ($this->assignments as $articleId => $assignment) {
+            if (array_key_exists($articleId, $assignments->assignments)) {
+                $this->assignments[$articleId] = $assignment + $assignments->assignments[$articleId];
+            }
+        }
         $this->assignments = $this->assignments + $assignments->assignments;
 
         return $this;

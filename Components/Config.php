@@ -610,6 +610,9 @@ class Config
     {
         $settings = (array) $settings;
         foreach ($settings as $settingName => $settingValue) {
+            if ($settingValue === null) {
+                continue;
+            }
             $this->setConfig($settingName, $settingValue, null, 'marketplace');
         }
     }

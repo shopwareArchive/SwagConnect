@@ -213,6 +213,11 @@ class Lifecycle implements SubscriberInterface
         $entity = $eventArgs->get('entity');
         if ($entity->getKind() !== 1) {
             $attribute = $this->helper->getConnectAttributeByModel($entity);
+
+            if (!$attribute) {
+                return;
+            }
+
             if (!$this->helper->isProductExported($attribute)) {
                 return;
             }

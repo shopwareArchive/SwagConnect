@@ -346,7 +346,7 @@ class LocalProductQuery extends BaseProductQuery
             SELECT `stream_id`, `name`
             FROM s_plugin_connect_streams_relation csr
             INNER JOIN s_product_streams ps ON csr.stream_id = ps.id
-            WHERE csr.article_id = ?
+            WHERE csr.article_id = ? AND csr.deleted = 0
         ', [$articleId])->fetchAll();
 
         $streams = [];

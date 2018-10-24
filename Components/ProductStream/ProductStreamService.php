@@ -70,7 +70,7 @@ class ProductStreamService
 
         $articleIds = $this->getArticlesIds($stream);
 
-        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
+        $assignment = $this->collectRelatedStreamsAssignments(array_keys($articleIds));
 
         if ($appendCurrent) {
             //merge prev with current streams
@@ -95,7 +95,12 @@ class ProductStreamService
         $articleIds = $this->getArticlesIds($stream);
         $assignment = [];
 
-        foreach ($articleIds as $articleId) {
+        foreach ($articleIds as $articleId => $deleted) {
+            if ($deleted === 1) {
+                $assignment[$articleId] = [];
+                continue;
+            };
+
             $assignment[$articleId][$stream->getId()] = $stream->getName();
         }
 
@@ -116,7 +121,7 @@ class ProductStreamService
 
         $articleIds = $this->getArticlesIds($stream);
 
-        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
+        $assignment = $this->collectRelatedStreamsAssignments(array_keys($articleIds));
 
         return new ProductStreamsAssignments(
             ['assignments' => $assignment]

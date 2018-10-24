@@ -68,9 +68,9 @@ class ProductStreamService
     {
         $stream = $this->findStream($streamId);
 
-        $articleIds = $this->getArticlesIds($stream);
+        $articleIds = array_keys($this->getArticlesIds($stream));
 
-        $assignment = $this->collectRelatedStreamsAssignments(array_keys($articleIds));
+        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
         if ($appendCurrent) {
             //merge prev with current streams
@@ -119,9 +119,9 @@ class ProductStreamService
         //checks stream existence
         $stream = $this->findStream($streamId);
 
-        $articleIds = $this->getArticlesIds($stream);
+        $articleIds = array_keys($this->getArticlesIds($stream));
 
-        $assignment = $this->collectRelatedStreamsAssignments(array_keys($articleIds));
+        $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
         return new ProductStreamsAssignments(
             ['assignments' => $assignment]

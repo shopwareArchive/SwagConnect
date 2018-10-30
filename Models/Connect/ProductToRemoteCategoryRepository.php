@@ -63,7 +63,7 @@ class ProductToRemoteCategoryRepository extends ModelRepository
         }
 
         if ($hideMapped) {
-            $builder->andWhere('att.connectMappedCategory <> 1');
+            $builder->andWhere('(att.connectMappedCategory <> 1 OR att.connectMappedCategory IS NULL)');
         }
 
         if ($stream != null) {

@@ -147,7 +147,7 @@ class CategoryExtractor
 
         if ($excludeMapped === true) {
             $sql .= ' INNER JOIN `s_articles_attributes` ar ON ar.articleDetailsID = pci.article_detail_id';
-            $whereSql[] = 'ar.connect_mapped_category <> 1';
+            $whereSql[] = '(ar.connect_mapped_category <> 1 OR ar.connect_mapped_category IS NULL)';
         }
 
         if (count($whereSql) > 0) {

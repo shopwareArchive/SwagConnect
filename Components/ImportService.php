@@ -541,7 +541,7 @@ class ImportService
 
         $attributeStatement = $this->manager->getConnection()->prepare('
                     UPDATE s_articles_attributes 
-                    SET connect_mapped_category = NULL 
+                    SET connect_mapped_category = 0 
                     WHERE articleID IN (' . implode(', ', $articleIds) . ') 
                       AND 
                         (SELECT COUNT(*) FROM s_articles_categories 
@@ -562,7 +562,7 @@ class ImportService
     private function unAssignArticlesFromAllCategories(array $articleIds)
     {
         $attributeStatement = $this->manager->getConnection()->prepare(
-            'UPDATE s_articles_attributes SET connect_mapped_category = NULL WHERE articleID IN (' . implode(', ', $articleIds) . ')'
+            'UPDATE s_articles_attributes SET connect_mapped_category = 0 WHERE articleID IN (' . implode(', ', $articleIds) . ')'
         );
         $attributeStatement->execute();
         $categoriesStatement = $this->manager->getConnection()->prepare('DELETE FROM s_articles_categories WHERE articleID IN (' . implode(', ', $articleIds) . ')');

@@ -68,7 +68,7 @@ class ProductStreamService
     {
         $stream = $this->findStream($streamId);
 
-        $articleIds = $this->getArticlesIds($stream);
+        $articleIds = array_keys($this->getArticlesIds($stream));
 
         $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 
@@ -95,7 +95,12 @@ class ProductStreamService
         $articleIds = $this->getArticlesIds($stream);
         $assignment = [];
 
-        foreach ($articleIds as $articleId) {
+        foreach ($articleIds as $articleId => $deleted) {
+            if ($deleted === 1) {
+                $assignment[$articleId] = [];
+                continue;
+            };
+
             $assignment[$articleId][$stream->getId()] = $stream->getName();
         }
 
@@ -114,7 +119,7 @@ class ProductStreamService
         //checks stream existence
         $stream = $this->findStream($streamId);
 
-        $articleIds = $this->getArticlesIds($stream);
+        $articleIds = array_keys($this->getArticlesIds($stream));
 
         $assignment = $this->collectRelatedStreamsAssignments($articleIds);
 

@@ -285,6 +285,8 @@ class LocalProductQuery extends BaseProductQuery
             $row = $this->applyConfiguratorOptions($row);
         }
 
+        $row['supplierStreams'] = $this->getSupplierStreams($row['localId']);
+
         foreach (['localId', 'detailId', 'detailKind', 'configuratorSetId'] as $fieldName) {
             unset($row[$fieldName]);
         }
@@ -331,6 +333,28 @@ class LocalProductQuery extends BaseProductQuery
         );
 
         return $product;
+    }
+
+    /**
+     * @param $articleId
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getSupplierStreams($articleId)
+    {
+        $result = $this->manager->getConnection()->executeQuery('
+            SELECT `stream_id`, `name`
+            FROM s_plugin_connect_streams_relation csr
+            INNER JOIN s_product_streams ps ON csr.stream_id = ps.id
+            WHERE csr.article_id = ? AND csr.deleted = 0
+        ', [$articleId])->fetchAll();
+
+        $streams = [];
+        foreach ($result as $row) {
+            $streams[$row['stream_id']] = $row['name'];
+        }
+
+        return $streams;
     }
 
     /**

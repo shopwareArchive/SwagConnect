@@ -111,9 +111,10 @@ class ProductStreamRepository implements RepositoryInterface
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array_map(function ($item) {
-            return $item['id'];
-        }, $items);
+        return array_reduce($items, function ($result, $item) {
+            $result[$item['id']] = 0;
+            return $result;
+        }, []);
     }
 
     /**
@@ -123,7 +124,7 @@ class ProductStreamRepository implements RepositoryInterface
     public function fetchArticleIdsFromDynamicStream(ProductStream $stream)
     {
         $build = $this->manager->getConnection()->createQueryBuilder();
-        $build->select(['product.id'])
+        $build->select(['product.id', 'streamProducts.deleted'])
             ->from('s_articles', 'product')
             ->leftJoin('product', 's_plugin_connect_streams_relation', 'streamProducts', 'streamProducts.article_id = product.id')
             ->where('streamProducts.stream_id = :streamId')
@@ -131,9 +132,10 @@ class ProductStreamRepository implements RepositoryInterface
 
         $items = $build->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array_map(function ($item) {
-            return $item['id'];
-        }, $items);
+        return array_reduce($items, function ($result, $item) {
+            $result[$item['id']] = (int)$item['deleted'];
+            return $result;
+        }, []);
     }
 
     /**

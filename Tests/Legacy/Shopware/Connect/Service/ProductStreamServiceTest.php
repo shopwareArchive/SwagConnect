@@ -120,13 +120,13 @@ class ProductStreamServiceTest extends ConnectTestHelper
         $articlesIds = $this->productStreamService->getArticlesIds($stream);
 
         $this->assertCount(4, $articlesIds);
-        $this->assertTrue(in_array(33, $articlesIds));
+        $this->assertTrue(array_key_exists(33, $articlesIds));
     }
 
     public function testGetArticlesIdsFromDynamicStream()
     {
-        $expectedArticleIds = [35, 36];
-        $this->productStreamService->createStreamRelation($this->streamDId, $expectedArticleIds);
+        $expectedArticleIds = [35 => 0, 36 => 0];
+        $this->productStreamService->createStreamRelation($this->streamDId, [35, 36]);
         $stream = $this->productStreamService->findStream($this->streamDId);
         $articlesIds = $this->productStreamService->getArticlesIds($stream);
 

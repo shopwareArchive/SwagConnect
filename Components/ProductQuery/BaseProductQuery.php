@@ -18,6 +18,7 @@ abstract class BaseProductQuery
     const SHORT_DESCRIPTION_FIELD = 'shortDescriptionField';
     const CONNECT_DESCRIPTION_FIELD = 'connectDescriptionField';
 
+    /** @var ModelManager  */
     protected $manager;
 
     private $mediaService;

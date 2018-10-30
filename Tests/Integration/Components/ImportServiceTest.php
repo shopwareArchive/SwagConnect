@@ -137,8 +137,8 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         $this->manager->clear();
         /** @var \Shopware\Models\Article\Article $article */
         foreach ($this->articleRepository->findBy(['id' => $articleIds]) as $article) {
-            // check connect_mapped_category flag, must be null
-            $this->assertNull($article->getAttribute()->getConnectMappedCategory());
+            // check connect_mapped_category flag, must be false
+            $this->assertNotEquals(1, $article->getAttribute()->getConnectMappedCategory());
             // check article->getCategories for each article, it should be an empty array
             $this->assertEmpty($article->getCategories());
         }
@@ -226,8 +226,8 @@ class ImportServiceTest extends \PHPUnit_Framework_TestCase
         $this->manager->clear();
         /** @var \Shopware\Models\Article\Article $article */
         foreach ($this->articleRepository->findBy(['id' => $articleIds]) as $article) {
-            // check connect_mapped_category flag, must be null
-            $this->assertNull($article->getAttribute()->getConnectMappedCategory());
+            // check connect_mapped_category flag, must be false
+            $this->assertNotEquals(1, $article->getAttribute()->getConnectMappedCategory());
 
             // check article->getCategories for each article, it should be an empty array
             $this->assertEmpty($article->getCategories());

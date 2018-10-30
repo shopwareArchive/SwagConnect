@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.24",
+    "currentVersion": "1.1.25",
     "changelog": {
         "de": {
+            "1.1.25": "CON-5362 - Fix: Artikel werden korrekt aus dynamischen Streams entfernt",
             "1.1.24": "CON-5355 - Fix: Cronjob exportiert alle dynamischen Streams",
             "1.1.23": "CON-5347 - Fix: Export von dynamischen Streams unter ElasticSearch; CON-5358 - Performanceverbesserung Cronjob zum Export von ProductStreams;",
             "1.1.22": "CON-5317 - Inaktive Produkte werden jetzt aus dem SN gelöscht, wenn Datenbanktrigger aktiviert sind",
@@ -40,6 +41,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.25": "CON-5362 - Fix: Products are correctly deleted from dynamic Streams",
             "1.1.24": "CON-5355 - Fix: Cronjob exports all dynamic Streams",
             "1.1.23": "CON-5347 - Fix: Export of dynamic Streams under ElasticSearch; CON-5358 - Performanceimprovement of Cronjob for Export of ProductStreams;",
             "1.1.22": "CON-5317 - Delete inactive Products from SN with DatabaseTriggers",
@@ -72,7 +74,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.5.1",
+        "maximumVersion": "5.5.2",
         "blacklist": []
     }
 }

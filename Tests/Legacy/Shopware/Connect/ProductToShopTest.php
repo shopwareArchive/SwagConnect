@@ -143,9 +143,10 @@ class ProductToShopTest extends ConnectTestHelper
         $detail = $connectAttribute->getArticleDetail();
 
         $this->assertEquals($product->minPurchaseQuantity, $detail->getMinPurchase());
-        $this->assertNull(
+        $this->assertNotEquals(
+            1,
             $detail->getAttribute()->getConnectMappedCategory(),
-            'connect_mapped_category must be null when product does not contain mapped category'
+            'connect_mapped_category must be false when product does not contain mapped category'
         );
     }
 

@@ -236,7 +236,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($categoryAssignment);
 
         $isProductConnectMapped = $connection->fetchColumn('SELECT connect_mapped_category FROM s_articles_attributes WHERE articleID = ?', [$productId]);
-        $this->assertNull($isProductConnectMapped);
+        $this->assertNotEquals(1, $isProductConnectMapped);
     }
 
     public function test_recreate_remote_categories()

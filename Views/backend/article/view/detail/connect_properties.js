@@ -1,3 +1,4 @@
+//{namespace name="backend/connect/view/main"}
 //{block name="backend/article/view/detail/properties" append}
 Ext.define('Shopware.apps.Article.view.detail.ConnectProperties', {
     override: 'Shopware.apps.Article.view.detail.Properties',

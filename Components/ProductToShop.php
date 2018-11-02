@@ -594,7 +594,7 @@ class ProductToShop implements ProductToShopBase
             }
 
             // If this is a new product
-            if (!$model->getId() && $field == 'image' && !$this->config->getConfig(
+            if ($field == 'image' && !$this->config->getConfig(
                 'importImagesOnFirstImport',
                     false
             )) {

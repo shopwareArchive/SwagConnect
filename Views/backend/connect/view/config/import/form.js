@@ -55,7 +55,7 @@ Ext.define('Shopware.apps.Connect.view.config.import.Form', {
         createCategoriesAutomatically: '{s name=config/import/categories/create_automatically}Kategorien automatisch anlegen{/s}',
         activateProductsAutomatically: '{s name=config/import/products/activate_automatically}Produkte automatisch aktivieren{/s}',
         createUnitsAutomatically: '{s name=config/import/units/create_automatically}Einheiten automatisch anlegen{/s}',
-        importPicturesLabel: '{s name=config/import/pictures_label}Load product images during first import{/s}',
+        importPicturesLabel: '{s name=config/import/pictures_label}Load product images during import{/s}',
         importPicturesHelp: '{s name=config/import/pictures_help}The import of images can slow down the import. If you want to import many products, you should not activate and import the pictures on the CronJob.{/s}',
         overwritePropertiesLabel: '{s name=config/import/overwrite_properties}Overwrite the following properties during import{/s}',
         overwritePropertiesHelp: '{s name=config/import/overwrite_properties_help}The fields selected here will automatically be overwritten when the source changes this store. You can define item-level exceptions.{/s}',

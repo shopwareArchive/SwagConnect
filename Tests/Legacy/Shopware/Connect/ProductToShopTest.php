@@ -264,6 +264,61 @@ class ProductToShopTest extends ConnectTestHelper
             $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
         }
 
+        $this->assertEquals(0, $connectAttribute->getArticle()->getImages()->count());
+        $this->assertEquals(0, $detail->getImages()->count());
+        $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());
+        $this->assertEquals('SC-3-' . $newSku, $detail->getNumber());
+    }
+
+    public function testUpdateVariantImportsImages()
+    {
+        $this->db->query('UPDATE s_plugin_connect_config SET value = 1 WHERE name = "importImagesOnFirstImport"');
+
+        $variants = $this->getVariants();
+        // insert variants
+        foreach ($variants as $variant) {
+            $this->productToShop->insertOrUpdate($variant);
+        }
+
+        $newTitle = 'Massimport#updateVariant' . rand(1, 10000000);
+        $newPrice = 22.48;
+        $newPurchasePrice = 8.48;
+        $newLongDesc = 'Updated connect variant - long description';
+        $newShortDesc = 'Updated connect variant - short description';
+        $newVat = 0.07;
+        $newSku = $variants[1]->sku . 'M';
+        $variants[1]->title = $newTitle;
+        $variants[1]->price = $newPrice;
+        $variants[1]->purchasePrice = $newPurchasePrice;
+        $variants[1]->longDescription = $newLongDesc;
+        $variants[1]->shortDescription = $newShortDesc;
+        $variants[1]->images[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
+        $variants[1]->variantImages[] = self::IMAGE_PROVIDER_URL . '?' . $variants[1]->sourceId;
+        $variants[1]->vat = $newVat;
+        $variants[1]->sku = $newSku;
+
+        $this->productToShop->insertOrUpdate($variants[1]);
+
+        $this->db->query('UPDATE s_plugin_connect_config SET value = 0 WHERE name = "importImagesOnFirstImport"');
+
+        /** @var \Shopware\CustomModels\Connect\Attribute $connectAttribute */
+        $connectAttribute = $this->modelManager
+            ->getRepository('Shopware\CustomModels\Connect\Attribute')
+            ->findOneBy(['sourceId' => $variants[1]->sourceId]);
+        $this->assertEquals($newTitle, $connectAttribute->getArticle()->getName());
+        $this->assertEquals($newLongDesc, $connectAttribute->getArticle()->getDescriptionLong());
+        $this->assertEquals($newShortDesc, $connectAttribute->getArticle()->getDescription());
+        $detail = $connectAttribute->getArticleDetail();
+        /** @var \Shopware\Models\Article\Price[] $prices */
+        $prices = $detail->getPrices();
+
+        $this->assertEquals($newPrice, $prices[0]->getPrice());
+        if (method_exists($detail, 'getPurchasePrice')) {
+            $this->assertEquals($newPurchasePrice, $detail->getPurchasePrice());
+        } else {
+            $this->assertEquals($newPurchasePrice, $prices[0]->getBasePrice());
+        }
+
         $this->assertEquals(2, $connectAttribute->getArticle()->getImages()->count());
         $this->assertEquals(1, $detail->getImages()->count());
         $this->assertEquals(7.00, $connectAttribute->getArticle()->getTax()->getTax());

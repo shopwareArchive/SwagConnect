@@ -61,3 +61,4 @@ Ext.define('Shopware.apps.Connect.view.import.tree.RemoteCategoryDragAndDrop', {
         return !me.isLeaf(targetRecord) && draggedDepth == droppedDepth;
     }
 });
+//{/block}

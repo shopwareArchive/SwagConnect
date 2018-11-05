@@ -1,3 +1,5 @@
+//{namespace name="backend/connect/view/main"}
+//{block name="backend/connect/view/import/tree/remote_category_drag_and_drop"}
 Ext.define('Shopware.apps.Connect.view.import.tree.RemoteCategoryDragAndDrop', {
     extend: 'Ext.tree.plugin.TreeViewDragDrop',
     

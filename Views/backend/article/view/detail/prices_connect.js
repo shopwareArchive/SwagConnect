@@ -1,6 +1,7 @@
 /**
  * Extend the article's price fieldset in order to disable it if the price was configured as fixedPrice in the source shop
  */
+//{namespace name="backend/connect/view/main"}
 //{block name="backend/article/view/detail/prices" append}
 Ext.define('Shopware.apps.Article.view.detail.PricesConnect', {
     override: 'Shopware.apps.Article.view.detail.Prices',
@@ -20,7 +21,7 @@ Ext.define('Shopware.apps.Article.view.detail.PricesConnect', {
         }
 
         style = 'style="width: 25px; height: 25px; display: inline-block; margin-right: 3px;"';
-        var fixedPriceMessage = Ext.String.format('{s name="connectFixedPriceMessage"}Für dieses [0]-Produkt wurde die Preisbindung vom Anbieter aktiviert. Aus diesem Grund kann der Preis für dieses Produkt nicht verändert werden.{/s}', marketplaceName);
+        var fixedPriceMessage = Ext.String.format('{s name="connect/connectFixedPriceMessage"}Für dieses [0]-Produkt wurde die Preisbindung vom Anbieter aktiviert. Aus diesem Grund kann der Preis für dieses Produkt nicht verändert werden.{/s}', marketplaceName);
 
         me.connectLabel = Ext.create('Ext.form.Label', {
             hidden: true,

@@ -64,7 +64,9 @@ class Logger
             VALUES (?, ?, ?, ?, ?, NOW())
         ', [$isError, $service, $command, $request, $response]);
 
-        $this->cleanup();
+        if (random_int(0, 100) === 0) {
+            $this->cleanup();
+        }
     }
 
     /**

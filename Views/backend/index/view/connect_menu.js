@@ -7,7 +7,6 @@ Ext.define('Shopware.apps.Index.view.ConnectMenu', {
      * @Override
      */
     initComponent: function() {
-        console.log('init');
         var me = this, result;
 
         me.isUpdateAvailable();
@@ -18,7 +17,6 @@ Ext.define('Shopware.apps.Index.view.ConnectMenu', {
     },
 
     isUpdateAvailable: function() {
-        console.log('peroform CHeck');
         var me = this;
 
         Ext.Ajax.request({

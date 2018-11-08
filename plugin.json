@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.27",
+    "currentVersion": "1.1.28",
     "changelog": {
         "de": {
+            "1.1.28": "CON-5365 - Fix: ACL Problem wenn Update verfügbar ist",
             "1.1.27": "CON-5392 - Fix: js Bug",
             "1.1.26": "CON-5366 - Fix: fehlende js-Namespaces ergänzt, CON-5383 - Performance-Verbesserung to_shop, CON-5389 - Bildimport Cronjob greift auch bei Update",
             "1.1.25": "CON-5362 - Fix: Artikel werden korrekt aus dynamischen Streams entfernt",
@@ -43,6 +44,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.28": "CON-5365 - Fix: ACL problems if update is available",
             "1.1.27": "CON-5392 - Fix: js Bug",
             "1.1.26": "CON-5366 - Fix: added missing js-namespaces, CON-5383 - Performance-Improvements to_shop, CON-5389 - Bildimport Cronjob also runs on Update",
             "1.1.25": "CON-5362 - Fix: Products are correctly deleted from dynamic Streams",
@@ -78,7 +80,7 @@
     },
     "compatibility": {
         "minimumVersion": "5.2.0",
-        "maximumVersion": "5.5.2",
+        "maximumVersion": "5.5.3",
         "blacklist": []
     }
 }

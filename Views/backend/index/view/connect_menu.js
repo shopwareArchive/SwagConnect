@@ -7,7 +7,41 @@ Ext.define('Shopware.apps.Index.view.ConnectMenu', {
      * @Override
      */
     initComponent: function() {
+        console.log('init');
         var me = this, result;
+
+        me.isUpdateAvailable();
+
+        result = me.callParent(arguments);
+
+        return result;
+    },
+
+    isUpdateAvailable: function() {
+        console.log('peroform CHeck');
+        var me = this;
+
+        Ext.Ajax.request({
+            url: '{url controller=Connect action=checkPluginVersion}',
+            async: true,
+            success: function (response) {
+                if (!response || !response.responseText) {
+                    return;
+                }
+
+                var result = Ext.decode(response.responseText);
+                if (!result.success) {
+                    return;
+                }
+
+                if (result.updateAvailable) {
+                    me.createUpdateMessage();
+                }
+            }
+        });
+    },
+
+    createUpdateMessage: function() {
         Shopware.app.Application.addSubApplication({
                 name: 'Shopware.apps.PluginManager'
             },
@@ -33,8 +67,9 @@ Ext.define('Shopware.apps.Index.view.ConnectMenu', {
                                         controller.displayLoadingMask(plugin, '{s name=execute_update}Plugin is being updated{/s}', false);
                                         store.load({
                                             scope: this,
-                                            callback: function() {
-                                                controller.executePluginUpdate(plugin, function(){ });
+                                            callback: function () {
+                                                controller.executePluginUpdate(plugin, function () {
+                                                });
                                             }
                                         });
                                     });
@@ -45,10 +80,6 @@ Ext.define('Shopware.apps.Index.view.ConnectMenu', {
                 });
             }
         );
-
-        result = me.callParent(arguments);
-
-        return result;
     }
 });
 //{/block}

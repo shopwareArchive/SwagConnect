@@ -1732,4 +1732,38 @@ class Shopware_Controllers_Backend_Connect extends \Shopware_Controllers_Backend
     {
         return ['login', 'autoLogin'];
     }
+
+    public function checkPluginVersionAction()
+    {
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'plugin.json'), true);
+
+        // URL: https://api.shopware.com/pluginStore/updates?pluginNames%5B0%5D=SwagBepado&shopwareVersion=5.0.0
+        //This url will return plugin version information only if shopware version is 5.2.* or higher
+        $baseUrl = 'https://api.shopware.com/pluginStore/updates';
+        $shopVersion = Shopware::VERSION;
+        $shopVersion = $shopVersion === '___VERSION___' ? '5.0.0' : $shopVersion;
+        $pluginName = 'SwagConnect';
+        $apiResponse = json_decode(
+            file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
+        )[0];
+        $updateAvailable = false;
+
+        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>') && $this->userHasPermissions()) {
+            $updateAvailable = true;
+        }
+
+        $this->View()->assign([
+            'success' => true,
+            'updateAvailable' => $updateAvailable
+        ]);
+    }
+
+    private function userHasPermissions()
+    {
+        return Shopware()->Plugins()->Backend()->Auth()->isAllowed([
+            'privilege' => 'update',
+            'resource' => 'pluginmanager',
+            'role' => null
+        ]);
+    }
 }

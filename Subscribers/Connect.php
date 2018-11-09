@@ -82,33 +82,12 @@ class Connect implements SubscriberInterface
     {
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
-        $request = $action->Request();
-        $response = $action->Response();
         $snippets = $this->snippetManager->getNamespace('backend/connect/view/main');
         $view = $action->View();
-        $info = null;
 
-        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate()) {
-            return;
-        }
-
-        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'plugin.json'), true);
-
-        // URL: https://api.shopware.com/pluginStore/updates?pluginNames%5B0%5D=SwagBepado&shopwareVersion=5.0.0
-        //This url will return plugin version information only if shopware version is 5.2.* or higher
-        $baseUrl = 'https://api.shopware.com/pluginStore/updates';
-        $shopVersion = Shopware::VERSION;
-        $shopVersion = $shopVersion === '___VERSION___' ? '5.0.0' : $shopVersion;
-        $pluginName = 'SwagConnect';
-        $apiResponse = json_decode(
-            file_get_contents($baseUrl . '?pluginNames[0]=' . $pluginName . '&shopwareVersion=' . $shopVersion)
-        )[0];
-
-        if (version_compare($apiResponse->highestVersion, $info['currentVersion'], '>') && $this->userHasPermissions()) {
-            $view->falseVersionTitle = $snippets->get('info/new_version_header');
-            $view->falseVersionMessage = $snippets->get('info/new_version_text');
-            $view->extendsTemplate('backend/index/view/connect_menu.js');
-        }
+        $view->falseVersionTitle = $snippets->get('info/new_version_header');
+        $view->falseVersionMessage = $snippets->get('info/new_version_text');
+        $view->extendsTemplate('backend/index/view/connect_menu.js');
     }
 
     /**
@@ -153,16 +132,5 @@ class Connect implements SubscriberInterface
         $view->purchasePriceInDetail = method_exists('Shopware\Models\Article\Detail', 'setPurchasePrice') ? 1 : 0;
 
         $view->extendsTemplate('backend/connect/menu_entry.tpl');
-    }
-
-    private function userHasPermissions()
-    {
-        // looks like this ignores the privilege
-        // but localy all privileges for pluginmanager were ignored e.g. i can open the pluginmanager if i don't have read rights
-        return Shopware()->Plugins()->Backend()->Auth()->isAllowed([
-            'privilege' => 'update',
-            'resource' => 'pluginmanager',
-            'role' => null
-        ]);
     }
 }

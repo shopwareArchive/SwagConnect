@@ -7,9 +7,10 @@
     "license": "proprietary",
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
-    "currentVersion": "1.1.29",
+    "currentVersion": "1.1.30",
     "changelog": {
         "de": {
+            "1.1.30": "CON-5345 - Fix: Paginierung in Connect Export",
             "1.1.29": "CON-5367 - Fix: Update Meldung",
             "1.1.28": "CON-5365 - Fix: ACL Problem wenn Update verfügbar ist",
             "1.1.27": "CON-5392 - Fix: js Bug",
@@ -45,6 +46,7 @@
             "1.0.18": "CON-4531 - Falscher Wert für Automatisch aktivierte Produkte gefixed; CON-4645 - Events für die Nutzung von customAttributes bei Bestellungen hinzugefügt;"
         },
         "en": {
+            "1.1.30": "CON-5345 - Fix: Pagination in Connect Export",
             "1.1.29": "CON-5365 - Fix: Update Message",
             "1.1.28": "CON-5365 - Fix: ACL problems if update is available",
             "1.1.27": "CON-5392 - Fix: js Bug",

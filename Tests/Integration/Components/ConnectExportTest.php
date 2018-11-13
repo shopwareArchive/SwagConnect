@@ -96,6 +96,7 @@ class ConnectExportTest extends \PHPUnit_Framework_TestCase
         $criteria = new SearchCriteria();
         $criteria->limit = 20;
         $criteria->offset = 0;
+        $criteria->orderBy = 'a.id';
 
         $result = $this->connectExport->getExportList($criteria);
 

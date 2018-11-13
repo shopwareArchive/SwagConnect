@@ -532,7 +532,7 @@ class ConnectExport
 
         $builder = $this->manager->getConnection()->createQueryBuilder();
         $builder->select([
-            'DISTINCT a.id',
+            'a.id',
             'd.ordernumber as number',
             'd.inStock as inStock',
             'a.name as name',
@@ -615,6 +615,7 @@ class ConnectExport
         }
 
         $totalBuilder = clone $builder;
+        $builder->groupBy('i.article_id');
         $builder->setFirstResult($criteria->offset);
         $builder->setMaxResults($criteria->limit);
         $data = $builder->execute()->fetchAll();

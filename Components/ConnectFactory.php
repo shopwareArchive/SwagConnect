@@ -193,40 +193,12 @@ class ConnectFactory
 
         $logger = new Logger(Shopware()->Db());
         $eventManager = $this->getContainer()->get('events');
-        $categoryResolver = $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
-            new AutoCategoryResolver(
-                $manager,
-                $manager->getRepository(Category::class),
-                $manager->getRepository(RemoteCategory::class),
-                $this->getConfigComponent(),
-                $this->getContainer()->get('CategoryDenormalization')
-            )
-            :
-            new DefaultCategoryResolver(
-                $manager,
-                $manager->getRepository(RemoteCategory::class),
-                $manager->getRepository(ProductToRemoteCategory::class),
-                $manager->getRepository(Category::class),
-                $this->getContainer()->get('CategoryDenormalization')
-            );
 
         return new SDK(
             $apiKey,
             $this->getSdkRoute($front),
             $gateway,
-            new ProductToShop(
-                $helper,
-                $manager,
-                $this->getImageImport(),
-                $this->getConfigComponent(),
-                new VariantConfigurator($manager, $this->getProductTranslationsGateway()),
-                $this->getMarketplaceGateway(),
-                $this->getProductTranslationsGateway(),
-                $categoryResolver,
-                $this->getConnectPDOGateway(),
-                $eventManager,
-                $this->getContainer()->get('CategoryDenormalization')
-            ),
+            $this->getProductToShop(),
             new ProductFromShop(
                 $helper,
                 $manager,
@@ -487,5 +459,49 @@ class ConnectFactory
             new ErrorHandler(),
             $this->container->get('events')
         );
+    }
+
+    /**
+     * @return ProductToShop
+     */
+    public function getProductToShop()
+    {
+        return new ProductToShop(
+            $this->getHelper(),
+            $this->getModelManager(),
+            $this->getImageImport(),
+            $this->getConfigComponent(),
+            new VariantConfigurator($this->getModelManager(), $this->getProductTranslationsGateway()),
+            $this->getMarketplaceGateway(),
+            $this->getProductTranslationsGateway(),
+            $this->getCategoryResolver(),
+            $this->getConnectPDOGateway(),
+            $this->getContainer()->get('events'),
+            $this->getContainer()->get('CategoryDenormalization')
+        );
+    }
+
+    /**
+     * @return CategoryResolver
+     */
+    public function getCategoryResolver()
+    {
+        $manager = $this->getModelManager();
+        return $this->getConfigComponent()->getConfig('createCategoriesAutomatically', false) == true ?
+            new AutoCategoryResolver(
+                $manager,
+                $manager->getRepository(Category::class),
+                $manager->getRepository(RemoteCategory::class),
+                $this->getConfigComponent(),
+                $this->getContainer()->get('CategoryDenormalization')
+            )
+            :
+            new DefaultCategoryResolver(
+                $manager,
+                $manager->getRepository(RemoteCategory::class),
+                $manager->getRepository(ProductToRemoteCategory::class),
+                $manager->getRepository(Category::class),
+                $this->getContainer()->get('CategoryDenormalization')
+            );
     }
 }

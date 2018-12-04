@@ -10,6 +10,7 @@ use ShopwarePlugins\Connect\Bootstrap\Uninstall;
 use ShopwarePlugins\Connect\Bootstrap\Update;
 use ShopwarePlugins\Connect\Bootstrap\Setup;
 use ShopwarePlugins\Connect\Commands\ApiEndpointCommand;
+use ShopwarePlugins\Connect\Commands\DeleteProductsCommand;
 use ShopwarePlugins\Connect\Commands\ImageImportCommand;
 use ShopwarePlugins\Connect\Components\BasketHelper;
 use ShopwarePlugins\Connect\Components\ConnectFactory;
@@ -214,7 +215,8 @@ final class Shopware_Plugins_Backend_SwagConnect_Bootstrap extends Shopware_Comp
 
         return new ArrayCollection([
             new ApiEndpointCommand(),
-            new ImageImportCommand($this->getHelper())
+            new ImageImportCommand($this->getHelper()),
+            new DeleteProductsCommand()
         ]);
     }
 

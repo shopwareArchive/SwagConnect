@@ -8,6 +8,7 @@
 namespace ShopwarePlugins\Connect\Components;
 
 use Doctrine\DBAL\Connection;
+use Shopware\CustomModels\Connect\Attribute;
 
 class TriggerService
 {
@@ -73,7 +74,7 @@ class TriggerService
             AFTER UPDATE
             ON s_articles
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.id
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.id
         ');
     }
 
@@ -84,21 +85,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_details
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_details_insert_trigger
             AFTER INSERT
             ON s_articles_details
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_details_delete_trigger
             AFTER DELETE
             ON s_articles_details
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_DELETE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -109,21 +110,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_attributes
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_attributes_insert_trigger
             AFTER INSERT
             ON s_articles_attributes
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_attributes_delete_trigger
             AFTER DELETE
             ON s_articles_attributes
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -134,21 +135,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_img
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_images_insert_trigger
             AFTER INSERT
             ON s_articles_img
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_images_delete_trigger
             AFTER DELETE
             ON s_articles_img
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -159,21 +160,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_categories
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_categories_insert_trigger
             AFTER INSERT
             ON s_articles_categories
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_categories_delete_trigger
             AFTER DELETE
             ON s_articles_categories
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -184,21 +185,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_prices
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_prices_insert_trigger
             AFTER INSERT
             ON s_articles_prices
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_prices_delete_trigger
             AFTER DELETE
             ON s_articles_prices
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -209,21 +210,21 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_translations
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_translations_insert_trigger
             AFTER INSERT
             ON s_articles_translations
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = NEW.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = NEW.articleID
         ');
         $this->connection->executeQuery('
             CREATE TRIGGER connect_article_translations_delete_trigger
             AFTER DELETE
             ON s_articles_translations
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id = OLD.articleID
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id = OLD.articleID
         ');
     }
 
@@ -234,7 +235,7 @@ class TriggerService
             AFTER UPDATE
             ON s_articles_supplier
             FOR EACH ROW
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id IN 
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id IN 
                     (
                         SELECT id FROM s_articles WHERE supplierID = NEW.id
                     );
@@ -249,7 +250,7 @@ class TriggerService
             ON s_core_tax
             FOR EACH ROW
                 IF (NEW.tax <> OLD.tax) THEN
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id IN 
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id IN 
                     (
                         SELECT id FROM s_articles WHERE taxID = NEW.id
                     );
@@ -265,7 +266,7 @@ class TriggerService
             ON s_categories
             FOR EACH ROW
                 IF (NEW.description <> OLD.description) OR (NEW.parent <> OLD.parent) THEN
-                UPDATE s_plugin_connect_items SET cron_update = 1 WHERE article_id IN 
+                UPDATE s_plugin_connect_items SET cron_update = 1, export_status = \'' . Attribute::STATUS_UPDATE . '\' WHERE article_id IN 
                     (
                         SELECT articleID FROM s_articles_categories WHERE categoryID = NEW.id
                     );

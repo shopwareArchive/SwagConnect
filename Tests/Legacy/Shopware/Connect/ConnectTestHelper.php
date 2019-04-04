@@ -40,7 +40,7 @@ class ConnectTestHelper extends \Enlight_Components_Test_Plugin_TestCase
      */
     private $connectFactory;
 
-    const IMAGE_PROVIDER_URL = 'https://de.shopware.com/press/company/Shopware_Jamaica.jpg';
+    const IMAGE_PROVIDER_URL = 'https://assets.shopware.com/media/website/press_materials/company/Shopware_Jamaica.jpg';
 
     public function setUp()
     {

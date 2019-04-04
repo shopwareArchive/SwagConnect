@@ -331,13 +331,23 @@ class Lifecycle implements SubscriberInterface
 
         // Mark the article detail for connect export
         try {
-            $this->helper->getOrCreateConnectAttributeByModel($detail);
+            $attribute = $this->helper->getOrCreateConnectAttributeByModel($detail);
             $forceExport = false;
             $changeSet = $eventArgs->get('entityManager')->getUnitOfWork()->getEntityChangeSet($detail);
             // if detail number has been changed
             // sc plugin must generate & sync the change immediately
             if (array_key_exists('number', $changeSet)) {
                 $forceExport = true;
+            }
+
+            // if the variant is assigned to a new Article we have to delete the old variant
+            // and insert a new ConnectAttribute with the right articleId
+            if (array_key_exists('articleId', $changeSet) && $attribute->getArticleId() !== $detail->getArticleId()) {
+                $this->sdk->recordDelete($attribute->getSourceId());
+                $this->manager->delete($attribute);
+                $this->manager->flush();
+
+                $this->helper->getOrCreateConnectAttributeByModel($detail);
             }
 
             $this->generateChangesForDetail($detail, $forceExport);

@@ -551,7 +551,6 @@ class ConnectExport
             ->leftJoin('d', 's_articles_prices', 'p', 'd.id = p.articledetailsID')
             ->leftJoin('a', 's_core_tax', 't', 'a.taxID = t.id')
             ->leftJoin('a', 's_articles_supplier', 's', 'a.supplierID = s.id')
-            ->groupBy('i.article_id')
             ->where('i.shop_id IS NULL');
 
         if ($customProductsTableExists) {
@@ -615,14 +614,14 @@ class ConnectExport
             $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
         }
 
+        $totalBuilder = clone $builder;
+        $builder->groupBy('i.article_id');
         $builder->setFirstResult($criteria->offset);
         $builder->setMaxResults($criteria->limit);
-
         $data = $builder->execute()->fetchAll();
 
-        $total = $this->manager->getConnection()->fetchColumn(
-            'SELECT COUNT(DISTINCT article_id) FROM s_plugin_connect_items WHERE shop_id IS NULL'
-        );
+        $totalBuilder->select('COUNT(DISTINCT a.id)');
+        $total = $totalBuilder->execute()->fetchColumn();
 
         return new ExportList([
             'articles' => $data,

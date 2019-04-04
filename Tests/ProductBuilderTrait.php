@@ -16,7 +16,7 @@ trait ProductBuilderTrait
     /**
      * @var string
      */
-    private $imageProviderUrl = 'https://de.shopware.com/press/company/Shopware_Jamaica.jpg';
+    private $imageProviderUrl = 'https://assets.shopware.com/media/website/press_materials/company/Shopware_Jamaica.jpg';
 
     /**
      * @param bool $withImage

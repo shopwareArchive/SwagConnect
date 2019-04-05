@@ -611,7 +611,7 @@ class ConnectExport
         }
 
         if ($criteria->orderBy) {
-            $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
+            $this->addGroupBy($criteria, $builder);
         }
 
         $totalBuilder = clone $builder;
@@ -788,5 +788,30 @@ class ConnectExport
                 ->set('items.cron_update', 0);
             $builder->execute();
         }
+    }
+
+    /**
+     * @param SearchCriteria $criteria
+     * @param $builder
+     */
+    private function addGroupBy(SearchCriteria $criteria, $builder)
+    {
+        if ($criteria->orderBy === 'exportStatus') {
+            $builder->orderBy('i.export_status', $criteria->orderByDirection);
+            return;
+        }
+        if ($criteria->orderBy === 'name') {
+            $builder->orderBy('a.name', $criteria->orderByDirection);
+            return;
+        }
+        if ($criteria->orderBy === 'supplier') {
+            $builder->orderBy('s.name', $criteria->orderByDirection);
+            return;
+        }
+        if ($criteria->orderBy === 'number') {
+            $builder->orderBy('d.ordernumber', $criteria->orderByDirection);
+            return;
+        }
+        $builder->orderBy($criteria->orderBy, $criteria->orderByDirection);
     }
 }
